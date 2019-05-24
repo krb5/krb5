@@ -73,11 +73,11 @@
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
-#define KRB5_KDB_SALTTYPE_V4            1
+/* #define KRB5_KDB_SALTTYPE_V4            1 */
 #define KRB5_KDB_SALTTYPE_NOREALM       2
 #define KRB5_KDB_SALTTYPE_ONLYREALM     3
 #define KRB5_KDB_SALTTYPE_SPECIAL       4
-#define KRB5_KDB_SALTTYPE_AFS3          5
+/* #define KRB5_KDB_SALTTYPE_AFS3          5 */
 #define KRB5_KDB_SALTTYPE_CERTHASH      6
 
 /* Attributes */

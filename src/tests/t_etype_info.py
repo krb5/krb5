@@ -1,6 +1,6 @@
 from k5test import *
 
-supported_enctypes = 'aes128-cts des3-cbc-sha1 rc4-hmac des-cbc-crc:afs3'
+supported_enctypes = 'aes128-cts des3-cbc-sha1 rc4-hmac'
 conf = {'libdefaults': {'allow_weak_crypto': 'true'},
         'realms': {'$realm': {'supported_enctypes': supported_enctypes}}}
 realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
@@ -42,28 +42,6 @@ test_etinfo('preauthuser', 'rc4-hmac-exp des3 rc4 des-cbc-crc',
              'error etype_info des3-cbc-sha1 KRBTEST.COMpreauthuser'])
 test_etinfo('preauthuser', 'rc4 aes256-cts',
             ['error etype_info2 rc4-hmac KRBTEST.COMpreauthuser'])
-
-# AFS3 salt for DES enctypes is conveyed using s2kparams in
-# PA-ETYPE-INFO2, not at all in PA-ETYPE-INFO, and with a special padata
-# type instead of PA-PW-SALT.
-test_etinfo('user', 'des-cbc-crc rc4',
-            ['asrep etype_info2 des-cbc-crc KRBTEST.COM 01',
-             'asrep etype_info des-cbc-crc KRBTEST.COM',
-             'asrep afs3_salt KRBTEST.COM'])
-test_etinfo('preauthuser', 'des-cbc-crc rc4',
-            ['error etype_info2 des-cbc-crc KRBTEST.COM 01',
-             'error etype_info des-cbc-crc KRBTEST.COM'])
-
-# DES keys can be used with other DES enctypes.  The requested enctype
-# shows up in the etype-info, not the database key enctype.
-test_etinfo('user', 'des-cbc-md4 rc4',
-            ['asrep etype_info2 des-cbc-md4 KRBTEST.COM 01',
-             'asrep etype_info des-cbc-md4 KRBTEST.COM',
-             'asrep afs3_salt KRBTEST.COM'])
-test_etinfo('user', 'des-cbc-md5 rc4',
-            ['asrep etype_info2 des KRBTEST.COM 01',
-             'asrep etype_info des KRBTEST.COM',
-             'asrep afs3_salt KRBTEST.COM'])
 
 # If no keys are found matching the request enctypes, a
 # preauth-required error can be generated with no etype-info at all

@@ -239,22 +239,6 @@ set passes {
 	{dummy=[verbose -log "AES + DES enctypes, DES3 TGT"]}
     }
     {
-	des-v4
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=des-cbc-crc:v4}
-	{default_tkt_enctypes(client)=des-cbc-crc}
-	{dummy=[verbose -log "DES TGT, DES-CRC enctype, V4 salt"]}
-    }
-    {
-	des-md5-v4
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
-	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-crc}
-	{dummy=[verbose -log "DES TGT, DES-MD5 and -CRC enctypes, V4 salt"]}
-    }
-    {
 	all-enctypes
 	mode=udp
 	des3_krbtgt=0
@@ -356,7 +340,6 @@ set unused_passes {
 	aes128-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:norealm \
 	des3-cbc-sha1:normal des3-cbc-sha1:none \
 	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
-	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
 	}
 	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
     }

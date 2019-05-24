@@ -155,9 +155,6 @@ realm.run([kadminl, 'ank', '-pw', 'pw', 'default'])
 realm.run([kadminl, 'ank', '-e', 'aes256-cts:special', '-pw', 'pw', 'exp'])
 realm.run([kadminl, 'ank', '-e', 'aes256-cts:special', '-pw', 'pw', '+preauth',
            'pexp'])
-realm.run([kadminl, 'ank', '-e', 'des-cbc-crc:afs3', '-pw', 'pw', 'afs'])
-realm.run([kadminl, 'ank', '-e', 'des-cbc-crc:afs3', '-pw', 'pw', '+preauth',
-           'pafs'])
 
 # Extract one of the explicit salt values from the database.
 out = realm.run([kdb5_util, 'tabdump', 'keyinfo'])
@@ -187,8 +184,6 @@ test_addent(realm, 'default', '-f')
 test_addent(realm, 'default', '-f -e aes128-cts')
 test_addent(realm, 'exp', '-f')
 test_addent(realm, 'pexp', '-f')
-test_addent(realm, 'afs', '-f')
-test_addent(realm, 'pafs', '-f')
 
 success('Keytab-related tests')
 success('Keytab-related tests')

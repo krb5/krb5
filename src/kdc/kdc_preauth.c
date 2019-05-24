@@ -781,8 +781,8 @@ add_etype_info(krb5_context context, krb5_kdcpreauth_rock rock,
     return add_pa_data_element(pa_list, pa);
 }
 
-/* Add PW-SALT or AFS3-SALT entries to pa_list as appropriate for the request
- * and client principal. */
+/* Add PW-SALT entries to pa_list as appropriate for the request and client
+ * principal. */
 static krb5_error_code
 add_pw_salt(krb5_context context, krb5_kdcpreauth_rock rock,
             krb5_pa_data ***pa_list)
@@ -801,21 +801,13 @@ add_pw_salt(krb5_context context, krb5_kdcpreauth_rock rock,
     if (ret)
         return 0;
 
-    if (salttype == KRB5_KDB_SALTTYPE_AFS3) {
-        ret = alloc_pa_data(KRB5_PADATA_AFS3_SALT, salt->length + 1, &pa);
-        if (ret)
-            goto cleanup;
-        memcpy(pa->contents, salt->data, salt->length);
-        pa->contents[salt->length] = '\0';
-    } else {
-        /* Steal memory from salt to make the pa-data entry. */
-        ret = alloc_pa_data(KRB5_PADATA_PW_SALT, 0, &pa);
-        if (ret)
-            goto cleanup;
-        pa->length = salt->length;
-        pa->contents = (uint8_t *)salt->data;
-        salt->data = NULL;
-    }
+    /* Steal memory from salt to make the pa-data entry. */
+    ret = alloc_pa_data(KRB5_PADATA_PW_SALT, 0, &pa);
+    if (ret)
+        goto cleanup;
+    pa->length = salt->length;
+    pa->contents = (uint8_t *)salt->data;
+    salt->data = NULL;
 
     /* add_pa_data_element() claims pa on success or failure. */
     ret = add_pa_data_element(pa_list, pa);
@@ -1545,20 +1537,6 @@ _make_etype_info_entry(krb5_context context,
                                    &salttype, &salt);
     if (retval)
         goto cleanup;
-    if (etype_info2 && salttype == KRB5_KDB_SALTTYPE_AFS3) {
-        switch (etype) {
-        case ENCTYPE_DES_CBC_CRC:
-        case ENCTYPE_DES_CBC_MD4:
-        case ENCTYPE_DES_CBC_MD5:
-            retval = alloc_data(&entry->s2kparams, 1);
-            if (retval)
-                goto cleanup;
-            entry->s2kparams.data[0] = 1;
-            break;
-        default:
-            break;
-        }
-    }
 
     entry->length = salt->length;
     entry->salt = (unsigned char *)salt->data;
