@@ -1272,7 +1272,7 @@ errout:
  * spnego_gss_accept_sec_context() when the request is empty.  For empty
  * requests, we implement the Microsoft NegHints extension to SPNEGO for
  * compatibility with some versions of Samba.  See:
- * http://msdn.microsoft.com/en-us/library/cc247039(PROT.10).aspx
+ * https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-spng/8e71cf53-e867-4b79-b5b5-38c92be3d472
  */
 static OM_uint32
 acc_ctx_hints(OM_uint32 *minor_status,

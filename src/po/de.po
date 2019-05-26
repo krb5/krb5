@@ -3848,7 +3848,6 @@ msgstr "%s: %s, es wird versucht, den Standard-Realm abzufragen\n"
 msgid "%s: cannot get memory for realm list\n"
 msgstr "%s: Speicher für die Realm-Liste kann nicht erlangt werden\n"
 
-# http://www.oreilly.de/german/freebooks/linuxdrive2ger/getcache.html
 #: ../../src/kdc/main.c:947
 msgid "while initializing lookaside cache"
 msgstr "beim Initialisieren des Lookaside-Zwischenspeichers"

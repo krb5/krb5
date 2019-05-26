@@ -33,10 +33,10 @@
  *
  * A copy of this license is available in the file LICENSE in the
  * top-level directory of the distribution or, alternatively, at
- * <http://www.OpenLDAP.org/license.html>.
+ * <https://www.OpenLDAP.org/license.html>.
  */
 
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>. */
+/* This work is part of OpenLDAP Software <https://www.openldap.org/>. */
 
 /* Basic UTF-8 routines
  *

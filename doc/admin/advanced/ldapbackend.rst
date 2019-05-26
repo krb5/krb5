@@ -140,4 +140,4 @@ To destroy database run::
 Useful references
 -----------------
 
-* `Kerberos and LDAP <https://help.ubuntu.com/10.04/serverguide/C/kerberos-ldap.html>`_
+* `Kerberos and LDAP <https://help.ubuntu.com/lts/serverguide/kerberos-ldap.html>`_

@@ -49,7 +49,7 @@
  *
  * A copy of this license is available in file LICENSE in the
  * top-level directory of the distribution or, alternatively, at
- * <http://www.OpenLDAP.org/license.html>.
+ * <https://www.OpenLDAP.org/license.html>.
  */
 /*
  * Copyright (C) 2000 Novell, Inc. All Rights Reserved.
@@ -57,13 +57,13 @@
  * THIS WORK IS SUBJECT TO U.S. AND INTERNATIONAL COPYRIGHT LAWS AND TREATIES.
  * USE, MODIFICATION, AND REDISTRIBUTION OF THIS WORK IS SUBJECT TO VERSION
  * 2.0.1 OF THE OPENLDAP PUBLIC LICENSE, A COPY OF WHICH IS AVAILABLE AT
- * HTTP://WWW.OPENLDAP.ORG/LICENSE.HTML OR IN THE FILE "LICENSE" IN THE
+ * HTTPS://WWW.OPENLDAP.ORG/LICENSE.HTML OR IN THE FILE "LICENSE" IN THE
  * TOP-LEVEL DIRECTORY OF THE DISTRIBUTION. ANY USE OR EXPLOITATION OF THIS
  * WORK OTHER THAN AS AUTHORIZED IN VERSION 2.0.1 OF THE OPENLDAP PUBLIC
  * LICENSE, OR OTHER PRIOR WRITTEN CONSENT FROM NOVELL, COULD SUBJECT THE
  * PERPETRATOR TO CRIMINAL AND CIVIL LIABILITY.
  */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>. */
+/* This work is part of OpenLDAP Software <https://www.openldap.org/>. */
 
 #ifndef K5_UTF8_H
 #define K5_UTF8_H

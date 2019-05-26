@@ -22,21 +22,21 @@ doc/pdf directory.
 Additionally, you may find copies of the HTML format documentation
 online at
 
-    http://web.mit.edu/kerberos/krb5-latest/doc/
+    https://web.mit.edu/kerberos/krb5-latest/doc/
 
 for the most recent supported release, or at
 
-    http://web.mit.edu/kerberos/krb5-devel/doc/
+    https://web.mit.edu/kerberos/krb5-devel/doc/
 
 for the release under development.
 
 More information about Kerberos may be found at
 
-    http://web.mit.edu/kerberos/
+    https://web.mit.edu/kerberos/
 
 and at the MIT Kerberos Consortium web site
 
-    http://kerberos.org/
+    https://kerberos.org/
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -58,7 +58,7 @@ krb5-bugs@mit.edu.
 
 You may view bug reports by visiting
 
-http://krbdev.mit.edu/rt/
+https://krbdev.mit.edu/rt/
 
 and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary

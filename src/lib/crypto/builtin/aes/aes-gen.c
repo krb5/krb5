@@ -1,6 +1,6 @@
 /*
  * To be compiled against the AES code from:
- * http://fp.gladman.plus.com/cryptography_technology/rijndael/index.htm
+ * https://github.com/BrianGladman/AES
  */
 #include <stdio.h>
 #include <string.h>

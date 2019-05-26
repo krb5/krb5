@@ -8,7 +8,7 @@
  *
  * A copy of this license is available in file LICENSE in the
  * top-level directory of the distribution or, alternatively, at
- * <http://www.OpenLDAP.org/license.html>.
+ * <https://www.OpenLDAP.org/license.html>.
  */
 /* Copyright 1999 Computing Research Labs, New Mexico State University
  *
@@ -32,7 +32,7 @@
  */
 
 /*
- * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * This work is part of OpenLDAP Software <https://www.openldap.org/>.
  * $OpenLDAP: pkg/ldap/libraries/liblunicode/ucdata/ucpgba.h,v 1.10 2008/01/07 23:20:05 kurt Exp $
  * $Id: ucpgba.h,v 1.4 1999/11/19 15:24:30 mleisher Exp $
  */

@@ -27,7 +27,7 @@
 ; Issue Date: 15/01/2002
 
 ; An AES (Rijndael) implementation for the Pentium MMX family using the NASM
-; assembler <http://www.web-sites.co.uk/nasm/>. This version only implements
+; assembler <https://www.nasm.us>. This version only implements
 ; the standard AES block length (128 bits, 16 bytes) with the same interface
 ; as that used in my C/C++ implementation.   This code does not preserve the
 ; eax, ecx or edx registers or the artihmetic status flags. However, the ebx, 

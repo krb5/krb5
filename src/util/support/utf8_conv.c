@@ -33,7 +33,7 @@
  *
  * A copy of this license is available in the file LICENSE in the
  * top-level directory of the distribution or, alternatively, at
- * <http://www.OpenLDAP.org/license.html>.
+ * <https://www.OpenLDAP.org/license.html>.
  */
 /* Copyright (C) 1999, 2000 Novell, Inc. All Rights Reserved.
  *
@@ -47,7 +47,7 @@
  * THE PERPETRATOR TO CRIMINAL AND CIVIL LIABILITY.
  */
 
-/* This work is based on OpenLDAP Software <http://www.openldap.org/>. */
+/* This work is based on OpenLDAP Software <https://www.openldap.org/>. */
 
 /*
  * These routines convert between UTF-16 and UTF-8.  UTF-16 encodes a Unicode

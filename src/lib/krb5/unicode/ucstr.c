@@ -7,11 +7,11 @@
  *
  * A copy of this license is available in file LICENSE in the top-level
  * directory of the distribution or, alternatively, at
- * <http://www.OpenLDAP.org/license.html>.
+ * <https://www.OpenLDAP.org/license.html>.
  */
 
 /*
- * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * This work is part of OpenLDAP Software <https://www.openldap.org/>.
  * $OpenLDAP: pkg/ldap/libraries/liblunicode/ucstr.c,v 1.40 2008/03/04 06:24:05 hyc Exp $
  */
 
