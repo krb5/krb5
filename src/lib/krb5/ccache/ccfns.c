@@ -80,33 +80,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_store_cred(krb5_context context, krb5_ccache cache,
                    krb5_creds *creds)
 {
-    krb5_error_code ret;
-    krb5_ticket *tkt;
-    krb5_principal s1, s2;
-
     TRACE_CC_STORE(context, cache, creds);
-    ret = cache->ops->store(context, cache, creds);
-    if (ret) return ret;
-
-    /*
-     * If creds->server and the server in the decoded ticket differ,
-     * store both principals.
-     */
-    s1 = creds->server;
-    ret = decode_krb5_ticket(&creds->ticket, &tkt);
-    /* Bail out on errors in case someone is storing a non-ticket. */
-    if (ret) return 0;
-    s2 = tkt->server;
-    if (!krb5_principal_compare(context, s1, s2)) {
-        creds->server = s2;
-        TRACE_CC_STORE_TKT(context, cache, creds);
-        /* remove any dups */
-        krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
-        ret = cache->ops->store(context, cache, creds);
-        creds->server = s1;
-    }
-    krb5_free_ticket(context, tkt);
-    return ret;
+    return cache->ops->store(context, cache, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
