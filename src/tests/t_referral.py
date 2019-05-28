@@ -18,9 +18,9 @@ def testref(realm, nametype):
     shutil.copyfile(savefile, realm.ccache)
     realm.run(['./gcred', nametype, 'a/x.d@'])
     out = realm.run([klist]).split('\n')
-    if len(out) != 8:
+    if len(out) != 9:
         fail('unexpected number of lines in klist output')
-    if out[5].split()[4] != 'a/x.d@' or out[6].split()[4] != 'a/x.d@REFREALM':
+    if out[5].split()[4] != 'a/x.d@' or out[7].split()[4] != 'a/x.d@REFREALM':
         fail('unexpected service principals in klist output')
 
 # Get credentials and check that we get an error, not a referral.

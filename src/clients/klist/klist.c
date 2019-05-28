@@ -662,25 +662,27 @@ static void
 show_credential(krb5_creds *cred)
 {
     krb5_error_code ret;
-    krb5_ticket *tkt;
-    char *name, *sname, *flags;
+    krb5_ticket *tkt = NULL;
+    char *name = NULL, *sname = NULL, *tktsname, *flags;
     int extra_field = 0, ccol = 0, i;
+    krb5_boolean is_config = krb5_is_config_principal(context, cred->server);
 
     ret = krb5_unparse_name(context, cred->client, &name);
     if (ret) {
         com_err(progname, ret, _("while unparsing client name"));
-        return;
+        goto cleanup;
     }
     ret = krb5_unparse_name(context, cred->server, &sname);
     if (ret) {
         com_err(progname, ret, _("while unparsing server name"));
-        krb5_free_unparsed_name(context, name);
-        return;
+        goto cleanup;
     }
+    if (!is_config)
+        (void)krb5_decode_ticket(&cred->ticket, &tkt);
     if (!cred->times.starttime)
         cred->times.starttime = cred->times.authtime;
 
-    if (!krb5_is_config_principal(context, cred->server)) {
+    if (!is_config) {
         printtime(cred->times.starttime);
         putchar(' ');
         putchar(' ');
@@ -707,7 +709,7 @@ show_credential(krb5_creds *cred)
         extra_field++;
     }
 
-    if (krb5_is_config_principal(context, cred->server))
+    if (is_config)
         print_config_data(ccol, &cred->ticket);
 
     if (cred->times.renew_till) {
@@ -737,11 +739,7 @@ show_credential(krb5_creds *cred)
         extra_field = 0;
     }
 
-    if (show_etype) {
-        ret = krb5_decode_ticket(&cred->ticket, &tkt);
-        if (ret)
-            goto err_tkt;
-
+    if (show_etype && tkt != NULL) {
         if (!extra_field)
             fputs("\t",stdout);
         else
@@ -750,10 +748,6 @@ show_credential(krb5_creds *cred)
                etype_string(cred->keyblock.enctype));
         printf("%s ", etype_string(tkt->enc_part.enctype));
         extra_field++;
-
-    err_tkt:
-        if (tkt != NULL)
-            krb5_free_ticket(context, tkt);
     }
 
     if (show_adtype) {
@@ -792,8 +786,23 @@ show_credential(krb5_creds *cred)
         }
     }
 
+    /* Display the ticket server if it is different from the server name the
+     * entry was cached under (most commonly for referrals). */
+    if (tkt != NULL &&
+        !krb5_principal_compare(context, cred->server, tkt->server)) {
+        ret = krb5_unparse_name(context, tkt->server, &tktsname);
+        if (ret) {
+            com_err(progname, ret, _("while unparsing ticket server name"));
+            goto cleanup;
+        }
+        printf(_("\tTicket server: %s\n"), tktsname);
+        krb5_free_unparsed_name(context, tktsname);
+    }
+
+cleanup:
     krb5_free_unparsed_name(context, name);
     krb5_free_unparsed_name(context, sname);
+    krb5_free_ticket(context, tkt);
 }
 
 #include "port-sockets.h"
