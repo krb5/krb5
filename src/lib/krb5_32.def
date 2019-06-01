@@ -277,7 +277,7 @@ EXPORTS
 	krb5_get_tgs_ktypes			@177	; PRIVATE GSSAPI krb5.hin
 	krb5_auth_con_set_req_cksumtype		@36	; PRIVATE GSSAPI krb5.hin
 	krb5_kt_free_entry			@192	; PRIVATE GSSAPI krb5.hin
-	krb5_rc_close				@217	; PRIVATE GSSAPI krb5.hin
+	k5_rc_close				@217	; PRIVATE GSSAPI krb5.hin
 	krb5_free_enc_tkt_part			@132	; PRIVATE GSSAPI krb5.hin
 	krb5_decrypt_tkt_part			@108	; PRIVATE GSSAPI krb5.hin
 
@@ -434,10 +434,8 @@ EXPORTS
 	krb5_responder_get_challenge			@406
 	krb5_responder_list_questions			@407
 	krb5_responder_set_answer			@408
-	krb5_rc_recover_or_initialize			@409 ; PRIVATE GSSAPI
-	krb5_rc_resolve_full				@410 ; PRIVATE GSSAPI
-	krb5_rc_get_name				@411 ; PRIVATE GSSAPI
-	krb5_rc_get_type				@412 ; PRIVATE GSSAPI
+	k5_rc_resolve					@410 ; PRIVATE GSSAPI
+	k5_rc_get_name					@411 ; PRIVATE GSSAPI
 	krb5_responder_otp_get_challenge		@413
 	krb5_responder_otp_set_answer			@414
 	krb5_responder_otp_challenge_free		@415

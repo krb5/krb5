@@ -141,7 +141,7 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
                 krb5_cc_close(ser_ctx, (krb5_ccache) nctx);
                 break;
             case KV5M_RCACHE:
-                krb5_rc_close(ser_ctx, (krb5_rcache) nctx);
+                k5_rc_close(ser_ctx, (krb5_rcache) nctx);
                 break;
             case KV5M_KEYTAB:
                 krb5_kt_close(ser_ctx, (krb5_keytab) nctx);
@@ -428,19 +428,17 @@ ser_rcache_test(krb5_context kcontext, int verbose)
 {
     krb5_error_code     kret;
     char                rcname[128];
-    krb5_rcache         rcache;
+    krb5_rcache         rcache = NULL;
 
-    snprintf(rcname, sizeof(rcname), "dfl:temp_rc_%d", (int) getpid());
-    if (!(kret = krb5_rc_resolve_full(kcontext, &rcache, rcname)) &&
-        !(kret = ser_data(verbose, "> Resolved FILE rcache",
-                          (krb5_pointer) rcache, KV5M_RCACHE)) &&
-        !(kret = krb5_rc_initialize(kcontext, rcache, 3600*24)) &&
-        !(kret = ser_data(verbose, "> Initialized FILE rcache",
-                          (krb5_pointer) rcache, KV5M_RCACHE)) &&
-        !(kret = krb5_rc_destroy(kcontext, rcache))) {
+    snprintf(rcname, sizeof(rcname), "file2:temp_rc_%d", (int) getpid());
+    if (!(kret = k5_rc_resolve(kcontext, rcname, &rcache)) &&
+        !(kret = ser_data(verbose, "> Resolved file2 rcache",
+                          (krb5_pointer) rcache, KV5M_RCACHE))) {
         if (verbose)
             printf("* rcache test succeeded\n");
     }
+    if (rcache != NULL)
+        k5_rc_close(kcontext, rcache);
     if (kret)
         printf("* krb5_rcache test failed\n");
     return(kret);

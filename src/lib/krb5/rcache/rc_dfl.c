@@ -128,55 +128,20 @@ cleanup:
 
 #endif /* not _WIN32 */
 
-static char * KRB5_CALLCONV
-dfl_get_name(krb5_context context, krb5_rcache rc)
+static krb5_error_code
+dfl_resolve(krb5_context context, const char *residual, void **rcdata_out)
 {
-    return "";
-}
-
-static krb5_error_code KRB5_CALLCONV
-dfl_get_span(krb5_context context, krb5_rcache rc, krb5_deltat *lifespan)
-{
-    *lifespan = context->clockskew;
+    *rcdata_out = NULL;
     return 0;
 }
 
-static krb5_error_code KRB5_CALLCONV
-dfl_init(krb5_context context, krb5_rcache rc, krb5_deltat lifespan)
+static void
+dfl_close(krb5_context context, void *rcdata)
 {
-    return 0;
 }
 
-static krb5_error_code KRB5_CALLCONV
-dfl_close(krb5_context context, krb5_rcache rc)
-{
-    k5_mutex_destroy(&rc->lock);
-    free(rc);
-    return 0;
-}
-
-#define dfl_destroy dfl_close
-
-static krb5_error_code KRB5_CALLCONV
-dfl_resolve(krb5_context context, krb5_rcache rc, char *name)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-dfl_recover(krb5_context context, krb5_rcache rc)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-dfl_recover_or_init(krb5_context context, krb5_rcache rc, krb5_deltat lifespan)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-dfl_store(krb5_context context, krb5_rcache rc, krb5_donot_replay *rep)
+static krb5_error_code
+dfl_store(krb5_context context, void *rcdata, const krb5_data *tag)
 {
     krb5_error_code ret;
     int fd;
@@ -185,29 +150,15 @@ dfl_store(krb5_context context, krb5_rcache rc, krb5_donot_replay *rep)
     if (ret)
         return ret;
 
-    ret = k5_rcfile2_store(context, fd, rep);
+    ret = k5_rcfile2_store(context, fd, tag);
     close(fd);
     return ret;
 }
 
-static krb5_error_code KRB5_CALLCONV
-dfl_expunge(krb5_context context, krb5_rcache rc)
+const krb5_rc_ops k5_rc_dfl_ops =
 {
-    return 0;
-}
-
-const krb5_rc_ops krb5_rc_dfl_ops =
-{
-    0,
     "dfl",
-    dfl_init,
-    dfl_recover,
-    dfl_recover_or_init,
-    dfl_destroy,
+    dfl_resolve,
     dfl_close,
-    dfl_store,
-    dfl_expunge,
-    dfl_get_span,
-    dfl_get_name,
-    dfl_resolve
+    dfl_store
 };

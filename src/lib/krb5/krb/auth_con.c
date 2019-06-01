@@ -70,7 +70,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context)
         krb5_k_free_key(context, auth_context->recv_subkey);
     zapfree(auth_context->cstate.data, auth_context->cstate.length);
     if (auth_context->rcache)
-        krb5_rc_close(context, auth_context->rcache);
+        k5_rc_close(context, auth_context->rcache);
     if (auth_context->permitted_etypes)
         free(auth_context->permitted_etypes);
     if (auth_context->ad_context)

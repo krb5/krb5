@@ -30,7 +30,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
 {
     krb5_context context;
     krb5_gss_cred_id_t cred;
-    krb5_error_code code1, code2, code3;
+    krb5_error_code code1, code2;
 
     code1 = krb5_gss_init_context(&context);
     if (code1) {
@@ -68,9 +68,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
         code2 = 0;
 
     if (cred->rcache)
-        code3 = krb5_rc_close(context, cred->rcache);
-    else
-        code3 = 0;
+        k5_rc_close(context, cred->rcache);
     if (cred->name)
         kg_release_name(context, &cred->name);
 
@@ -91,8 +89,6 @@ krb5_gss_release_cred(minor_status, cred_handle)
         *minor_status = code1;
     if (code2)
         *minor_status = code2;
-    if (code3)
-        *minor_status = code3;
 
     if (*minor_status)
         save_error_info(*minor_status, context);

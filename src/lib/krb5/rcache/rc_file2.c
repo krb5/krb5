@@ -186,24 +186,23 @@ store(krb5_context context, int fd, const uint8_t tag[TAG_LEN], uint32_t now,
 }
 
 krb5_error_code
-k5_rcfile2_store(krb5_context context, int fd, krb5_donot_replay *rep)
+k5_rcfile2_store(krb5_context context, int fd, const krb5_data *tag_data)
 {
     krb5_error_code ret;
     krb5_timestamp now;
-    uint8_t tag[TAG_LEN];
-
-    if (rep->tag.length == 0)
-        return EINVAL;
+    uint8_t tagbuf[TAG_LEN], *tag;
 
     ret = krb5_timeofday(context, &now);
     if (ret)
         return ret;
 
-    if (rep->tag.length >= TAG_LEN) {
-        memcpy(tag, rep->tag.data, TAG_LEN);
+    /* Extract a tag from the authenticator checksum. */
+    if (tag_data->length >= TAG_LEN) {
+        tag = (uint8_t *)tag_data->data;
     } else {
-        memcpy(tag, rep->tag.data, rep->tag.length);
-        memset(tag + rep->tag.length, 0, TAG_LEN - rep->tag.length);
+        memcpy(tagbuf, tag_data->data, tag_data->length);
+        memset(tagbuf + tag_data->length, 0, TAG_LEN - tag_data->length);
+        tag = tagbuf;
     }
 
     ret = krb5_lock_file(context, fd, KRB5_LOCKMODE_EXCLUSIVE);
@@ -214,61 +213,24 @@ k5_rcfile2_store(krb5_context context, int fd, krb5_donot_replay *rep)
     return ret;
 }
 
-static char * KRB5_CALLCONV
-file2_get_name(krb5_context context, krb5_rcache rc)
+static krb5_error_code
+file2_resolve(krb5_context context, const char *residual, void **rcdata_out)
 {
-    return (char *)rc->data;
+    *rcdata_out = strdup(residual);
+    return (*rcdata_out == NULL) ? ENOMEM : 0;
 }
 
-static krb5_error_code KRB5_CALLCONV
-file2_get_span(krb5_context context, krb5_rcache rc, krb5_deltat *lifespan)
+static void
+file2_close(krb5_context context, void *rcdata)
 {
-    *lifespan = context->clockskew;
-    return 0;
+    free(rcdata);
 }
 
-static krb5_error_code KRB5_CALLCONV
-file2_init(krb5_context context, krb5_rcache rc, krb5_deltat lifespan)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-file2_close(krb5_context context, krb5_rcache rc)
-{
-    k5_mutex_destroy(&rc->lock);
-    free(rc->data);
-    free(rc);
-    return 0;
-}
-
-#define file2_destroy file2_close
-
-static krb5_error_code KRB5_CALLCONV
-file2_resolve(krb5_context context, krb5_rcache rc, char *name)
-{
-    rc->data = strdup(name);
-    return (rc->data == NULL) ? ENOMEM : 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-file2_recover(krb5_context context, krb5_rcache rc)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-file2_recover_or_init(krb5_context context, krb5_rcache rc,
-                      krb5_deltat lifespan)
-{
-    return 0;
-}
-
-static krb5_error_code KRB5_CALLCONV
-file2_store(krb5_context context, krb5_rcache rc, krb5_donot_replay *rep)
+static krb5_error_code
+file2_store(krb5_context context, void *rcdata, const krb5_data *tag)
 {
     krb5_error_code ret;
-    const char *filename = rc->data;
+    const char *filename = rcdata;
     int fd;
 
     fd = open(filename, O_CREAT | O_RDWR | O_BINARY, 0600);
@@ -278,29 +240,15 @@ file2_store(krb5_context context, krb5_rcache rc, krb5_donot_replay *rep)
                   filename);
         return ret;
     }
-    ret = k5_rcfile2_store(context, fd, rep);
+    ret = k5_rcfile2_store(context, fd, tag);
     close(fd);
     return ret;
 }
 
-static krb5_error_code KRB5_CALLCONV
-file2_expunge(krb5_context context, krb5_rcache rc)
+const krb5_rc_ops k5_rc_file2_ops =
 {
-    return 0;
-}
-
-const krb5_rc_ops krb5_rc_file2_ops =
-{
-    0,
     "file2",
-    file2_init,
-    file2_recover,
-    file2_recover_or_init,
-    file2_destroy,
+    file2_resolve,
     file2_close,
-    file2_store,
-    file2_expunge,
-    file2_get_span,
-    file2_get_name,
-    file2_resolve
+    file2_store
 };

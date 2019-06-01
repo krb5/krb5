@@ -37,5 +37,5 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
      * server principal, but now ignores the piece argument and resolves the
      * default replay cache.
      */
-    return krb5_rc_default(context, rcptr);
+    return k5_rc_default(context, rcptr);
 }

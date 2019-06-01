@@ -1960,68 +1960,22 @@ typedef struct _krb5int_access {
 krb5_error_code KRB5_CALLCONV
 krb5int_accessor(krb5int_access*, krb5_int32);
 
-typedef struct _krb5_donot_replay {
-    krb5_magic magic;
-    krb5_ui_4 hash;
-    char *server;                       /* null-terminated */
-    char *client;                       /* null-terminated */
-    char *msghash;                      /* null-terminated */
-    krb5_data tag;
-    krb5_int32 cusec;
-    krb5_timestamp ctime;
-} krb5_donot_replay;
-
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_user_set_default_name(krb5_context context, const char *name);
 
-krb5_error_code krb5_rc_default(krb5_context, krb5_rcache *);
-krb5_error_code krb5_rc_resolve_type(krb5_context, krb5_rcache *,
-                                     const char *);
-krb5_error_code krb5_rc_resolve_full(krb5_context, krb5_rcache *,
-                                     const char *);
-char *krb5_rc_get_type(krb5_context, krb5_rcache);
-char *krb5_rc_default_type(krb5_context);
-char *krb5_rc_default_name(krb5_context);
-krb5_error_code krb5_auth_to_rep(krb5_context, krb5_tkt_authent *,
-                                 krb5_donot_replay *);
-krb5_error_code krb5_rc_hash_message(krb5_context context,
-                                     const krb5_data *message, char **out);
+krb5_error_code k5_rc_default(krb5_context context, krb5_rcache *rc_out);
+krb5_error_code k5_rc_resolve(krb5_context context, const char *name,
+                              krb5_rcache *rc_out);
+void k5_rc_close(krb5_context context, krb5_rcache rc);
+krb5_error_code k5_rc_store(krb5_context context, krb5_rcache rc,
+                            const krb5_enc_data *authenticator);
+const char *k5_rc_get_name(krb5_context context, krb5_rcache rc);
 
 /* Set *tag_out to the integrity tag of *enc.  (Does not allocate memory;
  * returned buffer is a subrange of *ctext.) */
 krb5_error_code
 k5_rc_tag_from_ciphertext(krb5_context context, const krb5_enc_data *enc,
                           krb5_data *tag_out);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_initialize(krb5_context, krb5_rcache, krb5_deltat);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_recover_or_initialize(krb5_context, krb5_rcache,krb5_deltat);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_recover(krb5_context, krb5_rcache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_destroy(krb5_context, krb5_rcache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_close(krb5_context, krb5_rcache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_store(krb5_context, krb5_rcache, krb5_donot_replay *);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_expunge(krb5_context, krb5_rcache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_get_lifespan(krb5_context, krb5_rcache,krb5_deltat *);
-
-char *KRB5_CALLCONV
-krb5_rc_get_name(krb5_context, krb5_rcache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_rc_resolve(krb5_context, krb5_rcache, char *);
 
 /*
  * This structure was exposed and used in macros in krb5 1.2, so do not

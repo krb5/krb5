@@ -191,12 +191,7 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
 
     /* If we have an explicit rcache name, open it. */
     if (rcname != NULL) {
-        code = krb5_rc_resolve_full(context, &rc, rcname);
-        if (code) {
-            major = GSS_S_FAILURE;
-            goto cleanup;
-        }
-        code = krb5_rc_recover_or_initialize(context, rc, context->clockskew);
+        code = k5_rc_resolve(context, rcname, &rc);
         if (code) {
             major = GSS_S_FAILURE;
             goto cleanup;
@@ -260,7 +255,7 @@ cleanup:
     if (kt != NULL)
         krb5_kt_close(context, kt);
     if (rc != NULL)
-        krb5_rc_close(context, rc);
+        k5_rc_close(context, rc);
     *minor_status = code;
     return major;
 }
@@ -880,7 +875,7 @@ error_out:
             krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
         if (cred->rcache)
-            krb5_rc_close(context, cred->rcache);
+            k5_rc_close(context, cred->rcache);
         if (cred->name)
             kg_release_name(context, &cred->name);
         krb5_free_principal(context, cred->impersonator);
@@ -1047,14 +1042,8 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
         *minor_status = code;
         return GSS_S_FAILURE;
     }
-    if (cred->rcache != NULL) {
-        code = krb5_rc_close(context, cred->rcache);
-        if (code) {
-            *minor_status = code;
-            krb5_free_context(context);
-            return GSS_S_FAILURE;
-        }
-    }
+    if (cred->rcache != NULL)
+        k5_rc_close(context, cred->rcache);
 
     cred->rcache = rcache;
 

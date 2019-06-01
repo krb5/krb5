@@ -86,8 +86,6 @@ main(int argc, char *argv[])
     krb5_data packet, inbuf;
     krb5_ccache ccdef;
     krb5_address addr, *portlocal_addr;
-    krb5_rcache rcache;
-    krb5_data   rcache_name;
 
     krb5_context          context;
     krb5_auth_context     auth_context = NULL;
@@ -267,17 +265,6 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    rcache_name.length = strlen(cp);
-    rcache_name.data = cp;
-
-    if ((retval = krb5_get_server_rcache(context, &rcache_name, &rcache))) {
-        com_err(progname, retval, "while getting server rcache");
-        exit(1);
-    }
-
-    /* set auth_context rcache */
-    krb5_auth_con_setrcache(context, auth_context, rcache);
-
     /* Make the safe message */
     inbuf.data = message;
     inbuf.length = strlen(message);
@@ -310,12 +297,6 @@ main(int argc, char *argv[])
     printf("Sent encrypted message: %d bytes\n", i);
     krb5_free_data_contents(context, &packet);
 
-    retval = krb5_rc_destroy(context, rcache);
-    if (retval) {
-        com_err(progname, retval, "while deleting replay cache");
-        exit(1);
-    }
-    krb5_auth_con_setrcache(context, auth_context, NULL);
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);
 

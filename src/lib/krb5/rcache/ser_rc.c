@@ -61,28 +61,17 @@ krb5_rcache_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
     krb5_error_code     kret;
     krb5_rcache         rcache;
-    size_t              required;
 
     kret = EINVAL;
     if ((rcache = (krb5_rcache) arg)) {
         /*
-         * Saving FILE: variants of krb5_rcache requires at minimum:
+         * Saving krb5_rcache requires at minimum:
          *      krb5_int32      for KV5M_RCACHE
          *      krb5_int32      for length of rcache name.
          *      krb5_int32      for KV5M_RCACHE
          */
-        required = sizeof(krb5_int32) * 3;
-        if (rcache->ops)
-            required += (strlen(rcache->ops->type)+1);
-
-        /*
-         * The rcache name is formed as follows:
-         *      <type>:<name>
-         */
-        required += strlen(krb5_rc_get_name(kcontext, rcache));
-
+        *sizep += sizeof(krb5_int32) * 3 + strlen(rcache->name);
         kret = 0;
-        *sizep += required;
     }
     return(kret);
 }
@@ -98,8 +87,6 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
     size_t              required;
     krb5_octet          *bp;
     size_t              remain;
-    char                *rcname;
-    char                *fnamep;
 
     required = 0;
     bp = *buffer;
@@ -109,34 +96,20 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
         kret = ENOMEM;
         if (!krb5_rcache_size(kcontext, arg, &required) &&
             (required <= remain)) {
-            /* Our identifier */
-            (void) krb5_ser_pack_int32(KV5M_RCACHE, &bp, &remain);
+            /* Put the header identifier. */
+            (void)krb5_ser_pack_int32(KV5M_RCACHE, &bp, &remain);
 
-            fnamep = krb5_rc_get_name(kcontext, rcache);
+            /* Put the replay cache name after its length. */
+            (void)krb5_ser_pack_int32(strlen(rcache->name), &bp, &remain);
+            (void)krb5_ser_pack_bytes((uint8_t *)rcache->name,
+                                      strlen(rcache->name), &bp, &remain);
 
-            if (rcache->ops->type) {
-                if (asprintf(&rcname, "%s:%s", rcache->ops->type, fnamep) < 0)
-                    rcname = NULL;
-            } else
-                rcname = strdup(fnamep);
+            /* Put the trailer. */
+            (void)krb5_ser_pack_int32(KV5M_RCACHE, &bp, &remain);
 
-            if (rcname) {
-                /* Put the length of the file name */
-                (void) krb5_ser_pack_int32((krb5_int32) strlen(rcname),
-                                           &bp, &remain);
-
-                /* Put the name */
-                (void) krb5_ser_pack_bytes((krb5_octet *) rcname,
-                                           strlen(rcname),
-                                           &bp, &remain);
-
-                /* Put the trailer */
-                (void) krb5_ser_pack_int32(KV5M_RCACHE, &bp, &remain);
-                kret = 0;
-                *buffer = bp;
-                *lenremain = remain;
-                free(rcname);
-            }
+            kret = 0;
+            *buffer = bp;
+            *lenremain = remain;
         }
     }
     return(kret);
@@ -178,10 +151,9 @@ krb5_rcache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **
     rcname[ibuf] = '\0';
 
     /* Resolve and recover the rcache. */
-    kret = krb5_rc_resolve_full(kcontext, &rcache, rcname);
+    kret = k5_rc_resolve(kcontext, rcname, &rcache);
     if (kret)
         goto cleanup;
-    krb5_rc_recover(kcontext, rcache);
 
     /* Read our magic number again. */
     kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
@@ -198,7 +170,7 @@ krb5_rcache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **
 cleanup:
     free(rcname);
     if (kret != 0 && rcache)
-        krb5_rc_close(kcontext, rcache);
+        k5_rc_close(kcontext, rcache);
     return kret;
 }
 

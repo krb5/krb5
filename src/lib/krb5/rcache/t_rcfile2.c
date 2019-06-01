@@ -55,21 +55,20 @@
 krb5_context ctx;
 
 static krb5_error_code
-test_store(krb5_rcache rc, uint8_t *tag, krb5_timestamp timestamp,
+test_store(const char *filename, uint8_t *tag, krb5_timestamp timestamp,
            const uint32_t clockskew)
 {
-    krb5_donot_replay rep = { 0 };
+    krb5_data tag_data = make_data(tag, TAG_LEN);
 
     ctx->clockskew = clockskew;
     (void)krb5_set_debugging_time(ctx, timestamp, 0);
-    rep.tag = make_data(tag, TAG_LEN);
-    return file2_store(ctx, rc, &rep);
+    return file2_store(ctx, (void *)filename, &tag_data);
 }
 
 /* Store a sequence of unique tags, with timestamps far enough apart that all
  * previous records appear expired.  Verify that we only use one table. */
 static void
-expiry_test(krb5_rcache rc, int reps, const char *filename)
+expiry_test(const char *filename, int reps)
 {
     krb5_error_code ret;
     struct stat statbuf;
@@ -85,7 +84,7 @@ expiry_test(krb5_rcache rc, int reps, const char *filename)
         hashval = k5_siphash24(data, 4, seed);
         store_64_be(hashval, tag);
 
-        ret = test_store(rc, tag, timestamp, clockskew);
+        ret = test_store(filename, tag, timestamp, clockskew);
         assert(ret == 0);
 
         /* Since we increment timestamp enough to expire every record between
@@ -99,7 +98,7 @@ expiry_test(krb5_rcache rc, int reps, const char *filename)
 /* Store a sequence of unique tags with the same timestamp.  Exit with failure
  * if any store operation doesn't succeed or fail as given by expect_fail. */
 static void
-store_records(krb5_rcache rc, int id, int reps, int expect_fail)
+store_records(const char *filename, int id, int reps, int expect_fail)
 {
     krb5_error_code ret;
     uint8_t tag[TAG_LEN] = { 0 };
@@ -108,7 +107,7 @@ store_records(krb5_rcache rc, int id, int reps, int expect_fail)
     store_32_be(id, tag);
     for (i = 0; i < reps; i++) {
         store_32_be(i, tag + 4);
-        ret = test_store(rc, tag, 1000, 100);
+        ret = test_store(filename, tag, 1000, 100);
         if (ret != (expect_fail ? KRB5KRB_AP_ERR_REPEAT : 0)) {
             fprintf(stderr, "store %d %d %sfail\n", id, i,
                     expect_fail ? "didn't " : "");
@@ -120,7 +119,7 @@ store_records(krb5_rcache rc, int id, int reps, int expect_fail)
 /* Spawn multiple child processes, each storing a sequence of unique tags.
  * After each process completes, verify that its tags appear as replays. */
 static void
-concurrency_test(krb5_rcache rc, int nchildren, int reps)
+concurrency_test(const char *filename, int nchildren, int reps)
 {
     pid_t *pids, pid;
     int i, nprocs, status;
@@ -131,7 +130,7 @@ concurrency_test(krb5_rcache rc, int nchildren, int reps)
         pids[i] = fork();
         assert(pids[i] != -1);
         if (pids[i] == 0) {
-            store_records(rc, i, reps, 0);
+            store_records(filename, i, reps, 0);
             _exit(0);
         }
     }
@@ -140,7 +139,7 @@ concurrency_test(krb5_rcache rc, int nchildren, int reps)
         assert(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0);
         for (i = 0; i < nchildren; i++) {
             if (pids[i] == pid)
-                store_records(rc, i, reps, 1);
+                store_records(filename, i, reps, 1);
         }
     }
     free(pids);
@@ -149,7 +148,7 @@ concurrency_test(krb5_rcache rc, int nchildren, int reps)
 /* Spawn multiple child processes, all trying to store the same tag.  Verify
  * that only one of the processes succeeded.  Repeat reps times. */
 static void
-race_test(krb5_rcache rc, int nchildren, int reps)
+race_test(const char *filename, int nchildren, int reps)
 {
     int i, j, status, nsuccess;
     uint8_t tag[TAG_LEN] = { 0 };
@@ -161,7 +160,7 @@ race_test(krb5_rcache rc, int nchildren, int reps)
             pid = fork();
             assert(pid != -1);
             if (pid == 0)
-                _exit(test_store(rc, tag, 1000, 100) != 0);
+                _exit(test_store(filename, tag, 1000, 100) != 0);
         }
 
         nsuccess = 0;
@@ -179,7 +178,6 @@ int
 main(int argc, char **argv)
 {
     const char *filename, *cmd;
-    struct krb5_rc_st rc = { 0 };
 
     argv++;
     assert(*argv != NULL);
@@ -190,19 +188,18 @@ main(int argc, char **argv)
     assert(*argv != NULL);
     filename = *argv++;
     unlink(filename);
-    rc.data = (void *)filename;
 
     assert(*argv != NULL);
     cmd = *argv++;
     if (strcmp(cmd, "expiry") == 0) {
         assert(argv[0] != NULL);
-        expiry_test(&rc, atoi(argv[0]), filename);
+        expiry_test(filename, atoi(argv[0]));
     } else if (strcmp(cmd, "concurrent") == 0) {
         assert(argv[0] != NULL && argv[1] != NULL);
-        concurrency_test(&rc, atoi(argv[0]), atoi(argv[1]));
+        concurrency_test(filename, atoi(argv[0]), atoi(argv[1]));
     } else if (strcmp(cmd, "race") == 0) {
         assert(argv[0] != NULL && argv[1] != NULL);
-        race_test(&rc, atoi(argv[0]), atoi(argv[1]));
+        race_test(filename, atoi(argv[0]), atoi(argv[1]));
     } else {
         abort();
     }
