@@ -123,6 +123,14 @@ write_record(int fd, off_t offset, const uint8_t tag[TAG_LEN],
     return 0;
 }
 
+/* Return true if timestamp is expired, for the current timestamp (now) and
+ * allowable clock skew. */
+static inline krb5_boolean
+expired(uint32_t timestamp, uint32_t now, uint32_t skew)
+{
+    return ts_after(now, ts_incr(timestamp, skew));
+}
+
 /* Check and store a record into an open and locked file.  fd is assumed to be
  * at offset 0. */
 static krb5_error_code
@@ -134,8 +142,8 @@ store(krb5_context context, int fd, const uint8_t tag[TAG_LEN], uint32_t now,
     off_t table_offset = -1, nrecords = 0, avail_offset = -1, record_offset;
     ssize_t st;
     int ind, nread;
-    uint8_t seed[K5_HASH_SEED_LEN], rec1_tag[TAG_LEN], rec2_tag[TAG_LEN];
-    uint32_t rec1_stamp, rec2_stamp;
+    uint8_t seed[K5_HASH_SEED_LEN], r1tag[TAG_LEN], r2tag[TAG_LEN];
+    uint32_t r1stamp, r2stamp;
 
     /* Read or generate the hash seed. */
     st = read(fd, seed, sizeof(seed));
@@ -161,23 +169,27 @@ store(krb5_context context, int fd, const uint8_t tag[TAG_LEN], uint32_t now,
         ind = k5_siphash24(tag, TAG_LEN, seed) % nrecords;
         record_offset = table_offset + ind * RECORD_LEN;
 
-        ret = read_records(fd, record_offset, rec1_tag, &rec1_stamp, rec2_tag,
-                           &rec2_stamp, &nread);
+        ret = read_records(fd, record_offset, r1tag, &r1stamp, r2tag, &r2stamp,
+                           &nread);
         if (ret)
             return ret;
 
-        if ((nread >= 1 && memcmp(rec1_tag, tag, TAG_LEN) == 0) ||
-            (nread == 2 && memcmp(rec2_tag, tag, TAG_LEN) == 0))
+        if ((nread >= 1 && memcmp(r1tag, tag, TAG_LEN) == 0) ||
+            (nread == 2 && memcmp(r2tag, tag, TAG_LEN) == 0))
             return KRB5KRB_AP_ERR_REPEAT;
 
+        /* Make note of the first record available for writing (empty, beyond
+         * the end of the file, or expired). */
         if (avail_offset == -1) {
-            if (nread == 0 || ts_after(now, ts_incr(rec1_stamp, skew)))
+            if (nread == 0 || !r1stamp || expired(r1stamp, now, skew))
                 avail_offset = record_offset;
-            else if (nread == 1 || ts_after(now, ts_incr(rec2_stamp, skew)))
+            else if (nread == 1 || !r2stamp || expired(r2stamp, now, skew))
                 avail_offset = record_offset + RECORD_LEN;
         }
 
-        if (nread < 2 || rec1_stamp == 0 || rec2_stamp == 0)
+        /* Stop searching if we encountered an empty record or one beyond the
+         * end of the file, as tag would have been written there previously. */
+        if (nread < 2 || !r1stamp || !r2stamp)
             return write_record(fd, avail_offset, tag, now);
 
         /* Use a different hash seed for the next table we search. */
