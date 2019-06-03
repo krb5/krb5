@@ -77,6 +77,7 @@ STLIBOBJS= \
 	mk_safe.o	\
 	pac.o		\
 	pac_sign.o	\
+	padata.o	\
 	parse.o		\
 	parse_host_string.o	\
 	plugin.o	\
@@ -190,6 +191,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)mk_safe.$(OBJEXT)	\
 	$(OUTPRE)pac.$(OBJEXT)		\
 	$(OUTPRE)pac_sign.$(OBJEXT)	\
+	$(OUTPRE)padata.$(OBJEXT)	\
 	$(OUTPRE)parse.$(OBJEXT)	\
 	$(OUTPRE)parse_host_string.$(OBJEXT)	\
 	$(OUTPRE)plugin.$(OBJEXT)	\
@@ -303,6 +305,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/mk_safe.c	\
 	$(srcdir)/pac.c		\
 	$(srcdir)/pac_sign.c	\
+	$(srcdir)/padata.c	\
 	$(srcdir)/parse.c	\
 	$(srcdir)/parse_host_string.c	\
 	$(srcdir)/plugin.c	\

@@ -851,11 +851,35 @@ typedef struct _krb5_cammac {
     krb5_verifier_mac **other_verifiers;
 } krb5_cammac;
 
+void krb5_free_etype_info(krb5_context, krb5_etype_info);
+
 krb5_pa_data *
 krb5int_find_pa_data(krb5_context, krb5_pa_data *const *, krb5_preauthtype);
 /* Does not return a copy; original padata sequence responsible for freeing*/
 
-void krb5_free_etype_info(krb5_context, krb5_etype_info);
+/* Allocate a pa-data object with uninitialized contents of size len.  If len
+ * is 0, set the contents field to NULL. */
+krb5_error_code
+k5_alloc_pa_data(krb5_preauthtype pa_type, size_t len, krb5_pa_data **out);
+
+/* Free a single pa-data object. */
+void
+k5_free_pa_data_element(krb5_pa_data *pa);
+
+/* Without copying, add single element *pa to *list, reallocating as necessary.
+ * If *list is NULL, allocate a new list.  Set *pa to NULL on success. */
+krb5_error_code
+k5_add_pa_data_element(krb5_pa_data ***list, krb5_pa_data **pa);
+
+/* Without copying, add a pa-data element of type pa_type to *list with the
+ * contents in data.  Set *data to empty_data() on success. */
+krb5_error_code
+k5_add_pa_data_from_data(krb5_pa_data ***list, krb5_preauthtype pa_type,
+                         krb5_data *data);
+
+/* Add an empty pa-data element of type pa_type to *list. */
+krb5_error_code
+k5_add_empty_pa_data(krb5_pa_data ***list, krb5_preauthtype pa_type);
 
 #endif /* KRB5_PREAUTH__ */
 /*

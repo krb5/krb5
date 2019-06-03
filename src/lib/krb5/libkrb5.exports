@@ -117,6 +117,10 @@ initialize_krb5_error_table
 initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
+k5_add_empty_pa_data
+k5_add_pa_data_element
+k5_add_pa_data_from_data
+k5_alloc_pa_data
 k5_authind_decode
 k5_build_conf_principals
 k5_ccselect_free_context
@@ -129,6 +133,7 @@ k5_free_cammac
 k5_free_data_ptr_list
 k5_free_otp_tokeninfo
 k5_free_kkdcp_message
+k5_free_pa_data_element
 k5_free_pa_otp_challenge
 k5_free_pa_otp_req
 k5_free_secure_cookie
