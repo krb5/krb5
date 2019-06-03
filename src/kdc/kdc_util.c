@@ -1375,7 +1375,7 @@ kdc_make_s4u2self_rep(krb5_context context,
     krb5_error_code             code;
     krb5_data                   *der_user_id = NULL, *der_s4u_x509_user = NULL;
     krb5_pa_s4u_x509_user       rep_s4u_user;
-    krb5_pa_data                *pa;
+    krb5_pa_data                *pa = NULL;
     krb5_enctype                enctype;
     krb5_keyusage               usage;
 
@@ -1405,15 +1405,8 @@ kdc_make_s4u2self_rep(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    /* Add a padata element, stealing memory from der_s4u_x509_user. */
-    code = alloc_pa_data(KRB5_PADATA_S4U_X509_USER, 0, &pa);
-    if (code != 0)
-        goto cleanup;
-    pa->length = der_s4u_x509_user->length;
-    pa->contents = (uint8_t *)der_s4u_x509_user->data;
-    der_s4u_x509_user->data = NULL;
-    /* add_pa_data_element() claims pa on success or failure. */
-    code = add_pa_data_element(&reply->padata, pa);
+    code = k5_add_pa_data_from_data(&reply->padata, KRB5_PADATA_S4U_X509_USER,
+                                    der_s4u_x509_user);
     if (code != 0)
         goto cleanup;
 
@@ -1429,9 +1422,9 @@ kdc_make_s4u2self_rep(krb5_context context,
      */
     if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
         enctype_requires_etype_info_2(enctype) == FALSE) {
-        code = alloc_pa_data(KRB5_PADATA_S4U_X509_USER,
-                             req_s4u_user->cksum.length +
-                             rep_s4u_user.cksum.length, &pa);
+        code = k5_alloc_pa_data(KRB5_PADATA_S4U_X509_USER,
+                                req_s4u_user->cksum.length +
+                                rep_s4u_user.cksum.length, &pa);
         if (code != 0)
             goto cleanup;
         memcpy(pa->contents,
@@ -1439,8 +1432,7 @@ kdc_make_s4u2self_rep(krb5_context context,
         memcpy(&pa->contents[req_s4u_user->cksum.length],
                rep_s4u_user.cksum.contents, rep_s4u_user.cksum.length);
 
-        /* add_pa_data_element() claims pa on success or failure. */
-        code = add_pa_data_element(&reply_encpart->enc_padata, pa);
+        code = k5_add_pa_data_element(&reply_encpart->enc_padata, &pa);
         if (code != 0)
             goto cleanup;
     }
@@ -1450,7 +1442,7 @@ cleanup:
         krb5_free_checksum_contents(context, &rep_s4u_user.cksum);
     krb5_free_data(context, der_user_id);
     krb5_free_data(context, der_s4u_x509_user);
-
+    k5_free_pa_data_element(pa);
     return code;
 }
 
@@ -1778,53 +1770,6 @@ enctype_requires_etype_info_2(krb5_enctype enctype)
     }
 }
 
-/* Allocate a pa-data entry with an uninitialized buffer of size len. */
-krb5_error_code
-alloc_pa_data(krb5_preauthtype pa_type, size_t len, krb5_pa_data **out)
-{
-    krb5_pa_data *pa;
-    uint8_t *buf = NULL;
-
-    *out = NULL;
-    if (len > 0) {
-        buf = malloc(len);
-        if (buf == NULL)
-            return ENOMEM;
-    }
-    pa = malloc(sizeof(*pa));
-    if (pa == NULL) {
-        free(buf);
-        return ENOMEM;
-    }
-    pa->magic = KV5M_PA_DATA;
-    pa->pa_type = pa_type;
-    pa->length = len;
-    pa->contents = buf;
-    *out = pa;
-    return 0;
-}
-
-/* Add pa to list, claiming its memory.  Free pa on failure. */
-krb5_error_code
-add_pa_data_element(krb5_pa_data ***list, krb5_pa_data *pa)
-{
-    size_t count;
-    krb5_pa_data **newlist;
-
-    for (count = 0; *list != NULL && (*list)[count] != NULL; count++);
-
-    newlist = realloc(*list, (count + 2) * sizeof(*newlist));
-    if (newlist == NULL) {
-        free(pa->contents);
-        free(pa);
-        return ENOMEM;
-    }
-    newlist[count] = pa;
-    newlist[count + 1] = NULL;
-    *list = newlist;
-    return 0;
-}
-
 void
 kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_timestamp starttime,
@@ -1926,7 +1871,7 @@ kdc_handle_protected_negotiation(krb5_context context,
     krb5_error_code retval = 0;
     krb5_checksum checksum;
     krb5_data *der_cksum = NULL;
-    krb5_pa_data *pa, *pa_in;
+    krb5_pa_data *pa_in;
 
     memset(&checksum, 0, sizeof(checksum));
 
@@ -1944,24 +1889,14 @@ kdc_handle_protected_negotiation(krb5_context context,
     if (retval != 0)
         goto cleanup;
 
-    /* Add a pa-data element to the list, stealing memory from der_cksum. */
-    retval = alloc_pa_data(KRB5_ENCPADATA_REQ_ENC_PA_REP, 0, &pa);
-    if (retval)
-        goto cleanup;
-    pa->length = der_cksum->length;
-    pa->contents = (uint8_t *)der_cksum->data;
-    der_cksum->data = NULL;
-    /* add_pa_data_element() claims pa on success or failure. */
-    retval = add_pa_data_element(out_enc_padata, pa);
+    retval = k5_add_pa_data_from_data(out_enc_padata,
+                                      KRB5_ENCPADATA_REQ_ENC_PA_REP,
+                                      der_cksum);
     if (retval)
         goto cleanup;
 
     /* Add a zero-length PA-FX-FAST element to the list. */
-    retval = alloc_pa_data(KRB5_PADATA_FX_FAST, 0, &pa);
-    if (retval)
-        goto cleanup;
-    /* add_pa_data_element() claims pa on success or failure. */
-    retval = add_pa_data_element(out_enc_padata, pa);
+    retval = k5_add_empty_pa_data(out_enc_padata, KRB5_PADATA_FX_FAST);
 
 cleanup:
     krb5_free_checksum_contents(context, &checksum);

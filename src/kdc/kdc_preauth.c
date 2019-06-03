@@ -108,9 +108,9 @@ static preauth_system *preauth_systems;
 static size_t n_preauth_systems;
 
 static krb5_error_code
-make_etype_info(krb5_context context, krb5_preauthtype pa_type,
+make_etype_info(krb5_context context, krb5_boolean etype_info2,
                 krb5_principal client, krb5_key_data *client_key,
-                krb5_enctype enctype, krb5_pa_data **pa_out);
+                krb5_enctype enctype, krb5_data **der_out);
 
 /* Get all available kdcpreauth vtables and a count of preauth types they
  * support.  Return an empty list on failure. */
@@ -753,32 +753,32 @@ add_etype_info(krb5_context context, krb5_kdcpreauth_rock rock,
                krb5_pa_data ***pa_list)
 {
     krb5_error_code ret;
-    krb5_pa_data *pa;
+    krb5_data *der;
 
     if (rock->client_key == NULL)
         return 0;
 
     if (!requires_info2(rock->request)) {
         /* Include PA-ETYPE-INFO only for old clients. */
-        ret = make_etype_info(context, KRB5_PADATA_ETYPE_INFO,
-                              rock->client->princ, rock->client_key,
-                              rock->client_keyblock->enctype, &pa);
+        ret = make_etype_info(context, FALSE, rock->client->princ,
+                              rock->client_key, rock->client_keyblock->enctype,
+                              &der);
         if (ret)
             return ret;
-        /* add_pa_data_element() claims pa on success or failure. */
-        ret = add_pa_data_element(pa_list, pa);
+        ret = k5_add_pa_data_from_data(pa_list, KRB5_PADATA_ETYPE_INFO, der);
+        krb5_free_data(context, der);
         if (ret)
             return ret;
     }
 
     /* Always include PA-ETYPE-INFO2. */
-    ret = make_etype_info(context, KRB5_PADATA_ETYPE_INFO2,
-                          rock->client->princ, rock->client_key,
-                          rock->client_keyblock->enctype, &pa);
+    ret = make_etype_info(context, TRUE, rock->client->princ, rock->client_key,
+                          rock->client_keyblock->enctype, &der);
     if (ret)
         return ret;
-    /* add_pa_data_element() claims pa on success or failure. */
-    return add_pa_data_element(pa_list, pa);
+    ret = k5_add_pa_data_from_data(pa_list, KRB5_PADATA_ETYPE_INFO2, der);
+    krb5_free_data(context, der);
+    return ret;
 }
 
 /* Add PW-SALT entries to pa_list as appropriate for the request and client
@@ -788,7 +788,6 @@ add_pw_salt(krb5_context context, krb5_kdcpreauth_rock rock,
             krb5_pa_data ***pa_list)
 {
     krb5_error_code ret;
-    krb5_pa_data *pa;
     krb5_data *salt = NULL;
     krb5_int16 salttype;
 
@@ -801,18 +800,7 @@ add_pw_salt(krb5_context context, krb5_kdcpreauth_rock rock,
     if (ret)
         return 0;
 
-    /* Steal memory from salt to make the pa-data entry. */
-    ret = alloc_pa_data(KRB5_PADATA_PW_SALT, 0, &pa);
-    if (ret)
-        goto cleanup;
-    pa->length = salt->length;
-    pa->contents = (uint8_t *)salt->data;
-    salt->data = NULL;
-
-    /* add_pa_data_element() claims pa on success or failure. */
-    ret = add_pa_data_element(pa_list, pa);
-
-cleanup:
+    ret = k5_add_pa_data_from_data(pa_list, KRB5_PADATA_PW_SALT, salt);
     krb5_free_data(context, salt);
     return ret;
 }
@@ -827,7 +815,7 @@ add_freshness_token(krb5_context context, krb5_kdcpreauth_rock rock,
     krb5_keyblock kb;
     krb5_checksum cksum;
     krb5_data d;
-    krb5_pa_data *pa;
+    krb5_pa_data *pa = NULL;
     char ckbuf[4];
 
     memset(&cksum, 0, sizeof(cksum));
@@ -857,19 +845,19 @@ add_freshness_token(krb5_context context, krb5_kdcpreauth_rock rock,
                                &d, &cksum);
 
     /* Compose a freshness token from the time, krbtgt kvno, and checksum. */
-    ret = alloc_pa_data(KRB5_PADATA_AS_FRESHNESS, 8 + cksum.length, &pa);
+    ret = k5_alloc_pa_data(KRB5_PADATA_AS_FRESHNESS, 8 + cksum.length, &pa);
     if (ret)
         goto cleanup;
     store_32_be(now, pa->contents);
     store_32_be(kd->key_data_kvno, pa->contents + 4);
     memcpy(pa->contents + 8, cksum.contents, cksum.length);
 
-    /* add_pa_data_element() claims pa on success or failure. */
-    ret = add_pa_data_element(pa_list, pa);
+    ret = k5_add_pa_data_element(pa_list, &pa);
 
 cleanup:
     krb5_free_keyblock_contents(context, &kb);
     krb5_free_checksum_contents(context, &cksum);
+    k5_free_pa_data_element(pa);
     return ret;
 }
 
@@ -927,12 +915,12 @@ finish_get_edata(void *arg, krb5_error_code code, krb5_pa_data *pa)
 
     if (code == 0) {
         if (pa == NULL) {
-            ret = alloc_pa_data(state->pa_type, 0, &pa);
+            ret = k5_alloc_pa_data(state->pa_type, 0, &pa);
             if (ret)
                 goto error;
         }
-        /* add_pa_data_element() claims pa on success or failure. */
-        ret = add_pa_data_element(&state->pa_data, pa);
+        ret = k5_add_pa_data_element(&state->pa_data, &pa);
+        k5_free_pa_data_element(pa);
         if (ret)
             goto error;
     }
@@ -981,7 +969,6 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
 {
     kdc_realm_t *kdc_active_realm = rock->rstate->realm_data;
     struct hint_state *state;
-    krb5_pa_data *pa;
 
     *e_data_out = NULL;
 
@@ -1001,10 +988,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
     state->ap = preauth_systems;
 
     /* Add an empty PA-FX-FAST element to advertise FAST support. */
-    if (alloc_pa_data(KRB5_PADATA_FX_FAST, 0, &pa) != 0)
-        goto error;
-    /* add_pa_data_element() claims pa on success or failure. */
-    if (add_pa_data_element(&state->pa_data, pa) != 0)
+    if (k5_add_empty_pa_data(&state->pa_data, KRB5_PADATA_FX_FAST) != 0)
         goto error;
 
     if (add_etype_info(kdc_context, rock, &state->pa_data) != 0)
@@ -1151,7 +1135,7 @@ maybe_add_etype_info2(struct padata_state *state, krb5_error_code code)
     krb5_error_code ret;
     krb5_context context = state->context;
     krb5_kdcpreauth_rock rock = state->rock;
-    krb5_pa_data *pa;
+    krb5_data *der;
 
     /* Only add key information when requesting another preauth round trip. */
     if (code != KRB5KDC_ERR_MORE_PREAUTH_DATA_REQUIRED)
@@ -1167,14 +1151,14 @@ maybe_add_etype_info2(struct padata_state *state, krb5_error_code code)
                              KRB5_PADATA_FX_COOKIE) != NULL)
         return 0;
 
-    ret = make_etype_info(context, KRB5_PADATA_ETYPE_INFO2,
-                          rock->client->princ, rock->client_key,
-                          rock->client_keyblock->enctype, &pa);
+    ret = make_etype_info(context, TRUE, rock->client->princ, rock->client_key,
+                          rock->client_keyblock->enctype, &der);
     if (ret)
         return ret;
-
-    /* add_pa_data_element() claims pa on success or failure. */
-    return add_pa_data_element(&state->pa_e_data, pa);
+    ret = k5_add_pa_data_from_data(&state->pa_e_data, KRB5_PADATA_ETYPE_INFO2,
+                                   der);
+    krb5_free_data(context, der);
+    return ret;
 }
 
 /* Release state and respond to the AS-REQ processing code with the result of
@@ -1468,8 +1452,8 @@ return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
             goto cleanup;
 
         if (send_pa != NULL) {
-            /* add_pa_data_element() claims send_pa on success or failure. */
-            retval = add_pa_data_element(&send_pa_list, send_pa);
+            retval = k5_add_pa_data_element(&send_pa_list, &send_pa);
+            k5_free_pa_data_element(send_pa);
             if (retval)
                 goto cleanup;
         }
@@ -1552,19 +1536,17 @@ cleanup:
     return retval;
 }
 
-/* Create etype-info or etype-info2 padata for client_key with the given
+/* Encode an etype-info or etype-info2 message for client_key with the given
  * enctype, using client to compute the salt if necessary. */
 static krb5_error_code
-make_etype_info(krb5_context context, krb5_preauthtype pa_type,
+make_etype_info(krb5_context context, krb5_boolean etype_info2,
                 krb5_principal client, krb5_key_data *client_key,
-                krb5_enctype enctype, krb5_pa_data **pa_out)
+                krb5_enctype enctype, krb5_data **der_out)
 {
     krb5_error_code retval;
     krb5_etype_info_entry **entry = NULL;
-    krb5_data *der_etype_info = NULL;
-    int etype_info2 = (pa_type == KRB5_PADATA_ETYPE_INFO2);
 
-    *pa_out = NULL;
+    *der_out = NULL;
 
     entry = k5calloc(2, sizeof(*entry), &retval);
     if (entry == NULL)
@@ -1575,23 +1557,12 @@ make_etype_info(krb5_context context, krb5_preauthtype pa_type,
         goto cleanup;
 
     if (etype_info2)
-        retval = encode_krb5_etype_info2(entry, &der_etype_info);
+        retval = encode_krb5_etype_info2(entry, der_out);
     else
-        retval = encode_krb5_etype_info(entry, &der_etype_info);
-    if (retval)
-        goto cleanup;
-
-    /* Steal the data from der_etype_info to create a pa-data element. */
-    retval = alloc_pa_data(pa_type, 0, pa_out);
-    if (retval)
-        goto cleanup;
-    (*pa_out)->contents = (uint8_t *)der_etype_info->data;
-    (*pa_out)->length = der_etype_info->length;
-    der_etype_info->data = NULL;
+        retval = encode_krb5_etype_info(entry, der_out);
 
 cleanup:
     krb5_free_etype_info(context, entry);
-    krb5_free_data(context, der_etype_info);
     return retval;
 }
 
@@ -1643,13 +1614,14 @@ return_referral_enc_padata( krb5_context context,
     if (code || tl_data.tl_data_length == 0)
         return 0;
 
-    code = alloc_pa_data(KRB5_PADATA_SVR_REFERRAL_INFO, tl_data.tl_data_length,
-                         &pa);
+    code = k5_alloc_pa_data(KRB5_PADATA_SVR_REFERRAL_INFO,
+                            tl_data.tl_data_length, &pa);
     if (code)
         return code;
     memcpy(pa->contents, tl_data.tl_data_contents, tl_data.tl_data_length);
-    /* add_pa_data_element() claims pa on success or failure. */
-    return add_pa_data_element(&reply->enc_padata, pa);
+    code = k5_add_pa_data_element(&reply->enc_padata, &pa);
+    k5_free_pa_data_element(pa);
+    return code;
 }
 
 krb5_error_code

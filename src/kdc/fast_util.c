@@ -456,7 +456,7 @@ static krb5_error_code
 make_padata(krb5_preauthtype pa_type, const void *contents, size_t len,
             krb5_pa_data **out)
 {
-    if (alloc_pa_data(pa_type, len, out) != 0)
+    if (k5_alloc_pa_data(pa_type, len, out) != 0)
         return ENOMEM;
     memcpy((*out)->contents, contents, len);
     return 0;
@@ -696,7 +696,8 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
         goto cleanup;
 
     /* Construct the cookie pa-data entry. */
-    ret = alloc_pa_data(KRB5_PADATA_FX_COOKIE, 8 + enc.ciphertext.length, &pa);
+    ret = k5_alloc_pa_data(KRB5_PADATA_FX_COOKIE, 8 + enc.ciphertext.length,
+                           &pa);
     memcpy(pa->contents, "MIT1", 4);
     store_32_be(kvno, pa->contents + 4);
     memcpy(pa->contents + 8, enc.ciphertext.data, enc.ciphertext.length);
