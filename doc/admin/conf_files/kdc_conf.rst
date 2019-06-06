@@ -642,16 +642,19 @@ Logging specifications may have the following forms:
     facility is specified, the default is **AUTH**.
 
 In the following example, the logging messages from the KDC will go to
-the console and to the system log under the facility LOG_DAEMON with
-default severity of LOG_INFO; and the logging messages from the
-administrative server will be appended to the file
-``/var/adm/kadmin.log`` and sent to the device ``/dev/tty04``. ::
+the console and to the system log under the facility LOG_DAEMON, and
+the logging messages from the administrative server will be appended
+to the file ``/var/adm/kadmin.log`` and sent to the device
+``/dev/tty04``. ::
 
     [logging]
         kdc = CONSOLE
         kdc = SYSLOG:INFO:DAEMON
         admin_server = FILE:/var/adm/kadmin.log
         admin_server = DEVICE=/dev/tty04
+
+If no logging specification is given, the default is to use syslog.
+To disable logging entirely, specify ``default = DEVICE=/dev/null``.
 
 
 .. _otp:
