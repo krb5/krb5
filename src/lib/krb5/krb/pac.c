@@ -408,12 +408,11 @@ k5_pac_validate_client(krb5_context context,
 {
     krb5_error_code ret;
     krb5_data client_info;
-    char *pac_princname;
+    char *pac_princname, *princname;
     unsigned char *p;
     krb5_timestamp pac_authtime;
     krb5_ui_2 pac_princname_length;
     int64_t pac_nt_authtime;
-    krb5_principal pac_principal;
     int flags = 0;
 
     ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_CLIENT_INFO,
@@ -442,33 +441,21 @@ k5_pac_validate_client(krb5_context context,
     if (ret != 0)
         return ret;
 
-    /* Parse the UTF-8 name as an enterprise principal if we are matching
-     * against one; otherwise parse it as a regular principal. */
-    if (principal->type == KRB5_NT_ENTERPRISE_PRINCIPAL)
-        flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+    flags = KRB5_PRINCIPAL_UNPARSE_DISPLAY;
+    if (!with_realm)
+        flags |= KRB5_PRINCIPAL_UNPARSE_NO_REALM;
 
-    if (with_realm)
-        flags |= KRB5_PRINCIPAL_PARSE_REQUIRE_REALM;
-    else
-        flags |= KRB5_PRINCIPAL_PARSE_NO_REALM;
-
-    ret = krb5_parse_name_flags(context, pac_princname, flags, &pac_principal);
+    ret = krb5_unparse_name_flags(context, principal, flags, &princname);
     if (ret != 0) {
         free(pac_princname);
         return ret;
     }
 
-    free(pac_princname);
-
-    if (pac_authtime != authtime ||
-        !krb5_principal_compare_flags(context,
-                                      pac_principal,
-                                      principal,
-                                      with_realm ? 0 :
-                                      KRB5_PRINCIPAL_COMPARE_IGNORE_REALM))
+    if (pac_authtime != authtime || strcmp(pac_princname, princname) != 0)
         ret = KRB5KRB_AP_WRONG_PRINC;
 
-    krb5_free_principal(context, pac_principal);
+    free(pac_princname);
+    krb5_free_unparsed_name(context, princname);
 
     return ret;
 }

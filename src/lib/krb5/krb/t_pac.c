@@ -733,12 +733,17 @@ main(int argc, char **argv)
     }
 
     {
-        krb5_principal ep;
+        krb5_principal ep, np;
 
         ret = krb5_parse_name_flags(context, user,
                                     KRB5_PRINCIPAL_PARSE_ENTERPRISE, &ep);
         if (ret)
             err(context, ret, "krb5_parse_name_flags");
+
+        ret = krb5_copy_principal(context, ep, &np);
+        if (ret)
+            err(context, ret, "krb5_copy_principal");
+        np->type = KRB5_NT_MS_PRINCIPAL;
 
         /* Try to verify as enterprise. */
         ret = krb5_pac_verify(context, pac, authtime, ep, &member_keyblock,
@@ -787,6 +792,47 @@ main(int argc, char **argv)
                               &kdc_keyblock);
         if (ret)
             err(context, ret, "krb5_pac_verify enterprise failed");
+
+        /* Also verify enterprise as KRB5_NT_MS_PRINCIPAL. */
+        ret = krb5_pac_verify(context, pac, authtime, np, &member_keyblock,
+                              &kdc_keyblock);
+        if (ret)
+            err(context, ret, "krb5_pac_verify enterprise as nt-ms failed");
+
+        ret = krb5_pac_verify(context, pac, authtime, p, &member_keyblock,
+                              &kdc_keyblock);
+        if (!ret)
+            err(context, ret, "krb5_pac_verify should have failed");
+
+        krb5_pac_free(context, pac);
+
+        /* Test nt-ms-principal. */
+        ret = krb5_pac_init(context, &pac);
+        if (ret)
+            err(context, ret, "krb5_pac_init");
+
+        ret = krb5_pac_sign(context, pac, authtime, np, &member_keyblock,
+                            &kdc_keyblock, &data);
+        if (ret)
+            err(context, ret, "krb5_pac_sign enterprise failed");
+
+        krb5_pac_free(context, pac);
+
+        ret = krb5_pac_parse(context, data.data, data.length, &pac);
+        krb5_free_data_contents(context, &data);
+        if (ret)
+            err(context, ret, "krb5_pac_parse failed");
+
+        ret = krb5_pac_verify(context, pac, authtime, np, &member_keyblock,
+                              &kdc_keyblock);
+        if (ret)
+            err(context, ret, "krb5_pac_verify enterprise failed");
+
+        /* Also verify as enterprise principal. */
+        ret = krb5_pac_verify(context, pac, authtime, ep, &member_keyblock,
+                              &kdc_keyblock);
+        if (ret)
+            err(context, ret, "krb5_pac_verify nt-ms as enterprise failed");
 
         ret = krb5_pac_verify(context, pac, authtime, p, &member_keyblock,
                               &kdc_keyblock);
@@ -862,6 +908,7 @@ main(int argc, char **argv)
             err(context, ret, "krb5_pac_verify_ext should have failed");
 
         krb5_free_principal(context, ep);
+        krb5_free_principal(context, np);
     }
 
     krb5_pac_free(context, pac);
