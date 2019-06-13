@@ -78,6 +78,7 @@ extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_proxiable);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_renew_life);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_address_list);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_out_ccache);
+extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_change_password_prompt);
 extern DECL_FUNC_PTR(krb5_get_init_creds_password);
 extern DECL_FUNC_PTR(krb5_build_principal_ext);
 extern DECL_FUNC_PTR(krb5_cc_get_name);

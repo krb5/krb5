@@ -264,6 +264,7 @@ cc_free_NC_info,
 #define LEASH_REGISTRY_VALUE_RENEW_MIN "renew_min"
 #define LEASH_REGISTRY_VALUE_RENEW_MAX "renew_max"
 #define LEASH_REGISTRY_VALUE_PRESERVE_KINIT "preserve_kinit_options"
+#define LEASH_REGISTRY_VALUE_SHOW_PASSWORD_PROMPT "show_password_prompt"
 
 /* must match values used within krb5_32.dll */
 #define KRB5_REGISTRY_KEY_NAME "Software\\MIT\\Kerberos5"
