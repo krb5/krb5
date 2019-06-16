@@ -376,4 +376,14 @@ krb5_error_code
 k5_get_etype_info(krb5_context context, krb5_init_creds_context ctx,
                   krb5_pa_data **padata);
 
+/*
+ * Make an S4U2Proxy (constrained delegation) request.  in_creds->client is the
+ * impersonator principal, and in_creds->second_ticket is the evidence
+ * ticket.
+ */
+krb5_error_code
+k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
+                           krb5_ccache ccache, krb5_creds *in_creds,
+                           krb5_creds **out_creds);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

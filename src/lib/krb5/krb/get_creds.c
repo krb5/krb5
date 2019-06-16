@@ -332,8 +332,7 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
     extra_options = ctx->req_kdcopt;
 
     /* Automatically set the enc-tkt-in-skey flag for user-to-user requests. */
-    if (ctx->in_creds->second_ticket.length != 0 &&
-        (extra_options & KDC_OPT_CNAME_IN_ADDL_TKT) == 0)
+    if (ctx->in_creds->second_ticket.length != 0)
         extra_options |= KDC_OPT_ENC_TKT_IN_SKEY;
 
     /* Set the canonicalize flag for referral requests. */
@@ -443,12 +442,6 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
         /* Try to cache the credential. */
         (void) krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
     }
-
-    /* If we were doing constrained delegation, make sure we got a forwardable
-     * ticket, or it won't work. */
-    if ((ctx->req_options & KRB5_GC_CONSTRAINED_DELEGATION)
-        && (ctx->reply_creds->ticket_flags & TKT_FLG_FORWARDABLE) == 0)
-        return KRB5_TKT_NOT_FORWARDABLE;
 
     ctx->state = STATE_COMPLETE;
     return 0;
@@ -1023,11 +1016,6 @@ check_cache(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_creds mcreds;
     krb5_flags fields;
 
-    /* For constrained delegation, the expected result is in second_ticket, so
-     * we can't really do a cache check here. */
-    if (ctx->req_options & KRB5_GC_CONSTRAINED_DELEGATION)
-        return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
-
     /* Perform the cache lookup. */
     code = krb5int_construct_matching_creds(context, ctx->req_options,
                                             ctx->in_creds, &mcreds, &fields);
@@ -1098,13 +1086,6 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
         ctx->req_kdcopt |= KDC_OPT_FORWARDABLE;
     if (options & KRB5_GC_NO_TRANSIT_CHECK)
         ctx->req_kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
-    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
-        if (options & KRB5_GC_USER_USER) {
-            code = EINVAL;
-            goto cleanup;
-        }
-        ctx->req_kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
-    }
 
     ctx->state = STATE_BEGIN;
 
@@ -1283,6 +1264,13 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     char *hostname = NULL, *canon_hostname = NULL;
 
     *out_creds = NULL;
+
+    /* If S4U2Proxy is requested, use the synchronous implementation in
+     * s4u_creds.c. */
+    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
+        return k5_get_proxy_cred_from_kdc(context, options, ccache, in_creds,
+                                          out_creds);
+    }
 
     /* Allocate a container. */
     ncreds = k5alloc(sizeof(*ncreds), &code);
