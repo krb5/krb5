@@ -111,28 +111,11 @@ free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 }
 
 void
-free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
-{
-    if (*in == NULL) return;
-    free((*in)->signedAuthPack.data);
-    free((*in)->kdcCert.data);
-    free(*in);
-}
-
-void
 free_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     if (*in == NULL) return;
     free((*in)->replyKey.contents);
     free((*in)->asChecksum.contents);
-    free(*in);
-}
-
-void
-free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
-{
-    if (*in == NULL) return;
-    free((*in)->replyKey.contents);
     free(*in);
 }
 
@@ -161,15 +144,6 @@ free_krb5_auth_pack(krb5_auth_pack **in)
 }
 
 void
-free_krb5_auth_pack_draft9(krb5_context context,
-                           krb5_auth_pack_draft9 **in)
-{
-    if ((*in) == NULL) return;
-    krb5_free_principal(context, (*in)->pkAuthenticator.kdcName);
-    free(*in);
-}
-
-void
 free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     if (*in == NULL) return;
@@ -184,14 +158,6 @@ free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     default:
         break;
     }
-    free(*in);
-}
-
-void
-free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
-{
-    if (*in == NULL) return;
-    free((*in)->u.encKeyPack.data);
     free(*in);
 }
 
@@ -262,17 +228,6 @@ init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 }
 
 void
-init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
-{
-    (*in) = malloc(sizeof(krb5_pa_pk_as_req_draft9));
-    if ((*in) == NULL) return;
-    (*in)->signedAuthPack.data = NULL;
-    (*in)->signedAuthPack.length = 0;
-    (*in)->kdcCert.data = NULL;
-    (*in)->kdcCert.length = 0;
-}
-
-void
 init_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     (*in) = malloc(sizeof(krb5_reply_key_pack));
@@ -281,15 +236,6 @@ init_krb5_reply_key_pack(krb5_reply_key_pack **in)
     (*in)->replyKey.length = 0;
     (*in)->asChecksum.contents = NULL;
     (*in)->asChecksum.length = 0;
-}
-
-void
-init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
-{
-    (*in) = malloc(sizeof(krb5_reply_key_pack_draft9));
-    if ((*in) == NULL) return;
-    (*in)->replyKey.contents = NULL;
-    (*in)->replyKey.length = 0;
 }
 
 void
@@ -304,17 +250,6 @@ init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     (*in)->u.encKeyPack.length = 0;
     (*in)->u.encKeyPack.data = NULL;
     (*in)->u.dh_Info.kdfID = NULL;
-}
-
-void
-init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
-{
-    (*in) = malloc(sizeof(krb5_pa_pk_as_rep_draft9));
-    if ((*in) == NULL) return;
-    (*in)->u.dhSignedData.length = 0;
-    (*in)->u.dhSignedData.data = NULL;
-    (*in)->u.encKeyPack.length = 0;
-    (*in)->u.encKeyPack.data = NULL;
 }
 
 void

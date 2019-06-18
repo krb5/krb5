@@ -49,8 +49,6 @@
 #define TRACE_PKINIT_CLIENT_KDF_OS2K(c, keyblock)                       \
     TRACE(c, "PKINIT client used octetstring2key to compute reply key " \
           "{keyblock}", keyblock)
-#define TRACE_PKINIT_CLIENT_NO_DRAFT9(c)                                \
-    TRACE(c, "PKINIT client ignoring draft 9 offer from RFC 4556 KDC")
 #define TRACE_PKINIT_CLIENT_NO_IDENTITY(c)                              \
     TRACE(c, "PKINIT client has no configured identity; giving up")
 #define TRACE_PKINIT_CLIENT_REP_CHECKSUM_FAIL(c, expected, received)    \
@@ -115,8 +113,6 @@
     TRACE(c, "PKINIT server found no SAN in client cert")
 #define TRACE_PKINIT_SERVER_PADATA_VERIFY(c)                    \
     TRACE(c, "PKINIT server verifying KRB5_PADATA_PK_AS_REQ")
-#define TRACE_PKINIT_SERVER_PADATA_VERIFY_OLD(c)                        \
-    TRACE(c, "PKINIT server verifying KRB5_PADATA_PK_AS_REQ_OLD")
 #define TRACE_PKINIT_SERVER_PADATA_VERIFY_FAIL(c)       \
     TRACE(c, "PKINIT server failed to verify PA data")
 #define TRACE_PKINIT_SERVER_RETURN_PADATA(c)    \

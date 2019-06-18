@@ -46,7 +46,6 @@
  */
 enum cms_msg_types {
     CMS_SIGN_CLIENT,
-    CMS_SIGN_DRAFT9,
     CMS_SIGN_SERVER,
     CMS_ENVEL_SERVER
 };

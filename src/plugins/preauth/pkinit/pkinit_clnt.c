@@ -148,11 +148,7 @@ pa_pkinit_gen_req(krb5_context context,
         goto cleanup;
     }
 
-    /*
-     * The most we'll return is two pa_data, normally just one.
-     * We need to make room for the NULL terminator.
-     */
-    return_pa_data = k5calloc(3, sizeof(*return_pa_data), &retval);
+    return_pa_data = k5calloc(2, sizeof(*return_pa_data), &retval);
     if (return_pa_data == NULL)
         goto cleanup;
 
@@ -162,20 +158,10 @@ pa_pkinit_gen_req(krb5_context context,
 
     return_pa_data[0]->magic = KV5M_PA_DATA;
 
-    if (pa_type == KRB5_PADATA_PK_AS_REQ_OLD)
-        return_pa_data[0]->pa_type = KRB5_PADATA_PK_AS_REP_OLD;
-    else
-        return_pa_data[0]->pa_type = pa_type;
+    return_pa_data[0]->pa_type = pa_type;
     return_pa_data[0]->length = out_data->length;
     return_pa_data[0]->contents = (krb5_octet *) out_data->data;
     *out_data = empty_data();
-
-    if (return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD) {
-        return_pa_data[1] = k5alloc(sizeof(*return_pa_data[1]), &retval);
-        if (return_pa_data[1] == NULL)
-            goto cleanup;
-        return_pa_data[1]->pa_type = KRB5_PADATA_AS_CHECKSUM;
-    }
 
     *out_padata = return_pa_data;
     return_pa_data = NULL;
@@ -206,8 +192,6 @@ pkinit_as_req_create(krb5_context context,
     krb5_data *coded_auth_pack = NULL;
     krb5_auth_pack auth_pack;
     krb5_pa_pk_as_req *req = NULL;
-    krb5_auth_pack_draft9 auth_pack9;
-    krb5_pa_pk_as_req_draft9 *req9 = NULL;
     krb5_algorithm_identifier **cmstypes = NULL;
     int protocol = reqctx->opts->dh_or_rsa;
     unsigned char *dh_params = NULL, *dh_pubkey = NULL;
@@ -216,42 +200,25 @@ pkinit_as_req_create(krb5_context context,
     pkiDebug("pkinit_as_req_create pa_type = %d\n", reqctx->pa_type);
 
     /* Create the authpack */
-    switch((int)reqctx->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        protocol = RSA_PROTOCOL;
-        memset(&auth_pack9, 0, sizeof(auth_pack9));
-        auth_pack9.pkAuthenticator.ctime = ctsec;
-        auth_pack9.pkAuthenticator.cusec = cusec;
-        auth_pack9.pkAuthenticator.nonce = nonce;
-        auth_pack9.pkAuthenticator.kdcName = server;
-        break;
-    case KRB5_PADATA_PK_AS_REQ:
-        memset(&info, 0, sizeof(info));
-        memset(&auth_pack, 0, sizeof(auth_pack));
-        auth_pack.pkAuthenticator.ctime = ctsec;
-        auth_pack.pkAuthenticator.cusec = cusec;
-        auth_pack.pkAuthenticator.nonce = nonce;
-        auth_pack.pkAuthenticator.paChecksum = *cksum;
-        if (!reqctx->opts->disable_freshness)
-            auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
-        auth_pack.clientDHNonce.length = 0;
-        auth_pack.clientPublicValue = &info;
-        auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
+    memset(&info, 0, sizeof(info));
+    memset(&auth_pack, 0, sizeof(auth_pack));
+    auth_pack.pkAuthenticator.ctime = ctsec;
+    auth_pack.pkAuthenticator.cusec = cusec;
+    auth_pack.pkAuthenticator.nonce = nonce;
+    auth_pack.pkAuthenticator.paChecksum = *cksum;
+    if (!reqctx->opts->disable_freshness)
+        auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
+    auth_pack.clientDHNonce.length = 0;
+    auth_pack.clientPublicValue = &info;
+    auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
 
-        /* add List of CMS algorithms */
-        retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
-                                               reqctx->cryptoctx,
-                                               reqctx->idctx, &cmstypes);
-        auth_pack.supportedCMSTypes = cmstypes;
-        if (retval)
-            goto cleanup;
-        break;
-    default:
-        pkiDebug("as_req: unrecognized pa_type = %d\n",
-                 (int)reqctx->pa_type);
-        retval = -1;
+    /* add List of CMS algorithms */
+    retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
+                                           reqctx->cryptoctx,
+                                           reqctx->idctx, &cmstypes);
+    auth_pack.supportedCMSTypes = cmstypes;
+    if (retval)
         goto cleanup;
-    }
 
     switch(protocol) {
     case DH_PROTOCOL:
@@ -274,14 +241,7 @@ pkinit_as_req_create(krb5_context context,
     case RSA_PROTOCOL:
         TRACE_PKINIT_CLIENT_REQ_RSA(context);
         pkiDebug("as_req: RSA key transport algorithm\n");
-        switch((int)reqctx->pa_type) {
-        case KRB5_PADATA_PK_AS_REQ_OLD:
-            auth_pack9.clientPublicValue = NULL;
-            break;
-        case KRB5_PADATA_PK_AS_REQ:
-            auth_pack.clientPublicValue = NULL;
-            break;
-        }
+        auth_pack.clientPublicValue = NULL;
         break;
     default:
         pkiDebug("as_req: unknown key transport protocol %d\n",
@@ -290,16 +250,7 @@ pkinit_as_req_create(krb5_context context,
         goto cleanup;
     }
 
-    /* Encode the authpack */
-    switch((int)reqctx->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        retval = k5int_encode_krb5_auth_pack(&auth_pack, &coded_auth_pack);
-        break;
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        retval = k5int_encode_krb5_auth_pack_draft9(&auth_pack9,
-                                                    &coded_auth_pack);
-        break;
-    }
+    retval = k5int_encode_krb5_auth_pack(&auth_pack, &coded_auth_pack);
     if (retval) {
         pkiDebug("failed to encode the AuthPack %d\n", retval);
         goto cleanup;
@@ -311,60 +262,39 @@ pkinit_as_req_create(krb5_context context,
 #endif
 
     /* create PKCS7 object from authpack */
-    switch((int)reqctx->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        init_krb5_pa_pk_as_req(&req);
-        if (req == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
-        if (use_content_info(context, reqctx, client)) {
-            retval = cms_contentinfo_create(context, plgctx->cryptoctx,
-                                            reqctx->cryptoctx, reqctx->idctx,
-                                            CMS_SIGN_CLIENT,
-                                            (unsigned char *)
-                                            coded_auth_pack->data,
-                                            coded_auth_pack->length,
-                                            (unsigned char **)
-                                            &req->signedAuthPack.data,
-                                            &req->signedAuthPack.length);
-        } else {
-            retval = cms_signeddata_create(context, plgctx->cryptoctx,
-                                           reqctx->cryptoctx, reqctx->idctx,
-                                           CMS_SIGN_CLIENT, 1,
-                                           (unsigned char *)
-                                           coded_auth_pack->data,
-                                           coded_auth_pack->length,
-                                           (unsigned char **)
-                                           &req->signedAuthPack.data,
-                                           &req->signedAuthPack.length);
-        }
-#ifdef DEBUG_ASN1
-        print_buffer_bin((unsigned char *)req->signedAuthPack.data,
-                         req->signedAuthPack.length,
-                         "/tmp/client_signed_data");
-#endif
-        break;
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        init_krb5_pa_pk_as_req_draft9(&req9);
-        if (req9 == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
+    init_krb5_pa_pk_as_req(&req);
+    if (req == NULL) {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+    if (use_content_info(context, reqctx, client)) {
+        retval = cms_contentinfo_create(context, plgctx->cryptoctx,
+                                        reqctx->cryptoctx, reqctx->idctx,
+                                        CMS_SIGN_CLIENT,
+                                        (unsigned char *)
+                                        coded_auth_pack->data,
+                                        coded_auth_pack->length,
+                                        (unsigned char **)
+                                        &req->signedAuthPack.data,
+                                        &req->signedAuthPack.length);
+    } else {
         retval = cms_signeddata_create(context, plgctx->cryptoctx,
-                                       reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_DRAFT9, 1,
-                                       (unsigned char *)coded_auth_pack->data,
+                                       reqctx->cryptoctx, reqctx->idctx,
+                                       CMS_SIGN_CLIENT, 1,
+                                       (unsigned char *)
+                                       coded_auth_pack->data,
                                        coded_auth_pack->length,
                                        (unsigned char **)
-                                       &req9->signedAuthPack.data,
-                                       &req9->signedAuthPack.length);
-        break;
-#ifdef DEBUG_ASN1
-        print_buffer_bin((unsigned char *)req9->signedAuthPack.data,
-                         req9->signedAuthPack.length,
-                         "/tmp/client_signed_data_draft9");
-#endif
+                                       &req->signedAuthPack.data,
+                                       &req->signedAuthPack.length);
     }
+
+#ifdef DEBUG_ASN1
+    print_buffer_bin((unsigned char *)req->signedAuthPack.data,
+                     req->signedAuthPack.length,
+                     "/tmp/client_signed_data");
+#endif
+
     krb5_free_data(context, coded_auth_pack);
     if (retval) {
         pkiDebug("failed to create pkcs7 signed data\n");
@@ -372,33 +302,21 @@ pkinit_as_req_create(krb5_context context,
     }
 
     /* create a list of trusted CAs */
-    switch((int)reqctx->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        retval = create_krb5_trustedCertifiers(context, plgctx->cryptoctx,
-                                               reqctx->cryptoctx, reqctx->idctx, &req->trustedCertifiers);
-        if (retval)
-            goto cleanup;
-        retval = create_issuerAndSerial(context, plgctx->cryptoctx,
-                                        reqctx->cryptoctx, reqctx->idctx,
-                                        (unsigned char **)&req->kdcPkId.data,
-                                        &req->kdcPkId.length);
-        if (retval)
-            goto cleanup;
+    retval = create_krb5_trustedCertifiers(context, plgctx->cryptoctx,
+                                           reqctx->cryptoctx, reqctx->idctx,
+                                           &req->trustedCertifiers);
+    if (retval)
+        goto cleanup;
+    retval = create_issuerAndSerial(context, plgctx->cryptoctx,
+                                    reqctx->cryptoctx, reqctx->idctx,
+                                    (unsigned char **)&req->kdcPkId.data,
+                                    &req->kdcPkId.length);
+    if (retval)
+        goto cleanup;
 
-        /* Encode the as-req */
-        retval = k5int_encode_krb5_pa_pk_as_req(req, as_req);
-        break;
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        retval = create_issuerAndSerial(context, plgctx->cryptoctx,
-                                        reqctx->cryptoctx, reqctx->idctx,
-                                        (unsigned char **)&req9->kdcCert.data,
-                                        &req9->kdcCert.length);
-        if (retval)
-            goto cleanup;
-        /* Encode the as-req */
-        retval = k5int_encode_krb5_pa_pk_as_req_draft9(req9, as_req);
-        break;
-    }
+    /* Encode the as-req */
+    retval = k5int_encode_krb5_pa_pk_as_req(req, as_req);
+
 #ifdef DEBUG_ASN1
     if (!retval)
         print_buffer_bin((unsigned char *)(*as_req)->data, (*as_req)->length,
@@ -410,7 +328,6 @@ cleanup:
     free(dh_params);
     free(dh_pubkey);
     free_krb5_pa_pk_as_req(&req);
-    free_krb5_pa_pk_as_req_draft9(&req9);
 
     pkiDebug("pkinit_as_req_create retval=%d\n", (int) retval);
 
@@ -1165,30 +1082,12 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
         d = make_data(in_padata->contents, in_padata->length);
         return krb5_copy_data(context, &d, &reqctx->freshness_token);
     case KRB5_PADATA_PK_AS_REQ:
-        reqctx->rfc4556_kdc = 1;
         pkiDebug("processing KRB5_PADATA_PK_AS_REQ\n");
         processing_request = 1;
         break;
 
     case KRB5_PADATA_PK_AS_REP:
-        reqctx->rfc4556_kdc = 1;
         pkiDebug("processing KRB5_PADATA_PK_AS_REP\n");
-        break;
-    case KRB5_PADATA_PK_AS_REP_OLD:
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        /* Don't fall back to draft9 code if the KDC supports RFC 4556. */
-        if (reqctx->rfc4556_kdc) {
-            TRACE_PKINIT_CLIENT_NO_DRAFT9(context);
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        }
-        if (in_padata->length == 0) {
-            pkiDebug("processing KRB5_PADATA_PK_AS_REQ_OLD\n");
-            in_padata->pa_type = KRB5_PADATA_PK_AS_REQ_OLD;
-            processing_request = 1;
-        } else {
-            pkiDebug("processing KRB5_PADATA_PK_AS_REP_OLD\n");
-            in_padata->pa_type = KRB5_PADATA_PK_AS_REP_OLD;
-        }
         break;
     default:
         pkiDebug("unrecognized patype = %d for PKINIT\n",
@@ -1363,8 +1262,6 @@ pkinit_client_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 static krb5_preauthtype supported_client_pa_types[] = {
     KRB5_PADATA_PK_AS_REP,
     KRB5_PADATA_PK_AS_REQ,
-    KRB5_PADATA_PK_AS_REP_OLD,
-    KRB5_PADATA_PK_AS_REQ_OLD,
     KRB5_PADATA_PKINIT_KX,
     KRB5_PADATA_AS_FRESHNESS,
     0

@@ -1050,17 +1050,11 @@ create_contentinfo(krb5_context context, ASN1_OBJECT *oid,
     if (p7->type == NULL)
         goto oom;
 
-    if (OBJ_obj2nid(oid) == NID_pkcs7_data) {
-        /* Draft 9 uses id-pkcs7-data for signed data.  For this type OpenSSL
-         * expects an octet string in d.data. */
-        p7->d.data = ostr;
-    } else {
-        p7->d.other = ASN1_TYPE_new();
-        if (p7->d.other == NULL)
-            goto oom;
-        p7->d.other->type = V_ASN1_OCTET_STRING;
-        p7->d.other->value.octet_string = ostr;
-    }
+    p7->d.other = ASN1_TYPE_new();
+    if (p7->d.other == NULL)
+        goto oom;
+    p7->d.other->type = V_ASN1_OCTET_STRING;
+    p7->d.other->value.octet_string = ostr;
 
     *p7_out = p7;
     return 0;
@@ -1249,43 +1243,37 @@ cms_signeddata_create(krb5_context context,
             goto cleanup;
         p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
 
-        if (cms_msg_type == CMS_SIGN_DRAFT9){
-            /* don't include signed attributes for pa-type 15 request */
-            abuf = data;
-            alen = data_len;
-        } else {
-            /* add signed attributes */
-            /* compute sha1 digest over the EncapsulatedContentInfo */
-            ctx = EVP_MD_CTX_new();
-            if (ctx == NULL)
-                goto cleanup;
-            EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
-            EVP_DigestUpdate(ctx, data, data_len);
-            md_tmp = EVP_MD_CTX_md(ctx);
-            EVP_DigestFinal_ex(ctx, md_data, &md_len);
-            EVP_MD_CTX_free(ctx);
+        /* add signed attributes */
+        /* compute sha1 digest over the EncapsulatedContentInfo */
+        ctx = EVP_MD_CTX_new();
+        if (ctx == NULL)
+            goto cleanup;
+        EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+        EVP_DigestUpdate(ctx, data, data_len);
+        md_tmp = EVP_MD_CTX_md(ctx);
+        EVP_DigestFinal_ex(ctx, md_data, &md_len);
+        EVP_MD_CTX_free(ctx);
 
-            /* create a message digest attr */
-            digest_attr = ASN1_OCTET_STRING_new();
-            ASN1_OCTET_STRING_set(digest_attr, md_data, (int)md_len);
-            PKCS7_add_signed_attribute(p7si, NID_pkcs9_messageDigest,
-                                       V_ASN1_OCTET_STRING, (char *) digest_attr);
+        /* create a message digest attr */
+        digest_attr = ASN1_OCTET_STRING_new();
+        ASN1_OCTET_STRING_set(digest_attr, md_data, (int)md_len);
+        PKCS7_add_signed_attribute(p7si, NID_pkcs9_messageDigest,
+                                   V_ASN1_OCTET_STRING, (char *)digest_attr);
 
-            /* create a content-type attr */
-            oid_copy = OBJ_dup(oid);
-            if (oid_copy == NULL)
-                goto cleanup2;
-            PKCS7_add_signed_attribute(p7si, NID_pkcs9_contentType,
-                                       V_ASN1_OBJECT, oid_copy);
+        /* create a content-type attr */
+        oid_copy = OBJ_dup(oid);
+        if (oid_copy == NULL)
+            goto cleanup2;
+        PKCS7_add_signed_attribute(p7si, NID_pkcs9_contentType,
+                                   V_ASN1_OBJECT, oid_copy);
 
-            /* create the signature over signed attributes. get DER encoded value */
-            /* This is the place where smartcard signature needs to be calculated */
-            sk = p7si->auth_attr;
-            alen = ASN1_item_i2d((ASN1_VALUE *) sk, &abuf,
-                                 ASN1_ITEM_rptr(PKCS7_ATTR_SIGN));
-            if (abuf == NULL)
-                goto cleanup2;
-        } /* signed attributes */
+        /* create the signature over signed attributes. get DER encoded value */
+        /* This is the place where smartcard signature needs to be calculated */
+        sk = p7si->auth_attr;
+        alen = ASN1_item_i2d((ASN1_VALUE *)sk, &abuf,
+                             ASN1_ITEM_rptr(PKCS7_ATTR_SIGN));
+        if (abuf == NULL)
+            goto cleanup2;
 
 #ifndef WITHOUT_PKCS11
         /* Some tokens can only do RSAEncryption without sha1 hash */
@@ -1301,11 +1289,7 @@ cms_signeddata_create(krb5_context context,
             ctx = EVP_MD_CTX_new();
             if (ctx == NULL)
                 goto cleanup;
-            /* if this is not draft9 request, include digest signed attribute */
-            if (cms_msg_type != CMS_SIGN_DRAFT9)
-                EVP_DigestInit_ex(ctx, md_tmp, NULL);
-            else
-                EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+            EVP_DigestInit_ex(ctx, md_tmp, NULL);
             EVP_DigestUpdate(ctx, abuf, alen);
             EVP_DigestFinal_ex(ctx, md_data2, &md_len2);
             EVP_MD_CTX_free(ctx);
@@ -1349,8 +1333,7 @@ cms_signeddata_create(krb5_context context,
 #ifdef DEBUG_SIG
         print_buffer(sig, sig_len);
 #endif
-        if (cms_msg_type != CMS_SIGN_DRAFT9 )
-            free(abuf);
+        free(abuf);
         if (retval)
             goto cleanup2;
 
@@ -1393,19 +1376,13 @@ cms_signeddata_create(krb5_context context,
         print_buffer_bin(*signed_data, *signed_data_len,
                          "/tmp/client_pkcs7_signeddata");
     } else {
-        if (cms_msg_type == CMS_SIGN_SERVER) {
-            print_buffer_bin(*signed_data, *signed_data_len,
-                             "/tmp/kdc_pkcs7_signeddata");
-        } else {
-            print_buffer_bin(*signed_data, *signed_data_len,
-                             "/tmp/draft9_pkcs7_signeddata");
-        }
+        print_buffer_bin(*signed_data, *signed_data_len,
+                         "/tmp/kdc_pkcs7_signeddata");
     }
 #endif
 
 cleanup2:
     if (p7si) {
-        if (cms_msg_type != CMS_SIGN_DRAFT9)
 #ifndef WITHOUT_PKCS11
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
@@ -1692,15 +1669,13 @@ cms_signeddata_verify(krb5_context context,
 #endif
         } else {
             /* retrieve verified certificate chain */
-            if (cms_msg_type == CMS_SIGN_CLIENT || cms_msg_type == CMS_SIGN_DRAFT9)
+            if (cms_msg_type == CMS_SIGN_CLIENT)
                 verified_chain = X509_STORE_CTX_get1_chain(cert_ctx);
         }
         X509_STORE_CTX_free(cert_ctx);
         if (i <= 0)
             goto cleanup;
         out = BIO_new(BIO_s_mem());
-        if (cms_msg_type == CMS_SIGN_DRAFT9)
-            flags |= CMS_NOATTR;
         if (CMS_verify(cms, NULL, store, NULL, out, flags) == 0) {
             unsigned long err = ERR_peek_error();
             switch(ERR_GET_REASON(err)) {
@@ -1717,21 +1692,6 @@ cms_signeddata_verify(krb5_context context,
     } /* message was signed */
     if (!OBJ_cmp(etype, oid))
         valid_oid = 1;
-    else if (cms_msg_type == CMS_SIGN_DRAFT9) {
-        /*
-         * Various implementations of the pa-type 15 request use
-         * different OIDS.  We check that the returned object
-         * has any of the acceptable OIDs
-         */
-        ASN1_OBJECT *client_oid = NULL, *server_oid = NULL, *rsa_oid = NULL;
-        client_oid = pkinit_pkcs7type2oid(plgctx, CMS_SIGN_CLIENT);
-        server_oid = pkinit_pkcs7type2oid(plgctx, CMS_SIGN_SERVER);
-        rsa_oid = pkinit_pkcs7type2oid(plgctx, CMS_ENVEL_SERVER);
-        if (!OBJ_cmp(etype, client_oid) ||
-            !OBJ_cmp(etype, server_oid) ||
-            !OBJ_cmp(etype, rsa_oid))
-            valid_oid = 1;
-    }
 
     if (valid_oid)
         pkiDebug("CMS Verification successful\n");
@@ -1761,7 +1721,7 @@ cms_signeddata_verify(krb5_context context,
         reqctx->received_cert = X509_dup(x);
 
         /* generate authorization data */
-        if (cms_msg_type == CMS_SIGN_CLIENT || cms_msg_type == CMS_SIGN_DRAFT9) {
+        if (cms_msg_type == CMS_SIGN_CLIENT) {
 
             if (authz_data == NULL || authz_data_len == NULL)
                 goto out;
@@ -1841,24 +1801,11 @@ cms_envelopeddata_create(krb5_context context,
     int signed_data_len = 0, enc_data_len = 0, flags = PKCS7_BINARY;
     STACK_OF(X509) *encerts = NULL;
     const EVP_CIPHER *cipher = NULL;
-    int cms_msg_type;
-
-    /* create the PKCS7 SignedData portion of the PKCS7 EnvelopedData */
-    switch ((int)pa_type) {
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-    case KRB5_PADATA_PK_AS_REP_OLD:
-        cms_msg_type = CMS_SIGN_DRAFT9;
-        break;
-    case KRB5_PADATA_PK_AS_REQ:
-        cms_msg_type = CMS_ENVEL_SERVER;
-        break;
-    default:
-        goto cleanup;
-    }
 
     retval = cms_signeddata_create(context, plgctx, reqctx, idctx,
-                                   cms_msg_type, include_certchain, key_pack, key_pack_len,
-                                   &signed_data, (unsigned int *)&signed_data_len);
+                                   CMS_ENVEL_SERVER, include_certchain,
+                                   key_pack, key_pack_len, &signed_data,
+                                   (unsigned int *)&signed_data_len);
     if (retval) {
         pkiDebug("failed to create pkcs7 signed data\n");
         goto cleanup;
@@ -1874,26 +1821,11 @@ cms_envelopeddata_create(krb5_context context,
 
     cipher = EVP_des_ede3_cbc();
     in = BIO_new(BIO_s_mem());
-    switch (pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        prepare_enc_data(signed_data, signed_data_len, &enc_data,
-                         &enc_data_len);
-        retval = BIO_write(in, enc_data, enc_data_len);
-        if (retval != enc_data_len) {
-            pkiDebug("BIO_write only wrote %d\n", retval);
-            goto cleanup;
-        }
-        break;
-    case KRB5_PADATA_PK_AS_REP_OLD:
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        retval = BIO_write(in, signed_data, signed_data_len);
-        if (retval != signed_data_len) {
-            pkiDebug("BIO_write only wrote %d\n", retval);
-            goto cleanup;
-        }
-        break;
-    default:
-        retval = -1;
+    prepare_enc_data(signed_data, signed_data_len, &enc_data,
+                     &enc_data_len);
+    retval = BIO_write(in, enc_data, enc_data_len);
+    if (retval != enc_data_len) {
+        pkiDebug("BIO_write only wrote %d\n", retval);
         goto cleanup;
     }
 
@@ -1902,20 +1834,7 @@ cms_envelopeddata_create(krb5_context context,
         retval = oerr(context, 0, _("Failed to encrypt PKCS7 object"));
         goto cleanup;
     }
-    switch (pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        p7->d.enveloped->enc_data->content_type =
-            OBJ_nid2obj(NID_pkcs7_signed);
-        break;
-    case KRB5_PADATA_PK_AS_REP_OLD:
-    case KRB5_PADATA_PK_AS_REQ_OLD:
-        p7->d.enveloped->enc_data->content_type =
-            OBJ_nid2obj(NID_pkcs7_data);
-        break;
-        break;
-        break;
-        break;
-    }
+    p7->d.enveloped->enc_data->content_type = OBJ_nid2obj(NID_pkcs7_signed);
 
     *out_len = i2d_PKCS7(p7, NULL);
     if (!*out_len || (p = *out = malloc(*out_len)) == NULL) {
@@ -1963,7 +1882,6 @@ cms_envelopeddata_verify(krb5_context context,
     const unsigned char *p = enveloped_data;
     unsigned int tmp_buf_len = 0, tmp_buf2_len = 0, vfy_buf_len = 0;
     unsigned char *tmp_buf = NULL, *tmp_buf2 = NULL, *vfy_buf = NULL;
-    int msg_type = 0;
 
 #ifdef DEBUG_ASN1
     print_buffer_bin(enveloped_data, enveloped_data_len,
@@ -1995,46 +1913,21 @@ cms_envelopeddata_verify(krb5_context context,
     print_buffer_bin(tmp_buf, tmp_buf_len, "/tmp/client_enc_keypack");
 #endif
     /* verify PKCS7 SignedData message */
-    switch (pa_type) {
-    case KRB5_PADATA_PK_AS_REP:
-        msg_type = CMS_ENVEL_SERVER;
-
-        break;
-    case KRB5_PADATA_PK_AS_REP_OLD:
-        msg_type = CMS_SIGN_DRAFT9;
-        break;
-    default:
-        pkiDebug("%s: unrecognized pa_type = %d\n", __FUNCTION__, pa_type);
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+    /* Wrap the signed data to make decoding easier in the verify routine. */
+    retval = wrap_signeddata(tmp_buf, tmp_buf_len, &tmp_buf2, &tmp_buf2_len);
+    if (retval) {
+        pkiDebug("failed to encode signeddata\n");
         goto cleanup;
     }
-    /*
-     * If this is the RFC style, wrap the signed data to make
-     * decoding easier in the verify routine.
-     * For draft9-compatible, we don't do anything because it
-     * is already wrapped.
-     */
-    if (msg_type == CMS_ENVEL_SERVER) {
-        retval = wrap_signeddata(tmp_buf, tmp_buf_len,
-                                 &tmp_buf2, &tmp_buf2_len);
-        if (retval) {
-            pkiDebug("failed to encode signeddata\n");
-            goto cleanup;
-        }
-        vfy_buf = tmp_buf2;
-        vfy_buf_len = tmp_buf2_len;
-
-    } else {
-        vfy_buf = tmp_buf;
-        vfy_buf_len = tmp_buf_len;
-    }
+    vfy_buf = tmp_buf2;
+    vfy_buf_len = tmp_buf2_len;
 
 #ifdef DEBUG_ASN1
     print_buffer_bin(vfy_buf, vfy_buf_len, "/tmp/client_enc_keypack2");
 #endif
 
     retval = cms_signeddata_verify(context, plg_cryptoctx, req_cryptoctx,
-                                   id_cryptoctx, msg_type,
+                                   id_cryptoctx, CMS_ENVEL_SERVER,
                                    require_crl_checking,
                                    vfy_buf, vfy_buf_len,
                                    data, data_len, NULL, NULL, NULL);
@@ -3580,8 +3473,6 @@ pkinit_pkcs7type2oid(pkinit_plg_crypto_context cryptoctx, int pkcs7_type)
     switch (pkcs7_type) {
     case CMS_SIGN_CLIENT:
         return cryptoctx->id_pkinit_authData;
-    case CMS_SIGN_DRAFT9:
-        return OBJ_nid2obj(NID_pkcs7_data);
     case CMS_SIGN_SERVER:
         return cryptoctx->id_pkinit_DHKeyData;
     case CMS_ENVEL_SERVER:

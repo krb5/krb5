@@ -213,7 +213,6 @@ struct _pkinit_req_context {
     pkinit_identity_opts *idopts;
     int do_identity_matching;
     krb5_preauthtype pa_type;
-    int rfc4556_kdc;
     int rfc6112_kdc;
     int identity_initialized;
     int identity_prompted;
@@ -244,7 +243,6 @@ struct _pkinit_kdc_req_context {
     int magic;
     pkinit_req_crypto_context cryptoctx;
     krb5_auth_pack *rcv_auth_pack;
-    krb5_auth_pack_draft9 *rcv_auth_pack9;
     krb5_preauthtype pa_type;
 };
 typedef struct _pkinit_kdc_req_context *pkinit_kdc_req_context;
@@ -329,22 +327,15 @@ void pkinit_free_deferred_ids(pkinit_deferred_id *identities);
  * initialization and free functions
  */
 void init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in);
-void init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in);
 void init_krb5_reply_key_pack(krb5_reply_key_pack **in);
-void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
-void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void init_krb5_subject_pk_info(krb5_subject_pk_info **in);
 
 void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in);
-void free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in);
 void free_krb5_reply_key_pack(krb5_reply_key_pack **in);
-void free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 void free_krb5_auth_pack(krb5_auth_pack **in);
-void free_krb5_auth_pack_draft9(krb5_context, krb5_auth_pack_draft9 **in);
 void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
-void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in);
 void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
