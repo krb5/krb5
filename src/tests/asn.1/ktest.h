@@ -101,18 +101,11 @@ void ktest_make_maximal_pa_otp_req(krb5_pa_otp_req *p);
 
 #ifndef DISABLE_PKINIT
 void ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p);
-void ktest_make_sample_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p);
 void ktest_make_sample_pa_pk_as_rep_dhInfo(krb5_pa_pk_as_rep *p);
 void ktest_make_sample_pa_pk_as_rep_encKeyPack(krb5_pa_pk_as_rep *p);
-void ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData(
-    krb5_pa_pk_as_rep_draft9 *p);
-void ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack(
-    krb5_pa_pk_as_rep_draft9 *p);
 void ktest_make_sample_auth_pack(krb5_auth_pack *p);
-void ktest_make_sample_auth_pack_draft9(krb5_auth_pack_draft9 *p);
 void ktest_make_sample_kdc_dh_key_info(krb5_kdc_dh_key_info *p);
 void ktest_make_sample_reply_key_pack(krb5_reply_key_pack *p);
-void ktest_make_sample_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p);
 void ktest_make_sample_sp80056a_other_info(krb5_sp80056a_other_info *p);
 void ktest_make_sample_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p);
 #endif
@@ -197,14 +190,10 @@ void ktest_empty_pa_otp_req(krb5_pa_otp_req *p);
 
 #ifndef DISABLE_PKINIT
 void ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p);
-void ktest_empty_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 *p);
 void ktest_empty_pa_pk_as_rep(krb5_pa_pk_as_rep *p);
-void ktest_empty_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 *p);
 void ktest_empty_auth_pack(krb5_auth_pack *p);
-void ktest_empty_auth_pack_draft9(krb5_auth_pack_draft9 *p);
 void ktest_empty_kdc_dh_key_info(krb5_kdc_dh_key_info *p);
 void ktest_empty_reply_key_pack(krb5_reply_key_pack *p);
-void ktest_empty_reply_key_pack_draft9(krb5_reply_key_pack_draft9 *p);
 void ktest_empty_sp80056a_other_info(krb5_sp80056a_other_info *p);
 void ktest_empty_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p);
 #endif

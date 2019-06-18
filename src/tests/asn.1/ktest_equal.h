@@ -139,13 +139,10 @@ int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
 
 #ifndef DISABLE_PKINIT
 generic(ktest_equal_pa_pk_as_req, krb5_pa_pk_as_req);
-generic(ktest_equal_pa_pk_as_req_draft9, krb5_pa_pk_as_req_draft9);
 generic(ktest_equal_pa_pk_as_rep, krb5_pa_pk_as_rep);
 generic(ktest_equal_auth_pack, krb5_auth_pack);
-generic(ktest_equal_auth_pack_draft9, krb5_auth_pack_draft9);
 generic(ktest_equal_kdc_dh_key_info, krb5_kdc_dh_key_info);
 generic(ktest_equal_reply_key_pack, krb5_reply_key_pack);
-generic(ktest_equal_reply_key_pack_draft9, krb5_reply_key_pack_draft9);
 #endif /* not DISABLE_PKINIT */
 
 int ktest_equal_kkdcp_message(krb5_kkdcp_message *ref,

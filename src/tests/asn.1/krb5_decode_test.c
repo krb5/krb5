@@ -42,8 +42,6 @@ void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val);
 #ifndef DISABLE_PKINIT
 static int equal_principal(krb5_principal *ref, krb5_principal var);
 static void ktest_free_auth_pack(krb5_context context, krb5_auth_pack *val);
-static void ktest_free_auth_pack_draft9(krb5_context context,
-                                        krb5_auth_pack_draft9 *val);
 static void ktest_free_kdc_dh_key_info(krb5_context context,
                                        krb5_kdc_dh_key_info *val);
 static void ktest_free_pa_pk_as_req(krb5_context context,
@@ -52,8 +50,6 @@ static void ktest_free_pa_pk_as_rep(krb5_context context,
                                     krb5_pa_pk_as_rep *val);
 static void ktest_free_reply_key_pack(krb5_context context,
                                       krb5_reply_key_pack *val);
-static void ktest_free_reply_key_pack_draft9(krb5_context context,
-                                             krb5_reply_key_pack_draft9 *val);
 #endif
 static void ktest_free_kkdcp_message(krb5_context context,
                                      krb5_kkdcp_message *val);
@@ -1184,16 +1180,6 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_krb5_auth_pack_draft9 */
-    {
-        setup(krb5_auth_pack_draft9,ktest_make_sample_auth_pack_draft9);
-        decode_run("krb5_auth_pack_draft9","","30 75 A0 4F 30 4D A0 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 05 02 03 01 E2 40 A3 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A4 03 02 01 2A A1 22 30 20 30 13 06 09 2A 86 48 86 F7 12 01 02 02 04 06 70 61 72 61 6D 73 03 09 00 6B 72 62 35 64 61 74 61",
-                   acc.decode_krb5_auth_pack_draft9,
-                   ktest_equal_auth_pack_draft9,ktest_free_auth_pack_draft9);
-        ktest_empty_auth_pack_draft9(&ref);
-    }
-
-    /****************************************************************/
     /* decode_krb5_kdc_dh_key_info */
     {
         setup(krb5_kdc_dh_key_info,ktest_make_sample_kdc_dh_key_info);
@@ -1211,16 +1197,6 @@ int main(argc, argv)
                    acc.decode_krb5_reply_key_pack,
                    ktest_equal_reply_key_pack,ktest_free_reply_key_pack);
         ktest_empty_reply_key_pack(&ref);
-    }
-
-    /****************************************************************/
-    /* decode_krb5_reply_key_pack_draft9 */
-    {
-        setup(krb5_reply_key_pack_draft9,ktest_make_sample_reply_key_pack_draft9);
-        decode_run("krb5_reply_key_pack_draft9","","30 1A A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 03 02 01 2A",
-                   acc.decode_krb5_reply_key_pack_draft9,
-                   ktest_equal_reply_key_pack_draft9,ktest_free_reply_key_pack_draft9);
-        ktest_empty_reply_key_pack_draft9(&ref);
     }
 
     /****************************************************************/
@@ -1280,14 +1256,6 @@ ktest_free_auth_pack(krb5_context context, krb5_auth_pack *val)
 }
 
 static void
-ktest_free_auth_pack_draft9(krb5_context context, krb5_auth_pack_draft9 *val)
-{
-    if (val)
-        ktest_empty_auth_pack_draft9(val);
-    free(val);
-}
-
-static void
 ktest_free_kdc_dh_key_info(krb5_context context, krb5_kdc_dh_key_info *val)
 {
     if (val)
@@ -1316,15 +1284,6 @@ ktest_free_reply_key_pack(krb5_context context, krb5_reply_key_pack *val)
 {
     if (val)
         ktest_empty_reply_key_pack(val);
-    free(val);
-}
-
-static void
-ktest_free_reply_key_pack_draft9(krb5_context context,
-                                 krb5_reply_key_pack_draft9 *val)
-{
-    if (val)
-        ktest_empty_reply_key_pack_draft9(val);
     free(val);
 }
 

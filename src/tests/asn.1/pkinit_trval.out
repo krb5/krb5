@@ -15,14 +15,6 @@ encode_krb5_pa_pk_as_req:
 .  [2] <8>
       6b 72 62 35 64 61 74 61                             krb5data
 
-encode_krb5_pa_pk_as_req_draft9:
-
-[Sequence/Sequence Of]
-.  [0] <8>
-      6b 72 62 35 64 61 74 61                             krb5data
-.  [2] <8>
-      6b 72 62 35 64 61 74 61                             krb5data
-
 encode_krb5_pa_pk_as_rep(dhInfo):
 
 [CONT 0]
@@ -35,16 +27,6 @@ encode_krb5_pa_pk_as_rep(dhInfo):
             6b 72 62 35 64 61 74 61                          krb5data
 
 encode_krb5_pa_pk_as_rep(encKeyPack):
-
-[CONT 1] <8>
-   6b 72 62 35 64 61 74 61                                krb5data
-
-encode_krb5_pa_pk_as_rep_draft9(dhSignedData):
-
-[CONT 0] <8>
-   6b 72 62 35 64 61 74 61                                krb5data
-
-encode_krb5_pa_pk_as_rep_draft9(encKeyPack):
 
 [CONT 1] <8>
    6b 72 62 35 64 61 74 61                                krb5data
@@ -79,27 +61,6 @@ encode_krb5_auth_pack:
 .  .  .  [0] [Object Identifier] <8>
             6b 72 62 35 64 61 74 61                          krb5data
 
-encode_krb5_auth_pack_draft9:
-
-[Sequence/Sequence Of]
-.  [0] [Sequence/Sequence Of]
-.  .  [0] [Sequence/Sequence Of]
-.  .  .  [0] [Integer] 1
-.  .  .  [1] [Sequence/Sequence Of]
-.  .  .  .  [General string] "hftsai"
-.  .  .  .  [General string] "extra"
-.  .  [1] [General string] "ATHENA.MIT.EDU"
-.  .  [2] [Integer] 123456
-.  .  [3] [Generalized Time] "19940610060317Z"
-.  .  [4] [Integer] 42
-.  [1] [Sequence/Sequence Of]
-.  .  [Sequence/Sequence Of]
-.  .  .  [Object Identifier] <9>
-            2a 86 48 86 f7 12 01 02 02                       *.H......
-.  .  .  [Octet String] "params"
-.  .  [Bit String] <9>
-         00 6b 72 62 35 64 61 74 61                       .krb5data
-
 encode_krb5_kdc_dh_key_info:
 
 [Sequence/Sequence Of]
@@ -117,14 +78,6 @@ encode_krb5_reply_key_pack:
 .  [1] [Sequence/Sequence Of]
 .  .  [0] [Integer] 1
 .  .  [1] [Octet String] "1234"
-
-encode_krb5_reply_key_pack_draft9:
-
-[Sequence/Sequence Of]
-.  [0] [Sequence/Sequence Of]
-.  .  [0] [Integer] 1
-.  .  [1] [Octet String] "12345678"
-.  [1] [Integer] 42
 
 encode_krb5_sp80056a_other_info:
 

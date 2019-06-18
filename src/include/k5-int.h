@@ -1860,7 +1860,7 @@ krb5int_random_string(krb5_context, char *string, unsigned int length);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 22
+#define KRB5INT_ACCESS_STRUCT_VERSION 23
 
 typedef struct _krb5int_access {
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
@@ -1890,10 +1890,6 @@ typedef struct _krb5int_access {
     (*encode_krb5_auth_pack)(const krb5_auth_pack *rep, krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_auth_pack_draft9)(const krb5_auth_pack_draft9 *rep,
-                                    krb5_data **code);
-
-    krb5_error_code
     (*encode_krb5_kdc_dh_key_info)(const krb5_kdc_dh_key_info *rep,
                                    krb5_data **code);
 
@@ -1902,24 +1898,12 @@ typedef struct _krb5int_access {
                                 krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_pa_pk_as_rep_draft9)(const krb5_pa_pk_as_rep_draft9 *rep,
-                                       krb5_data **code);
-
-    krb5_error_code
     (*encode_krb5_pa_pk_as_req)(const krb5_pa_pk_as_req *rep,
                                 krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_pa_pk_as_req_draft9)(const krb5_pa_pk_as_req_draft9 *rep,
-                                       krb5_data **code);
-
-    krb5_error_code
     (*encode_krb5_reply_key_pack)(const krb5_reply_key_pack *,
                                   krb5_data **code);
-
-    krb5_error_code
-    (*encode_krb5_reply_key_pack_draft9)(const krb5_reply_key_pack_draft9 *,
-                                         krb5_data **code);
 
     krb5_error_code
     (*encode_krb5_td_dh_parameters)(krb5_algorithm_identifier *const *,
@@ -1933,15 +1917,7 @@ typedef struct _krb5int_access {
     (*decode_krb5_auth_pack)(const krb5_data *, krb5_auth_pack **);
 
     krb5_error_code
-    (*decode_krb5_auth_pack_draft9)(const krb5_data *,
-                                    krb5_auth_pack_draft9 **);
-
-    krb5_error_code
     (*decode_krb5_pa_pk_as_req)(const krb5_data *, krb5_pa_pk_as_req **);
-
-    krb5_error_code
-    (*decode_krb5_pa_pk_as_req_draft9)(const krb5_data *,
-                                       krb5_pa_pk_as_req_draft9 **);
 
     krb5_error_code
     (*decode_krb5_pa_pk_as_rep)(const krb5_data *, krb5_pa_pk_as_rep **);
@@ -1954,10 +1930,6 @@ typedef struct _krb5int_access {
 
     krb5_error_code
     (*decode_krb5_reply_key_pack)(const krb5_data *, krb5_reply_key_pack **);
-
-    krb5_error_code
-    (*decode_krb5_reply_key_pack_draft9)(const krb5_data *,
-                                         krb5_reply_key_pack_draft9 **);
 
     krb5_error_code
     (*decode_krb5_td_dh_parameters)(const krb5_data *,

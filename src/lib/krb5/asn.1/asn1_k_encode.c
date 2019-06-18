@@ -1446,19 +1446,6 @@ static const struct atype_info *pk_authenticator_fields[] = {
 };
 DEFSEQTYPE(pk_authenticator, krb5_pk_authenticator, pk_authenticator_fields);
 
-DEFFIELD(pkauth9_0, krb5_pk_authenticator_draft9, kdcName, 0, principal);
-DEFFIELD(pkauth9_1, krb5_pk_authenticator_draft9, kdcName, 1,
-         realm_of_principal);
-DEFFIELD(pkauth9_2, krb5_pk_authenticator_draft9, cusec, 2, int32);
-DEFFIELD(pkauth9_3, krb5_pk_authenticator_draft9, ctime, 3, kerberos_time);
-DEFFIELD(pkauth9_4, krb5_pk_authenticator_draft9, nonce, 4, int32);
-static const struct atype_info *pk_authenticator_draft9_fields[] = {
-    &k5_atype_pkauth9_0, &k5_atype_pkauth9_1, &k5_atype_pkauth9_2,
-    &k5_atype_pkauth9_3, &k5_atype_pkauth9_4
-};
-DEFSEQTYPE(pk_authenticator_draft9, krb5_pk_authenticator_draft9,
-           pk_authenticator_draft9_fields);
-
 DEFCOUNTEDSTRINGTYPE(s_bitstring, char *, unsigned int,
                      k5_asn1_encode_bitstring, k5_asn1_decode_bitstring,
                      ASN1_BITSTRING);
@@ -1487,15 +1474,6 @@ static const struct atype_info *auth_pack_fields[] = {
     &k5_atype_auth_pack_3, &k5_atype_auth_pack_4
 };
 DEFSEQTYPE(auth_pack, krb5_auth_pack, auth_pack_fields);
-
-DEFFIELD(auth_pack9_0, krb5_auth_pack_draft9, pkAuthenticator, 0,
-         pk_authenticator_draft9);
-DEFFIELD(auth_pack9_1, krb5_auth_pack_draft9, clientPublicValue, 1,
-         opt_subject_pk_info_ptr);
-static const struct atype_info *auth_pack_draft9_fields[] = {
-    &k5_atype_auth_pack9_0, &k5_atype_auth_pack9_1
-};
-DEFSEQTYPE(auth_pack_draft9, krb5_auth_pack_draft9, auth_pack_draft9_fields);
 
 DEFFIELD_IMPLICIT(extprinc_0, krb5_external_principal_identifier,
                   subjectName, 0, opt_ostring_data);
@@ -1529,29 +1507,6 @@ static const struct atype_info *pa_pk_as_req_fields[] = {
 };
 DEFSEQTYPE(pa_pk_as_req, krb5_pa_pk_as_req, pa_pk_as_req_fields);
 
-/*
- * In draft-ietf-cat-kerberos-pk-init-09, this sequence has four fields, but we
- * only ever use the first and third.  The fields are specified as explicitly
- * tagged, but our historical behavior is to pretend that they are wrapped in
- * IMPLICIT OCTET STRING (i.e., generate primitive context tags), and we don't
- * want to change that without interop testing.
- */
-DEFFIELD_IMPLICIT(pa_pk_as_req9_0, krb5_pa_pk_as_req_draft9, signedAuthPack, 0,
-                  ostring_data);
-DEFFIELD_IMPLICIT(pa_pk_as_req9_2, krb5_pa_pk_as_req_draft9, kdcCert, 2,
-                  opt_ostring_data);
-static const struct atype_info *pa_pk_as_req_draft9_fields[] = {
-    &k5_atype_pa_pk_as_req9_0, &k5_atype_pa_pk_as_req9_2
-};
-DEFSEQTYPE(pa_pk_as_req_draft9, krb5_pa_pk_as_req_draft9,
-           pa_pk_as_req_draft9_fields);
-/* For decoding, we only care about the first field; we can ignore the rest. */
-static const struct atype_info *pa_pk_as_req_draft9_decode_fields[] = {
-    &k5_atype_pa_pk_as_req9_0
-};
-DEFSEQTYPE(pa_pk_as_req_draft9_decode, krb5_pa_pk_as_req_draft9,
-           pa_pk_as_req_draft9_decode_fields);
-
 DEFFIELD_IMPLICIT(dh_rep_info_0, krb5_dh_rep_info, dhSignedData, 0,
                   ostring_data);
 DEFFIELD(dh_rep_info_1, krb5_dh_rep_info, serverDHNonce, 1, opt_ostring_data);
@@ -1577,14 +1532,6 @@ static const struct atype_info *reply_key_pack_fields[] = {
 };
 DEFSEQTYPE(reply_key_pack, krb5_reply_key_pack, reply_key_pack_fields);
 
-DEFFIELD(key_pack9_0, krb5_reply_key_pack_draft9, replyKey, 0, encryption_key);
-DEFFIELD(key_pack9_1, krb5_reply_key_pack_draft9, nonce, 1, int32);
-static const struct atype_info *reply_key_pack_draft9_fields[] = {
-    &k5_atype_key_pack9_0, &k5_atype_key_pack9_1
-};
-DEFSEQTYPE(reply_key_pack_draft9, krb5_reply_key_pack_draft9,
-           reply_key_pack_draft9_fields);
-
 DEFCTAGGEDTYPE(pa_pk_as_rep_0, 0, dh_rep_info);
 DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep_1, 1, ostring_data);
 static const struct atype_info *pa_pk_as_rep_alternatives[] = {
@@ -1595,44 +1542,16 @@ DEFCHOICETYPE(pa_pk_as_rep_choice, union krb5_pa_pk_as_rep_choices,
 DEFCOUNTEDTYPE_SIGNED(pa_pk_as_rep, krb5_pa_pk_as_rep, u, choice,
                       pa_pk_as_rep_choice);
 
-/*
- * draft-ietf-cat-kerberos-pk-init-09 specifies these alternatives as
- * explicitly tagged SignedData and EnvelopedData respectively, which means
- * they should have constructed context tags.  However, our historical behavior
- * is to use primitive context tags, and we don't want to change that behavior
- * without interop testing.  We have the encodings for each alternative in a
- * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
- * order to wrap them in primitive [0] and [1] tags.
- */
-DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep9_0, 0, ostring_data);
-DEFCTAGGEDTYPE_IMPLICIT(pa_pk_as_rep9_1, 1, ostring_data);
-static const struct atype_info *pa_pk_as_rep_draft9_alternatives[] = {
-    &k5_atype_pa_pk_as_rep9_0, &k5_atype_pa_pk_as_rep9_1
-};
-DEFCHOICETYPE(pa_pk_as_rep_draft9_choice,
-              union krb5_pa_pk_as_rep_draft9_choices,
-              enum krb5_pa_pk_as_rep_draft9_selection,
-              pa_pk_as_rep_draft9_alternatives);
-DEFCOUNTEDTYPE_SIGNED(pa_pk_as_rep_draft9, krb5_pa_pk_as_rep_draft9, u, choice,
-                      pa_pk_as_rep_draft9_choice);
-
 MAKE_ENCODER(encode_krb5_pa_pk_as_req, pa_pk_as_req);
 MAKE_DECODER(decode_krb5_pa_pk_as_req, pa_pk_as_req);
-MAKE_ENCODER(encode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9);
-MAKE_DECODER(decode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9_decode);
 MAKE_ENCODER(encode_krb5_pa_pk_as_rep, pa_pk_as_rep);
 MAKE_DECODER(decode_krb5_pa_pk_as_rep, pa_pk_as_rep);
-MAKE_ENCODER(encode_krb5_pa_pk_as_rep_draft9, pa_pk_as_rep_draft9);
 MAKE_ENCODER(encode_krb5_auth_pack, auth_pack);
 MAKE_DECODER(decode_krb5_auth_pack, auth_pack);
-MAKE_ENCODER(encode_krb5_auth_pack_draft9, auth_pack_draft9);
-MAKE_DECODER(decode_krb5_auth_pack_draft9, auth_pack_draft9);
 MAKE_ENCODER(encode_krb5_kdc_dh_key_info, kdc_dh_key_info);
 MAKE_DECODER(decode_krb5_kdc_dh_key_info, kdc_dh_key_info);
 MAKE_ENCODER(encode_krb5_reply_key_pack, reply_key_pack);
 MAKE_DECODER(decode_krb5_reply_key_pack, reply_key_pack);
-MAKE_ENCODER(encode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
-MAKE_DECODER(decode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
 MAKE_ENCODER(encode_krb5_td_trusted_certifiers,
              seqof_external_principal_identifier);
 MAKE_DECODER(decode_krb5_td_trusted_certifiers,

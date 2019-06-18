@@ -798,15 +798,6 @@ main(argc, argv)
         ktest_empty_pa_pk_as_req(&req);
     }
     /****************************************************************/
-    /* encode_krb5_pa_pk_as_req_draft9 */
-    {
-        krb5_pa_pk_as_req_draft9 req;
-        ktest_make_sample_pa_pk_as_req_draft9(&req);
-        encode_run(req, "pa_pk_as_req_draft9", "",
-                   acc.encode_krb5_pa_pk_as_req_draft9);
-        ktest_empty_pa_pk_as_req_draft9(&req);
-    }
-    /****************************************************************/
     /* encode_krb5_pa_pk_as_rep */
     {
         krb5_pa_pk_as_rep rep;
@@ -820,34 +811,12 @@ main(argc, argv)
         ktest_empty_pa_pk_as_rep(&rep);
     }
     /****************************************************************/
-    /* encode_krb5_pa_pk_as_rep_draft9 */
-    {
-        krb5_pa_pk_as_rep_draft9 rep;
-        ktest_make_sample_pa_pk_as_rep_draft9_dhSignedData(&rep);
-        encode_run(rep, "pa_pk_as_rep_draft9", "(dhSignedData)",
-                   acc.encode_krb5_pa_pk_as_rep_draft9);
-        ktest_empty_pa_pk_as_rep_draft9(&rep);
-        ktest_make_sample_pa_pk_as_rep_draft9_encKeyPack(&rep);
-        encode_run(rep, "pa_pk_as_rep_draft9", "(encKeyPack)",
-                   acc.encode_krb5_pa_pk_as_rep_draft9);
-        ktest_empty_pa_pk_as_rep_draft9(&rep);
-    }
-    /****************************************************************/
     /* encode_krb5_auth_pack */
     {
         krb5_auth_pack pack;
         ktest_make_sample_auth_pack(&pack);
         encode_run(pack, "auth_pack", "", acc.encode_krb5_auth_pack);
         ktest_empty_auth_pack(&pack);
-    }
-    /****************************************************************/
-    /* encode_krb5_auth_pack_draft9_draft9 */
-    {
-        krb5_auth_pack_draft9 pack;
-        ktest_make_sample_auth_pack_draft9(&pack);
-        encode_run(pack, "auth_pack_draft9", "",
-                   acc.encode_krb5_auth_pack_draft9);
-        ktest_empty_auth_pack_draft9(&pack);
     }
     /****************************************************************/
     /* encode_krb5_kdc_dh_key_info */
@@ -864,15 +833,6 @@ main(argc, argv)
         ktest_make_sample_reply_key_pack(&pack);
         encode_run(pack, "reply_key_pack", "", acc.encode_krb5_reply_key_pack);
         ktest_empty_reply_key_pack(&pack);
-    }
-    /****************************************************************/
-    /* encode_krb5_reply_key_pack_draft9 */
-    {
-        krb5_reply_key_pack_draft9 pack;
-        ktest_make_sample_reply_key_pack_draft9(&pack);
-        encode_run(pack, "reply_key_pack_draft9", "",
-                   acc.encode_krb5_reply_key_pack_draft9);
-        ktest_empty_reply_key_pack_draft9(&pack);
     }
     /****************************************************************/
     /* encode_krb5_sp80056a_other_info */
