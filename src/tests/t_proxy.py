@@ -4,10 +4,6 @@ from k5test import *
 if runenv.tls_impl == 'no':
     skip_rest('HTTP proxy tests', 'TLS build support not enabled')
 try:
-    from paste import httpserver
-except:
-    skip_rest('HTTP proxy tests', 'Python paste module not found')
-try:
     import kdcproxy
 except:
     skip_rest('HTTP proxy tests', 'Python kdcproxy module not found')
@@ -54,7 +50,7 @@ kpasswd_input = (password('user') + '\n' + password('user') + '\n' +
 
 def start_proxy(realm, keycertpem):
     proxy_conf_path = os.path.join(realm.testdir, 'kdcproxy.conf')
-    proxy_exec_path = os.path.join(srctop, 'util', 'paste-kdcproxy.py')
+    proxy_exec_path = os.path.join(srctop, 'util', 'wsgiref-kdcproxy.py')
     conf = open(proxy_conf_path, 'w')
     conf.write('[%s]\n' % realm.realm)
     conf.write('kerberos = kerberos://localhost:%d\n' % realm.portbase)
