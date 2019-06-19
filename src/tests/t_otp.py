@@ -30,7 +30,7 @@
 
 from k5test import *
 from queue import Empty
-from io import StringIO
+import io
 import struct
 
 try:
@@ -52,7 +52,7 @@ ATTRIBUTE    NAS-Identifier  32    string
 
 class RadiusDaemon(Process):
     MAX_PACKET_SIZE = 4096
-    DICTIONARY = dictionary.Dictionary(StringIO.StringIO(radius_attributes))
+    DICTIONARY = dictionary.Dictionary(io.StringIO(radius_attributes))
 
     def listen(self, addr):
         raise NotImplementedError()
@@ -62,13 +62,15 @@ class RadiusDaemon(Process):
 
     def run(self):
         addr = self._args[0]
-        secr = self._args[1]
+        secrfile = self._args[1]
         pswd = self._args[2]
         outq = self._args[3]
 
-        if secr:
-            with open(secr) as file:
+        if secrfile:
+            with open(secrfile, 'rb') as file:
                 secr = file.read().strip()
+        else:
+            secr = b''
 
         data = self.listen(addr)
         outq.put("started")
@@ -81,7 +83,7 @@ class RadiusDaemon(Process):
         passwd = []
         for key in pkt.keys():
             if key == 'User-Password':
-                passwd = map(pkt.PwDecrypt, pkt[key])
+                passwd = list(map(pkt.PwDecrypt, pkt[key]))
             elif key == 'User-Name':
                 usernm = pkt[key]
 
@@ -126,7 +128,7 @@ class UnixRadiusDaemon(RadiusDaemon):
         sock.close()
         os.remove(addr)
 
-        buf = ""
+        buf = b''
         remain = RadiusDaemon.MAX_PACKET_SIZE
         while True:
             buf += conn.recv(remain)
@@ -226,13 +228,13 @@ realm.run(['./adata', realm.krbtgt_princ],
 #   https://github.com/wichert/pyrad/pull/18
 try:
     auth = packet.Packet.CreateAuthenticator()
-    packet.Packet(authenticator=auth, secret="").ReplyPacket()
+    packet.Packet(authenticator=auth, secret=b'').ReplyPacket()
 except AssertionError:
     skip_rest('OTP UNIX domain socket tests', 'pyrad assertion bug detected')
 
 ## Test Unix fail / custom username
 mark('Unix socket fail / custom username')
-daemon = UnixRadiusDaemon(args=(socket_file, '', 'accept', queue))
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
@@ -242,7 +244,7 @@ verify(daemon, queue, False, 'custom', 'reject')
 
 ## Test Unix success / standard username
 mark('Unix socket success / standard username')
-daemon = UnixRadiusDaemon(args=(socket_file, '', 'accept', queue))
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('unix')])
@@ -254,7 +256,7 @@ verify(daemon, queue, True, realm.user_princ, 'accept')
 ## accepting.  With the bug, the KDC incorrectly rejects the request
 ## and then performs invalid memory accesses, most likely crashing.
 daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', queue))
-daemon2 = UnixRadiusDaemon(args=(socket_file, '', 'accept2', queue))
+daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', queue))
 daemon1.start()
 queue.get()
 daemon2.start()
