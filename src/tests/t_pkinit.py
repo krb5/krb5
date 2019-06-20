@@ -4,14 +4,7 @@ from k5test import *
 if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
     skip_rest('PKINIT tests', 'PKINIT module not built')
 
-# Check if soft-pkcs11.so is available.
-try:
-    import ctypes
-    lib = ctypes.LibraryLoader(ctypes.CDLL).LoadLibrary('soft-pkcs11.so')
-    del lib
-    have_soft_pkcs11 = True
-except:
-    have_soft_pkcs11 = False
+soft_pkcs11 = os.path.join(buildtop, 'tests', 'softpkcs11', 'softpkcs11.so')
 
 # Construct a krb5.conf fragment configuring pkinit.
 certs = os.path.join(srctop, 'tests', 'dejagnu', 'pkinit-certs')
@@ -69,9 +62,9 @@ p12_upn2_identity = 'PKCS12:%s' % user_upn2_p12
 p12_upn3_identity = 'PKCS12:%s' % user_upn3_p12
 p12_generic_identity = 'PKCS12:%s' % generic_p12
 p12_enc_identity = 'PKCS12:%s' % user_enc_p12
-p11_identity = 'PKCS11:soft-pkcs11.so'
-p11_token_identity = ('PKCS11:module_name=soft-pkcs11.so:'
-                      'slotid=1:token=SoftToken (token)')
+p11_identity = 'PKCS11:' + soft_pkcs11
+p11_token_identity = ('PKCS11:module_name=' + soft_pkcs11 +
+                      ':slotid=1:token=SoftToken (token)')
 
 # Start a realm with the test kdb module for the following UPN SAN tests.
 realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=alias_kdc_conf,
@@ -397,9 +390,6 @@ realm.klist(realm.user_princ)
 # beginning with a comma.
 realm.kinit(realm.user_princ, flags=['-X', 'X509_user_identity=,'],
             expected_code=1, expected_msg='Preauthentication failed while')
-
-if not have_soft_pkcs11:
-    skip_rest('PKINIT PKCS11 tests', 'soft-pkcs11.so not found')
 
 softpkcs11rc = os.path.join(os.getcwd(), 'testdir', 'soft-pkcs11.rc')
 realm.env['SOFTPKCS11RC'] = softpkcs11rc

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2004-2006, Stockholms universitet
  * (Stockholm University, Stockholm Sweden)
@@ -31,7 +32,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "locl.h"
+#include "k5-platform.h"
+
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/rand.h>
+#include <openssl/x509.h>
+
+#include <ctype.h>
+#include <pwd.h>
+
+#include <pkcs11.h>
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_get0_RSA(key) ((key)->pkey.rsa)
+#define RSA_PKCS1_OpenSSL RSA_PKCS1_SSLeay
+#define RSA_get0_key compat_rsa_get0_key
+static void
+compat_rsa_get0_key(const RSA *rsa, const BIGNUM **n, const BIGNUM **e,
+                    const BIGNUM **d)
+{
+    if (n != NULL)
+        *n = rsa->n;
+    if (e != NULL)
+        *e = rsa->e;
+    if (d != NULL)
+        *d = rsa->d;
+}
+#endif
+
+#define OPENSSL_ASN1_MALLOC_ENCODE(T, B, BL, S, R)      \
+    {                                                   \
+        unsigned char *p;                               \
+        (BL) = i2d_##T((S), NULL);                      \
+        if ((BL) <= 0) {                                \
+            (R) = EINVAL;                               \
+        } else {                                        \
+            (B) = malloc((BL));                         \
+            if ((B) == NULL) {                          \
+                (R) = ENOMEM;                           \
+            } else {                                    \
+                p = (B);                                \
+                (R) = 0;                                \
+                (BL) = i2d_##T((S), &p);                \
+                if ((BL) <= 0) {                        \
+                    free((B));                          \
+                    (R) = EINVAL;                       \
+                }                                       \
+            }                                           \
+        }                                               \
+    }
 
 /* RCSID("$Id: main.c,v 1.24 2006/01/11 12:42:53 lha Exp $"); */
 
@@ -124,7 +175,7 @@ st_logf(const char *fmt, ...)
 }
 
 static void
-snprintf_fill(char *str, size_t size, char fillchar, const char *fmt, ...)
+snprintf_fill(char *str, int size, char fillchar, const char *fmt, ...)
 {
     int len;
     va_list ap;
@@ -141,19 +192,19 @@ snprintf_fill(char *str, size_t size, char fillchar, const char *fmt, ...)
 #endif
 
 #define VERIFY_SESSION_HANDLE(s, state)                 \
-{                                                       \
-    CK_RV ret;                                          \
-    ret = verify_session_handle(s, state);              \
-    if (ret != CKR_OK) {                                \
-        /* return CKR_OK */;                            \
-    }                                                   \
-}
+    {                                                   \
+        CK_RV vshret;                                   \
+        vshret = verify_session_handle(s, state);       \
+        if (vshret != CKR_OK) {                         \
+            /* return CKR_OK */;                        \
+        }                                               \
+    }
 
 static CK_RV
 verify_session_handle(CK_SESSION_HANDLE hSession,
                       struct session_state **state)
 {
-    int i;
+    size_t i;
 
     for (i = 0; i < MAX_NUM_SESSION; i++){
         if (soft_token.state[i].session_handle == hSession)
@@ -361,16 +412,20 @@ add_pubkey_info(struct st_object *o, CK_KEY_TYPE key_type, EVP_PKEY *key)
         CK_ULONG modulus_bits = 0;
         CK_BYTE *exponent = NULL;
         size_t exponent_len = 0;
+        RSA *rsa;
+        const BIGNUM *n, *e;
 
-        modulus_bits = BN_num_bits(key->pkey.rsa->n);
+        rsa = EVP_PKEY_get0_RSA(key);
+        RSA_get0_key(rsa, &n, &e, NULL);
+        modulus_bits = BN_num_bits(n);
 
-        modulus_len = BN_num_bytes(key->pkey.rsa->n);
+        modulus_len = BN_num_bytes(n);
         modulus = malloc(modulus_len);
-        BN_bn2bin(key->pkey.rsa->n, modulus);
+        BN_bn2bin(n, modulus);
 
-        exponent_len = BN_num_bytes(key->pkey.rsa->e);
+        exponent_len = BN_num_bytes(e);
         exponent = malloc(exponent_len);
-        BN_bn2bin(key->pkey.rsa->e, exponent);
+        BN_bn2bin(e, exponent);
 
         add_object_attribute(o, 0, CKA_MODULUS, modulus, modulus_len);
         add_object_attribute(o, 0, CKA_MODULUS_BITS,
@@ -378,7 +433,7 @@ add_pubkey_info(struct st_object *o, CK_KEY_TYPE key_type, EVP_PKEY *key)
         add_object_attribute(o, 0, CKA_PUBLIC_EXPONENT,
                              exponent, exponent_len);
 
-        RSA_set_method(key->pkey.rsa, RSA_PKCS1_SSLeay());
+        RSA_set_method(rsa, RSA_PKCS1_OpenSSL());
 
         free(modulus);
         free(exponent);
@@ -474,7 +529,7 @@ add_certificate(char *label,
     o->u.cert = cert;
     public_key = X509_get_pubkey(o->u.cert);
 
-    switch (EVP_PKEY_type(public_key->type)) {
+    switch (EVP_PKEY_base_id(public_key)) {
     case EVP_PKEY_RSA:
         key_type = CKK_RSA;
         break;
@@ -604,8 +659,8 @@ add_certificate(char *label,
             /* XXX verify keytype */
 
             if (key_type == CKK_RSA)
-                RSA_set_method(o->u.private_key.key->pkey.rsa,
-                               RSA_PKCS1_SSLeay());
+                RSA_set_method(EVP_PKEY_get0_RSA(o->u.private_key.key),
+                               RSA_PKCS1_OpenSSL());
 
             if (X509_check_private_key(cert, o->u.private_key.key) != 1) {
                 EVP_PKEY_free(o->u.private_key.key);
@@ -755,8 +810,9 @@ CK_RV
 C_Initialize(CK_VOID_PTR a)
 {
     CK_C_INITIALIZE_ARGS_PTR args = a;
+    size_t i;
+
     st_logf("Initialize\n");
-    int i;
 
     OpenSSL_add_all_algorithms();
     ERR_load_crypto_strings();
@@ -825,7 +881,7 @@ C_Initialize(CK_VOID_PTR a)
 CK_RV
 C_Finalize(CK_VOID_PTR args)
 {
-    int i;
+    size_t i;
 
     st_logf("Finalize\n");
 
@@ -1008,7 +1064,7 @@ C_OpenSession(CK_SLOT_ID slotID,
               CK_NOTIFY Notify,
               CK_SESSION_HANDLE_PTR phSession)
 {
-    int i;
+    size_t i;
 
     st_logf("OpenSession: slot: %d\n", (int)slotID);
 
@@ -1050,7 +1106,7 @@ C_CloseSession(CK_SESSION_HANDLE hSession)
 CK_RV
 C_CloseAllSessions(CK_SLOT_ID slotID)
 {
-    int i;
+    size_t i;
 
     st_logf("CloseAllSessions\n");
 
@@ -1127,7 +1183,8 @@ C_Login(CK_SESSION_HANDLE hSession,
         }
 
         /* XXX check keytype */
-        RSA_set_method(o->u.private_key.key->pkey.rsa, RSA_PKCS1_SSLeay());
+        RSA_set_method(EVP_PKEY_get0_RSA(o->u.private_key.key),
+                       RSA_PKCS1_OpenSSL());
 
         if (X509_check_private_key(o->u.private_key.cert, o->u.private_key.key) != 1) {
             EVP_PKEY_free(o->u.private_key.key);
@@ -1226,7 +1283,6 @@ C_FindObjectsInit(CK_SESSION_HANDLE hSession,
     }
     if (ulCount) {
         CK_ULONG i;
-        size_t len;
 
         print_attributes(pTemplate, ulCount);
 
@@ -1415,7 +1471,7 @@ C_Encrypt(CK_SESSION_HANDLE hSession,
         return CKR_ARGUMENTS_BAD;
     }
 
-    rsa = o->u.public_key->pkey.rsa;
+    rsa = EVP_PKEY_get0_RSA(o->u.public_key);
 
     if (rsa == NULL)
         return CKR_ARGUMENTS_BAD;
@@ -1445,7 +1501,7 @@ C_Encrypt(CK_SESSION_HANDLE hSession,
         goto out;
     }
 
-    if (buffer_len + padding_len < ulDataLen) {
+    if ((CK_ULONG)buffer_len + padding_len < ulDataLen) {
         ret = CKR_ARGUMENTS_BAD;
         goto out;
     }
@@ -1566,7 +1622,7 @@ C_Decrypt(CK_SESSION_HANDLE hSession,
         return CKR_ARGUMENTS_BAD;
     }
 
-    rsa = o->u.private_key.key->pkey.rsa;
+    rsa = EVP_PKEY_get0_RSA(o->u.private_key.key);
 
     if (rsa == NULL)
         return CKR_ARGUMENTS_BAD;
@@ -1596,7 +1652,7 @@ C_Decrypt(CK_SESSION_HANDLE hSession,
         goto out;
     }
 
-    if (buffer_len + padding_len < ulEncryptedDataLen) {
+    if ((CK_ULONG)buffer_len + padding_len < ulEncryptedDataLen) {
         ret = CKR_ARGUMENTS_BAD;
         goto out;
     }
@@ -1725,7 +1781,7 @@ C_Sign(CK_SESSION_HANDLE hSession,
         return CKR_ARGUMENTS_BAD;
     }
 
-    rsa = o->u.private_key.key->pkey.rsa;
+    rsa = EVP_PKEY_get0_RSA(o->u.private_key.key);
 
     if (rsa == NULL)
         return CKR_ARGUMENTS_BAD;
@@ -1754,7 +1810,7 @@ C_Sign(CK_SESSION_HANDLE hSession,
         goto out;
     }
 
-    if (buffer_len < ulDataLen + padding_len) {
+    if ((CK_ULONG)buffer_len < ulDataLen + padding_len) {
         ret = CKR_ARGUMENTS_BAD;
         goto out;
     }
@@ -1872,7 +1928,7 @@ C_Verify(CK_SESSION_HANDLE hSession,
         return CKR_ARGUMENTS_BAD;
     }
 
-    rsa = o->u.public_key->pkey.rsa;
+    rsa = EVP_PKEY_get0_RSA(o->u.public_key);
 
     if (rsa == NULL)
         return CKR_ARGUMENTS_BAD;
@@ -1900,7 +1956,7 @@ C_Verify(CK_SESSION_HANDLE hSession,
         goto out;
     }
 
-    if (buffer_len < ulDataLen) {
+    if ((CK_ULONG)buffer_len < ulDataLen) {
         ret = CKR_ARGUMENTS_BAD;
         goto out;
     }
@@ -1926,7 +1982,7 @@ C_Verify(CK_SESSION_HANDLE hSession,
     if (len > buffer_len)
         abort();
 
-    if (len != ulSignatureLen) {
+    if ((CK_ULONG)len != ulSignatureLen) {
         ret = CKR_GENERAL_ERROR;
         goto out;
     }
