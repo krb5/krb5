@@ -34,6 +34,7 @@ decode_krb5_pa_fx_fast_request
 decode_krb5_pa_otp_challenge
 decode_krb5_pa_otp_req
 decode_krb5_pa_otp_enc_req
+decode_krb5_pa_pac_options
 decode_krb5_pa_pac_req
 decode_krb5_pa_s4u_x509_user
 decode_krb5_pa_spake
@@ -86,6 +87,7 @@ encode_krb5_pa_fx_fast_reply
 encode_krb5_pa_otp_challenge
 encode_krb5_pa_otp_req
 encode_krb5_pa_otp_enc_req
+encode_krb5_pa_pac_options
 encode_krb5_pa_s4u_x509_user
 encode_krb5_pa_spake
 encode_krb5_padata_sequence

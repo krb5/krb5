@@ -725,6 +725,50 @@ cleanup:
     return code;
 }
 
+static krb5_error_code
+check_rbcd_support(krb5_context context, krb5_pa_data **padata)
+{
+    krb5_error_code code;
+    krb5_pa_data *pa;
+    krb5_pa_pac_options *pac_options;
+    krb5_data der_pac_options;
+
+    pa = krb5int_find_pa_data(context, padata, KRB5_PADATA_PAC_OPTIONS);
+    if (pa == NULL)
+        return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+
+    der_pac_options = make_data(pa->contents, pa->length);
+    code = decode_krb5_pa_pac_options(&der_pac_options, &pac_options);
+    if (code)
+        return code;
+
+    if (!(pac_options->options & KRB5_PA_PAC_OPTIONS_RBCD))
+        code = KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+
+    free(pac_options);
+    return code;
+}
+
+static krb5_error_code
+add_rbcd_padata(krb5_context context, krb5_pa_data ***in_padata)
+{
+    krb5_error_code code;
+    krb5_pa_pac_options pac_options;
+    krb5_data *der_pac_options = NULL;
+
+    memset(&pac_options, 0, sizeof(pac_options));
+    pac_options.options |= KRB5_PA_PAC_OPTIONS_RBCD;
+
+    code = encode_krb5_pa_pac_options(&pac_options, &der_pac_options);
+    if (code)
+        return code;
+
+    code = k5_add_pa_data_from_data(in_padata, KRB5_PADATA_PAC_OPTIONS,
+                                    der_pac_options);
+    krb5_free_data(context, der_pac_options);
+    return code;
+}
+
 /* Set *tgt_out to a local TGT for the client realm retrieved from ccache. */
 static krb5_error_code
 get_client_tgt(krb5_context context, krb5_flags options, krb5_ccache ccache,
@@ -748,8 +792,11 @@ get_client_tgt(krb5_context context, krb5_flags options, krb5_ccache ccache,
     return code;
 }
 
-/* Copy req_server to *out_server.  If req_server has the referral realm, set
- * the realm of *out_server to realm. */
+/*
+ * Copy req_server to *out_server.  If req_server has the referral realm, set
+ * the realm of *out_server to realm.  Otherwise the S4U2Proxy request will
+ * fail unless the specified realm is the same as the TGT (or an alias to it).
+ */
 static krb5_error_code
 normalize_server_princ(krb5_context context, const krb5_data *realm,
                        krb5_principal req_server, krb5_principal *out_server)
@@ -776,14 +823,162 @@ normalize_server_princ(krb5_context context, const krb5_data *realm,
     return 0;
 }
 
+/* Return an error if server is present in referral_list. */
+static krb5_error_code
+check_referral_path(krb5_context context, krb5_principal server,
+                    krb5_creds **referral_list, int referral_count)
+{
+    int i;
+
+    for (i = 0; i < referral_count; i++) {
+        if (krb5_principal_compare(context, server, referral_list[i]->server))
+            return KRB5_KDC_UNREACH;
+    }
+    return 0;
+}
+
+/*
+ * Make TGS requests for in_creds using *tgt_inout, following referrals until
+ * the requested service ticket is issued.  Replace *tgt_inout with the final
+ * TGT used, or free it and set it to NULL on error.  Place the final creds
+ * received in *creds_out.
+ */
+static krb5_error_code
+chase_referrals(krb5_context context, krb5_creds *in_creds, krb5_flags kdcopt,
+                krb5_creds **tgt_inout, krb5_creds **creds_out)
+{
+    krb5_error_code code;
+    krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS] = { NULL };
+    krb5_creds mcreds, *tgt, *tkt = NULL;
+    krb5_principal_data server;
+    int referral_count = 0, i;
+
+    tgt = *tgt_inout;
+    *tgt_inout = NULL;
+    *creds_out = NULL;
+
+    mcreds = *in_creds;
+    server = *in_creds->server;
+    mcreds.server = &server;
+
+    for (referral_count = 0; referral_count < KRB5_REFERRAL_MAXHOPS;
+         referral_count++) {
+        code = krb5_get_cred_via_tkt(context, tgt, kdcopt, tgt->addresses,
+                                     &mcreds, &tkt);
+        if (code)
+            goto cleanup;
+
+        if (krb5_principal_compare_any_realm(context, mcreds.server,
+                                             tkt->server)) {
+            *creds_out = tkt;
+            *tgt_inout = tgt;
+            tkt = tgt = NULL;
+            goto cleanup;
+        }
+
+        if (!IS_TGS_PRINC(tkt->server)) {
+            code = KRB5KRB_AP_WRONG_PRINC;
+            goto cleanup;
+        }
+
+        if (data_eq(tgt->server->data[1], tkt->server->data[1])) {
+            code = KRB5_ERR_HOST_REALM_UNKNOWN;
+            goto cleanup;
+        }
+
+        code = check_referral_path(context, tkt->server, referral_tgts,
+                                   referral_count);
+        if (code)
+            goto cleanup;
+
+        referral_tgts[referral_count] = tgt;
+        tgt = tkt;
+        tkt = NULL;
+        server.realm = tgt->server->data[1];
+    }
+
+    /* Max hop count exceeded. */
+    code = KRB5_KDCREP_MODIFIED;
+
+cleanup:
+    for (i = 0; i < KRB5_REFERRAL_MAXHOPS; i++)
+        krb5_free_creds(context, referral_tgts[i]);
+    krb5_free_creds(context, tkt);
+    krb5_free_creds(context, tgt);
+    return code;
+}
+
+/*
+ * Make non-S4U2Proxy TGS requests for in_creds using *tgt_inout, following
+ * referrals until the requested service ticket is returned.  Discard the
+ * service ticket, but replace *tgt_inout with the final referral TGT.
+ */
+static krb5_error_code
+get_tgt_to_target_realm(krb5_context context, krb5_creds *in_creds,
+                        krb5_flags req_kdcopt, krb5_creds **tgt_inout)
+{
+    krb5_error_code code;
+    krb5_flags kdcopt;
+    krb5_creds mcreds, *out;
+
+    mcreds = *in_creds;
+    mcreds.second_ticket = empty_data();
+    kdcopt = FLAGS2OPTS((*tgt_inout)->ticket_flags) | req_kdcopt;
+
+    code = chase_referrals(context, &mcreds, kdcopt, tgt_inout, &out);
+    krb5_free_creds(context, out);
+
+    return code;
+}
+
+/*
+ * Make TGS requests for a cross-TGT to realm using *tgt_inout, following
+ * alternate TGS replies until the requested TGT is issued.  Replace *tgt_inout
+ * with the result.  Do nothing if *tgt_inout is already a cross-TGT for realm.
+ */
+static krb5_error_code
+get_target_realm_proxy_tgt(krb5_context context, const krb5_data *realm,
+                           krb5_flags req_kdcopt, krb5_creds **tgt_inout)
+{
+    krb5_error_code code;
+    krb5_creds mcreds, *out;
+    krb5_principal tgs;
+    krb5_flags flags;
+
+    if (data_eq(*realm, (*tgt_inout)->server->data[1]))
+        return 0;
+
+    code = krb5int_tgtname(context, realm, &(*tgt_inout)->server->data[1],
+                           &tgs);
+    if (code)
+        return code;
+
+    memset(&mcreds, 0, sizeof(mcreds));
+    mcreds.client = (*tgt_inout)->client;
+    mcreds.server = tgs;
+    flags = req_kdcopt | FLAGS2OPTS((*tgt_inout)->ticket_flags);
+
+    code = chase_referrals(context, &mcreds, flags, tgt_inout, &out);
+    krb5_free_principal(context, tgs);
+    if (code)
+        return code;
+
+    krb5_free_creds(context, *tgt_inout);
+    *tgt_inout = out;
+
+    return 0;
+}
+
 krb5_error_code
 k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
                            krb5_ccache ccache, krb5_creds *in_creds,
                            krb5_creds **out_creds)
 {
     krb5_error_code code;
-    krb5_flags kdcopt, flags;
+    krb5_flags flags, req_kdcopt = 0;
     krb5_principal server = NULL;
+    krb5_pa_data **in_padata = NULL;
+    krb5_pa_data **enc_padata = NULL;
     krb5_creds mcreds, *tgt = NULL, *tkt = NULL;
 
     *out_creds = NULL;
@@ -803,27 +998,110 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
     if (code)
         goto cleanup;
 
-    kdcopt = KDC_OPT_CNAME_IN_ADDL_TKT;
+    code = add_rbcd_padata(context, &in_padata);
+    if (code)
+        goto cleanup;
+
     if (options & KRB5_GC_CANONICALIZE)
-        kdcopt |= KDC_OPT_CANONICALIZE;
+        req_kdcopt |= KDC_OPT_CANONICALIZE;
     if (options & KRB5_GC_FORWARDABLE)
-        kdcopt |= KDC_OPT_FORWARDABLE;
+        req_kdcopt |= KDC_OPT_FORWARDABLE;
     if (options & KRB5_GC_NO_TRANSIT_CHECK)
-        kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
+        req_kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
 
     mcreds = *in_creds;
     mcreds.server = server;
 
-    flags = kdcopt | FLAGS2OPTS(tgt->ticket_flags);
+    flags = req_kdcopt | FLAGS2OPTS(tgt->ticket_flags) |
+        KDC_OPT_CNAME_IN_ADDL_TKT | KDC_OPT_CANONICALIZE;
     code = krb5_get_cred_via_tkt_ext(context, tgt, flags, tgt->addresses,
-                                     NULL, &mcreds, NULL, NULL, NULL, NULL,
-                                     &tkt, NULL);
+                                     in_padata, &mcreds, NULL, NULL, NULL,
+                                     &enc_padata, &tkt, NULL);
+
+    /*
+     * If the server principal name included a foreign realm which wasn't an
+     * alias for the local realm, the KDC won't be able to decrypt the TGT.
+     * Windows KDCs will return a BAD_INTEGRITY error in this case, while MIT
+     * KDCs will return S_PRINCIPAL_UNKNOWN.  We cannot distinguish the latter
+     * error from the service principal actually being unknown in the realm,
+     * but set a comprehensible error message for the BAD_INTEGRITY error.
+     */
+    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY &&
+        !krb5_realm_compare(context, in_creds->client, server)) {
+        k5_setmsg(context, code, _("Realm specified but S4U2Proxy must use "
+                                   "referral realm"));
+    }
+
     if (code)
         goto cleanup;
 
-    if (!krb5_principal_compare(context, server, tkt->server)) {
-        code = KRB5KRB_AP_WRONG_PRINC;
-        goto cleanup;
+    if (!krb5_principal_compare_any_realm(context, server, tkt->server)) {
+        /* Make sure we got a referral. */
+        if (!IS_TGS_PRINC(tkt->server)) {
+            code = KRB5KRB_AP_WRONG_PRINC;
+            goto cleanup;
+        }
+
+        /*
+         * Make sure the KDC supports S4U and resource-based constrained
+         * delegation; otherwise we might have gotten a regular TGT referral
+         * rather than a proxy TGT referral.
+         */
+        code = check_rbcd_support(context, enc_padata);
+        if (code)
+            goto cleanup;
+
+        krb5_free_pa_data(context, enc_padata);
+        enc_padata = NULL;
+
+        /*
+         * Replace tgt with a regular (not proxy) TGT to the target realm, by
+         * making a normal TGS request and following referrals.  Per [MS-SFU]
+         * 3.1.5.2.2, we need this TGT to make the final TGS request.
+         */
+        code = get_tgt_to_target_realm(context, &mcreds, req_kdcopt, &tgt);
+        if (code)
+            goto cleanup;
+
+        /*
+         * Replace tkt with a proxy TGT (meaning, one obtained using the
+         * referral TGT we got from the first S4U2Proxy request) to the target
+         * realm, if it isn't already one.
+         */
+        code = get_target_realm_proxy_tgt(context, &tgt->server->data[1],
+                                          req_kdcopt, &tkt);
+        if (code)
+            goto cleanup;
+
+        krb5_free_data_contents(context, &server->realm);
+        code = krb5int_copy_data_contents(context, &tgt->server->data[1],
+                                          &server->realm);
+        if (code)
+            goto cleanup;
+
+        /* Make an S4U2Proxy request to the target realm using the regular TGT,
+         * with the proxy TGT as the evidence ticket. */
+        mcreds.second_ticket = tkt->ticket;
+        tkt->ticket = empty_data();
+        krb5_free_creds(context, tkt);
+        tkt = NULL;
+        flags = req_kdcopt | FLAGS2OPTS(tgt->ticket_flags) |
+            KDC_OPT_CNAME_IN_ADDL_TKT | KDC_OPT_CANONICALIZE;
+        code = krb5_get_cred_via_tkt_ext(context, tgt, flags, tgt->addresses,
+                                         in_padata, &mcreds, NULL, NULL, NULL,
+                                         &enc_padata, &tkt, NULL);
+        free(mcreds.second_ticket.data);
+        if (code)
+            goto cleanup;
+
+        code = check_rbcd_support(context, enc_padata);
+        if (code)
+            goto cleanup;
+
+        if (!krb5_principal_compare(context, server, tkt->server)) {
+            code = KRB5KRB_AP_WRONG_PRINC;
+            goto cleanup;
+        }
     }
 
     if (!krb5_principal_compare(context, in_creds->server, tkt->server)) {
@@ -844,6 +1122,8 @@ cleanup:
     krb5_free_creds(context, tgt);
     krb5_free_creds(context, tkt);
     krb5_free_principal(context, server);
+    krb5_free_pa_data(context, in_padata);
+    krb5_free_pa_data(context, enc_padata);
     return code;
 }
 

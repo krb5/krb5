@@ -129,6 +129,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_error_code     code;
     krb5_creds          in_creds, evidence_creds, mcreds, *result_creds = NULL;
     krb5_flags          flags = 0;
+    krb5_principal_data server_data;
 
     *out_creds = NULL;
 
@@ -139,8 +140,14 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     assert(cred->name != NULL);
 
+    /* Remove assumed realm from host-based S4U2Proxy requests as they must
+     * start in the client realm. */
+    server_data = *server->princ;
+    if (cred->impersonator != NULL && server_data.type == KRB5_NT_SRV_HST)
+        server_data.realm = empty_data();
+    in_creds.server = &server_data;
+
     in_creds.client = cred->name->princ;
-    in_creds.server = server->princ;
     in_creds.times.endtime = endtime;
     in_creds.authdata = NULL;
     in_creds.keyblock.enctype = 0;

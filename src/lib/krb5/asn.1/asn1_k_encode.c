@@ -1732,6 +1732,28 @@ DEFSEQTYPE(secure_cookie, krb5_secure_cookie, secure_cookie_fields);
 MAKE_ENCODER(encode_krb5_secure_cookie, secure_cookie);
 MAKE_DECODER(decode_krb5_secure_cookie, secure_cookie);
 
+/*
+ * -- based on MS-KILE and MS-SFU
+ * PAC-OPTIONS-FLAGS ::= BIT STRING {
+ *     claims(0),
+ *     branch-aware(1),
+ *     forward-to-full-dc(2),
+ *     resource-based-constrained-delegation(3)
+ * }
+ *
+ * PA-PAC-OPTIONS ::= SEQUENCE {
+ *     flags [0] PAC-OPTIONS-FLAGS
+ * }
+ */
+DEFFIELD(pa_pac_options_0, krb5_pa_pac_options, options, 0, krb5_flags);
+static const struct atype_info *pa_pac_options_fields[] = {
+    &k5_atype_pa_pac_options_0
+};
+DEFSEQTYPE(pa_pac_options, krb5_pa_pac_options, pa_pac_options_fields);
+MAKE_ENCODER(encode_krb5_pa_pac_options, pa_pac_options);
+MAKE_DECODER(decode_krb5_pa_pac_options, pa_pac_options);
+
+
 DEFFIELD(spake_factor_0, krb5_spake_factor, type, 0, int32);
 DEFFIELD(spake_factor_1, krb5_spake_factor, data, 1, opt_ostring_data_ptr);
 static const struct atype_info *spake_factor_fields[] = {

@@ -559,6 +559,13 @@ typedef struct _krb5_secure_cookie {
     krb5_pa_data **data;
 } krb5_secure_cookie;
 
+typedef struct _krb5_pa_pac_options {
+    krb5_flags options;
+} krb5_pa_pac_options;
+
+/* In PAC options, indicates Resource-Based Constrained Delegation support. */
+#define KRB5_PA_PAC_OPTIONS_RBCD 0x10000000
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -1536,6 +1543,9 @@ encode_utf8_strings(krb5_data *const *ut8fstrings, krb5_data **);
 krb5_error_code
 encode_krb5_secure_cookie(const krb5_secure_cookie *, krb5_data **);
 
+krb5_error_code
+encode_krb5_pa_pac_options(const krb5_pa_pac_options *, krb5_data **);
+
 /*************************************************************************
  * End of prototypes for krb5_encode.c
  *************************************************************************/
@@ -1717,6 +1727,9 @@ decode_utf8_strings(const krb5_data *, krb5_data ***);
 
 krb5_error_code
 decode_krb5_secure_cookie(const krb5_data *, krb5_secure_cookie **);
+
+krb5_error_code
+decode_krb5_pa_pac_options(const krb5_data *, krb5_pa_pac_options **);
 
 struct _krb5_key_data;          /* kdb.h */
 

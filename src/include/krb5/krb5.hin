@@ -1879,6 +1879,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_ENCPADATA_REQ_ENC_PA_REP   149 /**< RFC 6806 */
 #define KRB5_PADATA_AS_FRESHNESS        150 /**< RFC 8070 */
 #define KRB5_PADATA_SPAKE               151
+#define KRB5_PADATA_PAC_OPTIONS         167 /**< MS-KILE and MS-SFU */
 
 #define KRB5_SAM_USE_SAD_AS_KEY         0x80000000
 #define KRB5_SAM_SEND_ENCRYPTED_SAD     0x40000000
