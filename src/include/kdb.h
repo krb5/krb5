@@ -664,10 +664,12 @@ krb5_error_code krb5_db_sign_authdata(krb5_context kcontext,
                                       krb5_const_principal server_princ,
                                       krb5_db_entry *client,
                                       krb5_db_entry *server,
-                                      krb5_db_entry *krbtgt,
+                                      krb5_db_entry *header_server,
+                                      krb5_db_entry *local_tgt,
                                       krb5_keyblock *client_key,
                                       krb5_keyblock *server_key,
-                                      krb5_keyblock *krbtgt_key,
+                                      krb5_keyblock *header_key,
+                                      krb5_keyblock *local_tgt_key,
                                       krb5_keyblock *session_key,
                                       krb5_timestamp authtime,
                                       krb5_authdata **tgt_auth_data,
@@ -1303,10 +1305,11 @@ typedef struct _kdb_vftabl {
      *   server: The DB entry of the service principal, or of a cross-realm
      *     krbtgt principal in case of referral.
      *
-     *   krbtgt: For S4U2Proxy requests, the DB entry of the second ticket
-     *     server.  For other TGS requests, the DB entry of the header ticket
-     *     server.  For AS requests, the DB entry of the service principal;
-     *     this is usually a local krbtgt principal.
+     *   header_server: For S4U2Proxy requests, the DB entry of the second
+     *     ticket server.  For other TGS requests, the DB entry of the header
+     *     ticket server.  For AS requests, NULL.
+     *
+     *   local_tgt: the DB entry of the local krbtgt principal.
      *
      *   client_key: The reply key for the KDC request, before any FAST armor
      *     is applied.  For AS requests, this may be the client's long-term key
@@ -1315,10 +1318,11 @@ typedef struct _kdb_vftabl {
      *
      *   server_key: The server key used to encrypt the returned ticket.
      *
-     *   krbtgt_key: For S4U2Proxy requests, the key used to decrypt the second
-     *     ticket.  For other TGS requests, the key used to decrypt the header
-     *     ticket.  For AS requests, the server key used to encrypt the
-     *     returned ticket.
+     *   header_key: For S4U2Proxy requests, the key used to decrypt the second
+     *     ticket.  For TGS requests, the key used to decrypt the header
+     *     ticket.  For AS requests, NULL.
+     *
+     *   local_tgt_key: The decrypted first key of local_tgt.
      *
      *   session_key: The session key of the ticket being granted to the
      *     requestor.
@@ -1347,10 +1351,12 @@ typedef struct _kdb_vftabl {
                                      krb5_const_principal server_princ,
                                      krb5_db_entry *client,
                                      krb5_db_entry *server,
-                                     krb5_db_entry *krbtgt,
+                                     krb5_db_entry *header_server,
+                                     krb5_db_entry *local_tgt,
                                      krb5_keyblock *client_key,
                                      krb5_keyblock *server_key,
-                                     krb5_keyblock *krbtgt_key,
+                                     krb5_keyblock *header_key,
+                                     krb5_keyblock *local_tgt_key,
                                      krb5_keyblock *session_key,
                                      krb5_timestamp authtime,
                                      krb5_authdata **tgt_auth_data,
