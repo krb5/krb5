@@ -10,8 +10,6 @@ STLIBOBJS=\
 	aead.o		 	\
 	block_size.o		\
 	cf2.o 			\
-	checksum_cbc.o		\
-	checksum_confounder.o	\
 	checksum_dk_cmac.o	\
 	checksum_dk_hmac.o	\
 	checksum_etm.o		\
@@ -71,8 +69,6 @@ OBJS=\
 	$(OUTPRE)aead.$(OBJEXT)		 	\
 	$(OUTPRE)block_size.$(OBJEXT)		\
 	$(OUTPRE)cf2.$(OBJEXT) 			\
-	$(OUTPRE)checksum_cbc.$(OBJEXT)		\
-	$(OUTPRE)checksum_confounder.$(OBJEXT)	\
 	$(OUTPRE)checksum_dk_cmac.$(OBJEXT)	\
 	$(OUTPRE)checksum_dk_hmac.$(OBJEXT)	\
 	$(OUTPRE)checksum_etm.$(OBJEXT)		\
@@ -132,8 +128,6 @@ SRCS=\
 	$(srcdir)/aead.c		\
 	$(srcdir)/block_size.c		\
 	$(srcdir)/cf2.c 			\
-	$(srcdir)/checksum_cbc.c		\
-	$(srcdir)/checksum_confounder.c	\
 	$(srcdir)/checksum_dk_cmac.c	\
 	$(srcdir)/checksum_dk_hmac.c	\
 	$(srcdir)/checksum_etm.c	\
