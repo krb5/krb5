@@ -64,7 +64,7 @@ recvauth_common(krb5_context context,
 
     /*
      * Zero out problem variable.  If problem is set at the end of
-     * the intial version negotiation section, it means that we
+     * the initial version negotiation section, it means that we
      * need to send an error code back to the client application
      * and exit.
      */

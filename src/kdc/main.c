@@ -743,7 +743,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
             }
             break;
         case 'd':                       /* pathname for db */
-            /* now db_name is not a seperate argument.
+            /* now db_name is not a separate argument.
              * It has to be passed as part of the db_args
              */
             if( db_name == NULL ) {

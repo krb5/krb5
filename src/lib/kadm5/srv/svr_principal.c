@@ -651,7 +651,7 @@ kadm5_modify_principal(void *server_handle,
     if (mask & KADM5_TL_DATA) {
         krb5_tl_data *tl;
 
-        /* may have to change the version number of the API. Updates the list with the given tl_data rather than over-writting */
+        /* may have to change the version number of the API. Updates the list with the given tl_data rather than over-writing */
 
         for (tl = entry->tl_data; tl;
              tl = tl->tl_data_next)

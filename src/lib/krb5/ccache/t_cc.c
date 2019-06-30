@@ -499,7 +499,7 @@ test_misc(krb5_context context)
         CHECK(kret, "resolve unknown type");
     }
 
-    /* Test for not specifiying a cache type with no defaults */
+    /* Test for not specifying a cache type with no defaults */
     ops_save = krb5_cc_dfl_ops;
     krb5_cc_dfl_ops = 0;
 

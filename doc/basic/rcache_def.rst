@@ -66,7 +66,7 @@ are in lowercase.  The following types are defined:
 #. **none** disables the replay cache.  The residual value is ignored.
 
 #. **file2** (new in release 1.18) uses a hash-based format to store
-   replay records.  The file may grow to accomodate hash collisions.
+   replay records.  The file may grow to accommodate hash collisions.
    The residual value is the filename.
 
 #. **dfl** is the default type if no environment variable or

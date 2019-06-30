@@ -810,7 +810,7 @@ mutual_auth(
     if ((code = krb5_rd_rep(context, ctx->auth_context, &ap_rep,
                             &ap_rep_data))) {
         /*
-         * XXX A hack for backwards compatiblity.
+         * XXX A hack for backwards compatibility.
          * To be removed in 1999 -- proven
          */
         krb5_auth_con_setuseruserkey(context, ctx->auth_context,

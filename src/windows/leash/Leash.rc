@@ -715,8 +715,8 @@ BEGIN
     ID_LARGE_ICONS          "Show large or small tree icons"
     ID_UPPERCASE_REALM      "Allow realm names that include lower case letters.\n Allow Mixed Case Realm Name"
     ID_OPTIONS_RESETWINDOWSIZE
-                            "Puts Leash's main window back to it's default size "
-    ID_RESET_WINDOW_SIZE    "Refresh Leash window to it's default size/position"
+                            "Puts Leash's main window back to its default size "
+    ID_RESET_WINDOW_SIZE    "Refresh Leash window to its default size/position"
     ID_SYSTEM_CONTROL_PANEL "Open your System Properties window"
     ID_OPTIONS_LOWTICKETALARMSOUND
                             "Turn alarm off or on,  when ticket time is low"

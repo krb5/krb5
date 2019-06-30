@@ -507,7 +507,7 @@ proc setup_runtime_env { } {
 }
 
 # get_hostname
-# This procedure sets the global variale hostname to the local
+# This procedure sets the global variable hostname to the local
 # hostname as seen by krb5_sname_to_principal.  Returns 1 on success,
 # 0 on failure.
 

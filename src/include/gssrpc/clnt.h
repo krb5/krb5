@@ -70,7 +70,7 @@ enum clnt_stat {
 	 * callrpc & clnt_create errors
 	 */
 	RPC_UNKNOWNHOST=13,		/* unknown host name */
-	RPC_UNKNOWNPROTO=17,		/* unkown protocol */
+	RPC_UNKNOWNPROTO=17,		/* unknown protocol */
 
 	/*
 	 * _ create errors

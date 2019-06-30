@@ -192,7 +192,7 @@ k5_privsafe_check_replay(krb5_context context, krb5_auth_context authcon,
  * There are 2^7 + 2^15 + 2^23 + 2^23 = 16810112 total ambiguous
  * initial Heimdal counter values, but we receive them as one of 2^23
  * possible values.  There is a ~1/256 chance of a Heimdal
- * implementation sending an intial sequence number in the ambiguous
+ * implementation sending an initial sequence number in the ambiguous
  * range.
  *
  * We have to do special treatment when receiving sequence numbers
@@ -282,7 +282,7 @@ k5_privsafe_check_seqnum(krb5_context ctx, krb5_auth_context ac,
     }
 
     /*
-     * Magic wraparound for the case where the intial sequence number
+     * Magic wraparound for the case where the initial sequence number
      * is in the ambiguous range.  This means that the sender's
      * counter is at a different count than ours, so we correct ours,
      * and mark the sender as being a broken Heimdal implementation.

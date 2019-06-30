@@ -1079,7 +1079,7 @@ static krb5_error_code stdcc_setup(krb5_context context,
 {
     int     err;
 
-    /* make sure the API has been intialized */
+    /* make sure the API has been initialized */
     if (gCntrlBlock == NULL) {
 #ifdef CC_API_VER2
         err = cc_initialize(&gCntrlBlock, CC_API_VER_2, NULL, NULL);

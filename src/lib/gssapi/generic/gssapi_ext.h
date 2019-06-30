@@ -92,7 +92,7 @@ gss_userok(const gss_name_t name,
  *
  * @return Return GSS_S_COMPLETE if @a name is authorized to act as @a user,
  * GSS_S_UNAUTHORIZED if not, or an appropriate GSS error code if an error
- * occured.
+ * occurred.
  *
  * @sa gss_userok
  */

@@ -1725,7 +1725,7 @@ ure_compile(ucs2_t *re, unsigned long relen, int casefold, ure_buffer_t buf)
     buf->states.states_used = 0;
 
     /*
-     * Construct the NFA.  If this stage returns a 0, then an error occured or
+     * Construct the NFA.  If this stage returns a 0, then an error occurred or
      * an empty expression was passed.
      */
     if ((state = _ure_re2nfa(re, relen, buf)) == _URE_NOOP)

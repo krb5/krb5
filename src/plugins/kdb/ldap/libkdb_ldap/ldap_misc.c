@@ -1377,7 +1377,7 @@ get_ldap_auth_ind(krb5_context context, LDAP *ld, LDAPMessage *ldap_ent,
 
     k5_buf_init_dynamic(&buf);
 
-    /* Make a space seperated list of indicators. */
+    /* Make a space-separated list of indicators. */
     for (i = 0; auth_inds[i] != NULL; i++) {
         k5_buf_add(&buf, auth_inds[i]);
         if (auth_inds[i + 1] != NULL)

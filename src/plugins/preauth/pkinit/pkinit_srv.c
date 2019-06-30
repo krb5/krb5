@@ -837,7 +837,7 @@ pkinit_server_return_padata(krb5_context context,
                                    subjectPublicKey_len, &dh_pubkey, &dh_pubkey_len,
                                    &server_key, &server_key_len);
         if (retval) {
-            pkiDebug("failed to process/create dh paramters\n");
+            pkiDebug("failed to process/create dh parameters\n");
             goto cleanup;
         }
 

@@ -1245,11 +1245,11 @@ dnl
 dnl This test exists so that every application developer does not test this in
 dnl a different, and subtly broken fashion.
 dnl 
-dnl It has been argued that this test should be broken up into two seperate
+dnl It has been argued that this test should be broken up into two separate
 dnl tests, one for the resolver libraries, and one for the libraries necessary
 dnl for using Sockets API. Unfortunately, the two are carefully intertwined and
 dnl allowing the autoconf user to use them independantly potentially results in
-dnl unfortunate ordering dependancies -- as such, such component macros would
+dnl unfortunate ordering dependencies -- as such, such component macros would
 dnl have to carefully use indirection and be aware if the other components were
 dnl executed. Since other autoconf macros do not go to this trouble, and almost
 dnl no applications use sockets without the resolver, this complexity has not

@@ -266,7 +266,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     state->reply_encpart.flags = state->enc_tkt_reply.flags;
     state->reply_encpart.server = state->ticket_reply.server;
 
-    /* copy the time fields EXCEPT for authtime; it's location
+    /* copy the time fields EXCEPT for authtime; its location
      *  is used for ktime
      */
     state->reply_encpart.times = state->enc_tkt_reply.times;

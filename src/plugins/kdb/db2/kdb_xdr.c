@@ -153,11 +153,11 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     krb5_kdb_encode_int32(entry->fail_auth_count, nextloc);
     nextloc += 4;
 
-    /* # tl_data strutures */
+    /* # tl_data structures */
     krb5_kdb_encode_int16(entry->n_tl_data, nextloc);
     nextloc += 2;
 
-    /* # key_data strutures */
+    /* # key_data structures */
     krb5_kdb_encode_int16(entry->n_key_data, nextloc);
     nextloc += 2;
 
@@ -292,7 +292,7 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     krb5_kdb_decode_int32(nextloc, entry->fail_auth_count);
     nextloc += 4;
 
-    /* # tl_data strutures */
+    /* # tl_data structures */
     krb5_kdb_decode_int16(nextloc, entry->n_tl_data);
     nextloc += 2;
 
@@ -301,7 +301,7 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
         goto error_out;
     }
 
-    /* # key_data strutures */
+    /* # key_data structures */
     krb5_kdb_decode_int16(nextloc, entry->n_key_data);
     nextloc += 2;
 

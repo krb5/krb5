@@ -996,7 +996,7 @@ Leash_get_default_lifetime(
                            use the form 'ticket_lifetime = 600' where
                            the unit is assumed to be minutes.  While
                            these are technically wrong (a unit needs
-                           to be specified), we try to accomodate for
+                           to be specified), we try to accommodate for
                            this using the safe assumption that the
                            unit is seconds and tack an 's' to the end
                            and see if that works. */
@@ -1148,7 +1148,7 @@ Leash_get_default_renew_till(
                            use the form 'ticket_lifetime = 600' where
                            the unit is assumed to be minutes.  While
                            these are technically wrong (a unit needs
-                           to be specified), we try to accomodate for
+                           to be specified), we try to accommodate for
                            this using the safe assumption that the
                            unit is seconds and tack an 's' to the end
                            and see if that works. */
