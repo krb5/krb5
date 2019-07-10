@@ -289,7 +289,6 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
     krb5_keytab_entry cur_entry, new_entry;
     krb5_error_code kerror = 0;
     int found_wrong_kvno = 0;
-    krb5_boolean similar;
     int was_open;
     char *princname;
 
@@ -336,27 +335,11 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
             continue;
         }
 
-        /* if the enctype is not ignored and doesn't match, free new_entry
-           and continue to the next */
-
-        if (enctype != IGNORE_ENCTYPE) {
-            if ((kerror = krb5_c_enctype_compare(context, enctype,
-                                                 new_entry.key.enctype,
-                                                 &similar))) {
-                krb5_kt_free_entry(context, &new_entry);
-                break;
-            }
-
-            if (!similar) {
-                krb5_kt_free_entry(context, &new_entry);
-                continue;
-            }
-            /*
-             * Coerce the enctype of the output keyblock in case we
-             * got an inexact match on the enctype.
-             */
-            new_entry.key.enctype = enctype;
-
+        /* If the enctype is not ignored and doesn't match, free new_entry and
+           continue to the next. */
+        if (enctype != IGNORE_ENCTYPE && enctype != new_entry.key.enctype) {
+            krb5_kt_free_entry(context, &new_entry);
+            continue;
         }
 
         if (kvno == IGNORE_VNO || new_entry.vno == IGNORE_VNO) {
