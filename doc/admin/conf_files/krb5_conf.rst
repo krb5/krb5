@@ -35,17 +35,11 @@ or::
         baz = quux
     }
 
-Placing a '\*' at the end of a line indicates that this is the *final*
-value for the tag.  This means that neither the remainder of this
-configuration file nor any other configuration file will be checked
-for any other values for this tag.
-
-For example, if you have the following lines::
-
-    foo = bar*
-    foo = baz
-
-then the second value of ``foo`` (``baz``) would never be read.
+Placing a '\*' after the closing bracket of a section name indicates
+that the section is *final*, meaning that if the same section appears
+within a later file specified in **KRB5_CONFIG**, it will be ignored.
+A subsection can be marked as final by placing a '\*' after either the
+tag name or the closing brace.
 
 The krb5.conf file can include other files using either of the
 following directives at the beginning of a line::
