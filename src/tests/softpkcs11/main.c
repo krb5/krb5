@@ -78,6 +78,7 @@ compat_rsa_get0_key(const RSA *rsa, const BIGNUM **n, const BIGNUM **e,
                 (BL) = i2d_##T((S), &p);                \
                 if ((BL) <= 0) {                        \
                     free((B));                          \
+                    (B) = NULL;                         \
                     (R) = EINVAL;                       \
                 }                                       \
             }                                           \
@@ -149,6 +150,7 @@ static struct soft_token {
     } state[10];
 #define MAX_NUM_SESSION (sizeof(soft_token.state)/sizeof(soft_token.state[0]))
     FILE *logfile;
+    CK_SESSION_HANDLE next_session_handle;
 } soft_token;
 
 static void
@@ -179,6 +181,7 @@ snprintf_fill(char *str, int size, char fillchar, const char *fmt, ...)
 {
     int len;
     va_list ap;
+    va_start(ap, fmt);
     len = vsnprintf(str, size, fmt, ap);
     va_end(ap);
     if (len < 0 || len > size)
@@ -344,7 +347,13 @@ static struct st_object *
 add_st_object(void)
 {
     struct st_object *o, **objs;
-    int i;
+
+    objs = realloc(soft_token.object.objs,
+                   (soft_token.object.num_objs + 1) *
+                   sizeof(soft_token.object.objs[0]));
+    if (objs == NULL)
+        return NULL;
+    soft_token.object.objs = objs;
 
     o = malloc(sizeof(*o));
     if (o == NULL)
@@ -352,26 +361,9 @@ add_st_object(void)
     memset(o, 0, sizeof(*o));
     o->attrs = NULL;
     o->num_attributes = 0;
+    o->object_handle = soft_token.object.num_objs;
 
-    for (i = 0; i < soft_token.object.num_objs; i++) {
-        if (soft_token.object.objs == NULL) {
-            soft_token.object.objs[i] = o;
-            break;
-        }
-    }
-    if (i == soft_token.object.num_objs) {
-        objs = realloc(soft_token.object.objs,
-                       (soft_token.object.num_objs + 1) * sizeof(soft_token.object.objs[0]));
-        if (objs == NULL) {
-            free(o);
-            return NULL;
-        }
-        soft_token.object.objs = objs;
-        soft_token.object.objs[soft_token.object.num_objs++] = o;
-    }
-    soft_token.object.objs[i]->object_handle =
-        (random() & (~OBJECT_ID_MASK)) | i;
-
+    soft_token.object.objs[soft_token.object.num_objs++] = o;
     return o;
 }
 
@@ -797,6 +789,8 @@ read_conf_file(const char *fn)
 
         add_certificate(label, cert, key, id, anchor);
     }
+
+    fclose(f);
 }
 
 static CK_RV
@@ -806,18 +800,46 @@ func_not_supported(void)
     return CKR_FUNCTION_NOT_SUPPORTED;
 }
 
+static char *
+get_rcfilename()
+{
+    struct passwd *pw;
+    const char *home = NULL;
+    char *fn;
+
+    if (getuid() == geteuid()) {
+        fn = getenv("SOFTPKCS11RC");
+        if (fn != NULL)
+            return strdup(fn);
+
+        home = getenv("HOME");
+    }
+
+    if (home == NULL) {
+        pw = getpwuid(getuid());
+        if (pw != NULL)
+            home = pw->pw_dir;
+    }
+
+    if (home == NULL)
+        return strdup("/etc/soft-token.rc");
+
+    if (asprintf(&fn, "%s/.soft-token.rc", home) < 0)
+        return NULL;
+    return fn;
+}
+
 CK_RV
 C_Initialize(CK_VOID_PTR a)
 {
     CK_C_INITIALIZE_ARGS_PTR args = a;
     size_t i;
+    char *fn;
 
     st_logf("Initialize\n");
 
     OpenSSL_add_all_algorithms();
     ERR_load_crypto_strings();
-
-    srandom(getpid() ^ time(NULL));
 
     for (i = 0; i < MAX_NUM_SESSION; i++) {
         soft_token.state[i].session_handle = CK_INVALID_HANDLE;
@@ -850,31 +872,13 @@ C_Initialize(CK_VOID_PTR a)
         st_logf("\tFlags\t%04x\n", (unsigned int)args->flags);
     }
 
-    {
-        char *fn = NULL, *home = NULL;
+    soft_token.next_session_handle = 0;
 
-        if (getuid() == geteuid()) {
-            fn = getenv("SOFTPKCS11RC");
-            if (fn)
-                fn = strdup(fn);
-            home = getenv("HOME");
-        }
-        if (fn == NULL && home == NULL) {
-            struct passwd *pw = getpwuid(getuid());
-            if(pw != NULL)
-                home = pw->pw_dir;
-        }
-        if (fn == NULL) {
-            if (home)
-                asprintf(&fn, "%s/.soft-token.rc", home);
-            else
-                fn = strdup("/etc/soft-token.rc");
-        }
-
-        read_conf_file(fn);
-        free(fn);
-    }
-
+    fn = get_rcfilename();
+    if (fn == NULL)
+        return CKR_DEVICE_MEMORY;
+    read_conf_file(fn);
+    free(fn);
     return CKR_OK;
 }
 
@@ -1082,8 +1086,7 @@ C_OpenSession(CK_SLOT_ID slotID,
 
     soft_token.open_sessions++;
 
-    soft_token.state[i].session_handle =
-        (CK_SESSION_HANDLE)(random() & 0xfffff);
+    soft_token.state[i].session_handle = soft_token.next_session_handle++;
     *phSession = soft_token.state[i].session_handle;
 
     return CKR_OK;
@@ -1152,7 +1155,8 @@ C_Login(CK_SESSION_HANDLE hSession,
     VERIFY_SESSION_HANDLE(hSession, NULL);
 
     if (pPin != NULL_PTR) {
-        asprintf(&pin, "%.*s", (int)ulPinLen, pPin);
+        if (asprintf(&pin, "%.*s", (int)ulPinLen, pPin) < 0)
+            return CKR_DEVICE_MEMORY;
         st_logf("type: %d password: %s\n", (int)userType, pin);
     }
 
