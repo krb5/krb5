@@ -1,19 +1,20 @@
-#!/afs/athena/contrib/perl/p
+#!/usr/bin/perl
+use Socket qw(:addrinfo);
+use strict;
 
+my $hostname;
 if ($#ARGV == -1) {
     chop($hostname = `hostname`);
 } else {
     $hostname = $ARGV[0];
 }
 
-if (! (($name,$type,$addr) = (gethostbyname($hostname))[0,2,4])) {
-    print STDERR "No such host: $hostname\n";
-    exit(1);
-}
-if (! ($qualname = (gethostbyaddr($addr,$type))[0])) {
-    $qualname = $name;
-}
+my ($gaerr, @addrs) = getaddrinfo($hostname, "", {flags => AI_CANONNAME});
+die "No such host: $hostname ($gaerr)" if $gaerr;
+my ($canonname, $addr) = ($addrs[0]->{canonname}, $addrs[0]->{addr});
+
+my ($gnerr, $name, $servicename) = getnameinfo($addr, NI_NAMEREQD);
+my $qualname = $gnerr ? $name : $name;
 
 $qualname =~ tr/A-Z/a-z/;	# lowercase our name for keytab use.
 print "$qualname\n";
-

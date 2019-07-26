@@ -42,47 +42,22 @@
 
 /* This program tests the resolve library and sees if it is broken... */
 
-#include "autoconf.h"
-#include <stdio.h>
-
-#if STDC_HEADERS
-#include <string.h>
-#else
-#ifndef HAVE_STRCHR
-#define strchr index
-#endif
-char *strchr();
-#endif
-
+#include "k5-platform.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include <netinet/in.h>
-#include <netdb.h>
-
 int
-main(argc, argv)
-    int argc;
-    char **argv;
+main(int argc, char **argv)
 {
-    char myname[MAXHOSTNAMELEN+1];
-    char *ptr, *fqdn;
-    struct in_addr addrcopy;
-    struct hostent *host;
-    int quiet = 0;
+    struct addrinfo *ai = NULL, hint;
+    char myname[MAXHOSTNAMELEN + 1], namebuf[NI_MAXHOST], abuf[256];
+    const char *addrstr;
+    int err, quiet = 0;
 
     argc--; argv++;
     while (argc) {
@@ -95,7 +70,7 @@ main(argc, argv)
     }
 
     if (argc >= 1) {
-        strncpy(myname, *argv, MAXHOSTNAMELEN);
+        strlcpy(myname, *argv, sizeof(myname));
     } else {
         if(gethostname(myname, MAXHOSTNAMELEN)) {
             perror("gethostname failure");
@@ -109,53 +84,32 @@ main(argc, argv)
     if (!quiet)
         printf("Hostname:  %s\n", myname);
 
-
-    /* Set the hosts db to close each time - effectively rewinding file */
-    sethostent(0);
-
-    if((host = gethostbyname (myname)) == NULL) {
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_flags = AI_CANONNAME;
+    err = getaddrinfo(myname, 0, &hint, &ai);
+    if (err) {
         fprintf(stderr,
                 "Could not look up address for hostname '%s' - fatal\n",
                 myname);
         exit(2);
     }
 
-    fqdn = strdup(host->h_name);
-    if (fqdn == NULL) {
-        perror("strdup");
-        exit(2);
+    if (!quiet) {
+        addrstr = inet_ntop(ai->ai_family, ai->ai_addr, abuf, sizeof(abuf));
+        if (addrstr != NULL)
+            printf("Host address: %s\n", addrstr);
     }
 
-    ptr = host->h_addr_list[0];
-#define UC(a) (((int)a)&0xff)
-    if (!quiet)
-        printf("Host address: %d.%d.%d.%d\n",
-               UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
+    err = getnameinfo(ai->ai_addr, ai->ai_addrlen, namebuf, sizeof(namebuf),
+                      NULL, 0, NI_NAMEREQD);
+    if (err && !quiet)
+        fprintf(stderr, "Error looking up IP address\n");
 
-    memcpy(&addrcopy.s_addr, ptr, 4);
-
-    /* Convert back to full name */
-    if ((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
-        if (!quiet)
-            fprintf(stderr, "Error looking up IP address\n");
-    } else {
-        free(fqdn);
-        fqdn = strdup(host->h_name);
-        if (fqdn == NULL) {
-            perror("strdup");
-            exit (2);
-        }
-    }
-
-    if (quiet)
-        printf("%s\n", fqdn);
-    else
-        printf("FQDN: %s\n", fqdn);
+    printf("%s%s\n", quiet ? "" : "FQDN: ", err ? ai->ai_canonname : namebuf);
 
     if (!quiet)
         printf("Resolve library appears to have passed the test\n");
 
-    /* All ok */
-    exit(0);
-
+    freeaddrinfo(ai);
+    return 0;
 }
