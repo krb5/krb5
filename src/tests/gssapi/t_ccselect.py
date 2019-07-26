@@ -76,8 +76,9 @@ r1.addprinc(bob, password('bob'))
 r2.addprinc(zaphod, password('zaphod'))
 
 # Create host principals and keytabs for fallback realm tests.
-r1.addprinc('host/localhost')
-r2.addprinc('host/localhost')
+if hostname != 'localhost':
+    r1.addprinc('host/localhost')
+    r2.addprinc('host/localhost')
 r1.addprinc('host/' + foo)
 r2.addprinc('host/' + foo2)
 r1.addprinc('host/' + foobar)
