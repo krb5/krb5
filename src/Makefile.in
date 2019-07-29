@@ -495,7 +495,7 @@ check-unix: check-lmdb-$(HAVE_LMDB)
 	cat $(SKIPTESTS)
 
 check-pytests-no: check-postrecurse
-	@echo 'Skipped python test scripts: python 2.5 or later required' >> \
+	@echo 'Skipped python test scripts: python 3 required' >> \
 		$(SKIPTESTS)
 
 check-cmocka-no: check-postrecurse
@@ -567,7 +567,6 @@ coverity prevent cov: Makefiles
 FIND = find
 XARGS = xargs
 EMACS = emacs
-PYTHON = python
 
 INDENTDIRS = \
 	appl \
@@ -671,7 +670,7 @@ mark-cstyle-bsd:
 check-copyright:
 	(cd $(top_srcdir) && \
 	$(FIND) . \( -name '*.[ch]' -o -name '*.hin' \) -print0 | \
-	$(XARGS) -0 python util/krb5-check-copyright.py)
+	$(XARGS) -0 $(PYTHON) util/krb5-check-copyright.py)
 
 tags: FORCE
 	(cd $(top_srcdir) && \
