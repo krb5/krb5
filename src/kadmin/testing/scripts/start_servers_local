@@ -73,8 +73,6 @@ fi
 
 # allow admin to krlogin as root (for cleanup)
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
-hostname=`hostname`
-QUALNAME=`$TOP/testing/scripts/qualname.pl $hostname`; export QUALNAME
 
 cat - > /tmp/start_servers_local$$ <<\EOF
 if { [catch {
