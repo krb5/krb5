@@ -5,7 +5,7 @@ PERL_PATH=@PERL_PATH@
 .SUFFIXES: .plin .pl
 
 GEN_SCRIPTS = compare_dump.pl make-host-keytab.pl \
-	simple_dump.pl verify_xrunner_report.pl qualname.pl
+	simple_dump.pl verify_xrunner_report.pl
 
 all: env-setup.sh $(GEN_SCRIPTS)
 

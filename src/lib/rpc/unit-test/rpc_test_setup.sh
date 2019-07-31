@@ -20,12 +20,9 @@ fi
 
 PATH=$TOP/install/admin:$PATH; export PATH
 
-CANON_HOST=`$QUALNAME`
-export CANON_HOST
-
 cat - > /tmp/rpc_test_setup$$ <<\EOF
 source $env(TCLUTIL)
-set h $env(CANON_HOST)
+set h $env(QUALNAME)
 puts stdout [kadm5_init admin admin $KADM5_ADMIN_SERVICE null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 server_handle]
 if ![info exists server_handle] { exit 1 }
 puts stdout [kadm5_create_principal $server_handle [simple_principal server/$h] {KADM5_PRINCIPAL} admin]
