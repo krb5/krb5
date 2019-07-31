@@ -35,10 +35,9 @@ fi
 if [ $local = 0 ]; then
 
 	# Fix up the local krb5.conf to point to the remote 
-	localname=`$QUALNAME`
 	sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 		-e "s/__KDCHOST__/$hostname/g" \
-		-e "s/__LOCALHOST__/$localname/g" \
+		-e "s/__LOCALHOST__/$QUALNAME/g" \
 		-e "s#__MODDIR__#$TOP/../plugins/kdb#g"\
 		-e "s#__PLUGIN_DIR__#$TOP/../plugins#g"\
 		< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
