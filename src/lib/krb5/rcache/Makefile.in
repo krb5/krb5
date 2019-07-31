@@ -29,7 +29,7 @@ SRCS=	\
 	$(srcdir)/rc_none.c	\
 	$(srcdir)/ser_rc.c	\
 	$(srcdir)/t_memrcache.c	\
-	$(srcdir)/t_replay.c
+	$(srcdir)/t_rcfile2.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -41,11 +41,6 @@ t_memrcache: t_memrcache.o $(KRB5_BASE_DEPLIBS)
 
 t_rcfile2: t_rcfile2.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_rcfile2.o $(KRB5_BASE_LIBS)
-
-T_REPLAY_OBJS= t_replay.o
-
-t_replay: $(T_REPLAY_OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_replay $(T_REPLAY_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix: t_memrcache t_rcfile2
 	$(RUN_TEST) ./t_memrcache
