@@ -174,8 +174,8 @@ store(krb5_context context, int fd, const uint8_t tag[TAG_LEN], uint32_t now,
         if (ret)
             return ret;
 
-        if ((nread >= 1 && memcmp(r1tag, tag, TAG_LEN) == 0) ||
-            (nread == 2 && memcmp(r2tag, tag, TAG_LEN) == 0))
+        if ((nread >= 1 && r1stamp && memcmp(r1tag, tag, TAG_LEN) == 0) ||
+            (nread == 2 && r2stamp && memcmp(r2tag, tag, TAG_LEN) == 0))
             return KRB5KRB_AP_ERR_REPEAT;
 
         /* Make note of the first record available for writing (empty, beyond
