@@ -1142,14 +1142,18 @@ else
 fi
 AC_SUBST(HAVE_RUNTEST)
 
-# For Python tests.
+# For Python tests.  Python version 3.2.4 is required as prior
+# versions do not accept string input to subprocess.Popen.communicate
+# when universal_newlines is set.
+PYTHON_MINVERSION=3.2.4
+AC_SUBST(PYTHON_MINVERSION)
 AC_CHECK_PROG(PYTHON,python3,python3)
 if test x"$PYTHON" = x; then
 	AC_CHECK_PROG(PYTHON,python,python)
 fi
 HAVE_PYTHON=no
 if test x"$PYTHON" != x; then
-	wantver="(sys.hexversion >= 0x3000000)"
+	wantver="(sys.hexversion >= 0x30204F0)"
 	if "$PYTHON" -c "import sys; sys.exit(not $wantver and 1 or 0)"; then
 		HAVE_PYTHON=yes
 	fi

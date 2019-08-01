@@ -494,8 +494,9 @@ check-prerecurse: runenv.py
 check-unix: check-lmdb-$(HAVE_LMDB)
 	cat $(SKIPTESTS)
 
+MINPYTHON = @PYTHON_MINVERSION@
 check-pytests-no: check-postrecurse
-	@echo 'Skipped python test scripts: python 3 required' >> \
+	@echo 'Skipped python test scripts: python $(MINPYTHON) required' >> \
 		$(SKIPTESTS)
 
 check-cmocka-no: check-postrecurse
