@@ -371,6 +371,7 @@ command-line flags.  These are documented in the --help output.
 """
 
 import atexit
+import fcntl
 import optparse
 import os
 import shlex
@@ -471,6 +472,7 @@ def _onexit():
         sys.stdout.flush()
         sys.stdin.readline()
     for proc in _daemons:
+        check_daemon(proc)
         os.kill(proc.pid, signal.SIGTERM)
     if not _success:
         print
@@ -812,7 +814,26 @@ def _start_daemon(args, env, sentinel):
     return proc
 
 
+# Check a daemon's status prior to terminating it.  Display its return
+# code if it already exited, and display any output it has generated.
+def check_daemon(proc):
+    code = proc.poll()
+    if code is not None:
+        output('*** Daemon pid %d exited with code %d\n' % (proc.pid, code))
+
+    flags = fcntl.fcntl(proc.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(proc.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+    try:
+        out = proc.stdout.read()
+    except:
+        return
+
+    output('*** Daemon pid %d output:\n' % proc.pid)
+    output(out)
+
+
 def stop_daemon(proc):
+    check_daemon(proc)
     output('*** Terminating process %d\n' % proc.pid)
     os.kill(proc.pid, signal.SIGTERM)
     proc.wait()
