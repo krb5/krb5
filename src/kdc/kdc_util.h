@@ -413,6 +413,14 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
                      krb5_const_principal client_princ,
                      krb5_pa_data **cookie_out);
 
+krb5_error_code
+kdc_add_pa_pac_options(krb5_context context, krb5_kdc_req *request,
+                       krb5_pa_data ***out_enc_padata);
+
+krb5_error_code
+kdc_get_pa_pac_options(krb5_context context, krb5_pa_data **in_padata,
+                       krb5_pa_pac_options **pac_options_out);
+
 /* Information handle for kdcpreauth callbacks.  All pointers are aliases. */
 struct krb5_kdcpreauth_rock_st {
     krb5_kdc_req *request;

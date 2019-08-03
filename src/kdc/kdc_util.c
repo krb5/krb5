@@ -1900,6 +1900,54 @@ cleanup:
     return retval;
 }
 
+krb5_error_code
+kdc_get_pa_pac_options(krb5_context context, krb5_pa_data **in_padata,
+                       krb5_pa_pac_options **pac_options_out)
+{
+    krb5_pa_data *pa;
+    krb5_data der_pac_options;
+
+    *pac_options_out = NULL;
+
+    pa = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_PAC_OPTIONS);
+    if (pa == NULL)
+        return 0;
+
+    der_pac_options = make_data(pa->contents, pa->length);
+    return decode_krb5_pa_pac_options(&der_pac_options, pac_options_out);
+}
+
+krb5_error_code
+kdc_add_pa_pac_options(krb5_context context, krb5_kdc_req *request,
+                       krb5_pa_data ***out_enc_padata)
+{
+    krb5_error_code ret;
+    krb5_pa_pac_options *pac_options = NULL;
+    krb5_data *der_pac_options;
+
+    ret = kdc_get_pa_pac_options(context, request->padata, &pac_options);
+    if (ret || pac_options == NULL)
+        return ret;
+
+    /* Only return supported PAC options (currently only resource-based
+     * constrained delegation support). */
+    pac_options->options &= KRB5_PA_PAC_OPTIONS_RBCD;
+    if (pac_options->options == 0) {
+        free(pac_options);
+        return 0;
+    }
+
+    ret = encode_krb5_pa_pac_options(pac_options, &der_pac_options);
+    free(pac_options);
+    if (ret)
+        return ret;
+
+    ret = k5_add_pa_data_from_data(out_enc_padata, KRB5_PADATA_PAC_OPTIONS,
+                                   der_pac_options);
+    krb5_free_data(context, der_pac_options);
+    return ret;
+}
+
 /*
  * Although the KDC doesn't call this function directly,
  * process_tcp_connection_read() in net-server.c does call it.
