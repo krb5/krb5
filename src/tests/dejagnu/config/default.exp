@@ -275,8 +275,8 @@ proc delete_db {} {
 	$tmppwd/kdc-db.ulog \
 	$tmppwd/replica-db $tmppwd/replica-db.ok $tmppwd/replica-db.kadm5 $tmppwd/replica-db.kadm5.lock \
 	$tmppwd/replica-db~ $tmppwd/replica-db~.ok $tmppwd/replica-db~.kadm5 $tmppwd/replica-db~.kadm5.lock
-    # Creating a new database means we need a new keytab.
-    file delete $tmppwd/keytab $tmppwd/cpw_keytab
+    # Creating a new database invalidates the keytab and ccache.
+    file delete $tmppwd/keytab $tmppwd/tkt
 }
 
 delete_db
