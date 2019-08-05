@@ -109,7 +109,7 @@ struct st_object {
         X509 *cert;
         EVP_PKEY *public_key;
         struct {
-            const char *file;
+            char *file;
             EVP_PKEY *key;
             X509 *cert;
         } private_key;
@@ -343,6 +343,26 @@ print_attributes(const CK_ATTRIBUTE *attributes,
     }
 }
 
+static void
+free_st_object(struct st_object *o)
+{
+    int i;
+
+    for (i = 0; i < o->num_attributes; i++)
+        free(o->attrs[i].attribute.pValue);
+    free(o->attrs);
+    if (o->type == STO_T_CERTIFICATE) {
+        X509_free(o->u.cert);
+    } else if (o->type == STO_T_PRIVATE_KEY) {
+        free(o->u.private_key.file);
+        EVP_PKEY_free(o->u.private_key.key);
+        X509_free(o->u.private_key.cert);
+    } else if (o->type == STO_T_PUBLIC_KEY) {
+        EVP_PKEY_free(o->u.public_key);
+    }
+    free(o);
+}
+
 static struct st_object *
 add_st_object(void)
 {
@@ -518,7 +538,11 @@ add_certificate(char *label,
         goto out;
     }
     o->type = STO_T_CERTIFICATE;
-    o->u.cert = cert;
+    o->u.cert = X509_dup(cert);
+    if (o->u.cert == NULL) {
+        ret = CKR_DEVICE_MEMORY;
+        goto out;
+    }
     public_key = X509_get_pubkey(o->u.cert);
 
     switch (EVP_PKEY_base_id(public_key)) {
@@ -602,7 +626,11 @@ add_certificate(char *label,
         o->u.private_key.file = strdup(private_key_file);
         o->u.private_key.key = NULL;
 
-        o->u.private_key.cert = cert;
+        o->u.private_key.cert = X509_dup(cert);
+        if (o->u.private_key.cert == NULL) {
+            ret = CKR_DEVICE_MEMORY;
+            goto out;
+        }
 
         c = CKO_PRIVATE_KEY;
         add_object_attribute(o, 0, CKA_CLASS, &c, sizeof(c));
@@ -676,6 +704,7 @@ add_certificate(char *label,
     free(serial_data);
     free(issuer_data);
     free(subject_data);
+    X509_free(cert);
 
     return ret;
 }
@@ -872,7 +901,7 @@ C_Initialize(CK_VOID_PTR a)
         st_logf("\tFlags\t%04x\n", (unsigned int)args->flags);
     }
 
-    soft_token.next_session_handle = 0;
+    soft_token.next_session_handle = 1;
 
     fn = get_rcfilename();
     if (fn == NULL)
@@ -886,6 +915,7 @@ CK_RV
 C_Finalize(CK_VOID_PTR args)
 {
     size_t i;
+    int j;
 
     st_logf("Finalize\n");
 
@@ -896,6 +926,12 @@ C_Finalize(CK_VOID_PTR args)
             close_session(&soft_token.state[i]);
         }
     }
+
+    for (j = 0; j < soft_token.object.num_objs; j++)
+        free_st_object(soft_token.object.objs[j]);
+    free(soft_token.object.objs);
+    soft_token.object.objs = NULL;
+    soft_token.object.num_objs = 0;
 
     return CKR_OK;
 }
