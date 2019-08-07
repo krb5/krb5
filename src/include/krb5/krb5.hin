@@ -8338,6 +8338,28 @@ krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
                   const krb5_keyblock *privsvr_key, krb5_boolean with_realm,
                   krb5_data *data);
 
+
+/*
+ * Read client information from a PAC.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  pac             PAC handle
+ * @param [out] authtime_out    Authentication timestamp (NULL if not needed)
+ * @param [out] princname_out   Client account name
+ *
+ * Read the PAC_CLIENT_INFO buffer in @a pac.  Place the client account name as
+ * a string in @a princname_out.  If @a authtime_out is not NULL, place the
+ * initial authentication timestamp in @a authtime_out.
+ *
+ * @retval 0 on success, ENOENT if no PAC_CLIENT_INFO buffer is present in @a
+ * pac, ERANGE if the buffer contains invalid lengths.
+ *
+ * @version New in 1.18
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_pac_get_client_info(krb5_context context, const krb5_pac pac,
+                         krb5_timestamp *authtime_out, char **princname_out);
+
 /**
  * Allow the appplication to override the profile's allow_weak_crypto setting.
  *

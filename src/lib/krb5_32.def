@@ -488,3 +488,4 @@ EXPORTS
 
 ; new in 1.18
 	krb5int_c_deprecated_enctype			@450 ; PRIVATE
+	krb5_pac_get_client_info			@451
