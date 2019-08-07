@@ -234,7 +234,8 @@ handle_authdata (krb5_context context,
                  krb5_keyblock *header_key,
                  krb5_data *req_pkt,
                  krb5_kdc_req *request,
-                 krb5_const_principal for_user_princ,
+                 krb5_const_principal altcprinc,
+                 void *ad_info,
                  krb5_enc_tkt_part *enc_tkt_request,
                  krb5_data ***auth_indicators,
                  krb5_enc_tkt_part *enc_tkt_reply);
@@ -283,11 +284,19 @@ kdc_make_s4u2self_rep (krb5_context context,
 
 krb5_error_code
 kdc_process_s4u2proxy_req (kdc_realm_t *kdc_active_realm,
+                           unsigned int flags,
                            krb5_kdc_req *request,
                            const krb5_enc_tkt_part *t2enc,
+                           krb5_db_entry *krbtgt,
+                           krb5_keyblock *krbtgt_key,
                            const krb5_db_entry *server,
+                           krb5_keyblock *server_key,
                            krb5_const_principal server_princ,
+                           const krb5_db_entry *proxy,
                            krb5_const_principal proxy_princ,
+                           void *ad_info,
+                           void **stkt_ad_info,
+                           krb5_principal *stkt_ad_client,
                            const char **status);
 
 krb5_error_code
@@ -420,6 +429,10 @@ kdc_add_pa_pac_options(krb5_context context, krb5_kdc_req *request,
 krb5_error_code
 kdc_get_pa_pac_options(krb5_context context, krb5_pa_data **in_padata,
                        krb5_pa_pac_options **pac_options_out);
+
+krb5_error_code
+kdc_get_pa_pac_rbcd(krb5_context context, krb5_pa_data **in_padata,
+                    krb5_boolean *supported);
 
 /* Information handle for kdcpreauth callbacks.  All pointers are aliases. */
 struct krb5_kdcpreauth_rock_st {

@@ -1676,10 +1676,6 @@ check_allowed_to_delegate_to(krb5_context context, krb5_const_principal client,
                              const krb5_db_entry *server,
                              krb5_const_principal proxy)
 {
-    /* Can't get a TGT (otherwise it would be unconstrained delegation) */
-    if (krb5_is_tgs_principal(proxy))
-        return KRB5KDC_ERR_POLICY;
-
     /* Must be in same realm */
     if (!krb5_realm_compare(context, server->princ, proxy))
         return KRB5KDC_ERR_POLICY;
@@ -1687,16 +1683,67 @@ check_allowed_to_delegate_to(krb5_context context, krb5_const_principal client,
     return krb5_db_check_allowed_to_delegate(context, client, server, proxy);
 }
 
+static krb5_error_code
+check_rbcd_policy(kdc_realm_t *kdc_active_realm, unsigned int flags,
+                  const krb5_principal stkt_client_princ,
+                  krb5_principal stkt_authdata_client,
+                  const krb5_db_entry *stkt_server,
+                  krb5_const_principal header_client_princ,
+                  void *header_ad_info, const krb5_db_entry *proxy)
+{
+    krb5_principal client_princ = stkt_client_princ;
+
+    /* Ensure that either the evidence ticket server or the client matches the
+     * TGT client. */
+    if (isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+        /*
+         * Check that the proxy server is local, that the second ticket is a
+         * cross realm TGT, and that the second ticket client matches the
+         * header ticket client.
+         */
+        if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) ||
+            !is_cross_tgs_principal(stkt_server->princ) ||
+            !krb5_principal_compare(kdc_context, stkt_client_princ,
+                                    header_client_princ)) {
+            return KRB5KDC_ERR_BADOPTION;
+        }
+        /* The KDB module must be able to recover the reply ticket client name
+         * from the evidence ticket authorization data. */
+        if (stkt_authdata_client == NULL ||
+            stkt_authdata_client->realm.length == 0)
+            return KRB5KDC_ERR_BADOPTION;
+        client_princ = stkt_authdata_client;
+    } else if (!krb5_principal_compare(kdc_context, stkt_server->princ,
+                                       header_client_princ)) {
+        return KRB5KDC_ERR_BADOPTION;
+    }
+
+    /* If we are issuing a referral, the KDC in the resource realm will check
+     * if delegation is allowed. */
+    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL))
+        return 0;
+
+    return krb5_db_allowed_to_delegate_from(kdc_context, client_princ,
+                                            header_client_princ,
+                                            header_ad_info, proxy);
+}
+
 krb5_error_code
-kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
+kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
                           krb5_kdc_req *request,
                           const krb5_enc_tkt_part *t2enc,
+                          krb5_db_entry *krbtgt, krb5_keyblock *krbtgt_key,
                           const krb5_db_entry *server,
+                          krb5_keyblock *server_key,
                           krb5_const_principal server_princ,
+                          const krb5_db_entry *proxy,
                           krb5_const_principal proxy_princ,
+                          void *ad_info, void **stkt_ad_info,
+                          krb5_principal *stkt_authdata_client,
                           const char **status)
 {
     krb5_error_code errcode;
+    krb5_boolean support_rbcd;
 
     /*
      * Constrained delegation is mutually exclusive with renew/forward/etc.
@@ -1706,6 +1753,41 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm,
     if (request->kdc_options & (NON_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)) {
         *status = "INVALID_S4U2PROXY_OPTIONS";
         return KRB5KDC_ERR_BADOPTION;
+    }
+
+    /* Can't get a TGT (otherwise it would be unconstrained delegation). */
+    if (krb5_is_tgs_principal(proxy_princ)) {
+        *status = "NOT_ALLOWED_TO_DELEGATE";
+        return KRB5KDC_ERR_POLICY;
+    }
+
+    errcode = krb5_db_get_authdata_info(kdc_context, flags,
+                                        t2enc->authorization_data,
+                                        t2enc->client, proxy_princ, server_key,
+                                        krbtgt_key, krbtgt,
+                                        t2enc->times.authtime, stkt_ad_info,
+                                        stkt_authdata_client);
+    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP) {
+        *status = "NOT_ALLOWED_TO_DELEGATE";
+        return errcode;
+    }
+
+    errcode = kdc_get_pa_pac_rbcd(kdc_context, request->padata, &support_rbcd);
+    if (errcode)
+        return errcode;
+
+    if (support_rbcd && ad_info != NULL) {
+        errcode = check_rbcd_policy(kdc_active_realm, flags, t2enc->client,
+                                    *stkt_authdata_client, server,
+                                    server_princ, ad_info, proxy);
+        if (errcode == 0)
+            return 0;
+        if (errcode != KRB5KDC_ERR_POLICY &&
+            errcode != KRB5_PLUGIN_OP_NOTSUPP) {
+            *status = "INVALID_S4U2PROXY_XREALM_REQUEST";
+            return errcode;
+        }
+        /* Fall back to old constrained delegation. */
     }
 
     /* Ensure that evidence ticket server matches TGT client */
@@ -1946,6 +2028,26 @@ kdc_add_pa_pac_options(krb5_context context, krb5_kdc_req *request,
                                    der_pac_options);
     krb5_free_data(context, der_pac_options);
     return ret;
+}
+
+krb5_error_code
+kdc_get_pa_pac_rbcd(krb5_context context, krb5_pa_data **in_padata,
+                    krb5_boolean *supported)
+{
+    krb5_error_code retval;
+    krb5_pa_pac_options *pac_options = NULL;
+
+    *supported = FALSE;
+
+    retval = kdc_get_pa_pac_options(context, in_padata, &pac_options);
+    if (retval || !pac_options)
+        return retval;
+
+    if (pac_options->options & KRB5_PA_PAC_OPTIONS_RBCD)
+        *supported = TRUE;
+
+    free(pac_options);
+    return 0;
 }
 
 /*

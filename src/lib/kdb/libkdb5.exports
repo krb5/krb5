@@ -3,6 +3,7 @@ krb5_db_open
 krb5_db_inited
 krb5_db_alloc
 krb5_db_free
+krb5_db_allowed_to_delegate_from
 krb5_db_audit_as_req
 krb5_db_check_allowed_to_delegate
 krb5_db_get_s4u_x509_principal
@@ -15,8 +16,10 @@ krb5_db_destroy
 krb5_db_fetch_mkey
 krb5_db_fetch_mkey_list
 krb5_db_fini
+krb5_db_free_authdata_info
 krb5_db_free_principal
 krb5_db_get_age
+krb5_db_get_authdata_info
 krb5_db_get_key_data_kvno
 krb5_db_get_context
 krb5_db_get_principal

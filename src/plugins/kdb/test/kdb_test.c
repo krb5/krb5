@@ -539,12 +539,13 @@ test_encrypt_key_data(krb5_context context, const krb5_keyblock *mkey,
 
 static krb5_error_code
 test_sign_authdata(krb5_context context, unsigned int flags,
-                   krb5_const_principal client_princ, krb5_db_entry *client,
+                   krb5_const_principal client_princ,
+                   krb5_const_principal server_princ, krb5_db_entry *client,
                    krb5_db_entry *server, krb5_db_entry *krbtgt,
                    krb5_keyblock *client_key, krb5_keyblock *server_key,
                    krb5_keyblock *krbtgt_key, krb5_keyblock *session_key,
                    krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
-                   krb5_data ***auth_indicators,
+                   void *ad_info, krb5_data ***auth_indicators,
                    krb5_authdata ***signed_auth_data)
 {
     krb5_authdata **list, *ad;

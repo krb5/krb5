@@ -1642,6 +1642,12 @@ return_enc_padata(krb5_context context, krb5_data *req_pkt,
                                             &reply_encpart->enc_padata);
     if (code)
         goto cleanup;
+
+    code = kdc_add_pa_pac_options(context, request,
+                                  &reply_encpart->enc_padata);
+    if (code)
+        goto cleanup;
+
     /*Add potentially other enc_padata providers*/
 cleanup:
     return code;

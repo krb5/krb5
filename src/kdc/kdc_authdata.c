@@ -318,8 +318,8 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
                    krb5_db_entry *client, krb5_db_entry *server,
                    krb5_db_entry *header_server, krb5_keyblock *client_key,
                    krb5_keyblock *server_key, krb5_keyblock *header_key,
-                   krb5_kdc_req *req, krb5_const_principal for_user_princ,
-                   krb5_enc_tkt_part *enc_tkt_req,
+                   krb5_kdc_req *req, krb5_const_principal altcprinc,
+                   void *ad_info, krb5_enc_tkt_part *enc_tkt_req,
                    krb5_enc_tkt_part *enc_tkt_reply,
                    krb5_data ***auth_indicators)
 {
@@ -356,13 +356,10 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
             return 0;
     }
 
-    /*
-     * We have this special case for protocol transition, because for
-     * cross-realm protocol transition the ticket reply client will
-     * not be changed until the final hop.
-     */
-    if (isflagset(flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
-        actual_client = for_user_princ;
+    /* S4U referral replies should contain authdata for the requested client,
+     * even though they use the requesting service as the ticket client. */
+    if (isflagset(flags, KRB5_KDB_FLAGS_S4U))
+        actual_client = altcprinc;
     else
         actual_client = enc_tkt_reply->client;
 
@@ -376,11 +373,11 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
     krbtgt_key = (header_key != NULL) ? header_key : server_key;
 
     tgt_authdata = tgs_req ? enc_tkt_req->authorization_data : NULL;
-    ret = krb5_db_sign_authdata(context, flags, actual_client, client,
-                                server, krbtgt, client_key, server_key,
+    ret = krb5_db_sign_authdata(context, flags, actual_client, req->server,
+                                client, server, krbtgt, client_key, server_key,
                                 krbtgt_key, enc_tkt_reply->session,
                                 enc_tkt_reply->times.authtime, tgt_authdata,
-                                auth_indicators, &db_authdata);
+                                ad_info, auth_indicators, &db_authdata);
     if (ret)
         return (ret == KRB5_PLUGIN_OP_NOTSUPP) ? 0 : ret;
 
@@ -823,7 +820,7 @@ handle_authdata(krb5_context context, unsigned int flags,
                 krb5_keyblock *local_tgt_key, krb5_keyblock *client_key,
                 krb5_keyblock *server_key, krb5_keyblock *header_key,
                 krb5_data *req_pkt, krb5_kdc_req *req,
-                krb5_const_principal for_user_princ,
+                krb5_const_principal altcprinc, void *ad_info,
                 krb5_enc_tkt_part *enc_tkt_req,
                 krb5_data ***auth_indicators,
                 krb5_enc_tkt_part *enc_tkt_reply)
@@ -848,7 +845,7 @@ handle_authdata(krb5_context context, unsigned int flags,
             h = &authdata_modules[i];
             ret = h->vt.handle(context, h->data, flags, client, server,
                                header_server, client_key, server_key,
-                               header_key, req_pkt, req, for_user_princ,
+                               header_key, req_pkt, req, altcprinc,
                                enc_tkt_req, enc_tkt_reply);
             if (ret)
                 kdc_err(context, ret, "from authdata module %s", h->vt.name);
@@ -867,8 +864,8 @@ handle_authdata(krb5_context context, unsigned int flags,
         /* Fetch authdata from the KDB if appropriate. */
         ret = fetch_kdb_authdata(context, flags, client, server, header_server,
                                  client_key, server_key, header_key, req,
-                                 for_user_princ, enc_tkt_req, enc_tkt_reply,
-                                 auth_indicators);
+                                 altcprinc, ad_info, enc_tkt_req,
+                                 enc_tkt_reply, auth_indicators);
         if (ret)
             return ret;
     }
@@ -886,8 +883,8 @@ handle_authdata(krb5_context context, unsigned int flags,
         /* Validate and insert AD-SIGNTICKET authdata.  This must happen last
          * since it contains a signature over the other authdata. */
         ret = handle_signticket(context, flags, client, server, local_tgt,
-                                local_tgt_key, req, for_user_princ,
-                                enc_tkt_req, enc_tkt_reply);
+                                local_tgt_key, req, altcprinc, enc_tkt_req,
+                                enc_tkt_reply);
         if (ret)
             return ret;
     }
