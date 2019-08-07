@@ -69,7 +69,7 @@
 
 /* This version will be incremented when incompatible changes are made to the
  * KDB API, and will be kept in sync with the libkdb major version. */
-#define KRB5_KDB_API_VERSION 9
+#define KRB5_KDB_API_VERSION 10
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
@@ -670,6 +670,7 @@ krb5_error_code krb5_db_sign_authdata(krb5_context kcontext,
                                       krb5_keyblock *session_key,
                                       krb5_timestamp authtime,
                                       krb5_authdata **tgt_auth_data,
+                                      krb5_data ***auth_indicators,
                                       krb5_authdata ***signed_auth_data);
 
 krb5_error_code krb5_db_check_transited_realms(krb5_context kcontext,
@@ -871,7 +872,7 @@ krb5_error_code krb5_db_register_keytab(krb5_context context);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 7
+#define KRB5_KDB_DAL_MAJOR_VERSION 8
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1304,6 +1305,12 @@ typedef struct _kdb_vftabl {
      *
      *   tgt_auth_data: For TGS requests, the authorization data present in the
      *     subject ticket.  For AS requests, NULL.
+     *
+     *   auth_indicators: Points to NULL or a null-terminated list of krb5_data
+     *     pointers, each containing an authentication indicator (RFC 8129).
+     *     The method may modify this list, or free it and replace
+     *     *auth_indicators with NULL, to change which auth indicators will be
+     *     included in the ticket.
      */
     krb5_error_code (*sign_authdata)(krb5_context kcontext,
                                      unsigned int flags,
@@ -1317,6 +1324,7 @@ typedef struct _kdb_vftabl {
                                      krb5_keyblock *session_key,
                                      krb5_timestamp authtime,
                                      krb5_authdata **tgt_auth_data,
+                                     krb5_data ***auth_indicators,
                                      krb5_authdata ***signed_auth_data);
 
     /*
@@ -1405,8 +1413,6 @@ typedef struct _kdb_vftabl {
      */
     void (*free_principal_e_data)(krb5_context kcontext, krb5_octet *e_data);
 
-    /* End of minor version 0. */
-
     /*
      * Optional: get a principal entry for S4U2Self based on X509 certificate.
      *
@@ -1426,7 +1432,7 @@ typedef struct _kdb_vftabl {
                                               unsigned int flags,
                                               krb5_db_entry **entry_out);
 
-    /* End of minor version 1 for major version 7. */
+    /* End of minor version 0 for major version 8. */
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */

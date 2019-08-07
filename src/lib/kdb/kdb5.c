@@ -323,12 +323,7 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->refresh_config = in->refresh_config;
     out->check_allowed_to_delegate = in->check_allowed_to_delegate;
     out->free_principal_e_data = in->free_principal_e_data;
-
-    /* Copy fields for minor version 1 (major version 7). */
-    assert(KRB5_KDB_DAL_MAJOR_VERSION == 7);
-    out->get_s4u_x509_principal = NULL;
-    if (in->min_ver >= 1)
-        out->get_s4u_x509_principal = in->get_s4u_x509_principal;
+    out->get_s4u_x509_principal = in->get_s4u_x509_principal;
 
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
@@ -2599,6 +2594,7 @@ krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
                       krb5_keyblock *client_key, krb5_keyblock *server_key,
                       krb5_keyblock *krbtgt_key, krb5_keyblock *session_key,
                       krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
+                      krb5_data ***auth_indicators,
                       krb5_authdata ***signed_auth_data)
 {
     krb5_error_code status = 0;
@@ -2613,7 +2609,7 @@ krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
     return v->sign_authdata(kcontext, flags, client_princ, client, server,
                             krbtgt, client_key, server_key, krbtgt_key,
                             session_key, authtime, tgt_auth_data,
-                            signed_auth_data);
+                            auth_indicators, signed_auth_data);
 }
 
 krb5_error_code

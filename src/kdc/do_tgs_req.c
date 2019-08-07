@@ -610,15 +610,10 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
                               header_server, local_tgt, &local_tgt_key,
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
-                              encrypting_key, /* U2U or server key */
-                              header_key,
-                              pkt,
-                              request,
+                              encrypting_key, header_key, pkt, request,
                               s4u_x509_user ?
                               s4u_x509_user->user_id.user : NULL,
-                              subject_tkt,
-                              auth_indicators,
-                              &enc_tkt_reply);
+                              subject_tkt, &auth_indicators, &enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
                          errcode);

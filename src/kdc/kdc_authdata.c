@@ -320,7 +320,8 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
                    krb5_keyblock *server_key, krb5_keyblock *header_key,
                    krb5_kdc_req *req, krb5_const_principal for_user_princ,
                    krb5_enc_tkt_part *enc_tkt_req,
-                   krb5_enc_tkt_part *enc_tkt_reply)
+                   krb5_enc_tkt_part *enc_tkt_reply,
+                   krb5_data ***auth_indicators)
 {
     krb5_error_code ret;
     krb5_authdata **tgt_authdata, **db_authdata = NULL;
@@ -379,7 +380,7 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
                                 server, krbtgt, client_key, server_key,
                                 krbtgt_key, enc_tkt_reply->session,
                                 enc_tkt_reply->times.authtime, tgt_authdata,
-                                &db_authdata);
+                                auth_indicators, &db_authdata);
     if (ret)
         return (ret == KRB5_PLUGIN_OP_NOTSUPP) ? 0 : ret;
 
@@ -824,7 +825,7 @@ handle_authdata(krb5_context context, unsigned int flags,
                 krb5_data *req_pkt, krb5_kdc_req *req,
                 krb5_const_principal for_user_princ,
                 krb5_enc_tkt_part *enc_tkt_req,
-                krb5_data *const *auth_indicators,
+                krb5_data ***auth_indicators,
                 krb5_enc_tkt_part *enc_tkt_reply)
 {
     kdcauthdata_handle *h;
@@ -862,23 +863,26 @@ handle_authdata(krb5_context context, unsigned int flags,
             return ret;
     }
 
+    if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
+        /* Fetch authdata from the KDB if appropriate. */
+        ret = fetch_kdb_authdata(context, flags, client, server, header_server,
+                                 client_key, server_key, header_key, req,
+                                 for_user_princ, enc_tkt_req, enc_tkt_reply,
+                                 auth_indicators);
+        if (ret)
+            return ret;
+    }
+
     /* Add auth indicators if any were given. */
     if (auth_indicators != NULL && *auth_indicators != NULL &&
         !isflagset(server->attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED)) {
-        ret = add_auth_indicators(context, auth_indicators, server_key,
+        ret = add_auth_indicators(context, *auth_indicators, server_key,
                                   local_tgt, local_tgt_key, enc_tkt_reply);
         if (ret)
             return ret;
     }
 
     if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
-        /* Fetch authdata from the KDB if appropriate. */
-        ret = fetch_kdb_authdata(context, flags, client, server, header_server,
-                                 client_key, server_key, header_key, req,
-                                 for_user_princ, enc_tkt_req, enc_tkt_reply);
-        if (ret)
-            return ret;
-
         /* Validate and insert AD-SIGNTICKET authdata.  This must happen last
          * since it contains a signature over the other authdata. */
         ret = handle_signticket(context, flags, client, server, local_tgt,

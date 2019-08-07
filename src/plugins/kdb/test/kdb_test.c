@@ -544,9 +544,12 @@ test_sign_authdata(krb5_context context, unsigned int flags,
                    krb5_keyblock *client_key, krb5_keyblock *server_key,
                    krb5_keyblock *krbtgt_key, krb5_keyblock *session_key,
                    krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
+                   krb5_data ***auth_indicators,
                    krb5_authdata ***signed_auth_data)
 {
     krb5_authdata **list, *ad;
+    krb5_data **inds, d;
+    int i, val;
 
     ad = ealloc(sizeof(*ad));
     ad->magic = KV5M_AUTHDATA;
@@ -557,6 +560,24 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     list[0] = ad;
     list[1] = NULL;
     *signed_auth_data = list;
+
+    /* If we see an auth indicator "dbincrX", replace the whole indicator list
+     * with "dbincr{X+1}". */
+    inds = *auth_indicators;
+    for (i = 0; inds != NULL && inds[i] != NULL; i++) {
+        if (inds[i]->length == 7 && memcmp(inds[i]->data, "dbincr", 6) == 0) {
+            val = inds[i]->data[6];
+            k5_free_data_ptr_list(inds);
+            inds = ealloc(2 * sizeof(*inds));
+            d = string2data("dbincr0");
+            check(krb5_copy_data(context, &d, &inds[0]));
+            inds[0]->data[6] = val + 1;
+            inds[1] = NULL;
+            *auth_indicators = inds;
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -593,7 +614,7 @@ test_check_allowed_to_delegate(krb5_context context,
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
-    1,                                      /* minor version number */
+    0,                                      /* minor version number */
     test_init,
     test_cleanup,
     test_open,

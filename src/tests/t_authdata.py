@@ -228,6 +228,11 @@ out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
 
+# Test alteration of auth indicators by KDB module (AS and TGS).
+realm.kinit(realm.user_princ, None, ['-k', '-X', 'indicators=dummy dbincr1'])
+realm.run(['./adata', realm.krbtgt_princ], expected_msg='+97: [dbincr2]')
+realm.run(['./adata', 'service/1'], expected_msg='+97: [dbincr3]')
+
 # Test that KDB module authdata is included in an AS request, by
 # default or with an explicit PAC request.
 mark('AS-REQ KDB module authdata')
