@@ -407,6 +407,7 @@ def fail(msg):
 
 def success(msg):
     global _success
+    _check_daemons()
     output('*** Success: %s\n' % msg)
     _success = True
 
@@ -427,6 +428,7 @@ def skipped(whatmsg, whymsg):
 def skip_rest(whatmsg, whymsg):
     global _success
     skipped(whatmsg, whymsg)
+    _check_daemons()
     _success = True
     sys.exit(0)
 
@@ -458,22 +460,14 @@ def password(name):
 def _onexit():
     global _daemons, _success, srctop, verbose
     global _debug, _stop_before, _stop_after, _shell_before, _shell_after
-    if _daemons is None:
-        # In Python 2.5, if we exit as a side-effect of importing
-        # k5test, _onexit will execute in an empty global namespace.
-        # This can happen if argument processing fails or the build
-        # root isn't valid.  In this case we can safely assume that no
-        # daemons have been launched and that we don't really need to
-        # amend the error message.  The bug is fixed in Python 2.6.
-        return
     if _debug or _stop_before or _stop_after or _shell_before or _shell_after:
         # Wait before killing daemons in case one is being debugged.
         sys.stdout.write('*** Press return to kill daemons and exit script: ')
         sys.stdout.flush()
         sys.stdin.readline()
     for proc in _daemons:
-        check_daemon(proc)
-        os.kill(proc.pid, signal.SIGTERM)
+        if _check_daemon(proc) is None:
+            os.kill(proc.pid, signal.SIGTERM)
     if not _success:
         print
         if not verbose:
@@ -816,7 +810,9 @@ def _start_daemon(args, env, sentinel):
 
 # Check a daemon's status prior to terminating it.  Display its return
 # code if it already exited, and display any output it has generated.
-def check_daemon(proc):
+# Return the daemon's exit status or None if it is still running.
+def _check_daemon(proc):
+    exited = False
     code = proc.poll()
     if code is not None:
         output('*** Daemon pid %d exited with code %d\n' % (proc.pid, code))
@@ -830,14 +826,40 @@ def check_daemon(proc):
 
     output('*** Daemon pid %d output:\n' % proc.pid)
     output(out)
+    return code
+
+
+# Check all tracked daemon processes.  If any daemons already exited,
+# remove them from the list (so we don't try to terminate them again).
+# If any daemons exited with an error, fail out.
+def _check_daemons():
+    exited = []
+    daemon_error = False
+    for proc in _daemons:
+        code = _check_daemon(proc)
+        if code is not None:
+            exited.append(proc)
+            if code != 0:
+                daemon_error = True
+
+    for proc in exited:
+        _daemons.remove(proc)
+
+    if daemon_error:
+        fail('One or more daemon processes exited with an error')
 
 
 def stop_daemon(proc):
-    check_daemon(proc)
-    output('*** Terminating process %d\n' % proc.pid)
-    os.kill(proc.pid, signal.SIGTERM)
-    proc.wait()
-    _daemons.remove(proc)
+    code = _check_daemon(proc)
+    if code is not None:
+        _daemons.remove(proc)
+        if code != 0:
+            fail('Daemon process %d exited early' % proc.pid)
+    else:
+        output('*** Terminating process %d\n' % proc.pid)
+        os.kill(proc.pid, signal.SIGTERM)
+        proc.wait()
+        _daemons.remove(proc)
 
 
 class K5Realm(object):
