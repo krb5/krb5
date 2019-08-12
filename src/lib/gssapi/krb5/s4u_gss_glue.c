@@ -48,11 +48,15 @@ kg_impersonate_name(OM_uint32 *minor_status,
     OM_uint32 major_status;
     krb5_error_code code;
     krb5_creds in_creds, *out_creds = NULL;
+    krb5_data *subject_cert = NULL;
 
     *output_cred = NULL;
     memset(&in_creds, 0, sizeof(in_creds));
 
-    in_creds.client = user->princ;
+    if (user->is_cert)
+        subject_cert = user->princ->data;
+    else
+        in_creds.client = user->princ;
     in_creds.server = impersonator_cred->name->princ;
 
     if (impersonator_cred->req_enctypes != NULL)
@@ -77,8 +81,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
     code = krb5_get_credentials_for_user(context,
                                          KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
                                          impersonator_cred->ccache,
-                                         &in_creds,
-                                         NULL, &out_creds);
+                                         &in_creds, subject_cert, &out_creds);
     if (code != 0) {
         krb5_free_authdata(context, in_creds.authdata);
         *minor_status = code;

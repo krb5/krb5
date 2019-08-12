@@ -61,6 +61,12 @@ name types are supported by the krb5 mechanism:
   is defined in the ``<gssapi/gssapi_krb5.h>`` header.  (New in
   release 1.17.)
 
+* **GSS_KRB5_NT_X509_CERT**: The value should be an X.509 certificate
+  encoded according to :rfc:`5280`.  This name form can be used for
+  the desired_name parameter of gss_acquire_cred_impersonate_name(),
+  to identify the S4U2Self user by certificate.  (New in release
+  1.19.)
+
 
 Initiator credentials
 ---------------------

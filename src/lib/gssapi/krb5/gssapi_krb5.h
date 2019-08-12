@@ -78,6 +78,11 @@ GSS_DLLIMP extern const gss_OID GSS_KRB5_NT_ENTERPRISE_NAME;
 /* {iso(1) member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
  * krb5(2) krb5-enterprise-name(6)}. */
 
+/* Kerberos X.509 DER-encoded certificate */
+GSS_DLLIMP extern const gss_OID GSS_KRB5_NT_X509_CERT;
+/* {iso(1) member-body(2) United States(840) mit(113554) infosys(1) gssapi(2)
+ * krb5(2) krb5-x509-cert(7)}. */
+
 GSS_DLLIMP extern const gss_OID gss_mech_krb5;
 GSS_DLLIMP extern const gss_OID gss_mech_krb5_old;
 GSS_DLLIMP extern const gss_OID gss_mech_krb5_wrong;

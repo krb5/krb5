@@ -277,6 +277,16 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
 r1.run([kvno, '-U', 'enterprise@abc', '-F', cert_path, r1.user_princ],
        expected_trace=msgs)
 
+shutil.copyfile(savefile, r1.ccache)
+
+mark('S4U2Self using X509 certificate (GSSAPI)')
+
+r1.run(['./t_s4u', 'c:other', '-', r1.keytab])
+r1.run(['./t_s4u', 'c:user@UREALM', '-', r1.keytab])
+
+r1.run(['./t_s4u', '--spnego', 'c:other', '-', r1.keytab])
+r1.run(['./t_s4u', '--spnego', 'c:user@UREALM', '-', r1.keytab])
+
 r1.stop()
 r2.stop()
 

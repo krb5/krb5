@@ -163,6 +163,7 @@ typedef struct _krb5_gss_name_rec {
     krb5_principal princ;       /* immutable */
     char *service;              /* immutable */
     char *host;                 /* immutable */
+    int is_cert;                /* immutable */
     k5_mutex_t lock;            /* protects ad_context only for now */
     krb5_authdata_context ad_context;
 } krb5_gss_name_rec, *krb5_gss_name_t;
