@@ -255,6 +255,8 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_complete_auth_token,
 	spnego_gss_acquire_cred_impersonate_name,
 	NULL,				/* gss_add_cred_impersonate_name */
+	spnego_gss_acquire_cred_impersonate_cert,
+	NULL,				/* gss_add_cred_impersonate_cert */
 	spnego_gss_display_name_ext,
 	spnego_gss_inquire_name,
 	spnego_gss_get_name_attribute,
@@ -2679,6 +2681,60 @@ cleanup:
 	return (status);
 }
 
+OM_uint32 KRB5_CALLCONV
+spnego_gss_acquire_cred_impersonate_cert(OM_uint32 *minor_status,
+					 const gss_cred_id_t impersonator_cred_handle,
+					 const gss_name_t desired_name,
+					 const gss_buffer_t cert_data,
+					 OM_uint32 time_req,
+					 gss_OID_set desired_mechs,
+					 gss_cred_usage_t cred_usage,
+					 gss_cred_id_t *output_cred_handle,
+					 gss_OID_set *actual_mechs,
+					 OM_uint32 *time_rec)
+{
+	OM_uint32 status, tmpmin;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+	spnego_gss_cred_id_t imp_spcred = NULL, out_spcred = NULL;
+	gss_cred_id_t imp_mcred, out_mcred = GSS_C_NO_CREDENTIAL;
+
+	dsyslog("Entering spnego_gss_acquire_cred_impersonate_cert\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	imp_spcred = (spnego_gss_cred_id_t)impersonator_cred_handle;
+	imp_mcred = imp_spcred ? imp_spcred->mcred : GSS_C_NO_CREDENTIAL;
+	status = gss_inquire_cred(minor_status, imp_mcred, NULL, NULL,
+				  NULL, &amechs);
+	if (status != GSS_S_COMPLETE)
+		return status;
+
+	status = gss_acquire_cred_impersonate_cert(minor_status, imp_mcred,
+						   desired_name, cert_data,
+						   time_req, amechs,
+						   cred_usage, &out_mcred,
+						   actual_mechs, time_rec);
+	if (status != GSS_S_COMPLETE)
+		goto cleanup;
+
+	status = create_spnego_cred(minor_status, out_mcred, &out_spcred);
+	if (status != GSS_S_COMPLETE)
+		goto cleanup;
+
+	out_mcred = GSS_C_NO_CREDENTIAL;
+	*output_cred_handle = (gss_cred_id_t)out_spcred;
+
+cleanup:
+	(void) gss_release_oid_set(&tmpmin, &amechs);
+	(void) gss_release_cred(&tmpmin, &out_mcred);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_cert\n");
+	return (status);
+}
 OM_uint32 KRB5_CALLCONV
 spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 				      const gss_name_t desired_name,

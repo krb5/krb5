@@ -40,6 +40,7 @@ static OM_uint32
 kg_impersonate_name(OM_uint32 *minor_status,
                     const krb5_gss_cred_id_t impersonator_cred,
                     const krb5_gss_name_t user,
+                    const gss_buffer_t cert_data,
                     OM_uint32 time_req,
                     krb5_gss_cred_id_t *output_cred,
                     OM_uint32 *time_rec,
@@ -48,37 +49,45 @@ kg_impersonate_name(OM_uint32 *minor_status,
     OM_uint32 major_status;
     krb5_error_code code;
     krb5_creds in_creds, *out_creds = NULL;
+    krb5_data subject_cert = empty_data();
 
     *output_cred = NULL;
     memset(&in_creds, 0, sizeof(in_creds));
 
-    in_creds.client = user->princ;
+    if (user != NULL)
+        in_creds.client = user->princ;
     in_creds.server = impersonator_cred->name->princ;
+    if (cert_data != NULL)
+        subject_cert = make_data(cert_data->value, cert_data->length);
 
     if (impersonator_cred->req_enctypes != NULL)
         in_creds.keyblock.enctype = impersonator_cred->req_enctypes[0];
 
-    k5_mutex_lock(&user->lock);
+    /* Client authroization data can only be sent in the request if a user name
+     * is provided */
+    if (user != NULL) {
+        k5_mutex_lock(&user->lock);
 
-    if (user->ad_context != NULL) {
-        code = krb5_authdata_export_authdata(context,
-                                             user->ad_context,
-                                             AD_USAGE_TGS_REQ,
-                                             &in_creds.authdata);
-        if (code != 0) {
-            k5_mutex_unlock(&user->lock);
-            *minor_status = code;
-            return GSS_S_FAILURE;
+        if (user->ad_context != NULL) {
+            code = krb5_authdata_export_authdata(context,
+                                                 user->ad_context,
+                                                 AD_USAGE_TGS_REQ,
+                                                 &in_creds.authdata);
+            if (code != 0) {
+                k5_mutex_unlock(&user->lock);
+                *minor_status = code;
+                return GSS_S_FAILURE;
+            }
         }
-    }
 
-    k5_mutex_unlock(&user->lock);
+        k5_mutex_unlock(&user->lock);
+    }
 
     code = krb5_get_credentials_for_user(context,
                                          KRB5_GC_CANONICALIZE | KRB5_GC_NO_STORE,
                                          impersonator_cred->ccache,
                                          &in_creds,
-                                         NULL, &out_creds);
+                                         &subject_cert, &out_creds);
     if (code != 0) {
         krb5_free_authdata(context, in_creds.authdata);
         *minor_status = code;
@@ -111,6 +120,26 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                        gss_OID_set *actual_mechs,
                                        OM_uint32 *time_rec)
 {
+    return krb5_gss_acquire_cred_impersonate_cert(minor_status,
+                                                  impersonator_cred_handle,
+                                                  desired_name, NULL, time_req,
+                                                  desired_mechs, cred_usage,
+                                                  output_cred_handle,
+                                                  actual_mechs, time_rec);
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_impersonate_cert(OM_uint32 *minor_status,
+                                       const gss_cred_id_t impersonator_cred_handle,
+                                       const gss_name_t desired_name,
+                                       const gss_buffer_t cert_data,
+                                       OM_uint32 time_req,
+                                       const gss_OID_set desired_mechs,
+                                       gss_cred_usage_t cred_usage,
+                                       gss_cred_id_t *output_cred_handle,
+                                       gss_OID_set *actual_mechs,
+                                       OM_uint32 *time_rec)
+{
     OM_uint32 major_status;
     krb5_error_code code;
     krb5_gss_cred_id_t imp_cred = (krb5_gss_cred_id_t)impersonator_cred_handle;
@@ -120,7 +149,7 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
     if (impersonator_cred_handle == GSS_C_NO_CREDENTIAL)
         return GSS_S_CALL_INACCESSIBLE_READ;
 
-    if (desired_name == GSS_C_NO_NAME)
+    if (desired_name == GSS_C_NO_NAME && cert_data == GSS_C_NO_BUFFER)
         return GSS_S_CALL_INACCESSIBLE_READ;
 
     if (output_cred_handle == NULL)
@@ -156,6 +185,7 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
     major_status = kg_impersonate_name(minor_status,
                                        imp_cred,
                                        (krb5_gss_name_t)desired_name,
+                                       cert_data,
                                        time_req,
                                        &cred,
                                        time_rec,

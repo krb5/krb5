@@ -187,3 +187,6 @@ EXPORTS
 	GSS_C_SEC_CONTEXT_SASL_SSF			@149	DATA
 ; Added in 1.17
 	GSS_KRB5_NT_ENTERPRISE_NAME			@150 	DATA
+; Added now
+	gss_acquire_cred_impersonate_cert		@151
+	gss_add_cred_impersonate_cert			@152

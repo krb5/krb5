@@ -734,6 +734,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	/* Services4User (introduced in 1.8) */
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_acquire_cred_impersonate_name);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_add_cred_impersonate_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_acquire_cred_impersonate_cert);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_add_cred_impersonate_cert);
 	/* Naming extensions (introduced in 1.8) */
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_display_name_ext);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_name);

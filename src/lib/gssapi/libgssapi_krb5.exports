@@ -44,9 +44,11 @@ gss_accept_sec_context
 gss_acquire_cred
 gss_acquire_cred_with_password
 gss_acquire_cred_impersonate_name
+gss_acquire_cred_impersonate_cert
 gss_add_buffer_set_member
 gss_add_cred
 gss_add_cred_impersonate_name
+gss_add_cred_impersonate_cert
 gss_add_cred_with_password
 gss_add_oid_set_member
 gss_authorize_localname

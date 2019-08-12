@@ -468,6 +468,19 @@ spnego_gss_acquire_cred_impersonate_name(
     OM_uint32 *);	    /* time_rec */
 
 OM_uint32 KRB5_CALLCONV
+spnego_gss_acquire_cred_impersonate_cert(
+    OM_uint32 *,	    /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_name_t,	    /* desired_name */
+    const gss_buffer_t,	    /* cert_data */
+    OM_uint32,		    /* time_req */
+    const gss_OID_set,	    /* desired_mechs */
+    gss_cred_usage_t,	    /* cred_usage */
+    gss_cred_id_t *,	    /* output_cred_handle */
+    gss_OID_set *,	    /* actual_mechs */
+    OM_uint32 *);	    /* time_rec */
+
+OM_uint32 KRB5_CALLCONV
 spnego_gss_acquire_cred_with_password(
     OM_uint32 *minor_status,
     const gss_name_t desired_name,

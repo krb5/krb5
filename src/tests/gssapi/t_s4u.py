@@ -278,6 +278,36 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
 r1.run([kvno, '-U', 'enterprise@abc', '-F', cert_path, r1.user_princ],
        expected_trace=msgs)
 
+shutil.copyfile(savefile, r1.ccache)
+
+mark('S4U2Self using X509 certificate (GSSAPI)')
+
+r1.run(['./t_s4u_cert', 'other'])
+r1.run(['./t_s4u_cert', 'other', 'p:other'])
+r1.run(['./t_s4u_cert', 'other', 'e:other'])
+r1.run(['./t_s4u_cert', '-', 'p:other'])
+r1.run(['./t_s4u_cert', '-', 'e:other'])
+
+r1.run(['./t_s4u_cert', '--spnego', 'other'])
+r1.run(['./t_s4u_cert', '--spnego', 'other', 'p:other'])
+r1.run(['./t_s4u_cert', '--spnego', 'other', 'e:other'])
+r1.run(['./t_s4u_cert', '--spnego', '-', 'p:other'])
+r1.run(['./t_s4u_cert', '--spnego', '-', 'e:other'])
+
+mark('cross-realm S4U2Self using X509 certificate (GSSAPI)')
+
+r1.run(['./t_s4u_cert', 'user@UREALM'])
+r1.run(['./t_s4u_cert', 'user@UREALM', 'p:user@UREALM'])
+r1.run(['./t_s4u_cert', 'user@UREALM', 'e:enterprise@abc'])
+r1.run(['./t_s4u_cert', '-', 'p:user@UREALM'])
+r1.run(['./t_s4u_cert', '-', 'e:enterprise@abc'])
+
+r1.run(['./t_s4u_cert', '--spnego', 'user@UREALM'])
+r1.run(['./t_s4u_cert', '--spnego', 'user@UREALM', 'p:user@UREALM'])
+r1.run(['./t_s4u_cert', '--spnego', 'user@UREALM', 'e:enterprise@abc'])
+r1.run(['./t_s4u_cert', '--spnego', '-', 'p:user@UREALM'])
+r1.run(['./t_s4u_cert', '--spnego', '-', 'e:enterprise@abc'])
+
 r1.stop()
 r2.stop()
 
