@@ -577,7 +577,7 @@ get_kdc_offset(krb5_context context, krb5_ccache cache)
     if (cache_call(context, cache, &req) != 0)
         goto cleanup;
     time_offset = k5_input_get_uint32_be(&req.reply);
-    if (!req.reply.status)
+    if (req.reply.status)
         goto cleanup;
     context->os_context.time_offset = time_offset;
     context->os_context.usec_offset = 0;
