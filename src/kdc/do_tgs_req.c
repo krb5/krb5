@@ -262,15 +262,16 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         goto cleanup;
     }
 
-    if (!is_local_principal(kdc_active_realm, header_enc_tkt->client))
+    if (!is_local_principal(kdc_active_realm, header_ticket->server))
         setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
+    if (is_referral)
+        setflag(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL);
 
     /* Check for protocol transition */
     errcode = kdc_process_s4u2self_req(kdc_active_realm,
                                        request,
                                        header_enc_tkt->client,
-                                       header_ticket->server,
-                                       is_referral,
+                                       c_flags,
                                        server,
                                        subkey,
                                        header_enc_tkt->session,
@@ -539,8 +540,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         }
     }
 
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-        !isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) && !is_referral)
         enc_tkt_reply.client = s4u_x509_user->user_id.user;
     else
         enc_tkt_reply.client = subject_tkt->client;

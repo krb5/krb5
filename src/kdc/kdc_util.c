@@ -1453,8 +1453,7 @@ krb5_error_code
 kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                          krb5_kdc_req *request,
                          krb5_const_principal client_princ,
-                         krb5_const_principal header_srv_princ,
-                         krb5_boolean issuing_referral,
+                         unsigned int c_flags,
                          const krb5_db_entry *server,
                          krb5_keyblock *tgs_subkey,
                          krb5_keyblock *tgs_session,
@@ -1464,7 +1463,6 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
                          const char **status)
 {
     krb5_error_code             code;
-    krb5_boolean                is_local_tgt;
     krb5_pa_data                *pa_data;
     int                         flags;
     krb5_db_entry               *princ;
@@ -1573,8 +1571,8 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
      * final cross-realm requests in a multi-realm scenario.
      */
 
-    is_local_tgt = !is_cross_tgs_principal(header_srv_princ);
-    if (is_local_tgt && issuing_referral) {
+    if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+        isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
         /* The requesting server appears to no longer exist, and we found
          * a referral instead.  Treat this as a server lookup failure. */
         *status = "LOOKING_UP_SERVER";
@@ -1588,7 +1586,8 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
 
-        if (!is_local_tgt && !issuing_referral) {
+        if (isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+            !isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
             /* A local server should not need a cross-realm TGT to impersonate
              * a local principal. */
             *status = "NOT_CROSS_REALM_REQUEST";
@@ -1633,7 +1632,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         }
 
         *princ_ptr = princ;
-    } else if (is_local_tgt) {
+    } else if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
         /*
          * The server is asking to impersonate a principal from another realm,
          * using a local TGT.  It should instead ask that principal's realm and

@@ -123,6 +123,9 @@
 #define KRB5_KDB_FLAG_CROSS_REALM               0x00001000
 /* Allow in-realm aliases */
 #define KRB5_KDB_FLAG_ALIAS_OK                  0x00002000
+/* Issuing referral */
+#define KRB5_KDB_FLAG_ISSUING_REFERRAL          0x00004000
+
 
 #define KRB5_KDB_FLAGS_S4U                      ( KRB5_KDB_FLAG_PROTOCOL_TRANSITION | \
                                                   KRB5_KDB_FLAG_CONSTRAINED_DELEGATION )
@@ -1010,9 +1013,14 @@ typedef struct _kdb_vftabl {
      *     client entry during an S4U2Proxy TGS request.  Also affects PAC
      *     generation.
      *
-     * KRB5_KDB_FLAG_CROSS_REALM: Set by the KDC when looking up a client entry
-     *     during a TGS request, if the client principal is not part of the
-     *     realm being served.
+     * KRB5_KDB_FLAG_CROSS_REALM: Set by the KDC after looking up a server
+     *     entry during a TGS request, if the header ticket was issued by a
+     *     different realm.
+     *
+     * KRB5_KDB_FLAG_ISSUING_REFERRAL: Set by the KDC after looking up a server
+     *     entry during a TGS request, if the requested server principal is not
+     *     part of the realm being served, and a referral or alternate TGT will
+     *     be issued instead.
      *
      * KRB5_KDB_FLAG_ALIAS_OK: Set by the KDC for server principal lookups and
      *     for AS request client principal lookups with canonicalization
