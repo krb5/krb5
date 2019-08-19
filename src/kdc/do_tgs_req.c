@@ -584,14 +584,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         }
         newtransited = 1;
     }
-    if (isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
-        errcode = validate_transit_path(kdc_context, header_enc_tkt->client,
-                                        server, header_server);
-        if (errcode) {
-            status = "NON_TRANSITIVE";
-            goto cleanup;
-        }
-    }
     if (!isflagset (request->kdc_options, KDC_OPT_DISABLE_TRANSITED_CHECK)) {
         errcode = kdc_check_transited_list (kdc_active_realm,
                                             &enc_tkt_reply.transited.tr_contents,

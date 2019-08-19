@@ -104,11 +104,6 @@
 #define KRB5_KDB_CREATE_BTREE           0x00000001
 #define KRB5_KDB_CREATE_HASH            0x00000002
 
-/* Private flag used to indicate principal is local TGS */
-#define KRB5_KDB_TICKET_GRANTING_SERVICE        0x01000000
-/* Private flag used to indicate xrealm relationship  is non-transitive */
-#define KRB5_KDB_XREALM_NON_TRANSITIVE          0x02000000
-
 /* Entry get flags */
 /* Name canonicalization requested */
 #define KRB5_KDB_FLAG_CANONICALIZE              0x00000010

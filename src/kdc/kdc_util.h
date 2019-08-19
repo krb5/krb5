@@ -307,11 +307,6 @@ audit_tgs_request (krb5_kdc_req *request,
                    krb5_timestamp authtime,
                    krb5_error_code errcode);
 
-krb5_error_code
-validate_transit_path(krb5_context context,
-                      krb5_const_principal client,
-                      krb5_db_entry *server,
-                      krb5_db_entry *krbtgt);
 void
 kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_timestamp now,
