@@ -463,37 +463,19 @@ make_padata(krb5_preauthtype pa_type, const void *contents, size_t len,
 }
 
 /*
- * Construct the secure cookie encryption key for the given local-realm TGT
- * entry, kvno, and client principal.  The cookie key is derived from the first
- * TGT key for the given kvno, using the concatenation of "COOKIE" and the
- * unparsed client principal name as input.  If kvno is 0, the highest current
- * kvno of the TGT is used.  If kvno_out is not null, *kvno_out is set to the
- * kvno used.
+ * Derive the secure cookie encryption key from tgt_key and client_princ.  The
+ * cookie key is derived with PRF+ using the concatenation of "COOKIE" and the
+ * unparsed client principal name as input.
  */
 static krb5_error_code
-get_cookie_key(krb5_context context, krb5_db_entry *tgt, krb5_kvno kvno,
-               krb5_const_principal client_princ, krb5_keyblock **key_out,
-               krb5_kvno *kvno_out)
+derive_cookie_key(krb5_context context, krb5_keyblock *tgt_key,
+                  krb5_const_principal client_princ, krb5_keyblock **key_out)
 {
     krb5_error_code ret;
-    krb5_key_data *kd;
-    krb5_keyblock kb;
     krb5_data d;
-    krb5_int32 start = 0;
     char *princstr = NULL, *derive_input = NULL;
 
     *key_out = NULL;
-    memset(&kb, 0, sizeof(kb));
-
-    /* Find the first krbtgt key with the specified kvno. */
-    ret = krb5_dbe_search_enctype(context, tgt, &start, -1, -1, kvno, &kd);
-    if (ret)
-        goto cleanup;
-
-    /* Decrypt the key. */
-    ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &kb, NULL);
-    if (ret)
-        goto cleanup;
 
     /* Construct the input string and derive the cookie key. */
     ret = krb5_unparse_name(context, client_princ, &princstr);
@@ -504,15 +486,44 @@ get_cookie_key(krb5_context context, krb5_db_entry *tgt, krb5_kvno kvno,
         goto cleanup;
     }
     d = string2data(derive_input);
-    ret = krb5_c_derive_prfplus(context, &kb, &d, ENCTYPE_NULL, key_out);
-
-    if (kvno_out != NULL)
-        *kvno_out = kd->key_data_kvno;
+    ret = krb5_c_derive_prfplus(context, tgt_key, &d, ENCTYPE_NULL, key_out);
 
 cleanup:
-    krb5_free_keyblock_contents(context, &kb);
     krb5_free_unparsed_name(context, princstr);
     free(derive_input);
+    return ret;
+}
+
+/* Derive the cookie key for the specified kvno in tgt.  tgt_key must be the
+ * decrypted first key data entry in tgt. */
+static krb5_error_code
+get_cookie_key(krb5_context context, krb5_db_entry *tgt,
+               krb5_keyblock *tgt_key, krb5_kvno kvno,
+               krb5_const_principal client_princ, krb5_keyblock **key_out)
+{
+    krb5_error_code ret;
+    krb5_keyblock storage, *key;
+    krb5_key_data *kd;
+
+    *key_out = NULL;
+    memset(&storage, 0, sizeof(storage));
+
+    if (kvno == tgt->key_data[0].key_data_kvno) {
+        /* Use the already-decrypted first key. */
+        key = tgt_key;
+    } else {
+        /* The cookie used an older TGT key; find and decrypt it. */
+        ret = krb5_dbe_find_enctype(context, tgt, -1, -1, kvno, &kd);
+        if (ret)
+            return ret;
+        ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &storage, NULL);
+        if (ret)
+            return ret;
+        key = &storage;
+    }
+
+    ret = derive_cookie_key(context, key, client_princ, key_out);
+    krb5_free_keyblock_contents(context, &storage);
     return ret;
 }
 
@@ -538,7 +549,8 @@ is_relevant(krb5_pa_data *const *cpadata, krb5_pa_data *const *rpadata)
  */
 krb5_error_code
 kdc_fast_read_cookie(krb5_context context, struct kdc_request_state *state,
-                     krb5_kdc_req *req, krb5_db_entry *local_tgt)
+                     krb5_kdc_req *req, krb5_db_entry *local_tgt,
+                     krb5_keyblock *local_tgt_key)
 {
     krb5_error_code ret;
     krb5_secure_cookie *cookie = NULL;
@@ -560,7 +572,8 @@ kdc_fast_read_cookie(krb5_context context, struct kdc_request_state *state,
 
     /* Extract the kvno and generate the corresponding cookie key. */
     kvno = load_32_be(pa->contents + 4);
-    ret = get_cookie_key(context, local_tgt, kvno, req->client, &key, NULL);
+    ret = get_cookie_key(context, local_tgt, local_tgt_key, kvno, req->client,
+                         &key);
     if (ret)
         goto cleanup;
 
@@ -646,7 +659,7 @@ kdc_fast_set_cookie(struct kdc_request_state *state, krb5_preauthtype pa_type,
  * trivial "MIT" cookie if no values are set. */
 krb5_error_code
 kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
-                     krb5_db_entry *local_tgt,
+                     krb5_db_entry *local_tgt, krb5_keyblock *local_tgt_key,
                      krb5_const_principal client_princ,
                      krb5_pa_data **cookie_out)
 {
@@ -657,7 +670,6 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
     krb5_timestamp now;
     krb5_enc_data enc;
     krb5_data *der_cookie = NULL;
-    krb5_kvno kvno;
     size_t ctlen;
 
     *cookie_out = NULL;
@@ -665,10 +677,10 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
 
     /* Make a trivial cookie if there are no contents to marshal or we don't
      * have a TGT entry to encrypt them. */
-    if (contents == NULL || *contents == NULL || local_tgt == NULL)
+    if (contents == NULL || *contents == NULL || local_tgt_key == NULL)
         return make_padata(KRB5_PADATA_FX_COOKIE, "MIT", 3, cookie_out);
 
-    ret = get_cookie_key(context, local_tgt, 0, client_princ, &key, &kvno);
+    ret = derive_cookie_key(context, local_tgt_key, client_princ, &key);
     if (ret)
         goto cleanup;
 
@@ -699,7 +711,7 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
     ret = k5_alloc_pa_data(KRB5_PADATA_FX_COOKIE, 8 + enc.ciphertext.length,
                            &pa);
     memcpy(pa->contents, "MIT1", 4);
-    store_32_be(kvno, pa->contents + 4);
+    store_32_be(local_tgt->key_data[0].key_data_kvno, pa->contents + 4);
     memcpy(pa->contents + 8, enc.ciphertext.data, enc.ciphertext.length);
     *cookie_out = pa;
 

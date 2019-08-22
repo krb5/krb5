@@ -550,7 +550,8 @@ errout:
 /*
  * If candidate is the local TGT for realm, set *alias_out to candidate and
  * *storage_out to NULL.  Otherwise, load the local TGT into *storage_out and
- * set *alias_out to *storage_out.
+ * set *alias_out to *storage_out.  In either case, set *key_out to the
+ * decrypted first key of the local TGT.
  *
  * In the future we might generalize this to a small per-request principal
  * cache.  For now, it saves a load operation in the common case where the AS
@@ -559,29 +560,46 @@ errout:
 krb5_error_code
 get_local_tgt(krb5_context context, const krb5_data *realm,
               krb5_db_entry *candidate, krb5_db_entry **alias_out,
-              krb5_db_entry **storage_out)
+              krb5_db_entry **storage_out, krb5_keyblock *key_out)
 {
     krb5_error_code ret;
     krb5_principal princ;
-    krb5_db_entry *tgt;
+    krb5_db_entry *storage = NULL, *tgt;
 
     *alias_out = NULL;
     *storage_out = NULL;
+    memset(key_out, 0, sizeof(*key_out));
 
     ret = krb5_build_principal_ext(context, &princ, realm->length, realm->data,
                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
                                    realm->length, realm->data, 0);
     if (ret)
-        return ret;
+        goto cleanup;
 
     if (!krb5_principal_compare(context, candidate->princ, princ)) {
-        ret = krb5_db_get_principal(context, princ, 0, &tgt);
-        if (!ret)
-            *storage_out = *alias_out = tgt;
+        ret = krb5_db_get_principal(context, princ, 0, &storage);
+        if (ret)
+            goto cleanup;
+        tgt = storage;
     } else {
-        *alias_out = candidate;
+        tgt = candidate;
     }
 
+    if (tgt->n_key_data == 0) {
+        ret = KRB5_KDB_NO_MATCHING_KEY;
+        goto cleanup;
+    }
+    ret = krb5_dbe_decrypt_key_data(context, NULL, &tgt->key_data[0], key_out,
+                                    NULL);
+    if (ret)
+        goto cleanup;
+
+    *alias_out = tgt;
+    *storage_out = storage;
+    storage = NULL;
+
+cleanup:
+    krb5_db_free_principal(context, storage);
     krb5_free_principal(context, princ);
     return ret;
 }

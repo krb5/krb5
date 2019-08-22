@@ -76,8 +76,8 @@
 
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *, krb5_kdc_req *, krb5_db_entry *,
-                 int, krb5_pa_data **, krb5_boolean, krb5_principal,
-                 krb5_data **, const char *);
+                 krb5_keyblock *, int, krb5_pa_data **, krb5_boolean,
+                 krb5_principal, krb5_data **, const char *);
 
 /* Determine the key-expiration value according to RFC 4120 section 5.4.2. */
 static krb5_timestamp
@@ -157,6 +157,7 @@ struct as_req_state {
     krb5_enc_tkt_part enc_tkt_reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply;
+    krb5_keyblock local_tgt_key;
     krb5_keyblock server_keyblock;
     krb5_keyblock client_keyblock;
     krb5_db_entry *client;
@@ -294,21 +295,12 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         goto egress;
     }
 
-    errcode = handle_authdata(kdc_context,
-                              state->c_flags,
-                              state->client,
-                              state->server,
-                              NULL,
-                              state->local_tgt,
-                              &state->client_keyblock,
-                              &state->server_keyblock,
-                              NULL,
-                              state->req_pkt,
-                              state->request,
-                              NULL, /* for_user_princ */
-                              NULL, /* enc_tkt_request */
-                              state->auth_indicators,
-                              &state->enc_tkt_reply);
+    errcode = handle_authdata(kdc_context, state->c_flags, state->client,
+                              state->server, NULL, state->local_tgt,
+                              &state->local_tgt_key, &state->client_keyblock,
+                              &state->server_keyblock, NULL, state->req_pkt,
+                              state->request, NULL, NULL,
+                              state->auth_indicators, &state->enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),
                          errcode);
@@ -405,8 +397,9 @@ egress:
                 errcode = KRB_ERR_GENERIC;
 
             errcode = prepare_error_as(state->rstate, state->request,
-                                       state->local_tgt, errcode,
-                                       state->e_data, state->typed_e_data,
+                                       state->local_tgt, &state->local_tgt_key,
+                                       errcode, state->e_data,
+                                       state->typed_e_data,
                                        ((state->client != NULL) ?
                                         state->client->princ : NULL),
                                        &response, state->status);
@@ -419,6 +412,8 @@ egress:
     if (state->enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context,
                            state->enc_tkt_reply.authorization_data);
+    if (state->local_tgt_key.contents != NULL)
+        krb5_free_keyblock_contents(kdc_context, &state->local_tgt_key);
     if (state->server_keyblock.contents != NULL)
         krb5_free_keyblock_contents(kdc_context, &state->server_keyblock);
     if (state->client_keyblock.contents != NULL)
@@ -667,7 +662,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     errcode = get_local_tgt(kdc_context, &state->request->server->realm,
                             state->server, &state->local_tgt,
-                            &state->local_tgt_storage);
+                            &state->local_tgt_storage, &state->local_tgt_key);
     if (errcode) {
         state->status = "GET_LOCAL_TGT";
         goto errout;
@@ -802,7 +797,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     errcode = kdc_fast_read_cookie(kdc_context, state->rstate, state->request,
-                                   state->local_tgt);
+                                   state->local_tgt, &state->local_tgt_key);
     if (errcode) {
         state->status = "READ_COOKIE";
         goto errout;
@@ -826,7 +821,8 @@ errout:
 
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
-                 krb5_db_entry *local_tgt, int error, krb5_pa_data **e_data_in,
+                 krb5_db_entry *local_tgt, krb5_keyblock *local_tgt_key,
+                 int error, krb5_pa_data **e_data_in,
                  krb5_boolean typed_e_data, krb5_principal canon_client,
                  krb5_data **response, const char *status)
 {
@@ -848,7 +844,8 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
             return ENOMEM;
         memcpy(e_data, e_data_in, count * sizeof(*e_data));
         retval = kdc_fast_make_cookie(kdc_context, rstate, local_tgt,
-                                      request->client, &cookie);
+                                      local_tgt_key, request->client,
+                                      &cookie);
         e_data[count] = cookie;
     }
 

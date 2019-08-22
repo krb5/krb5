@@ -115,7 +115,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_error_code retval = 0;
     krb5_keyblock server_keyblock, *encrypting_key;
     krb5_timestamp kdc_time, authtime = 0;
-    krb5_keyblock session_key;
+    krb5_keyblock session_key, local_tgt_key;
     krb5_keyblock *reply_key = NULL;
     krb5_key_data  *server_key;
     krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
@@ -144,6 +144,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     memset(&ticket_reply, 0, sizeof(ticket_reply));
     memset(&enc_tkt_reply, 0, sizeof(enc_tkt_reply));
     memset(&server_keyblock, 0, sizeof(server_keyblock));
+    memset(&local_tgt_key, 0, sizeof(local_tgt_key));
     session_key.contents = NULL;
 
     /* Save pointer to client-requested service principal, in case of
@@ -203,7 +204,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     }
 
     errcode = get_local_tgt(kdc_context, &sprinc->realm, header_server,
-                            &local_tgt, &local_tgt_storage);
+                            &local_tgt, &local_tgt_storage, &local_tgt_key);
     if (errcode) {
         status = "GET_LOCAL_TGT";
         goto cleanup;
@@ -361,7 +362,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
      * requests (where the client didn't authenticate). */
     if (s4u_x509_user == NULL) {
         errcode = get_auth_indicators(kdc_context, subject_tkt, local_tgt,
-                                      &auth_indicators);
+                                      &local_tgt_key, &auth_indicators);
         if (errcode) {
             status = "GET_AUTH_INDICATORS";
             goto cleanup;
@@ -606,7 +607,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     }
 
     errcode = handle_authdata(kdc_context, c_flags, client, server,
-                              header_server, local_tgt,
+                              header_server, local_tgt, &local_tgt_key,
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
                               encrypting_key, /* U2U or server key */
@@ -798,6 +799,8 @@ cleanup:
     krb5_db_free_principal(kdc_context, header_server);
     krb5_db_free_principal(kdc_context, client);
     krb5_db_free_principal(kdc_context, local_tgt_storage);
+    if (local_tgt_key.contents != NULL)
+        krb5_free_keyblock_contents(kdc_context, &local_tgt_key);
     if (session_key.contents != NULL)
         krb5_free_keyblock_contents(kdc_context, &session_key);
     if (newtransited)
