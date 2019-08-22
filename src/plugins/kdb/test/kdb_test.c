@@ -61,12 +61,16 @@
  *             }
  *         }
  *
- * Key values are generated using a hash of the kvno, enctype, salt type, and
- * principal name.  This module does not use master key encryption, so it
- * serves as a partial test of the DAL's ability to avoid that.
+ * Key values are generated using a hash of the kvno, enctype, salt type,
+ * principal name, and lookup realm.  This module does not use master key
+ * encryption, so it serves as a partial test of the DAL's ability to avoid
+ * that.
  *
- * For cross realm, just add outbound 'krbtgt/OTHER_REALM' principal to each
- * kdc configuration, while for inbound trust the local krbtgt will be used.
+ * Inbound cross-realm TGT entries are currently implicit; they will use the
+ * same configuration and key enctypes as the local krbtgt principal, although
+ * they will use different keys (because the lookup realm is hashed in).
+ * Outgoing cross-realm TGT entries must be added explicitly
+ * (krbtgt/OTHER_REALM).
  */
 
 #include "k5-int.h"
@@ -173,7 +177,8 @@ get_time(testhandle h, const char *s1, const char *s2, const char *s3)
  * salttype, and princstr for the key bytes. */
 static void
 make_keyblock(krb5_kvno kvno, krb5_enctype etype, int32_t salttype,
-              const char *princstr, krb5_keyblock *kb_out)
+              const char *princstr, const krb5_data *realm,
+              krb5_keyblock *kb_out)
 {
     size_t keybytes, keylength, pos, n;
     char *hashstr;
@@ -184,8 +189,8 @@ make_keyblock(krb5_kvno kvno, krb5_enctype etype, int32_t salttype,
     alloc_data(&rndin, keybytes);
 
     /* Hash the kvno, enctype, salt type, and principal name together. */
-    if (asprintf(&hashstr, "%d %d %d %s", (int)kvno, (int)etype,
-                 (int)salttype, princstr) < 0)
+    if (asprintf(&hashstr, "%d %d %d %s %.*s", (int)kvno, (int)etype,
+                 (int)salttype, princstr, (int)realm->length, realm->data) < 0)
         abort();
     d = string2data(hashstr);
     check(krb5_c_make_checksum(NULL, CKSUMTYPE_NIST_SHA, NULL, 0, &d, &cksum));
@@ -208,7 +213,8 @@ make_keyblock(krb5_kvno kvno, krb5_enctype etype, int32_t salttype,
 /* Return key data for the given key/salt tuple strings, using hashes of the
  * enctypes, salts, and princstr for the key contents. */
 static void
-make_keys(char **strings, const char *princstr, krb5_db_entry *ent)
+make_keys(char **strings, const char *princstr, const krb5_data *realm,
+          krb5_db_entry *ent)
 {
     krb5_key_data *key_data, *kd;
     krb5_keyblock kb;
@@ -246,7 +252,7 @@ make_keys(char **strings, const char *princstr, krb5_db_entry *ent)
         ks = ks_lists[i];
         for (j = 0; j < ks_list_sizes[i]; j++) {
             make_keyblock(kvnos[i], ks[j].ks_enctype, ks[j].ks_salttype,
-                          princstr, &kb);
+                          princstr, realm, &kb);
             kd->key_data_ver = 2;
             kd->key_data_kvno = kvnos[i];
             kd->key_data_type[0] = ks[j].ks_enctype;
@@ -406,7 +412,7 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     set_names(h, "princs", ename, "keys");
     ret = profile_get_values(h->profile, h->names, &key_strings);
     if (ret != PROF_NO_RELATION) {
-        make_keys(key_strings, ename, ent);
+        make_keys(key_strings, ename, &search_for->realm, ent);
         profile_free_list(key_strings);
     }
 
