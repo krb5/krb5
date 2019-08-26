@@ -472,8 +472,21 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
 static krb5_boolean
 conf_skip_transit_check(krb5_context context, unsigned int opt_flags)
 {
+    krb5_error_code ret;
+    int bval;
+
     if (opt_flags & KRB5_RD_REQ_SKIP_TRANSIT_CHECK) {
         return TRUE;
+    }
+
+    ret = profile_get_boolean(context->profile,
+                              KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_ACCEPTOR_SKIP_TRANSIT_CHECK,
+                              NULL,
+                              FALSE,
+                              &bval);
+    if (ret == 0) {
+        return bval;
     }
 
     return FALSE;

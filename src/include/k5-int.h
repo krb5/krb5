@@ -178,6 +178,7 @@ typedef unsigned char   u_char;
 
 /* Profile variables.  Constants are named KRB5_CONF_STRING, where STRING
  * matches the variable name.  Keep these alphabetized. */
+#define KRB5_CONF_ACCEPTOR_SKIP_TRANSIT_CHECK  "acceptor_skip_transit_check"
 #define KRB5_CONF_ACL_FILE                     "acl_file"
 #define KRB5_CONF_ADMIN_SERVER                 "admin_server"
 #define KRB5_CONF_ALLOW_WEAK_CRYPTO            "allow_weak_crypto"
