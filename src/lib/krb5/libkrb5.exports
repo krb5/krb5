@@ -539,6 +539,7 @@ krb5_rd_rep_dce
 krb5_rd_req
 krb5_rd_req_decoded
 krb5_rd_req_decoded_anyflag
+krb5_rd_req_decoded_opt
 krb5_rd_safe
 krb5_read_message
 krb5_read_password
