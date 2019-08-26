@@ -849,6 +849,10 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
+    if (cred->skip_transit_check) {
+        opt_flags |= KRB5_RD_REQ_SKIP_TRANSIT_CHECK;
+    }
+
     code = krb5_rd_req_decoded_opt(context, &auth_context, request,
                                    cred->acceptor_mprinc, cred->keytab,
                                    &ap_req_options, NULL, opt_flags);
