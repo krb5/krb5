@@ -469,6 +469,16 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
     return (ret != 0) ? ret : dret;
 }
 
+static krb5_boolean
+conf_skip_transit_check(krb5_context context, unsigned int opt_flags)
+{
+    if (opt_flags & KRB5_RD_REQ_SKIP_TRANSIT_CHECK) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 krb5_error_code
 krb5_rd_req_decoded_opt(krb5_context context,
                         krb5_auth_context *auth_context,
@@ -487,6 +497,7 @@ krb5_rd_req_decoded_opt(krb5_context context,
     int                   permitted_etypes_len = 0;
     krb5_keyblock         decrypt_key;
     int                   check_valid_flag = 0;
+    krb5_boolean          skip_transit_check = FALSE;
 
     if (opt_flags & ~_KRB5_RD_REQ_VALID_FLAGS) {
         return EINVAL;
@@ -562,6 +573,8 @@ krb5_rd_req_decoded_opt(krb5_context context,
     }
     /* okay, now check cross-realm policy */
 
+    skip_transit_check = conf_skip_transit_check(context, opt_flags);
+
 #if defined(_SINGLE_HOP_ONLY)
 
     /* Single hop cross-realm tickets only */
@@ -602,7 +615,7 @@ krb5_rd_req_decoded_opt(krb5_context context,
 
     /* Hierarchical Cross-Realm */
 
-    {
+    if (!skip_transit_check) {
         krb5_data      * realm;
         krb5_transited * trans;
         krb5_flags       flags;

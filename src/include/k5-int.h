@@ -2165,9 +2165,11 @@ krb5_error_code KRB5_CALLCONV krb5_get_default_config_files(char ***filenames);
 void KRB5_CALLCONV krb5_free_config_files(char **filenames);
 
 #define KRB5_RD_REQ_CHECK_VALID_FLAG (1 << 0)
+#define KRB5_RD_REQ_SKIP_TRANSIT_CHECK (1 << 1)
 
 #define _KRB5_RD_REQ_VALID_FLAGS ( \
 	KRB5_RD_REQ_CHECK_VALID_FLAG | \
+	KRB5_RD_REQ_SKIP_TRANSIT_CHECK | \
 	0)
 
 krb5_error_code krb5_rd_req_decoded_opt(krb5_context context,
