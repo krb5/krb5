@@ -684,6 +684,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
     krb5_ap_req *request = NULL;
+    unsigned int opt_flags = KRB5_RD_REQ_CHECK_VALID_FLAG;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -848,9 +849,9 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
-    code = krb5_rd_req_decoded(context, &auth_context, request,
-                               cred->acceptor_mprinc, cred->keytab,
-                               &ap_req_options, NULL);
+    code = krb5_rd_req_decoded_opt(context, &auth_context, request,
+                                   cred->acceptor_mprinc, cred->keytab,
+                                   &ap_req_options, NULL, opt_flags);
     if (code) {
         major_status = GSS_S_FAILURE;
         goto fail;
