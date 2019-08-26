@@ -602,7 +602,7 @@ krb5_rd_req_decoded_opt(krb5_context context,
 
     /* Hierarchical Cross-Realm */
 
-    {
+    if (!(opt_flags & KRB5_RD_REQ_NO_TRANSIT_CHECK)) {
         krb5_data      * realm;
         krb5_transited * trans;
         krb5_flags       flags;
