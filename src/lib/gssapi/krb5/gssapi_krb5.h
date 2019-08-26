@@ -107,6 +107,18 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X;
 
 /*
+ *
+ * This OID can be used with gss_set_cred_option() to suppress the
+ * checking of the transited realm array. Typically the caller
+ * requires a verified PAC and delegate the cross-realm verification
+ * to the [K]DC of an active directory domain.
+ *
+ * iso(1) member-body(2) Sweden(752) Stockholm University(43) Heimdal GSS-API
+ * Extensions(13) no_transit_check(32)
+ */
+GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_NO_TRANSIT_CHECK_X;
+
+/*
  * This OID can be used with gss_inquire_cred_by_oid(0 to retrieve the
  * impersonator name (if any).
  *
