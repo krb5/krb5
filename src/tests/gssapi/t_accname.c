@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 
@@ -37,7 +38,7 @@
  * call is unsuccessful, displays an error message.  Exits with status 0 if all
  * operations are successful, or 1 if not.
  *
- * Usage: ./t_accname targetname [acceptorname]
+ * Usage: ./t_accname targetname [acceptorname] [skip_transit_check]
  */
 
 int
@@ -48,9 +49,11 @@ main(int argc, char *argv[])
     gss_name_t target_name, acceptor_name = GSS_C_NO_NAME, real_acceptor_name;
     gss_buffer_desc namebuf;
     gss_ctx_id_t initiator_context, acceptor_context;
+    krb5_boolean skip_transit_check = FALSE;
 
-    if (argc < 2 || argc > 3) {
-        fprintf(stderr, "Usage: %s targetname [acceptorname]\n", argv[0]);
+    if (argc < 2 || argc > 4) {
+usage:
+        fprintf(stderr, "Usage: %s targetname [acceptorname] [skip_transit_check]\n", argv[0]);
         return 1;
     }
 
@@ -58,12 +61,26 @@ main(int argc, char *argv[])
     target_name = import_name(argv[1]);
     if (argc >= 3)
         acceptor_name = import_name(argv[2]);
+    if (argc >= 4) {
+        if (strcmp(argv[3], "skip_transit_check") != 0) {
+             goto usage;
+        }
+        skip_transit_check = TRUE;
+    }
 
     /* Get acceptor cred. */
     major = gss_acquire_cred(&minor, acceptor_name, GSS_C_INDEFINITE,
                              GSS_C_NO_OID_SET, GSS_C_ACCEPT,
                              &acceptor_cred, NULL, NULL);
     check_gsserr("gss_acquire_cred", major, minor);
+    if (skip_transit_check) {
+        gss_buffer_desc empty_buffer = GSS_C_EMPTY_BUFFER;
+
+        major = gss_set_cred_option(&minor, &acceptor_cred,
+                                    (gss_OID)GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X,
+                                    &empty_buffer);
+        check_gsserr("gss_set_cred_option(SKIP_TRANSIT_CHECK_X)", major, minor);
+    }
 
     flags = GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
     establish_contexts(&mech_krb5, GSS_C_NO_CREDENTIAL, acceptor_cred,
