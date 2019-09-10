@@ -453,7 +453,6 @@ definitions of these relations.
 * **ldap_kadmind_sasl_mech**
 * **ldap_kadmind_sasl_realm**
 * **ldap_service_password_file**
-* **ldap_servers**
 * **ldap_conns_per_server**
 
 
