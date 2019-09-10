@@ -515,8 +515,6 @@ definitions of these relations.
 .IP \(bu 2
 \fBldap_service_password_file\fP
 .IP \(bu 2
-\fBldap_servers\fP
-.IP \(bu 2
 \fBldap_conns_per_server\fP
 .UNINDENT
 .SS [dbmodules]
@@ -720,10 +718,10 @@ facility is specified, the default is \fBAUTH\fP\&.
 .UNINDENT
 .sp
 In the following example, the logging messages from the KDC will go to
-the console and to the system log under the facility LOG_DAEMON with
-default severity of LOG_INFO; and the logging messages from the
-administrative server will be appended to the file
-\fB/var/adm/kadmin.log\fP and sent to the device \fB/dev/tty04\fP\&.
+the console and to the system log under the facility LOG_DAEMON, and
+the logging messages from the administrative server will be appended
+to the file \fB/var/adm/kadmin.log\fP and sent to the device
+\fB/dev/tty04\fP\&.
 .INDENT 0.0
 .INDENT 3.5
 .sp
@@ -738,6 +736,9 @@ administrative server will be appended to the file
 .fi
 .UNINDENT
 .UNINDENT
+.sp
+If no logging specification is given, the default is to use syslog.
+To disable logging entirely, specify \fBdefault = DEVICE=/dev/null\fP\&.
 .SS [otp]
 .sp
 Each subsection of [otp] is the name of an OTP token type.  The tags
