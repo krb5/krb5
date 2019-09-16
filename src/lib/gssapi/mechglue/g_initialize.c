@@ -473,11 +473,18 @@ loadConfigFiles()
 	glob_t globbuf;
 	time_t highest = 0, now;
 	char **path;
+	const char *val;
 
 	/* Don't glob and stat more than once per second. */
 	if (time(&now) == (time_t)-1 || now == g_confLastCall)
 		return;
 	g_confLastCall = now;
+
+	val = secure_getenv("GSS_MECH_CONFIG");
+	if (val != NULL) {
+		load_if_changed(val, g_confFileModTime, &g_confFileModTime);
+		return;
+	}
 
 	load_if_changed(MECH_CONF, g_confFileModTime, &highest);
 

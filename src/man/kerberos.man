@@ -174,6 +174,12 @@ used).
 .TP
 \fBKPROP_PORT\fP
 kprop(8) port to use.  Defaults to 754.
+.TP
+\fBGSS_MECH_CONFIG\fP
+Specifies a filename containing GSSAPI mechanism module
+configuration.  The default is to read \fB@SYSCONFDIR@\fP\fB/gss/mech\fP
+and files with a \fB\&.conf\fP suffix within the directory
+\fB@SYSCONFDIR@\fP\fB/gss/mech.d\fP\&.
 .UNINDENT
 .sp
 Most environment variables are disabled for certain programs, such as

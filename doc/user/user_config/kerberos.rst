@@ -142,6 +142,12 @@ programs.  These include:
 **KPROP_PORT**
     :ref:`kprop(8)` port to use.  Defaults to 754.
 
+**GSS_MECH_CONFIG**
+    Specifies a filename containing GSSAPI mechanism module
+    configuration.  The default is to read |sysconfdir|\ ``/gss/mech``
+    and files with a ``.conf`` suffix within the directory
+    |sysconfdir|\ ``/gss/mech.d``.
+
 Most environment variables are disabled for certain programs, such as
 login system programs and setuid programs, which are designed to be
 secure when run within an untrusted process environment.

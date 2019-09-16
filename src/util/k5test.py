@@ -884,6 +884,7 @@ class K5Realm(object):
         self.keytab = os.path.join(self.testdir, 'keytab')
         self.client_keytab = os.path.join(self.testdir, 'client_keytab')
         self.ccache = os.path.join(self.testdir, 'ccache')
+        self.gss_mech_config = os.path.join(self.testdir, 'mech.conf')
         self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
         self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
         base_kdc_conf = _default_kdc_conf
@@ -1002,6 +1003,7 @@ class K5Realm(object):
         env['KRB5RCACHEDIR'] = self.testdir
         env['KPROPD_PORT'] = str(self.kprop_port())
         env['KPROP_PORT'] = str(self.kprop_port())
+        env['GSS_MECH_CONFIG'] = self.gss_mech_config
         return env
 
     def run(self, args, env=None, **keywords):

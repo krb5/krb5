@@ -4,7 +4,7 @@ SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc threads softpkcs11
 
 RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
-	LC_ALL=C $(VALGRIND)
+	GSS_MECH_CONFIG=mech.conf LC_ALL=C $(VALGRIND)
 
 OBJS= adata.o etinfo.o forward.o gcred.o hist.o hooks.o hrealm.o \
 	icinterleave.o icred.o kdbtest.o localauth.o plugorder.o rdreq.o \

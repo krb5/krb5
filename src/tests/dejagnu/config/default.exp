@@ -470,6 +470,7 @@ proc envstack_pop { } {
 #
 set envvars_tosave {
     KRB5_CONFIG KRB5CCNAME KRB5_CLIENT_KTNAME KRB5RCACHEDIR KRB5_KDC_PROFILE
+    GSS_MECH_CONFIG
 }
 set krb5_init_vars [list ]
 # XXX -- fix me later!
@@ -853,6 +854,12 @@ if [ info exists env(KRB5RCACHEDIR)] {
     catch "unset orig_krb5rcachedir"
 }
 
+if [ info exists env(GSS_MECH_CONFIG)] {
+    set orig_gss_mech_config $env(GSS_MECH_CONFIG)
+} else {
+    catch "unset orig_gss_mech_config"
+}
+
 # setup_kerberos_env
 # Set the environment variables needed to run Kerberos programs.
 
@@ -883,6 +890,11 @@ proc setup_kerberos_env { {type client} } {
     set env(KRB5RCACHEDIR) $tmppwd
     verbose "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 
+    # Direct the GSS library at a nonexistent file in the temporary
+    # directory, to avoid interference from system configuration.
+    set env(GSS_MECH_CONFIG) $tmppwd/mech.conf
+    verbose "GSS_MECH_CONFIG=$env(GSS_MECH_CONFIG)"
+
     # Get the run time environment variables... (including LD_LIBRARY_PATH)
     setup_runtime_env
 
@@ -905,6 +917,7 @@ proc setup_kerberos_env { {type client} } {
 	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
 	puts $envfile "KRB5_CLIENT_KTNAME=$env(KRB5_CLIENT_KTNAME)"
 	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
+	puts $envfile "GSS_MECH_CONFIG=$env(GSS_MECH_CONFIG)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
 	} else {
@@ -912,6 +925,7 @@ proc setup_kerberos_env { {type client} } {
 	}
 	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
 	puts $envfile "export KRB5_KDC_PROFILE KRB5_CLIENT_KTNAME"
+	puts $envfile "export GSS_MECH_CONFIG"
 	foreach i $krb5_init_vars {
 		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
 		puts $envfile "$evar=$env($evar)"
@@ -925,6 +939,7 @@ proc setup_kerberos_env { {type client} } {
 	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
 	puts $envfile "setenv KRB5_CLIENT_KTNAME $env(KRB5_CLIENT_KTNAME)"
 	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
+	puts $envfile "setenv GSS_MECH_CONFIG $env(GSS_MECH_CONFIG)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
 	} else {
