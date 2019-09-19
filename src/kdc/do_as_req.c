@@ -546,6 +546,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     /* Seed the audit trail with the request ID and basic information. */
     kau_as_req(kdc_context, TRUE, au_state);
 
+    errcode = krb5_timeofday(kdc_context, &state->kdc_time);
+    if (errcode)
+        goto errout;
+    state->authtime = state->kdc_time;
+
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
                          1, 4, &encoded_req_body) != 0) {
         errcode = ASN1_BAD_ID;
@@ -670,10 +675,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->rock.local_tgt = state->local_tgt;
 
     au_state->stage = VALIDATE_POL;
-
-    if ((errcode = krb5_timeofday(kdc_context, &state->kdc_time)))
-        goto errout;
-    state->authtime = state->kdc_time; /* for audit_as_request() */
 
     if ((errcode = validate_as_request(kdc_active_realm,
                                        state->request, *state->client,
