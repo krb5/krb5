@@ -127,8 +127,7 @@ main(int argc, char **argv)
 
     /* TEST 1:  SHA-1/AES */
     /* set up algorithm id */
-    alg_id.algorithm.data = (char *)krb5_pkinit_sha1_oid;
-    alg_id.algorithm.length = krb5_pkinit_sha1_oid_len;
+    alg_id.algorithm = sha1_id;
 
     enctype = enctype_aes;
 
@@ -138,7 +137,7 @@ main(int argc, char **argv)
                                               u_principal, v_principal,
                                               enctype, &as_req, &pk_as_rep,
                                               &key_block))) {
-        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d",
+        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
     }
@@ -159,8 +158,7 @@ main(int argc, char **argv)
 
     /* TEST 2: SHA-256/AES */
     /* set up algorithm id */
-    alg_id.algorithm.data = (char *)krb5_pkinit_sha256_oid;
-    alg_id.algorithm.length = krb5_pkinit_sha256_oid_len;
+    alg_id.algorithm = sha256_id;
 
     enctype = enctype_aes;
 
@@ -170,7 +168,7 @@ main(int argc, char **argv)
                                               u_principal, v_principal,
                                               enctype, &as_req, &pk_as_rep,
                                               &key_block))) {
-        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d",
+        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
     }
@@ -191,8 +189,7 @@ main(int argc, char **argv)
 
     /* TEST 3: SHA-512/DES3 */
     /* set up algorithm id */
-    alg_id.algorithm.data = (char *)krb5_pkinit_sha512_oid;
-    alg_id.algorithm.length = krb5_pkinit_sha512_oid_len;
+    alg_id.algorithm = sha512_id;
 
     enctype = enctype_des3;
 
@@ -202,7 +199,7 @@ main(int argc, char **argv)
                                               u_principal, v_principal,
                                               enctype, &as_req, &pk_as_rep,
                                               &key_block))) {
-        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d",
+        printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
     }
@@ -225,5 +222,6 @@ cleanup:
     krb5_free_principal(context, u_principal);
     krb5_free_principal(context, v_principal);
     krb5_free_keyblock_contents(context, &key_block);
-    exit(retval);
+    krb5_free_context(context);
+    return retval ? 1 : 0;
 }

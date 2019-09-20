@@ -42,14 +42,19 @@
  * library carries complications, so use the built-in implementations of these
  * primitives instead.  OpenSSL 3.0 also deprecates DES_set_odd_parity() with
  * no replacement.
+ *
+ * OpenSSL 3.0 adds KDF implementations matching the ones we use to derive
+ * encryption and authentication keys from protocol keys.
  */
 #define K5_BUILTIN_DES_KEY_PARITY
 #define K5_BUILTIN_MD4
 #define K5_BUILTIN_RC4
+#define K5_OPENSSL_KDF
 #else
 #define K5_OPENSSL_DES_KEY_PARITY
 #define K5_OPENSSL_MD4
 #define K5_OPENSSL_RC4
+#define K5_BUILTIN_KDF
 #endif
 
 #define K5_OPENSSL_AES
@@ -68,6 +73,7 @@
 #define K5_BUILTIN_DES
 #define K5_BUILTIN_DES_KEY_PARITY
 #define K5_BUILTIN_HMAC
+#define K5_BUILTIN_KDF
 #define K5_BUILTIN_MD4
 #define K5_BUILTIN_MD5
 #define K5_BUILTIN_PBKDF2
@@ -387,10 +393,6 @@ krb5_error_code krb5int_derive_random(const struct krb5_enc_provider *enc,
                                       krb5_key inkey, krb5_data *outrnd,
                                       const krb5_data *in_constant,
                                       enum deriv_alg alg);
-krb5_error_code
-k5_sp800_108_counter_hmac(const struct krb5_hash_provider *hash,
-                          krb5_key inkey, krb5_data *outrnd,
-                          const krb5_data *label, const krb5_data *context);
 
 /*** Miscellaneous prototypes ***/
 
@@ -509,6 +511,39 @@ krb5_error_code krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
                                     const krb5_data *out, unsigned long count,
                                     const krb5_data *password,
                                     const krb5_data *salt);
+
+/*
+ * Compute the NIST SP800-108 KDF in counter mode (section 5.1) with the
+ * following parameters:
+ *   - HMAC (with hash as the hash provider) is the PRF.
+ *   - A block counter of four bytes is used.
+ *   - Four bytes are used to encode the output length in the PRF input.
+ *
+ * There are no uses requiring more than a single PRF invocation.
+ */
+krb5_error_code
+k5_sp800_108_counter_hmac(const struct krb5_hash_provider *hash,
+                          krb5_key key, const krb5_data *label,
+                          const krb5_data *context, krb5_data *rnd_out);
+
+/*
+ * Compute the NIST SP800-108 KDF in feedback mode (section 5.2) with the
+ * following parameters:
+ *   - CMAC (with enc as the enc provider) is the PRF.
+ *   - A block counter of four bytes is used.
+ *   - Label is the key derivation constant.
+ *   - Context is empty.
+ *   - Four bytes are used to encode the output length in the PRF input.
+ */
+krb5_error_code
+k5_sp800_108_feedback_cmac(const struct krb5_enc_provider *enc, krb5_key key,
+                           const krb5_data *label, krb5_data *rnd_out);
+
+/* Compute the RFC 3961 section 5.1 KDF (which uses n-fold) with enc as E,
+ * inkey as Key, and in_constant as Constant. */
+krb5_error_code
+k5_derive_random_rfc3961(const struct krb5_enc_provider *enc, krb5_key key,
+                         const krb5_data *constant, krb5_data *rnd_out);
 
 /* The following are used by test programs and are just handler functions from
  * the AES and Camellia enc providers. */
