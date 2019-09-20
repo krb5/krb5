@@ -38,6 +38,12 @@
 #include <dirent.h>
 #include <arpa/inet.h>
 
+#ifdef HAVE_EVP_KDF_FETCH
+#include <openssl/core_names.h>
+#include <openssl/kdf.h>
+#include <openssl/params.h>
+#endif
+
 static krb5_error_code pkinit_init_pkinit_oids(pkinit_plg_crypto_context );
 static void pkinit_fini_pkinit_oids(pkinit_plg_crypto_context );
 
@@ -2288,15 +2294,16 @@ cleanup:
 }
 
 
-/**
+/*
  * Given an algorithm_identifier, this function returns the hash length
  * and EVP function associated with that algorithm.
+ *
+ * RFC 8636 defines a SHA384 variant, but we don't use it.
  */
 static krb5_error_code
-pkinit_alg_values(krb5_context context,
-                  const krb5_data *alg_id,
-                  size_t *hash_bytes,
-                  const EVP_MD *(**func)(void))
+pkinit_alg_values(krb5_context context, const krb5_data *alg_id,
+                  size_t *hash_bytes, const EVP_MD *(**func)(void),
+                  char **hash_name)
 {
     *hash_bytes = 0;
     *func = NULL;
@@ -2305,18 +2312,21 @@ pkinit_alg_values(krb5_context context,
                      krb5_pkinit_sha1_oid_len))) {
         *hash_bytes = 20;
         *func = &EVP_sha1;
+        *hash_name = strdup("SHA1");
         return 0;
     } else if ((alg_id->length == krb5_pkinit_sha256_oid_len) &&
                (0 == memcmp(alg_id->data, krb5_pkinit_sha256_oid,
                             krb5_pkinit_sha256_oid_len))) {
         *hash_bytes = 32;
         *func = &EVP_sha256;
+        *hash_name = strdup("SHA256");
         return 0;
     } else if ((alg_id->length == krb5_pkinit_sha512_oid_len) &&
                (0 == memcmp(alg_id->data, krb5_pkinit_sha512_oid,
                             krb5_pkinit_sha512_oid_len))) {
         *hash_bytes = 64;
         *func = &EVP_sha512;
+        *hash_name = strdup("SHA512");
         return 0;
     } else {
         krb5_set_error_message(context, KRB5_ERR_BAD_S2K_PARAMS,
@@ -2325,11 +2335,60 @@ pkinit_alg_values(krb5_context context,
     }
 } /* pkinit_alg_values() */
 
+#ifdef HAVE_EVP_KDF_FETCH
+static krb5_error_code
+openssl_sskdf(krb5_context context, size_t hash_bytes, krb5_data *key,
+              krb5_data *info, char *out, size_t out_len, char *digest)
+{
+    krb5_error_code ret;
+    EVP_KDF *kdf = NULL;
+    EVP_KDF_CTX *kctx = NULL;
+    OSSL_PARAM params[4];
+    size_t i = 0;
 
-/* pkinit_alg_agility_kdf() --
- * This function generates a key using the KDF described in
- * draft_ietf_krb_wg_pkinit_alg_agility-04.txt.  The algorithm is
- * described as follows:
+    if (digest == NULL) {
+        ret = oerr(context, ENOMEM,
+                   _("Failed to allocate space for digest algorithm name"));
+        goto done;
+    }
+
+    kdf = EVP_KDF_fetch(NULL, "SSKDF", NULL);
+    if (kdf == NULL) {
+        ret = oerr(context, KRB5_CRYPTO_INTERNAL, _("Failed to fetch SSKDF"));
+        goto done;
+    }
+
+    kctx = EVP_KDF_CTX_new(kdf);
+    if (!kctx) {
+        ret = oerr(context, KRB5_CRYPTO_INTERNAL,
+                   _("Failed to instantiate SSKDF"));
+        goto done;
+    }
+
+    params[i++] = OSSL_PARAM_construct_utf8_string(OSSL_KDF_PARAM_DIGEST,
+                                                   digest, 0);
+    params[i++] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_KEY,
+                                                    key->data, key->length);
+    params[i++] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_INFO,
+                                                    info->data, info->length);
+    params[i] = OSSL_PARAM_construct_end();
+    if (EVP_KDF_derive(kctx, (unsigned char *)out, out_len, params) <= 0) {
+        ret = oerr(context, KRB5_CRYPTO_INTERNAL,
+                   _("Failed to derive key using SSKDF"));
+        goto done;
+    }
+
+    ret = 0;
+done:
+    EVP_KDF_free(kdf);
+    EVP_KDF_CTX_free(kctx);
+    return ret;
+}
+#else
+/*
+ * Generate a key using the KDF described in RFC 8636, also known as SSKDF
+ * (single-step kdf).  Our caller precomputes `reps`, but otherwise the
+ * algorithm is as follows:
  *
  *     1.  reps = keydatalen (K) / hash length (H)
  *
@@ -2343,95 +2402,16 @@ pkinit_alg_values(krb5_context context,
  *
  *     4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes.
  */
-krb5_error_code
-pkinit_alg_agility_kdf(krb5_context context,
-                       krb5_data *secret,
-                       krb5_data *alg_oid,
-                       krb5_const_principal party_u_info,
-                       krb5_const_principal party_v_info,
-                       krb5_enctype enctype,
-                       krb5_data *as_req,
-                       krb5_data *pk_as_rep,
-                       krb5_keyblock *key_block)
+static krb5_error_code
+builtin_sskdf(krb5_context context, unsigned int reps, size_t hash_len,
+              const EVP_MD *(*EVP_func)(void), krb5_data *secret,
+              krb5_data *other_info, char *out, size_t out_len)
 {
-    krb5_error_code retval = 0;
+    krb5_error_code ret = 0;
 
-    unsigned int reps = 0;
-    uint32_t counter = 1;       /* Does this type work on Windows? */
+    uint32_t counter = 1;
     size_t offset = 0;
-    size_t hash_len = 0;
-    size_t rand_len = 0;
-    size_t key_len = 0;
-    krb5_data random_data;
-    krb5_sp80056a_other_info other_info_fields;
-    krb5_pkinit_supp_pub_info supp_pub_info_fields;
-    krb5_data *other_info = NULL;
-    krb5_data *supp_pub_info = NULL;
-    krb5_algorithm_identifier alg_id;
     EVP_MD_CTX *ctx = NULL;
-    const EVP_MD *(*EVP_func)(void);
-
-    /* initialize random_data here to make clean-up safe */
-    random_data.length = 0;
-    random_data.data = NULL;
-
-    /* allocate and initialize the key block */
-    key_block->magic = 0;
-    key_block->enctype = enctype;
-    if (0 != (retval = krb5_c_keylengths(context, enctype, &rand_len,
-                                         &key_len)))
-        goto cleanup;
-
-    random_data.length = rand_len;
-    key_block->length = key_len;
-
-    if (NULL == (key_block->contents = malloc(key_block->length))) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-
-    memset (key_block->contents, 0, key_block->length);
-
-    /* If this is anonymous pkinit, use the anonymous principle for party_u_info */
-    if (party_u_info && krb5_principal_compare_any_realm(context, party_u_info,
-                                                         krb5_anonymous_principal()))
-        party_u_info = (krb5_principal)krb5_anonymous_principal();
-
-    if (0 != (retval = pkinit_alg_values(context, alg_oid, &hash_len, &EVP_func)))
-        goto cleanup;
-
-    /* 1.  reps = keydatalen (K) / hash length (H) */
-    reps = key_block->length/hash_len;
-
-    /* ... and round up, if necessary */
-    if (key_block->length > (reps * hash_len))
-        reps++;
-
-    /* Allocate enough space in the random data buffer to hash directly into
-     * it, even if the last hash will make it bigger than the key length. */
-    if (NULL == (random_data.data = malloc(reps * hash_len))) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-
-    /* Encode the ASN.1 octet string for "SuppPubInfo" */
-    supp_pub_info_fields.enctype = enctype;
-    supp_pub_info_fields.as_req = *as_req;
-    supp_pub_info_fields.pk_as_rep = *pk_as_rep;
-    if (0 != ((retval = encode_krb5_pkinit_supp_pub_info(&supp_pub_info_fields,
-                                                         &supp_pub_info))))
-        goto cleanup;
-
-    /* Now encode the ASN.1 octet string for "OtherInfo" */
-    memset(&alg_id, 0, sizeof alg_id);
-    alg_id.algorithm = *alg_oid; /*alias*/
-
-    other_info_fields.algorithm_identifier = alg_id;
-    other_info_fields.party_u_info = (krb5_principal) party_u_info;
-    other_info_fields.party_v_info = (krb5_principal) party_v_info;
-    other_info_fields.supp_pub_info = *supp_pub_info;
-    if (0 != (retval = encode_krb5_sp80056a_other_info(&other_info_fields, &other_info)))
-        goto cleanup;
 
     /* 2.  Initialize a 32-bit, big-endian bit string counter as 1.
      * 3.  For i = 1 to reps by 1, do the following:
@@ -2444,7 +2424,7 @@ pkinit_alg_agility_kdf(krb5_context context,
 
         ctx = EVP_MD_CTX_new();
         if (ctx == NULL) {
-            retval = KRB5_CRYPTO_INTERNAL;
+            ret = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
@@ -2452,7 +2432,7 @@ pkinit_alg_agility_kdf(krb5_context context,
         if (!EVP_DigestInit(ctx, EVP_func())) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestInit() returned an error.");
-            retval = KRB5_CRYPTO_INTERNAL;
+            ret = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
@@ -2461,15 +2441,16 @@ pkinit_alg_agility_kdf(krb5_context context,
             !EVP_DigestUpdate(ctx, other_info->data, other_info->length)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
-            retval = KRB5_CRYPTO_INTERNAL;
+            ret = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
-        /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes. */
-        if (!EVP_DigestFinal(ctx, (uint8_t *)random_data.data + offset, &s)) {
+        /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K
+         * bytes. */
+        if (!EVP_DigestFinal(ctx, (unsigned char *)out + offset, &s)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
-            retval = KRB5_CRYPTO_INTERNAL;
+            ret = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
         offset += s;
@@ -2478,26 +2459,113 @@ pkinit_alg_agility_kdf(krb5_context context,
         EVP_MD_CTX_free(ctx);
         ctx = NULL;
     }
-
-    retval = krb5_c_random_to_key(context, enctype, &random_data,
-                                  key_block);
-
 cleanup:
     EVP_MD_CTX_free(ctx);
+    return ret;
+} /* builtin_sskdf() */
+#endif /* HAVE_EVP_KDF_FETCH */
 
-    /* If this has been an error, free the allocated key_block, if any */
-    if (retval) {
-        krb5_free_keyblock_contents(context, key_block);
+/* id-pkinit-kdf family, as specified by RFC 8636. */
+krb5_error_code
+pkinit_alg_agility_kdf(krb5_context context, krb5_data *secret,
+                       krb5_data *alg_oid, krb5_const_principal party_u_info,
+                       krb5_const_principal party_v_info,
+                       krb5_enctype enctype, krb5_data *as_req,
+                       krb5_data *pk_as_rep, krb5_keyblock *key_block)
+{
+    krb5_error_code ret;
+    size_t hash_len = 0, rand_len = 0, key_len = 0;
+    const EVP_MD *(*EVP_func)(void);
+    krb5_sp80056a_other_info other_info_fields;
+    krb5_pkinit_supp_pub_info supp_pub_info_fields;
+    krb5_data *other_info = NULL, *supp_pub_info = NULL;
+    krb5_data random_data = empty_data();
+    krb5_algorithm_identifier alg_id;
+    unsigned int reps;
+    char *hash_name = NULL;
+
+    /* Allocate and initialize the key block. */
+    key_block->magic = 0;
+    key_block->enctype = enctype;
+
+    /* Use separate variables to avoid alignment restriction problems. */
+    ret = krb5_c_keylengths(context, enctype, &rand_len, &key_len);
+    if (ret)
+        goto cleanup;
+    random_data.length = rand_len;
+    key_block->length = key_len;
+
+    key_block->contents = k5calloc(key_block->length, 1, &ret);
+    if (key_block->contents == NULL)
+        goto cleanup;
+
+    /* If this is anonymous pkinit, use the anonymous principle for
+     * party_u_info. */
+    if (party_u_info &&
+        krb5_principal_compare_any_realm(context, party_u_info,
+                                         krb5_anonymous_principal())) {
+        party_u_info = (krb5_principal)krb5_anonymous_principal();
     }
 
-    /* free other allocated resources, either way */
-    if (random_data.data)
-        free(random_data.data);
+    ret = pkinit_alg_values(context, alg_oid, &hash_len, &EVP_func,
+                            &hash_name);
+    if (ret)
+        goto cleanup;
+
+    /* 1.  reps = keydatalen (K) / hash length (H) */
+    reps = key_block->length / hash_len;
+
+    /* ... and round up, if necessary. */
+    if (key_block->length > (reps * hash_len))
+        reps++;
+
+    /* Allocate enough space in the random data buffer to hash directly into
+     * it, even if the last hash will make it bigger than the key length. */
+    random_data.data = k5alloc(reps * hash_len, &ret);
+    if (random_data.data == NULL)
+        goto cleanup;
+
+    /* Encode the ASN.1 octet string for "SuppPubInfo". */
+    supp_pub_info_fields.enctype = enctype;
+    supp_pub_info_fields.as_req = *as_req;
+    supp_pub_info_fields.pk_as_rep = *pk_as_rep;
+    ret = encode_krb5_pkinit_supp_pub_info(&supp_pub_info_fields,
+                                           &supp_pub_info);
+    if (ret)
+        goto cleanup;
+
+    /* Now encode the ASN.1 octet string for "OtherInfo". */
+    memset(&alg_id, 0, sizeof(alg_id));
+    alg_id.algorithm = *alg_oid;
+    other_info_fields.algorithm_identifier = alg_id;
+    other_info_fields.party_u_info = (krb5_principal)party_u_info;
+    other_info_fields.party_v_info = (krb5_principal)party_v_info;
+    other_info_fields.supp_pub_info = *supp_pub_info;
+    ret = encode_krb5_sp80056a_other_info(&other_info_fields, &other_info);
+    if (ret)
+        goto cleanup;
+
+#ifdef HAVE_EVP_KDF_FETCH
+    ret = openssl_sskdf(context, hash_len, secret, other_info,
+                        random_data.data, key_block->length, hash_name);
+#else
+    ret = builtin_sskdf(context, reps, hash_len, EVP_func, secret,
+                        other_info, random_data.data, key_block->length);
+#endif
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_c_random_to_key(context, enctype, &random_data, key_block);
+cleanup:
+    if (ret)
+        krb5_free_keyblock_contents(context, key_block);
+
+    free(hash_name);
+    zapfree(random_data.data, random_data.length);
     krb5_free_data(context, other_info);
     krb5_free_data(context, supp_pub_info);
-
-    return retval;
-} /*pkinit_alg_agility_kdf() */
+    return ret;
+}
 
 /* Call DH_compute_key() and ensure that we left-pad short results instead of
  * leaving junk bytes at the end of the buffer. */
