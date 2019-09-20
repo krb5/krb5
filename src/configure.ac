@@ -285,6 +285,10 @@ AC_SUBST(CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL_CFLAGS)
 AC_SUBST(CRYPTO_IMPL_LIBS)
 
+if test "$CRYPTO_IMPL" = openssl; then
+   AC_CHECK_FUNCS(EVP_KDF_fetch)
+fi
+
 AC_ARG_WITH([prng-alg],
   [AS_HELP_STRING([--with-prng-alg=ALG],
                   [use specified PRNG algorithm. @<:@fortuna@:>@])],
