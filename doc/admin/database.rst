@@ -761,7 +761,7 @@ in the krbtgt keys is used by default to determine the session key
 types supported by the krbtgt service (see
 :ref:`session_key_selection`).  Because non-MIT Kerberos clients
 sometimes send a limited set of encryption types when making AS
-requests, it can be important to for the krbtgt service to support
+requests, it can be important for the krbtgt service to support
 multiple encryption types.  This can be accomplished by giving the
 krbtgt principal multiple keys, which is usually as simple as not
 specifying any **-e** option when changing the krbtgt key, or by
