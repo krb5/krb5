@@ -793,13 +793,7 @@ an "update log" file, maintained as a circular buffer of a certain
 size.  A process on each replica KDC connects to a service on the
 master KDC (currently implemented in the :ref:`kadmind(8)` server) and
 periodically requests the changes that have been made since the last
-check.  By default, this check is done every two minutes.  If the
-database has just been modified in the previous several seconds
-(currently the threshold is hard-coded at 10 seconds), the replica
-will not retrieve updates, but instead will pause and try again soon
-after.  This reduces the likelihood that incremental update queries
-will cause delays for an administrator trying to make a bunch of
-changes to the database at the same time.
+check.  By default, this check is done every two minutes.
 
 Incremental propagation uses the following entries in the per-realm
 data in the KDC config file (See :ref:`kdc.conf(5)`):
