@@ -1107,7 +1107,7 @@ enctype_name(krb5_enctype ktype, char *buf, size_t buflen)
     else
         return krb5_enctype_to_name(ktype, FALSE, buf, buflen);
 
-    if (strlcpy(name, buf, buflen) >= buflen)
+    if (strlcpy(buf, name, buflen) >= buflen)
         return ENOMEM;
     return 0;
 }
