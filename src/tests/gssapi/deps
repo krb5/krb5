@@ -41,6 +41,10 @@ $(OUTPRE)t_ciflags.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \
   common.h t_ciflags.c
+$(OUTPRE)t_context.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \
+  common.h t_context.c
 $(OUTPRE)t_credstore.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h \

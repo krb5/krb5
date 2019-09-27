@@ -1499,6 +1499,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	kdc kprop config-files build-tools man doc include
 
 	plugins/certauth/test
+	plugins/gssapi/negoextest
 	plugins/hostrealm/test
 	plugins/localauth/test
 	plugins/kadm5_hook/test

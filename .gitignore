@@ -474,6 +474,7 @@ local.properties
 /src/tests/gssapi/t_add_cred
 /src/tests/gssapi/t_ccselect
 /src/tests/gssapi/t_ciflags
+/src/tests/gssapi/t_context
 /src/tests/gssapi/t_credstore
 /src/tests/gssapi/t_enctypes
 /src/tests/gssapi/t_err
