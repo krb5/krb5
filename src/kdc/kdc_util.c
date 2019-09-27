@@ -1073,20 +1073,22 @@ void limit_string(char *name)
 static krb5_error_code
 enctype_name(krb5_enctype ktype, char *buf, size_t buflen)
 {
-    char *name;
+    const char *name, *prefix = "";
     size_t len;
 
     if (buflen == 0)
         return EINVAL;
     *buf = '\0'; /* ensure these are always valid C-strings */
 
-    if (krb5int_c_deprecated_enctype(ktype)) {
-        len = strlcpy(buf, "DEPRECATED:", buflen);
-        if (len >= buflen)
-            return ENOMEM;
-        buflen -= len;
-        buf += len;
-    }
+    if (!krb5_c_valid_enctype(ktype))
+        prefix = "UNSUPPORTED:";
+    else if (krb5int_c_deprecated_enctype(ktype))
+        prefix = "DEPRECATED:";
+    len = strlcpy(buf, prefix, buflen);
+    if (len >= buflen)
+        return ENOMEM;
+    buflen -= len;
+    buf += len;
 
     /* rfc4556 recommends that clients wishing to indicate support for these
      * pkinit algorithms include them in the etype field of the AS-REQ. */
