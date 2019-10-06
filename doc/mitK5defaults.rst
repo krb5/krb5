@@ -14,7 +14,7 @@ Client :ref:`keytab_definition` file        |ckeytab|                      **KRB
 Kerberos config file :ref:`krb5.conf(5)`    |krb5conf|\ ``:``\             **KRB5_CONFIG**
                                             |sysconfdir|\ ``/krb5.conf``
 KDC config file :ref:`kdc.conf(5)`          |kdcdir|\ ``/kdc.conf``        **KRB5_KDC_PROFILE**
-GSS mechanism config file                   |sysconfdir|\ ``/gss.mech``    **GSS_MECH_CONFIG**
+GSS mechanism config file                   |sysconfdir|\ ``/gss/mech``    **GSS_MECH_CONFIG**
 KDC database path (DB2)                     |kdcdir|\ ``/principal``
 Master key :ref:`stash_definition`          |kdcdir|\ ``/.k5.``\ *realm*
 Admin server ACL file :ref:`kadm5.acl(5)`   |kdcdir|\ ``/kadm5.acl``
