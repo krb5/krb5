@@ -204,15 +204,17 @@ directory.  Only files with a ``.conf`` suffix will be read from the
 ``/etc/gss/mech.d/`` directory.  Each line in these files has the
 form::
 
-    oid  pathname  [options]  <type>
+    name  oid  pathname  [options]  <type>
 
-Only the oid and pathname are required.  *oid* is the object
-identifier of the GSSAPI mechanism to be registered.  *pathname* is a
-path to the module shared object or DLL.  *options* (if present) are
-options provided to the plugin module, surrounded in square brackets.
-*type* (if present) can be used to indicate a special type of module.
-Currently the only special module type is "interposer", for a module
-designed to intercept calls to other mechanisms.
+Only the name, oid, and pathname are required.  *name* is the
+mechanism name, which may be used for debugging or logging purposes.
+*oid* is the object identifier of the GSSAPI mechanism to be
+registered.  *pathname* is a path to the module shared object or DLL.
+*options* (if present) are options provided to the plugin module,
+surrounded in square brackets.  *type* (if present) can be used to
+indicate a special type of module.  Currently the only special module
+type is "interposer", for a module designed to intercept calls to
+other mechanisms.
 
 
 .. _profile_plugin_config:
