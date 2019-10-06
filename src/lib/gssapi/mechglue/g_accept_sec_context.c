@@ -104,6 +104,10 @@ allow_mech_by_default(gss_OID mech)
     if (status)
 	return 0;
 
+    /* If the mechanism doesn't support RFC 5587, don't exclude it. */
+    if (attrs == GSS_C_NO_OID_SET)
+	return 1;
+
     /* Check for each attribute which would cause us to exclude this mech from
      * the default credential. */
     if (generic_gss_test_oid_set_member(&minor, GSS_C_MA_DEPRECATED,
