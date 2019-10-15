@@ -389,6 +389,9 @@ realm.run([kadminl, 'modprinc', '+requires_preauth', 'canon'])
 realm.kinit('canon', password('canon'))
 realm.kinit('alias', password('canon'), ['-C'])
 
+# Test client name canonicalization in non-krbtgt AS reply
+realm.kinit('alias', password('canon'), ['-C', '-S', 'kadmin/changepw'])
+
 mark('LDAP password history')
 
 # Test password history.

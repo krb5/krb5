@@ -230,17 +230,12 @@ verify_as_reply(krb5_context            context,
     if (canon_req) {
         canon_ok = IS_TGS_PRINC(request->server) &&
             IS_TGS_PRINC(as_reply->enc_part2->server);
-        if (!canon_ok && (request->kdc_options & KDC_OPT_REQUEST_ANONYMOUS)) {
-            canon_ok = krb5_principal_compare_any_realm(context,
-                                                        as_reply->client,
-                                                        krb5_anonymous_principal());
-        }
     } else
         canon_ok = 0;
 
     if ((!canon_ok &&
-         (!krb5_principal_compare(context, as_reply->client, request->client) ||
-          !krb5_principal_compare(context, as_reply->enc_part2->server, request->server)))
+         !krb5_principal_compare(context, as_reply->enc_part2->server, request->server))
+        || (!canon_req && !krb5_principal_compare(context, as_reply->client, request->client))
         || !krb5_principal_compare(context, as_reply->enc_part2->server, as_reply->ticket->server)
         || (request->nonce != as_reply->enc_part2->nonce)
         /* XXX check for extraneous flags */
