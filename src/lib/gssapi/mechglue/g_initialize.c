@@ -1155,6 +1155,7 @@ gssint_get_mechanism(gss_const_OID oid)
 
 	if (krb5int_open_plugin(aMech->uLibName, &dl, &errinfo) != 0 ||
 	    errinfo.code != 0) {
+		k5_clear_error(&errinfo);
 		k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
@@ -1165,6 +1166,7 @@ gssint_get_mechanism(gss_const_OID oid)
 		aMech->mech = (*sym)(aMech->mech_type);
 	} else {
 		/* Try dynamic dispatch table */
+		k5_clear_error(&errinfo);
 		aMech->mech = build_dynamicMech(dl, aMech->mech_type);
 		aMech->freeMech = 1;
 	}
