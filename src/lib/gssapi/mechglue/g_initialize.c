@@ -168,6 +168,9 @@ gss_OID *oid;
 	OM_uint32 major;
 	gss_mech_info aMech;
 
+	if (minor_status != NULL)
+	    *minor_status = 0;
+
 	if (minor_status == NULL || oid == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 

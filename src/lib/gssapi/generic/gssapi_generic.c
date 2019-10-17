@@ -413,6 +413,8 @@ generic_gss_display_mech_attr(
 {
     size_t i;
 
+    if (minor_status != NULL)
+        *minor_status = 0;
     if (name != GSS_C_NO_BUFFER) {
         name->length = 0;
         name->value = NULL;
@@ -425,6 +427,8 @@ generic_gss_display_mech_attr(
         long_desc->length = 0;
         long_desc->value = NULL;
     }
+    if (minor_status == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
     for (i = 0; i < sizeof(mech_attr_info)/sizeof(mech_attr_info[0]); i++) {
         struct mech_attr_info_desc *mai = &mech_attr_info[i];
 
