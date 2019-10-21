@@ -36,6 +36,9 @@ gssalloc_calloc(size_t count, size_t size)
 static inline void *
 gssalloc_realloc(void *value, size_t size)
 {
+    /* Unlike realloc(), HeapReAlloc() does not work on null values. */
+    if (value == NULL)
+        return HeapAlloc(GetProcessHeap(), 0, size);
     return HeapReAlloc(GetProcessHeap(), 0, value, size);
 }
 
