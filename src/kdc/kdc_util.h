@@ -305,20 +305,6 @@ kdc_check_transited_list (kdc_realm_t *kdc_active_realm,
                           const krb5_data *realm1,
                           const krb5_data *realm2);
 
-krb5_error_code
-audit_as_request (krb5_kdc_req *request,
-                  krb5_db_entry *client,
-                  krb5_db_entry *server,
-                  krb5_timestamp authtime,
-                  krb5_error_code errcode);
-
-krb5_error_code
-audit_tgs_request (krb5_kdc_req *request,
-                   krb5_const_principal client,
-                   krb5_db_entry *server,
-                   krb5_timestamp authtime,
-                   krb5_error_code errcode);
-
 void
 kdc_get_ticket_endtime(kdc_realm_t *kdc_active_realm,
                        krb5_timestamp now,

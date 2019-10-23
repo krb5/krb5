@@ -172,7 +172,6 @@ struct as_req_state {
     krb5_boolean typed_e_data;
     krb5_kdc_rep reply;
     krb5_timestamp kdc_time;
-    krb5_timestamp authtime;
     krb5_keyblock session_key;
     unsigned int c_flags;
     krb5_data *req_pkt;
@@ -266,13 +265,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     state->reply_encpart.key_exp = get_key_exp(state->client);
     state->reply_encpart.flags = state->enc_tkt_reply.flags;
     state->reply_encpart.server = state->ticket_reply.server;
-
-    /* copy the time fields EXCEPT for authtime; its location
-     *  is used for ktime
-     */
     state->reply_encpart.times = state->enc_tkt_reply.times;
-    state->reply_encpart.times.authtime = state->authtime = state->kdc_time;
-
     state->reply_encpart.caddrs = state->enc_tkt_reply.caddrs;
     state->reply_encpart.enc_padata = NULL;
 
@@ -361,7 +354,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     log_as_req(kdc_context, state->local_addr, state->remote_addr,
                state->request, &state->reply, state->client, state->cname,
-               state->server, state->sname, state->authtime, 0, 0, 0);
+               state->server, state->sname, state->kdc_time, 0, 0, 0);
     did_log = 1;
 
 egress:
@@ -383,7 +376,7 @@ egress:
     if (state->status) {
         log_as_req(kdc_context, state->local_addr, state->remote_addr,
                    state->request, &state->reply, state->client,
-                   state->cname, state->server, state->sname, state->authtime,
+                   state->cname, state->server, state->sname, state->kdc_time,
                    state->status, errcode, emsg);
         did_log = 1;
     }
@@ -549,7 +542,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     errcode = krb5_timeofday(kdc_context, &state->kdc_time);
     if (errcode)
         goto errout;
-    state->authtime = state->kdc_time;
 
     if (fetch_asn1_field((unsigned char *) req_pkt->data,
                          1, 4, &encoded_req_body) != 0) {
@@ -719,7 +711,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->enc_tkt_reply.flags = get_ticket_flags(state->request->kdc_options,
                                                   state->client, state->server,
                                                   NULL);
-    state->enc_tkt_reply.times.authtime = state->authtime;
+    state->enc_tkt_reply.times.authtime = state->kdc_time;
 
     /*
      * It should be noted that local policy may affect the
