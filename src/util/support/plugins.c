@@ -54,6 +54,21 @@
 #define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | GROUP | NODELETE)
 #endif
 
+/*
+ * glibc bug 11941, fixed in release 2.25, can cause an assertion failure in
+ * dlclose() on process exit.  Our workaround is to leak dlopen() handles
+ * (which doesn't typically manifest in leak detection tools because the
+ * handles are still reachable via a global table in libdl).  Because we
+ * dlopen() with RTLD_NODELETE, we weren't going to unload the plugin objects
+ * anyway.
+ */
+#ifdef __linux__
+#include <features.h>
+#if ! __GLIBC_PREREQ(2, 25)
+#define dlclose(x)
+#endif
+#endif
+
 #if USE_DLOPEN && USE_CFBUNDLE
 #include <CoreFoundation/CoreFoundation.h>
 
