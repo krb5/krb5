@@ -734,6 +734,11 @@ krb5_error_code krb5_db_get_authdata_info(krb5_context context,
 
 void krb5_db_free_authdata_info(krb5_context context, void *ad_info);
 
+krb5_error_code krb5_db_check_alias(krb5_context kcontext,
+                                    const krb5_db_entry *self,
+                                    krb5_const_principal princ,
+                                    krb5_boolean *is_self);
+
 /**
  * Sort an array of @a krb5_key_data keys in descending order by their kvno.
  * Key data order within a kvno is preserved.
@@ -1518,6 +1523,14 @@ typedef struct _kdb_vftabl {
 
     void (*free_authdata_info)(krb5_context context,
                                void *ad_info);
+
+    /*
+     *
+     */
+    krb5_error_code (*check_alias)(krb5_context kcontext,
+                                   const krb5_db_entry *self,
+                                   krb5_const_principal princ,
+                                   krb5_boolean *is_self);
 
     /* End of minor version 0 for major version 8. */
 } kdb_vftabl;
