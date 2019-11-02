@@ -2379,6 +2379,12 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                               krb5_creds **out_creds);
 
 krb5_error_code KRB5_CALLCONV
+krb5_get_creds_for_user_to_self(krb5_context context, krb5_flags options,
+                                krb5_ccache ccache, krb5_creds *in_creds,
+                                krb5_data *subject_cert, krb5_principal self,
+                                krb5_creds **out_creds);
+
+krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_for_proxy(krb5_context context,
                                krb5_flags options,
                                krb5_ccache ccache,

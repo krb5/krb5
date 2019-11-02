@@ -499,3 +499,6 @@ EXPORTS
 	k5_size_context					@467 ; PRIVATE GSSAPI
 	k5_size_keyblock				@468 ; PRIVATE GSSAPI
 	k5_size_principal				@469 ; PRIVATE GSSAPI
+
+; new
+	krb5_get_creds_for_user_to_self			@470 ; PRIVATE GSSAPI

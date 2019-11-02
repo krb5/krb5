@@ -425,6 +425,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
                             krb5_flags options,
                             krb5_ccache ccache,
                             krb5_creds *in_creds,
+                            krb5_principal client,
                             krb5_data *subject_cert,
                             krb5_data *user_realm,
                             krb5_creds **out_creds)
@@ -444,21 +445,20 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     memset(&s4u_user, 0, sizeof(s4u_user));
 
-    if (in_creds->client != NULL && in_creds->client->length > 0) {
-        if (in_creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+    if (client != NULL && client->length > 0) {
+        if (client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
             code = krb5_build_principal_ext(context,
                                             &s4u_user.user_id.user,
                                             user_realm->length,
                                             user_realm->data,
-                                            in_creds->client->data[0].length,
-                                            in_creds->client->data[0].data,
+                                            client->data[0].length,
+                                            client->data[0].data,
                                             0);
             if (code != 0)
                 goto cleanup;
             s4u_user.user_id.user->type = KRB5_NT_ENTERPRISE_PRINCIPAL;
         } else {
-            code = krb5_copy_principal(context,
-                                       in_creds->client,
+            code = krb5_copy_principal(context, client,
                                        &s4u_user.user_id.user);
             if (code != 0)
                 goto cleanup;
@@ -480,7 +480,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    tgtq.client = in_creds->server;
+    tgtq.client = in_creds->client;
     tgtq.server = tgs;
 
     code = krb5_get_credentials(context, options, ccache, &tgtq, &tgt);
@@ -498,7 +498,6 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     /* Make a shallow copy of in_creds with client pointing to the server
      * principal.  We will set s4u_creds.server for each request. */
     s4u_creds = *in_creds;
-    s4u_creds.client = in_creds->server;
 
     /* Then, walk back the referral path to S4U2Self for user */
     kdcopt = 0;
@@ -644,8 +643,21 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
                               krb5_data *subject_cert,
                               krb5_creds **out_creds)
 {
+    return krb5_get_creds_for_user_to_self(context, options, ccache,
+                                           in_creds, subject_cert,
+                                           in_creds->server, out_creds);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_creds_for_user_to_self(krb5_context context, krb5_flags options,
+                                krb5_ccache ccache, krb5_creds *in_creds,
+                                krb5_data *subject_cert,
+                                krb5_principal self,
+                                krb5_creds **out_creds)
+{
     krb5_error_code code;
-    krb5_principal realm = NULL;
+    krb5_principal client, realm = NULL;
+    krb5_creds creds;
 
     *out_creds = NULL;
 
@@ -681,7 +693,11 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
             goto cleanup;
     }
 
-    code = krb5_get_self_cred_from_kdc(context, options, ccache, in_creds,
+    client = in_creds->client;
+    creds = *in_creds;
+    creds.client = self;
+
+    code = krb5_get_self_cred_from_kdc(context, options, ccache, &creds, client,
                                        subject_cert, &realm->realm, out_creds);
     if (code != 0)
         goto cleanup;
