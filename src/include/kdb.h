@@ -1057,15 +1057,18 @@ typedef struct _kdb_vftabl {
      * in-realm alias, fill in a different value for entries->princ than the
      * one requested.
      *
-     * A module can return out-of-realm referrals if KRB5_KDB_FLAG_CANONICALIZE
-     * is set.  For AS request clients (KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is
-     * also set), the module should do so by simply filling in an out-of-realm
-     * name in entries->princ and setting all other fields to NULL.  Otherwise,
-     * the module should return the entry for the cross-realm TGS of the
-     * referred-to realm.  For TGS referals, the module can also include
-     * tl-data of type KRB5_TL_SERVER_REFERRAL containing ASN.1-encoded Windows
-     * referral data as documented in draft-ietf-krb-wg-kerberos-referrals-11
-     * appendix A; this will be returned to the client as encrypted padata.
+     * A module can return a referral to another realm if
+     * KRB5_KDB_FLAG_CANONICALIZE is set, or if
+     * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is set and search_for->type is
+     * KRB5_NT_ENTERPRISE_PRINCIPAL.  If KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is
+     * set, the module should return a referral by simply filling in an
+     * out-of-realm name in (*entry)->princ and setting all other fields to
+     * NULL.  Otherwise, the module should return the entry for the cross-realm
+     * TGS of the referred-to realm.  For TGS referals, the module can also
+     * include tl-data of type KRB5_TL_SERVER_REFERRAL containing ASN.1-encoded
+     * Windows referral data as documented in
+     * draft-ietf-krb-wg-kerberos-referrals-11 appendix A; this will be
+     * returned to the client as encrypted padata.
      */
     krb5_error_code (*get_principal)(krb5_context kcontext,
                                      krb5_const_principal search_for,

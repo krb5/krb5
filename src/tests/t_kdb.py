@@ -340,10 +340,13 @@ ldap_modify('dn: krbPrincipalName=canon@KRBTEST.COM,cn=t1,cn=krb5\n'
             'changetype: modify\n'
             'add: krbPrincipalName\n'
             'krbPrincipalName: alias@KRBTEST.COM\n'
+            'krbPrincipalName: ent@abc@KRBTEST.COM\n'
             '-\n'
             'add: krbCanonicalName\n'
             'krbCanonicalName: canon@KRBTEST.COM\n')
 realm.run([kadminl, 'getprinc', 'alias'],
+          expected_msg='Principal: canon@KRBTEST.COM\n')
+realm.run([kadminl, 'getprinc', 'ent\@abc'],
           expected_msg='Principal: canon@KRBTEST.COM\n')
 realm.run([kadminl, 'getprinc', 'canon'],
           expected_msg='Principal: canon@KRBTEST.COM\n')
@@ -388,6 +391,15 @@ realm.klist('canon@KRBTEST.COM', 'alias@KRBTEST.COM')
 realm.run([kadminl, 'modprinc', '+requires_preauth', 'canon'])
 realm.kinit('canon', password('canon'))
 realm.kinit('alias', password('canon'), ['-C'])
+
+# Test enterprise alias with and without canonicalization.
+realm.kinit('ent@abc', password('canon'), ['-E', '-C'])
+realm.run([kvno, 'alias'])
+realm.klist('canon@KRBTEST.COM', 'alias@KRBTEST.COM')
+
+realm.kinit('ent@abc', password('canon'), ['-E'])
+realm.run([kvno, 'alias'])
+realm.klist('ent\@abc@KRBTEST.COM', 'alias@KRBTEST.COM')
 
 # Test client name canonicalization in non-krbtgt AS reply
 realm.kinit('alias', password('canon'), ['-C', '-S', 'kadmin/changepw'])

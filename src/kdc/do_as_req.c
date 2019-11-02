@@ -596,14 +596,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * of cross realm TGS entries.
      */
     setflag(state->c_flags, KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY);
-    /*
-     * Note that according to the referrals draft we should
-     * always canonicalize enterprise principal names.
-     */
+    /* Enterprise principals are implicitly alias-ok. */
     if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE) ||
         state->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
-        setflag(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE);
         setflag(state->c_flags, KRB5_KDB_FLAG_ALIAS_OK);
+    }
+    if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
+        setflag(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
     if (include_pac_p(kdc_context, state->request)) {
         setflag(state->c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
