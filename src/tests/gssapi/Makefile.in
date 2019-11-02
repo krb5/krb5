@@ -18,15 +18,16 @@ SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
 	$(srcdir)/t_inq_mechs_name.c $(srcdir)/t_iov.c \
 	$(srcdir)/t_lifetime.c $(srcdir)/t_namingexts.c $(srcdir)/t_oid.c \
 	$(srcdir)/t_pcontok.c $(srcdir)/t_prf.c $(srcdir)/t_s4u.c \
-	$(srcdir)/t_s4u2proxy_krb5.c $(srcdir)/t_saslname.c \
-	$(srcdir)/t_spnego.c $(srcdir)/t_srcattrs.c
+	$(srcdir)/t_s4u_alias_krb5.c $(srcdir)/t_s4u2proxy_krb5.c \
+	$(srcdir)/t_saslname.c $(srcdir)/t_spnego.c $(srcdir)/t_srcattrs.c
 
 OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_add_cred.o t_ccselect.o \
 	t_ciflags.o t_context.o t_credstore.o t_enctypes.o t_err.o \
 	t_export_cred.o t_export_name.o t_gssexts.o t_imp_cred.o t_imp_name.o \
 	t_invalid.o t_inq_cred.o t_inq_ctx.o t_inq_mechs_name.o t_iov.o \
 	t_lifetime.o t_namingexts.o t_oid.o t_pcontok.o t_prf.o t_s4u.o \
-	t_s4u2proxy_krb5.o t_saslname.o t_spnego.o t_srcattrs.o
+	t_s4u2proxy_krb5.o t_saslname.o t_spnego.o t_srcattrs.o \
+	t_s4u_alias_krb5.o
 
 COMMON_DEPS= common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 COMMON_LIBS= common.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
@@ -35,7 +36,7 @@ all: ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags t_context \
 	t_credstore t_enctypes t_err t_export_cred t_export_name t_gssexts \
 	t_imp_cred t_imp_name t_invalid t_inq_cred t_inq_ctx t_inq_mechs_name \
 	t_iov t_lifetime t_namingexts t_oid t_pcontok t_prf t_s4u \
-	t_s4u2proxy_krb5 t_saslname t_spnego t_srcattrs
+	t_s4u2proxy_krb5 t_saslname t_spnego t_srcattrs t_s4u_alias_krb5
 
 check-unix: t_oid
 	$(RUN_TEST) ./t_invalid
@@ -46,7 +47,7 @@ check-unix: t_oid
 check-pytests: ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags \
 	t_context t_credstore t_enctypes t_err t_export_cred t_export_name \
 	t_imp_cred t_inq_cred t_inq_ctx t_inq_mechs_name t_iov t_lifetime \
-	t_pcontok t_s4u t_s4u2proxy_krb5 t_spnego t_srcattrs
+	t_pcontok t_s4u t_s4u2proxy_krb5 t_spnego t_srcattrs t_s4u_alias_krb5
 	$(RUNPYTEST) $(srcdir)/t_gssapi.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_ccselect.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_client_keytab.py $(PYTESTFLAGS)
@@ -108,6 +109,8 @@ t_prf: t_prf.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_prf.o $(COMMON_LIBS)
 t_s4u: t_s4u.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_s4u.o $(COMMON_LIBS)
+t_s4u_alias_krb5: t_s4u_alias_krb5.o $(COMMON_DEPS)
+	$(CC_LINK) -o $@ t_s4u_alias_krb5.o $(COMMON_LIBS)
 t_s4u2proxy_krb5: t_s4u2proxy_krb5.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_s4u2proxy_krb5.o $(COMMON_LIBS)
 t_saslname: t_saslname.o $(COMMON_DEPS)
@@ -123,4 +126,4 @@ clean:
 	$(RM) t_export_name t_gssexts t_imp_cred t_imp_name t_invalid
 	$(RM) t_inq_cred t_inq_ctx t_inq_mechs_name t_iov t_lifetime
 	$(RM) t_namingexts t_oid t_pcontok t_prf t_s4u t_s4u2proxy_krb5
-	$(RM) t_saslname t_spnego t_srcattrs
+	$(RM) t_saslname t_spnego t_srcattrs t_s4u_alias_krb5
