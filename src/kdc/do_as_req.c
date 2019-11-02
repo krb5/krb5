@@ -599,9 +599,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     /*
      * Note that according to the referrals draft we should
      * always canonicalize enterprise principal names.
+     * -- that didn't make it to RFC 6806 and Windows KDC does not implicitly
+     *    canonicalize enterprise principal names.
      */
-    if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE) ||
-        state->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+    if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
         setflag(state->c_flags, KRB5_KDB_FLAG_CANONICALIZE);
         setflag(state->c_flags, KRB5_KDB_FLAG_ALIAS_OK);
     }
