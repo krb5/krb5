@@ -1466,6 +1466,19 @@ cleanup:
     return code;
 }
 
+static krb5_error_code
+aliases(krb5_context context, const krb5_db_entry *server,
+        krb5_const_principal name, krb5_boolean *is_self)
+{
+    *is_self = FALSE;
+    if (krb5_principal_compare(context, server->princ, name)) {
+        *is_self = TRUE;
+        return 0;
+    }
+
+    return krb5_db_check_alias(context, server, name, is_self);
+}
+
 /*
  * Protocol transition (S4U2Self)
  */
@@ -1537,12 +1550,6 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
      *
      * (3) The requested service is some other name type: an exact
      *     match is required.
-     *
-     * An alternative would be to look up the server once again with
-     * FLAG_CANONICALIZE | FLAG_CLIENT_REFERRALS_ONLY set, do an exact
-     * match between the returned name and client_princ. However, this
-     * assumes that the client set FLAG_CANONICALIZE when requesting
-     * the TGT and that we have a global name service.
      */
     flags = 0;
     switch (krb5_princ_type(kdc_context, request->server)) {
@@ -1557,12 +1564,19 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         break;
     }
 
-    if (!krb5_principal_compare_flags(kdc_context,
-                                      request->server,
-                                      client_princ,
-                                      flags)) {
-        *status = "INVALID_S4U2SELF_REQUEST";
-        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
+    if (!isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) &&
+        !krb5_principal_compare_flags(kdc_context, request->server,
+                                      client_princ, flags)) {
+        krb5_boolean self;
+
+        code = aliases(kdc_context, server, client_princ, &self);
+        if (code != 0 || !self) {
+            if (code == 0)
+                code = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+            *status = "INVALID_S4U2SELF_REQUEST";
+            /* match Windows error code */
+            return code;
+        }
     }
 
     /*
@@ -1693,6 +1707,7 @@ check_rbcd_policy(kdc_realm_t *kdc_active_realm, unsigned int flags,
                   krb5_const_principal header_client_princ,
                   void *header_ad_info, const krb5_db_entry *proxy)
 {
+    krb5_error_code code;
     krb5_principal client_princ = stkt_client_princ;
 
     /* Ensure that either the evidence ticket server or the client matches the
@@ -1715,9 +1730,15 @@ check_rbcd_policy(kdc_realm_t *kdc_active_realm, unsigned int flags,
             stkt_authdata_client->realm.length == 0)
             return KRB5KDC_ERR_BADOPTION;
         client_princ = stkt_authdata_client;
-    } else if (!krb5_principal_compare(kdc_context, stkt_server->princ,
-                                       header_client_princ)) {
-        return KRB5KDC_ERR_BADOPTION;
+    } else {
+        krb5_boolean self;
+
+        code = aliases(kdc_context, stkt_server, header_client_princ, &self);
+        if (code != 0 || !self) {
+            if (code == 0)
+                code = KRB5KDC_ERR_BADOPTION;
+            return code;
+	}
     }
 
     /* If we are issuing a referral, the KDC in the resource realm will check
@@ -1746,6 +1767,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
 {
     krb5_error_code errcode;
     krb5_boolean support_rbcd;
+    krb5_boolean self;
 
     /*
      * Constrained delegation is mutually exclusive with renew/forward/etc.
@@ -1793,11 +1815,12 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
     }
 
     /* Ensure that evidence ticket server matches TGT client */
-    if (!krb5_principal_compare(kdc_context,
-                                server->princ, /* after canon */
-                                server_princ)) {
+    errcode = aliases(kdc_context, server, server_princ, &self);
+    if (errcode != 0 || !self) {
+        if (errcode == 0)
+            errcode = KRB5KDC_ERR_SERVER_NOMATCH;
         *status = "EVIDENCE_TICKET_MISMATCH";
-        return KRB5KDC_ERR_SERVER_NOMATCH;
+        return errcode;
     }
 
     if (!isflagset(t2enc->flags, TKT_FLG_FORWARDABLE)) {
