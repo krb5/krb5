@@ -3176,21 +3176,17 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 		     gss_cred_usage_t usage, gss_OID_set *rmechs)
 {
 	OM_uint32 ret, tmpmin;
-	gss_cred_id_t creds = GSS_C_NO_CREDENTIAL, *credptr;
+	gss_cred_id_t creds = GSS_C_NO_CREDENTIAL;
 	gss_OID_set cred_mechs = GSS_C_NULL_OID_SET;
 	gss_OID_set intersect_mechs = GSS_C_NULL_OID_SET;
 	unsigned int i;
 	int present;
 
 	if (spcred == NULL) {
-		/*
-		 * The default credentials were supplied.  Return a list of all
-		 * available mechs except SPNEGO.  When initiating, trim this
-		 * list to mechs we can acquire credentials for.
-		 */
-		credptr = (usage == GSS_C_INITIATE) ? &creds : NULL;
+		/* The default credentials were supplied.  Return a list of all
+		 * permissible mechs we can acquire a cred for. */
 		ret = get_available_mechs(minor_status, GSS_C_NO_NAME, usage,
-					  GSS_C_NO_CRED_STORE, credptr,
+					  GSS_C_NO_CRED_STORE, &creds,
 					  rmechs, NULL);
 		gss_release_cred(&tmpmin, &creds);
 		return (ret);
