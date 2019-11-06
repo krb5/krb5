@@ -85,6 +85,7 @@ check_context(krb5_context c, krb5_context r)
     check(c->use_conf_ktypes == r->use_conf_ktypes);
     check(c->allow_weak_crypto == r->allow_weak_crypto);
     check(c->ignore_acceptor_hostname == r->ignore_acceptor_hostname);
+    check(c->enforce_ok_as_delegate == r->enforce_ok_as_delegate);
     check(c->dns_canonicalize_hostname == r->dns_canonicalize_hostname);
     compare_string(c->plugin_base_dir, r->plugin_base_dir);
 
@@ -139,6 +140,7 @@ main(int argc, char **argv)
     ctx->udp_pref_limit = 2345;
     ctx->use_conf_ktypes = TRUE;
     ctx->ignore_acceptor_hostname = TRUE;
+    ctx->enforce_ok_as_delegate = TRUE;
     ctx->dns_canonicalize_hostname = CANONHOST_FALSE;
     free(ctx->plugin_base_dir);
     check((ctx->plugin_base_dir = strdup("/a/b/c/d")) != NULL);

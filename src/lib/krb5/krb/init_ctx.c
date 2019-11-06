@@ -232,6 +232,11 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
         goto cleanup;
     ctx->ignore_acceptor_hostname = tmp;
 
+    retval = get_boolean(ctx, KRB5_CONF_ENFORCE_OK_AS_DELEGATE, 0, &tmp);
+    if (retval)
+        goto cleanup;
+    ctx->enforce_ok_as_delegate = tmp;
+
     retval = get_tristate(ctx, KRB5_CONF_DNS_CANONICALIZE_HOSTNAME, "fallback",
                           CANONHOST_FALLBACK, 1, &tmp);
     if (retval)

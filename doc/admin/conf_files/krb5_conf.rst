@@ -212,6 +212,13 @@ The libdefaults section may contain any of the following relations:
     fallback if no URI records were found.  The default value is true.
     New in release 1.15.
 
+**enforce_ok_as_delegate**
+    If this flag to true, GSSAPI credential delegation will be
+    disabled when the ``ok-as-delegate`` flag is not set in the
+    service ticket.  If this flag is false, the ``ok-as-delegate``
+    ticket flag is only enforced when an application specifically
+    requests enforcement.  The default value is false.
+
 **err_fmt**
     This relation allows for custom error message formatting.  If a
     value is set, error messages will be formatted by substituting a

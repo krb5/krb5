@@ -563,6 +563,13 @@ kg_new_connection(
     ctx->seed_init = 0;
     ctx->seqstate = 0;
 
+    /* enforce_ok_as_delegate causes GSS_C_DELEG_FLAG to be treated as
+     * GSS_C_DELEG_POLICY_FLAG (so ok-as-delegate is always enforced). */
+    if (context->enforce_ok_as_delegate && (req_flags & GSS_C_DELEG_FLAG)) {
+        req_flags &= ~GSS_C_DELEG_FLAG;
+        req_flags |= GSS_C_DELEG_POLICY_FLAG;
+    }
+
     ctx->gss_flags = req_flags & (GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
                                   GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                   GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |

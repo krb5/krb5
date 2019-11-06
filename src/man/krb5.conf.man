@@ -76,25 +76,11 @@ fubar = {
 .UNINDENT
 .UNINDENT
 .sp
-Placing a \(aq*\(aq at the end of a line indicates that this is the \fIfinal\fP
-value for the tag.  This means that neither the remainder of this
-configuration file nor any other configuration file will be checked
-for any other values for this tag.
-.sp
-For example, if you have the following lines:
-.INDENT 0.0
-.INDENT 3.5
-.sp
-.nf
-.ft C
-foo = bar*
-foo = baz
-.ft P
-.fi
-.UNINDENT
-.UNINDENT
-.sp
-then the second value of \fBfoo\fP (\fBbaz\fP) would never be read.
+Placing a \(aq*\(aq after the closing bracket of a section name indicates
+that the section is \fIfinal\fP, meaning that if the same section appears
+within a later file specified in \fBKRB5_CONFIG\fP, it will be ignored.
+A subsection can be marked as final by placing a \(aq*\(aq after either the
+tag name or the closing brace.
 .sp
 The krb5.conf file can include other files using either of the
 following directives at the beginning of a line:
@@ -197,10 +183,7 @@ If this flag is set to false, then weak encryption types (as noted
 in Encryption_types in kdc.conf(5)) will be filtered
 out of the lists \fBdefault_tgs_enctypes\fP,
 \fBdefault_tkt_enctypes\fP, and \fBpermitted_enctypes\fP\&.  The default
-value for this tag is false, which may cause authentication
-failures in existing Kerberos infrastructures that do not support
-strong crypto.  Users in affected environments should set this tag
-to true until their infrastructure adopts stronger ciphers.
+value for this tag is false.
 .TP
 \fBcanonicalize\fP
 If this flag is set to true, initial ticket requests to the KDC
@@ -259,9 +242,7 @@ the client should request when making a TGS\-REQ, in order of
 preference from highest to lowest.  The list may be delimited with
 commas or whitespace.  See Encryption_types in
 kdc.conf(5) for a list of the accepted values for this tag.
-The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types
-will be implicitly removed from this list if the value of
-\fBallow_weak_crypto\fP is false.
+The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .sp
 Do not set this unless required for specific backward
 compatibility purposes; stale values of this setting can prevent
@@ -273,9 +254,7 @@ Identifies the supported list of session key encryption types that
 the client should request when making an AS\-REQ, in order of
 preference from highest to lowest.  The format is the same as for
 default_tgs_enctypes.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types will be implicitly
-removed from this list if the value of \fBallow_weak_crypto\fP is
-false.
+\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .sp
 Do not set this unless required for specific backward
 compatibility purposes; stale values of this setting can prevent
@@ -315,6 +294,13 @@ and other servers for a realm, if they are not listed in the
 krb5.conf information for the realm.  SRV records are used as a
 fallback if no URI records were found.  The default value is true.
 New in release 1.15.
+.TP
+\fBenforce_ok_as_delegate\fP
+If this flag to true, GSSAPI credential delegation will be
+disabled when the \fBok\-as\-delegate\fP flag is not set in the
+service ticket.  If this flag is false, the \fBok\-as\-delegate\fP
+ticket flag is only enforced when an application specifically
+requests enforcement.  The default value is false.
 .TP
 \fBerr_fmt\fP
 This relation allows for custom error message formatting.  If a
@@ -393,9 +379,7 @@ used across NATs.  The default value is true.
 \fBpermitted_enctypes\fP
 Identifies all encryption types that are permitted for use in
 session key encryption.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP, but weak encryption types will be implicitly
-removed from this list if the value of \fBallow_weak_crypto\fP is
-false.
+\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .TP
 \fBplugin_base_dir\fP
 If set, determines the base directory where krb5 plugins are

@@ -213,6 +213,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DOMAIN_REALM                 "domain_realm"
 #define KRB5_CONF_ENABLE_ONLY                  "enable_only"
 #define KRB5_CONF_ENCRYPTED_CHALLENGE_INDICATOR "encrypted_challenge_indicator"
+#define KRB5_CONF_ENFORCE_OK_AS_DELEGATE       "enforce_ok_as_delegate"
 #define KRB5_CONF_ERR_FMT                      "err_fmt"
 #define KRB5_CONF_EXTRA_ADDRESSES              "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                  "forwardable"
@@ -1255,6 +1256,7 @@ struct _krb5_context {
 
     krb5_boolean allow_weak_crypto;
     krb5_boolean ignore_acceptor_hostname;
+    krb5_boolean enforce_ok_as_delegate;
     enum dns_canonhost dns_canonicalize_hostname;
 
     krb5_trace_callback trace_callback;
