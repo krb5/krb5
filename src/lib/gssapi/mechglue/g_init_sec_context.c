@@ -63,6 +63,12 @@ val_init_sec_ctx_args(
 	output_token->value = NULL;
     }
 
+    if (ret_flags != NULL)
+	*ret_flags = 0;
+
+    if (time_rec != NULL)
+	*time_rec = 0;
+
     /* Validate arguments. */
 
     if (minor_status == NULL)

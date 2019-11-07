@@ -106,6 +106,7 @@ typedef struct {
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
 	gss_OID actual_mech;
+	gss_cred_id_t deleg_cred;
 } spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
 
 /*

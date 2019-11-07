@@ -130,8 +130,7 @@ init_ctx_reselect(OM_uint32 *, spnego_gss_ctx_id_t, OM_uint32,
 static OM_uint32
 init_ctx_call_init(OM_uint32 *, spnego_gss_ctx_id_t, spnego_gss_cred_id_t,
 		   OM_uint32, gss_name_t, OM_uint32, OM_uint32, gss_buffer_t,
-		   gss_OID *, gss_buffer_t, OM_uint32 *, OM_uint32 *,
-		   send_token_flag *);
+		   gss_buffer_t, OM_uint32 *, send_token_flag *);
 
 static OM_uint32
 acc_ctx_new(OM_uint32 *, gss_buffer_t, spnego_gss_cred_id_t, gss_buffer_t *,
@@ -145,9 +144,8 @@ acc_ctx_vfy_oid(OM_uint32 *, spnego_gss_ctx_id_t, gss_OID,
 		OM_uint32 *, send_token_flag *);
 static OM_uint32
 acc_ctx_call_acc(OM_uint32 *, spnego_gss_ctx_id_t, spnego_gss_cred_id_t,
-		 gss_buffer_t, gss_OID *, gss_buffer_t,
-		 OM_uint32 *, OM_uint32 *, gss_cred_id_t *,
-		 OM_uint32 *, send_token_flag *);
+		 gss_buffer_t, gss_buffer_t, OM_uint32 *, OM_uint32 *,
+		 send_token_flag *);
 
 static gss_OID
 negotiate_mech(gss_OID_set, gss_OID_set, OM_uint32 *);
@@ -468,6 +466,7 @@ create_spnego_ctx(int initiate)
 	spnego_ctx->initiate = initiate;
 	spnego_ctx->internal_name = GSS_C_NO_NAME;
 	spnego_ctx->actual_mech = GSS_C_NO_OID;
+	spnego_ctx->deleg_cred = GSS_C_NO_CREDENTIAL;
 
 	return (spnego_ctx);
 }
@@ -900,9 +899,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		   OM_uint32 req_flags,
 		   OM_uint32 time_req,
 		   gss_buffer_t mechtok_in,
-		   gss_OID *actual_mech,
 		   gss_buffer_t mechtok_out,
-		   OM_uint32 *ret_flags,
 		   OM_uint32 *time_rec,
 		   send_token_flag *send_token)
 {
@@ -938,8 +935,6 @@ init_ctx_call_init(OM_uint32 *minor_status,
 
 	if (ret == GSS_S_COMPLETE) {
 		sc->mech_complete = 1;
-		if (ret_flags != NULL)
-			*ret_flags = sc->ctx_flags;
 		/*
 		 * Microsoft SPNEGO implementations expect an even number of
 		 * token exchanges.  So if we're sending a final token, ask for
@@ -979,8 +974,8 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		goto fail;
 	tmpret = init_ctx_call_init(&tmpmin, sc, spcred, acc_negState,
 				    target_name, req_flags, time_req,
-				    mechtok_in, actual_mech, mechtok_out,
-				    ret_flags, time_rec, send_token);
+				    mechtok_in, mechtok_out, time_rec,
+				    send_token);
 	if (HARD_ERROR(tmpret))
 		goto fail;
 	*minor_status = tmpmin;
@@ -1056,6 +1051,8 @@ spnego_gss_init_sec_context(
 
 	if (actual_mech != NULL)
 		*actual_mech = GSS_C_NO_OID;
+	if (time_rec != NULL)
+		*time_rec = 0;
 
 	/* Step 1: perform mechanism negotiation. */
 	spcred = (spnego_gss_cred_id_t)claimant_cred_handle;
@@ -1080,9 +1077,8 @@ spnego_gss_init_sec_context(
 	if (!spnego_ctx->mech_complete) {
 		ret = init_ctx_call_init(minor_status, spnego_ctx, spcred,
 					 acc_negState, target_name, req_flags,
-					 time_req, mechtok_in, actual_mech,
-					 &mechtok_out, ret_flags, time_rec,
-					 &send_token);
+					 time_req, mechtok_in, &mechtok_out,
+					 time_rec, &send_token);
 		if (ret != GSS_S_COMPLETE)
 			goto cleanup;
 
@@ -1105,6 +1101,9 @@ spnego_gss_init_sec_context(
 		if (HARD_ERROR(ret))
 			goto cleanup;
 	}
+
+	if (ret_flags != NULL)
+		*ret_flags = spnego_ctx->ctx_flags & ~GSS_C_PROT_READY_FLAG;
 
 	ret = (send_token == NO_TOKEN_SEND || negState == ACCEPT_COMPLETE) ?
 		GSS_S_COMPLETE : GSS_S_CONTINUE_NEEDED;
@@ -1134,8 +1133,12 @@ cleanup:
 		spnego_ctx->opened = 1;
 		if (actual_mech != NULL)
 			*actual_mech = spnego_ctx->actual_mech;
-		if (ret_flags != NULL)
-			*ret_flags = spnego_ctx->ctx_flags;
+		/* Get an updated lifetime if we didn't call into the mech. */
+		if (time_rec != NULL && *time_rec == 0) {
+			(void) gss_context_time(&tmpmin,
+						spnego_ctx->ctx_handle,
+						time_rec);
+		}
 	} else if (ret != GSS_S_CONTINUE_NEEDED) {
 		if (spnego_ctx != NULL) {
 			gss_delete_sec_context(&tmpmin,
@@ -1533,12 +1536,10 @@ cleanup:
 static OM_uint32
 acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 		 spnego_gss_cred_id_t spcred, gss_buffer_t mechtok_in,
-		 gss_OID *mech_type, gss_buffer_t mechtok_out,
-		 OM_uint32 *ret_flags, OM_uint32 *time_rec,
-		 gss_cred_id_t *delegated_cred_handle,
+		 gss_buffer_t mechtok_out, OM_uint32 *time_rec,
 		 OM_uint32 *negState, send_token_flag *tokflag)
 {
-	OM_uint32 ret;
+	OM_uint32 ret, tmpmin;
 	gss_OID_desc mechoid;
 	gss_cred_id_t mcred;
 
@@ -1558,17 +1559,13 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	}
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
-	ret = gss_accept_sec_context(minor_status,
-				     &sc->ctx_handle,
-				     mcred,
-				     mechtok_in,
-				     GSS_C_NO_CHANNEL_BINDINGS,
-				     &sc->internal_name,
-				     mech_type,
-				     mechtok_out,
-				     &sc->ctx_flags,
-				     time_rec,
-				     delegated_cred_handle);
+	(void) gss_release_name(&tmpmin, &sc->internal_name);
+	(void) gss_release_cred(&tmpmin, &sc->deleg_cred);
+	ret = gss_accept_sec_context(minor_status, &sc->ctx_handle, mcred,
+				     mechtok_in, GSS_C_NO_CHANNEL_BINDINGS,
+				     &sc->internal_name, &sc->actual_mech,
+				     mechtok_out, &sc->ctx_flags, time_rec,
+				     &sc->deleg_cred);
 	if (ret == GSS_S_COMPLETE) {
 #ifdef MS_BUG_TEST
 		/*
@@ -1585,8 +1582,6 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 		}
 #endif
 		sc->mech_complete = 1;
-		if (ret_flags != NULL)
-			*ret_flags = sc->ctx_flags;
 
 		if (!sc->mic_reqd ||
 		    !(sc->ctx_flags & GSS_C_INTEG_FLAG)) {
@@ -1724,11 +1719,9 @@ spnego_gss_accept_sec_context(
 	 * whether it is the first round-trip.
 	 */
 	if (negState != REQUEST_MIC && mechtok_in != GSS_C_NO_BUFFER) {
-		ret = acc_ctx_call_acc(minor_status, sc, spcred,
-				       mechtok_in, mech_type, &mechtok_out,
-				       ret_flags, time_rec,
-				       delegated_cred_handle,
-				       &negState, &return_token);
+		ret = acc_ctx_call_acc(minor_status, sc, spcred, mechtok_in,
+				       &mechtok_out, time_rec, &negState,
+				       &return_token);
 	}
 
 	/* Step 3: process or generate the MIC, if the negotiated mech is
@@ -1741,6 +1734,10 @@ spnego_gss_accept_sec_context(
 				 sc, &mic_out,
 				 &negState, &return_token);
 	}
+
+	if (!HARD_ERROR(ret) && ret_flags != NULL)
+		*ret_flags = sc->ctx_flags & ~GSS_C_PROT_READY_FLAG;
+
 cleanup:
 	if (return_token == INIT_TOKEN_SEND && sendTokenInit) {
 		assert(sc != NULL);
@@ -1766,6 +1763,17 @@ cleanup:
 		    src_name != NULL) {
 			*src_name = sc->internal_name;
 			sc->internal_name = GSS_C_NO_NAME;
+		}
+		if (mech_type != NULL)
+			*mech_type = sc->actual_mech;
+		/* Get an updated lifetime if we didn't call into the mech. */
+		if (time_rec != NULL && *time_rec == 0) {
+			(void) gss_context_time(&tmpmin, sc->ctx_handle,
+						time_rec);
+		}
+		if (delegated_cred_handle != NULL) {
+			*delegated_cred_handle = sc->deleg_cred;
+			sc->deleg_cred = GSS_C_NO_CREDENTIAL;
 		}
 	} else if (ret != GSS_S_CONTINUE_NEEDED) {
 		if (sc != NULL) {
@@ -3065,6 +3073,7 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
 		(void) gss_release_oid_set(&minor_stat, &context->mech_set);
 
 		(void) gss_release_name(&minor_stat, &context->internal_name);
+		(void) gss_release_cred(&minor_stat, &context->deleg_cred);
 
 		free(context);
 		*ctx = NULL;
