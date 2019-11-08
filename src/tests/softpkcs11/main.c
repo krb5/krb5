@@ -261,7 +261,7 @@ attributes_match(const struct st_object *obj,
             }
         }
         if (match == 0) {
-            st_logf("type %d attribute have no match\n", attributes[i].type);
+            st_logf("type %lu attribute have no match\n", attributes[i].type);
             return 0;
         }
     }
@@ -553,8 +553,9 @@ add_certificate(char *label,
         key_type = CKK_DSA;
         break;
     default:
-        /* XXX */
-        break;
+        st_logf("invalid key_type\n");
+        ret = CKR_GENERAL_ERROR;
+        goto out;
     }
 
     c = CKO_CERTIFICATE;
