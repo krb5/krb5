@@ -972,6 +972,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 	gss_release_buffer(&tmpmin, &sc->DER_mechTypes);
 	if (put_mech_set(sc->mech_set, &sc->DER_mechTypes) < 0)
 		goto fail;
+	gss_delete_sec_context(&tmpmin, &sc->ctx_handle, GSS_C_NO_BUFFER);
 	tmpret = init_ctx_call_init(&tmpmin, sc, spcred, acc_negState,
 				    target_name, req_flags, time_req,
 				    mechtok_in, mechtok_out, time_rec,
