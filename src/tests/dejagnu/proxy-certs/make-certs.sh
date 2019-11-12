@@ -25,7 +25,7 @@ private_key = $PWD/privkey.pem
 default_days = $DAYS
 x509_extensions = exts_proxy
 policy = proxyname
-default_md = sha1
+default_md = sha256
 unique_subject = no
 email_in_dn = no
 
