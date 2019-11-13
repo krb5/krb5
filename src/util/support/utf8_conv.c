@@ -94,7 +94,6 @@ k5_utf8_to_utf16le(const char *utf8, uint8_t **utf16_out, size_t *nbytes_out)
     struct k5buf buf;
     krb5_ucs4 ch;
     size_t chlen, i;
-    uint8_t *p;
 
     *utf16_out = NULL;
     *nbytes_out = 0;
@@ -127,16 +126,13 @@ k5_utf8_to_utf16le(const char *utf8, uint8_t **utf16_out, size_t *nbytes_out)
 
         /* Characters in the basic multilingual plane are encoded using two
          * bytes; other characters are encoded using four bytes. */
-        p = k5_buf_get_space(&buf, IS_BMP(ch) ? 2 : 4);
-        if (p == NULL)
-            return ENOMEM;
         if (IS_BMP(ch)) {
-            store_16_le(ch, p);
+            k5_buf_add_uint16_le(&buf, ch);
         } else {
             /* 0x10000 is subtracted from ch; then the high ten bits plus
              * 0xD800 and the low ten bits plus 0xDC00 are the surrogates. */
-            store_16_le(HIGH_SURROGATE(ch), p);
-            store_16_le(LOW_SURROGATE(ch), p + 2);
+            k5_buf_add_uint16_le(&buf, HIGH_SURROGATE(ch));
+            k5_buf_add_uint16_le(&buf, LOW_SURROGATE(ch));
         }
 
         /* Move to next UTF-8 character. */

@@ -120,10 +120,7 @@ parse_cookie(const krb5_data *cookie, int *stage_out, int32_t *group_out,
 static void
 marshal_data(struct k5buf *buf, const krb5_data *data)
 {
-    uint8_t lenbuf[4];
-
-    store_32_be(data->length, lenbuf);
-    k5_buf_add_len(buf, lenbuf, 4);
+    k5_buf_add_uint32_be(buf, data->length);
     k5_buf_add_len(buf, data->data, data->length);
 }
 
@@ -133,18 +130,14 @@ make_cookie(int stage, int32_t group, const krb5_data *spake,
             const krb5_data *thash, krb5_data *cookie_out)
 {
     struct k5buf buf;
-    uint8_t intbuf[4];
 
     *cookie_out = empty_data();
     k5_buf_init_dynamic_zap(&buf);
 
     /* Marshal the version, stage, and group. */
-    store_16_be(1, intbuf);
-    k5_buf_add_len(&buf, intbuf, 2);
-    store_16_be(stage, intbuf);
-    k5_buf_add_len(&buf, intbuf, 2);
-    store_32_be(group, intbuf);
-    k5_buf_add_len(&buf, intbuf, 4);
+    k5_buf_add_uint16_be(&buf, 1);
+    k5_buf_add_uint16_be(&buf, stage);
+    k5_buf_add_uint32_be(&buf, group);
 
     /* Marshal the data fields. */
     marshal_data(&buf, spake);

@@ -121,16 +121,6 @@ kcmreq_init(struct kcmreq *req, kcm_opcode opcode, krb5_ccache cache)
     }
 }
 
-/* Add a 32-bit value to the request in big-endian byte order. */
-static void
-kcmreq_put32(struct kcmreq *req, uint32_t val)
-{
-    unsigned char bytes[4];
-
-    store_32_be(val, bytes);
-    k5_buf_add_len(&req->reqbuf, bytes, 4);
-}
-
 #ifdef __APPLE__
 
 /* The maximum length of an in-band request or reply as defined by the RPC
@@ -596,7 +586,7 @@ set_kdc_offset(krb5_context context, krb5_ccache cache)
 
     if (context->os_context.os_flags & KRB5_OS_TOFFSET_VALID) {
         kcmreq_init(&req, KCM_OP_SET_KDC_OFFSET, cache);
-        kcmreq_put32(&req, context->os_context.time_offset);
+        k5_buf_add_uint32_be(&req.reqbuf, context->os_context.time_offset);
         (void)cache_call(context, cache, &req);
         kcmreq_free(&req);
     }
@@ -824,7 +814,7 @@ kcm_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
     struct kcmreq req;
 
     kcmreq_init(&req, KCM_OP_REMOVE_CRED, cache);
-    kcmreq_put32(&req, flags);
+    k5_buf_add_uint32_be(&req.reqbuf, flags);
     k5_marshal_mcred(&req.reqbuf, mcred);
     ret = cache_call(context, cache, &req);
     kcmreq_free(&req);

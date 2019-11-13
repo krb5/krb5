@@ -446,7 +446,6 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     krb5_error_code ret;
     krb5_os_context os_ctx = &context->os_context;
     fcc_data *data = id->data;
-    char i16buf[2], i32buf[4];
     uint16_t fields_len;
     ssize_t nwritten;
     int st, flags, version, fd = -1;
@@ -484,25 +483,19 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     /* Prepare the header and principal in buf. */
     k5_buf_init_dynamic(&buf);
     version = context->fcc_default_format - FVNO_BASE;
-    store_16_be(FVNO_BASE + version, i16buf);
-    k5_buf_add_len(&buf, i16buf, 2);
+    k5_buf_add_uint16_be(&buf, FVNO_BASE + version);
     if (version >= 4) {
         /* Add tagged header fields. */
         fields_len = 0;
         if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
             fields_len += 12;
-        store_16_be(fields_len, i16buf);
-        k5_buf_add_len(&buf, i16buf, 2);
+        k5_buf_add_uint16_be(&buf, fields_len);
         if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
             /* Add time offset tag. */
-            store_16_be(FCC_TAG_DELTATIME, i16buf);
-            k5_buf_add_len(&buf, i16buf, 2);
-            store_16_be(8, i16buf);
-            k5_buf_add_len(&buf, i16buf, 2);
-            store_32_be(os_ctx->time_offset, i32buf);
-            k5_buf_add_len(&buf, i32buf, 4);
-            store_32_be(os_ctx->usec_offset, i32buf);
-            k5_buf_add_len(&buf, i32buf, 4);
+            k5_buf_add_uint16_be(&buf, FCC_TAG_DELTATIME);
+            k5_buf_add_uint16_be(&buf, 8);
+            k5_buf_add_uint32_be(&buf, os_ctx->time_offset);
+            k5_buf_add_uint32_be(&buf, os_ctx->usec_offset);
         }
     }
     k5_marshal_princ(&buf, version, princ);
