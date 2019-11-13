@@ -108,4 +108,58 @@ int k5_buf_status(struct k5buf *buf);
  */
 void k5_buf_free(struct k5buf *buf);
 
+static inline void
+k5_buf_add_uint16_be(struct k5buf *buf, uint16_t val)
+{
+    void *p = k5_buf_get_space(buf, 2);
+
+    if (p != NULL)
+        store_16_be(val, p);
+}
+
+static inline void
+k5_buf_add_uint16_le(struct k5buf *buf, uint16_t val)
+{
+    void *p = k5_buf_get_space(buf, 2);
+
+    if (p != NULL)
+        store_16_le(val, p);
+}
+
+static inline void
+k5_buf_add_uint32_be(struct k5buf *buf, uint32_t val)
+{
+    void *p = k5_buf_get_space(buf, 4);
+
+    if (p != NULL)
+        store_32_be(val, p);
+}
+
+static inline void
+k5_buf_add_uint32_le(struct k5buf *buf, uint32_t val)
+{
+    void *p = k5_buf_get_space(buf, 4);
+
+    if (p != NULL)
+        store_32_le(val, p);
+}
+
+static inline void
+k5_buf_add_uint64_be(struct k5buf *buf, uint64_t val)
+{
+    void *p = k5_buf_get_space(buf, 8);
+
+    if (p != NULL)
+        store_64_be(val, p);
+}
+
+static inline void
+k5_buf_add_uint64_le(struct k5buf *buf, uint64_t val)
+{
+    void *p = k5_buf_get_space(buf, 8);
+
+    if (p != NULL)
+        store_64_le(val, p);
+}
+
 #endif /* K5_BUF_H */
