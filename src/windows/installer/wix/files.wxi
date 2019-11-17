@@ -365,6 +365,7 @@
                         <Directory Id="dirinc_krb5_gssapi" Name="gssapi" FileSource="$(var.IncDir)gssapi\">
                             <Component Id="cmp_dirinc_krb5_gssapi" Guid="BD3C190B-1EBB-4d14-81DD-B2000DC4EAC7" DiskId="1">
                                 <File Id="fil_gssapi_h" Name="gssapi.h" KeyPath="yes" />
+                                <File Id="fil_gssapi_alloc_h" Name="gssapi_alloc.h" />
                                 <File Id="fil_gssapi_ext_h" Name="gssapi_ext.h" />
                                 <File Id="fil_gssapi_generic_h" Name="gssapi_generic.h" />
                                 <File Id="fil_gssapi_krb5_h" Name="gssapi_krb5.h" />
