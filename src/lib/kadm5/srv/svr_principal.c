@@ -302,7 +302,7 @@ kadm5_create_principal_3(void *server_handle,
     kadm5_server_handle_t handle = server_handle;
     krb5_keyblock               *act_mkey;
     krb5_kvno                   act_kvno;
-    int                         new_n_ks_tuple = 0;
+    int                         new_n_ks_tuple = 0, i;
     krb5_key_salt_tuple         *new_ks_tuple = NULL;
 
     CHECK_HANDLE(server_handle);
@@ -468,6 +468,10 @@ kadm5_create_principal_3(void *server_handle,
         /* Null password means create with random key (new in 1.8). */
         ret = krb5_dbe_crk(handle->context, &master_keyblock,
                            new_ks_tuple, new_n_ks_tuple, FALSE, kdb);
+        if (mask & KADM5_KVNO) {
+            for (i = 0; i < kdb->n_key_data; i++)
+                kdb->key_data[i].key_data_kvno = entry->kvno;
+        }
     }
     if (ret)
         goto cleanup;
