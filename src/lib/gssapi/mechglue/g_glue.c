@@ -758,3 +758,31 @@ gssint_create_copy_buffer(srcBuf, destBuf, addNullChar)
 
     return (GSS_S_COMPLETE);
 } /* ****** gssint_create_copy_buffer  ****** */
+
+OM_uint32
+gssint_create_union_context(OM_uint32 *minor, gss_const_OID mech_oid,
+			    gss_union_ctx_id_t *ctx_out)
+{
+    OM_uint32 status;
+    gss_union_ctx_id_t ctx;
+
+    *ctx_out = NULL;
+
+    ctx = calloc(1, sizeof(*ctx));
+    if (ctx == NULL) {
+	*minor = ENOMEM;
+	return GSS_S_FAILURE;
+    }
+
+    status = generic_gss_copy_oid(minor, mech_oid, &ctx->mech_type);
+    if (status != GSS_S_COMPLETE) {
+	free(ctx);
+	return status;
+    }
+
+    ctx->loopback = ctx;
+    ctx->internal_ctx_id = GSS_C_NO_CONTEXT;
+
+    *ctx_out = ctx;
+    return GSS_S_COMPLETE;
+}

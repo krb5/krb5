@@ -769,6 +769,12 @@ OM_uint32 gssint_create_copy_buffer(
 	int			/* NULL terminate buffer ? */
 );
 
+OM_uint32 gssint_create_union_context(
+	OM_uint32 *minor,	/* minor_status */
+	gss_const_OID,		/* mech_oid */
+	gss_union_ctx_id_t *	/* ctx_out */
+);
+
 OM_uint32 gssint_copy_oid_set(
 	OM_uint32 *,			/* minor_status */
 	const gss_OID_set_desc * const,	/* oid set */
