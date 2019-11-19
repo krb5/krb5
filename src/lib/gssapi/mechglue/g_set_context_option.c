@@ -96,6 +96,7 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
 		return status;
 	    }
 
+	    ctx->loopback = ctx;
 	    ctx->internal_ctx_id = internal_ctx;
 	    *context_handle = (gss_ctx_id_t)ctx;
 	}
