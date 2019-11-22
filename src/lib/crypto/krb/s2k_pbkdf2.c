@@ -168,9 +168,8 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
     if (err)
         goto cleanup;
 
-    err = krb5int_derive_keyblock(ktp->enc, ktp->hash, tempkey, key, &usage,
+    err = krb5int_derive_keyblock(ktp->enc, hash, tempkey, key, &usage,
                                   deriv_alg);
-
 cleanup:
     if (sandp.data)
         free(sandp.data);
