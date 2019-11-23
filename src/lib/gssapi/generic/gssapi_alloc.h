@@ -80,7 +80,7 @@ gssalloc_realloc(void *value, size_t size)
         return gssalloc_malloc(size);
     if (memcmp(p, "gssalloc", 8) != 0)
         abort();
-    return (char *)realloc(p, size) + 8;
+    return (char *)realloc(p, size + 8) + 8;
 }
 
 #else /* not _WIN32 or DEBUG_GSSALLOC */
