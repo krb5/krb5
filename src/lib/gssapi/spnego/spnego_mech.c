@@ -3732,7 +3732,7 @@ negotiate_mech(gss_OID_set supported, gss_OID_set received,
 static spnego_token_t
 make_spnego_token(const char *name)
 {
-	return (spnego_token_t)strdup(name);
+	return (spnego_token_t)gssalloc_strdup(name);
 }
 
 static gss_buffer_desc

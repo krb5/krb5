@@ -51,7 +51,7 @@ gss_encapsulate_token(gss_const_buffer_t input_token,
     assert(tokenSize > 2);
     tokenSize -= 2; /* TOK_ID */
 
-    output_token->value = malloc(tokenSize);
+    output_token->value = gssalloc_malloc(tokenSize);
     if (output_token->value == NULL)
         return GSS_S_FAILURE;
 
