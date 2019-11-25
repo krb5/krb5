@@ -3,7 +3,14 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
+#ifdef _WIN32
 #include <stdio.h>
+#include "prof_int.h"
+#else
+#include "prof_int.h"
+#include <stdio.h>
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -29,7 +36,6 @@
 #endif
 #endif
 
-#include "prof_int.h"
 #include "k5-platform.h"
 
 struct global_shared_profile_data {

@@ -53,8 +53,13 @@
 
 #ifndef LEAN_CLIENT
 
+#ifdef _WIN32
 #include <stdio.h>
 #include "k5-int.h"
+#else
+#include "k5-int.h"
+#include <stdio.h>
+#endif
 #include "../os/os-proto.h"
 
 /*
