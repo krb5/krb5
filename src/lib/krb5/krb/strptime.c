@@ -43,6 +43,10 @@ __RCSID("$NetBSD: strptime.c,v 1.18 1999/04/29 02:58:30 tv Exp $");
 #include <string.h>
 #include <time.h>
 
+#ifdef _WIN32
+#include "win-mac.h"
+#endif
+
 #undef _ctloc
 #define _ctloc(x)		_CurrentTimeLocale->x
 

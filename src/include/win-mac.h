@@ -240,12 +240,15 @@ typedef _W64 int         ssize_t;
 #define isatty		_isatty
 #define wcsicmp		_wcsicmp
 #define strupr		_strupr
+#ifndef getcwd
 #define getcwd		_getcwd
+#endif
+#ifndef chdir
 #define chdir		_chdir
+#endif
 #define access		_access
 #define stat		_stat
 #define mktemp		_mktemp
-#define strdup		_strdup
 #define strnicmp	_strnicmp
 #endif
 

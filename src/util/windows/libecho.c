@@ -11,6 +11,10 @@
 #include <io.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include "win-mac.h"
+#endif
+
 void echo_files(char *, char *);
 
 int

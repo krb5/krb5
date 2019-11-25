@@ -60,11 +60,12 @@
  * from the functions: open, close, read, write, lseek.
  */
 
-#include "k5-int.h"
-#include "cc-int.h"
 
 #include <stdio.h>
 #include <errno.h>
+
+#include "k5-int.h"
+#include "cc-int.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

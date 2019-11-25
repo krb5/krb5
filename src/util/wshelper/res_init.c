@@ -64,6 +64,7 @@ static char sccsid[] = "@(#)res_init.c  6.15 (Berkeley) 2/24/91";
 #include <mitwhich.h>
 
 #include "resource.h"
+#include "win-mac.h"
 
 char debstr[80];
 

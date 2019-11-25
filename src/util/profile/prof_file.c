@@ -3,8 +3,6 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
-#include "prof_int.h"
-
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -26,12 +24,12 @@
 #if defined(_WIN32)
 #include <io.h>
 #define HAVE_STAT
-#define stat _stat
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) & S_IFMT) == S_IFDIR)
 #endif
 #endif
 
+#include "prof_int.h"
 #include "k5-platform.h"
 
 struct global_shared_profile_data {
