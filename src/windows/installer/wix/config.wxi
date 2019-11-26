@@ -49,6 +49,8 @@
         <?define VCVer="140"?>
     <?elseif $(env.VISUALSTUDIOVERSION) = "15.0"?>
         <?define VCVer="141"?>
+    <?elseif $(env.VISUALSTUDIOVERSION) = "16.0"?>
+        <?define VCVer="142"?>
     <?else?>
         <?error Unknown MFC version?>
     <?endif?>
