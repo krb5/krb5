@@ -962,22 +962,24 @@ class K5Realm(object):
     def _subst_cfg_value(self, value):
         global buildtop, srctop, hostname
         template = string.Template(value)
-        return template.substitute(realm=self.realm,
-                                   testdir=self.testdir,
-                                   buildtop=buildtop,
-                                   srctop=srctop,
-                                   plugins=plugins,
-                                   hostname=hostname,
-                                   port0=self.portbase,
-                                   port1=self.portbase + 1,
-                                   port2=self.portbase + 2,
-                                   port3=self.portbase + 3,
-                                   port4=self.portbase + 4,
-                                   port5=self.portbase + 5,
-                                   port6=self.portbase + 6,
-                                   port7=self.portbase + 7,
-                                   port8=self.portbase + 8,
-                                   port9=self.portbase + 9)
+        subst = template.substitute(realm=self.realm,
+                                    testdir=self.testdir,
+                                    buildtop=buildtop,
+                                    srctop=srctop,
+                                    plugins=plugins,
+                                    hostname=hostname,
+                                    port0=self.portbase,
+                                    port1=self.portbase + 1,
+                                    port2=self.portbase + 2,
+                                    port3=self.portbase + 3,
+                                    port4=self.portbase + 4,
+                                    port5=self.portbase + 5,
+                                    port6=self.portbase + 6,
+                                    port7=self.portbase + 7,
+                                    port8=self.portbase + 8,
+                                    port9=self.portbase + 9)
+        # Empty values must be quoted to avoid a syntax error.
+        return subst if subst else '""'
 
     def _create_acl(self):
         global hostname

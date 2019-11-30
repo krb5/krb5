@@ -24,8 +24,9 @@ from k5test import *
 
 # Create two independent realms (no cross-realm TGTs).  For the
 # fallback realm tests we need to control the precise server hostname,
-# so turn off DNS canonicalization.
-conf = {'libdefaults': {'dns_canonicalize_hostname': 'false'}}
+# so turn off DNS canonicalization and shortname qualification.
+conf = {'libdefaults': {'dns_canonicalize_hostname': 'false',
+                        'qualify_shortname': ''}}
 r1 = K5Realm(create_user=False, krb5_conf=conf)
 r2 = K5Realm(create_user=False, krb5_conf=conf, realm='KRBTEST2.COM',
              portbase=62000, testdir=os.path.join(r1.testdir, 'r2'))

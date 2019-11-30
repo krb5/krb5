@@ -6,7 +6,8 @@ conf = {'domain_realm': {'kerberos.org': 'R1',
                          'example.com': 'R2',
                          'mit.edu': 'R3'}}
 no_rdns_conf = {'libdefaults': {'rdns': 'false'}}
-no_canon_conf = {'libdefaults': {'dns_canonicalize_hostname': 'false'}}
+no_canon_conf = {'libdefaults': {'dns_canonicalize_hostname': 'false',
+                                 'qualify_shortname': 'example.com'}}
 fallback_canon_conf = {'libdefaults':
                        {'rdns': 'false',
                         'dns_canonicalize_hostname': 'fallback'}}
@@ -62,12 +63,15 @@ testu('Example.COM:xyZ', 'Example.COM:xyZ', 'R2')
 testu('example.com.::123', 'example.com.::123', '')
 
 # With dns_canonicalize_hostname=false, we downcase and remove
-# trailing dots but do not canonicalize the hostname.  Trailers do not
-# get downcased.
+# trailing dots but do not canonicalize the hostname.
+# Single-component names are qualified with the configured suffix
+# (defaulting to the first OS search domain, but Python cannot easily
+# retrieve that value so we don't test it).  Trailers do not get
+# downcased.
 mark('dns_canonicalize_host=false')
 testnc('ptr-mismatch.kerberos.org', 'ptr-mismatch.kerberos.org', 'R1')
 testnc('Example.COM', 'example.com', 'R2')
-testnc('abcde', 'abcde', '')
+testnc('abcde', 'abcde.example.com', 'R2')
 testnc('example.com.:123', 'example.com:123', 'R2')
 testnc('Example.COM:xyZ', 'example.com:xyZ', 'R2')
 testnc('example.com.::123', 'example.com.::123', '')

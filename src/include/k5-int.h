@@ -281,6 +281,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_PLUGIN_BASE_DIR              "plugin_base_dir"
 #define KRB5_CONF_PREFERRED_PREAUTH_TYPES      "preferred_preauth_types"
 #define KRB5_CONF_PROXIABLE                    "proxiable"
+#define KRB5_CONF_QUALIFY_SHORTNAME            "qualify_shortname"
 #define KRB5_CONF_RDNS                         "rdns"
 #define KRB5_CONF_REALMS                       "realms"
 #define KRB5_CONF_REALM_TRY_DOMAINS            "realm_try_domains"

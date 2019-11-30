@@ -136,6 +136,8 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
 krb5_error_code k5_try_realm_txt_rr(krb5_context context, const char *prefix,
                                     const char *name, char **realm);
 
+char *k5_primary_domain(void);
+
 int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);

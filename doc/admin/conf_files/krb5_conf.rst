@@ -314,6 +314,15 @@ The libdefaults section may contain any of the following relations:
     If this flag is true, initial tickets will be proxiable by
     default, if allowed by the KDC.  The default value is false.
 
+**qualify_shortname**
+    If this string is set, it determines the domain suffix for
+    single-component hostnames when DNS canonicalization is not used
+    (either because **dns_canonicalize_hostname** is false or because
+    forward canonicalization failed).  The default value is the first
+    search domain of the system's DNS configuration.  To disable
+    qualification of shortnames, set this relation to the empty string
+    with ``qualify_shortname = ""``.  (New in release 1.18.)
+
 **rdns**
     If this flag is true, reverse name lookup will be used in addition
     to forward name lookup to canonicalizing hostnames for use in
