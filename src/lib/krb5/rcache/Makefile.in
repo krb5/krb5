@@ -10,16 +10,14 @@ STLIBOBJS = \
 	rc_base.o	\
 	rc_dfl.o 	\
 	rc_file2.o	\
-	rc_none.o	\
-	ser_rc.o
+	rc_none.o
 
 OBJS=	\
 	$(OUTPRE)memrcache.$(OBJEXT)	\
 	$(OUTPRE)rc_base.$(OBJEXT)	\
 	$(OUTPRE)rc_dfl.$(OBJEXT) 	\
 	$(OUTPRE)rc_file2.$(OBJEXT) 	\
-	$(OUTPRE)rc_none.$(OBJEXT)	\
-	$(OUTPRE)ser_rc.$(OBJEXT)
+	$(OUTPRE)rc_none.$(OBJEXT)
 
 SRCS=	\
 	$(srcdir)/memrcache.c	\
@@ -27,7 +25,6 @@ SRCS=	\
 	$(srcdir)/rc_dfl.c 	\
 	$(srcdir)/rc_file2.c 	\
 	$(srcdir)/rc_none.c	\
-	$(srcdir)/ser_rc.c	\
 	$(srcdir)/t_memrcache.c	\
 	$(srcdir)/t_rcfile2.c
 

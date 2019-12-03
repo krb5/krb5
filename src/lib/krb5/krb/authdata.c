@@ -1149,13 +1149,11 @@ krb5_authdata_context_copy(krb5_context kcontext,
 /*
  * Calculate size of to-be-externalized authdata context.
  */
-static krb5_error_code
-krb5_authdata_context_size(krb5_context kcontext,
-                           krb5_pointer ptr,
-                           size_t *sizep)
+krb5_error_code
+k5_size_authdata_context(krb5_context kcontext, krb5_authdata_context context,
+                         size_t *sizep)
 {
     krb5_error_code code;
-    krb5_authdata_context context = (krb5_authdata_context)ptr;
 
     code = k5_ad_size(kcontext, context, AD_USAGE_MASK, sizep);
     if (code != 0)
@@ -1169,14 +1167,12 @@ krb5_authdata_context_size(krb5_context kcontext,
 /*
  * Externalize an authdata context.
  */
-static krb5_error_code
-krb5_authdata_context_externalize(krb5_context kcontext,
-                                  krb5_pointer ptr,
-                                  krb5_octet **buffer,
-                                  size_t *lenremain)
+krb5_error_code
+k5_externalize_authdata_context(krb5_context kcontext,
+                                krb5_authdata_context context,
+                                krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code code;
-    krb5_authdata_context context = (krb5_authdata_context)ptr;
     krb5_octet *bp;
     size_t remain;
 
@@ -1208,11 +1204,10 @@ krb5_authdata_context_externalize(krb5_context kcontext,
 /*
  * Internalize an authdata context.
  */
-static krb5_error_code
-krb5_authdata_context_internalize(krb5_context kcontext,
-                                  krb5_pointer *ptr,
-                                  krb5_octet **buffer,
-                                  size_t *lenremain)
+krb5_error_code
+k5_internalize_authdata_context(krb5_context kcontext,
+                                krb5_authdata_context *ptr,
+                                krb5_octet **buffer, size_t *lenremain)
 {
     krb5_error_code code;
     krb5_authdata_context context;
@@ -1255,23 +1250,6 @@ krb5_authdata_context_internalize(krb5_context kcontext,
     *ptr = context;
 
     return 0;
-}
-
-static const krb5_ser_entry krb5_authdata_context_ser_entry = {
-    KV5M_AUTHDATA_CONTEXT,
-    krb5_authdata_context_size,
-    krb5_authdata_context_externalize,
-    krb5_authdata_context_internalize
-};
-
-/*
- * Register the authdata context serializer.
- */
-krb5_error_code
-krb5_ser_authdata_context_init(krb5_context kcontext)
-{
-    return krb5_register_serializer(kcontext,
-                                    &krb5_authdata_context_ser_entry);
 }
 
 krb5_error_code

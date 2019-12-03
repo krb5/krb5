@@ -259,18 +259,10 @@ EXPORTS
 
 ; DO NOT USE -- Currently required to implement gssapi32.dll
 	decode_krb5_ap_req			@2	; PRIVATE GSSAPI k5-int.h KRB5_CALLCONV_WRONG
-	krb5_externalize_opaque			@114	; PRIVATE GSSAPI k5-int.h
-	krb5_internalize_opaque			@184	; PRIVATE GSSAPI k5-int.h
-	krb5_ser_auth_context_init		@230	; PRIVATE GSSAPI k5-int.h
-	krb5_ser_ccache_init			@231	; PRIVATE GSSAPI k5-int.h
-	krb5_ser_context_init			@232	; PRIVATE GSSAPI k5-int.h
-	krb5_ser_keytab_init			@233	; PRIVATE GSSAPI k5-int.h
 	krb5_ser_pack_bytes			@234	; PRIVATE GSSAPI k5-int.h
 	krb5_ser_pack_int32			@235	; PRIVATE GSSAPI k5-int.h
-	krb5_ser_rcache_init			@236	; PRIVATE GSSAPI k5-int.h
 	krb5_ser_unpack_bytes			@237	; PRIVATE GSSAPI k5-int.h
 	krb5_ser_unpack_int32			@238	; PRIVATE GSSAPI k5-int.h
-	krb5_size_opaque			@247	; PRIVATE GSSAPI k5-int.h
 	krb5int_cc_default			@268	; PRIVATE GSSAPI k5-int.h
 
 	krb5_free_ap_req			@119	; PRIVATE GSSAPI krb5.hin
@@ -489,3 +481,21 @@ EXPORTS
 ; new in 1.18
 	krb5int_c_deprecated_enctype			@450 ; PRIVATE
 	krb5_pac_get_client_info			@451
+	k5_externalize_auth_context			@452 ; PRIVATE GSSAPI
+	k5_externalize_authdata				@453 ; PRIVATE GSSAPI
+	k5_externalize_authdata_context			@454 ; PRIVATE GSSAPI
+	k5_externalize_context				@455 ; PRIVATE GSSAPI
+	k5_externalize_keyblock				@456 ; PRIVATE GSSAPI
+	k5_externalize_principal			@457 ; PRIVATE GSSAPI
+	k5_internalize_auth_context			@458 ; PRIVATE GSSAPI
+	k5_internalize_authdata				@459 ; PRIVATE GSSAPI
+	k5_internalize_authdata_context			@460 ; PRIVATE GSSAPI
+	k5_internalize_context				@461 ; PRIVATE GSSAPI
+	k5_internalize_keyblock				@462 ; PRIVATE GSSAPI
+	k5_internalize_principal			@463 ; PRIVATE GSSAPI
+	k5_size_auth_context				@464 ; PRIVATE GSSAPI
+	k5_size_authdata				@465 ; PRIVATE GSSAPI
+	k5_size_authdata_context			@466 ; PRIVATE GSSAPI
+	k5_size_context					@467 ; PRIVATE GSSAPI
+	k5_size_keyblock				@468 ; PRIVATE GSSAPI
+	k5_size_principal				@469 ; PRIVATE GSSAPI

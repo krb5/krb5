@@ -44,7 +44,7 @@ STLIBOBJS= \
 	cc_memory.o \
 	cc_keyring.o \
 	ccfns.o \
-	ser_cc.o $(KCMRPC_OBJ)
+	$(KCMRPC_OBJ)
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
@@ -63,7 +63,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cc_memory.$(OBJEXT) \
 	$(OUTPRE)cc_keyring.$(OBJEXT) \
 	$(OUTPRE)ccfns.$(OBJEXT) \
-	$(OUTPRE)ser_cc.$(OBJEXT) $(MSLSA_OBJ)
+	$(MSLSA_OBJ)
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
@@ -82,7 +82,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cc_memory.c \
 	$(srcdir)/cc_keyring.c \
 	$(srcdir)/ccfns.c \
-	$(srcdir)/ser_cc.c $(MSLSA_SRC)
+	$(MSLSA_SRC)
 
 EXTRADEPSRCS= \
 	$(srcdir)/t_cc.c \

@@ -74,8 +74,6 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->default_realm = NULL;
     nctx->profile = NULL;
     nctx->dal_handle = NULL;
-    nctx->ser_ctx_count = 0;
-    nctx->ser_ctx = NULL;
     nctx->prompt_types = NULL;
     nctx->preauth_context = NULL;
     nctx->ccselect_handles = NULL;

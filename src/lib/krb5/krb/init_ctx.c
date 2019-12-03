@@ -316,10 +316,6 @@ krb5_free_context(krb5_context ctx)
     ctx->tgs_etypes = NULL;
     free(ctx->default_realm);
     ctx->default_realm = 0;
-    if (ctx->ser_ctx_count && ctx->ser_ctx) {
-        free(ctx->ser_ctx);
-        ctx->ser_ctx = 0;
-    }
 
     krb5_clear_error_message(ctx);
     free(ctx->err_fmt);

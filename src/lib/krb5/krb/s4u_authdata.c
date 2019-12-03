@@ -418,8 +418,7 @@ s4u2proxy_size(krb5_context kcontext,
     *sizep += sizeof(krb5_int32); /* princ count */
 
     for (i = 0; i < s4uctx->count; i++) {
-        code = krb5_size_opaque(kcontext, KV5M_PRINCIPAL,
-                                (krb5_pointer)s4uctx->delegated[i], sizep);
+        code = k5_size_principal(s4uctx->delegated[i], sizep);
         if (code != 0)
             return code;
     }
@@ -457,9 +456,7 @@ s4u2proxy_externalize(krb5_context kcontext,
     krb5_ser_pack_int32(s4uctx->count, &bp, &remain); /* princ count */
 
     for (i = 0; i < s4uctx->count; i++) {
-        code = krb5_externalize_opaque(kcontext, KV5M_PRINCIPAL,
-                                       (krb5_pointer)s4uctx->delegated[i],
-                                       &bp, &remain);
+        code = k5_externalize_principal(s4uctx->delegated[i], &bp, &remain);
         if (code != 0)
             return code;
     }
@@ -516,9 +513,7 @@ s4u2proxy_internalize(krb5_context kcontext,
             goto cleanup;
 
         for (i = 0; i < count; i++) {
-            code = krb5_internalize_opaque(kcontext, KV5M_PRINCIPAL,
-                                           (krb5_pointer *)&delegated[i],
-                                           &bp, &remain);
+            code = k5_internalize_principal(&delegated[i], &bp, &remain);
             if (code != 0)
                 goto cleanup;
         }

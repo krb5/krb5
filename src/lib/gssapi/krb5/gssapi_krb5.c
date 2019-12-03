@@ -79,8 +79,6 @@
  */
 
 
-/* For declaration of krb5_ser_context_init */
-#include "k5-int.h"
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 

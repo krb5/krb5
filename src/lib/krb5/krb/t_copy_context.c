@@ -91,8 +91,6 @@ check_context(krb5_context c, krb5_context r)
 
     /* Check fields which don't propagate. */
     check(c->dal_handle == NULL);
-    check(c->ser_ctx_count == 0);
-    check(c->ser_ctx == NULL);
     check(c->prompt_types == NULL);
     check(c->libkrb5_plugins.files == NULL);
     check(c->preauth_context == NULL);

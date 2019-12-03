@@ -521,275 +521,6 @@ krb5_ktfile_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor
 }
 
 /*
- * ser_ktf.c - Serialize keytab file context for subsequent reopen.
- */
-
-static const char ktfile_def_name[] = ".";
-
-/*
- * Routines to deal with externalizing krb5_keytab for [WR]FILE: variants.
- *      krb5_ktf_keytab_size();
- *      krb5_ktf_keytab_externalize();
- *      krb5_ktf_keytab_internalize();
- */
-static krb5_error_code
-krb5_ktf_keytab_size(krb5_context, krb5_pointer, size_t *);
-
-static krb5_error_code
-krb5_ktf_keytab_externalize(krb5_context, krb5_pointer, krb5_octet **,
-                            size_t *);
-
-static krb5_error_code
-krb5_ktf_keytab_internalize(krb5_context,krb5_pointer *, krb5_octet **,
-                            size_t *);
-
-/*
- * Serialization entry for this type.
- */
-const krb5_ser_entry krb5_ktfile_ser_entry = {
-    KV5M_KEYTAB,                        /* Type                 */
-    krb5_ktf_keytab_size,               /* Sizer routine        */
-    krb5_ktf_keytab_externalize,        /* Externalize routine  */
-    krb5_ktf_keytab_internalize         /* Internalize routine  */
-};
-
-/*
- * krb5_ktf_keytab_size()       - Determine the size required to externalize
- *                                this krb5_keytab variant.
- */
-static krb5_error_code
-krb5_ktf_keytab_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
-{
-    krb5_error_code     kret;
-    krb5_keytab         keytab;
-    size_t              required;
-    krb5_ktfile_data    *ktdata;
-
-    kret = EINVAL;
-    if ((keytab = (krb5_keytab) arg)) {
-        /*
-         * Saving FILE: variants of krb5_keytab requires at minimum:
-         *      krb5_int32      for KV5M_KEYTAB
-         *      krb5_int32      for length of keytab name.
-         *      krb5_int32      for file status.
-         *      krb5_int32      for file position.
-         *      krb5_int32      for file position.
-         *      krb5_int32      for version.
-         *      krb5_int32      for KV5M_KEYTAB
-         */
-        required = sizeof(krb5_int32) * 7;
-        if (keytab->ops && keytab->ops->prefix)
-            required += (strlen(keytab->ops->prefix)+1);
-
-        /*
-         * The keytab name is formed as follows:
-         *      <prefix>:<name>
-         * If there's no name, we use a default name so that we have something
-         * to call krb5_keytab_resolve with.
-         */
-        ktdata = (krb5_ktfile_data *) keytab->data;
-        required += strlen((ktdata && ktdata->name) ?
-                           ktdata->name : ktfile_def_name);
-        kret = 0;
-
-        if (!kret)
-            *sizep += required;
-    }
-    return(kret);
-}
-
-/*
- * krb5_ktf_keytab_externalize()        - Externalize the krb5_keytab.
- */
-static krb5_error_code
-krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
-{
-    krb5_error_code     kret;
-    krb5_keytab         keytab;
-    size_t              required;
-    krb5_octet          *bp;
-    size_t              remain;
-    krb5_ktfile_data    *ktdata;
-    krb5_int32          file_is_open;
-    int64_t             file_pos;
-    char                *ktname;
-    const char          *fnamep;
-
-    required = 0;
-    bp = *buffer;
-    remain = *lenremain;
-    kret = EINVAL;
-    if ((keytab = (krb5_keytab) arg)) {
-        kret = ENOMEM;
-        if (!krb5_ktf_keytab_size(kcontext, arg, &required) &&
-            (required <= remain)) {
-            /* Our identifier */
-            (void) krb5_ser_pack_int32(KV5M_KEYTAB, &bp, &remain);
-
-            ktdata = (krb5_ktfile_data *) keytab->data;
-            file_is_open = 0;
-            file_pos = 0;
-
-            /* Calculate the length of the name */
-            if (ktdata && ktdata->name)
-                fnamep = ktdata->name;
-            else
-                fnamep = ktfile_def_name;
-
-            if (keytab->ops && keytab->ops->prefix) {
-                if (asprintf(&ktname, "%s:%s", keytab->ops->prefix, fnamep) < 0)
-                    ktname = NULL;
-            } else
-                ktname = strdup(fnamep);
-
-            if (ktname) {
-                /* Fill in the file-specific keytab information. */
-                if (ktdata) {
-                    if (ktdata->openf) {
-                        long    fpos;
-                        int     fflags = 0;
-
-                        file_is_open = 1;
-#if !defined(_WIN32)
-                        fflags = fcntl(fileno(ktdata->openf), F_GETFL, 0);
-                        if (fflags > 0)
-                            file_is_open |= ((fflags & O_ACCMODE) << 1);
-#else
-                        file_is_open = 0;
-#endif
-                        fpos = ftell(ktdata->openf);
-                        file_pos = fpos; /* XX range check? */
-                    }
-                }
-
-                /* Put the length of the file name */
-                (void) krb5_ser_pack_int32((krb5_int32) strlen(ktname),
-                                           &bp, &remain);
-
-                /* Put the name */
-                (void) krb5_ser_pack_bytes((krb5_octet *) ktname,
-                                           strlen(ktname),
-                                           &bp, &remain);
-
-                /* Put the file open flag */
-                (void) krb5_ser_pack_int32(file_is_open, &bp, &remain);
-
-                /* Put the file position */
-                (void) krb5_ser_pack_int64(file_pos, &bp, &remain);
-
-                /* Put the version */
-                (void) krb5_ser_pack_int32((krb5_int32) ((ktdata) ?
-                                                         ktdata->version : 0),
-                                           &bp, &remain);
-
-                /* Put the trailer */
-                (void) krb5_ser_pack_int32(KV5M_KEYTAB, &bp, &remain);
-                kret = 0;
-                *buffer = bp;
-                *lenremain = remain;
-                free(ktname);
-            }
-        }
-    }
-    return(kret);
-}
-
-/*
- * krb5_ktf_keytab_internalize()        - Internalize the krb5_ktf_keytab.
- */
-static krb5_error_code
-krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
-{
-    krb5_error_code     kret;
-    krb5_keytab         keytab = NULL;
-    krb5_int32          ibuf;
-    krb5_octet          *bp;
-    size_t              remain;
-    char                *ktname = NULL;
-    krb5_ktfile_data    *ktdata;
-    krb5_int32          file_is_open;
-    int64_t             foff;
-
-    *argp = NULL;
-    bp = *buffer;
-    remain = *lenremain;
-
-    /* Read our magic number */
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain) || ibuf != KV5M_KEYTAB)
-        return EINVAL;
-
-    /* Read the keytab name */
-    kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-    if (kret)
-        return kret;
-    ktname = malloc(ibuf + 1);
-    if (!ktname)
-        return ENOMEM;
-    kret = krb5_ser_unpack_bytes((krb5_octet *) ktname, (size_t) ibuf,
-                                 &bp, &remain);
-    if (kret)
-        goto cleanup;
-    ktname[ibuf] = '\0';
-
-    /* Resolve the keytab. */
-    kret = krb5_kt_resolve(kcontext, ktname, &keytab);
-    if (kret)
-        goto cleanup;
-
-    if (keytab->ops != &krb5_ktf_ops) {
-        kret = EINVAL;
-        goto cleanup;
-    }
-    ktdata = (krb5_ktfile_data *) keytab->data;
-
-    if (remain < (sizeof(krb5_int32)*5)) {
-        kret = EINVAL;
-        goto cleanup;
-    }
-    (void) krb5_ser_unpack_int32(&file_is_open, &bp, &remain);
-    (void) krb5_ser_unpack_int64(&foff, &bp, &remain);
-    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-    ktdata->version = (int) ibuf;
-    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-    if (ibuf != KV5M_KEYTAB) {
-        kret = EINVAL;
-        goto cleanup;
-    }
-
-    if (file_is_open) {
-        int     fmode;
-        long    fpos;
-
-#if !defined(_WIN32)
-        fmode = (file_is_open >> 1) & O_ACCMODE;
-#else
-        fmode = 0;
-#endif
-        if (fmode)
-            kret = krb5_ktfileint_openw(kcontext, keytab);
-        else
-            kret = krb5_ktfileint_openr(kcontext, keytab);
-        if (kret)
-            goto cleanup;
-        fpos = foff; /* XX range check? */
-        if (fseek(KTFILEP(keytab), fpos, SEEK_SET) == -1) {
-            kret = errno;
-            goto cleanup;
-        }
-    }
-
-    *buffer = bp;
-    *lenremain = remain;
-    *argp = (krb5_pointer) keytab;
-cleanup:
-    if (kret != 0 && keytab)
-        krb5_kt_close(kcontext, keytab);
-    free(ktname);
-    return kret;
-}
-
-
-/*
  * krb5_ktfile_add()
  */
 
@@ -900,8 +631,7 @@ const struct _krb5_kt_ops krb5_ktf_ops = {
     krb5_ktfile_get_next,
     krb5_ktfile_end_get,
     krb5_ktfile_add,
-    krb5_ktfile_remove,
-    &krb5_ktfile_ser_entry
+    krb5_ktfile_remove
 };
 
 /*
@@ -921,8 +651,7 @@ const struct _krb5_kt_ops krb5_ktf_writable_ops = {
     krb5_ktfile_get_next,
     krb5_ktfile_end_get,
     krb5_ktfile_add,
-    krb5_ktfile_remove,
-    &krb5_ktfile_ser_entry
+    krb5_ktfile_remove
 };
 
 /*
@@ -940,8 +669,7 @@ const krb5_kt_ops krb5_kt_dfl_ops = {
     krb5_ktfile_get_next,
     krb5_ktfile_end_get,
     0,
-    0,
-    &krb5_ktfile_ser_entry
+    0
 };
 
 /* Formerly lib/krb5/keytab/file/ktf_util.c */

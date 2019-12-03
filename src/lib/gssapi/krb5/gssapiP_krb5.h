@@ -360,16 +360,16 @@ OM_uint32 kg_seal_size (OM_uint32 *minor_status,
                         OM_uint32 *input_size);
 
 krb5_error_code kg_ctx_size (krb5_context kcontext,
-                             krb5_pointer arg,
+                             krb5_gss_ctx_id_t ctx,
                              size_t *sizep);
 
 krb5_error_code kg_ctx_externalize (krb5_context kcontext,
-                                    krb5_pointer arg,
+                                    krb5_gss_ctx_id_t ctx,
                                     krb5_octet **buffer,
                                     size_t *lenremain);
 
 krb5_error_code kg_ctx_internalize (krb5_context kcontext,
-                                    krb5_pointer *argp,
+                                    krb5_gss_ctx_id_t *argp,
                                     krb5_octet **buffer,
                                     size_t *lenremain);
 
@@ -850,8 +850,6 @@ OM_uint32 KRB5_CALLCONV krb5_gss_import_sec_context
  gss_ctx_id_t *              /* context_handle */
 );
 #endif /* LEAN_CLIENT */
-
-krb5_error_code krb5_gss_ser_init(krb5_context);
 
 OM_uint32 krb5_gss_release_oid
 (OM_uint32 *,           /* minor_status */

@@ -1212,8 +1212,6 @@ struct _krb5_context {
     char            *default_realm;
     profile_t       profile;
     kdb5_dal_handle *dal_handle;
-    int             ser_ctx_count;
-    void            *ser_ctx;
     /* allowable clock skew */
     krb5_deltat     clockskew;
     krb5_flags      kdc_default_options;
@@ -1780,64 +1778,110 @@ krb5_error_code
 k5_parse_host_string(const char *address, int default_port, char **host_out,
                      int *port_out);
 
-/*
- * [De]Serialization Handle and operations.
- */
-struct __krb5_serializer {
-    krb5_magic          odtype;
-    krb5_error_code     (*sizer) (krb5_context,
-                                  krb5_pointer,
-                                  size_t *);
-    krb5_error_code     (*externalizer) (krb5_context,
-                                         krb5_pointer,
-                                         krb5_octet **,
-                                         size_t *);
-    krb5_error_code     (*internalizer) (krb5_context,
-                                         krb5_pointer *,
-                                         krb5_octet **,
-                                         size_t *);
-};
-typedef const struct __krb5_serializer * krb5_ser_handle;
-typedef struct __krb5_serializer krb5_ser_entry;
-
-krb5_ser_handle krb5_find_serializer(krb5_context, krb5_magic);
-krb5_error_code krb5_register_serializer(krb5_context, const krb5_ser_entry *);
-
-/* Determine the external size of a particular opaque structure */
-krb5_error_code KRB5_CALLCONV
-krb5_size_opaque(krb5_context, krb5_magic, krb5_pointer, size_t *);
-
-/* Serialize the structure into a buffer */
-krb5_error_code KRB5_CALLCONV
-krb5_externalize_opaque(krb5_context, krb5_magic, krb5_pointer, krb5_octet **,
-                        size_t *);
-
-/* Deserialize the structure from a buffer */
-krb5_error_code KRB5_CALLCONV
-krb5_internalize_opaque(krb5_context, krb5_magic, krb5_pointer *,
-                        krb5_octet **, size_t *);
-
-/* Serialize data into a buffer */
 krb5_error_code
-krb5_externalize_data(krb5_context, krb5_pointer, krb5_octet **, size_t *);
+k5_size_authdata_context(krb5_context kcontext, krb5_authdata_context context,
+                         size_t *sizep);
+
+krb5_error_code
+k5_externalize_authdata_context(krb5_context kcontext,
+                                krb5_authdata_context context,
+                                krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_authdata_context(krb5_context kcontext,
+                                krb5_authdata_context *ptr,
+                                krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_auth_context(krb5_auth_context auth_context, size_t *sizep);
+
+krb5_error_code
+k5_externalize_auth_context(krb5_auth_context auth_context,
+                            krb5_octet **buffer, size_t *lenremain);
+krb5_error_code
+k5_internalize_auth_context(krb5_auth_context *argp,
+                            krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_authdata(krb5_authdata *authdata, size_t *sizep);
+
+krb5_error_code
+k5_externalize_authdata(krb5_authdata *authdata,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_authdata(krb5_authdata **authdata,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_address(krb5_address *address, size_t *sizep);
+
+krb5_error_code
+k5_externalize_address(krb5_address *address,
+                       krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_address(krb5_address **argp,
+                       krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_authenticator(krb5_authenticator *authenticator, size_t *sizep);
+
+krb5_error_code
+k5_externalize_authenticator(krb5_authenticator *authenticator,
+                             krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_authenticator(krb5_authenticator **argp,
+                             krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_checksum(krb5_checksum *checksum, size_t *sizep);
+
+krb5_error_code
+k5_externalize_checksum(krb5_checksum *checksum,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_checksum(krb5_checksum **argp,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_context(krb5_context context, size_t *sizep);
+
+krb5_error_code
+k5_externalize_context(krb5_context context,
+                       krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_context(krb5_context *argp,
+                       krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_keyblock(krb5_keyblock *keyblock, size_t *sizep);
+
+krb5_error_code
+k5_externalize_keyblock(krb5_keyblock *keyblock,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_keyblock(krb5_keyblock **argp,
+                        krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_size_principal(krb5_principal principal, size_t *sizep);
+
+krb5_error_code
+k5_externalize_principal(krb5_principal principal,
+                         krb5_octet **buffer, size_t *lenremain);
+
+krb5_error_code
+k5_internalize_principal(krb5_principal *argp,
+                         krb5_octet **buffer, size_t *lenremain);
+
 /*
  * Initialization routines.
  */
-
-/* Initialize serialization for krb5_[os_]context */
-krb5_error_code KRB5_CALLCONV krb5_ser_context_init(krb5_context);
-
-/* Initialize serialization for krb5_auth_context */
-krb5_error_code KRB5_CALLCONV krb5_ser_auth_context_init(krb5_context);
-
-/* Initialize serialization for krb5_keytab */
-krb5_error_code KRB5_CALLCONV krb5_ser_keytab_init(krb5_context);
-
-/* Initialize serialization for krb5_ccache */
-krb5_error_code KRB5_CALLCONV krb5_ser_ccache_init(krb5_context);
-
-/* Initialize serialization for krb5_rcache */
-krb5_error_code KRB5_CALLCONV krb5_ser_rcache_init(krb5_context);
 
 /* [De]serialize 4-byte integer */
 krb5_error_code KRB5_CALLCONV
@@ -2017,9 +2061,6 @@ typedef struct _krb5_kt_ops {
                                          krb5_keytab_entry *);
     krb5_error_code (KRB5_CALLCONV *remove)(krb5_context, krb5_keytab,
                                             krb5_keytab_entry *);
-
-    /* Handle for serializer */
-    const krb5_ser_entry *serializer;
 } krb5_kt_ops;
 
 /* Not sure it's ready for exposure just yet.  */
