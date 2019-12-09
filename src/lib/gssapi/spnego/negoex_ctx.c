@@ -454,6 +454,7 @@ verify_checksum(OM_uint32 *minor, spnego_gss_ctx_id_t ctx,
 
     /* Verify the checksum over the existing transcript and the portion of the
      * input token leading up to the verify message. */
+    assert(input_token != NULL);
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = make_data(ctx->negoex_transcript.data,
                             ctx->negoex_transcript.len);
