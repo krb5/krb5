@@ -204,8 +204,11 @@ k5_externalize_context(krb5_context context,
         return (kret);
 
     /* Finally, handle profile, if appropriate */
-    if (context->profile != NULL)
+    if (context->profile != NULL) {
         kret = profile_ser_externalize(NULL, context->profile, &bp, &remain);
+        if (kret)
+            return (kret);
+    }
 
     /*
      * If we were successful, write trailer then update the pointer and
