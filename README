@@ -73,6 +73,29 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.16.4 (2019-12-11)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a bug preventing "addprinc -randkey -kvno" from working in
+  kadmin.
+
+krb5-1.16.4 changes by ticket ID
+--------------------------------
+
+8783    memory leak via krb5_rc_none_close
+8801    Fix some return code handling bugs
+8824    Initialize life/rlife in kdcpolicy interface
+8825    Don't skip past zero byte in profile parsing
+8840    Accept GSS mechs which don't supply attributes
+8841    Fix t_otp.py for pyrad 2.2
+8846    Fix SPNEGO fallback context handling
+8848    kadmin.local: ank -kvno parameter doesnt work
+8850    Fix gss_set_sec_context_option() context creation
+8852    Various gssalloc fixes
+
+
 Major changes in 1.16.3 (2019-01-07)
 ------------------------------------
 
@@ -526,6 +549,7 @@ reports, suggestions, and valuable resources:
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
+    Lutz Justen
     Alexander Karaivanov
     Anders Kaseorg
     Bar Katz
@@ -538,6 +562,7 @@ reports, suggestions, and valuable resources:
     Reinhard Kugler
     Tomas Kuthan
     Pierre Labastie
+    Andreas Ladanyi
     Chris Leick
     Volker Lendecke
     Jan iankko Lieskovsky
