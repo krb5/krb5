@@ -73,6 +73,50 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.17.1 (2019-12-11)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a bug preventing "addprinc -randkey -kvno" from working in
+  kadmin.
+
+* Fix a bug preventing time skew correction from working when a KCM
+  credential cache is used.
+
+krb5-1.17.1 changes by ticket ID
+--------------------------------
+
+8735    GSS buffer set failures on Windows due to gssalloc_realloc()
+8774    Update doxygen-RST bridge to Python 3
+8779    Remove erroneous text from kinit man page
+8783    memory leak via krb5_rc_none_close
+8789    Document the double-colon behavior of DIR ccaches
+8790    Leash krb5_cc_start_seq_get error popups
+8796    Document krb5kdc without -r
+8797    Wrong functions used in gss_get_mic_iov_length() documentation example code
+8801    Fix some return code handling bugs
+8802    Remove outdated text in krb5kdc/kadmind man pages
+8803    Rename hmac() function
+8810    Fix Python fallback in configure.ac
+8813    Improve logging documentation
+8818    Convert OTP and kdcproxy tests to Python 3
+8821    Correct documentation of final profiles
+8824    Initialize life/rlife in kdcpolicy interface
+8825    Don't skip past zero byte in profile parsing
+8826    Fix KCM client time offset propagation
+8831    Update LDAP KDB module documentation
+8834    Update supported_enctypes documentation
+8835    Remove some outdated iprop documentation
+8839    Fix missing field in /etc/gss/mech documentation
+8840    Accept GSS mechs which don't supply attributes
+8841    Fix t_otp.py for pyrad 2.2
+8846    Fix SPNEGO fallback context handling
+8848    kadmin.local: ank -kvno parameter doesnt work
+8850    Fix gss_set_sec_context_option() context creation
+8852    Various gssalloc fixes
+
+
 Major changes in 1.17 (2019-01-08)
 ----------------------------------
 
@@ -410,6 +454,7 @@ reports, suggestions, and valuable resources:
     Remi Ferrand
     Paul Fertser
     Fabiano Fidêncio
+    Frank Filz
     William Fiveash
     Jacques Florent
     Ákos Frohner
@@ -445,6 +490,7 @@ reports, suggestions, and valuable resources:
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
+    Lutz Justen
     Alexander Karaivanov
     Anders Kaseorg
     Bar Katz
@@ -453,11 +499,13 @@ reports, suggestions, and valuable resources:
     W. Trevor King
     Patrik Kis
     Martin Kittel
+    Thomas Klausner
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
     Tomas Kuthan
     Pierre Labastie
+    Andreas Ladanyi
     Chris Leick
     Volker Lendecke
     Jan iankko Lieskovsky
@@ -492,7 +540,9 @@ reports, suggestions, and valuable resources:
     Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Dilyan Palauzov
     Tom Parker
+    Eric Pauly
     Ezra Peisach
     Alejandro Perez
     Zoran Pericic
