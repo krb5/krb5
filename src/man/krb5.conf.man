@@ -76,25 +76,11 @@ fubar = {
 .UNINDENT
 .UNINDENT
 .sp
-Placing a \(aq*\(aq at the end of a line indicates that this is the \fIfinal\fP
-value for the tag.  This means that neither the remainder of this
-configuration file nor any other configuration file will be checked
-for any other values for this tag.
-.sp
-For example, if you have the following lines:
-.INDENT 0.0
-.INDENT 3.5
-.sp
-.nf
-.ft C
-foo = bar*
-foo = baz
-.ft P
-.fi
-.UNINDENT
-.UNINDENT
-.sp
-then the second value of \fBfoo\fP (\fBbaz\fP) would never be read.
+Placing a \(aq*\(aq after the closing bracket of a section name indicates
+that the section is \fIfinal\fP, meaning that if the same section appears
+within a later file specified in \fBKRB5_CONFIG\fP, it will be ignored.
+A subsection can be marked as final by placing a \(aq*\(aq after either the
+tag name or the closing brace.
 .sp
 The krb5.conf file can include other files using either of the
 following directives at the beginning of a line:
