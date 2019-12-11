@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.17\n"
+"Project-Id-Version: mit-krb5 1.17-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-08 11:00-0500\n"
+"POT-Creation-Date: 2019-12-11 11:14-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -330,7 +330,7 @@ msgstr ""
 
 #: ../../src/clients/kinit/kinit.c:484 ../../src/kadmin/dbutil/kdb5_util.c:311
 #: ../../src/kprop/kprop.c:156
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:391
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:395
 msgid "while getting default realm"
 msgstr ""
 
@@ -2802,7 +2802,7 @@ msgid "%d key(s) purged.\n"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_stash.c:97
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:538
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:542
 #, c-format
 msgid "while setting up enctype %d"
 msgstr ""
@@ -2848,12 +2848,12 @@ msgid ""
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:215
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:260
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:264
 msgid "while initializing Kerberos code"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:221
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:267
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:271
 msgid "while creating sub-command arguments"
 msgstr ""
 
@@ -2867,31 +2867,31 @@ msgid "while parsing command arguments\n"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:263
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:291
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:295
 msgid "while setting default realm name"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:268
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:298
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:302
 #, c-format
 msgid ": %s is an invalid enctype"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:276
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:307
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:311
 #, c-format
 msgid ": %s is an invalid mkeyVNO"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:321
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:431
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:435
 msgid "while retreiving configuration parameters"
 msgstr ""
 
 #: ../../src/kadmin/dbutil/kdb5_util.c:381
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_realm.c:883
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_realm.c:1491
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:564
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:568
 msgid "while initializing database"
 msgstr ""
 
@@ -3426,29 +3426,29 @@ msgstr ""
 msgid "TGS_REQ : handle_authdata (%d)"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:55
+#: ../../src/kdc/fast_util.c:56
 #, c-format
 msgid "%s while handling ap-request armor"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:64
+#: ../../src/kdc/fast_util.c:65
 msgid "ap-request armor for something other than the local TGS"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:73
+#: ../../src/kdc/fast_util.c:74
 msgid "ap-request armor without subkey"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:161
+#: ../../src/kdc/fast_util.c:162
 msgid "Ap-request armor not permitted with TGS"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:168
+#: ../../src/kdc/fast_util.c:169
 #, c-format
 msgid "Unknown FAST armor type %d"
 msgstr ""
 
-#: ../../src/kdc/fast_util.c:182
+#: ../../src/kdc/fast_util.c:183
 msgid "No armor key but FAST armored request present"
 msgstr ""
 
@@ -5117,23 +5117,23 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1813
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1814
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1818
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1819
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1823
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1824
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1828
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1829
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1833
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1834
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
@@ -6030,7 +6030,7 @@ msgid "while getting service password filename"
 msgstr ""
 
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_services.c:165
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:477
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:481
 #, c-format
 msgid "Password for \"%s\""
 msgstr ""
@@ -6074,62 +6074,63 @@ msgstr ""
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:105
 #, c-format
 msgid ""
-"Usage: kdb5_ldap_util [-D user_dn [-w passwd]] [-H ldapuri]\n"
+"Usage: kdb5_ldap_util [-D user_dn [-w passwd]] [-H ldapuri] [-r realm]\n"
 "\tcmd [cmd_options]\n"
-"create          [-subtrees subtree_dn_list] [-sscope search_scope] [-"
-"containerref container_reference_dn]\n"
-"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype] [-kv mkeyVNO] [-s]\n"
-"\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
-"\t\t[ticket_flags] [-r realm]\n"
-"modify          [-subtrees subtree_dn_list] [-sscope search_scope] [-"
-"containerref container_reference_dn]\n"
-"\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
-"\t\t[ticket_flags] [-r realm]\n"
-"view            [-r realm]\n"
-"destroy                [-f] [-r realm]\n"
+"create          [-subtrees subtree_dn_list] [-sscope search_scope]\n"
+"\t\t[-containerref container_reference_dn]\n"
+"\t\t[-m|-P password|-sf stashfilename] [-s]\n"
+"\t\t[-k mkeytype] [-kv mkeyVNO] [-M mkeyname]\n"
+"\t\t[-maxtktlife max_ticket_life]\n"
+"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags]\n"
+"modify          [-subtrees subtree_dn_list] [-sscope search_scope]\n"
+"\t\t[-containerref container_reference_dn]\n"
+"\t\t[-maxtktlife max_ticket_life]\n"
+"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags]\n"
+"view\n"
+"destroy         [-f]\n"
 "list\n"
 "stashsrvpw      [-f filename] service_dn\n"
-"create_policy   [-r realm] [-maxtktlife max_ticket_life]\n"
+"create_policy   [-maxtktlife max_ticket_life]\n"
 "\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy\n"
-"modify_policy   [-r realm] [-maxtktlife max_ticket_life]\n"
+"modify_policy   [-maxtktlife max_ticket_life]\n"
 "\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy\n"
-"view_policy     [-r realm] policy\n"
-"destroy_policy  [-r realm] [-force] policy\n"
-"list_policy     [-r realm]\n"
+"view_policy     policy\n"
+"destroy_policy  [-force] policy\n"
+"list_policy\n"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:325
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:333
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:341
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:329
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:337
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:345
 msgid "while reading ldap parameters"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:439
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:443
 msgid "while initializing error handling"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:447
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:451
 msgid "while initializing ldap handle"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:461
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:470
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:483
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:525
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:465
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:474
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:487
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:529
 msgid "while retrieving ldap configuration"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:500
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:507
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:516
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:504
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:511
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:520
 msgid "while initializing server list"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:547
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:551
 msgid "while setting up lib handle"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:556
+#: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:560
 msgid "while reading ldap configuration"
 msgstr ""
 
