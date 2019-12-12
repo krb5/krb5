@@ -53,9 +53,14 @@
 
 #ifndef LEAN_CLIENT
 
-#include "k5-int.h"
-#include "../os/os-proto.h"
+#ifdef _WIN32
 #include <stdio.h>
+#include "k5-int.h"
+#else
+#include "k5-int.h"
+#include <stdio.h>
+#endif
+#include "../os/os-proto.h"
 
 /*
  * Information needed by internal routines of the file-based ticket

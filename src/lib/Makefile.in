@@ -60,7 +60,7 @@ clean-windows::
 ##WIN32##!endif
 ##WIN32##!endif
 ##WIN32##!endif
-##WIN32##WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib \
+##WIN32##WINLIBS = kernel32.lib ws2_32.lib user32.lib shell32.lib \
 ##WIN32##	version.lib secur32.lib advapi32.lib gdi32.lib delayimp.lib \
 ##WIN32##	$(WINCRTEXTRA)
 ##WIN32##WINDLLFLAGS = $(DLL_LINKOPTS) -base:0x1c000000 /DELAYLOAD:secur32.dll \

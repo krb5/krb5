@@ -66,6 +66,7 @@ static char sccsid[] = "@(#)gethostnamadr.c	6.48 (Berkeley) 1/10/93";
 
 #ifdef _WIN32
 #include <mitwhich.h>
+#include "win-mac.h"
 #endif
 
 #define MAXALIASES      35

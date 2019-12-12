@@ -3,9 +3,14 @@
  * prof_file.c ---- routines that manipulate an individual profile file.
  */
 
-#include "prof_int.h"
-
+#ifdef _WIN32
 #include <stdio.h>
+#include "prof_int.h"
+#else
+#include "prof_int.h"
+#include <stdio.h>
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -26,7 +31,6 @@
 #if defined(_WIN32)
 #include <io.h>
 #define HAVE_STAT
-#define stat _stat
 #ifndef S_ISDIR
 #define S_ISDIR(x) (((x) & S_IFMT) == S_IFDIR)
 #endif

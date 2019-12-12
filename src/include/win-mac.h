@@ -220,6 +220,38 @@ typedef _W64 int         ssize_t;
 #define strdup _strdup
 #endif
 
+/*
+ * oldnames.lib
+ */
+#ifndef oldnames
+#define open		_open
+#define close		_close
+#define read		_read
+#define write		_write
+#define lseek		_lseek
+#define unlink		_unlink
+#define getpid		_getpid
+#define fileno		_fileno
+#define fdopen		_fdopen
+#define fstat		_fstat
+#define chmod		_chmod
+#define mkdir		_mkdir
+#define stricmp		_stricmp
+#define isatty		_isatty
+#define wcsicmp		_wcsicmp
+#define strupr		_strupr
+#ifndef getcwd
+#define getcwd		_getcwd
+#endif
+#ifndef chdir
+#define chdir		_chdir
+#endif
+#define access		_access
+#define stat		_stat
+#define mktemp		_mktemp
+#define strnicmp	_strnicmp
+#endif
+
 /* Windows has its own name for reentrant strtok. */
 #define strtok_r strtok_s
 

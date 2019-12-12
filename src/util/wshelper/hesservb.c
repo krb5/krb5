@@ -30,6 +30,8 @@ static char sccsid[] = "@(#)getservbyname.c	5.3 (Berkeley) 5/19/86";
 #include <stdio.h>
 #include <ctype.h>
 
+#include "win-mac.h"
+
 #define cistrcmp stricmp
 
 #define LISTSIZE 15

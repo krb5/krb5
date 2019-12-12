@@ -51,8 +51,8 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
 #include <stdio.h>
+#include "k5-int.h"
 
 #ifndef LEAN_CLIENT
 

@@ -24,6 +24,7 @@
  * or implied warranty.
  */
 
+#include <stdio.h>
 #include "autoconf.h"
 #include <k5-int.h>
 #include "k5-platform.h"        /* For asprintf and getopt */
@@ -31,7 +32,6 @@
 #include "extern.h"
 #include <locale.h>
 #include <string.h>
-#include <stdio.h>
 #include <time.h>
 #include <errno.h>
 #include <com_err.h>
