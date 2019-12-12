@@ -193,7 +193,9 @@ realm2.stop()
 testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'krbtgt/FOREIGN': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
-              'service/1': {'keys': 'aes128-cts', 'flags': '+preauth'},
+              'user2': {'keys': 'aes128-cts', 'flags': '+preauth'},
+              'service/1': {'keys': 'aes128-cts',
+                            'flags': '+ok_to_auth_as_delegate'},
               'service/2': {'keys': 'aes128-cts'},
               'noauthdata': {'keys': 'aes128-cts',
                              'flags': '+no_auth_data_required'}}
@@ -219,6 +221,11 @@ out = realm.run(['./adata', '-p', realm.user_princ, 'service/1'])
 if '97:' in out:
     fail('auth-indicator present in S4U2Self response')
 
+# Get another S4U2Self ticket with requested authdata.
+realm.run(['./s4u2self', 'user', 'service/1', '-', '-2', 'self_ad'])
+realm.run(['./adata', '-p', realm.user_princ, 'service/1', '-2', 'self_ad'],
+          expected_msg=' -2: self_ad')
+
 # S4U2Proxy (indicators should come from evidence ticket, not TGT)
 mark('S4U2Proxy (auth indicators from evidence ticket expected)')
 realm.kinit(realm.user_princ, None, ['-k', '-f', '-X', 'indicators=indcl',
@@ -227,6 +234,19 @@ realm.run(['./s4u2proxy', usercache, 'service/2'])
 out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
+
+# Get another S4U2Proxy ticket including request-authdata.
+realm.run(['./s4u2proxy', usercache, 'service/2', '-2', 'proxy_ad'])
+realm.run(['./adata', '-p', realm.user_princ, 'service/2', '-2', 'proxy_ad'],
+          expected_msg=' -2: proxy_ad')
+
+# Get an S4U2Proxy ticket using an evidence ticket obtained by S4U2Self,
+# with request authdata in both steps.
+realm.run(['./s4u2self', 'user2', 'service/1', usercache, '-2', 'self_ad'])
+realm.run(['./s4u2proxy', usercache, 'service/2', '-2', 'proxy_ad'])
+out = realm.run(['./adata', '-p', 'user2', 'service/2', '-2', 'proxy_ad'])
+if ' -2: self_ad' not in out or ' -2: proxy_ad' not in out:
+    fail('expected authdata not seen in S4U2Proxy ticket')
 
 # Test alteration of auth indicators by KDB module (AS and TGS).
 realm.kinit(realm.user_princ, None, ['-k', '-X', 'indicators=dummy dbincr1'])

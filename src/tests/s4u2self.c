@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/s4u2proxy.c - S4U2Proxy test harness */
 /*
- * Copyright (C) 2015 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2019 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +30,11 @@
  */
 
 /*
- * Usage: s4u2proxy evccname targetname [ad-type ad-contents]
+ * Usage: s4u2self user self out_cache [ad-type ad-contents]
  *
- * evccname contains an evidence ticket.  The default ccache contains a TGT for
- * the intermediate service.  The default keytab contains a key for the
- * intermediate service.  An S4U2Proxy request is made to get a ticket from
- * evccname's default principal to the target service.  The resulting cred is
- * stored in the default ccache.
+ * The default ccache contains a TGT for the intermediate service self.  An
+ * S4U2Self request is made to self.  The resulting cred is stored in
+ * out_cache.
  */
 
 #include <k5-int.h>
@@ -83,60 +80,47 @@ int
 main(int argc, char **argv)
 {
     krb5_context context;
-    krb5_ccache defcc, evcc;
-    krb5_principal client_name, int_name, target_name;
-    krb5_keytab defkt;
-    krb5_creds mcred, ev_cred, *new_cred;
-    krb5_ticket *ev_ticket;
+    krb5_ccache defcc, ocache;
+    krb5_principal client, self;
+    krb5_creds mcred, *new_cred;
     krb5_authdata **req_authdata = NULL;
 
-    if (argc == 5) {
-        req_authdata = make_request_authdata(atoi(argv[3]), argv[4]);
+    if (argc == 6) {
+        req_authdata = make_request_authdata(atoi(argv[4]), argv[5]);
         argc -= 2;
     }
 
-    assert(argc == 3);
+    assert(argc == 4);
     check(krb5_init_context(&context));
 
-    /* Open the default ccache, evidence ticket ccache, and default keytab. */
+    /* Open the default ccache. */
     check(krb5_cc_default(context, &defcc));
-    check(krb5_cc_resolve(context, argv[1], &evcc));
-    check(krb5_kt_default(context, &defkt));
 
-    /* Determine the client name, intermediate name, and target name. */
-    check(krb5_cc_get_principal(context, evcc, &client_name));
-    check(krb5_cc_get_principal(context, defcc, &int_name));
-    check(krb5_parse_name(context, argv[2], &target_name));
+    check(krb5_parse_name(context, argv[1], &client));
+    check(krb5_parse_name(context, argv[2], &self));
 
-    /* Retrieve and decrypt the evidence ticket. */
     memset(&mcred, 0, sizeof(mcred));
-    mcred.client = client_name;
-    mcred.server = int_name;
-    check(krb5_cc_retrieve_cred(context, evcc, 0, &mcred, &ev_cred));
-    check(krb5_decode_ticket(&ev_cred.ticket, &ev_ticket));
-    check(krb5_server_decrypt_ticket_keytab(context, defkt, ev_ticket));
-
-    /* Make an S4U2Proxy request for the target service. */
-    mcred.client = client_name;
-    mcred.server = target_name;
+    mcred.client = client;
+    mcred.server = self;
     mcred.authdata = req_authdata;
-    check(krb5_get_credentials_for_proxy(context, KRB5_GC_NO_STORE |
-                                         KRB5_GC_CANONICALIZE, defcc,
-                                         &mcred, ev_ticket, &new_cred));
+    check(krb5_get_credentials_for_user(context, KRB5_GC_NO_STORE |
+                                        KRB5_GC_CANONICALIZE, defcc,
+                                        &mcred, NULL, &new_cred));
 
-    /* Store the new cred in the default ccache. */
-    check(krb5_cc_store_cred(context, defcc, new_cred));
+    if (strcmp(argv[3], "-") == 0) {
+        check(krb5_cc_store_cred(context, defcc, new_cred));
+    } else {
+        check(krb5_cc_resolve(context, argv[3], &ocache));
+        check(krb5_cc_initialize(context, ocache, new_cred->client));
+        check(krb5_cc_store_cred(context, ocache, new_cred));
+        krb5_cc_close(context, ocache);
+    }
 
     assert(req_authdata == NULL || new_cred->authdata != NULL);
 
     krb5_cc_close(context, defcc);
-    krb5_cc_close(context, evcc);
-    krb5_kt_close(context, defkt);
-    krb5_free_principal(context, client_name);
-    krb5_free_principal(context, int_name);
-    krb5_free_principal(context, target_name);
-    krb5_free_cred_contents(context, &ev_cred);
-    krb5_free_ticket(context, ev_ticket);
+    krb5_free_principal(context, client);
+    krb5_free_principal(context, self);
     krb5_free_creds(context, new_cred);
     krb5_free_authdata(context, req_authdata);
     krb5_free_context(context);
