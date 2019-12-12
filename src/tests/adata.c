@@ -303,9 +303,11 @@ main(int argc, char **argv)
     check(krb5_get_credentials(ctx, KRB5_GC_NO_STORE, ccache, &in_creds,
                                &creds));
 
+    assert(in_creds.authdata == NULL || creds->authdata != NULL);
+
     check(krb5_decode_ticket(&creds->ticket, &ticket));
     check(krb5_kt_default(ctx, &keytab));
-    check(krb5_kt_get_entry(ctx, keytab, server, ticket->enc_part.kvno,
+    check(krb5_kt_get_entry(ctx, keytab, ticket->server, ticket->enc_part.kvno,
                             ticket->enc_part.enctype, &ktent));
     check(krb5_decrypt_tkt_part(ctx, &ktent.key, ticket));
 

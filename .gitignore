@@ -444,6 +444,7 @@ local.properties
 /src/tests/responder
 /src/tests/s2p
 /src/tests/s4u2proxy
+/src/tests/s4u2self
 /src/tests/unlockiter
 
 /src/tests/asn.1/expected_encode.out
