@@ -582,6 +582,10 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         if (code != 0)
             goto cleanup;
 
+        /* The authdata in this referral TGT will be copied into the final
+         * credentials, so we don't need to request it again. */
+        s4u_creds.authdata = NULL;
+
         /* Only include a cert in the initial request to the client realm. */
         s4u_user.user_id.subject_cert = empty_data();
 
@@ -707,6 +711,12 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         }
         code = 0;
     }
+
+    /* Note the authdata we asked for in the output creds. */
+    code = krb5_copy_authdata(context, in_creds->authdata,
+                              &(*out_creds)->authdata);
+    if (code)
+        goto cleanup;
 
     if ((options & KRB5_GC_NO_STORE) == 0) {
         code = krb5_cc_store_cred(context, ccache, *out_creds);
@@ -1042,6 +1052,10 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
             goto cleanup;
         }
 
+        /* The authdata in this referral TGT will be copied into the final
+         * credentials, so we don't need to request it again. */
+        mcreds.authdata = NULL;
+
         /*
          * Make sure the KDC supports S4U and resource-based constrained
          * delegation; otherwise we might have gotten a regular TGT referral
@@ -1111,6 +1125,11 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
         if (code)
             goto cleanup;
     }
+
+    /* Note the authdata we asked for in the output creds. */
+    code = krb5_copy_authdata(context, in_creds->authdata, &tkt->authdata);
+    if (code)
+        goto cleanup;
 
     if (!(options & KRB5_GC_NO_STORE))
         (void)krb5_cc_store_cred(context, ccache, tkt);
