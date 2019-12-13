@@ -52,6 +52,6 @@
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 17
 #define KRB5_PATCHLEVEL 1
-#define KRB5_RELTAIL "postrelease"
+#define KRB5_RELTAIL "kfw-4.2-beta2-mit"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "krb5-1.17"
+#define KRB5_RELTAG "kfw-4.2-beta2-mit"
