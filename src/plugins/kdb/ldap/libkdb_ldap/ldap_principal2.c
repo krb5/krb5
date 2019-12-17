@@ -1233,19 +1233,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                 goto cleanup;
         }
 
-        if (!(entry->mask & KADM5_PRINCIPAL)) {
-            memset(strval, 0, sizeof(strval));
-            if ((strval[0]=getstringtime(entry->pw_expiration)) == NULL)
-                goto cleanup;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods,
-                                              "krbpasswordexpiration",
-                                              LDAP_MOD_REPLACE, strval)) != 0) {
-                free (strval[0]);
-                goto cleanup;
-            }
-            free (strval[0]);
-        }
-
         /* Update last password change whenever a new key is set */
         {
             krb5_timestamp last_pw_changed;

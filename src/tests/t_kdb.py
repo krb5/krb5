@@ -479,6 +479,23 @@ else:
     realm.run([kadminl, 'modprinc', '-pwexpire', '2040-02-03', 'user'])
     realm.run([kadminl, 'getprinc', 'user'], expected_msg=' 2040\n')
 
+# Regression test for #8861 (pw_expiration policy enforcement).
+mark('pw_expiration propogation')
+# Create a policy with a max life and verify its application.
+realm.run([kadminl, 'addpol', '-maxlife', '1s', 'pw_e'])
+realm.run([kadminl, 'addprinc', '-policy', 'pw_e', '-pw', 'password',
+           'pwuser'])
+out = realm.run([kadminl, 'getprinc', 'pwuser'],
+                expected_msg='Password expiration date: ')
+if 'Password expiration date: [never]' in out:
+    fail('pw_expiration not applied at principal creation')
+# Unset the policy max life and verify its application during password
+# change.
+realm.run([kadminl, 'modpol', '-maxlife', '0', 'pw_e'])
+realm.run([kadminl, 'cpw', '-pw', 'password_', 'pwuser'])
+realm.run([kadminl, 'getprinc', 'pwuser'],
+          expected_msg='Password expiration date: [never]')
+
 realm.stop()
 
 # Briefly test dump and load.
