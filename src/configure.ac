@@ -961,7 +961,6 @@ case "$srcdir" in
 *)	S_TOP=`pwd`/$srcdir ;;
 esac
 AC_SUBST(S_TOP)
-AC_PATH_PROG(PERL_PATH,perl)
 AC_PATH_PROG(EXPECT,expect)
 # For kadmin/testing/util/Makefile.in
 if test "$TCL_LIBS" != "" ;  then
