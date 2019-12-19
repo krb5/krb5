@@ -2,6 +2,8 @@
 # $Id$
 #
 
+source runenv.exp
+
 set kill /bin/kill
 set sleep /bin/sleep
 set kinit $KINIT

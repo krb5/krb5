@@ -264,7 +264,7 @@ proc kdestroy {} {
 	if {[info exists errorInfo]} {
 		set saveErrorInfo $errorInfo
 	}
-	catch "system $KDESTROY -5 2>/dev/null"
+	catch "exec $KDESTROY -5 2>/dev/null"
 	if {[info exists saveErrorCode]} {
 		set errorCode $saveErrorCode
 	} elseif {[info exists errorCode]} {

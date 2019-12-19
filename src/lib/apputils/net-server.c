@@ -73,7 +73,17 @@ static int max_tcp_or_rpc_data_connections = 45;
 static int
 setreuseaddr(int sock, int value)
 {
-    return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
+    int st;
+
+    st = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
+    if (st)
+        return st;
+#ifdef SO_REUSEPORT
+    st = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &value, sizeof(value));
+    if (st)
+        return st;
+#endif
+    return 0;
 }
 
 #if defined(IPV6_V6ONLY)

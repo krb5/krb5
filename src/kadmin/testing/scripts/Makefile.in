@@ -1,7 +1,7 @@
 mydir=kadmin$(S)testing$(S)scripts
 BUILDTOP=$(REL)..$(S)..$(S)..
 
-all: env-setup.sh $(GEN_SCRIPTS)
+all: env-setup.sh runenv.sh $(GEN_SCRIPTS)
 
 # Should only rebuild env_setup.sh here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.

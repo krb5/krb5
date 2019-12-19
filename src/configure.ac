@@ -134,6 +134,7 @@ if test "$enable_nls" != no; then
 
   AC_CHECK_PROG(MSGFMT,msgfmt,msgfmt)
   if test x"$MSGFMT" != x; then
+    K5_GEN_MAKEFILE(po)
     po=po
   fi
 
@@ -1537,5 +1538,4 @@ V5_AC_OUTPUT_MAKEFILE(.
 	tests tests/resolve tests/asn.1 tests/create tests/hammer
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
 	tests/gss-threads tests/misc
-	po
 )

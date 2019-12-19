@@ -3,6 +3,16 @@ import re
 
 from k5test import *
 
+# On macOS with System Integrity Protection enabled, this script hangs
+# in the wait_for_prop() call after starting the first kpropd process,
+# most likely due to signal restrictions preventing the listening
+# child from informing the parent that a full resync was processed.
+if which('csrutil'):
+    out = subprocess.check_output(['csrutil', 'status'],
+                                  universal_newlines=True)
+    if 'status: enabled' in out:
+        skip_rest('iprop tests', 'System Integrity Protection is enabled')
+
 # Read lines from kpropd output until we are synchronized.  Error if
 # full_expected is true and we didn't see a full propagation or vice
 # versa.

@@ -31,6 +31,8 @@ MODDIR=$TOP/../plugins/kdb
 SBIN=$TOP/keytab:$TOP/server
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
 
+. ./runenv.sh
+
 if [ ! -d $MODDIR ]; then
 	echo "+++" 1>&2
 	echo "+++ Error!  $MODDIR does not exist!" 1>&2

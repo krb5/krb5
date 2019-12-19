@@ -1333,7 +1333,6 @@ proc start_kpropd {} {
 # success, 0 on failure.
 
 proc start_kerberos_daemons { standalone } {
-    global BINSH
     global REALMNAME
     global KRB5KDC
     global KADMIND
@@ -1425,7 +1424,7 @@ proc start_kerberos_daemons { standalone } {
     envstack_push
     setup_kerberos_env kdc
     file delete $kadmind_pidfile
-    spawn $BINSH -c "exec $KADMIND -r $REALMNAME -W -nofork -P $kadmind_pidfile"
+    spawn $KADMIND -r $REALMNAME -W -nofork -P $kadmind_pidfile
     envstack_pop
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id

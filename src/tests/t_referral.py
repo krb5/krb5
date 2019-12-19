@@ -100,12 +100,8 @@ refrealm.stop()
 mark('#7483 regression test')
 drealm = {'domain_realm': {'d': 'KRBTEST.COM'}}
 realm = K5Realm(kdc_conf=drealm, create_host=False)
-tracefile = os.path.join(realm.testdir, 'trace')
-realm.run(['env', 'KRB5_TRACE=' + tracefile, './gcred', 'srv-hst', 'a/x.d@'],
-          expected_code=1)
-f = open(tracefile, 'r')
-trace = f.read()
-f.close()
+out, trace = realm.run(['./gcred', 'srv-hst', 'a/x.d@'], expected_code=1,
+                       return_trace=True)
 if 'back to same realm' in trace:
     fail('KDC returned referral to service realm')
 realm.stop()

@@ -475,7 +475,7 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_in_ccache t_cc_config t_copy_context t_princ t_etypes t_vfy_increds \
 	t_response_items t_sname_match t_valid_times t_get_etype_info
 
-check-unix: $(TEST_PROGS)
+check-unix: $(TEST_PROGS) runenv.sh
 	$(RUN_TEST_LOCAL_CONF) ./t_kerb \
 		parse_name tytso \
 		parse_name tytso@SHAZAAM \

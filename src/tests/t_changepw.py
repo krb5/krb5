@@ -13,15 +13,11 @@ realm.run([kinit, realm.user_princ], input=pwinput)
 # Do the same thing with FAST, with tracing turned on.
 realm.run([kadminl, 'modprinc', '-pwexpire', '1 day ago', 'user'])
 pwinput = 'abcd\nefgh\nefgh\n'
-tracefile = os.path.join(realm.testdir, 'trace')
-realm.run(['env', 'KRB5_TRACE=' + tracefile, kinit, '-T', realm.ccache,
-           realm.user_princ], input=pwinput)
+out, trace = realm.run([kinit, '-T', realm.ccache, realm.user_princ],
+                       input=pwinput, return_trace=True)
 
 # Read the trace and check that FAST was used when getting the
 # kadmin/changepw ticket.
-f = open(tracefile, 'r')
-trace = f.read()
-f.close()
 getting_changepw = fast_used_for_changepw = False
 for line in trace.splitlines():
     if 'Getting initial credentials for user@' in line:

@@ -56,6 +56,10 @@ server-setkey-test: setkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-setkey-test setkey-test.o \
 		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
+runenv.exp: Makefile
+	$(RUN_SETUP); for i in $(RUN_VARS); do \
+		eval echo "set env\($$i\) \$$$$i"; done > runenv.exp
+
 #
 # The unit-test targets
 #
@@ -94,20 +98,20 @@ test-destroy: destroy-test
 test-setkey-client: client-setkey-test
 	$(ENV_SETUP) $(VALGRIND) ./client-setkey-test testkeys admin admin
 
-unit-test-client-setup:
+unit-test-client-setup: runenv.sh
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 
 unit-test-client-cleanup:
 	$(ENV_SETUP) $(STOP_SERVERS)
 
-unit-test-server-setup:
+unit-test-server-setup: runenv.sh
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS_LOCAL)
 
 unit-test-server-cleanup:
 	$(ENV_SETUP) $(STOP_SERVERS_LOCAL)
 
 unit-test-client-body: site.exp test-noauth test-destroy test-handle-client \
-	test-setkey-client
+	test-setkey-client runenv.exp
 	$(ENV_SETUP) $(RUNTEST) --tool api RPC=1 API=$(CLNTTCL) \
 		KINIT=$(BUILDTOP)/clients/kinit/kinit \
 		KDESTROY=$(BUILDTOP)/clients/kdestroy/kdestroy \
@@ -136,4 +140,4 @@ clean:
 	$(RM) lock-test lock-test.o
 	$(RM) server-iter-test iter-test.o
 	$(RM) server-setkey-test client-setkey-test setkey-test.o
-	$(RM) *.log *.plog *.sum *.psum unit-test-log.*
+	$(RM) *.log *.plog *.sum *.psum unit-test-log.* runenv.exp

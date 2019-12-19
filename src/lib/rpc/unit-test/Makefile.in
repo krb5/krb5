@@ -16,6 +16,10 @@ server: server.o rpc_test_svc.o $(GSSRPC_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 client.o server.o: rpc_test.h
 
+runenv.exp: Makefile
+	$(RUN_SETUP); for i in $(RUN_VARS); do \
+		eval echo "set env\($$i\) \$$$$i"; done > runenv.exp
+
 # If rpc_test.h and rpc_test_*.c do not work on your system, you can
 # try using rpcgen by uncommenting these lines (be sure to uncomment
 # then in the generated not Makefile.in).
@@ -42,7 +46,7 @@ unit-test-:
 unit-test-ok: unit-test-body
 
 PASS=@PASS@
-unit-test-body:
+unit-test-body: runenv.sh runenv.exp
 	$(RM) krb5cc_rpc_test_*
 	$(ENV_SETUP) $(VALGRIND) $(START_SERVERS)
 	RPC_TEST_KEYTAB=/tmp/rpc_test_keytab.$$$$ ; export RPC_TEST_KEYTAB ; \
@@ -62,5 +66,5 @@ unit-test-body:
 
 clean:
 	$(RM) server client
-	$(RM) dbg.log rpc_test.log rpc_test.sum
+	$(RM) dbg.log rpc_test.log rpc_test.sum runenv.exp
 

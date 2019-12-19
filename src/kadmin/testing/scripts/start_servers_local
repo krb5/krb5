@@ -7,6 +7,8 @@ DUMMY=${SRVTCL=$TESTDIR/util/kadm5_srv_tcl}; export SRVTCL
 DUMMY=${STOP_SERVERS_LOCAL=$STESTDIR/scripts/stop_servers_local}
 DUMMY=${KRB5RCACHEDIR=$TESTDIR} ; export KRB5RCACHEDIR
 
+. ./runenv.sh
+
 if [ -d /usr/tmp ]; then
 	usrtmp=/usr/tmp
 else
@@ -108,7 +110,7 @@ fi
 
 kdc_args="-R dfl:kdc_rcache.$USER"
 
-(trap "" 2; cd $TOP/../kdc; ./krb5kdc $kdc_args; touch $kdc_start_file) \
+(trap "" 2; $TOP/../kdc/krb5kdc $kdc_args; touch $kdc_start_file) \
 	< /dev/null > $usrtmp/kdc-log.$USER 2>&1 &
 
 s=1
@@ -120,7 +122,7 @@ ovadm_args=-W
 
 rm -f $adm_start_file
 
-(sleep 1; cd $TOP/server; ./kadmind $ovadm_args; \
+(sleep 1; $TOP/server/kadmind $ovadm_args; \
 	touch $adm_start_file) < /dev/null > $usrtmp/kadm-log.$USER 2>&1 &
 
 # wait until they start
