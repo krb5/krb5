@@ -1487,6 +1487,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     int                         flags;
     krb5_db_entry               *princ;
     krb5_s4u_userid             *id;
+    krb5_boolean                tgt_client_local;
 
     *princ_ptr = NULL;
 
@@ -1591,7 +1592,9 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
      * final cross-realm requests in a multi-realm scenario.
      */
 
-    if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+    tgt_client_local = is_local_principal(kdc_active_realm, client_princ);
+
+    if (tgt_client_local &&
         isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
         /* The requesting server appears to no longer exist, and we found
          * a referral instead.  Treat this as a server lookup failure. */
@@ -1652,7 +1655,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         }
 
         *princ_ptr = princ;
-    } else if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+    } else if (tgt_client_local) {
         /*
          * The server is asking to impersonate a principal from another realm,
          * using a local TGT.  It should instead ask that principal's realm and
