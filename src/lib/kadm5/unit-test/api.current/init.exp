@@ -688,17 +688,11 @@ proc test45_46 {service} {
 if {$RPC} {
     test "init 45"
 
-    test45_46 ovsec_adm/admin
+    test45_46 kadmin/admin
 
     test "init 46"
 
-    test45_46 ovsec_adm/changepw
-
-    # re-extract the keytab so it is right
-    exec rm $env(K5ROOT)/ovsec_adm.keytab
-    exec $env(MAKE_KEYTAB) -princ ovsec_adm/admin -princ ovsec_adm/changepw \
-	    -princ kadmin/admin -princ kadmin/changepw \
-	    $env(K5ROOT)/ovsec_adm.keytab
+    test45_46 kadmin/changepw
 }
 
 return ""

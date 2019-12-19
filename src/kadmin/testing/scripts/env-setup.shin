@@ -65,9 +65,6 @@ fi
 
 COMPARE_DUMP=$TESTDIR/scripts/compare_dump.pl; export COMPARE_DUMP
 INITDB=$STESTDIR/scripts/init_db; export INITDB
-MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl; export MAKE_KEYTAB
-LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl
-export LOCAL_MAKE_KEYTAB
 SIMPLE_DUMP=$TESTDIR/scripts/simple_dump.pl; export SIMPLE_DUMP
 TCLUTIL=$STESTDIR/tcl/util.t; export TCLUTIL
 BSDDB_DUMP=$TESTDIR/util/bsddb_dump; export BSDDB_DUMP
@@ -87,13 +84,6 @@ GSS_MECH_CONFIG=$K5ROOT/mech.conf; export GSS_MECH_CONFIG
 # Make sure we don't get confused by translated messages
 # or localized times.
 LC_ALL=C; export LC_ALL
-
-if [ "$TEST_SERVER" != "" ]; then
-	MAKE_KEYTAB="$MAKE_KEYTAB -server $TEST_SERVER"
-fi
-if [ "$TEST_PATH" != "" ]; then
-	MAKE_KEYTAB="$MAKE_KEYTAB -top $TEST_PATH"
-fi
 
 if [ "x$PS_ALL" = "x" ]; then
 	if ps auxww >/dev/null 2>&1; then

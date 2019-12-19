@@ -59,9 +59,8 @@ proc expect_kadm_ok {} {
 	default { perror "didn't get ok back" }
     }
 }
-# trying to translate rpc_test_setup.sh into inline tcl...
 proc setup_database {} {
-    global env spawn_id kadmin_tcl_spawn_id TESTDIR MAKE_KEYTAB CANON_HOST
+    global env spawn_id kadmin_tcl_spawn_id TESTDIR CANON_HOST
 
     # XXXXX
     set_from_env TOP {/x/x/x/x/x}
@@ -71,7 +70,6 @@ proc setup_database {} {
     set_from_env CLNTTCL $TESTDIR/util/kadm5_clnt_tcl
     set_from_env TCLUTIL $TESTDIR/tcl/util.t
     set env(TCLUTIL) $TCLUTIL
-    set_from_env MAKE_KEYTAB $TESTDIR/scripts/make-host-keytab.pl
     set env(PATH) "$TOP/install/admin:$env(PATH)"
 
     # $VERBOSE ?
@@ -122,7 +120,7 @@ if ![info exists CANON_HOST] {
     set CANON_HOST $env(QUALNAME)
     setup_database
     file delete $env(RPC_TEST_KEYTAB)
-    exec $env(MAKE_KEYTAB) -princ "server/$CANON_HOST" $env(RPC_TEST_KEYTAB)
+    exec $env(TOP)/cli/kadmin -p admin -w admin ktadd -k $env(RPC_TEST_KEYTAB) server/$CANON_HOST
 }
 
 

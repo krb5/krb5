@@ -44,7 +44,6 @@ DUMMY=${TESTDIR=$TOP/testing}; export TESTDIR
 DUMMY=${STESTDIR=$STOP/testing}
 DUMMY=${SRVTCL=$TESTDIR/util/kadm5_srv_tcl}; export SRVTCL
 DUMMY=${TCLUTIL=$STESTDIR/tcl/util.t}; export TCLUTIL
-DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
 
 PATH=$ADMIN:$BIN:$ETC:$SBIN:$PATH; export PATH
 
@@ -215,8 +214,6 @@ admin/no-delete@$REALM		amcil
 changepw/kerberos@$REALM	cil
 
 EOF
-
-eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw $K5ROOT/ovsec_adm.keytab $REDIRECT
 
 # Create $K5ROOT/setup.csh to make it easy to run other programs against
 # the test db
