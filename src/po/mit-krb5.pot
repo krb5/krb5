@@ -1645,12 +1645,12 @@ msgstr ""
 
 #: ../../src/kadmin/cli/kadmin.c:1228
 #, c-format
-msgid "NOTICE: no policy specified for %s; assigning \"default\"\n"
+msgid "No policy specified for %s; assigning \"default\"\n"
 msgstr ""
 
 #: ../../src/kadmin/cli/kadmin.c:1234
 #, c-format
-msgid "WARNING: no policy specified for %s; defaulting to no policy\n"
+msgid "No policy specified for %s; defaulting to no policy\n"
 msgstr ""
 
 #: ../../src/kadmin/cli/kadmin.c:1276

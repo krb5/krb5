@@ -1690,16 +1690,16 @@ msgstr "WARNUNG: Richtlinie »%s« existiert nicht.\n"
 
 #: ../../src/kadmin/cli/kadmin.c:1230
 #, c-format
-msgid "NOTICE: no policy specified for %s; assigning \"default\"\n"
+msgid "No policy specified for %s; assigning \"default\"\n"
 msgstr ""
-"HINWEIS: Für %s wurde keine Richtlinie angegeben, es wird »default« "
+"Für %s wurde keine Richtlinie angegeben, es wird »default« "
 "zugewiesen\n"
 
 #: ../../src/kadmin/cli/kadmin.c:1235
 #, c-format
-msgid "WARNING: no policy specified for %s; defaulting to no policy\n"
+msgid "No policy specified for %s; defaulting to no policy\n"
 msgstr ""
-"WARNUNG: Für %s wurde keine Richtlinie angegeben, es wird die Vorgabe "
+"Für %s wurde keine Richtlinie angegeben, es wird die Vorgabe "
 "»keine\n"
 "Richtlinie« verwandt.\n"
 

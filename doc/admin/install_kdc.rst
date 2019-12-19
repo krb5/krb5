@@ -239,7 +239,7 @@ is created::
 
     kadmin.local: addprinc admin/admin@ATHENA.MIT.EDU
 
-    WARNING: no policy specified for "admin/admin@ATHENA.MIT.EDU";
+    No policy specified for "admin/admin@ATHENA.MIT.EDU";
     assigning "default".
     Enter password for principal admin/admin@ATHENA.MIT.EDU:  <= Enter a password.
     Re-enter password for principal admin/admin@ATHENA.MIT.EDU:  <= Type it again.
@@ -316,11 +316,11 @@ following::
 
     shell% kadmin
     kadmin: addprinc -randkey host/kerberos.mit.edu
-    NOTICE: no policy specified for "host/kerberos.mit.edu@ATHENA.MIT.EDU"; assigning "default"
+    No policy specified for "host/kerberos.mit.edu@ATHENA.MIT.EDU"; assigning "default"
     Principal "host/kerberos.mit.edu@ATHENA.MIT.EDU" created.
 
     kadmin: addprinc -randkey host/kerberos-1.mit.edu
-    NOTICE: no policy specified for "host/kerberos-1.mit.edu@ATHENA.MIT.EDU"; assigning "default"
+    No policy specified for "host/kerberos-1.mit.edu@ATHENA.MIT.EDU"; assigning "default"
     Principal "host/kerberos-1.mit.edu@ATHENA.MIT.EDU" created.
 
 It is not strictly necessary to have the master KDC server in the

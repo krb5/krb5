@@ -419,7 +419,7 @@ Options:
 Example::
 
     kadmin: addprinc jennifer
-    WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
+    No policy specified for "jennifer@ATHENA.MIT.EDU";
     defaulting to no policy.
     Enter password for principal jennifer@ATHENA.MIT.EDU:
     Re-enter password for principal jennifer@ATHENA.MIT.EDU:

@@ -103,7 +103,7 @@ If you want to create a principal which is contained by a LDAP object,
 all you need to do is::
 
     kadmin: addprinc -x dn=cn=jennifer,dc=example,dc=com jennifer
-    WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
+    No policy specified for "jennifer@ATHENA.MIT.EDU";
     defaulting to no policy.
     Enter password for principal jennifer@ATHENA.MIT.EDU:  <= Type the password.
     Re-enter password for principal jennifer@ATHENA.MIT.EDU:  <=Type it again.
@@ -114,7 +114,7 @@ If you want to create a principal under a specific LDAP container and
 link to an existing LDAP object, all you need to do is::
 
     kadmin: addprinc -x containerdn=dc=example,dc=com -x linkdn=cn=david,dc=example,dc=com david
-    WARNING: no policy specified for "david@ATHENA.MIT.EDU";
+    No policy specified for "david@ATHENA.MIT.EDU";
     defaulting to no policy.
     Enter password for principal david@ATHENA.MIT.EDU:  <= Type the password.
     Re-enter password for principal david@ATHENA.MIT.EDU:  <=Type it again.

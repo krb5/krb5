@@ -1229,13 +1229,13 @@ kadmin_addprinc(int argc, char *argv[])
         /* If the policy "default" exists, assign it. */
         if (policy_exists("default")) {
             if (!script_mode) {
-                fprintf(stderr, _("NOTICE: no policy specified for %s; "
+                fprintf(stderr, _("No policy specified for %s; "
                                   "assigning \"default\"\n"), canon);
             }
             princ.policy = "default";
             mask |= KADM5_POLICY;
         } else if (!script_mode) {
-            fprintf(stderr, _("WARNING: no policy specified for %s; "
+            fprintf(stderr, _("No policy specified for %s; "
                               "defaulting to no policy\n"), canon);
         }
     }
