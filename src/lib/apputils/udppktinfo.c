@@ -23,6 +23,9 @@
  * or implied warranty.
  */
 
+/* macOS requires this define for IPV6_PKTINFO. */
+#define __APPLE_USE_RFC_3542
+
 #include "udppktinfo.h"
 
 #include <netinet/in.h>
