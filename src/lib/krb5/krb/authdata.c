@@ -557,6 +557,8 @@ extract_cammacs(krb5_context kcontext, krb5_authdata **cammacs,
         if (ret && ret != KRB5KRB_AP_ERR_BAD_INTEGRITY)
             goto cleanup;
         ret = 0;
+        if (elements == NULL)
+            continue;
 
         /* Add the verified elements to list and free the container array. */
         for (n_elements = 0; elements[n_elements] != NULL; n_elements++);
