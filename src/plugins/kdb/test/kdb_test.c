@@ -351,14 +351,12 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                                   &search_name));
     canon = get_string(h, "alias", search_name, NULL);
     if (canon != NULL) {
-        if (!(flags & KRB5_KDB_FLAG_ALIAS_OK) &&
-            search_for->type != KRB5_NT_ENTERPRISE_PRINCIPAL) {
-            ret = KRB5_KDB_NOENTRY;
-            goto cleanup;
-        }
         check(krb5_parse_name(context, canon, &princ));
         if (!krb5_realm_compare(context, search_for, princ)) {
-            if (flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) {
+            /* Out of realm */
+            if ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) &&
+                ((flags & KRB5_KDB_FLAG_CANONICALIZE) ||
+                 search_for->type == KRB5_NT_ENTERPRISE_PRINCIPAL)) {
                 /* Return a client referral by creating an entry with only the
                  * principal set. */
                 *entry = ealloc(sizeof(**entry));
@@ -486,9 +484,7 @@ test_get_s4u_x509_principal(krb5_context context, const krb5_data *client_cert,
                                   &princ_name));
     canon = get_string(h, "alias", princ_name, NULL);
     krb5_free_unparsed_name(context, princ_name);
-    if (canon != NULL &&
-        ((flags & KRB5_KDB_FLAG_ALIAS_OK) ||
-         princ->type == KRB5_NT_ENTERPRISE_PRINCIPAL)) {
+    if (canon != NULL) {
         check(krb5_parse_name(context, canon, &canon_princ));
         match = krb5_principal_compare(context, canon_princ, (*entry)->princ);
         krb5_free_principal(context, canon_princ);

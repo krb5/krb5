@@ -189,15 +189,12 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
             if ((values=ldap_get_values(ld, ent, "krbcanonicalname")) != NULL) {
                 if (values[0] && strcmp(values[0], user) != 0) {
                     /* We matched an alias, not the canonical name. */
-                    if (flags & KRB5_KDB_FLAG_ALIAS_OK) {
-                        st = krb5_ldap_parse_principal_name(values[0], &cname);
-                        if (st != 0)
-                            goto cleanup;
-                        st = krb5_parse_name(context, cname, &cprinc);
-                        if (st != 0)
-                            goto cleanup;
-                    } else /* No canonicalization, so don't return aliases. */
-                        found = FALSE;
+                    st = krb5_ldap_parse_principal_name(values[0], &cname);
+                    if (st != 0)
+                        goto cleanup;
+                    st = krb5_parse_name(context, cname, &cprinc);
+                    if (st != 0)
+                        goto cleanup;
                 }
                 ldap_value_free(values);
                 if (!found)

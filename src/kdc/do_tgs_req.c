@@ -238,7 +238,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     /* XXX make sure server here has the proper realm...taken from AP_REQ
        header? */
 
-    setflag(s_flags, KRB5_KDB_FLAG_ALIAS_OK);
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
         setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
         setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);

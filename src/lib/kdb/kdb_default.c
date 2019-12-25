@@ -524,8 +524,7 @@ krb5_db_def_rename_principal(krb5_context kcontext,
     if (source == NULL || target == NULL)
         return EINVAL;
 
-    ret = krb5_db_get_principal(kcontext, source, KRB5_KDB_FLAG_ALIAS_OK,
-                                &kdb);
+    ret = krb5_db_get_principal(kcontext, source, 0, &kdb);
     if (ret)
         goto cleanup;
 

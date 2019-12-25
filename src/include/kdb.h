@@ -121,8 +121,6 @@
 #define KRB5_KDB_FLAG_USER_TO_USER              0x00000800
 /* Cross-realm */
 #define KRB5_KDB_FLAG_CROSS_REALM               0x00001000
-/* Allow in-realm aliases */
-#define KRB5_KDB_FLAG_ALIAS_OK                  0x00002000
 /* Issuing referral */
 #define KRB5_KDB_FLAG_ISSUING_REFERRAL          0x00004000
 
@@ -1047,15 +1045,9 @@ typedef struct _kdb_vftabl {
      *     part of the realm being served, and a referral or alternate TGT will
      *     be issued instead.
      *
-     * KRB5_KDB_FLAG_ALIAS_OK: Set by the KDC for server principal lookups and
-     *     for AS request client principal lookups with canonicalization
-     *     requested; also set by the admin interface.  Determines whether the
-     *     module should return in-realm aliases.
-     *
-     * A module can return in-realm aliases if KRB5_KDB_FLAG_ALIAS_OK is set,
-     * or if search_for->type is KRB5_NT_ENTERPRISE_PRINCIPAL.  To return an
-     * in-realm alias, fill in a different value for entries->princ than the
-     * one requested.
+     * A module may return an in-realm alias by setting (*entry)->princ to the
+     * canonical name.  The KDC will decide based on the request whether to use
+     * the requested name or the canonical name in the issued ticket.
      *
      * A module can return a referral to another realm if
      * KRB5_KDB_FLAG_CANONICALIZE is set, or if

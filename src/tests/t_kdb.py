@@ -383,8 +383,9 @@ realm.klist(realm.user_princ, 'alias@KRBTEST.COM')
 
 # Test client principal aliases, with and without preauth.
 realm.kinit('canon', password('canon'))
-realm.kinit('alias', password('canon'), expected_code=1,
-            expected_msg='not found in Kerberos database')
+realm.kinit('alias', password('canon'))
+realm.run([kvno, 'alias'])
+realm.klist('alias@KRBTEST.COM', 'alias@KRBTEST.COM')
 realm.kinit('alias', password('canon'), ['-C'])
 realm.run([kvno, 'alias'])
 realm.klist('canon@KRBTEST.COM', 'alias@KRBTEST.COM')

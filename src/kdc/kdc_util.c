@@ -403,9 +403,8 @@ kdc_rd_ap_req(kdc_realm_t *kdc_active_realm,
         match_enctype = 0;
     }
 
-    retval = kdc_get_server_key(kdc_context, apreq->ticket,
-                                KRB5_KDB_FLAG_ALIAS_OK, match_enctype, server,
-                                NULL, NULL);
+    retval = kdc_get_server_key(kdc_context, apreq->ticket, 0, match_enctype,
+                                server, NULL, NULL);
     if (retval)
         return retval;
 

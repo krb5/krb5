@@ -1038,8 +1038,7 @@ krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
         logging(kcontext))
         return KRB5_PLUGIN_OP_NOTSUPP;
 
-    status = krb5_db_get_principal(kcontext, target, KRB5_KDB_FLAG_ALIAS_OK,
-                                   &entry);
+    status = krb5_db_get_principal(kcontext, target, 0, &entry);
     if (status == 0) {
         krb5_db_free_principal(kcontext, entry);
         return KRB5_KDB_INUSE;
