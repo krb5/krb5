@@ -448,6 +448,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_TKT_CREDS(c, creds, cache)                            \
     TRACE(c, "Getting credentials {creds} using ccache {ccache}",   \
           creds, cache)
+#define TRACE_TKT_CREDS_FOR_USER_TO_SELF(c, user, self)              \
+    TRACE(c, "Getting credentials {princ} -> {princ} (S4U2S)", user, self)
+#define TRACE_TkT_CRED_VIA_TGT(c, request, reply)              \
+    TRACE(c, "Get cred via TGT {princ} after requesting {princ}",    \
+          reply, request)
 #define TRACE_TKT_CREDS_ADVANCE(c, realm)                               \
     TRACE(c, "Received TGT for {data}; advancing current realm", realm)
 #define TRACE_TKT_CREDS_CACHED_INTERMEDIATE_TGT(c, tgt)                 \

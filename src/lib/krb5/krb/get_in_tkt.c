@@ -540,6 +540,7 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_pa_data(context, ctx->method_padata);
     krb5_free_pa_data(context, ctx->more_padata);
     krb5_free_data_contents(context, &ctx->salt);
+    krb5_free_data_contents(context, &ctx->subject_cert);
     krb5_free_data_contents(context, &ctx->s2kparams);
     krb5_free_keyblock_contents(context, &ctx->as_key);
     k5_json_release(ctx->cc_config_in);
@@ -613,7 +614,7 @@ krb5_init_creds_get_creds(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_creds *creds)
 {
-    if (!ctx->complete)
+    if (!ctx->complete || ctx->identify_realm)
         return KRB5_NO_TKT_SUPPLIED;
 
     return k5_copy_creds_contents(context, &ctx->cred, creds);
@@ -624,12 +625,26 @@ krb5_init_creds_get_times(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_ticket_times *times)
 {
-    if (!ctx->complete)
+    if (!ctx->complete || ctx->identify_realm)
         return KRB5_NO_TKT_SUPPLIED;
 
     *times = ctx->cred.times;
 
     return 0;
+}
+
+/* Return a principal with only the realm component as identified realm. */
+krb5_error_code KRB5_CALLCONV
+k5_init_creds_get_identified_realm(krb5_context context,
+                                   krb5_init_creds_context ctx,
+                                   krb5_principal *realm)
+{
+    if (!ctx->complete)
+        return KRB5_NO_TKT_SUPPLIED;
+
+    return krb5_build_principal_ext(context, realm,
+                                    ctx->request->client->realm.length,
+                                    ctx->request->client->realm.data, 0);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -1084,6 +1099,37 @@ krb5_init_creds_set_service(krb5_context context,
     return restart_init_creds_loop(context, ctx, FALSE);
 }
 
+krb5_error_code
+k5_init_creds_set_identify_realm(krb5_context context,
+                            krb5_init_creds_context ctx,
+                            int set)
+{
+    ctx->identify_realm = set ? TRUE : FALSE;
+
+    return 0;
+}
+
+krb5_error_code
+k5_init_creds_set_subject_cert(krb5_context context,
+                               krb5_init_creds_context ctx,
+                               const krb5_data *cert)
+{
+    krb5_error_code code;
+
+    krb5_free_data_contents(context, &ctx->subject_cert);
+    ctx->subject_cert.length = 0;
+
+    if (cert == NULL)
+        return 0;
+
+    code = krb5int_copy_data_contents(context, cert, &ctx->subject_cert);
+    if (code)
+        return code;
+
+    ctx->identify_realm = TRUE;
+    return 0;
+}
+
 static krb5_error_code
 init_creds_validate_reply(krb5_context context,
                           krb5_init_creds_context ctx,
@@ -1386,8 +1432,8 @@ init_creds_step_request(krb5_context context,
     if (code)
         goto cleanup;
 
-    if (ctx->subject_cert != NULL) {
-        code = krb5int_copy_data_contents(context, ctx->subject_cert, &copy);
+    if (ctx->subject_cert.length != 0) {
+        code = krb5int_copy_data_contents(context, &ctx->subject_cert, &copy);
         if (code)
             goto cleanup;
         code = k5_add_pa_data_from_data(&ctx->request->padata,
@@ -1832,46 +1878,6 @@ cleanup:
     krb5_init_creds_free(context, ctx);
 
     return code;
-}
-
-krb5_error_code
-k5_identify_realm(krb5_context context, krb5_principal client,
-                  const krb5_data *subject_cert, krb5_principal *client_out)
-{
-    krb5_error_code ret;
-    krb5_get_init_creds_opt *opts = NULL;
-    krb5_init_creds_context ctx = NULL;
-    int use_master = 0;
-
-    *client_out = NULL;
-
-    ret = krb5_get_init_creds_opt_alloc(context, &opts);
-    if (ret)
-        goto cleanup;
-    krb5_get_init_creds_opt_set_tkt_life(opts, 15);
-    krb5_get_init_creds_opt_set_renew_life(opts, 0);
-    krb5_get_init_creds_opt_set_forwardable(opts, 0);
-    krb5_get_init_creds_opt_set_proxiable(opts, 0);
-    krb5_get_init_creds_opt_set_canonicalize(opts, 1);
-
-    ret = krb5_init_creds_init(context, client, NULL, NULL, 0, opts, &ctx);
-    if (ret)
-        goto cleanup;
-
-    ctx->identify_realm = TRUE;
-    ctx->subject_cert = subject_cert;
-
-    ret = k5_init_creds_get(context, ctx, &use_master);
-    if (ret)
-        goto cleanup;
-
-    TRACE_INIT_CREDS_IDENTIFIED_REALM(context, &ctx->request->client->realm);
-    ret = krb5_copy_principal(context, ctx->request->client, client_out);
-
-cleanup:
-    krb5_get_init_creds_opt_free(context, opts);
-    krb5_init_creds_free(context, ctx);
-    return ret;
 }
 
 krb5_error_code

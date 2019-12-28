@@ -83,6 +83,11 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
                                  krb5_creds *in_creds, krb5_creds *mcreds,
                                  krb5_flags *fields);
 
+krb5_error_code
+k5_get_cached_local_tgt(krb5_context context, krb5_principal client,
+                        krb5_flags flags, krb5_ccache ccache,
+                        krb5_creds **tgt_out);
+
 #define IS_TGS_PRINC(p) ((p)->length == 2 &&                            \
                          data_eq_string((p)->data[0], KRB5_TGS_NAME))
 
@@ -294,17 +299,6 @@ k5_get_init_creds(krb5_context context, krb5_creds *creds,
                   get_as_key_fn gak, void *gak_data, int *master,
                   krb5_kdc_rep **as_reply);
 
-/*
- * Make AS requests with the canonicalize flag set, stopping when we get a
- * message indicating which realm the client principal is in.  Set *client_out
- * to a copy of client with the canonical realm.  If subject_cert is non-null,
- * include PA_S4U_X509_USER pa-data with the subject certificate each request.
- * (See [MS-SFU] 3.1.5.1.1.1 and 3.1.5.1.1.2.)
- */
-krb5_error_code
-k5_identify_realm(krb5_context context, krb5_principal client,
-                  const krb5_data *subject_cert, krb5_principal *client_out);
-
 krb5_error_code
 k5_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **opt,
                     krb5_flags options, krb5_address *const *addrs,
@@ -385,5 +379,89 @@ krb5_error_code
 k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
                            krb5_ccache ccache, krb5_creds *in_creds,
                            krb5_creds **out_creds);
+
+/* Convert ticket flags to necessary KDC options */
+#define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
+
+/* Glue API for krb5_tkt_creds_ */
+typedef struct _k5_tkt_creds_in_data {
+    krb5_flags req_options;     /* Caller-requested KRB5_GC_* options */
+    krb5_flags req_kdcopt;      /* Caller-requested options as KDC options */
+    krb5_creds *in_creds;       /* Creds requested by caller */
+    krb5_ccache ccache;         /* Caller-provided ccache (alias) */
+    krb5_principal req_server;  /* Caller-requested server principal */
+    krb5_authdata **authdata;   /* Caller-requested authdata */
+    krb5_principal impersonate;
+    krb5_data impersonate_cert;
+} *k5_tkt_creds_in_data;
+
+void k5_tkt_creds_in_data_free(krb5_context context,
+                               k5_tkt_creds_in_data in_data);
+
+typedef struct _krb5_gc_creds_context *krb5_gc_creds_context;
+
+krb5_error_code k5_gc_tgs_init(krb5_context context,
+                               k5_tkt_creds_in_data in_data,
+                               krb5_gc_creds_context *out_ctx);
+
+krb5_error_code k5_gc_tgs_step(krb5_context context,
+                               krb5_gc_creds_context ctx,
+                               krb5_data *in, krb5_data *out,
+                               krb5_data *realm,
+                               unsigned int *flags,
+                               krb5_creds **reply_creds);
+
+void k5_gc_tgs_free(krb5_context context, krb5_gc_creds_context ctx);
+
+typedef struct _krb5_s4u2s_creds_context *krb5_s4u2s_creds_context;
+
+krb5_error_code k5_gc_s4u2s_init(krb5_context context,
+                                 k5_tkt_creds_in_data in_data,
+                                 krb5_s4u2s_creds_context *out_ctx);
+
+krb5_error_code k5_gc_s4u2s_step(krb5_context context,
+                                 krb5_s4u2s_creds_context ctx,
+                                 krb5_data *in, krb5_data *out,
+                                 krb5_data *realm,
+                                 unsigned int *flags,
+                                 krb5_creds **reply_creds);
+
+void k5_gc_s4u2s_free(krb5_context context, krb5_s4u2s_creds_context ctx);
+
+typedef struct _krb5_s4u2p_creds_context *krb5_s4u2p_creds_context;
+
+krb5_error_code k5_gc_s4u2p_init(krb5_context context,
+                                 k5_tkt_creds_in_data in_data,
+                                 krb5_s4u2p_creds_context *out_ctx);
+
+krb5_error_code k5_gc_s4u2p_step(krb5_context context,
+                                 krb5_s4u2p_creds_context ctx,
+                                 krb5_data *in, krb5_data *out,
+                                 krb5_data *realm,
+                                 unsigned int *flags,
+                                 krb5_creds **reply_creds);
+
+void k5_gc_s4u2p_free(krb5_context context, krb5_s4u2p_creds_context ctx);
+
+/**
+ * Set or unset flag to stop when client realm is identified.
+ */
+krb5_error_code
+k5_init_creds_set_identify_realm(krb5_context context,
+                                 krb5_init_creds_context ctx,
+                                 int set);
+
+/**
+ * Set or unset client certificate to identify its realm (implies identify_realm).
+ */
+krb5_error_code
+k5_init_creds_set_subject_cert(krb5_context context,
+                               krb5_init_creds_context ctx,
+                               const krb5_data *cert);
+
+krb5_error_code KRB5_CALLCONV
+k5_init_creds_get_identified_realm(krb5_context context,
+                                   krb5_init_creds_context ctx,
+                                   krb5_principal *realm);
 
 #endif /* KRB5_INT_FUNC_PROTO__ */

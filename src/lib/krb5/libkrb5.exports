@@ -644,3 +644,4 @@ profile_ser_externalize
 profile_ser_internalize
 profile_ser_size
 profile_update_relation
+krb5_tkt_creds_set_impersonate

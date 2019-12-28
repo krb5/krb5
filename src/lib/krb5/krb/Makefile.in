@@ -119,6 +119,7 @@ STLIBOBJS= \
 	srv_rcache.o	\
 	str_conv.o	\
 	tgtname.o	\
+	tkt_api.o	\
 	unparse.o	\
 	val_renew.o	\
 	valid_times.o	\
@@ -233,6 +234,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)srv_rcache.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
 	$(OUTPRE)tgtname.$(OBJEXT)	\
+	$(OUTPRE)tkt_api.$(OBJEXT)	\
 	$(OUTPRE)unparse.$(OBJEXT)	\
 	$(OUTPRE)val_renew.$(OBJEXT)	\
 	$(OUTPRE)valid_times.$(OBJEXT)	\
@@ -348,6 +350,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/t_ad_fx_armor.c \
 	$(srcdir)/tgtname.c	\
+	$(srcdir)/tkt_api.c	\
 	$(srcdir)/unparse.c	\
 	$(srcdir)/val_renew.c	\
 	$(srcdir)/valid_times.c	\

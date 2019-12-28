@@ -7659,6 +7659,40 @@ krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
  * @return
  * Kerberos error codes
  */
+
+/**
+ * Set impersonate client.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  impersonate     Impersonate client principal
+ *
+ * @retval
+ * 0 Success
+ * @return
+ * Kerberos error codes
+ */
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_impersonate(krb5_context context,
+                               krb5_tkt_creds_context ctx,
+                               krb5_principal impersonate);
+
+/**
+ * Set impersonate client certificate.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  cert            Impersonate client certificate
+ *
+ * @retval
+ * 0 Success
+ * @return
+ * Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_impersonate_cert(krb5_context context,
+                                    krb5_tkt_creds_context ctx,
+                                    krb5_data *cert);
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,
                            krb5_principal client, krb5_keytab arg_keytab,
