@@ -135,7 +135,6 @@ static char *kdb5_util = KPROPD_DEFAULT_KDB5_UTIL;
 static char *kerb_database = NULL;
 static char *acl_file_name = KPROPD_ACL_FILE;
 
-static krb5_address *sender_addr;
 static krb5_address *receiver_addr;
 static const char *port = KPROP_SERVICE;
 
@@ -1190,10 +1189,6 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
     krb5_keytab keytab = NULL;
     char *name, etypebuf[100];
 
-    /* Set recv_addr and send_addr. */
-    sockaddr2krbaddr(context, my_sin->ss_family, (struct sockaddr *)my_sin,
-                     &sender_addr);
-
     sin_length = sizeof(r_sin);
     if (getsockname(fd, (struct sockaddr *)&r_sin, &sin_length)) {
         com_err(progname, errno, _("while getting local socket address"));
@@ -1229,8 +1224,13 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
         exit(1);
     }
 
+    /*
+     * Do not set a remote address, to allow replication over a NAT that
+     * changes the client address.  A reflection attack against kpropd is
+     * impossible because kpropd only sends one message at the end.
+     */
     retval = krb5_auth_con_setaddrs(context, auth_context, receiver_addr,
-                                    sender_addr);
+                                    NULL);
     if (retval) {
         syslog(LOG_ERR, _("Error in krb5_auth_con_setaddrs: %s"),
                error_message(retval));
