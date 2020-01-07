@@ -241,7 +241,8 @@ Scripts may use the following realm methods and attributes:
   return code other than 0, expected_msg=MSG to expect a substring in
   the command output, and expected_trace=('a', 'b', ...) to expect an
   ordered series of line substrings in the command's KRB5_TRACE
-  output.
+  output, or return_trace=True to return a tuple of the command output
+  and the trace output.
 
 * realm.kprop_port(): Returns a port number based on realm.portbase
   intended for use by kprop and kpropd.
@@ -673,25 +674,23 @@ def _stop_or_shell(stop, shell, env, ind):
         subprocess.call(os.getenv('SHELL'), env=env)
 
 
-# Read tracefile and look for the expected strings in successive lines.
-def _check_trace(tracefile, expected):
-    output('*** Trace output for previous command:\n')
+# Look for the expected strings in successive lines of trace.
+def _check_trace(trace, expected):
     i = 0
-    with open(tracefile, 'r') as f:
-        for line in f:
-            output(line)
-            if i < len(expected) and expected[i] in line:
-                i += 1
+    for line in trace.splitlines():
+        if i < len(expected) and expected[i] in line:
+            i += 1
     if i < len(expected):
         fail('Expected string not found in trace output: ' + expected[i])
 
 
 def _run_cmd(args, env, input=None, expected_code=0, expected_msg=None,
-             expected_trace=None):
+             expected_trace=None, return_trace=False):
     global null_input, _cmd_index, _last_cmd, _last_cmd_output, _debug
     global _stop_before, _stop_after, _shell_before, _shell_after
 
-    if expected_trace is not None:
+    tracefile = None
+    if expected_trace is not None or return_trace:
         tracefile = 'testtrace'
         if os.path.exists(tracefile):
             os.remove(tracefile)
@@ -731,10 +730,15 @@ def _run_cmd(args, env, input=None, expected_code=0, expected_msg=None,
     if expected_msg is not None and expected_msg not in outdata:
         fail('Expected string not found in command output: ' + expected_msg)
 
-    if expected_trace is not None:
-        _check_trace(tracefile, expected_trace)
+    if tracefile is not None:
+        with open(tracefile, 'r') as f:
+            trace = f.read()
+        output('*** Trace output for previous command:\n')
+        output(trace)
+        if expected_trace is not None:
+            _check_trace(trace, expected_trace)
 
-    return outdata
+    return (outdata, trace) if return_trace else outdata
 
 
 def _debug_cmd(args, env, input):
