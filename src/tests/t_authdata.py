@@ -292,7 +292,8 @@ a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'delegation': {'impersonator' : 'resource'},
                                   'princs': a_princs,
-                                  'alias': {'service/rb.b': '@B'}}}}
+                                  'alias': {'impersonator@A': 'impersonator',
+                                            'service/rb.b': '@B'}}}}
 
 b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
             'krbtgt/A': {'keys': 'aes128-cts'},
@@ -314,6 +315,7 @@ ra.start_kdc()
 rb.start_kdc()
 
 ra.extract_keytab('impersonator@A', ra.keytab)
+ra.extract_keytab('impersonator\@A@A', ra.keytab)
 rb.extract_keytab('user@B', rb.keytab)
 
 usercache = 'FILE:' + os.path.join(rb.testdir, 'usercache')

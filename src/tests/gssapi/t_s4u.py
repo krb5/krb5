@@ -379,4 +379,57 @@ ra.stop()
 rb.stop()
 rc.stop()
 
+mark('S4U using aliases names')
+
+x_princs = {'krbtgt/X': {'keys': 'aes128-cts'},
+            'krbtgt/Y': {'keys': 'aes128-cts'},
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
+            'impersonator': {'keys': 'aes128-cts',
+                             'flags': '+ok_to_auth_as_delegate'},
+            'srv/rb_cd': {'keys': 'aes128-cts'},
+            'srv/rb_cd2': {'keys': 'aes128-cts'},
+            'srv/legacy_cd': {'keys': 'aes128-cts'}}
+x_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'princs': x_princs,
+                                  'rbcd': {'srv/rb_cd@X': 'imp_client@X',
+                                           'srv/rb_cd2@X': 'imp@abc@X'},
+                                  'delegation': {'impersonator': 'srv/legacy_cd'},
+                                  'alias': {'imp_client': 'impersonator',
+                                            'imp@abc': 'impersonator',
+                                            'imp_server': 'impersonator'}}}}
+
+y_princs = {'krbtgt/Y': {'keys': 'aes128-cts'},
+            'krbtgt/X': {'keys': 'aes128-cts'},
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'}}
+y_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'princs': y_princs,
+                                  'alias': {'imp_server': '@X'}}}}
+
+rx, ry = cross_realms(2, xtgts=(),
+                      args=({'realm': 'X', 'kdc_conf': x_kconf},
+                            {'realm': 'Y', 'kdc_conf': y_kconf}),
+                      create_kdb=False)
+
+rx.start_kdc()
+ry.start_kdc()
+
+rx.extract_keytab('imp_client@X', rx.keytab)
+rx.kinit('imp_client@X', None, ['-f', '-k', '-t', rx.keytab])
+rx.run(['./t_s4u_alias_krb5', rx.user_princ, 'imp_server', 'srv/rb_cd'])
+rx.run(['./t_s4u_alias_krb5', ry.user_princ, 'imp_server', 'srv/rb_cd'])
+rx.run(['./t_s4u_alias_krb5', rx.user_princ, 'imp_server', 'srv/legacy_cd'])
+rx.run(['./t_s4u_alias_krb5', ry.user_princ, 'imp_server', 'srv/legacy_cd'])
+
+rx.extract_keytab('imp\@abc@X', rx.keytab)
+rx.kinit('imp@abc@X', None, ['-E', '-f', '-k', '-t', rx.keytab])
+rx.run(['./t_s4u_alias_krb5', rx.user_princ, 'imp_server', 'srv/rb_cd2'])
+rx.run(['./t_s4u_alias_krb5', ry.user_princ, 'imp_server', 'srv/rb_cd2'])
+rx.run(['./t_s4u_alias_krb5', rx.user_princ, 'imp_server', 'srv/legacy_cd'])
+rx.run(['./t_s4u_alias_krb5', ry.user_princ, 'imp_server', 'srv/legacy_cd'])
+
+rx.stop()
+ry.stop()
+
 success('S4U test cases')
