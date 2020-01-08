@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.18
+                   Kerberos Version 5, Release 1.19
 
                             Release Notes
                         The MIT Kerberos Team
@@ -73,10 +73,10 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.18
+Major changes in 1.19
 ---------------------
 
-krb5-1.18 changes by ticket ID
+krb5-1.19 changes by ticket ID
 ------------------------------
 
 Acknowledgements
@@ -179,6 +179,7 @@ reports, suggestions, and valuable resources:
     Brian Almeida
     Michael B Allen
     Pooja Anil
+    Jeffrey Arbuckle
     Heinz-Ado Arnolds
     Derek Atkins
     Mark Bannister
@@ -189,6 +190,7 @@ reports, suggestions, and valuable resources:
     Adam Bernstein
     Arlene Berry
     Jeff Blaine
+    Toby Blake
     Radoslav Bodo
     Sumit Bose
     Emmanuel Bouillon
@@ -236,6 +238,7 @@ reports, suggestions, and valuable resources:
     Remi Ferrand
     Paul Fertser
     Fabiano Fidêncio
+    Frank Filz
     William Fiveash
     Jacques Florent
     Ákos Frohner
@@ -271,6 +274,7 @@ reports, suggestions, and valuable resources:
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
+    Lutz Justen
     Alexander Karaivanov
     Anders Kaseorg
     Bar Katz
@@ -279,11 +283,13 @@ reports, suggestions, and valuable resources:
     W. Trevor King
     Patrik Kis
     Martin Kittel
+    Thomas Klausner
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
     Tomas Kuthan
     Pierre Labastie
+    Andreas Ladanyi
     Chris Leick
     Volker Lendecke
     Jan iankko Lieskovsky
@@ -298,6 +304,7 @@ reports, suggestions, and valuable resources:
     Ryan Lynch
     Roland Mainz
     Sorin Manolache
+    Robert Marshall
     Andrei Maslennikov
     Michael Mattioli
     Nathaniel McCallum
@@ -318,7 +325,9 @@ reports, suggestions, and valuable resources:
     Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Dilyan Palauzov
     Tom Parker
+    Eric Pauly
     Ezra Peisach
     Alejandro Perez
     Zoran Pericic
@@ -343,6 +352,7 @@ reports, suggestions, and valuable resources:
     Paul Seyfert
     Tom Shaw
     Jim Shi
+    Jerry Shipman
     Peter Shoults
     Richard Silverman
     Cel Skeggs
