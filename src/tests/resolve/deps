@@ -2,6 +2,7 @@
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)resolve.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   resolve.c
 $(OUTPRE)addrinfo-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
