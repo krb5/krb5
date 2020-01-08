@@ -19,9 +19,9 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: https://web.mit.edu/kerberos/krb5-1.17/
-    - Supported: https://web.mit.edu/kerberos/krb5-1.16/
-    - Release cycle: 9 -- 12 months
+    - Latest stable: https://web.mit.edu/kerberos/krb5-1.18/
+    - Supported: https://web.mit.edu/kerberos/krb5-1.17/
+    - Release cycle: approximately 12 months
 
 Supported platforms \/ OS distributions:
     - Windows (KfW 4.0): Windows 7, Vista, XP
@@ -470,6 +470,68 @@ Release 1.17
     with more recent versions of Visual Studio.  A large volume of
     unused Windows-specific code has been removed.  Visual Studio 2013
     or later is now required.
+
+Release 1.18
+
+* Administrator experience:
+
+  - Remove support for single-DES encryption types.
+
+  - Change the replay cache format to be more efficient and robust.
+    Replay cache filenames using the new format end with ``.rcache2``
+    by default.
+
+  - setuid programs will automatically ignore environment variables
+    that normally affect krb5 API functions, even if the caller does
+    not use krb5_init_secure_context().
+
+  - Add an ``enforce_ok_as_delegate`` krb5.conf relation to disable
+    credential forwarding during GSSAPI authentication unless the KDC
+    sets the ok-as-delegate bit in the service ticket.
+
+* Developer experience:
+
+  - Implement krb5_cc_remove_cred() for all credential cache types.
+
+  - Add the krb5_pac_get_client_info() API to get the client account
+    name from a PAC.
+
+* Protocol evolution:
+
+  - Add KDC support for S4U2Self requests where the user is identified
+    by X.509 certificate.  (Requires support for certificate lookup
+    from a third-party KDB module.)
+
+  - Remove support for an old ("draft 9") variant of PKINIT.
+
+  - Add support for Microsoft NegoEx.  (Requires one or more
+    third-party GSS modules implementing NegoEx mechanisms.)
+
+* User experience:
+
+  - Add support for ``dns_canonicalize_hostname=fallback``, causing
+    host-based principal names to be tried first without DNS
+    canonicalization, and again with DNS canonicalization if the
+    un-canonicalized server is not found.
+
+  - Expand single-component hostnames in hhost-based principal names
+    when DNS canonicalization is not used, adding the system's first
+    DNS search path as a suffix.  Add a ``qualify_shortname``
+    krb5.conf relation to override this suffix or disable expansion.
+
+* Code quality:
+
+  - The libkrb5 serialization code (used to export and import krb5 GSS
+    security contexts) has been simplified and made type-safe.
+
+  - The libkrb5 code for creating KRB-PRIV, KRB-SAFE, and KRB-CRED
+    messages has been revised to conform to current coding practices.
+
+  - The test suite has been modified to work with macOS System
+    Integrity Protection enabled.
+
+  - The test suite incorporates soft-pkcs11 so that PKINIT PKCS11
+    support can always be tested.
 
 `Pre-authentication mechanisms`
 
