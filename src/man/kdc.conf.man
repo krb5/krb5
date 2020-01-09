@@ -480,7 +480,7 @@ specified multiple times.  New in release 1.17.
 (List of \fIkey\fP:\fIsalt\fP strings.)  Specifies the default key/salt
 combinations of principals for this realm.  Any principals created
 through kadmin(1) will have keys of these types.  The
-default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96:normal aes128\-cts\-hmac\-sha1\-96:normal des3\-cbc\-sha1:normal arcfour\-hmac\-md5:normal\fP\&.  For lists of
+default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96:normal aes128\-cts\-hmac\-sha1\-96:normal\fP\&.  For lists of
 possible values, see \fI\%Keysalt lists\fP\&.
 .UNINDENT
 .SS [dbdefaults]

@@ -397,6 +397,15 @@ which forces libkrb5 to attempt to use PKINIT if it is supported.
 If this flag is true, initial tickets will be proxiable by
 default, if allowed by the KDC.  The default value is false.
 .TP
+\fBqualify_shortname\fP
+If this string is set, it determines the domain suffix for
+single\-component hostnames when DNS canonicalization is not used
+(either because \fBdns_canonicalize_hostname\fP is false or because
+forward canonicalization failed).  The default value is the first
+search domain of the system\(aqs DNS configuration.  To disable
+qualification of shortnames, set this relation to the empty string
+with \fBqualify_shortname = ""\fP\&.  (New in release 1.18.)
+.TP
 \fBrdns\fP
 If this flag is true, reverse name lookup will be used in addition
 to forward name lookup to canonicalizing hostnames for use in
