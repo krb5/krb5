@@ -114,11 +114,19 @@ gssint_mechglue_init(void)
 	add_error_table(&et_ggss_error_table);
 
 	err = k5_mutex_finish_init(&g_mechSetLock);
+	if (err)
+		return err;
 	err = k5_mutex_finish_init(&g_mechListLock);
+	if (err)
+		return err;
 
 #ifdef _GSS_STATIC_LINK
 	err = gss_krb5int_lib_init();
+	if (err)
+		return err;
 	err = gss_spnegoint_lib_init();
+	if (err)
+		return err;
 #endif
 
 	err = gssint_mecherrmap_init();
