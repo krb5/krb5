@@ -332,6 +332,27 @@ tgtname(krb5_context context, const krb5_data *tgs_realm,
     return princ;
 }
 
+/* Return true if search_for is within context's default realm or is an
+ * incoming cross-realm TGS name. */
+static krb5_boolean
+request_for_us(krb5_context context, krb5_const_principal search_for)
+{
+    char *defrealm;
+    krb5_data realm;
+    krb5_boolean for_us;
+    krb5_principal local_tgs;
+
+    check(krb5_get_default_realm(context, &defrealm));
+    realm = string2data(defrealm);
+    local_tgs = tgtname(context, &realm, &realm);
+    krb5_free_default_realm(context, defrealm);
+
+    for_us = krb5_realm_compare(context, local_tgs, search_for) ||
+        krb5_principal_compare_any_realm(context, local_tgs, search_for);
+    krb5_free_principal(context, local_tgs);
+    return for_us;
+}
+
 static krb5_error_code
 test_get_principal(krb5_context context, krb5_const_principal search_for,
                    unsigned int flags, krb5_db_entry **entry)
@@ -345,6 +366,9 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     krb5_db_entry *ent;
 
     *entry = NULL;
+
+    if (!request_for_us(context, search_for))
+        return KRB5_KDB_NOENTRY;
 
     check(krb5_unparse_name_flags(context, search_for,
                                   KRB5_PRINCIPAL_UNPARSE_NO_REALM,
@@ -449,7 +473,8 @@ lookup_princ_by_cert(krb5_context context, const krb5_data *client_cert,
     cert_princ_name = k5memdup0(client_cert->data, client_cert->length, &ret);
     check(ret);
 
-    check(krb5_parse_name(context, cert_princ_name, princ));
+    check(krb5_parse_name_flags(context, cert_princ_name,
+                                KRB5_PRINCIPAL_PARSE_ENTERPRISE, princ));
     free(cert_princ_name);
 }
 

@@ -163,11 +163,13 @@ testprincs = {'krbtgt/SREALM': {'keys': 'aes128-cts'},
 kdcconf1 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
-                                   'alias': {'enterprise@abc': '@UREALM'}}}}
+                                   'alias': {'enterprise@abc': '@UREALM',
+                                             'user@UREALM': '@UREALM'}}}}
 kdcconf2 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
                                    'alias': {'user@SREALM': '@SREALM',
+                                             'user@UREALM': 'user',
                                              'enterprise@abc': 'user'}}}}
 r1, r2 = cross_realms(2, xtgts=(),
                       args=({'realm': 'SREALM', 'kdc_conf': kdcconf1},
