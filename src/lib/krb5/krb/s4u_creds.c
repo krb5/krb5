@@ -1731,12 +1731,19 @@ krb5_get_credentials_for_proxy(krb5_context context,
         goto cleanup;
 
     s4u_creds = *in_creds;
-    s4u_creds.client = evidence_tkt->server;
+    //s4u_creds.client = evidence_tkt->server;
     s4u_creds.second_ticket = *evidence_tkt_data;
+
+    /* HACK */
+    code = krb5_cc_get_principal(context, ccache, &s4u_creds.client);
+    if (code != 0)
+        goto cleanup;
 
     code = krb5_get_credentials(context,
                                 options | KRB5_GC_CONSTRAINED_DELEGATION,
                                 ccache, &s4u_creds, out_creds);
+    krb5_free_principal(context, s4u_creds.client);
+    s4u_creds.client = NULL;
     if (code != 0)
         goto cleanup;
 
