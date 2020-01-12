@@ -1699,11 +1699,13 @@ check_rbcd_policy(kdc_realm_t *kdc_active_realm, unsigned int flags,
     if (isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
         /*
          * Check that the proxy server is local, that the second ticket is a
-         * cross realm TGT, and that the second ticket client matches the
-         * header ticket client.
+         * cross-realm TGT for us, and that the second ticket client matches
+         * the header ticket client.
          */
         if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) ||
             !is_cross_tgs_principal(stkt_server->princ) ||
+            !krb5_principal_compare_any_realm(kdc_context, stkt_server->princ,
+                                              tgs_server) ||
             !krb5_principal_compare(kdc_context, stkt_client_princ,
                                     header_client_princ)) {
             return KRB5KDC_ERR_BADOPTION;
