@@ -514,7 +514,7 @@ Release 1.18
     canonicalization, and again with DNS canonicalization if the
     un-canonicalized server is not found.
 
-  - Expand single-component hostnames in hhost-based principal names
+  - Expand single-component hostnames in host-based principal names
     when DNS canonicalization is not used, adding the system's first
     DNS search path as a suffix.  Add a ``qualify_shortname``
     krb5.conf relation to override this suffix or disable expansion.
