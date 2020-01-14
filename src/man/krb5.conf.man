@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KRB5.CONF" "5" " " "1.18" "MIT Kerberos"
+.TH "KRB5.CONF" "5" " " "1.19" "MIT Kerberos"
 .SH NAME
 krb5.conf \- Kerberos configuration file
 .
@@ -242,7 +242,10 @@ the client should request when making a TGS\-REQ, in order of
 preference from highest to lowest.  The list may be delimited with
 commas or whitespace.  See Encryption_types in
 kdc.conf(5) for a list of the accepted values for this tag.
-The default value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
+Starting in release 1.18, the default value is the value of
+\fBpermitted_enctypes\fP\&.  For previous releases or if
+\fBpermitted_enctypes\fP is not set, the default value is
+\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .sp
 Do not set this unless required for specific backward
 compatibility purposes; stale values of this setting can prevent
@@ -253,8 +256,10 @@ libraries are upgraded.
 Identifies the supported list of session key encryption types that
 the client should request when making an AS\-REQ, in order of
 preference from highest to lowest.  The format is the same as for
-default_tgs_enctypes.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
+default_tgs_enctypes.  Starting in release 1.18, the default
+value is the value of \fBpermitted_enctypes\fP\&.  For previous
+releases or if \fBpermitted_enctypes\fP is not set, the default
+value is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .sp
 Do not set this unless required for specific backward
 compatibility purposes; stale values of this setting can prevent
@@ -377,9 +382,12 @@ made with address restrictions set, allowing the tickets to be
 used across NATs.  The default value is true.
 .TP
 \fBpermitted_enctypes\fP
-Identifies all encryption types that are permitted for use in
-session key encryption.  The default value for this tag is
-\fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
+Identifies the encryption types that servers will permit for
+session keys and for ticket and authenticator encryption, ordered
+by preference from highest to lowest.  Starting in release 1.18,
+this tag also acts as the default value for
+\fBdefault_tgs_enctypes\fP and \fBdefault_tkt_enctypes\fP\&.  The
+default value for this tag is \fBaes256\-cts\-hmac\-sha1\-96 aes128\-cts\-hmac\-sha1\-96 aes256\-cts\-hmac\-sha384\-192 aes128\-cts\-hmac\-sha256\-128 des3\-cbc\-sha1 arcfour\-hmac\-md5 camellia256\-cts\-cmac camellia128\-cts\-cmac\fP\&.
 .TP
 \fBplugin_base_dir\fP
 If set, determines the base directory where krb5 plugins are
