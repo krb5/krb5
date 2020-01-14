@@ -501,63 +501,43 @@ krb5int_parse_enctype_list(krb5_context context, const char *profkey,
 
     if (list == NULL)
         return ENOMEM;
-    *result = list;
-    return 0;
-}
-
-/*
- * Set *etypes_ptr to a zero-terminated list of enctypes.  ctx_list
- * (containing application-specified enctypes) is used if non-NULL;
- * otherwise the libdefaults profile string specified by profkey is
- * used.  default_list is the default enctype list to be used while
- * parsing profile strings, and is also used if the profile string is
- * not set.
- */
-static krb5_error_code
-get_profile_etype_list(krb5_context context, krb5_enctype **etypes_ptr,
-                       char *profkey, krb5_enctype *ctx_list,
-                       krb5_enctype *default_list)
-{
-    krb5_enctype *etypes;
-    krb5_error_code code;
-    char *profstr;
-
-    *etypes_ptr = NULL;
-
-    if (ctx_list) {
-        /* Use application defaults. */
-        code = k5_copy_etypes(ctx_list, &etypes);
-        if (code)
-            return code;
-    } else {
-        /* Parse profile setting, or "DEFAULT" if not specified. */
-        code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
-                                  profkey, NULL, "DEFAULT", &profstr);
-        if (code)
-            return code;
-        code = krb5int_parse_enctype_list(context, profkey, profstr,
-                                          default_list, &etypes);
-        profile_release_string(profstr);
-        if (code)
-            return code;
-    }
-
-    if (etypes[0] == 0) {
-        free(etypes);
+    if (list[0] == ENCTYPE_NULL) {
+        free(list);
         return KRB5_CONFIG_ETYPE_NOSUPP;
     }
-
-    *etypes_ptr = etypes;
+    *result = list;
     return 0;
 }
 
 krb5_error_code
 krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
 {
-    return get_profile_etype_list(context, ktypes,
-                                  KRB5_CONF_DEFAULT_TKT_ENCTYPES,
-                                  context->in_tkt_etypes,
-                                  default_enctype_list);
+    krb5_error_code ret;
+    char *profstr = NULL;
+    const char *profkey;
+
+    *ktypes = NULL;
+
+    if (context->in_tkt_etypes != NULL)
+        return k5_copy_etypes(context->in_tkt_etypes, ktypes);
+
+    profkey = KRB5_CONF_DEFAULT_TKT_ENCTYPES;
+    ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                             profkey, NULL, NULL, &profstr);
+    if (ret)
+        return ret;
+    if (profstr == NULL) {
+        profkey = KRB5_CONF_PERMITTED_ENCTYPES;
+        ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                 profkey, NULL, "DEFAULT", &profstr);
+        if (ret)
+            return ret;
+    }
+
+    ret = krb5int_parse_enctype_list(context, profkey, profstr,
+                                     default_enctype_list, ktypes);
+    profile_release_string(profstr);
+    return ret;
 }
 
 void
@@ -567,29 +547,61 @@ krb5_free_enctypes(krb5_context context, krb5_enctype *val)
     free (val);
 }
 
-krb5_error_code
-KRB5_CALLCONV
-krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_enctype **ktypes)
+krb5_error_code KRB5_CALLCONV
+krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ,
+                    krb5_enctype **ktypes)
 {
-    if (context->use_conf_ktypes)
-        /* This one is set *only* by reading the config file; it's not
-           set by the application.  */
-        return get_profile_etype_list(context, ktypes,
-                                      KRB5_CONF_DEFAULT_TGS_ENCTYPES, NULL,
-                                      default_enctype_list);
-    else
-        return get_profile_etype_list(context, ktypes,
-                                      KRB5_CONF_DEFAULT_TGS_ENCTYPES,
-                                      context->tgs_etypes,
-                                      default_enctype_list);
+    krb5_error_code ret;
+    char *profstr = NULL;
+    const char *profkey;
+
+    *ktypes = NULL;
+
+    /* Use only profile configuration when use_conf_ktypes is set. */
+    if (!context->use_conf_ktypes && context->tgs_etypes != NULL)
+        return k5_copy_etypes(context->tgs_etypes, ktypes);
+
+    profkey = KRB5_CONF_DEFAULT_TGS_ENCTYPES;
+    ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                             profkey, NULL, NULL, &profstr);
+    if (ret)
+        return ret;
+    if (profstr == NULL) {
+        profkey = KRB5_CONF_PERMITTED_ENCTYPES;
+        ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                 profkey, NULL, "DEFAULT", &profstr);
+        if (ret)
+            return ret;
+    }
+
+    ret = krb5int_parse_enctype_list(context, profkey, profstr,
+                                     default_enctype_list, ktypes);
+    profile_release_string(profstr);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes)
 {
-    return get_profile_etype_list(context, ktypes,
-                                  KRB5_CONF_PERMITTED_ENCTYPES,
-                                  context->tgs_etypes, default_enctype_list);
+    krb5_error_code ret;
+    char *profstr = NULL;
+    const char *profkey;
+
+    *ktypes = NULL;
+
+    if (context->tgs_etypes != NULL)
+        return k5_copy_etypes(context->tgs_etypes, ktypes);
+
+    profkey = KRB5_CONF_PERMITTED_ENCTYPES;
+    ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                             profkey, NULL, "DEFAULT", &profstr);
+    if (ret)
+        return ret;
+
+    ret = krb5int_parse_enctype_list(context, profkey, profstr,
+                                     default_enctype_list, ktypes);
+    profile_release_string(profstr);
+    return ret;
 }
 
 krb5_boolean

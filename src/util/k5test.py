@@ -1299,60 +1299,42 @@ _passes = [
 
     # Exercise the DES3 enctype.
     ('des3', None,
-     {'libdefaults': {
-                'default_tgs_enctypes': 'des3',
-                'default_tkt_enctypes': 'des3',
-                'permitted_enctypes': 'des3'}},
+     {'libdefaults': {'permitted_enctypes': 'des3'}},
      {'realms': {'$realm': {
                     'supported_enctypes': 'des3-cbc-sha1:normal',
                     'master_key_type': 'des3-cbc-sha1'}}}),
 
     # Exercise the arcfour enctype.
     ('arcfour', None,
-     {'libdefaults': {
-                'default_tgs_enctypes': 'rc4',
-                'default_tkt_enctypes': 'rc4',
-                'permitted_enctypes': 'rc4'}},
+     {'libdefaults': {'permitted_enctypes': 'rc4'}},
      {'realms': {'$realm': {
                     'supported_enctypes': 'arcfour-hmac:normal',
                     'master_key_type': 'arcfour-hmac'}}}),
 
     # Exercise the AES128 enctype.
     ('aes128', None,
-      {'libdefaults': {
-                'default_tgs_enctypes': 'aes128-cts',
-                'default_tkt_enctypes': 'aes128-cts',
-                'permitted_enctypes': 'aes128-cts'}},
+      {'libdefaults': {'permitted_enctypes': 'aes128-cts'}},
       {'realms': {'$realm': {
                     'supported_enctypes': 'aes128-cts:normal',
                     'master_key_type': 'aes128-cts'}}}),
 
     # Exercise the camellia256-cts enctype.
     ('camellia256', None,
-      {'libdefaults': {
-                'default_tgs_enctypes': 'camellia256-cts',
-                'default_tkt_enctypes': 'camellia256-cts',
-                'permitted_enctypes': 'camellia256-cts'}},
+      {'libdefaults': {'permitted_enctypes': 'camellia256-cts'}},
       {'realms': {'$realm': {
                     'supported_enctypes': 'camellia256-cts:normal',
                     'master_key_type': 'camellia256-cts'}}}),
 
     # Exercise the aes128-sha2 enctype.
     ('aes128-sha2', None,
-      {'libdefaults': {
-                'default_tgs_enctypes': 'aes128-sha2',
-                'default_tkt_enctypes': 'aes128-sha2',
-                'permitted_enctypes': 'aes128-sha2'}},
+      {'libdefaults': {'permitted_enctypes': 'aes128-sha2'}},
       {'realms': {'$realm': {
                     'supported_enctypes': 'aes128-sha2:normal',
                     'master_key_type': 'aes128-sha2'}}}),
 
     # Exercise the aes256-sha2 enctype.
     ('aes256-sha2', None,
-      {'libdefaults': {
-                'default_tgs_enctypes': 'aes256-sha2',
-                'default_tkt_enctypes': 'aes256-sha2',
-                'permitted_enctypes': 'aes256-sha2'}},
+      {'libdefaults': {'permitted_enctypes': 'aes256-sha2'}},
       {'realms': {'$realm': {
                     'supported_enctypes': 'aes256-sha2:normal',
                     'master_key_type': 'aes256-sha2'}}}),

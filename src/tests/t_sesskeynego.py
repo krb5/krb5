@@ -24,6 +24,7 @@ conf3 = {'libdefaults': {
         'allow_weak_crypto': 'true',
         'default_tkt_enctypes': 'aes128-cts',
         'default_tgs_enctypes': 'rc4-hmac,aes128-cts'}}
+conf4 = {'libdefaults': {'permitted_enctypes': 'aes256-cts'}}
 # Test with client request and session_enctypes preferring aes128, but
 # aes256 long-term key.
 realm = K5Realm(krb5_conf=conf1, create_host=False, get_creds=False)
@@ -57,6 +58,13 @@ test_kvno(realm, 'aes128-cts-hmac-sha1-96', 'aes256-cts-hmac-sha1-96')
 realm.run([kadminl, 'setstr', 'server', 'session_enctypes',
            'rc4-hmac,aes128-cts,aes256-cts'])
 test_kvno(realm, 'DEPRECATED:arcfour-hmac', 'aes256-cts-hmac-sha1-96')
+realm.stop()
+
+# 4: Check that permitted_enctypes is a default for session key enctypes.
+realm = K5Realm(krb5_conf=conf4, create_host=False, get_creds=False)
+realm.kinit(realm.user_princ, password('user'))
+realm.run([kvno, 'user'],
+          expected_trace=('etypes requested in TGS request: aes256-cts',))
 realm.stop()
 
 success('sesskeynego')

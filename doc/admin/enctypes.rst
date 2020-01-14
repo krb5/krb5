@@ -88,8 +88,12 @@ affect how enctypes are chosen.
     required for backward compatibility.
 
 **permitted_enctypes**
-    controls the set of enctypes that a service will accept as session
-    keys.
+    controls the set of enctypes that a service will permit for
+    session keys and for ticket and authenticator encryption.  The KDC
+    and other programs that access the Kerberos database will ignore
+    keys of non-permitted enctypes.  Starting in release 1.18, this
+    setting also acts as the default for **default_tkt_enctypes** and
+    **defaut_tgs_enctypes**.
 
 **default_tkt_enctypes**
     controls the default set of enctypes that the Kerberos client

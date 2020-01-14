@@ -159,7 +159,10 @@ The libdefaults section may contain any of the following relations:
     preference from highest to lowest.  The list may be delimited with
     commas or whitespace.  See :ref:`Encryption_types` in
     :ref:`kdc.conf(5)` for a list of the accepted values for this tag.
-    The default value is |defetypes|.
+    Starting in release 1.18, the default value is the value of
+    **permitted_enctypes**.  For previous releases or if
+    **permitted_enctypes** is not set, the default value is
+    |defetypes|.
 
     Do not set this unless required for specific backward
     compatibility purposes; stale values of this setting can prevent
@@ -170,8 +173,10 @@ The libdefaults section may contain any of the following relations:
     Identifies the supported list of session key encryption types that
     the client should request when making an AS-REQ, in order of
     preference from highest to lowest.  The format is the same as for
-    default_tgs_enctypes.  The default value for this tag is
-    |defetypes|.
+    default_tgs_enctypes.  Starting in release 1.18, the default
+    value is the value of **permitted_enctypes**.  For previous
+    releases or if **permitted_enctypes** is not set, the default
+    value is |defetypes|.
 
     Do not set this unless required for specific backward
     compatibility purposes; stale values of this setting can prevent
@@ -294,9 +299,12 @@ The libdefaults section may contain any of the following relations:
     used across NATs.  The default value is true.
 
 **permitted_enctypes**
-    Identifies all encryption types that are permitted for use in
-    session key encryption.  The default value for this tag is
-    |defetypes|.
+    Identifies the encryption types that servers will permit for
+    session keys and for ticket and authenticator encryption, ordered
+    by preference from highest to lowest.  Starting in release 1.18,
+    this tag also acts as the default value for
+    **default_tgs_enctypes** and **default_tkt_enctypes**.  The
+    default value for this tag is |defetypes|.
 
 **plugin_base_dir**
     If set, determines the base directory where krb5 plugins are
