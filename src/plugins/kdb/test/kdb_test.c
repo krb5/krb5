@@ -66,7 +66,6 @@
  *                 # intermediate_service may be in a different realm.
  *                 target_service = intermediate_service
  *             }
- *             ad_type = mspac
  *         }
  *
  * Key values are generated using a hash of the kvno, enctype, salt type,
@@ -907,30 +906,20 @@ test_sign_authdata(krb5_context context, unsigned int flags,
                    void *ad_info, krb5_data ***auth_indicators,
                    krb5_authdata ***signed_auth_data)
 {
-    testhandle h = context->dal_handle->db_context;
     krb5_authdata *pac_ad = NULL, *test_ad = NULL, **list;
     krb5_data **inds, d;
     int i, val;
-    char *ad_type;
 
     generate_pac(context, flags, client_princ, server_princ, client,
                  header_server, local_tgt, server_key, header_key,
                  local_tgt_key, authtime, ad_info, &pac_ad);
 
-    /*
-     * Omit test_ad if ad_type is mspac (only), as handle_signticket() fails in
-     * constrained delegation if the PAC is not the only authorization data
-     * element.
-     */
-    ad_type = get_string(h, "ad_type", NULL, NULL);
-    if (ad_type == NULL || strcmp(ad_type, "mspac") != 0) {
-        test_ad = ealloc(sizeof(*test_ad));
-        test_ad->magic = KV5M_AUTHDATA;
-        test_ad->ad_type = TEST_AD_TYPE;
-        test_ad->contents = (uint8_t *)estrdup("db-authdata-test");
-        test_ad->length = strlen((char *)test_ad->contents);
-    }
-    free(ad_type);
+    /* Add our TEST_AD_TYPE authdata */
+    test_ad = ealloc(sizeof(*test_ad));
+    test_ad->magic = KV5M_AUTHDATA;
+    test_ad->ad_type = TEST_AD_TYPE;
+    test_ad->contents = (uint8_t *)estrdup("db-authdata-test");
+    test_ad->length = strlen((char *)test_ad->contents);
 
     list = ealloc(3 * sizeof(*list));
     list[0] = (test_ad != NULL) ? test_ad : pac_ad;

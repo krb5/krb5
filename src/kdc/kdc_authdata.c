@@ -658,14 +658,11 @@ free_deleg_path(krb5_context context, krb5_principal *deleg_path)
     free(deleg_path);
 }
 
-/* Return true if the Windows 2000 PAC is the only element in the supplied
- * authorization data. */
+/* Return true if the Windows PAC is present in authorization data. */
 static krb5_boolean
-only_pac_p(krb5_context context, krb5_authdata **authdata)
+has_pac(krb5_context context, krb5_authdata **authdata)
 {
-    return has_kdc_issued_authdata(context, authdata,
-                                   KRB5_AUTHDATA_WIN2K_PAC) &&
-        authdata[1] == NULL;
+    return has_kdc_issued_authdata(context, authdata, KRB5_AUTHDATA_WIN2K_PAC);
 }
 
 /* Verify AD-SIGNTICKET authdata if we need to, and insert an AD-SIGNEDPATH
@@ -685,12 +682,11 @@ handle_signticket(krb5_context context, unsigned int flags,
 
     s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
-    /*
-     * The Windows PAC fulfils the same role as the signed path
-     * if it is the only authorization data element.
-     */
+    /* For cross-realm the Windows PAC must have been verified, and it
+     * fulfills the same role as the signed path. */
     if (req->msg_type == KRB5_TGS_REQ &&
-        !only_pac_p(context, enc_tkt_req->authorization_data)) {
+        (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM) ||
+         !has_pac(context, enc_tkt_req->authorization_data))) {
         ret = verify_signedpath(context, local_tgt, local_tgt_key, enc_tkt_req,
                                 &deleg_path, &signed_path);
         if (ret)
@@ -705,8 +701,7 @@ handle_signticket(krb5_context context, unsigned int flags,
     /* No point in including signedpath authdata for a cross-realm TGT, since
      * it will be presented to a different KDC. */
     if (!isflagset(server->attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED) &&
-        !is_cross_tgs_principal(server->princ) &&
-        !only_pac_p(context, enc_tkt_reply->authorization_data)) {
+        !is_cross_tgs_principal(server->princ)) {
         ret = make_signedpath(context, for_user_princ,
                               s4u2proxy ? subject_server->princ : NULL,
                               local_tgt_key, deleg_path, enc_tkt_reply);
