@@ -1493,9 +1493,9 @@ typedef struct _kdb_vftabl {
      * such as a Windows PAC, based on the request client lookup flags.  Return
      * 0 if all checks have passed.  Optionally return a representation of the
      * authdata in *ad_info_out, to be consumed by allowed_to_delegate_from and
-     * sign_authdata.  If client_out is not NULL, set *client_out to the client
-     * name in the PAC; this indicates the requested client principal for a
-     * cross-realm S4U2Proxy request.
+     * sign_authdata.  If client_out is not NULL and the PAC has been verified,
+     * set *client_out to the client name in the PAC; this indicates the
+     * requested client principal for a cross-realm S4U2Proxy request.
      *
      * This method is called for TGS requests on the authorization data from
      * the header ticket.  For S4U2Proxy requests it is also called on the
