@@ -282,6 +282,48 @@ out = realm.run(['./adata', 'noauthdata'])
 if '-456: db-authdata-test' in out:
     fail('DB authdata not suppressed by +no_auth_data_required')
 
+
+mark('S4U2Proxy with a foreign client')
+
+a_princs = {'krbtgt/A': {'keys': 'aes128-cts'},
+            'krbtgt/B': {'keys': 'aes128-cts'},
+            'impersonator': {'keys': 'aes128-cts'},
+            'resource': {'keys': 'aes128-cts'}}
+a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'delegation': { 'impersonator' :
+                                                  'resource' },
+                                  'princs': a_princs }}}
+
+b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
+            'krbtgt/A': {'keys': 'aes128-cts'},
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'}}
+b_kconf = {'realms': {'$realm': {'database_module': 'test'}},
+           'dbmodules': {'test': {'db_library': 'test',
+                                  'princs': b_princs }}}
+
+ra, rb = cross_realms(2, xtgts=(),
+                          args=({'realm': 'A', 'kdc_conf': a_kconf},
+                                {'realm': 'B', 'kdc_conf': b_kconf}),
+                          create_kdb=False)
+
+ra.start_kdc()
+rb.start_kdc()
+
+ra.extract_keytab('impersonator@A', ra.keytab)
+rb.extract_keytab('user@B', rb.keytab)
+
+usercache = 'FILE:' + os.path.join(rb.testdir, 'usercache')
+rb.kinit(rb.user_princ, None, ['-k', '-f', '-c', usercache])
+rb.run([kvno, '-C', 'impersonator@A', '-c', usercache])
+
+ra.kinit('impersonator@A', None, ['-f', '-k', '-t', ra.keytab])
+ra.run(['./s4u2proxy', usercache, 'resource@A'])
+
+ra.stop()
+rb.stop()
+
+
 # Additional KDB module authdata behavior we don't currently test:
 # * KDB module authdata is suppressed in TGS requests if the TGT
 #   contains no authdata and the request is not cross-realm or S4U.

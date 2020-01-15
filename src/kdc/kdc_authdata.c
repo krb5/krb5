@@ -672,7 +672,7 @@ only_pac_p(krb5_context context, krb5_authdata **authdata)
  * element if we should. */
 static krb5_error_code
 handle_signticket(krb5_context context, unsigned int flags,
-                  krb5_db_entry *client, krb5_db_entry *server,
+                  krb5_db_entry *subject_server, krb5_db_entry *server,
                   krb5_db_entry *local_tgt, krb5_keyblock *local_tgt_key,
                   krb5_kdc_req *req, krb5_const_principal for_user_princ,
                   krb5_enc_tkt_part *enc_tkt_req,
@@ -708,8 +708,8 @@ handle_signticket(krb5_context context, unsigned int flags,
         !is_cross_tgs_principal(server->princ) &&
         !only_pac_p(context, enc_tkt_reply->authorization_data)) {
         ret = make_signedpath(context, for_user_princ,
-                              s4u2proxy ? client->princ : NULL, local_tgt_key,
-                              deleg_path, enc_tkt_reply);
+                              s4u2proxy ? subject_server->princ : NULL,
+                              local_tgt_key, deleg_path, enc_tkt_reply);
         if (ret)
             goto cleanup;
     }
@@ -807,9 +807,9 @@ cleanup:
 krb5_error_code
 handle_authdata(krb5_context context, unsigned int flags,
                 krb5_db_entry *client, krb5_db_entry *server,
-                krb5_db_entry *header_server, krb5_db_entry *local_tgt,
+                krb5_db_entry *subject_server, krb5_db_entry *local_tgt,
                 krb5_keyblock *local_tgt_key, krb5_keyblock *client_key,
-                krb5_keyblock *server_key, krb5_keyblock *header_key,
+                krb5_keyblock *server_key, krb5_keyblock *subject_key,
                 krb5_data *req_pkt, krb5_kdc_req *req,
                 krb5_const_principal altcprinc, void *ad_info,
                 krb5_enc_tkt_part *enc_tkt_req,
@@ -835,8 +835,8 @@ handle_authdata(krb5_context context, unsigned int flags,
         for (i = 0; i < n_authdata_modules; i++) {
             h = &authdata_modules[i];
             ret = h->vt.handle(context, h->data, flags, client, server,
-                               header_server, client_key, server_key,
-                               header_key, req_pkt, req, altcprinc,
+                               subject_server, client_key, server_key,
+                               subject_key, req_pkt, req, altcprinc,
                                enc_tkt_req, enc_tkt_reply);
             if (ret)
                 kdc_err(context, ret, "from authdata module %s", h->vt.name);
@@ -853,10 +853,11 @@ handle_authdata(krb5_context context, unsigned int flags,
 
     if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
         /* Fetch authdata from the KDB if appropriate. */
-        ret = fetch_kdb_authdata(context, flags, client, server, header_server,
-                                 local_tgt, client_key, server_key, header_key,
-                                 local_tgt_key, req, altcprinc, ad_info,
-                                 enc_tkt_req, enc_tkt_reply, auth_indicators);
+        ret = fetch_kdb_authdata(context, flags, client, server,
+                                 subject_server, local_tgt, client_key,
+                                 server_key, subject_key, local_tgt_key,
+                                 req, altcprinc, ad_info, enc_tkt_req,
+                                 enc_tkt_reply, auth_indicators);
         if (ret)
             return ret;
     }
@@ -873,9 +874,9 @@ handle_authdata(krb5_context context, unsigned int flags,
     if (!isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS)) {
         /* Validate and insert AD-SIGNTICKET authdata.  This must happen last
          * since it contains a signature over the other authdata. */
-        ret = handle_signticket(context, flags, client, server, local_tgt,
-                                local_tgt_key, req, altcprinc, enc_tkt_req,
-                                enc_tkt_reply);
+        ret = handle_signticket(context, flags, subject_server,
+                                server, local_tgt, local_tgt_key, req,
+                                altcprinc, enc_tkt_req, enc_tkt_reply);
         if (ret)
             return ret;
     }
