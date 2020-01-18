@@ -291,14 +291,19 @@ a_princs = {'krbtgt/A': {'keys': 'aes128-cts'},
 a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'delegation': {'impersonator' : 'resource'},
-                                  'princs': a_princs}}}
+                                  'princs': a_princs,
+                                  'alias': {'service/rb.b': '@B'}}}}
 
 b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
             'krbtgt/A': {'keys': 'aes128-cts'},
-            'user': {'keys': 'aes128-cts', 'flags': '+preauth'}}
+            'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
+            'rb': {'keys': 'aes128-cts'}}
 b_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
-                                  'princs': b_princs}}}
+                                  'princs': b_princs,
+                                  'rbcd': {'rb@B': 'impersonator@A'},
+                                  'alias': {'service/rb.b': 'rb',
+                                            'impersonator@A': '@A'}}}}
 
 ra, rb = cross_realms(2, xtgts=(),
                           args=({'realm': 'A', 'kdc_conf': a_kconf},
@@ -317,6 +322,26 @@ rb.run([kvno, '-C', 'impersonator@A', '-c', usercache])
 
 ra.kinit('impersonator@A', None, ['-f', '-k', '-t', ra.keytab])
 ra.run(['./s4u2proxy', usercache, 'resource@A'])
+
+mark('Cross realm S4U authdata tests')
+
+ra.kinit('impersonator@A', None, ['-k', '-t', ra.keytab])
+ra.run(['./s4u2self', rb.user_princ, 'impersonator@A', usercache, '-2',
+        'cross_s4u_self_ad'])
+out = ra.run(['./adata', '-c', usercache, '-p', rb.user_princ,
+              'impersonator@A', '-2', 'cross_s4u_self_ad'])
+if out.count(' -2: cross_s4u_self_ad') != 1:
+    fail('expected one cross_s4u_self_ad, got: %s' % count)
+
+ra.run(['./s4u2proxy', usercache, 'service/rb.b', '-2',
+        'cross_s4u_proxy_ad'])
+rb.extract_keytab('service/rb.b', ra.keytab)
+out = ra.run(['./adata', '-p', rb.user_princ, 'service/rb.b', '-2',
+              'cross_s4u_proxy_ad'])
+if out.count(' -2: cross_s4u_self_ad') != 1:
+    fail('expected one cross_s4u_self_ad, got: %s' % count)
+if out.count(' -2: cross_s4u_proxy_ad') != 1:
+    fail('expected one cross_s4u_proxy_ad, got: %s' % count)
 
 ra.stop()
 rb.stop()
