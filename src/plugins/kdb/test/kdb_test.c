@@ -885,20 +885,22 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     krb5_data **inds, d;
     int i, val;
 
+    /* Possibly create a PAC authdata element. */
     generate_pac(context, flags, client_princ, server_princ, client,
                  header_server, local_tgt, server_key, header_key,
                  local_tgt_key, authtime, ad_info, &pac_ad);
 
-    /* Add our TEST_AD_TYPE authdata */
+    /* Always create a TEST_AD_TYPE element. */
     test_ad = ealloc(sizeof(*test_ad));
     test_ad->magic = KV5M_AUTHDATA;
     test_ad->ad_type = TEST_AD_TYPE;
     test_ad->contents = (uint8_t *)estrdup("db-authdata-test");
     test_ad->length = strlen((char *)test_ad->contents);
 
+    /* Assemble the authdata into a one-element or two-element list. */
     list = ealloc(3 * sizeof(*list));
-    list[0] = (test_ad != NULL) ? test_ad : pac_ad;
-    list[1] = (test_ad != NULL) ? pac_ad : NULL;
+    list[0] = test_ad;
+    list[1] = pac_ad;
     list[2] = NULL;
     *signed_auth_data = list;
 
