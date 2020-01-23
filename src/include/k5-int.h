@@ -1207,7 +1207,6 @@ struct hostrealm_module_handle;
 struct k5_tls_vtable_st;
 struct _krb5_context {
     krb5_magic      magic;
-    krb5_enctype    *in_tkt_etypes;
     krb5_enctype    *tgs_etypes;
     struct _krb5_os_context os_context;
     char            *default_realm;
@@ -2079,13 +2078,7 @@ struct _krb5_kt {       /* should move into k5-int.h */
     krb5_pointer data;
 };
 
-krb5_error_code krb5_set_default_in_tkt_ktypes(krb5_context,
-                                               const krb5_enctype *);
-
 krb5_error_code krb5_get_default_in_tkt_ktypes(krb5_context, krb5_enctype **);
-
-krb5_error_code krb5_set_default_tgs_ktypes(krb5_context,
-                                            const krb5_enctype *);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_tgs_ktypes(krb5_context, krb5_const_principal, krb5_enctype **);

@@ -70,7 +70,6 @@ check_context(krb5_context c, krb5_context r)
     int i;
 
     /* Check fields which should have been propagated from r. */
-    compare_etypes(c->in_tkt_etypes, r->in_tkt_etypes);
     compare_etypes(c->tgs_etypes, r->tgs_etypes);
     check(c->os_context.time_offset == r->os_context.time_offset);
     check(c->os_context.usec_offset == r->os_context.usec_offset);
@@ -113,9 +112,8 @@ main(int argc, char **argv)
 {
     krb5_context ctx, ctx2;
     krb5_plugin_initvt_fn *mods;
-    const krb5_enctype etypes1[] = { ENCTYPE_DES3_CBC_SHA1, 0 };
-    const krb5_enctype etypes2[] = { ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-                                     ENCTYPE_AES256_CTS_HMAC_SHA1_96, 0 };
+    const krb5_enctype etypes[] = { ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+                                    ENCTYPE_AES256_CTS_HMAC_SHA1_96, 0 };
     krb5_prompt_type ptypes[] = { KRB5_PROMPT_TYPE_PASSWORD };
 
     /* Copy a default context and verify the result. */
@@ -126,8 +124,7 @@ main(int argc, char **argv)
 
     /* Set non-default values for all of the propagated fields in ctx. */
     ctx->allow_weak_crypto = TRUE;
-    check(krb5_set_default_in_tkt_ktypes(ctx, etypes1) == 0);
-    check(krb5_set_default_tgs_enctypes(ctx, etypes2) == 0);
+    check(krb5_set_default_tgs_enctypes(ctx, etypes) == 0);
     check(krb5_set_debugging_time(ctx, 1234, 5678) == 0);
     check(krb5_cc_set_default_name(ctx, "defccname") == 0);
     check(krb5_set_default_realm(ctx, "defrealm") == 0);

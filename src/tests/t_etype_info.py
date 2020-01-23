@@ -16,7 +16,9 @@ realm.run([kadminl, 'addprinc', '-nokey', '+requires_preauth', 'nokeyuser'])
 # list.  Compare the output to the expected lines, ignoring order.
 def test_etinfo(princ, enctypes, expected_lines):
     mark('etinfo test: %s %s' % (princ.partition('@')[0], enctypes))
-    lines = realm.run(['./etinfo', princ, enctypes]).splitlines()
+    conf = {'libdefaults': {'default_tkt_enctypes': enctypes}}
+    etypes_env = realm.special_env('etypes', False, krb5_conf=conf)
+    lines = realm.run(['./etinfo', princ], env=etypes_env).splitlines()
     if sorted(lines) != sorted(expected_lines):
         fail('Unexpected output for princ %s, etypes %s' % (princ, enctypes))
 
@@ -60,8 +62,8 @@ conf = {'plugins': {'kdcpreauth': {'module': 'test:' + testpreauth},
                     'clpreauth': {'module': 'test:' + testpreauth}}}
 realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
 realm.run([kadminl, 'setstr', realm.user_princ, '2rt', '2rtval'])
-out = realm.run(['./etinfo', realm.user_princ, 'aes128-cts', '-123'])
-if out != 'more etype_info2 aes128-cts KRBTEST.COMuser\n':
+out = realm.run(['./etinfo', realm.user_princ, '-123'])
+if out != 'more etype_info2 aes256-cts KRBTEST.COMuser\n':
     fail('Unexpected output for MORE_PREAUTH_DATA_REQUIRED test')
 
 success('KDC etype-info tests')

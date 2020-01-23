@@ -310,8 +310,6 @@ krb5_free_context(krb5_context ctx)
         return;
     k5_os_free_context(ctx);
 
-    free(ctx->in_tkt_etypes);
-    ctx->in_tkt_etypes = NULL;
     free(ctx->tgs_etypes);
     ctx->tgs_etypes = NULL;
     free(ctx->default_realm);
@@ -339,9 +337,8 @@ krb5_free_context(krb5_context ctx)
 /*
  * Set the desired default ktypes, making sure they are valid.
  */
-static krb5_error_code
-set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
-                      krb5_enctype **var)
+krb5_error_code KRB5_CALLCONV
+krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes)
 {
     krb5_error_code code;
     krb5_enctype *list;
@@ -374,29 +371,9 @@ set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
         list = NULL;
     }
 
-    free(*var);
-    *var = list;
+    free(context->tgs_etypes);
+    context->tgs_etypes = list;
     return 0;
-}
-
-krb5_error_code
-krb5_set_default_in_tkt_ktypes(krb5_context context,
-                               const krb5_enctype *etypes)
-{
-    return set_default_etype_var(context, etypes, &context->in_tkt_etypes);
-}
-
-krb5_error_code KRB5_CALLCONV
-krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes)
-{
-    return set_default_etype_var(context, etypes, &context->tgs_etypes);
-}
-
-/* Old name for above function. */
-krb5_error_code
-krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
-{
-    return set_default_etype_var(context, etypes, &context->tgs_etypes);
 }
 
 /*
@@ -517,9 +494,6 @@ krb5_get_default_in_tkt_ktypes(krb5_context context, krb5_enctype **ktypes)
     const char *profkey;
 
     *ktypes = NULL;
-
-    if (context->in_tkt_etypes != NULL)
-        return k5_copy_etypes(context->in_tkt_etypes, ktypes);
 
     profkey = KRB5_CONF_DEFAULT_TKT_ENCTYPES;
     ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,

@@ -58,8 +58,6 @@ k5_size_context(krb5_context context, size_t *sizep)
      *  krb5_int32                      for KV5M_CONTEXT
      *  krb5_int32                      for sizeof(default_realm)
      *  strlen(default_realm)           for default_realm.
-     *  krb5_int32                      for n_in_tkt_etypes*sizeof(krb5_int32)
-     *  nktypes*sizeof(krb5_int32)      for in_tkt_etypes.
      *  krb5_int32                      for n_tgs_etypes*sizeof(krb5_int32)
      *  nktypes*sizeof(krb5_int32)      for tgs_etypes.
      *  krb5_int32                      for clockskew
@@ -74,8 +72,7 @@ k5_size_context(krb5_context context, size_t *sizep)
     kret = EINVAL;
     if (context != NULL) {
         /* Calculate base length */
-        required = (10 * sizeof(krb5_int32) +
-                    (etypes_len(context->in_tkt_etypes) * sizeof(krb5_int32)) +
+        required = (9 * sizeof(krb5_int32) +
                     (etypes_len(context->tgs_etypes) * sizeof(krb5_int32)));
 
         if (context->default_realm)
@@ -136,22 +133,6 @@ k5_externalize_context(krb5_context context,
                                    &bp, &remain);
         if (kret)
             return (kret);
-    }
-
-    /* Now number of initial ticket ktypes */
-    kret = krb5_ser_pack_int32(etypes_len(context->in_tkt_etypes),
-                               &bp, &remain);
-    if (kret)
-        return (kret);
-
-    /* Now serialize ktypes */
-    if (context->in_tkt_etypes) {
-        for (i = 0; context->in_tkt_etypes[i]; i++) {
-            kret = krb5_ser_pack_int32(context->in_tkt_etypes[i],
-                                       &bp, &remain);
-            if (kret)
-                return (kret);
-        }
     }
 
     /* Now number of default ktypes */
@@ -268,25 +249,6 @@ k5_internalize_context(krb5_context *argp,
 
         context->default_realm[ibuf] = '\0';
     }
-
-    /* Get the in_tkt_etypes */
-    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-        goto cleanup;
-    count = ibuf;
-    if (count > 0) {
-        context->in_tkt_etypes = calloc(count + 1, sizeof(krb5_enctype));
-        if (!context->in_tkt_etypes) {
-            kret = ENOMEM;
-            goto cleanup;
-        }
-        for (i = 0; i < count; i++) {
-            if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-                goto cleanup;
-            context->in_tkt_etypes[i] = ibuf;
-        }
-        context->in_tkt_etypes[count] = 0;
-    } else
-        context->in_tkt_etypes = NULL;
 
     /* Get the tgs_etypes */
     if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))

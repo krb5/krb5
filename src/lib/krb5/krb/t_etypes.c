@@ -206,21 +206,21 @@ main(int argc, char **argv)
                  * instead. */
                 copy = NULL;
                 list = NULL;
-                ret = krb5_set_default_in_tkt_ktypes(ctx, tests[i].defaults);
+                ret = krb5_set_default_tgs_enctypes(ctx, tests[i].defaults);
                 if (ret != expected_err) {
                     com_err("krb5_set_default_in_tkt_ktypes", ret, "");
                     return 2;
                 }
             }
             if (!expected_err) {
-                compare(ctx, tests[i].str ? list : ctx->in_tkt_etypes,
+                compare(ctx, tests[i].str ? list : ctx->tgs_etypes,
                         (weak) ? tests[i].expected : tests[i].expected_noweak,
                         tests[i].str, weak);
             }
             free(copy);
             free(list);
             if (!tests[i].str)
-                krb5_set_default_in_tkt_ktypes(ctx, NULL);
+                krb5_set_default_tgs_enctypes(ctx, NULL);
         }
     }
 
