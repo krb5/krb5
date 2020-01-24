@@ -635,7 +635,9 @@ def _cfg_merge(cfg1, cfg2):
         return cfg2
     result = cfg1.copy()
     for key, value2 in cfg2.items():
-        if value2 is None or key not in result:
+        if value2 is None:
+            result.pop(key, None)
+        elif key not in result:
             result[key] = value2
         else:
             value1 = result[key]
@@ -960,7 +962,7 @@ class K5Realm(object):
                 # A string value yields a straightforward variable setting.
                 value = self._subst_cfg_value(value)
                 file.write('%s%s = %s\n' % (indent, name, value))
-            elif value is not None:
+            else:
                 raise TypeError()
 
     def _subst_cfg_value(self, value):

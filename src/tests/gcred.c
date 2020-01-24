@@ -33,7 +33,7 @@
 /*
  * This program is intended to be run from a python script as:
  *
- *     gcred nametype princname
+ *     gcred [-f] [-t] nametype princname
  *
  * where nametype is one of "unknown", "principal", "srv-inst", and "srv-hst",
  * and princname is the name of the service principal.  gcred acquires
@@ -41,6 +41,9 @@
  * the server principal name of the obtained credentials to stdout and exits
  * with status 0.  On failure, gcred displays the error message for the failed
  * operation to stderr and exits with status 1.
+ *
+ * The -f and -t flags set the KRB5_GC_FORWARDABLE and KRB5_GC_NO_TRANSIT_CHECK
+ * options respectively.
  */
 
 #include "k5-int.h"
@@ -73,10 +76,13 @@ main(int argc, char **argv)
 
     check(krb5_init_context(&ctx));
 
-    while ((c = getopt(argc, argv, "f")) != -1) {
+    while ((c = getopt(argc, argv, "ft")) != -1) {
         switch (c) {
         case 'f':
             options |= KRB5_GC_FORWARDABLE;
+            break;
+        case 't':
+            options |= KRB5_GC_NO_TRANSIT_CHECK;
             break;
         default:
             abort();
