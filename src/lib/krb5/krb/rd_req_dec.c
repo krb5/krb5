@@ -564,16 +564,19 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     {
         krb5_data      * realm;
         krb5_transited * trans;
+        krb5_flags       flags;
 
         realm = &req->ticket->enc_part2->client->realm;
         trans = &(req->ticket->enc_part2->transited);
+        flags = req->ticket->enc_part2->flags;
 
         /*
-         * If the transited list is not empty, then check that all realms
-         * transited are within the hierarchy between the client's realm
-         * and the local realm.
+         * If the transited list is not empty and the KDC hasn't checked it,
+         * then check that all realms transited are within the hierarchy
+         * between the client's realm and the local realm.
          */
-        if (trans->tr_contents.length > 0 && trans->tr_contents.data[0]) {
+        if (!(flags & TKT_FLG_TRANSIT_POLICY_CHECKED) &&
+            trans->tr_contents.length > 0 && trans->tr_contents.data[0]) {
             retval = krb5_check_transited_list(context, &(trans->tr_contents),
                                                realm, &server->realm);
         }
