@@ -254,6 +254,7 @@ main(int argc, char **argv)
         }
 
         krb5_free_checksum_contents(context, &cksum);
+        assert(cksum.length == 0);
     }
     return status;
 }

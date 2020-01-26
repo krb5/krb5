@@ -39,7 +39,6 @@ kg_checksum_channel_bindings(context, cb, cksum)
     size_t sumlen;
     krb5_data plaind;
     krb5_error_code code;
-    void *temp;
 
     /* initialize the the cksum */
     code = krb5_c_checksum_length(context, CKSUMTYPE_RSA_MD5, &sumlen);
@@ -88,21 +87,6 @@ kg_checksum_channel_bindings(context, cb, cksum)
 
     code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
                                 &plaind, cksum);
-    if (code)
-        goto cleanup;
-
-    if ((temp = xmalloc(cksum->length)) == NULL) {
-        krb5_free_checksum_contents(context, cksum);
-        code = ENOMEM;
-        goto cleanup;
-    }
-
-    memcpy(temp, cksum->contents, cksum->length);
-    krb5_free_checksum_contents(context, cksum);
-    cksum->contents = (krb5_octet *)temp;
-
-    /* success */
-cleanup:
     if (buf)
         xfree(buf);
     return code;

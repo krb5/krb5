@@ -4692,6 +4692,8 @@ krb5_free_checksum(krb5_context context, krb5_checksum *val);
  * @param [in] val              Checksum structure to free contents of
  *
  * This function frees the contents of @a val, but not the structure itself.
+ * It sets the checksum's data pointer to null and (beginning in release 1.19)
+ * sets its length to zero.
  */
 void KRB5_CALLCONV
 krb5_free_checksum_contents(krb5_context context, krb5_checksum *val);
@@ -4751,6 +4753,8 @@ krb5_free_octet_data(krb5_context context, krb5_octet_data *val);
  * @param [in] val              Data structure to free contents of
  *
  * This function frees the contents of @a val, but not the structure itself.
+ * It sets the structure's data pointer to null and (beginning in release 1.19)
+ * sets its length to zero.
  */
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val);

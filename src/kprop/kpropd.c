@@ -1412,7 +1412,6 @@ recv_database(krb5_context context, int fd, int database_fd,
         }
         n = write(database_fd, outbuf.data, outbuf.length);
         krb5_free_data_contents(context, &inbuf);
-        krb5_free_data_contents(context, &outbuf);
         if (n < 0) {
             snprintf(buf, sizeof(buf),
                      "while writing database block starting at offset %d",
@@ -1426,6 +1425,7 @@ recv_database(krb5_context context, int fd, int database_fd,
             send_error(context, fd, KRB5KRB_ERR_GENERIC, buf);
         }
         received_size += outbuf.length;
+        krb5_free_data_contents(context, &outbuf);
     }
 
     /* OK, we've seen the entire file.  Did we get too many bytes? */
