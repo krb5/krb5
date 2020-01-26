@@ -1108,6 +1108,12 @@ k5_gc_s4u2s_step(krb5_context context, krb5_s4u2s_creds_context ctx,
         ctx->state == STATE_S4U2S_COMPLETE)
         return EINVAL;
 
+    /* TEMP: Set in_creds->server->realm to referral realm. */
+    if (ctx->state == STATE_S4U2S_BEGIN) {
+        krb5_free_data_contents(context, &ctx->in->in_creds->server->realm);
+        ctx->in->in_creds->server->realm.length = 0;
+    }
+
     if (ctx->state == STATE_S4U2S_BEGIN)
         return s4u2s_begin(context, ctx);
     else if (ctx->state == STATE_IDENTIFY_CLIENT_REALM)
@@ -1621,6 +1627,12 @@ k5_gc_s4u2p_step(krb5_context context, krb5_s4u2p_creds_context ctx,
     if (no_input != (ctx->state == STATE_S4U2P_BEGIN) ||
         ctx->state == STATE_S4U2P_COMPLETE)
         return EINVAL;
+
+    /* TEMP: Set in_creds->server->realm to referral realm. */
+    if (ctx->state == STATE_S4U2P_BEGIN) {
+        krb5_free_data_contents(context, &ctx->in->in_creds->server->realm);
+        ctx->in->in_creds->server->realm.length = 0;
+    }
 
     if (!no_input) {
         /* Convert the input token into a credential and store it in ctx. */
