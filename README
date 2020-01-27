@@ -92,6 +92,9 @@ Administrator experience:
   credential forwarding during GSSAPI authentication unless the KDC
   sets the ok-as-delegate bit in the service ticket.
 
+* Use the permitted_enctypes krb5.conf setting as the default value
+  for default_tkt_enctypes and default_tgs_enctypes.
+
 Developer experience:
 
 * Implement krb5_cc_remove_cred() for all credential cache types.
@@ -109,6 +112,10 @@ Protocol evolution:
 
 * Add support for Microsoft NegoEx.  (Requires one or more third-party
   GSS modules implementing NegoEx mechanisms.)
+
+* Honor the transited-policy-checked ticket flag on application
+  servers, eliminating the requirement to configure capaths on
+  servers in some scenarios.
 
 User experience:
 
@@ -195,6 +202,13 @@ krb5-1.18 changes by ticket ID
 8859    Remove KRB5_KDB_FLAG_ALIAS_OK
 8860    Allow kprop over NATs
 8861    Fix LDAP policy enforcement of pw_expiration
+8864    Fix error handling in gssint_mechglue_init()
+8865    Check cross-realm TGT name for RBCD requests
+8866    Fix S4U client authdata handling
+8867    Fix KDC crash in handle_signticket
+8868    Allow cross-realm RBCD with PAC and other authdata
+8869    Apply permitted_enctypes to KDC request enctypes
+8870    Honor transited-policy-checked flag in servers
 
 Acknowledgements
 ----------------
