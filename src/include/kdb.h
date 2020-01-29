@@ -1493,8 +1493,13 @@ typedef struct _kdb_vftabl {
      * such as a Windows PAC, based on the request client lookup flags.  Return
      * 0 if all checks have passed.  Optionally return a representation of the
      * authdata in *ad_info_out, to be consumed by allowed_to_delegate_from and
-     * sign_authdata.  If client_out is not NULL and the PAC has been verified,
-     * set *client_out to the client name in the PAC; this indicates the
+     * sign_authdata.  Returning *ad_info_out is required to support
+     * resource-based constrained delegation.
+     *
+     * If the KRB5_KDB_FLAG_CONSTRAINED_DELEGATION bit is set, a PAC must be
+     * provided and verified, and an error should be returned if the client is
+     * not allowed to delegate.  If the KRB5_KDB_FLAG_CROSS_REALM bit is also
+     * set, set *client_out to the client name in the PAC; this indicates the
      * requested client principal for a cross-realm S4U2Proxy request.
      *
      * This method is called for TGS requests on the authorization data from

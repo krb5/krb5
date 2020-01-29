@@ -1622,65 +1622,6 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     return 0;
 }
 
-static krb5_error_code
-check_allowed_to_delegate_to(krb5_context context, krb5_const_principal client,
-                             const krb5_db_entry *server,
-                             krb5_const_principal proxy)
-{
-    /* Must be in same realm */
-    if (!krb5_realm_compare(context, server->princ, proxy))
-        return KRB5KDC_ERR_POLICY;
-
-    return krb5_db_check_allowed_to_delegate(context, client, server, proxy);
-}
-
-static krb5_error_code
-check_rbcd_policy(kdc_realm_t *kdc_active_realm, unsigned int flags,
-                  const krb5_principal stkt_client_princ,
-                  krb5_principal stkt_authdata_client,
-                  const krb5_db_entry *stkt_server,
-                  krb5_const_principal header_client_princ,
-                  void *header_ad_info, const krb5_db_entry *proxy)
-{
-    krb5_principal client_princ = stkt_client_princ;
-
-    /* Ensure that either the evidence ticket server or the client matches the
-     * TGT client. */
-    if (isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
-        /*
-         * Check that the proxy server is local, that the second ticket is a
-         * cross-realm TGT for us, and that the second ticket client matches
-         * the header ticket client.
-         */
-        if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) ||
-            !is_cross_tgs_principal(stkt_server->princ) ||
-            !krb5_principal_compare_any_realm(kdc_context, stkt_server->princ,
-                                              tgs_server) ||
-            !krb5_principal_compare(kdc_context, stkt_client_princ,
-                                    header_client_princ)) {
-            return KRB5KDC_ERR_BADOPTION;
-        }
-        /* The KDB module must be able to recover the reply ticket client name
-         * from the evidence ticket authorization data. */
-        if (stkt_authdata_client == NULL ||
-            stkt_authdata_client->realm.length == 0)
-            return KRB5KDC_ERR_BADOPTION;
-        client_princ = stkt_authdata_client;
-    } else if (!krb5_principal_compare(kdc_context, stkt_server->princ,
-                                       header_client_princ)) {
-        return KRB5KDC_ERR_BADOPTION;
-    }
-
-    /* If we are issuing a referral, the KDC in the resource realm will check
-     * if delegation is allowed. */
-    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL))
-        return 0;
-
-    return krb5_db_allowed_to_delegate_from(kdc_context, client_princ,
-                                            header_client_princ,
-                                            header_ad_info, proxy);
-}
-
 krb5_error_code
 kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
                           krb5_kdc_req *request,
@@ -1697,6 +1638,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
 {
     krb5_error_code errcode;
     krb5_boolean support_rbcd;
+    krb5_principal client_princ = t2enc->client;
 
     /*
      * Constrained delegation is mutually exclusive with renew/forward/etc.
@@ -1714,59 +1656,102 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
         return KRB5KDC_ERR_POLICY;
     }
 
+    /* Check if the client supports resource-based constrained delegation. */
+    errcode = kdc_get_pa_pac_rbcd(kdc_context, request->padata, &support_rbcd);
+    if (errcode)
+        return errcode;
+
     errcode = krb5_db_get_authdata_info(kdc_context, flags,
                                         t2enc->authorization_data,
                                         t2enc->client, proxy_princ, server_key,
                                         krbtgt_key, krbtgt,
                                         t2enc->times.authtime, stkt_ad_info,
                                         stkt_authdata_client);
-    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP) {
+    if (errcode != 0 && errcode != KRB5_PLUGIN_OP_NOTSUPP) {
         *status = "NOT_ALLOWED_TO_DELEGATE";
         return errcode;
     }
 
-    errcode = kdc_get_pa_pac_rbcd(kdc_context, request->padata, &support_rbcd);
-    if (errcode)
-        return errcode;
+    /* For RBCD we require that both client and impersonator's authdata have
+     * been verified. */
+    if (errcode != 0 || ad_info == NULL)
+        support_rbcd = FALSE;
 
-    if (support_rbcd && ad_info != NULL) {
-        errcode = check_rbcd_policy(kdc_active_realm, flags, t2enc->client,
-                                    *stkt_authdata_client, server,
-                                    server_princ, ad_info, proxy);
-        if (errcode == 0)
-            return 0;
-        if (errcode != KRB5KDC_ERR_POLICY &&
-            errcode != KRB5_PLUGIN_OP_NOTSUPP) {
-            *status = "INVALID_S4U2PROXY_XREALM_REQUEST";
-            return errcode;
+    /* Ensure that either the evidence ticket server or the client matches the
+     * TGT client. */
+    if (isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+        /*
+         * Check that the proxy server is local, that the second ticket is a
+         * cross-realm TGT for us, and that the second ticket client matches
+         * the header ticket client.
+         */
+        if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) ||
+            !is_cross_tgs_principal(server->princ) ||
+            !krb5_principal_compare_any_realm(kdc_context, server->princ,
+                                              tgs_server) ||
+            !krb5_principal_compare(kdc_context, client_princ, server_princ)) {
+            *status = "XREALM_EVIDENCE_TICKET_MISMATCH";
+            return KRB5KDC_ERR_BADOPTION;
         }
-        /* Fall back to old constrained delegation. */
-    }
+        /* The KDB module must be able to recover the reply ticket client name
+         * from the evidence ticket authorization data. */
+        if (*stkt_authdata_client == NULL ||
+            (*stkt_authdata_client)->realm.length == 0) {
+            *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
+            return KRB5KDC_ERR_BADOPTION;
+        }
 
-    /* Ensure that evidence ticket server matches TGT client */
-    if (!krb5_principal_compare(kdc_context,
-                                server->princ, /* after canon */
-                                server_princ)) {
+        client_princ = *stkt_authdata_client;
+    } else if (!krb5_principal_compare(kdc_context,
+                                       server->princ, /* after canon */
+                                       server_princ)) {
         *status = "EVIDENCE_TICKET_MISMATCH";
         return KRB5KDC_ERR_SERVER_NOMATCH;
     }
 
-    if (!isflagset(t2enc->flags, TKT_FLG_FORWARDABLE)) {
-        *status = "EVIDENCE_TKT_NOT_FORWARDABLE";
-        return KRB5_TKT_NOT_FORWARDABLE;
+    /* If both are in the same realm, try allowed_to_delegate first. */
+    if (krb5_realm_compare(kdc_context, server->princ, proxy_princ)) {
+
+        errcode = krb5_db_check_allowed_to_delegate(kdc_context, client_princ,
+                                                    server, proxy_princ);
+        if (errcode != 0 && errcode != KRB5KDC_ERR_POLICY &&
+            errcode != KRB5_PLUGIN_OP_NOTSUPP)
+            return errcode;
+
+        if (errcode == 0) {
+
+            /*
+             * In legacy constrained-delegation, the evidence ticket must be
+             * forwardable.  This check deliberately causes an error response
+             * even if the delegation is also authorized by resource-based
+             * constrained delegation (which does not require a forwardable
+             * evidence ticket).  Windows KDCs behave the same way.
+             */
+            if (!isflagset(t2enc->flags, TKT_FLG_FORWARDABLE)) {
+                *status = "EVIDENCE_TKT_NOT_FORWARDABLE";
+                return KRB5KDC_ERR_BADOPTION;
+            }
+
+            return 0;
+        }
+        /* Fall back to resource-based constrained-delegation. */
     }
 
-    /* Backend policy check */
-    errcode = check_allowed_to_delegate_to(kdc_context,
-                                           t2enc->client,
-                                           server,
-                                           proxy_princ);
-    if (errcode) {
+    if (!support_rbcd) {
+        *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
+        return KRB5KDC_ERR_BADOPTION;
+    }
+
+    /* If we are issuing a referral, the KDC in the resource realm will check
+     * if delegation is allowed. */
+    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL))
+        return 0;
+
+    errcode = krb5_db_allowed_to_delegate_from(kdc_context, client_princ,
+                                               server_princ, ad_info, proxy);
+    if (errcode)
         *status = "NOT_ALLOWED_TO_DELEGATE";
-        return errcode;
-    }
-
-    return 0;
+    return errcode;
 }
 
 krb5_error_code

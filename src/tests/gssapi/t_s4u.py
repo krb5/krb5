@@ -36,7 +36,7 @@ realm.kinit(realm.user_princ, password('user'), ['-f', '-c', usercache])
 output = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, '-',
                     pservice1, pservice2], expected_code=1)
 if ('auth1: ' + realm.user_princ not in output or
-    'NOT_ALLOWED_TO_DELEGATE' not in output):
+    'KDC can\'t fulfill requested option' not in output):
     fail('krb5 -> s4u2proxy')
 
 # Again with SPNEGO.
@@ -44,7 +44,7 @@ output = realm.run(['./t_s4u2proxy_krb5', '--spnego', usercache, storagecache,
                     '-', pservice1, pservice2],
                    expected_code=1)
 if ('auth1: ' + realm.user_princ not in output or
-    'NOT_ALLOWED_TO_DELEGATE' not in output):
+    'KDC can\'t fulfill requested option' not in output):
     fail('krb5 -> s4u2proxy (SPNEGO)')
 
 # Try krb5 -> S4U2Proxy without forwardable user creds.
@@ -52,28 +52,28 @@ realm.kinit(realm.user_princ, password('user'), ['-c', usercache])
 output = realm.run(['./t_s4u2proxy_krb5', usercache, storagecache, pservice1,
                    pservice1, pservice2], expected_code=1)
 if ('auth1: ' + realm.user_princ not in output or
-    'EVIDENCE_TKT_NOT_FORWARDABLE' not in output):
+    'KDC can\'t fulfill requested option' not in output):
     fail('krb5 -> s4u2proxy not-forwardable')
 
 # Try S4U2Self.  Ask for an S4U2Proxy step; this won't succeed because
 # service/1 isn't allowed to get a forwardable S4U2Self ticket.
 realm.run(['./t_s4u', puser, pservice2], expected_code=1,
-          expected_msg='EVIDENCE_TKT_NOT_FORWARDABLE')
+          expected_msg='KDC can\'t fulfill requested option')
 realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1,
-          expected_msg='EVIDENCE_TKT_NOT_FORWARDABLE')
+          expected_msg='KDC can\'t fulfill requested option')
 
 # Correct that problem and try again.  As above, the S4U2Proxy step
 # won't actually succeed since we don't support that in DB2.
 realm.run([kadminl, 'modprinc', '+ok_to_auth_as_delegate', service1])
 realm.run(['./t_s4u', puser, pservice2], expected_code=1,
-          expected_msg='NOT_ALLOWED_TO_DELEGATE')
+          expected_msg='KDC can\'t fulfill requested option')
 
 # Again with SPNEGO.  This uses SPNEGO for the initial authentication,
 # but still uses krb5 for S4U2Proxy--the delegated cred is returned as
 # a krb5 cred, not a SPNEGO cred, and t_s4u uses the delegated cred
 # directly rather than saving and reacquiring it.
 realm.run(['./t_s4u', '--spnego', puser, pservice2], expected_code=1,
-          expected_msg='NOT_ALLOWED_TO_DELEGATE')
+          expected_msg='KDC can\'t fulfill requested option')
 
 realm.stop()
 
@@ -288,14 +288,20 @@ a_princs = {'krbtgt/A': {'keys': 'aes128-cts'},
             'sensitive': {'keys': 'aes128-cts',
                           'flags': '+disallow_forwardable'},
             'impersonator': {'keys': 'aes128-cts'},
+            'service1': {'keys': 'aes128-cts',
+                         'flags': '+ok_to_auth_as_delegate'},
+            'rb2': {'keys': 'aes128-cts'},
             'rb': {'keys': 'aes128-cts'}}
 a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'princs': a_princs,
-                                  'rbcd': {'rb@A': 'impersonator@A'},
+                                  'rbcd': {'rb@A': 'impersonator@A',
+                                           'rb2@A': 'service1@A'},
+                                  'delegation': {'service1': 'rb2'},
                                   'alias': {'rb@A': 'rb',
                                             'rb@B': '@B',
                                             'rb@C': '@B',
+                                            'rb2_alias': 'rb2',
                                             'service/rb.a': 'rb',
                                             'service/rb.b': '@B',
                                             'service/rb.c': '@B' }}}}
@@ -340,7 +346,7 @@ domain_realm = {'domain_realm': {'.a':'A', '.b':'B', '.c':'C'}}
 domain_conf = ra.special_env('domain_conf', False, krb5_conf=domain_realm)
 
 ra.extract_keytab('impersonator@A', ra.keytab)
-ra.kinit('impersonator@A', None, ['-k', '-t', ra.keytab])
+ra.kinit('impersonator@A', None, ['-F', '-k', '-t', ra.keytab])
 
 mark('Local-realm RBCD')
 ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb'])
@@ -371,6 +377,14 @@ ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.c'])
 ra.run(['./t_s4u', 'p:' + ra.user_princ, 'h:service@rb.c'], env=domain_conf)
 ra.run(['./t_s4u', 'p:' + 'sensitive@A', 'h:service@rb.c'], expected_code=1)
 ra.run(['./t_s4u', 'p:' + rb.user_princ, 'h:service@rb.c'])
+
+mark('With both delegation types, 2nd ticket must be forwardable')
+ra.extract_keytab('service1@A', ra.keytab)
+ra.kinit('service1@A', None, ['-F', '-k', '-t', ra.keytab])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb2'], expected_code=1)
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb2_alias'])
+ra.kinit('service1@A', None, ['-f', '-k', '-t', ra.keytab])
+ra.run(['./t_s4u', 'p:' + ra.user_princ, 'p:rb2'])
 
 ra.stop()
 rb.stop()
