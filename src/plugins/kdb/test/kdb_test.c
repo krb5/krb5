@@ -897,10 +897,11 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     test_ad->contents = (uint8_t *)estrdup("db-authdata-test");
     test_ad->length = strlen((char *)test_ad->contents);
 
-    /* Assemble the authdata into a one-element or two-element list. */
+    /* Assemble the authdata into a one-element or two-element list.
+     * The PAC must be the first element. */
     list = ealloc(3 * sizeof(*list));
-    list[0] = test_ad;
-    list[1] = pac_ad;
+    list[0] = (pac_ad != NULL) ? pac_ad : test_ad;
+    list[1] = (pac_ad != NULL) ? test_ad : NULL;
     list[2] = NULL;
     *signed_auth_data = list;
 
