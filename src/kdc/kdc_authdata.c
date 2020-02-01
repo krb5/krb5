@@ -383,11 +383,14 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
     if (ret)
         return (ret == KRB5_PLUGIN_OP_NOTSUPP) ? 0 : ret;
 
-    /* Add the KDB authdata to the ticket, without copying or filtering. */
-    ret = merge_authdata(context, db_authdata,
-                         &enc_tkt_reply->authorization_data, FALSE, FALSE);
+    /* Put the KDB authdata first in the ticket.  A successful merge places the
+     * combined list in db_authdata and releases the old ticket authdata. */
+    ret = merge_authdata(context, enc_tkt_reply->authorization_data,
+                         &db_authdata, FALSE, FALSE);
     if (ret)
         krb5_free_authdata(context, db_authdata);
+    else
+        enc_tkt_reply->authorization_data = db_authdata;
     return ret;
 }
 
