@@ -42,6 +42,11 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
     size_t i;
     int ok;
 
+    /* Starting in OpenSSL 3.0, the evp_*() calls can fail if the appropriate
+     * provider is not loaded. */
+    if (type == NULL)
+        return KRB5_CRYPTO_INTERNAL;
+
     if (output->length != (unsigned int)EVP_MD_size(type))
         return KRB5_CRYPTO_INTERNAL;
 
