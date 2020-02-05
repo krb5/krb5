@@ -48,5 +48,5 @@ k5_sha256(const krb5_data *in, size_t n, uint8_t out[K5_SHA256_HASHLEN])
         ok = ok && EVP_DigestUpdate(ctx, in[i].data, in[i].length);
     ok = ok && EVP_DigestFinal_ex(ctx, out, NULL);
     EVP_MD_CTX_free(ctx);
-    return ok ? 0 : ENOMEM;
+    return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }

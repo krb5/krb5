@@ -58,7 +58,7 @@ hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
     }
     ok = ok && EVP_DigestFinal_ex(ctx, (uint8_t *)output->data, NULL);
     EVP_MD_CTX_free(ctx);
-    return ok ? 0 : ENOMEM;
+    return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }
 
 static krb5_error_code
