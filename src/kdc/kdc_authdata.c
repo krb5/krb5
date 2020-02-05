@@ -108,7 +108,7 @@ unload_authdata_plugins(krb5_context context)
 /* Return true if authdata should be filtered when copying from untrusted
  * authdata.  If desired_type is non-zero, look only for that type. */
 static krb5_boolean
-is_kdc_issued_authdatum(krb5_context context, krb5_authdata *authdata,
+is_kdc_issued_authdatum(krb5_authdata *authdata,
                         krb5_authdatatype desired_type)
 {
     krb5_boolean result = FALSE;
@@ -117,7 +117,7 @@ is_kdc_issued_authdatum(krb5_context context, krb5_authdata *authdata,
     krb5_authdatatype *ad_types, *containee_types = NULL;
 
     if (authdata->ad_type == KRB5_AUTHDATA_IF_RELEVANT) {
-        if (krb5int_get_authdata_containee_types(context, authdata, &count,
+        if (krb5int_get_authdata_containee_types(NULL, authdata, &count,
                                                  &containee_types) != 0)
             goto cleanup;
         ad_types = containee_types;
@@ -152,7 +152,7 @@ cleanup:
 /* Return true if authdata contains any elements which should only come from
  * the KDC.  If desired_type is non-zero, look only for that type. */
 static krb5_boolean
-has_kdc_issued_authdata(krb5_context context, krb5_authdata **authdata,
+has_kdc_issued_authdata(krb5_authdata **authdata,
                         krb5_authdatatype desired_type)
 {
     int i;
@@ -160,7 +160,7 @@ has_kdc_issued_authdata(krb5_context context, krb5_authdata **authdata,
     if (authdata == NULL)
         return FALSE;
     for (i = 0; authdata[i] != NULL; i++) {
-        if (is_kdc_issued_authdatum(context, authdata[i], desired_type))
+        if (is_kdc_issued_authdatum(authdata[i], desired_type))
             return TRUE;
     }
     return FALSE;
@@ -181,66 +181,71 @@ has_mandatory_for_kdc_authdata(krb5_context context, krb5_authdata **authdata)
     return FALSE;
 }
 
-/*
- * Add the elements of in_authdata to out_authdata.  If copy is false,
- * in_authdata is invalid on successful return.  If ignore_kdc_issued is true,
- * KDC-issued authdata is not copied.
- */
+/* Add elements from *new_elements to *existing_list, reallocating as
+ * necessary.  On success, release *new_elements and set it to NULL. */
 static krb5_error_code
-merge_authdata(krb5_context context, krb5_authdata **in_authdata,
-               krb5_authdata ***out_authdata, krb5_boolean copy,
-               krb5_boolean ignore_kdc_issued)
+merge_authdata(krb5_authdata ***existing_list, krb5_authdata ***new_elements)
 {
-    krb5_error_code ret;
-    size_t i, j, nadata = 0;
-    krb5_authdata **in_copy = NULL, **authdata = *out_authdata;
+    size_t count = 0, ncount = 0;
+    krb5_authdata **list = *existing_list, **nlist = *new_elements;
 
-    if (in_authdata == NULL || in_authdata[0] == NULL)
+    if (nlist == NULL)
         return 0;
 
-    if (authdata != NULL) {
-        for (nadata = 0; authdata[nadata] != NULL; nadata++)
-            ;
-    }
+    for (count = 0; list != NULL && list[count] != NULL; count++);
+    for (ncount = 0; nlist[ncount] != NULL; ncount++);
 
-    for (i = 0; in_authdata[i] != NULL; i++)
-        ;
-
-    if (copy) {
-        ret = krb5_copy_authdata(context, in_authdata, &in_copy);
-        if (ret)
-            return ret;
-        in_authdata = in_copy;
-    }
-
-    authdata = realloc(authdata, (nadata + i + 1) * sizeof(krb5_authdata *));
-    if (authdata == NULL) {
-        krb5_free_authdata(context, in_copy);
+    list = realloc(list, (count + ncount + 1) * sizeof(*list));
+    if (list == NULL)
         return ENOMEM;
+
+    memcpy(list + count, nlist, ncount * sizeof(*nlist));
+    list[count + ncount] = NULL;
+    free(nlist);
+
+    if (list[0] == NULL) {
+        free(list);
+        list = NULL;
     }
 
-    for (i = 0, j = 0; in_authdata[i] != NULL; i++) {
-        if (ignore_kdc_issued &&
-            is_kdc_issued_authdatum(context, in_authdata[i], 0)) {
-            free(in_authdata[i]->contents);
-            free(in_authdata[i]);
+    *new_elements = NULL;
+    *existing_list = list;
+    return 0;
+}
+
+/* Add a copy of new_elements to *existing_list, omitting KDC-issued
+ * authdata. */
+static krb5_error_code
+add_filtered_authdata(krb5_authdata ***existing_list,
+                      krb5_authdata **new_elements)
+{
+    krb5_error_code ret;
+    krb5_authdata **copy;
+    size_t i, j;
+
+    if (new_elements == NULL)
+        return 0;
+
+    ret = krb5_copy_authdata(NULL, new_elements, &copy);
+    if (ret)
+        return ret;
+
+    /* Remove KDC-issued elements from copy. */
+    j = 0;
+    for (i = 0; copy[i] != NULL; i++) {
+        if (is_kdc_issued_authdatum(copy[i], 0)) {
+            free(copy[i]->contents);
+            free(copy[i]);
         } else {
-            authdata[nadata + j++] = in_authdata[i];
+            copy[j++] = copy[i];
         }
     }
+    copy[j] = NULL;
 
-    authdata[nadata + j] = NULL;
-
-    free(in_authdata);
-
-    if (authdata[0] == NULL) {
-        free(authdata);
-        authdata = NULL;
-    }
-
-    *out_authdata = authdata;
-
-    return 0;
+    /* Destructively merge the filtered copy into existing_list. */
+    ret = merge_authdata(existing_list, &copy);
+    krb5_free_authdata(NULL, copy);
+    return ret;
 }
 
 /* Copy TGS-REQ authorization data into the ticket authdata. */
@@ -289,10 +294,7 @@ copy_request_authdata(krb5_context context, krb5_keyblock *client_key,
         goto cleanup;
     }
 
-    /* Add a copy of the requested authdata to the ticket, ignoring KDC-issued
-     * types. */
-    ret = merge_authdata(context, req->unenc_authdata, tkt_authdata, TRUE,
-                         TRUE);
+    ret = add_filtered_authdata(tkt_authdata, req->unenc_authdata);
 
 cleanup:
     free(plaintext.data);
@@ -307,9 +309,7 @@ copy_tgt_authdata(krb5_context context, krb5_kdc_req *request,
     if (has_mandatory_for_kdc_authdata(context, tgt_authdata))
         return KRB5KDC_ERR_POLICY;
 
-    /* Add a copy of the TGT authdata to the ticket, ignoring KDC-issued
-     * types. */
-    return merge_authdata(context, tgt_authdata, tkt_authdata, TRUE, TRUE);
+    return add_filtered_authdata(tkt_authdata, tgt_authdata);
 }
 
 /* Fetch authorization data from KDB module. */
@@ -374,8 +374,7 @@ fetch_kdb_authdata(krb5_context context, unsigned int flags,
 
     /* Put the KDB authdata first in the ticket.  A successful merge places the
      * combined list in db_authdata and releases the old ticket authdata. */
-    ret = merge_authdata(context, enc_tkt_reply->authorization_data,
-                         &db_authdata, FALSE, FALSE);
+    ret = merge_authdata(&db_authdata, &enc_tkt_reply->authorization_data);
     if (ret)
         krb5_free_authdata(context, db_authdata);
     else
@@ -404,8 +403,7 @@ make_signedpath_data(krb5_context context, krb5_const_principal client,
             return ret;
 
         for (i = 0, j = 0; authdata[i] != NULL; i++) {
-            if (is_kdc_issued_authdatum(context, authdata[i],
-                                        KRB5_AUTHDATA_SIGNTICKET))
+            if (is_kdc_issued_authdatum(authdata[i], KRB5_AUTHDATA_SIGNTICKET))
                 continue;
 
             sign_authdata[j++] = authdata[i];
@@ -635,12 +633,8 @@ make_signedpath(krb5_context context, krb5_const_principal for_user_princ,
     if (ret)
         goto cleanup;
 
-    /* Add the authdata to the ticket, without copying or filtering. */
-    ret = merge_authdata(context, if_relevant,
-                         &enc_tkt_reply->authorization_data, FALSE, FALSE);
-    if (ret)
-        goto cleanup;
-    if_relevant = NULL;         /* merge_authdata() freed */
+    /* Add the signedpath authdata to the ticket. */
+    ret = merge_authdata(&enc_tkt_reply->authorization_data, &if_relevant);
 
 cleanup:
     free(sp.delegated);
@@ -665,7 +659,7 @@ free_deleg_path(krb5_context context, krb5_principal *deleg_path)
 static krb5_boolean
 has_pac(krb5_context context, krb5_authdata **authdata)
 {
-    return has_kdc_issued_authdata(context, authdata, KRB5_AUTHDATA_WIN2K_PAC);
+    return has_kdc_issued_authdata(authdata, KRB5_AUTHDATA_WIN2K_PAC);
 }
 
 /* Verify AD-SIGNTICKET authdata if we need to, and insert an AD-SIGNEDPATH
@@ -746,11 +740,7 @@ add_auth_indicators(krb5_context context, krb5_data *const *auth_indicators,
         goto cleanup;
 
     /* Add the wrapped authdata to the ticket, without copying or filtering. */
-    ret = merge_authdata(context, cammac, &enc_tkt_reply->authorization_data,
-                         FALSE, FALSE);
-    if (ret)
-        goto cleanup;
-    cammac = NULL;              /* merge_authdata() freed */
+    ret = merge_authdata(&enc_tkt_reply->authorization_data, &cammac);
 
 cleanup:
     krb5_free_data(context, der_indicators);

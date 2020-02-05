@@ -52,11 +52,6 @@ compress_transited (krb5_data *,
                     krb5_principal,
                     krb5_data *);
 krb5_error_code
-concat_authorization_data (krb5_context,
-                           krb5_authdata **,
-                           krb5_authdata **,
-                           krb5_authdata ***);
-krb5_error_code
 fetch_last_req_info (krb5_db_entry *, krb5_last_req_entry ***);
 
 krb5_error_code
