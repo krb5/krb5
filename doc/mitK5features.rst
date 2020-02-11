@@ -489,6 +489,9 @@ Release 1.18
     credential forwarding during GSSAPI authentication unless the KDC
     sets the ok-as-delegate bit in the service ticket.
 
+  - Use the ``permitted_enctypes`` krb5.conf setting as the default
+    value for ``default_tkt_enctypes`` and ``default_tgs_enctypes``.
+
 * Developer experience:
 
   - Implement krb5_cc_remove_cred() for all credential cache types.
@@ -506,6 +509,10 @@ Release 1.18
 
   - Add support for Microsoft NegoEx.  (Requires one or more
     third-party GSS modules implementing NegoEx mechanisms.)
+
+  - Honor the transited-policy-checked ticket flag on application
+    servers, eliminating the requirement to configure capaths on
+    servers in some scenarios.
 
 * User experience:
 
