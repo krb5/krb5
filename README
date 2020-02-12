@@ -73,8 +73,8 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.18
----------------------
+Major changes in 1.18 (2019-02-12)
+----------------------------------
 
 Administrator experience:
 
@@ -209,6 +209,9 @@ krb5-1.18 changes by ticket ID
 8868    Allow cross-realm RBCD with PAC and other authdata
 8869    Apply permitted_enctypes to KDC request enctypes
 8870    Honor transited-policy-checked flag in servers
+8872    Put KDB authdata first
+8873    Don't assume OpenSSL failures are memory errors
+8874    Always use S4U2Proxy second ticket parsed authdata
 
 Acknowledgements
 ----------------
