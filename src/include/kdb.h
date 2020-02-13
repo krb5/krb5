@@ -724,7 +724,7 @@ krb5_error_code krb5_db_get_authdata_info(krb5_context context,
                                           unsigned int flags,
                                           krb5_authdata **in_authdata,
                                           krb5_const_principal client_princ,
-                                          krb5_const_principal server_princ,
+                                          krb5_const_principal request_server,
                                           krb5_keyblock *server_key,
                                           krb5_keyblock *krbtgt_key,
                                           krb5_db_entry *krbtgt,
@@ -1291,7 +1291,7 @@ typedef struct _kdb_vftabl {
      *     principal requested by the service; for regular TGS requests, the
      *     possibly-canonicalized client principal.
      *
-     *   server_princ: The server principal in the request.
+     *   request_server: The server principal in the request.
      *
      *   client: The DB entry of the client if it is in the local realm, NULL
      *     if not.  For S4U2Self and S4U2Proxy TGS requests, this is the DB
@@ -1343,7 +1343,7 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*sign_authdata)(krb5_context kcontext,
                                      unsigned int flags,
                                      krb5_const_principal client_princ,
-                                     krb5_const_principal server_princ,
+                                     krb5_const_principal request_server,
                                      krb5_db_entry *client,
                                      krb5_db_entry *server,
                                      krb5_db_entry *header_server,
@@ -1508,7 +1508,7 @@ typedef struct _kdb_vftabl {
                                          unsigned int flags,
                                          krb5_authdata **in_authdata,
                                          krb5_const_principal client_princ,
-                                         krb5_const_principal server_princ,
+                                         krb5_const_principal request_server,
                                          krb5_keyblock *server_key,
                                          krb5_keyblock *krbtgt_key,
                                          krb5_db_entry *krbtgt,

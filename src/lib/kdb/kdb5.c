@@ -2592,13 +2592,14 @@ krb5_db_set_context(krb5_context context, void *db_context)
 krb5_error_code
 krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
                       krb5_const_principal client_princ,
-                      krb5_const_principal server_princ, krb5_db_entry *client,
-                      krb5_db_entry *server, krb5_db_entry *header_server,
-                      krb5_db_entry *local_tgt, krb5_keyblock *client_key,
-                      krb5_keyblock *server_key, krb5_keyblock *header_key,
-                      krb5_keyblock *local_tgt_key, krb5_keyblock *session_key,
-                      krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
-                      void *ad_info, krb5_data ***auth_indicators,
+                      krb5_const_principal request_server,
+                      krb5_db_entry *client, krb5_db_entry *server,
+                      krb5_db_entry *header_server, krb5_db_entry *local_tgt,
+                      krb5_keyblock *client_key, krb5_keyblock *server_key,
+                      krb5_keyblock *header_key, krb5_keyblock *local_tgt_key,
+                      krb5_keyblock *session_key, krb5_timestamp authtime,
+                      krb5_authdata **tgt_auth_data, void *ad_info,
+                      krb5_data ***auth_indicators,
                       krb5_authdata ***signed_auth_data)
 {
     krb5_error_code status = 0;
@@ -2610,7 +2611,7 @@ krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
         return status;
     if (v->sign_authdata == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->sign_authdata(kcontext, flags, client_princ, server_princ,
+    return v->sign_authdata(kcontext, flags, client_princ, request_server,
                             client, server, header_server, local_tgt,
                             client_key, server_key, header_key, local_tgt_key,
                             session_key, authtime, tgt_auth_data, ad_info,
@@ -2769,7 +2770,7 @@ krb5_error_code
 krb5_db_get_authdata_info(krb5_context kcontext, unsigned int flags,
                           krb5_authdata **in_authdata,
                           krb5_const_principal client_princ,
-                          krb5_const_principal server_princ,
+                          krb5_const_principal request_server,
                           krb5_keyblock *server_key, krb5_keyblock *krbtgt_key,
                           krb5_db_entry *krbtgt, krb5_timestamp authtime,
                           void **ad_info_out, krb5_principal *client_out)
@@ -2787,7 +2788,7 @@ krb5_db_get_authdata_info(krb5_context kcontext, unsigned int flags,
     if (v->get_authdata_info == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_authdata_info(kcontext, flags, in_authdata, client_princ,
-                                server_princ, server_key, krbtgt_key, krbtgt,
+                                request_server, server_key, krbtgt_key, krbtgt,
                                 authtime, ad_info_out, client_out);
 }
 

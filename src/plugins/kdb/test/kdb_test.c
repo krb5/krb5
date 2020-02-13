@@ -817,7 +817,7 @@ parse_pac_princ(krb5_context context, krb5_boolean xrealm_s4u, char *pac_princ,
 static void
 generate_pac(krb5_context context, unsigned int flags,
              krb5_const_principal client_princ,
-             krb5_const_principal server_princ, krb5_db_entry *client,
+             krb5_const_principal request_server, krb5_db_entry *client,
              krb5_db_entry *header_server, krb5_db_entry *local_tgt,
              krb5_keyblock *server_key, krb5_keyblock *header_key,
              krb5_keyblock *local_tgt_key, krb5_timestamp authtime,
@@ -845,7 +845,7 @@ generate_pac(krb5_context context, unsigned int flags,
         assert((flags & KRB5_KDB_FLAGS_S4U) == 0);
         return;
     } else {
-        if (IS_TGS_PRINC(server_princ) &&
+        if (IS_TGS_PRINC(request_server) &&
             info->deleg_info.proxy_target != NULL) {
             /* RBCD transitive trust. */
             assert(flags & KRB5_KDB_FLAG_CROSS_REALM);
@@ -863,7 +863,7 @@ generate_pac(krb5_context context, unsigned int flags,
              * have been acquired via constrained delegation.
              */
             free(info->deleg_info.proxy_target);
-            check(krb5_unparse_name_flags(context, server_princ,
+            check(krb5_unparse_name_flags(context, request_server,
                                           KRB5_PRINCIPAL_UNPARSE_NO_REALM,
                                           &info->deleg_info.proxy_target));
             /* This is supposed to be a list of impersonators, but we currently
@@ -897,7 +897,7 @@ generate_pac(krb5_context context, unsigned int flags,
 static krb5_error_code
 test_sign_authdata(krb5_context context, unsigned int flags,
                    krb5_const_principal client_princ,
-                   krb5_const_principal server_princ, krb5_db_entry *client,
+                   krb5_const_principal request_server, krb5_db_entry *client,
                    krb5_db_entry *server, krb5_db_entry *header_server,
                    krb5_db_entry *local_tgt, krb5_keyblock *client_key,
                    krb5_keyblock *server_key, krb5_keyblock *header_key,
@@ -911,7 +911,7 @@ test_sign_authdata(krb5_context context, unsigned int flags,
     int i, val;
 
     /* Possibly create a PAC authdata element. */
-    generate_pac(context, flags, client_princ, server_princ, client,
+    generate_pac(context, flags, client_princ, request_server, client,
                  header_server, local_tgt, server_key, header_key,
                  local_tgt_key, authtime, ad_info, &pac_ad);
 
@@ -1016,7 +1016,7 @@ static krb5_error_code
 test_get_authdata_info(krb5_context context, unsigned int flags,
                        krb5_authdata **in_authdata,
                        krb5_const_principal client_princ,
-                       krb5_const_principal server_princ,
+                       krb5_const_principal request_server,
                        krb5_keyblock *server_key, krb5_keyblock *krbtgt_key,
                        krb5_db_entry *krbtgt, krb5_timestamp authtime,
                        void **ad_info_out, krb5_principal *client_out)
@@ -1038,7 +1038,7 @@ test_get_authdata_info(krb5_context context, unsigned int flags,
         return KRB5KDC_ERR_BADOPTION;
     }
 
-    rbcd_transitive = IS_TGS_PRINC(server_princ) &&
+    rbcd_transitive = IS_TGS_PRINC(request_server) &&
         (flags & KRB5_KDB_FLAG_CROSS_REALM) && info->deleg_info.proxy_target &&
         !(flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
@@ -1060,7 +1060,7 @@ test_get_authdata_info(krb5_context context, unsigned int flags,
         client_princ = pac_princ;
         /* In the non-transitive case we can match the proxy too. */
         if (!rbcd_transitive) {
-            check(krb5_unparse_name_flags(context, server_princ,
+            check(krb5_unparse_name_flags(context, request_server,
                                           KRB5_PRINCIPAL_UNPARSE_NO_REALM,
                                           &proxy_name));
             assert(info->deleg_info.proxy_target != NULL);
