@@ -400,10 +400,7 @@ local.properties
 
 /src/lib/rpc/types.stamp
 
-/src/lib/rpc/unit-test/*.log
-/src/lib/rpc/unit-test/*.sum
 /src/lib/rpc/unit-test/client
-/src/lib/rpc/unit-test/dbg.log
 /src/lib/rpc/unit-test/server
 
 /src/man/*.sub

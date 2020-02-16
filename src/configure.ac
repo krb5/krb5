@@ -1098,8 +1098,6 @@ extern void endrpcent();],
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 K5_GEN_FILE(include/gssrpc/types.h:include/gssrpc/types.hin)
-PASS=tcp
-AC_SUBST(PASS)
 
 # for pkinit
 AC_ARG_ENABLE([pkinit],
