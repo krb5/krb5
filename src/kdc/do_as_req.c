@@ -211,13 +211,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     au_state->stage = ENCR_REP;
 
-    errcode = check_indicators(kdc_context, state->server,
-                               state->auth_indicators);
-    if (errcode) {
-        state->status = "HIGHER_AUTHENTICATION_REQUIRED";
-        goto egress;
-    }
-
     state->ticket_reply.enc_part2 = &state->enc_tkt_reply;
 
     errcode = check_kdcpolicy_as(kdc_context, state->request, state->client,
@@ -298,6 +291,13 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),
                          errcode);
         state->status = "HANDLE_AUTHDATA";
+        goto egress;
+    }
+
+    errcode = check_indicators(kdc_context, state->server,
+                               state->auth_indicators);
+    if (errcode) {
+        state->status = "HIGHER_AUTHENTICATION_REQUIRED";
         goto egress;
     }
 
