@@ -158,6 +158,8 @@ realm.run(['./adata', realm.host_princ], expected_msg='+97: [indcl]')
 mark('auth indicator enforcement')
 realm.addprinc('restricted')
 realm.run([kadminl, 'setstr', 'restricted', 'require_auth', 'superstrong'])
+realm.kinit(realm.user_princ, password('user'), ['-S', 'restricted'],
+            expected_code=1, expected_msg='KDC policy rejects request')
 realm.run([kvno, 'restricted'], expected_code=1,
           expected_msg='KDC policy rejects request')
 realm.run([kadminl, 'setstr', 'restricted', 'require_auth', 'indcl'])
@@ -194,6 +196,8 @@ testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'krbtgt/FOREIGN': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
               'user2': {'keys': 'aes128-cts', 'flags': '+preauth'},
+              'rservice': {'keys': 'aes128-cts',
+                           'strings': 'require_auth:strong'},
               'service/1': {'keys': 'aes128-cts',
                             'flags': '+ok_to_auth_as_delegate'},
               'service/2': {'keys': 'aes128-cts'},
@@ -208,6 +212,7 @@ usercache = 'FILE:' + os.path.join(realm.testdir, 'usercache')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.extract_keytab('krbtgt/FOREIGN', realm.keytab)
 realm.extract_keytab(realm.user_princ, realm.keytab)
+realm.extract_keytab('ruser', realm.keytab)
 realm.extract_keytab('service/1', realm.keytab)
 realm.extract_keytab('service/2', realm.keytab)
 realm.extract_keytab('noauthdata', realm.keytab)
@@ -252,6 +257,12 @@ if ' -2: self_ad' not in out or ' -2: proxy_ad' not in out:
 realm.kinit(realm.user_princ, None, ['-k', '-X', 'indicators=dummy dbincr1'])
 realm.run(['./adata', realm.krbtgt_princ], expected_msg='+97: [dbincr2]')
 realm.run(['./adata', 'service/1'], expected_msg='+97: [dbincr3]')
+realm.kinit(realm.user_princ, None,
+            ['-k', '-X', 'indicators=strong', '-S', 'rservice'])
+# Test enforcement of altered indicators during AS request.
+realm.kinit(realm.user_princ, None,
+            ['-k', '-X', 'indicators=strong dbincr1', '-S', 'rservice'],
+            expected_code=1)
 
 # Test that KDB module authdata is included in an AS request, by
 # default or with an explicit PAC request.

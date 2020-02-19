@@ -54,6 +54,8 @@
  *                     # Initial number is kvno; defaults to 1.
  *                     keys = 3 aes256-cts aes128-cts:normal
  *                     keys = 2 rc4-hmac
+ *                     strings = key1:value1
+ *                     strings = key2:value2
  *                 }
  *             }
  *             delegation = {
@@ -282,6 +284,33 @@ make_keys(char **strings, const char *princstr, const krb5_data *realm,
     ent->n_key_data = nkeys;
 }
 
+static void
+make_strings(char **stringattrs, krb5_db_entry *ent)
+{
+    struct k5buf buf;
+    char **p;
+    const char *str, *sep;
+    krb5_tl_data *tl;
+
+    k5_buf_init_dynamic(&buf);
+    for (p = stringattrs; *p != NULL; p++) {
+        str = *p;
+        sep = strchr(str, ':');
+        assert(sep != NULL);
+        k5_buf_add_len(&buf, str, sep - str);
+        k5_buf_add_len(&buf, "\0", 1);
+        k5_buf_add_len(&buf, sep + 1, strlen(sep + 1) + 1);
+    }
+    assert(buf.data != NULL);
+
+    tl = ealloc(sizeof(*ent->tl_data));
+    tl->tl_data_next = NULL;
+    tl->tl_data_type = KRB5_TL_STRING_ATTRS;
+    tl->tl_data_length = buf.len;
+    tl->tl_data_contents = buf.data;
+    ent->tl_data = tl;
+}
+
 static krb5_error_code
 test_init()
 {
@@ -360,7 +389,8 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     krb5_principal princ = NULL, tgtprinc;
     krb5_principal_data empty_princ = { KV5M_PRINCIPAL };
     testhandle h = context->dal_handle->db_context;
-    char *search_name = NULL, *canon = NULL, *flagstr, **names, **key_strings;
+    char *search_name = NULL, *canon = NULL, *flagstr;
+    char **names, **key_strings, **stringattrs;
     const char *ename;
     krb5_db_entry *ent;
 
@@ -439,7 +469,7 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
     ent->pw_expiration = get_time(h, "princs", ename, "pwexpiration");
 
     /* Leave last_success, last_failed, fail_auth_count zeroed. */
-    /* Leave tl_data and e_data empty. */
+    /* Leave e_data empty. */
 
     set_names(h, "princs", ename, "keys");
     ret = profile_get_values(h->profile, h->names, &key_strings);
@@ -448,11 +478,19 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
         profile_free_list(key_strings);
     }
 
+    set_names(h, "princs", ename, "strings");
+    ret = profile_get_values(h->profile, h->names, &stringattrs);
+    if (ret != PROF_NO_RELATION) {
+        make_strings(stringattrs, ent);
+        profile_free_list(stringattrs);
+    }
+
     /* We must include mod-princ data or kadm5_get_principal() won't work and
      * we can't extract keys with kadmin.local. */
     check(krb5_dbe_update_mod_princ_data(context, ent, 0, &empty_princ));
 
     *entry = ent;
+    ret = 0;
 
 cleanup:
     krb5_free_unparsed_name(context, search_name);
