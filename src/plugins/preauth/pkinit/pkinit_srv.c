@@ -320,12 +320,12 @@ static krb5_error_code
 authorize_cert(krb5_context context, certauth_handle *certauth_modules,
                pkinit_kdc_context plgctx, pkinit_kdc_req_context reqctx,
                krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-               krb5_principal client)
+               krb5_principal client, krb5_boolean *hwauth_out)
 {
     krb5_error_code ret;
     certauth_handle h;
     struct certauth_req_opts opts;
-    krb5_boolean accepted = FALSE;
+    krb5_boolean accepted = FALSE, hwauth = FALSE;
     uint8_t *cert;
     size_t i, cert_len;
     void *db_ent = NULL;
@@ -347,9 +347,10 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
 
     /*
      * Check the certificate against each certauth module.  For the certificate
-     * to be authorized at least one module must return 0, and no module can an
-     * error code other than KRB5_PLUGIN_NO_HANDLE (pass).  Add indicators from
-     * modules that return 0 or pass.
+     * to be authorized at least one module must return 0 or
+     * KRB5_CERTAUTH_HWAUTH, and no module can return an error code other than
+     * KRB5_PLUGIN_NO_HANDLE (pass).  Add indicators from modules that return 0
+     * or pass.
      */
     ret = KRB5_PLUGIN_NO_HANDLE;
     for (i = 0; certauth_modules != NULL && certauth_modules[i] != NULL; i++) {
@@ -359,6 +360,8 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
                               &opts, db_ent, &ais);
         if (ret == 0)
             accepted = TRUE;
+        else if (ret == KRB5_CERTAUTH_HWAUTH)
+            accepted = hwauth = TRUE;
         else if (ret != KRB5_PLUGIN_NO_HANDLE)
             goto cleanup;
 
@@ -374,6 +377,7 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
         }
     }
 
+    *hwauth_out = hwauth;
     ret = accepted ? 0 : KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
 
 cleanup:
@@ -430,7 +434,7 @@ pkinit_server_verify_padata(krb5_context context,
     int is_signed = 1;
     krb5_pa_data **e_data = NULL;
     krb5_kdcpreauth_modreq modreq = NULL;
-    krb5_boolean valid_freshness_token = FALSE;
+    krb5_boolean valid_freshness_token = FALSE, hwauth = FALSE;
     char **sp;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
@@ -494,7 +498,7 @@ pkinit_server_verify_padata(krb5_context context,
     }
     if (is_signed) {
         retval = authorize_cert(context, moddata->certauth_modules, plgctx,
-                                reqctx, cb, rock, request->client);
+                                reqctx, cb, rock, request->client, &hwauth);
         if (retval)
             goto cleanup;
 
@@ -613,6 +617,8 @@ pkinit_server_verify_padata(krb5_context context,
 
     /* remember to set the PREAUTH flag in the reply */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+    if (hwauth)
+        enc_tkt_reply->flags |= TKT_FLG_HW_AUTH;
     modreq = (krb5_kdcpreauth_modreq)reqctx;
     reqctx = NULL;
 
@@ -1044,7 +1050,9 @@ pkinit_server_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 {
     if (patype == KRB5_PADATA_PKINIT_KX)
         return PA_INFO;
-    return PA_SUFFICIENT | PA_REPLACES_KEY | PA_TYPED_E_DATA;
+    /* PKINIT does not normally set the hw-authent ticket flag, but a
+     * certauth module can cause it to do so. */
+    return PA_SUFFICIENT | PA_REPLACES_KEY | PA_TYPED_E_DATA | PA_HARDWARE;
 }
 
 static krb5_preauthtype supported_server_pa_types[] = {

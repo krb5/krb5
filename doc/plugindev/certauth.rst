@@ -15,8 +15,11 @@ principal.  **authorize** receives the DER-encoded certificate, the
 requested client principal, and a pointer to the client's
 krb5_db_entry (for modules that link against libkdb5).  It returns the
 authorization status and optionally outputs a list of authentication
-indicator strings to be added to the ticket.  A module must use its
-own internal or library-provided ASN.1 certificate decoder.
+indicator strings to be added to the ticket.  Beginning in release
+1.19, the authorize method can request that the hardware
+authentication bit be set in the ticket by returning
+**KRB5_CERTAUTH_HWAUTH**.  A module must use its own internal or
+library-provided ASN.1 certificate decoder.
 
 A module can optionally create and destroy module data with the
 **init** and **fini** methods.  Module data objects last for the

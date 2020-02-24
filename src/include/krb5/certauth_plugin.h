@@ -85,13 +85,16 @@ typedef void
 (*krb5_certauth_fini_fn)(krb5_context context, krb5_certauth_moddata moddata);
 
 /*
- * Mandatory:
- * Return 0 if the DER-encoded cert is authorized for PKINIT authentication by
- * princ; otherwise return one of the following error codes:
+ * Mandatory: return 0 or KRB5_CERTAUTH_HWAUTH if the DER-encoded cert is
+ * authorized for PKINIT authentication by princ; otherwise return one of the
+ * following error codes:
  * - KRB5KDC_ERR_CLIENT_NAME_MISMATCH - incorrect SAN value
  * - KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE - incorrect EKU
  * - KRB5KDC_ERR_CERTIFICATE_MISMATCH - other extension error
  * - KRB5_PLUGIN_NO_HANDLE - the module has no opinion about cert
+ *
+ * Returning KRB5_CERTAUTH_HWAUTH will cause the hw-authent flag to be set in
+ * the issued ticket (new in release 1.19).
  *
  * - opts is used by built-in modules to receive internal data, and must be
  *   ignored by other modules.

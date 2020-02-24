@@ -31,6 +31,7 @@
  */
 
 #include <k5-int.h>
+#include <kdb.h>
 #include "krb5/certauth_plugin.h"
 
 struct krb5_certauth_moddata_st {
@@ -131,7 +132,8 @@ has_cn(krb5_context context, const uint8_t *cert, size_t cert_len,
 
 /*
  * Test module 2 returns OK if princ matches the CN part of the subject name,
- * and returns indicators of the module name and princ.
+ * and returns indicators of the module name and princ.  If the "hwauth" string
+ * attribute is set on db_entry, it returns KRB5_CERTAUTH_HWAUTH.
  */
 static krb5_error_code
 test2_authorize(krb5_context context, krb5_certauth_moddata moddata,
@@ -141,7 +143,7 @@ test2_authorize(krb5_context context, krb5_certauth_moddata moddata,
                 char ***authinds_out)
 {
     krb5_error_code ret;
-    char *name = NULL, **ais = NULL;
+    char *name = NULL, *strval = NULL, **ais = NULL;
 
     *authinds_out = NULL;
 
@@ -166,6 +168,11 @@ test2_authorize(krb5_context context, krb5_certauth_moddata moddata,
     *authinds_out = ais;
 
     ais = NULL;
+
+    ret = krb5_dbe_get_string(context, (krb5_db_entry *)db_entry, "hwauth",
+                              &strval);
+    ret = (strval != NULL) ? KRB5_CERTAUTH_HWAUTH : 0;
+    krb5_dbe_free_string(context, strval);
 
 cleanup:
     krb5_free_unparsed_name(context, name);
