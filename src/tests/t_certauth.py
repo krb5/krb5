@@ -43,4 +43,17 @@ out = realm.kinit("user2@KRBTEST.COM",
                   expected_code=1,
                   expected_msg='kinit: Certificate mismatch')
 
+# Test the KRB5_CERTAUTH_HWAUTH return code.
+mark('hw-authent flag tests')
+# First test +requires_hwauth without causing the hw-authent ticket
+# flag to be set.  This currently results in a preauth loop.
+realm.run([kadminl, 'modprinc', '+requires_hwauth', realm.user_princ])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity],
+            expected_code=1, expected_msg='Looping detected')
+# Cause the test2 module to return KRB5_CERTAUTH_HWAUTH and try again.
+realm.run([kadminl, 'setstr', realm.user_princ, 'hwauth', 'x'])
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % file_identity])
+
 success("certauth tests")
