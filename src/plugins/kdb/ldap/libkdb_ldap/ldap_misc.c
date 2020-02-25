@@ -721,6 +721,8 @@ get_int_from_tl_data(krb5_context context, krb5_db_entry *entry, int type,
     void *ptr;
     int *intptr;
 
+    *intval = 0;
+
     tl_data.tl_data_type = KDB_TL_USER_INFO;
     ret = krb5_dbe_lookup_tl_data(context, entry, &tl_data);
     if (ret || tl_data.tl_data_length == 0)

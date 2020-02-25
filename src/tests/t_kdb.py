@@ -319,18 +319,42 @@ realm.klist(realm.user_princ, realm.host_princ)
 
 mark('LDAP auth indicator')
 
-# Test auth indicator support
+# Test require_auth normalization.
 realm.addprinc('authind', password('authind'))
 realm.run([kadminl, 'setstr', 'authind', 'require_auth', 'otp radius'])
 
+# Check that krbPrincipalAuthInd attributes are set when the string
+# attribute it set.
 out = ldap_search('(krbPrincipalName=authind*)')
 if 'krbPrincipalAuthInd: otp' not in out:
     fail('Expected krbPrincipalAuthInd value not in output')
 if 'krbPrincipalAuthInd: radius' not in out:
     fail('Expected krbPrincipalAuthInd value not in output')
 
+# Check that the string attribute still appears when the principal is
+# loaded.
 realm.run([kadminl, 'getstrs', 'authind'],
           expected_msg='require_auth: otp radius')
+
+# Modify the LDAP attributes and check that the change is reflected in
+# the string attribute.
+ldap_modify('dn: krbPrincipalName=authind@KRBTEST.COM,cn=t1,cn=krb5\n'
+            'changetype: modify\n'
+            'replace: krbPrincipalAuthInd\n'
+            'krbPrincipalAuthInd: radius\n'
+            'krbPrincipalAuthInd: pkinit\n')
+realm.run([kadminl, 'getstrs', 'authind'],
+           expected_msg='require_auth: radius pkinit')
+
+# Regression test for #8877: remove the string attribute and check
+# that it is reflected in the LDAP attributes and by getstrs.
+realm.run([kadminl, 'delstr', 'authind', 'require_auth'])
+out = ldap_search('(krbPrincipalName=authind*)')
+if 'krbPrincipalAuthInd' in out:
+    fail('krbPrincipalAuthInd attribute still present after delstr')
+out = realm.run([kadminl, 'getstrs', 'authind'])
+if 'require_auth' in out:
+    fail('require_auth string attribute still visible after delstr')
 
 mark('LDAP service principal aliases')
 
