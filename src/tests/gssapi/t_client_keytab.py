@@ -124,4 +124,22 @@ realm.kinit(realm.user_princ, password('user'))
 realm.run(['./t_ccselect', phost], env=bad_cktname,
           expected_msg=realm.user_princ)
 
+mark('refresh of manually acquired creds')
+
+# Test 17: no name/ccache specified, manually acquired creds which
+# will expire soon.  Verify that creds are refreshed using the current
+# client name, with refresh_time set in the refreshed ccache.
+realm.kinit('bob', password('bob'), ['-l', '15s'])
+realm.run(['./t_ccselect', phost], expected_msg='bob')
+realm.run([klist, '-C'], expected_msg='refresh_time = ')
+
+# Test 18: no name/ccache specified, manually acquired creds with a
+# client principal not present in the client keytab.  A refresh is
+# attempted but fails, and an expired ticket error results.
+realm.kinit(realm.admin_princ, password('admin'), ['-l', '-1s'])
+msgs = ('Getting initial credentials for user/admin@KRBTEST.COM',
+        '/Matching credential not found')
+realm.run(['./t_ccselect', phost], expected_code=1,
+          expected_msg='Ticket expired', expected_trace=msgs)
+
 success('Client keytab tests')

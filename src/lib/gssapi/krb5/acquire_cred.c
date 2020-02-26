@@ -557,15 +557,23 @@ set_refresh_time(krb5_context context, krb5_ccache ccache,
 krb5_boolean
 kg_cred_time_to_refresh(krb5_context context, krb5_gss_cred_id_rec *cred)
 {
-    krb5_timestamp now;
+    krb5_timestamp now, soon;
 
     if (krb5_timeofday(context, &now))
         return FALSE;
+    soon = ts_incr(now, 30);
     if (cred->refresh_time != 0 && !ts_after(cred->refresh_time, now)) {
-        set_refresh_time(context, cred->ccache,
-                         ts_incr(cred->refresh_time, 30));
+        set_refresh_time(context, cred->ccache, soon);
         return TRUE;
     }
+
+    /* If the creds will expire soon, try to refresh even if they weren't
+     * acquired with a client keytab. */
+    if (ts_after(soon, cred->expire)) {
+        set_refresh_time(context, cred->ccache, soon);
+        return TRUE;
+    }
+
     return FALSE;
 }
 
