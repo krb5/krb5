@@ -7172,11 +7172,10 @@ typedef void
  *
  * Set a callback to receive password and account expiration times.
  *
- * This option only applies to krb5_get_init_creds_password().  @a cb will be
- * invoked if and only if credentials are successfully acquired.  The callback
- * will receive the @a context from the krb5_get_init_creds_password() call and
- * the @a data argument supplied with this API.  The remaining arguments should
- * be interpreted as follows:
+ * @a cb will be invoked if and only if credentials are successfully acquired.
+ * The callback will receive the @a context from the calling function and the
+ * @a data argument supplied with this API.  The remaining arguments should be
+ * interpreted as follows:
  *
  * If @a is_last_req is true, then the KDC reply contained last-req entries
  * which unambiguously indicated the password expiration, account expiration,

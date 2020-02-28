@@ -1482,6 +1482,116 @@ accept_method_data(krb5_context context, krb5_init_creds_context ctx)
                                      ctx->method_padata);
 }
 
+/* Return the password expiry time indicated by enc_part2.  Set *is_last_req
+ * if the information came from a last_req value. */
+static void
+get_expiry_times(krb5_enc_kdc_rep_part *enc_part2, krb5_timestamp *pw_exp,
+                 krb5_timestamp *acct_exp, krb5_boolean *is_last_req)
+{
+    krb5_last_req_entry **last_req;
+    krb5_int32 lr_type;
+
+    *pw_exp = 0;
+    *acct_exp = 0;
+    *is_last_req = FALSE;
+
+    /* Look for last-req entries for password or account expiration. */
+    if (enc_part2->last_req) {
+        for (last_req = enc_part2->last_req; *last_req; last_req++) {
+            lr_type = (*last_req)->lr_type;
+            if (lr_type == KRB5_LRQ_ALL_PW_EXPTIME ||
+                lr_type == KRB5_LRQ_ONE_PW_EXPTIME) {
+                *is_last_req = TRUE;
+                *pw_exp = (*last_req)->value;
+            } else if (lr_type == KRB5_LRQ_ALL_ACCT_EXPTIME ||
+                       lr_type == KRB5_LRQ_ONE_ACCT_EXPTIME) {
+                *is_last_req = TRUE;
+                *acct_exp = (*last_req)->value;
+            }
+        }
+    }
+
+    /* If we didn't find any, use the ambiguous key_exp field. */
+    if (*is_last_req == FALSE)
+        *pw_exp = enc_part2->key_exp;
+}
+
+/*
+ * Send an appropriate warning prompter if as_reply indicates that the password
+ * is going to expire soon.  If an expire callback was provided, use that
+ * instead.
+ */
+static void
+warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
+               krb5_prompter_fct prompter, void *data,
+               const char *in_tkt_service, krb5_kdc_rep *as_reply)
+{
+    krb5_error_code ret;
+    krb5_expire_callback_func expire_cb;
+    void *expire_data;
+    krb5_timestamp pw_exp, acct_exp, now;
+    krb5_boolean is_last_req;
+    krb5_deltat delta;
+    char ts[256], banner[1024];
+
+    if (as_reply == NULL || as_reply->enc_part2 == NULL)
+        return;
+
+    get_expiry_times(as_reply->enc_part2, &pw_exp, &acct_exp, &is_last_req);
+
+    k5_gic_opt_get_expire_cb(options, &expire_cb, &expire_data);
+    if (expire_cb != NULL) {
+        /* Invoke the expire callback and don't send prompter warnings. */
+        (*expire_cb)(context, expire_data, pw_exp, acct_exp, is_last_req);
+        return;
+    }
+
+    /* Don't warn if no password expiry value was sent. */
+    if (pw_exp == 0)
+        return;
+
+    /* Don't warn if the password is being changed. */
+    if (in_tkt_service && strcmp(in_tkt_service, "kadmin/changepw") == 0)
+        return;
+
+    /*
+     * If the expiry time came from a last_req field, assume the KDC wants us
+     * to warn.  Otherwise, warn only if the expiry time is less than a week
+     * from now.
+     */
+    ret = krb5_timeofday(context, &now);
+    if (ret != 0)
+        return;
+    if (!is_last_req &&
+        (ts_after(now, pw_exp) || ts_delta(pw_exp, now) > 7 * 24 * 60 * 60))
+        return;
+
+    if (!prompter)
+        return;
+
+    ret = krb5_timestamp_to_string(pw_exp, ts, sizeof(ts));
+    if (ret != 0)
+        return;
+
+    delta = ts_delta(pw_exp, now);
+    if (delta < 3600) {
+        snprintf(banner, sizeof(banner),
+                 _("Warning: Your password will expire in less than one hour "
+                   "on %s"), ts);
+    } else if (delta < 86400 * 2) {
+        snprintf(banner, sizeof(banner),
+                 _("Warning: Your password will expire in %d hour%s on %s"),
+                 delta / 3600, delta < 7200 ? "" : "s", ts);
+    } else {
+        snprintf(banner, sizeof(banner),
+                 _("Warning: Your password will expire in %d days on %s"),
+                 delta / 86400, ts);
+    }
+
+    /* PROMPTER_INVOCATION */
+    (*prompter)(context, data, 0, banner, 0, 0);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1693,6 +1803,8 @@ init_creds_step_reply(krb5_context context,
 
     /* success */
     ctx->complete = TRUE;
+    warn_pw_expiry(context, ctx->opt, ctx->prompter, ctx->prompter_data,
+                   ctx->in_tkt_service, ctx->reply);
 
 cleanup:
     krb5_free_pa_data(context, kdc_padata);
