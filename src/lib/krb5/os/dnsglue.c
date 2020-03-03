@@ -91,7 +91,7 @@ static int initparse(struct krb5int_dns_state *);
 #define DECLARE_HANDLE(h) struct __res_state h
 #define INIT_HANDLE(h) (memset(&h, 0, sizeof(h)), res_ninit(&h) == 0)
 #define SEARCH(h, n, c, t, a, l) res_nsearch(&h, n, c, t, a, l)
-#define PRIMARY_DOMAIN(h) strdup(h.dnsrch[0])
+#define PRIMARY_DOMAIN(h) ((h.dnsrch[0] == NULL) ? NULL : strdup(h.dnsrch[0]))
 #if HAVE_RES_NDESTROY
 #define DESTROY_HANDLE(h) res_ndestroy(&h)
 #else
@@ -104,7 +104,8 @@ static int initparse(struct krb5int_dns_state *);
 #define DECLARE_HANDLE(h)
 #define INIT_HANDLE(h) (res_init() == 0)
 #define SEARCH(h, n, c, t, a, l) res_search(n, c, t, a, l)
-#define PRIMARY_DOMAIN(h) strdup(_res.defdname)
+#define PRIMARY_DOMAIN(h) \
+    ((_res.defdname == NULL) ? NULL : strdup(_res.defdname))
 #define DESTROY_HANDLE(h)
 
 #endif
