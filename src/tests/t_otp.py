@@ -256,16 +256,17 @@ verify(daemon, queue, True, realm.user_princ, 'accept')
 ## tokens configured, with the first rejecting and the second
 ## accepting.  With the bug, the KDC incorrectly rejects the request
 ## and then performs invalid memory accesses, most likely crashing.
+queue2 = Queue()
 daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', queue))
-daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', queue))
+daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', queue2))
 daemon1.start()
 queue.get()
 daemon2.start()
-queue.get()
+queue2.get()
 oconf = '[' + otpconfig_1('udp') + ', ' + otpconfig_1('unix') + ']'
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
 realm.kinit(realm.user_princ, 'accept2', flags=flags)
 verify(daemon1, queue, False, realm.user_princ.split('@')[0], 'accept2')
-verify(daemon2, queue, True, realm.user_princ, 'accept2')
+verify(daemon2, queue2, True, realm.user_princ, 'accept2')
 
 success('OTP tests')
