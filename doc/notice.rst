@@ -1,4 +1,4 @@
-Copyright |copy| 1985-2019 by the Massachusetts Institute of Technology.
+Copyright |copy| 1985-2020 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
