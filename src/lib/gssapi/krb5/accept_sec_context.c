@@ -430,6 +430,32 @@ kg_process_extension(krb5_context context,
 /* A zero-value channel binding, for comparison */
 static const uint8_t null_cb[CB_MD5_LEN];
 
+/* Look for AP_OPTIONS in authdata.  If present and the options include
+ * KERB_AP_OPTIONS_CBT, set *cbt_out to true. */
+static krb5_error_code
+check_cbt(krb5_context context, krb5_authdata **authdata,
+          krb5_boolean *cbt_out)
+{
+    krb5_error_code code;
+    uint32_t ad_ap_options;
+    const uint32_t KERB_AP_OPTIONS_CBT = 0x4000;
+
+    *cbt_out = FALSE;
+
+    code = krb5_find_authdata(context, NULL, authdata,
+                              KRB5_AUTHDATA_AP_OPTIONS, &authdata);
+    if (code || authdata == NULL)
+        return code;
+    if (authdata[1] != NULL || authdata[0]->length != 4)
+        return KRB5KRB_AP_ERR_MSG_TYPE;
+
+    ad_ap_options = load_32_le(authdata[0]->contents);
+    if (ad_ap_options & KERB_AP_OPTIONS_CBT)
+        *cbt_out = TRUE;
+
+    return 0;
+}
+
 /*
  * The krb5 GSS mech appropriates the authenticator checksum field from RFC
  * 4120 to store structured data instead of a checksum, indicated with checksum
@@ -454,7 +480,7 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
     krb5_error_code code = 0;
     OM_uint32 status, option_id, token_flags;
     size_t cb_len, option_len;
-    krb5_boolean valid, token_cb_present = FALSE, cb_match = FALSE;
+    krb5_boolean valid, client_cbt, token_cb_present = FALSE, cb_match = FALSE;
     krb5_key subkey;
     krb5_data option, empty = empty_data();
     krb5_checksum cb_cksum;
@@ -580,6 +606,23 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
                 goto fail;
             }
         }
+    }
+
+    /*
+     * If the client asserts the KERB_AP_OPTIONS_CBT flag (from MS-KILE) in the
+     * authenticator authdata, and the acceptor passed channel bindings,
+     * require matching channel bindings from the client.  The intent is to
+     * prevent an authenticator generated for use outside of a TLS channel from
+     * being used inside of one.
+     */
+    code = check_cbt(context, authenticator->authorization_data, &client_cbt);
+    if (code) {
+        status = GSS_S_FAILURE;
+        goto fail;
+    }
+    if (client_cbt && acceptor_cb != GSS_C_NO_CHANNEL_BINDINGS && !cb_match) {
+        status = GSS_S_BAD_BINDINGS;
+        goto fail;
     }
 
     status = GSS_S_COMPLETE;

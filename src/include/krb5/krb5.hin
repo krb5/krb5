@@ -1909,6 +1909,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_AUTHDATA_SIGNTICKET        512     /**< formerly 142 in krb5 1.8 */
 #define KRB5_AUTHDATA_FX_ARMOR 71
 #define KRB5_AUTHDATA_AUTH_INDICATOR 97
+#define KRB5_AUTHDATA_AP_OPTIONS 143
 /** @} */ /* end of KRB5_AUTHDATA group */
 
 /* password change constants */
