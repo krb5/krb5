@@ -68,10 +68,9 @@
 */
 
 static krb5_error_code
-make_etype_list(krb5_context context,
-                krb5_enctype *desired_etypes,
-                krb5_enctype tkt_enctype,
-                krb5_authdata ***authdata);
+make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
+                 krb5_enctype tkt_enctype, krb5_boolean client_aware_cb,
+                 krb5_authdata ***authdata_out);
 
 static krb5_error_code
 generate_authenticator(krb5_context,
@@ -263,7 +262,8 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
                        krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
-    krb5_authdata **ext_authdata = NULL;
+    krb5_authdata **ext_authdata = NULL, **ap_authdata, **combined;
+    int client_aware_cb;
 
     authent->client = client;
     authent->checksum = cksum;
@@ -297,99 +297,104 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
         krb5_free_authdata(context, ext_authdata);
     }
 
-    /* Only send EtypeList if we prefer another enctype to tkt_enctype */
-    if (desired_etypes != NULL && desired_etypes[0] != tkt_enctype) {
-        TRACE_MK_REQ_ETYPES(context, desired_etypes);
-        retval = make_etype_list(context, desired_etypes, tkt_enctype,
-                                 &authent->authorization_data);
+    retval = profile_get_boolean(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                 KRB5_CONF_CLIENT_AWARE_GSS_BINDINGS, NULL,
+                                 FALSE, &client_aware_cb);
+    if (retval)
+        return retval;
+
+    /* Add etype negotiation or channel-binding awareness authdata to the
+     * front, if appropriate. */
+    retval = make_ap_authdata(context, desired_etypes, tkt_enctype,
+                              client_aware_cb, &ap_authdata);
+    if (retval)
+        return retval;
+    if (ap_authdata != NULL) {
+        retval = krb5_merge_authdata(context, ap_authdata,
+                                     authent->authorization_data, &combined);
+        krb5_free_authdata(context, ap_authdata);
         if (retval)
             return retval;
+        krb5_free_authdata(context, authent->authorization_data);
+        authent->authorization_data = combined;
     }
 
     return(krb5_us_timeofday(context, &authent->ctime, &authent->cusec));
 }
 
-/* RFC 4537 */
+/* Set *out to a DER-encoded RFC 4537 etype list, or to NULL if no etype list
+ * should be sent. */
 static krb5_error_code
-make_etype_list(krb5_context context,
-                krb5_enctype *desired_etypes,
-                krb5_enctype tkt_enctype,
-                krb5_authdata ***authdata)
+make_etype_list(krb5_context context, krb5_enctype *desired_enctypes,
+                krb5_enctype tkt_enctype, krb5_data **out)
 {
-    krb5_error_code code;
-    krb5_etype_list etypes;
-    krb5_data *enc_etype_list;
-    krb5_data *ad_if_relevant;
-    krb5_authdata *etype_adata[2], etype_adatum, **adata;
-    int i;
+    krb5_etype_list etlist;
+    int count;
 
-    etypes.etypes = desired_etypes;
+    *out = NULL;
 
-    for (etypes.length = 0;
-         etypes.etypes[etypes.length] != ENCTYPE_NULL;
-         etypes.length++)
-    {
-        /*
-         * RFC 4537:
-         *
-         *   If the enctype of the ticket session key is included in the enctype
-         *   list sent by the client, it SHOULD be the last on the list;
-         */
-        if (etypes.length && etypes.etypes[etypes.length - 1] == tkt_enctype)
+    /* Only send a list if we prefer another enctype to tkt_enctype. */
+    if (desired_enctypes == NULL || desired_enctypes[0] == tkt_enctype)
+        return 0;
+
+    /* Count elements of desired_etypes, stopping at tkt_enctypes if present.
+     * (Per RFC 4537, it must be the last option if it is included.) */
+    for (count = 0; desired_enctypes[count] != ENCTYPE_NULL; count++) {
+        if (count > 0 && desired_enctypes[count - 1] == tkt_enctype)
             break;
     }
 
-    code = encode_krb5_etype_list(&etypes, &enc_etype_list);
-    if (code) {
-        return code;
+    etlist.etypes = desired_enctypes;
+    etlist.length = count;
+    return encode_krb5_etype_list(&etlist, out);
+}
+
+/* Set *authdata_out to appropriate authenticator authdata for the request,
+ * encoded in a single AD_IF_RELEVANT element. */
+static krb5_error_code
+make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
+                 krb5_enctype tkt_enctype, krb5_boolean client_aware_cb,
+                 krb5_authdata ***authdata_out)
+{
+    krb5_error_code ret;
+    krb5_authdata etypes_ad, flags_ad, *list[3];
+    krb5_data *der_etypes = NULL;
+    size_t count = 0;
+    uint8_t flagbuf[4];
+    const uint32_t KERB_AP_OPTIONS_CBT = 0x4000;
+
+    *authdata_out = NULL;
+
+    /* Include an ETYPE_NEGOTIATION element if appropriate. */
+    ret = make_etype_list(context, desired_enctypes, tkt_enctype, &der_etypes);
+    if (ret)
+        goto cleanup;
+    if (der_etypes != NULL) {
+        etypes_ad.magic = KV5M_AUTHDATA;
+        etypes_ad.ad_type = KRB5_AUTHDATA_ETYPE_NEGOTIATION;
+        etypes_ad.length = der_etypes->length;
+        etypes_ad.contents = (uint8_t *)der_etypes->data;
+        list[count++] = &etypes_ad;
     }
 
-    etype_adatum.magic = KV5M_AUTHDATA;
-    etype_adatum.ad_type = KRB5_AUTHDATA_ETYPE_NEGOTIATION;
-    etype_adatum.length = enc_etype_list->length;
-    etype_adatum.contents = (krb5_octet *)enc_etype_list->data;
-
-    etype_adata[0] = &etype_adatum;
-    etype_adata[1] = NULL;
-
-    /* Wrap in AD-IF-RELEVANT container */
-    code = encode_krb5_authdata(etype_adata, &ad_if_relevant);
-    if (code) {
-        krb5_free_data(context, enc_etype_list);
-        return code;
+    /* Include an AP_OPTIONS element if the CBT flag is configured. */
+    if (client_aware_cb != 0) {
+        store_32_le(KERB_AP_OPTIONS_CBT, flagbuf);
+        flags_ad.magic = KV5M_AUTHDATA;
+        flags_ad.ad_type = KRB5_AUTHDATA_AP_OPTIONS;
+        flags_ad.length = 4;
+        flags_ad.contents = flagbuf;
+        list[count++] = &flags_ad;
     }
 
-    krb5_free_data(context, enc_etype_list);
-
-    adata = *authdata;
-    if (adata == NULL) {
-        adata = (krb5_authdata **)calloc(2, sizeof(krb5_authdata *));
-        i = 0;
-    } else {
-        for (i = 0; adata[i] != NULL; i++)
-            ;
-
-        adata = (krb5_authdata **)realloc(*authdata,
-                                          (i + 2) * sizeof(krb5_authdata *));
+    if (count > 0) {
+        list[count] = NULL;
+        ret = krb5_encode_authdata_container(context,
+                                             KRB5_AUTHDATA_IF_RELEVANT,
+                                             list, authdata_out);
     }
-    if (adata == NULL) {
-        krb5_free_data(context, ad_if_relevant);
-        return ENOMEM;
-    }
-    *authdata = adata;
 
-    adata[i] = (krb5_authdata *)malloc(sizeof(krb5_authdata));
-    if (adata[i] == NULL) {
-        krb5_free_data(context, ad_if_relevant);
-        return ENOMEM;
-    }
-    adata[i]->magic = KV5M_AUTHDATA;
-    adata[i]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
-    adata[i]->length = ad_if_relevant->length;
-    adata[i]->contents = (krb5_octet *)ad_if_relevant->data;
-    free(ad_if_relevant); /* contents owned by adata[i] */
-
-    adata[i + 1] = NULL;
-
-    return 0;
+cleanup:
+    krb5_free_data(context, der_etypes);
+    return ret;
 }

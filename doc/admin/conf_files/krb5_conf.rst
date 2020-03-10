@@ -383,6 +383,12 @@ The libdefaults section may contain any of the following relations:
     credentials will fail if the client machine does not have a
     keytab.  The default value is false.
 
+**client_aware_channel_bindings**
+    If this flag is true, then all application protocol authentication
+    requests will be flagged to indicate that the application supports
+    channel bindings when operating over a secure channel.  The
+    default value is false.
+
 .. _realms:
 
 [realms]
