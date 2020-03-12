@@ -74,7 +74,7 @@ jobs:
                 cd src
                 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
                 set
-                set PATH=C:\Strawberry\perl\bin;%PATH%;%wix%bin
+                set PATH=%PATH%;%wix%bin
                 nmake -f Makefile.in prep-windows
                 nmake
                 nmake install
@@ -87,7 +87,7 @@ jobs:
                 cd src
                 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
                 set
-                set PATH=C:\Strawberry\perl\bin;%PATH%;%wix%bin;"%WindowsSdkVerBinPath%"\x86
+                set PATH=%PATH%;%wix%bin;"%WindowsSdkVerBinPath%"\x86
                 nmake clean
                 nmake
                 nmake install
