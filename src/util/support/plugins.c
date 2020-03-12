@@ -62,7 +62,7 @@
  * dlopen() with RTLD_NODELETE, we weren't going to unload the plugin objects
  * anyway.
  */
-#ifdef __GLIBC__PREREQ
+#ifdef __GLIBC_PREREQ
 #if ! __GLIBC_PREREQ(2, 25)
 #define dlclose(x)
 #endif
