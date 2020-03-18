@@ -64,14 +64,11 @@ and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary
 way to interact with our bug database is via email.
 
-DES transition
---------------
+DES no longer supported
+-----------------------
 
-The Data Encryption Standard (DES) is widely recognized as weak.  The
-krb5-1.7 release contains measures to encourage sites to migrate away
-from using single-DES cryptosystems.  Among these is a configuration
-variable that enables "weak" enctypes, which defaults to "false"
-beginning with krb5-1.8.
+Beginning with the krb5-1.18 release, single-DES encryption types are
+no longer supported.
 
 Major changes in 1.19
 ---------------------
