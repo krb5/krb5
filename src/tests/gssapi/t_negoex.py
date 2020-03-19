@@ -139,4 +139,11 @@ msgs = ('sending [3]AP_REQUEST', 'sending [7]CHALLENGE', 'sending [8]VERIFY',
         'sending [11]CHALLENGE', 'sending [12]VERIFY', 'sending [13]VERIFY')
 test({'HOPS': '4', 'KEY': 'accept-always'}, expected_trace=())
 
+mark('channel bindings')
+e = realm.env.copy()
+e.update({'HOPS': '1', 'GSS_INIT_BINDING': 'a', 'GSS_ACCEPT_BINDING': 'b'})
+# The test mech will verify that the bindings are communicated to the
+# mech, but does not set the channel-bound flag.
+realm.run(['./t_bindings', '-s', 'h:host', 'a', 'b'], env=e, expected_msg='no')
+
 success('NegoEx tests')

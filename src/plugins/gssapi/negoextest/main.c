@@ -57,6 +57,15 @@ gss_init_sec_context(OM_uint32 *minor_status,
     const char *envstr;
     uint8_t hops, mech_last_octet;
 
+    envstr = getenv("GSS_INIT_BINDING");
+    if (envstr != NULL) {
+        assert(strlen(envstr) > 0);
+        assert(input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS);
+        assert(strlen(envstr) == input_chan_bindings->application_data.length);
+        assert(strcmp((char *)input_chan_bindings->application_data.value,
+                      envstr) == 0);
+    }
+
     if (input_token == GSS_C_NO_BUFFER || input_token->length == 0) {
         envstr = getenv("HOPS");
         hops = (envstr != NULL) ? atoi(envstr) : 1;
@@ -111,6 +120,15 @@ gss_accept_sec_context(OM_uint32 *minor_status, gss_ctx_id_t *context_handle,
     struct test_context *ctx = (struct test_context *)*context_handle;
     uint8_t hops, mech_last_octet;
     const char *envstr;
+
+    envstr = getenv("GSS_ACCEPT_BINDING");
+    if (envstr != NULL) {
+        assert(strlen(envstr) > 0);
+        assert(input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS);
+        assert(strlen(envstr) == input_chan_bindings->application_data.length);
+        assert(strcmp((char *)input_chan_bindings->application_data.value,
+                      envstr) == 0);
+    }
 
     /*
      * The unwrapped token sits at the end and is just one byte giving the

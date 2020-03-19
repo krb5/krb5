@@ -470,6 +470,7 @@ local.properties
 /src/tests/gssapi/ccrefresh
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_add_cred
+/src/tests/gssapi/t_bindings
 /src/tests/gssapi/t_ccselect
 /src/tests/gssapi/t_ciflags
 /src/tests/gssapi/t_context
