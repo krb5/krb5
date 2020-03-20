@@ -683,5 +683,12 @@ tags: FORCE
 FORCE:
 .PHONY: FORCE tags
 
+# Update versioned automatically-generated files.
+regen:
+	$(MAKE) depend
+	(cd man && $(MAKE) man)
+	(cd po && $(MAKE) update-po)
+	(cd lib/krb5/krb && $(RM) deltat.c && $(MAKE) deltat.c)
+
 distclean-unix:
 	$(RM) $(top_srcdir)/TAGS
