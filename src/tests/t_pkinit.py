@@ -248,10 +248,13 @@ realm.run(['./adata', realm.host_princ],
 # supplied by the responder.
 # Supply the response in raw form.
 mark('FILE identity, password on key (responder)')
-realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % file_enc_identity,
-           '-r', 'pkinit={"%s": "encrypted"}' % file_enc_identity,
-           '-X', 'X509_user_identity=%s' % file_enc_identity,
-           realm.user_princ])
+out = realm.run(['./responder', '-x', 'pkinit={"%s": 0}' % file_enc_identity,
+                 '-r', 'pkinit={"%s": "encrypted"}' % file_enc_identity,
+                 '-X', 'X509_user_identity=%s' % file_enc_identity,
+                 realm.user_princ])
+# Regression test for #8885 (password question asked twice).
+if out.count('OK: ') != 1:
+    fail('Wrong number of responder calls')
 # Supply the response through the convenience API.
 realm.run(['./responder', '-X', 'X509_user_identity=%s' % file_enc_identity,
            '-p', '%s=%s' % (file_enc_identity, 'encrypted'), realm.user_princ])

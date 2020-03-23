@@ -4309,17 +4309,18 @@ pkinit_load_fs_cert_and_key(krb5_context context,
 
     /* Load the certificate. */
     retval = get_cert(certname, &x);
-    if (retval != 0 || x == NULL) {
-        retval = oerr(context, 0, _("Cannot read certificate file '%s'"),
+    if (retval) {
+        retval = oerr(context, retval, _("Cannot read certificate file '%s'"),
                       certname);
-        goto cleanup;
     }
+    if (retval || x == NULL)
+        goto cleanup;
     /* Load the key. */
     retval = get_key(context, id_cryptoctx, keyname, fsname, &y, password);
-    if (retval != 0 || y == NULL) {
-        retval = oerr(context, 0, _("Cannot read key file '%s'"), fsname);
+    if (retval)
+        retval = oerr(context, retval, _("Cannot read key file '%s'"), fsname);
+    if (retval || y == NULL)
         goto cleanup;
-    }
 
     id_cryptoctx->creds[cindex] = malloc(sizeof(struct _pkinit_cred_info));
     if (id_cryptoctx->creds[cindex] == NULL) {

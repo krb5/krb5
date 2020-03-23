@@ -905,6 +905,11 @@ pkinit_client_prep_questions(krb5_context context,
     k5_json_object jval = NULL;
     k5_json_number jflag = NULL;
 
+    /* Don't ask questions for the informational padata items or when the
+     * ticket is issued. */
+    if (pa_data->pa_type != KRB5_PADATA_PK_AS_REQ)
+        return 0;
+
     if (!reqctx->identity_initialized) {
         pkinit_client_profile(context, plgctx, reqctx, cb, rock,
                               &request->server->realm);
