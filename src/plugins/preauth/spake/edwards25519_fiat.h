@@ -11,8 +11,8 @@
 #include <stdint.h>
 typedef unsigned char fiat_25519_uint1;
 typedef signed char fiat_25519_int1;
-typedef signed __int128 fiat_25519_int128;
-typedef unsigned __int128 fiat_25519_uint128;
+typedef int128_t fiat_25519_int128;
+typedef uint128_t fiat_25519_uint128;
 
 
 /*
