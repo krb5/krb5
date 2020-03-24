@@ -68,7 +68,9 @@
  *   generation.  The fiat_25519_selectznz and fiat_25519_carry_scmul_121666
  *   functions were removed from both branches as they are not used here (the
  *   former because it is not used by the BoringSSL code and the latter because
- *   it is only used by the X25519 code).
+ *   it is only used by the X25519 code).  The fiat_25519_int128 and
+ *   fiat_25519_uint128 typedefs were adjusted to work with older versions of
+ *   gcc.
  *
  * - fe_cmov() has the initial "Silence an unused function warning" part
  *   removed, as we removed fiat_25519_selectznz instead.
