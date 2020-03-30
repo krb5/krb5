@@ -47,6 +47,9 @@ realm.run(['./t_accname', 'p:service2/calvin', 'h:service2'],
           expected_msg='service2/calvin')
 realm.run(['./t_accname', 'p:service2/calvin', 'h:service1'], expected_code=1,
           expected_msg=' found in keytab but does not match server principal')
+# Regression test for #8892 (trailing @ in name).
+realm.run(['./t_accname', 'p:service1/andrew', 'h:service1@'],
+          expected_msg='service1/abraham')
 
 # Test with acceptor name containing service and host.  Use the
 # client's un-canonicalized hostname as acceptor input to mirror what

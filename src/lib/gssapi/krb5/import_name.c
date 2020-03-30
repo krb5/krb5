@@ -102,8 +102,8 @@ parse_hostbased(const char *str, size_t len,
     memcpy(service, str, servicelen);
     service[servicelen] = '\0';
 
-    /* If present, copy the hostname. */
-    if (at != NULL) {
+    /* Copy the hostname if present (at least one character after '@'). */
+    if (len - servicelen > 1) {
         hostlen = len - servicelen - 1;
         host = malloc(hostlen + 1);
         if (host == NULL) {
