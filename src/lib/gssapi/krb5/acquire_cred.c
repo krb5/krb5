@@ -591,7 +591,7 @@ kg_cred_set_initial_refresh(krb5_context context, krb5_gss_cred_id_rec *cred,
 
     /* Make a note to refresh these when they are halfway to expired. */
     refresh = ts_incr(times->starttime,
-                      ts_delta(times->endtime, times->starttime) / 2);
+		      (ts_delta(times->endtime, times->starttime) + context->clockskew)/ 2);
     set_refresh_time(context, cred->ccache, refresh);
 }
 
@@ -853,8 +853,8 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                                   GSS_C_NO_NAME);
             if (GSS_ERROR(ret))
                 goto error_out;
-            *time_rec = ts_after(cred->expire, now) ?
-                ts_delta(cred->expire, now) : 0;
+	    *time_rec = ts_after(cred->expire, now) ?
+		ts_delta(cred->expire, now) + context->clockskew : 0;
             k5_mutex_unlock(&cred->lock);
         }
     }

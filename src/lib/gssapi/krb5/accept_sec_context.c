@@ -352,8 +352,8 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
         *mech_type = ctx->mech_used;
 
     if (time_rec) {
-        *time_rec = ts_delta(ctx->krb_times.endtime, now) +
-            ctx->k5_context->clockskew;
+	    *time_rec = ts_delta(ctx->krb_times.endtime, now) +
+		ctx->k5_context->clockskew;
     }
 
     /* Never return GSS_C_DELEG_FLAG since we don't support DCE credential
@@ -1133,7 +1133,7 @@ kg_accept_krb5(minor_status, context_handle,
     /* Add the maximum allowable clock skew as a grace period for context
      * expiration, just as we do for the ticket. */
     if (time_rec)
-        *time_rec = ts_delta(ctx->krb_times.endtime, now) + context->clockskew;
+	    *time_rec = ts_delta(ctx->krb_times.endtime, now) + context->clockskew;
 
     if (ret_flags)
         *ret_flags = ctx->gss_flags;
