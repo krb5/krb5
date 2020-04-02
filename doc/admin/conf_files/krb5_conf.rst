@@ -1123,7 +1123,7 @@ PKINIT krb5.conf options
     specifies **X509_user_identity** on the command line.
 
 **pkinit_kdc_hostname**
-    The presense of this option indicates that the client is willing
+    The presence of this option indicates that the client is willing
     to accept a KDC certificate with a dNSName SAN (Subject
     Alternative Name) rather than requiring the id-pkinit-san as
     defined in :rfc:`4556`.  This option may be specified multiple

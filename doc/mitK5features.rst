@@ -112,7 +112,7 @@ Release 1.9
  -   Plugin to test password quality           :ref:`pwqual_plugin`
  -   Plugin to synchronize password changes    :ref:`kadm5_hook_plugin`
  -   Parallel KDC
- -   GSS-API extentions for SASL GS2 bridge    :rfc:`5801` :rfc:`5587`
+ -   GSS-API extensions for SASL GS2 bridge    :rfc:`5801` :rfc:`5587`
  -   Purging old keys
  -   Naming extensions for delegation chain
  -   Password expiration API

@@ -90,7 +90,7 @@ backwards-incompatible ABI changes.)
 
 Overflow checks for ulogentries times block size?
 
-If file can't be made the size indicated by ulogentries, shoud we
+If file can't be made the size indicated by ulogentries, should we
 truncate or error out?  If we error out, this could blow out when
 resizing the log because of a too-large log entry.
 
