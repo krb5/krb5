@@ -506,7 +506,7 @@ FUNC_INFO leash_fi[] = {
     END_FUNC_INFO
 };
 
-// com_err funcitons
+// com_err functions
 DECL_FUNC_PTR(error_message);
 FUNC_INFO ce_fi[] =  {
     MAKE_FUNC_INFO(error_message),
@@ -1237,7 +1237,7 @@ CLeashApp::IpAddrChangeMonitor(void * hWnd)
 
         NumOfAddrs = GetNumOfIpAddrs();
         if ( NumOfAddrs != prevNumOfAddrs ) {
-            // wait for the network state to stablize
+            // wait for the network state to stabilize
             Sleep(2000);
             // this call should probably be mutex protected
             ObtainTicketsViaUserIfNeeded((HWND)hWnd);

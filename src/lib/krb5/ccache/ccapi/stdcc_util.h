@@ -20,7 +20,7 @@
 
 #include "krb5.h"
 
-/* protoypes for private functions declared in stdcc_util.c */
+/* prototypes for private functions declared in stdcc_util.c */
 #ifdef USE_CCAPI_V3
 krb5_error_code
 copy_cc_cred_union_to_krb5_creds (krb5_context in_context,

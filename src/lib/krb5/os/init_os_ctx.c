@@ -369,7 +369,7 @@ add_kdc_config_file(profile_filespec_t **pfiles)
 
 /* Set the profile paths in the context.  If secure is set to TRUE
    then do not include user paths (from environment variables, etc).
-   If kdc is TRUE, include kdc.conf from whereever we expect to find
+   If kdc is TRUE, include kdc.conf from wherever we expect to find
    it.  */
 static krb5_error_code
 os_init_paths(krb5_context ctx, krb5_boolean kdc)

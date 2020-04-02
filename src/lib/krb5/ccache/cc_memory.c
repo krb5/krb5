@@ -361,7 +361,7 @@ krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id,
  * cursor is a krb5_cc_cursor originally obtained from
  * krb5_mcc_start_seq_get.
  *
- * Modifes:
+ * Modifies:
  * cursor, creds
  *
  * Effects:

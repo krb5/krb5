@@ -284,7 +284,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
             goto cleanup;
         }
 
-        /* TODO: file lock for the service passowrd file */
+        /* TODO: file lock for the service password file */
 
         fclose(pfile);
         fclose(newfile);

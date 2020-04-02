@@ -625,7 +625,7 @@ krb5_stdccv3_retrieve (krb5_context context,
 /*
  *  end seq
  *
- * just free up the storage assoicated with the cursor (if we can)
+ * just free up the storage associated with the cursor (if we can)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_end_seq_get (krb5_context context,
@@ -1393,7 +1393,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_next_cred
 
 
 /*
- * retreive
+ * retrieve
  *
  * - try to find a matching credential in the cache
  */
@@ -1412,7 +1412,7 @@ krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
 /*
  *  end seq
  *
- * just free up the storage assoicated with the cursor (if we could)
+ * just free up the storage associated with the cursor (if we could)
  */
 krb5_error_code KRB5_CALLCONV krb5_stdcc_end_seq_get
 (krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
@@ -1515,7 +1515,7 @@ krb5_stdcc_destroy (krb5_context context, krb5_ccache id)
     free(id);
 
     /* If the cache does not exist when we tried to destroy it,
-       that's fine.  That means someone else destryoed it since
+       that's fine.  That means someone else destroyed it since
        we resolved it. */
     if (retval == KRB5_FCC_NOFILE)
         return 0;

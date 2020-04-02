@@ -46,7 +46,7 @@ def check_mkey_list(*expected):
 
 
 # Get the K/M principal.  Verify that it has the expected mkvno.  Each
-# remaining argment must be a sequence of two elements: an expected
+# remaining argument must be a sequence of two elements: an expected
 # key version and an expected enctype.
 keyline_re = re.compile(r'^Key: vno (\d+), (\S+)$')
 def check_master_dbent(expected_mkvno, *expected_keys):

@@ -758,7 +758,7 @@ pkinit_as_rep_parse(krb5_context context,
 
         break;
     default:
-        pkiDebug("unknow as_rep type %d\n", kdc_reply->choice);
+        pkiDebug("unknown as_rep type %d\n", kdc_reply->choice);
         goto cleanup;
     }
 

@@ -93,9 +93,9 @@ kr_remote_free(krad_remote *rr);
  * The timeout parameter is the total timeout across all retries in
  * milliseconds.
  *
- * If the cb is called with a retval of ETIMEDOUT it indicates that the alloted
- * time has elapsed. However, in the case of a timeout, we continue to listen
- * for the packet until krad_remote_cancel() is called or a response is
+ * If the cb is called with a retval of ETIMEDOUT it indicates that the
+ * allotted time has elapsed. However, in the case of a timeout, we continue to
+ * listen for the packet until krad_remote_cancel() is called or a response is
  * received. This means that cb will always be called twice in the event of a
  * timeout. This permits you to pursue other remotes while still listening for
  * a response from the first one.

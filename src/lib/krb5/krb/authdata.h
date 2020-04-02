@@ -43,7 +43,7 @@ krb5int_authdata_verify(krb5_context context,
 
 /* PAC */
 /*
- * A PAC consists of a sequence of PAC_INFO_BUFFERs, preceeded by
+ * A PAC consists of a sequence of PAC_INFO_BUFFERs, preceded by
  * a PACTYPE header. Decoding the contents of the buffers is left
  * to the application (notwithstanding signature verification).
  */

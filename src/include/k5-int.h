@@ -1113,7 +1113,7 @@ krb5_authdata_free_internal(krb5_context kcontext,
  * A pluggable interface should have one or more currently supported major
  * versions, starting at 1.  Each major version should have a current minor
  * version, also starting at 1.  If new methods are added to a vtable, the
- * minor version should be incremented and the vtable stucture should document
+ * minor version should be incremented and the vtable structure should document
  * where each minor vtable version ends.  If method signatures for a vtable are
  * changed, the major version should be incremented.
  *
@@ -1367,7 +1367,7 @@ void KRB5_CALLCONV krb5_free_priv_enc_part(krb5_context, krb5_priv_enc_part *);
   krb5_data **code);
   modifies  *code
   effects   Returns the ASN.1 encoding of *rep in **code.
-  Returns ASN1_MISSING_FIELD if a required field is emtpy in *rep.
+  Returns ASN1_MISSING_FIELD if a required field is empty in *rep.
   Returns ENOMEM if memory runs out.
 */
 
@@ -1907,7 +1907,7 @@ krb5_ser_unpack_bytes(krb5_octet *, size_t, krb5_octet **, size_t *);
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(krb5_context, krb5_ccache *);
 
-/* Fill in the buffer with random alpha-numeric data. */
+/* Fill in the buffer with random alphanumeric data. */
 krb5_error_code
 krb5int_random_string(krb5_context, char *string, unsigned int length);
 

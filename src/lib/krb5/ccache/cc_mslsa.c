@@ -1512,7 +1512,7 @@ typedef struct _krb5_lcc_cursor {
  * id
  *
  * Effects:
- * Acccess the MS Kerberos LSA cache in the current logon session
+ * Access the MS Kerberos LSA cache in the current logon session
  * Ignore the residual.
  *
  * Returns:
@@ -1737,7 +1737,7 @@ krb5_lcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
  * cursor is a krb5_cc_cursor originally obtained from
  * krb5_lcc_start_seq_get.
  *
- * Modifes:
+ * Modifies:
  * cursor
  *
  * Effects:

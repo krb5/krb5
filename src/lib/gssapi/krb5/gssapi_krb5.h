@@ -124,7 +124,7 @@ typedef struct gss_krb5_lucid_key {
 } gss_krb5_lucid_key_t;
 
 typedef struct gss_krb5_rfc1964_keydata {
-    OM_uint32       sign_alg;       /* signing algorthm */
+    OM_uint32       sign_alg;       /* signing algorithm */
     OM_uint32       seal_alg;       /* seal/encrypt algorithm */
     gss_krb5_lucid_key_t    ctx_key;
     /* Context key

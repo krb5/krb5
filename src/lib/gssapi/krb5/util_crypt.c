@@ -677,7 +677,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
      * the padding length.
      *
      * If the caller manages the padding length, then relative_padlength
-     * wil be zero.
+     * will be zero.
      *
      * eg. if the buffers are structured as follows:
      *

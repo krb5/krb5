@@ -310,7 +310,7 @@ error:
  *
  * Arguments:
  *      db              (input) db handle
- *      func            (input) fucntion pointer to call
+ *      func            (input) function pointer to call
  *      data            opaque data type
  *      <return value>  0 on success error code on failure
  *

@@ -439,7 +439,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
             /* see if we can extract a number */
             l = strtol(p, &q, 10);
             if ((q != NULL) && (q > p)) {
-                /* got a valid number; search for a matchin entry */
+                /* got a valid number; search for a matching entry */
                 for (i = base; padata[i] != NULL; i++) {
                     /* bubble the matching entry to the front of the list */
                     if (padata[i]->pa_type == l) {

@@ -1103,7 +1103,7 @@ typedef struct _kdb_vftabl {
 
     /*
      * Optional: For each principal entry in the database, invoke func with the
-     * argments func_arg and the entry data.  If match_entry is specified, the
+     * arguments func_arg and the entry data.  If match_entry is specified, the
      * module may narrow the iteration to principal names matching that regular
      * expression; a module may alternatively ignore match_entry.
      */
@@ -1135,9 +1135,9 @@ typedef struct _kdb_vftabl {
 
     /*
      * Optional: For each password policy entry in the database, invoke func
-     * with the argments data and the entry data.  If match_entry is specified,
-     * the module may narrow the iteration to policy names matching that
-     * regular expression; a module may alternatively ignore match_entry.
+     * with the arguments data and the entry data.  If match_entry is
+     * specified, the module may narrow the iteration to policy names matching
+     * that regular expression; a module may alternatively ignore match_entry.
      */
     krb5_error_code (*iter_policy)(krb5_context kcontext, char *match_entry,
                                    osa_adb_iter_policy_func func,

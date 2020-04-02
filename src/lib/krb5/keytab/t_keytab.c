@@ -219,7 +219,7 @@ kt_test(krb5_context context, const char *name)
 
 
     kret = krb5_kt_get_entry(context, kt, princ, 0, 0, &kent);
-    CHECK_ERR(kret, KRB5_KT_NOTFOUND, "Getting non-existant entry");
+    CHECK_ERR(kret, KRB5_KT_NOTFOUND, "Getting nonexistent entry");
 
     krb5_free_principal(context, princ);
 

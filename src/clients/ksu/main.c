@@ -23,7 +23,7 @@
  *     direct, indirect, or consequential damages with respect to any
  *     claim by the user or distributor of the ksu software.
  *
- * KSU was writen by:  Ari Medvinsky, ari@isi.edu
+ * KSU was written by:  Ari Medvinsky, ari@isi.edu
  */
 
 #include "ksu.h"
@@ -506,7 +506,7 @@ main (argc, argv)
 #endif /* GET_TGT_VIA_PASSWD */
     }
 
-    /* if the user is root or same uid then authentication is not neccesary,
+    /* if the user is root or same uid then authentication is not necessary,
        root gets in automatically */
 
     if (source_uid && (source_uid != target_uid)) {
@@ -625,7 +625,7 @@ main (argc, argv)
 
 #ifdef HAVE_GETUSERSHELL
 
-    /* insist that the target login uses a standard shell (root is omited) */
+    /* insist that the target login uses a standard shell (root is omitted) */
 
     if (!standard_shell(target_pwd->pw_shell) && source_uid) {
         fprintf(stderr, _("ksu: permission denied (shell).\n"));
@@ -1001,7 +1001,7 @@ static void sweep_up(context, cc)
 /*****************************************************************
 get_params is to be called for the -a option or -e option to
            collect all params passed in for the shell or for
-           cmd.  An aray is returned containing all params.
+           cmd.  An array is returned containing all params.
            optindex is incremented accordingly and the first
            element in the returned array is reserved for the
            name of the command to be executed or the name of the

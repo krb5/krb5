@@ -316,7 +316,7 @@ int main(argc, argv)
                                      &global_params, &global_params);
     if (retval) {
         com_err(progname, retval,
-                _("while retreiving configuration parameters"));
+                _("while retrieving configuration parameters"));
         exit(1);
     }
 

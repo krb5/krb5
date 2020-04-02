@@ -158,7 +158,7 @@ proc test12 {} {
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 \
 		server_handle
     }]} {
-	perror "$test unexecpted failure in init"
+	perror "$test unexpected failure in init"
 	return
     }
     if {! [cmd [format {

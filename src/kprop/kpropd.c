@@ -1446,7 +1446,7 @@ recv_database(krb5_context context, int fd, int database_fd,
     inbuf.length = sizeof(database_size);
     retval = krb5_mk_safe(context,auth_context,&inbuf,confmsg,NULL);
     if (retval) {
-        com_err(progname, retval, "while encoding # of receieved bytes");
+        com_err(progname, retval, "while encoding # of received bytes");
         send_error(context, fd, retval, "while encoding # of received bytes");
         exit(1);
     }

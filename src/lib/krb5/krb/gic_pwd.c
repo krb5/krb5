@@ -417,7 +417,7 @@ cleanup:
   If password is passed as NULL, the password is read from the terminal,
   and then converted into a key.
 
-  A succesful call will place the ticket in the credentials cache ccache.
+  A successful call will place the ticket in the credentials cache ccache.
 
   returns system errors, encryption errors
 */

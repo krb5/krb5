@@ -285,7 +285,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         goto error;
 
     /*
-     * Bypass the remainder of the code and return straightaway
+     * Bypass the remainder of the code and return straight away
      * if the gss service requested is kiprop
      */
     if (iprop_enable) {

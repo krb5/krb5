@@ -504,7 +504,7 @@ create_workers(verto_ctx *ctx, int num)
 
     /*
      * Setup our signal handlers which will forward to the children.
-     * These handlers will be overriden in the child processes.
+     * These handlers will be overridden in the child processes.
      */
 #ifdef POSIX_SIGNALS
     (void) sigemptyset(&s_action.sa_mask);

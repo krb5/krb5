@@ -442,7 +442,7 @@ kadmin_startup(int argc, char *argv[], char **request_out, char ***args_out)
 
     /*
      * If no principal name is specified: If authenticating anonymously, use
-     * the anonymouse principal for the local realm, else if a ccache was
+     * the anonymous principal for the local realm, else if a ccache was
      * specified and its primary principal name can be read, it is used, else
      * if a keytab was specified, the principal name is host/hostname,
      * otherwise append "/admin" to the primary name of the default ccache,

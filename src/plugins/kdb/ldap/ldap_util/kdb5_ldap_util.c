@@ -432,7 +432,7 @@ main(int argc, char *argv[])
                                          &global_params, &global_params);
         if (retval) {
             com_err(progname, retval,
-                    _("while retreiving configuration parameters"));
+                    _("while retrieving configuration parameters"));
             exit_status++;
             goto cleanup;
         }

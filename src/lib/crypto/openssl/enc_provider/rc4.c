@@ -52,7 +52,7 @@ struct arcfour_state {
 /* Interface layer to krb5 crypto layer */
 
 /* The workhorse of the arcfour system,
- * this impliments the cipher
+ * this implements the cipher
  */
 
 /* In-place IOV crypto */

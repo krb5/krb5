@@ -291,7 +291,7 @@ krb5_ldap_delete_principal(krb5_context context,
              * From the attrsetmask value, identify the attributes set on the directory user
              * object and delete them.
              * NOTE: krbsecretkey attribute has per principal entries. There can be chances that the
-             * other principals' keys are exisiting/left-over. So delete all the values.
+             * other principals' keys are existing/left-over. So delete all the values.
              */
             while (attrsetmask) {
                 if (attrsetmask & 1) {
@@ -565,7 +565,7 @@ cleanup:
 /*
  * Function: krb5_ldap_unparse_principal_name
  *
- * Purpose: Removes '\\' that comes before every occurence of '@'
+ * Purpose: Removes '\\' that comes before every occurrence of '@'
  *          in the principal name component.
  *
  * Arguments:
@@ -593,7 +593,7 @@ krb5_ldap_unparse_principal_name(char *user_name)
 /*
  * Function: krb5_ldap_parse_principal_name
  *
- * Purpose: Inserts '\\' before every occurence of '@'
+ * Purpose: Inserts '\\' before every occurrence of '@'
  *          in the principal name component.
  *
  * Arguments:

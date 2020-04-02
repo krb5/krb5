@@ -139,7 +139,7 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
 
 #else
 
-    /* Heavy mangling, in 4 sub-rounds of 20 interations each. */
+    /* Heavy mangling, in 4 sub-rounds of 20 iterations each. */
     subRound( A, B, C, D, E, f1, K1, eData[  0 ] );
     subRound( E, A, B, C, D, f1, K1, eData[  1 ] );
     subRound( D, E, A, B, C, f1, K1, eData[  2 ] );

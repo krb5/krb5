@@ -750,7 +750,8 @@ kg_accept_krb5(minor_status, context_handle,
             goto fail;
         }
 
-        /* Always read the clients bindings - eventhough we might ignore them */
+        /* Always read the client's bindings, even though we might ignore
+         * them. */
         TREAD_STR(ptr, ptr2, reqcksum.length);
 
         if (input_chan_bindings != GSS_C_NO_CHANNEL_BINDINGS ) {

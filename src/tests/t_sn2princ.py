@@ -102,7 +102,7 @@ realm.addprinc(oprinc)
 # oprinc now exists, but we still get the fprinc ticket from the cache.
 realm.run(['./gcred', 'srv-hst', oprinc], env=fallback_canon,
           expected_msg=fprinc)
-# Without the cached result, we sould get oprinc in preference to fprinc.
+# Without the cached result, we should get oprinc in preference to fprinc.
 os.rename(realm.ccache + '.save', realm.ccache)
 realm.run(['./gcred', 'srv-hst', oprinc], env=fallback_canon,
           expected_msg=oprinc)

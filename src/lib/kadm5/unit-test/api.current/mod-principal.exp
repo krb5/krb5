@@ -493,7 +493,7 @@ proc test22 {} {
 	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_PW_EXPIRATION}
     } $test]]} {
-	fail "$test: modifiy failed"
+	fail "$test: modify failed"
 	return
     }
     if {! [cmd [format {
@@ -535,7 +535,7 @@ proc test23 {} {
 	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_PW_EXPIRATION}
     } $test]]} {
-	fail "$test: modifiy failed"
+	fail "$test: modify failed"
 	return
     }
     if {! [cmd [format {
@@ -885,7 +885,7 @@ proc test29 {} {
 	kadm5_modify_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_POLICY_CLR}
     } $test]]} {
-	fail "$test: modifiy failed"
+	fail "$test: modify failed"
 	return
     }
     if {! [cmd [format {

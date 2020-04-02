@@ -67,7 +67,7 @@ if { $RPC } { test1805 }
 
 #
 # admin with changepw service tickets try to change other principals
-# password, failes with AUTH error
+# password, fails with AUTH error
 test "chpass-principal 180.625"
 proc test180625 {} {
     global test

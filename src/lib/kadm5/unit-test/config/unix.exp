@@ -156,62 +156,62 @@ proc api_start {} {
 	send "set current_struct_version \[expr \$KADM5_STRUCT_VERSION &~ \$KADM5_STRUCT_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set current_api_version \[expr \$KADM5_API_VERSION_3 &~ \$KADM5_API_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set bad_struct_version_mask \[expr 0x65432100 | \$current_struct_version\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set bad_api_version_mask \[expr 0x65432100 | \$current_api_version\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set no_api_version_mask \$current_api_version\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set no_struct_version_mask \$current_struct_version\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set old_api_version \[expr \$KADM5_API_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set old_struct_version \[expr \$KADM5_STRUCT_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set new_api_version \[expr \$KADM5_API_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 	send "set new_struct_version \[expr \$KADM5_STRUCT_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { perror "EOF setting API varibles"}
-		timeout { perror "timeout setting API varibles"}
+		eof { perror "EOF setting API variables"}
+		timeout { perror "timeout setting API variables"}
 	}
 
 	set api_pid $pid

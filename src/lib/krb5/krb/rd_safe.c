@@ -92,7 +92,7 @@ read_krbsafe(krb5_context context, krb5_auth_context ac,
     if (ret)
         goto cleanup;
 
-    /* Verify the checkum over the re-encoded message. */
+    /* Verify the checksum over the re-encoded message. */
     ret = krb5_k_verify_checksum(context, key, KRB5_KEYUSAGE_KRB_SAFE_CKSUM,
                                  der_zerosafe, safe_cksum, &valid);
     if (!valid) {

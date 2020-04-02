@@ -132,7 +132,7 @@ int krb5int_utf8_isspace( const char *);
 size_t krb5int_utf8_strcspn( const char* str, const char *set);
 /* span characters in set, return bytes spanned */
 size_t krb5int_utf8_strspn( const char* str, const char *set);
-/* return first occurance of character in string */
+/* return first occurrence of character in string */
 char *krb5int_utf8_strchr( const char* str, const char *chr);
 /* return first character of set in string */
 char *krb5int_utf8_strpbrk( const char* str, const char *set);

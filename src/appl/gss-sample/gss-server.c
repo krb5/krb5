@@ -106,7 +106,7 @@ int     verbose = 0;
  * Effects:
  *
  * The service name is imported with gss_import_name, and service
- * credentials are acquired with gss_acquire_cred.  If either opertion
+ * credentials are acquired with gss_acquire_cred.  If either operation
  * fails, an error message is displayed and -1 is returned; otherwise,
  * 0 is returned.  If mech is given, credentials are acquired for the
  * specified mechanism.

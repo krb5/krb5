@@ -74,7 +74,7 @@
 #define PROT_CONSTRAINT 1 /**< Protocol constraint */
 #define LOCAL_POLICY    2 /**< Local policy violation */
 
-#define REQID_LEN 32 /* Size of the alpha-numeric request ID */
+#define REQID_LEN 32 /* Size of the alphanumeric request ID */
 
 /** KDC audit state structure and declarations */
 typedef struct _krb5_audit_state {

@@ -1468,7 +1468,7 @@ return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
      * data doesn't correspond to the replaced reply key, and RFC 4120 section
      * 5.2.7.5 forbids us from sending etype-info describing the initial reply
      * key in an AS-REP if it doesn't have the same enctype as the replaced
-     * reply key.  For all current and forseeable preauth mechs, we can assume
+     * reply key.  For all current and foreseeable preauth mechs, we can assume
      * the client received etype-info2 in an earlier step and already computed
      * the initial reply key if it needed it.  The client can determine the
      * enctype of the replaced reply key from the etype field of the enc-part

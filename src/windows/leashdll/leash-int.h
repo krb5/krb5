@@ -241,7 +241,7 @@ cc_free_NC_info,
 
 /* The following definitions are summarized from KRB5, Leash32, and
  * Leashw32 modules.  They are current as of KfW 2.6.2.  There is no
- * guarrantee that changes to other modules will be updated in this list.
+ * guarantee that changes to other modules will be updated in this list.
  */
 
 /* Must match the values used in Leash32.exe */

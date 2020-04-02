@@ -703,7 +703,7 @@ const krb5_kt_ops krb5_kt_dfl_ops = {
  * There are no separators between fields of an entry.
  * A principal is a length-encoded array of length-encoded strings.  The
  * length is a krb5_int16 in each case.  The specific format, then, is
- * multiple entries concatinated with no separators.  An entry has this
+ * multiple entries concatenated with no separators.  An entry has this
  * exact format:
  *
  * sizeof(krb5_int16) bytes for number of components in the principal;
@@ -1299,7 +1299,7 @@ krb5_ktfileint_size_entry(krb5_context context, krb5_keytab_entry *entry, krb5_i
  * Find and reserve a slot in the file for an entry of the needed size.
  * The commit point will be set to the position in the file where the
  * the length (sizeof(krb5_int32) bytes) of this node should be written
- * when commiting the write.  The file position left as a result of this
+ * when committing the write.  The file position left as a result of this
  * call is the position where the actual data should be written.
  *
  * The size_needed argument may be adjusted if we find a hole that is

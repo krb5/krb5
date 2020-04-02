@@ -1506,7 +1506,7 @@ VOID CLeashView::OnDebugMode()
     }
 
 
-    // Check all possible 'KRB' system varables, then reset (delete) debug file
+    // Check all possible 'KRB' system variables, then delete debug file
     CHAR*  Env[] = {"TEMP", "TMP", "HOME", NULL};
     CHAR** pEnv = Env;
     CHAR debugFilePath[MAX_PATH];
@@ -2168,7 +2168,7 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
                 if (CMainFrame::m_isMinimum)
                 {
-                    // minimized dispay
+                    // minimized display
                     ticketStatusKrb5.Format("Kerb-5: %02d:%02d Left",
                                              (m_ticketTimeLeft / 60L / 60L),
                                              (m_ticketTimeLeft / 60L % 60L));

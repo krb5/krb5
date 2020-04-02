@@ -3759,7 +3759,7 @@ put_negResult(unsigned char **buf_out, OM_uint32 negResult,
 }
 
 /*
- * This routine compares the recieved mechset to the mechset that
+ * This routine compares the received mechset to the mechset that
  * this server can support. It looks sequentially through the mechset
  * and the first one that matches what the server can support is
  * chosen as the negotiated mechanism. If one is found, negResult

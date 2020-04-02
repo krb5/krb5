@@ -60,7 +60,7 @@ get_as_key_skey(krb5_context context, krb5_principal client,
   the system key store (e.g. /etc/krb5.keytab).  If keyblock is non-NULL, it
   is used as the decryption key.
 
-  A succesful call will place the ticket in the credentials cache ccache.
+  A successful call will place the ticket in the credentials cache ccache.
 
   returns system errors, encryption errors
 

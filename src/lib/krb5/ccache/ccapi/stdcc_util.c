@@ -367,7 +367,7 @@ copy_cc_cred_union_to_krb5_creds (krb5_context in_context,
 
 /*
  * copy_krb5_creds_to_cc_credentials
- * - analagous to above but in the reverse direction
+ * - analogous to above but in the reverse direction
  */
 krb5_error_code
 copy_krb5_creds_to_cc_cred_union (krb5_context in_context,
@@ -618,7 +618,7 @@ int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray)
 
 /*
  * copyK5DataArrayToCC
- * - analagous to above, but in the other direction
+ * - analogous to above, but in the other direction
  */
 int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 {
@@ -759,7 +759,7 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest)
 
 /*
  * dupK5toCC
- * - analagous to above but in the reverse direction
+ * - analogous to above but in the reverse direction
  */
 void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 {
@@ -839,7 +839,7 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
   (in dupK5toCC() above) with its own memory allocation routines - which
   may be different than how the CCache allocates memory - the Kerb5 library
   must have its own version of cc_free_creds() to deallocate it.  These
-  functions do that.  The top-level function to substitue for cc_free_creds()
+  functions do that.  The top-level function to substitute for cc_free_creds()
   is krb5_free_cc_cred_union().
 
   If the CCache library wants to use a cred_union structure created by

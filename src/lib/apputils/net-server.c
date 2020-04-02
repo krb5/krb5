@@ -362,7 +362,7 @@ loop_add_address(const char *address, int port, enum bind_type type,
  *
  * - addresses
  *      A string for the addresses.  Pass NULL to use the wildcard address.
- *      Supported delimeters can be found in ADDRESSES_DELIM.  Addresses are
+ *      Supported delimiters can be found in ADDRESSES_DELIM.  Addresses are
  *      parsed with k5_parse_host_name().
  * - default_port
  *      What port the socket should be set to if not specified in addresses.

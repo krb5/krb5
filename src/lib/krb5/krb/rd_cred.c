@@ -90,7 +90,7 @@ make_cred_list(krb5_context context, krb5_cred *krbcred,
     if (list == NULL)
         goto cleanup;
 
-    /* For each credential, create a strcture in the list of credentials and
+    /* For each credential, create a structure in the list of credentials and
      * copy the information. */
     for (i = 0; i < count; i++) {
         list[i] = k5alloc(sizeof(*list[i]), &ret);

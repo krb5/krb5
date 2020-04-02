@@ -244,7 +244,7 @@ static bool_t xdr_krb5_boolean(XDR *xdrs, krb5_boolean *kbool)
 bool_t xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp)
 {
      /*
-      * Note that this function intentionally DOES NOT tranfer key
+      * Note that this function intentionally DOES NOT transfer key
       * length or contents!  xdr_krb5_key_data in adb_xdr.c does, but
       * that is only for use within the server-side library.
       */

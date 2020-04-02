@@ -645,7 +645,7 @@ proc test28 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return
     }
     send "lindex \$principal 10\n"
@@ -689,7 +689,7 @@ proc test29 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 1\n"
@@ -733,7 +733,7 @@ proc test30 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -778,7 +778,7 @@ proc test31 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -823,7 +823,7 @@ proc test32 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     if { ! [cmd {kadm5_get_policy $server_handle test-pol policy}]} {
@@ -912,7 +912,7 @@ proc test33 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -957,7 +957,7 @@ proc test34 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -1002,7 +1002,7 @@ proc test35 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -1047,7 +1047,7 @@ proc test36 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     if { ! [cmd {kadm5_get_policy $server_handle test-pol policy} ]} {
@@ -1135,7 +1135,7 @@ proc test37 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -1179,7 +1179,7 @@ proc test38 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 3\n"
@@ -1308,7 +1308,7 @@ proc test40 {} {
     if {! [cmd [format {
 	kadm5_get_principal $server_handle "%s/a" principal KADM5_PRINCIPAL_NORMAL_MASK
     } $test]]} {
-	fail "$test: can not retreive principal"
+	fail "$test: can not retrieve principal"
 	return;
     }
     send "lindex \$principal 4\n"

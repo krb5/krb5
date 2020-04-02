@@ -330,7 +330,7 @@ display_status_1(char *m, OM_uint32 code, int type)
  * Effects:
  *
  * The GSS-API messages associated with maj_stat and min_stat are
- * displayed on stderr, each preceeded by "GSS-API error <msg>: " and
+ * displayed on stderr, each preceded by "GSS-API error <msg>: " and
  * followed by a newline.
  */
 void
@@ -343,7 +343,7 @@ display_status(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 /*
  * Function: display_ctx_flags
  *
- * Purpose: displays the flags returned by context initation in
+ * Purpose: displays the flags returned by context initiation in
  *          a human-readable form
  *
  * Arguments:

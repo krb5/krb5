@@ -603,7 +603,7 @@ main(void)
     if (check_registered(context, "KEYRING:process:"))
         do_test(context, "KEYRING:process:");
     else
-        printf("Skiping KEYRING: test - unregistered type\n");
+        printf("Skipping KEYRING: test - unregistered type\n");
 
     do_test(context, "MEMORY:");
     do_test(context, "FILE:");

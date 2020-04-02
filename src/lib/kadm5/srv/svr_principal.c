@@ -2005,7 +2005,7 @@ static int decrypt_key_data(krb5_context context,
  *      kvnop           (w) kvno to fill in, or NULL
  *
  * Effects: Searches the key_data array of entry, which must have been
- * retrived with kadm5_get_principal with the KADM5_KEY_DATA mask, to
+ * retrieved with kadm5_get_principal with the KADM5_KEY_DATA mask, to
  * find a key with a specified enctype, salt type, and kvno in a
  * principal entry.  If not found, return ENOENT.  Otherwise, decrypt
  * it with the master key, and return the key in keyblock, the salt

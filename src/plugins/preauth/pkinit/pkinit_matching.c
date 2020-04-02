@@ -296,7 +296,7 @@ parse_rule_component(krb5_context context,
     rc->kwval_type = kwval_type;
 
     /*
-     * Before procesing the value for this keyword,
+     * Before processing the value for this keyword,
      * (compiling the regular expression or processing the list)
      * we need to find the end of it.  That means parsing for the
      * beginning of the next keyword (or the end of the rule).

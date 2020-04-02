@@ -356,7 +356,7 @@ importExportName(minor, unionName, inputNameType)
      *	 the unwrapped name.  Presumably the exported name had,
      *	 prior to being exported been obtained in such a way
      *	 that it has been properly perpared ("canonicalized," in
-     *	 GSS-API terms) accroding to some name type; we cannot
+     *	 GSS-API terms) according to some name type; we cannot
      *	 tell what that name type was now, but the name should
      *	 need no further preparation other than the lowest
      *	 common denominator afforded by the mech to names

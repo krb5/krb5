@@ -26,7 +26,7 @@
   -->
 <Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
 
-    <!-- include site sepecific customizations -->
+    <!-- include site-specific customizations -->
     <?include site-local.wxi?>
     
     <!-- Sanity checks -->

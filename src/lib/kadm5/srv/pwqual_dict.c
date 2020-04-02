@@ -87,7 +87,7 @@ word_compare(const void *s1, const void *s2)
  * success.
  *
  * Modifies:
- *      word_list to point to a chunck of allocated memory containing
+ *      word_list to point to a chunk of allocated memory containing
  *      pointers to words
  *      word_block to contain the dictionary.
  *

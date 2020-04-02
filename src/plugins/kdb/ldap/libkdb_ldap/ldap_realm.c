@@ -444,7 +444,7 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     }
 
 
-    /* Realm modify opearation */
+    /* Realm modify operation */
     if (mods != NULL) {
         if ((st=ldap_modify_ext_s(ld, rparams->realmdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
             st = set_ldap_error (context, st, OP_MOD);

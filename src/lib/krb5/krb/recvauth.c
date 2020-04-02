@@ -144,7 +144,7 @@ recvauth_common(krb5_context context,
 
     /*
      * If there was a problem, send back a krb5_error message,
-     * preceeded by the length of the krb5_error message.  If
+     * preceded by the length of the krb5_error message.  If
      * everything's ok, send back 0 for the length.
      */
     if (problem) {

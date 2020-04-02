@@ -1764,7 +1764,7 @@ proc kinit { name pass standalone } {
     # Use kinit to get a ticket.
 	#
 	# For now always get forwardable tickets. Later when we need to make
-	# tests that distiguish between forwardable tickets and otherwise
+	# tests that distinguish between forwardable tickets and otherwise
 	# we should but another option to this proc. --proven
 	#
     spawn $KINIT -5 -f $name@$REALMNAME
@@ -1899,7 +1899,7 @@ proc kinit_kt { name keytab standalone testname } {
     # Use kinit to get a ticket.
 	#
 	# For now always get forwardable tickets. Later when we need to make
-	# tests that distiguish between forwardable tickets and otherwise
+	# tests that distinguish between forwardable tickets and otherwise
 	# we should but another option to this proc. --proven
 	#
     spawn $KINIT -5 -f -k -t $keytab $name@$REALMNAME

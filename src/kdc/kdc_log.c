@@ -224,7 +224,7 @@ log_tgs_alt_tgt(krb5_context context, krb5_principal p)
     char *sname;
     if (krb5_unparse_name(context, p, &sname)) {
         krb5_klog_syslog(LOG_INFO,
-                         _("TGS_REQ: issuing alternate <un-unparseable> TGT"));
+                         _("TGS_REQ: issuing alternate <un-unparsable> TGT"));
     } else {
         limit_string(sname);
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ: issuing TGT %s"), sname);

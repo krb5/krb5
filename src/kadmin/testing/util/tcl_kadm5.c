@@ -688,7 +688,7 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ,
         krb5_ret = krb5_unparse_name(context, princ->principal, &tmp);
         if (krb5_ret) {
             /* XXX Do we want to return an error?  Not sure. */
-            Tcl_DStringAppendElement(str, "[unparseable principal]");
+            Tcl_DStringAppendElement(str, "[unparsable principal]");
         }
         else {
             Tcl_DStringAppendElement(str, tmp);
@@ -713,7 +713,7 @@ static Tcl_DString *unparse_principal_ent(kadm5_principal_ent_t princ,
     if (mask & KADM5_MOD_NAME) {
         if ((krb5_ret = krb5_unparse_name(context, princ->mod_name, &tmp))) {
             /* XXX */
-            Tcl_DStringAppendElement(str, "[unparseable principal]");
+            Tcl_DStringAppendElement(str, "[unparsable principal]");
         }
         else {
             Tcl_DStringAppendElement(str, tmp);
