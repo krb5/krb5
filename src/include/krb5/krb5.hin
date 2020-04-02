@@ -1685,7 +1685,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 
 /*
  * Mask of ticket flags in the TGT which should be converted into KDC
- * options when using the TGT to get derivitive tickets.
+ * options when using the TGT to get derivative tickets.
  *
  *  New mask = KDC_OPT_FORWARDABLE | KDC_OPT_PROXIABLE |
  *             KDC_OPT_ALLOW_POSTDATE | KDC_OPT_RENEWABLE
@@ -3175,7 +3175,7 @@ krb5_mk_req(krb5_context context, krb5_auth_context *auth_context,
  *                                request used for user to user
  *                                authentication.
  * @li #AP_OPTS_MUTUAL_REQUIRED - Request a mutual authentication packet from
- *                                the reciever.
+ *                                the receiver.
  * @li #AP_OPTS_USE_SUBKEY      - Generate a subsession key from the current
  *                                session key obtained from the credentials.
  *
@@ -5993,7 +5993,7 @@ krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context);
  *
  * This function sets the replay cache in @a auth_context to @a rcache.  @a
  * rcache will be closed when @a auth_context is freed, so the caller should
- * relinguish that responsibility.
+ * relinquish that responsibility.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
@@ -8361,7 +8361,7 @@ krb5_pac_get_client_info(krb5_context context, const krb5_pac pac,
                          krb5_timestamp *authtime_out, char **princname_out);
 
 /**
- * Allow the appplication to override the profile's allow_weak_crypto setting.
+ * Allow the application to override the profile's allow_weak_crypto setting.
  *
  * @param [in] context          Library context
  * @param [in] enable           Boolean flag

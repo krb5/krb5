@@ -92,7 +92,7 @@ to principals from a different realm than the default realm::
             # only principals in OTHER.REALM are matched.
             #
             # s/@OTHER\.REALM$// removes the realm name, leaving behind the
-            # principal name as the acount name.
+            # principal name as the account name.
             auth_to_local = RULE:[1:$1@$0](.*@OTHER\.REALM)s/@OTHER\.REALM$//
 
             # Also allow principals from the default realm.  Omit this line
