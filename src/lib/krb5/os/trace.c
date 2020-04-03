@@ -411,8 +411,8 @@ krb5int_trace(krb5_context context, const char *fmt, ...)
         goto cleanup;
     if (krb5_crypto_us_timeofday(&sec, &usec) != 0)
         goto cleanup;
-    if (asprintf(&msg, "[%d] %u.%d: %s\n", (int) getpid(), (unsigned int) sec,
-                 (int) usec, str) < 0)
+    if (asprintf(&msg, "[%d] %u.%06d: %s\n", (int)getpid(),
+                 (unsigned int)sec, (int)usec, str) < 0)
         goto cleanup;
     info.message = msg;
     context->trace_callback(context, &info, context->trace_callback_data);
