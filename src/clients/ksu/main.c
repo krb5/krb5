@@ -48,6 +48,7 @@ int quiet = 0;
 static int set_env_var (char *, char *);
 static void sweep_up (krb5_context, krb5_ccache);
 static char * ontty (void);
+static krb5_error_code init_ksu_context(krb5_context *);
 static krb5_error_code set_ccname_env(krb5_context, krb5_ccache);
 static void print_status( const char *fmt, ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
@@ -129,7 +130,7 @@ main (argc, argv)
 
     unsetenv ("KRB5_CONFIG");
 
-    retval = krb5_init_secure_context(&ksu_context);
+    retval = init_ksu_context(&ksu_context);
     if (retval) {
         com_err(argv[0], retval, _("while initializing krb5"));
         exit(1);
@@ -792,6 +793,34 @@ main (argc, argv)
             exit (1);
         }
     }
+}
+
+static krb5_error_code
+init_ksu_context(krb5_context *context_out)
+{
+    krb5_error_code retval;
+    const char *env_ccname;
+    krb5_context context;
+
+    *context_out = NULL;
+
+    retval = krb5_init_secure_context(&context);
+    if (retval)
+        return retval;
+
+    /* We want to obey KRB5CCNAME in this context even though this is a setuid
+     * program.  (It will only be used when operating as the real uid.) */
+    env_ccname = getenv(KRB5_ENV_CCNAME);
+    if (env_ccname != NULL) {
+        retval = krb5_cc_set_default_name(context, env_ccname);
+        if (retval) {
+            krb5_free_context(context);
+            return retval;
+        }
+    }
+
+    *context_out = context;
+    return 0;
 }
 
 /* Set KRB5CCNAME in the environment to point to ccache.  Print an error
