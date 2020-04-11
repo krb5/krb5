@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.18\n"
+"Project-Id-Version: mit-krb5 1.18-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-12 12:20-0500\n"
+"POT-Creation-Date: 2020-04-11 15:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgid "Other credential caches present, use -A to destroy all\n"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:110
-#: ../../src/clients/kinit/kinit.c:346 ../../src/clients/ksu/main.c:295
+#: ../../src/clients/kinit/kinit.c:346 ../../src/clients/ksu/main.c:296
 #, c-format
 msgid "Only one -c option allowed\n"
 msgstr ""
@@ -77,8 +77,8 @@ msgid "-A option is exclusive with -p option\n"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:150
-#: ../../src/clients/klist/klist.c:239 ../../src/clients/ksu/main.c:134
-#: ../../src/clients/ksu/main.c:140 ../../src/clients/kswitch/kswitch.c:94
+#: ../../src/clients/klist/klist.c:239 ../../src/clients/ksu/main.c:135
+#: ../../src/clients/ksu/main.c:141 ../../src/clients/kswitch/kswitch.c:94
 #: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:953
 #: ../../src/kprop/kprop.c:102 ../../src/kprop/kpropd.c:1057
 msgid "while initializing krb5"
@@ -116,7 +116,7 @@ msgstr ""
 msgid "while resolving ccache"
 msgstr ""
 
-#: ../../src/clients/kdestroy/kdestroy.c:211 ../../src/clients/ksu/main.c:997
+#: ../../src/clients/kdestroy/kdestroy.c:211 ../../src/clients/ksu/main.c:1026
 msgid "while destroying cache"
 msgstr ""
 
@@ -323,7 +323,7 @@ msgid "while getting default ccache"
 msgstr ""
 
 #: ../../src/clients/kinit/kinit.c:476 ../../src/clients/kinit/kinit.c:555
-#: ../../src/clients/kpasswd/kpasswd.c:30 ../../src/clients/ksu/main.c:248
+#: ../../src/clients/kpasswd/kpasswd.c:30 ../../src/clients/ksu/main.c:249
 #, c-format
 msgid "when parsing name %s"
 msgstr ""
@@ -851,7 +851,7 @@ msgstr ""
 msgid "         in remotely using an unsecure (non-encrypted) channel. \n"
 msgstr ""
 
-#: ../../src/clients/ksu/krb_auth_su.c:114 ../../src/clients/ksu/main.c:480
+#: ../../src/clients/ksu/krb_auth_su.c:114 ../../src/clients/ksu/main.c:481
 msgid "while reclaiming root uid"
 msgstr ""
 
@@ -903,7 +903,7 @@ msgstr ""
 msgid " %s while unparsing name\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:68
+#: ../../src/clients/ksu/main.c:69
 #, c-format
 msgid ""
 "Usage: %s [target user] [-n principal] [-c source cachename] [-k] [-r time] "
@@ -911,274 +911,274 @@ msgid ""
 "[args... ] ]\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:150
+#: ../../src/clients/ksu/main.c:151
 msgid ""
 "program name too long - quitting to avoid triggering system logging bugs"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:176
+#: ../../src/clients/ksu/main.c:177
 msgid "while allocating memory"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:189
+#: ../../src/clients/ksu/main.c:190
 msgid "while setting euid to source user"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:200 ../../src/clients/ksu/main.c:241
+#: ../../src/clients/ksu/main.c:201 ../../src/clients/ksu/main.c:242
 #, c-format
 msgid "Bad lifetime value (%s hours?)\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:212 ../../src/clients/ksu/main.c:303
+#: ../../src/clients/ksu/main.c:213 ../../src/clients/ksu/main.c:304
 msgid "when gathering parameters"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:262
+#: ../../src/clients/ksu/main.c:263
 #, c-format
 msgid "-z option is mutually exclusive with -Z.\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:270
+#: ../../src/clients/ksu/main.c:271
 #, c-format
 msgid "-Z option is mutually exclusive with -z.\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:283
+#: ../../src/clients/ksu/main.c:284
 #, c-format
 msgid "while looking for credentials cache %s"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:289
+#: ../../src/clients/ksu/main.c:290
 #, c-format
 msgid "malformed credential cache name %s\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:347
+#: ../../src/clients/ksu/main.c:348
 #, c-format
 msgid "ksu: who are you?\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:351
+#: ../../src/clients/ksu/main.c:352
 #, c-format
 msgid "Your uid doesn't match your passwd entry?!\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:366
+#: ../../src/clients/ksu/main.c:367
 #, c-format
 msgid "ksu: unknown login %s\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:386
+#: ../../src/clients/ksu/main.c:387
 msgid "while getting source cache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:395
+#: ../../src/clients/ksu/main.c:396
 msgid "while selecting the best principal"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:403
+#: ../../src/clients/ksu/main.c:404
 msgid "while returning to source uid after finding best principal"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:423
+#: ../../src/clients/ksu/main.c:424
 #, c-format
 msgid "account %s: authorization failed\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:458
+#: ../../src/clients/ksu/main.c:459
 msgid "while parsing temporary name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:463
+#: ../../src/clients/ksu/main.c:464
 msgid "while creating temporary cache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:469 ../../src/clients/ksu/main.c:709
+#: ../../src/clients/ksu/main.c:470 ../../src/clients/ksu/main.c:710
 #, c-format
 msgid "while copying cache %s to %s"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:487
+#: ../../src/clients/ksu/main.c:488
 #, c-format
 msgid ""
 "WARNING: Your password may be exposed if you enter it here and are logged\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:489
+#: ../../src/clients/ksu/main.c:490
 #, c-format
 msgid "         in remotely using an unsecure (non-encrypted) channel.\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:495
+#: ../../src/clients/ksu/main.c:496
 #, c-format
 msgid "Goodbye\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:499
+#: ../../src/clients/ksu/main.c:500
 #, c-format
 msgid "Could not get a tgt for "
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:521
+#: ../../src/clients/ksu/main.c:522
 #, c-format
 msgid "Authentication failed.\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:529
+#: ../../src/clients/ksu/main.c:530
 msgid "When unparsing name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:533
+#: ../../src/clients/ksu/main.c:534
 #, c-format
 msgid "Authenticated %s\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:540
+#: ../../src/clients/ksu/main.c:541
 msgid "while switching to target for authorization check"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:547
+#: ../../src/clients/ksu/main.c:548
 msgid "while checking authorization"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:553
+#: ../../src/clients/ksu/main.c:554
 msgid "while switching back from target after authorization check"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:560
+#: ../../src/clients/ksu/main.c:561
 #, c-format
 msgid "Account %s: authorization for %s for execution of\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:562
+#: ../../src/clients/ksu/main.c:563
 #, c-format
 msgid "               %s successful\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:568
+#: ../../src/clients/ksu/main.c:569
 #, c-format
 msgid "Account %s: authorization for %s successful\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:580
+#: ../../src/clients/ksu/main.c:581
 #, c-format
 msgid "Account %s: authorization for %s for execution of %s failed\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:588
+#: ../../src/clients/ksu/main.c:589
 #, c-format
 msgid "Account %s: authorization of %s failed\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:603
+#: ../../src/clients/ksu/main.c:604
 msgid "while calling cc_filter"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:611
+#: ../../src/clients/ksu/main.c:612
 msgid "while erasing target cache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:631
+#: ../../src/clients/ksu/main.c:632
 #, c-format
 msgid "ksu: permission denied (shell).\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:640
+#: ../../src/clients/ksu/main.c:641
 #, c-format
 msgid "ksu: couldn't set environment variable USER\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:646
+#: ../../src/clients/ksu/main.c:647
 #, c-format
 msgid "ksu: couldn't set environment variable HOME\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:651
+#: ../../src/clients/ksu/main.c:652
 #, c-format
 msgid "ksu: couldn't set environment variable SHELL\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:662
+#: ../../src/clients/ksu/main.c:663
 #, c-format
 msgid "ksu: initgroups failed.\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:667
+#: ../../src/clients/ksu/main.c:668
 #, c-format
 msgid "Leaving uid as %s (%ld)\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:670
+#: ../../src/clients/ksu/main.c:671
 #, c-format
 msgid "Changing uid to %s (%ld)\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:696
+#: ../../src/clients/ksu/main.c:697
 msgid "while getting name of target ccache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:716
+#: ../../src/clients/ksu/main.c:717
 #, c-format
 msgid "%s does not have correct permissions for %s, %s aborted"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:737
+#: ../../src/clients/ksu/main.c:738
 #, c-format
 msgid "Internal error: command %s did not get resolved\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:754 ../../src/clients/ksu/main.c:790
+#: ../../src/clients/ksu/main.c:755 ../../src/clients/ksu/main.c:791
 #, c-format
 msgid "while trying to execv %s"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:780
+#: ../../src/clients/ksu/main.c:781
 msgid "while calling waitpid"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:785
+#: ../../src/clients/ksu/main.c:786
 msgid "while trying to fork."
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:807
+#: ../../src/clients/ksu/main.c:836
 msgid "while reading cache name from ccache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:813
+#: ../../src/clients/ksu/main.c:842
 #, c-format
 msgid "ksu: couldn't set environment variable %s\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:839
+#: ../../src/clients/ksu/main.c:868
 msgid "while resetting target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:853
+#: ../../src/clients/ksu/main.c:882
 msgid "while determining target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:892
+#: ../../src/clients/ksu/main.c:921
 msgid "while generating part of the target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:898
+#: ../../src/clients/ksu/main.c:927
 msgid "while allocating memory for the target ccache name"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:917
+#: ../../src/clients/ksu/main.c:946
 msgid "while creating new target ccache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:923
+#: ../../src/clients/ksu/main.c:952
 msgid "while initializing target cache"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:963
+#: ../../src/clients/ksu/main.c:992
 #, c-format
 msgid "terminal name %s too long\n"
 msgstr ""
 
-#: ../../src/clients/ksu/main.c:991
+#: ../../src/clients/ksu/main.c:1020
 msgid "while changing to target uid for destroying ccache"
 msgstr ""
 
@@ -3435,7 +3435,7 @@ msgid ""
 "vers=%d, flavor=%d"
 msgstr ""
 
-#: ../../src/kdc/do_as_req.c:298
+#: ../../src/kdc/do_as_req.c:291
 #, c-format
 msgid "AS_REQ : handle_authdata (%d)"
 msgstr ""
@@ -6287,76 +6287,76 @@ msgstr ""
 msgid "%s option value missing"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:668
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:676
 msgid "DN is out of the realm subtree"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:700
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:708
 msgid "ldap object is already kerberized"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:794
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:802
 msgid "Principal does not belong to the default realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:862
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:870
 #, c-format
 msgid ""
 "operation can not continue, more than one entry with principal name \"%s\" "
 "found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:925
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:933
 #, c-format
 msgid "'%s' not found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:989
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:997
 #, c-format
 msgid ""
 "link information can not be set/updated as the kerberos principal belongs to "
 "an ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1004
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1012
 #, c-format
 msgid "Failed getting object references"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1011
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1019
 #, c-format
 msgid "kerberos principal is already linked to a ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1336
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1345
 msgid "ticket policy object value: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1384
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1393
 #, c-format
 msgid "Principal delete failed (trying to replace entry): %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1394
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1403
 #, c-format
 msgid "Principal add failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1432
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1441
 #, c-format
 msgid "User modification failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1505
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1514
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_realm.c:294
 msgid "Error reading ticket policy"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1635
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1644
 msgid "unable to decode stored principal key data"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1693
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1702
 msgid "unable to decode stored principal pw history"
 msgstr ""
 
@@ -6687,26 +6687,26 @@ msgstr ""
 msgid "error %ld"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:201
+#: ../../src/util/support/plugins.c:200
 #, c-format
 msgid "unable to find plugin [%s]: %s"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:289
+#: ../../src/util/support/plugins.c:288
 msgid "unknown failure"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:292
+#: ../../src/util/support/plugins.c:291
 #, c-format
 msgid "unable to load plugin [%s]: %s"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:315
+#: ../../src/util/support/plugins.c:314
 #, c-format
 msgid "unable to load DLL [%s]"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:331
+#: ../../src/util/support/plugins.c:330
 #, c-format
 msgid "plugin unavailable: %s"
 msgstr ""
