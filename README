@@ -70,6 +70,46 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
+Major changes in 1.18.1 (2020-04-13)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a crash when qualifying short hostnames when the system has no
+  primary DNS domain.
+
+* Fix a regression when an application imports "service@" as a GSS
+  host-based name for its acceptor credential handle.
+
+* Fix KDC enforcement of auth indicators when they are modified by the
+  KDB module.
+
+* Fix removal of require_auth string attributes when the LDAP KDB
+  module is used.
+
+* Fix a compile error when building with musl libc on Linux.
+
+* Fix a compile error when building with gcc 4.x.
+
+* Change the KDC constrained delegation precedence order for
+  consistency with Windows KDCs.
+
+krb5-1.18.1 changes by ticket ID
+--------------------------------
+
+8876    Fix AS-REQ checking of KDB-modified indicators
+8877    Cannot remove require_auth attribute with LDAP KDB module
+8880    Fix Linux build error with musl libc
+8881    Segfault in k5_primary_domain
+8884    Change KDC constrained-delegation precedence order
+8886    Document client keytab usage
+8888    compile failure on red hat 6
+8891    Codespell report for "krb5" (on fossies.org)
+8894    Correct formatting of trace log microseconds
+8895    ksu does not honor KRB5CCNAME
+8896    Fix typo in SPAKE modprinc example
+
+
 Major changes in 1.18 (2019-02-12)
 ----------------------------------
 
@@ -376,6 +416,7 @@ reports, suggestions, and valuable resources:
     Sebastian Galiano
     Marcus Granado
     Dylan Gray
+    Norm Green
     Scott Grizzard
     Helmut Grohne
     Steve Grubb
@@ -433,6 +474,7 @@ reports, suggestions, and valuable resources:
     Nuno Lopes
     Todd Lubin
     Ryan Lynch
+    Glenn Machin
     Roland Mainz
     Sorin Manolache
     Robert Marshall
@@ -479,6 +521,7 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Joshua Schaeffer
+    Jens Schleusener
     Andreas Schneider
     Paul Seyfert
     Tom Shaw
@@ -510,6 +553,7 @@ reports, suggestions, and valuable resources:
     Nicolas Williams
     Ross Wilper
     Augustin Wolf
+    Garrett Wollman
     David Woodhouse
     Tsu-Phong Wu
     Xu Qiang
