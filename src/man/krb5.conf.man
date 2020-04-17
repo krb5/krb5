@@ -1288,7 +1288,7 @@ default value.  Note that these values are not used if the user
 specifies \fBX509_user_identity\fP on the command line.
 .TP
 \fBpkinit_kdc_hostname\fP
-The presense of this option indicates that the client is willing
+The presence of this option indicates that the client is willing
 to accept a KDC certificate with a dNSName SAN (Subject
 Alternative Name) rather than requiring the id\-pkinit\-san as
 defined in \fI\%RFC 4556\fP\&.  This option may be specified multiple
