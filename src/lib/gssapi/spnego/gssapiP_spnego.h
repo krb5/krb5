@@ -357,6 +357,14 @@ OM_uint32 KRB5_CALLCONV spnego_gss_wrap_size_limit
 	OM_uint32	*max_input_size
 );
 
+OM_uint32 KRB5_CALLCONV spnego_gss_localname
+(
+	OM_uint32 *minor_status,
+	const gss_name_t pname,
+	const gss_const_OID mech_type,
+	gss_buffer_t localname
+);
+
 OM_uint32 KRB5_CALLCONV spnego_gss_get_mic
 (
 	OM_uint32 *minor_status,

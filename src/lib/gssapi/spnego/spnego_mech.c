@@ -237,7 +237,7 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_inquire_context,	/* gss_inquire_context */
 	NULL,				/* gss_internal_release_oid */
 	spnego_gss_wrap_size_limit,	/* gss_wrap_size_limit */
-	NULL,				/* gssd_pname_to_uid */
+	spnego_gss_localname,
 	NULL,				/* gss_userok */
 	NULL,				/* gss_export_name */
 	spnego_gss_duplicate_name,	/* gss_duplicate_name */
@@ -2369,6 +2369,13 @@ spnego_gss_wrap_size_limit(
 				req_output_size,
 				max_input_size);
 	return (ret);
+}
+
+OM_uint32 KRB5_CALLCONV
+spnego_gss_localname(OM_uint32 *minor_status, const gss_name_t pname,
+		     const gss_const_OID mech_type, gss_buffer_t localname)
+{
+	return gss_localname(minor_status, pname, GSS_C_NO_OID, localname);
 }
 
 OM_uint32 KRB5_CALLCONV
