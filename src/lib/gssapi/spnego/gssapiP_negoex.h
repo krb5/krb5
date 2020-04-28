@@ -201,10 +201,10 @@ negoex_restrict_auth_schemes(spnego_gss_ctx_id_t ctx,
 OM_uint32
 negoex_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
             gss_name_t target_name, OM_uint32 req_flags, OM_uint32 time_req,
-            gss_buffer_t input_token, gss_buffer_t output_token,
-            OM_uint32 *time_rec);
+            gss_buffer_t input_token, gss_channel_bindings_t bindings,
+            gss_buffer_t output_token, OM_uint32 *time_rec);
 
 OM_uint32
 negoex_accept(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
-              gss_buffer_t input_token, gss_buffer_t output_token,
-              OM_uint32 *time_rec);
+              gss_buffer_t input_token, gss_channel_bindings_t bindings,
+              gss_buffer_t output_token, OM_uint32 *time_rec);

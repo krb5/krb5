@@ -276,7 +276,8 @@ static OM_uint32
 mech_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
           gss_name_t target, OM_uint32 req_flags, OM_uint32 time_req,
           struct negoex_message *messages, size_t nmessages,
-          gss_buffer_t output_token, OM_uint32 *time_rec)
+          gss_channel_bindings_t bindings, gss_buffer_t output_token,
+          OM_uint32 *time_rec)
 {
     OM_uint32 major, first_major = 0, first_minor = 0;
     struct negoex_auth_mech *mech = NULL;
@@ -316,10 +317,9 @@ mech_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
         mech = K5_TAILQ_FIRST(&ctx->negoex_mechs);
 
         major = gss_init_sec_context(minor, cred, &mech->mech_context, target,
-                                     mech->oid, req_flags, time_req,
-                                     GSS_C_NO_CHANNEL_BINDINGS, input_token,
-                                     &ctx->actual_mech, output_token,
-                                     &ctx->ctx_flags, time_rec);
+                                     mech->oid, req_flags, time_req, bindings,
+                                     input_token, &ctx->actual_mech,
+                                     output_token, &ctx->ctx_flags, time_rec);
 
         if (major == GSS_S_COMPLETE)
             mech->complete = 1;
@@ -351,7 +351,8 @@ mech_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
 static OM_uint32
 mech_accept(OM_uint32 *minor, spnego_gss_ctx_id_t ctx,
             gss_cred_id_t cred, struct negoex_message *messages,
-            size_t nmessages, gss_buffer_t output_token, OM_uint32 *time_rec)
+            size_t nmessages, gss_channel_bindings_t bindings,
+            gss_buffer_t output_token, OM_uint32 *time_rec)
 {
     OM_uint32 major, tmpmin;
     struct negoex_auth_mech *mech;
@@ -395,10 +396,10 @@ mech_accept(OM_uint32 *minor, spnego_gss_ctx_id_t ctx,
         gss_release_cred(&tmpmin, &ctx->deleg_cred);
 
     major = gss_accept_sec_context(minor, &mech->mech_context, cred,
-                                   &msg->token, GSS_C_NO_CHANNEL_BINDINGS,
-                                   &ctx->internal_name, &ctx->actual_mech,
-                                   output_token, &ctx->ctx_flags,
-                                   time_rec, &ctx->deleg_cred);
+                                   &msg->token, bindings, &ctx->internal_name,
+                                   &ctx->actual_mech, output_token,
+                                   &ctx->ctx_flags, time_rec,
+                                   &ctx->deleg_cred);
 
     if (major == GSS_S_COMPLETE)
         mech->complete = 1;
@@ -609,8 +610,8 @@ make_output_token(OM_uint32 *minor, spnego_gss_ctx_id_t ctx,
 OM_uint32
 negoex_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
             gss_name_t target_name, OM_uint32 req_flags, OM_uint32 time_req,
-            gss_buffer_t input_token, gss_buffer_t output_token,
-            OM_uint32 *time_rec)
+            gss_buffer_t input_token, gss_channel_bindings_t bindings,
+            gss_buffer_t output_token, OM_uint32 *time_rec)
 {
     OM_uint32 major, tmpmin;
     gss_buffer_desc mech_output_token = GSS_C_EMPTY_BUFFER;
@@ -663,7 +664,8 @@ negoex_init(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
     /* Process the input token and/or produce an output token.  This may prune
      * the mech list, but on success there will be at least one mech entry. */
     major = mech_init(minor, ctx, cred, target_name, req_flags, time_req,
-                      messages, nmessages, &mech_output_token, time_rec);
+                      messages, nmessages, bindings, &mech_output_token,
+                      time_rec);
     if (major != GSS_S_COMPLETE)
         goto cleanup;
     assert(!K5_TAILQ_EMPTY(&ctx->negoex_mechs));
@@ -701,8 +703,8 @@ cleanup:
 
 OM_uint32
 negoex_accept(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
-              gss_buffer_t input_token, gss_buffer_t output_token,
-              OM_uint32 *time_rec)
+              gss_buffer_t input_token, gss_channel_bindings_t bindings,
+              gss_buffer_t output_token, OM_uint32 *time_rec)
 {
     OM_uint32 major, tmpmin;
     gss_buffer_desc mech_output_token = GSS_C_EMPTY_BUFFER;
@@ -754,7 +756,7 @@ negoex_accept(OM_uint32 *minor, spnego_gss_ctx_id_t ctx, gss_cred_id_t cred,
      * prune the list to a single mech.  Continue on error if an output token
      * is generated, so that we send the token to the initiator.
      */
-    major = mech_accept(minor, ctx, cred, messages, nmessages,
+    major = mech_accept(minor, ctx, cred, messages, nmessages, bindings,
                         &mech_output_token, time_rec);
     if (major != GSS_S_COMPLETE && mech_output_token.length == 0)
         goto cleanup;
