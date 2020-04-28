@@ -1566,12 +1566,12 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	}
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
-	(void) gss_release_name(&tmpmin, &sc->internal_name);
-	(void) gss_release_cred(&tmpmin, &sc->deleg_cred);
 	if (negoex) {
 		ret = negoex_accept(minor_status, sc, mcred, mechtok_in,
 				    mechtok_out, time_rec);
 	} else {
+		(void) gss_release_name(&tmpmin, &sc->internal_name);
+		(void) gss_release_cred(&tmpmin, &sc->deleg_cred);
 		ret = gss_accept_sec_context(minor_status, &sc->ctx_handle,
 					     mcred, mechtok_in,
 					     GSS_C_NO_CHANNEL_BINDINGS,
