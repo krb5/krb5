@@ -816,8 +816,6 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
         }
         if (src_name != NULL)
             *src_name = GSS_C_NO_NAME;
-        if (mech_type != NULL)
-            *mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)
             *ret_flags = 0;
         if (time_rec != NULL)
@@ -844,9 +842,10 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                                                        &exts);
         if (major_status == GSS_S_COMPLETE)
             ctx->established = 1;
-        if (mech_type != NULL)
-            *mech_type = (gss_OID)gss_mech_krb5;
     }
+
+    if (mech_type != NULL)
+        *mech_type = gss_mech_iakerb;
 
 cleanup:
     if (initialContextToken && GSS_ERROR(major_status)) {
@@ -970,17 +969,16 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                                                      &exts);
         if (major_status == GSS_S_COMPLETE)
             ctx->established = 1;
-        if (actual_mech_type != NULL)
-            *actual_mech_type = (gss_OID)gss_mech_krb5;
     } else {
-        if (actual_mech_type != NULL)
-            *actual_mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)
             *ret_flags = 0;
         if (time_rec != NULL)
             *time_rec = 0;
         major_status = GSS_S_CONTINUE_NEEDED;
     }
+
+    if (actual_mech_type != NULL)
+        *actual_mech_type = gss_mech_iakerb;
 
 cleanup:
     if (cred_locked)
