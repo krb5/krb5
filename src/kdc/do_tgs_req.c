@@ -392,8 +392,8 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     }
     authtime = subject_tkt->times.authtime;
 
-    /* Extract auth indicators from the subject ticket, except for S4U2Self
-     * requests (where the client didn't authenticate). */
+    /* Extract and check auth indicators from the subject ticket, except for
+     * S4U2Self requests (where the client didn't authenticate). */
     if (s4u_x509_user == NULL) {
         errcode = get_auth_indicators(kdc_context, subject_tkt, local_tgt,
                                       &local_tgt_key, &auth_indicators);
@@ -401,12 +401,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
             status = "GET_AUTH_INDICATORS";
             goto cleanup;
         }
-    }
 
-    errcode = check_indicators(kdc_context, server, auth_indicators);
-    if (errcode) {
-        status = "HIGHER_AUTHENTICATION_REQUIRED";
-        goto cleanup;
+        errcode = check_indicators(kdc_context, server, auth_indicators);
+        if (errcode) {
+            status = "HIGHER_AUTHENTICATION_REQUIRED";
+            goto cleanup;
+        }
     }
 
     if (is_referral)
