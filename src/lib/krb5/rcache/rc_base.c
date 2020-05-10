@@ -160,3 +160,39 @@ k5_rc_tag_from_ciphertext(krb5_context context, const krb5_enc_data *enc,
     *tag_out = make_data(cdata->data + cdata->length - len, len);
     return 0;
 }
+
+/*
+ * Stub functions for former internal replay cache functions used by OpenSSL
+ * (despite the lack of prototypes) before the OpenSSL 1.1 release.
+ */
+
+krb5_error_code krb5_rc_default(krb5_context, krb5_rcache *);
+krb5_error_code KRB5_CALLCONV krb5_rc_destroy(krb5_context, krb5_rcache);
+krb5_error_code KRB5_CALLCONV krb5_rc_get_lifespan(krb5_context, krb5_rcache,
+                                                   krb5_deltat *);
+krb5_error_code KRB5_CALLCONV krb5_rc_initialize(krb5_context, krb5_rcache,
+                                                 krb5_deltat);
+
+krb5_error_code
+krb5_rc_default(krb5_context context, krb5_rcache *rc)
+{
+    return EINVAL;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rc_destroy(krb5_context context, krb5_rcache rc)
+{
+    return EINVAL;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rc_get_lifespan(krb5_context context, krb5_rcache rc, krb5_deltat *span)
+{
+    return EINVAL;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_rc_initialize(krb5_context context, krb5_rcache rc, krb5_deltat span)
+{
+    return EINVAL;
+}

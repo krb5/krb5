@@ -522,6 +522,10 @@ krb5_principal_compare
 krb5_principal_compare_any_realm
 krb5_principal_compare_flags
 krb5_prompter_posix
+krb5_rc_default
+krb5_rc_destroy
+krb5_rc_get_lifespan
+krb5_rc_initialize
 krb5_rd_cred
 krb5_rd_error
 krb5_rd_priv
