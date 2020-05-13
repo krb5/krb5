@@ -120,7 +120,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key, local_tgt_key;
     krb5_keyblock *reply_key = NULL;
-    krb5_key_data  *server_key;
     krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
     krb5_const_principal authdata_client;
     krb5_principal stkt_authdata_client = NULL;
@@ -523,26 +522,9 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
         encrypting_key = t2enc->session;
     } else {
-        /*
-         * Find the server key
-         */
-        if ((errcode = krb5_dbe_find_enctype(kdc_context, server,
-                                             -1, /* ignore keytype */
-                                             -1, /* Ignore salttype */
-                                             0,  /* Get highest kvno */
-                                             &server_key))) {
+        errcode = get_first_current_key(kdc_context, server, &server_keyblock);
+        if (errcode) {
             status = "FINDING_SERVER_KEY";
-            goto cleanup;
-        }
-
-        /*
-         * Convert server.key into a real key
-         * (it may be encrypted in the database)
-         */
-        if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL,
-                                                 server_key, &server_keyblock,
-                                                 NULL))) {
-            status = "DECRYPT_SERVER_KEY";
             goto cleanup;
         }
         encrypting_key = &server_keyblock;
@@ -680,7 +662,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         kau_u2u(kdc_context, TRUE, au_state);
         st_idx++;
     } else {
-        ticket_kvno = server_key->key_data_kvno;
+        ticket_kvno = current_kvno(server);
     }
 
     errcode = krb5_encrypt_tkt_part(kdc_context, encrypting_key,

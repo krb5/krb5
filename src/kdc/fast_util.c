@@ -508,7 +508,7 @@ get_cookie_key(krb5_context context, krb5_db_entry *tgt,
     *key_out = NULL;
     memset(&storage, 0, sizeof(storage));
 
-    if (kvno == tgt->key_data[0].key_data_kvno) {
+    if (kvno == current_kvno(tgt)) {
         /* Use the already-decrypted first key. */
         key = tgt_key;
     } else {
@@ -711,7 +711,7 @@ kdc_fast_make_cookie(krb5_context context, struct kdc_request_state *state,
     ret = k5_alloc_pa_data(KRB5_PADATA_FX_COOKIE, 8 + enc.ciphertext.length,
                            &pa);
     memcpy(pa->contents, "MIT1", 4);
-    store_32_be(local_tgt->key_data[0].key_data_kvno, pa->contents + 4);
+    store_32_be(current_kvno(local_tgt), pa->contents + 4);
     memcpy(pa->contents + 8, enc.ciphertext.data, enc.ciphertext.length);
     *cookie_out = pa;
 

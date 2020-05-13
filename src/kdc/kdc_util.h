@@ -71,6 +71,10 @@ kdc_get_server_key (krb5_context, krb5_ticket *, unsigned int,
                     krb5_db_entry **, krb5_keyblock **, krb5_kvno *);
 
 krb5_error_code
+get_first_current_key(krb5_context context, krb5_db_entry *entry,
+                      krb5_keyblock *key_out);
+
+krb5_error_code
 get_local_tgt(krb5_context context, const krb5_data *realm,
               krb5_db_entry *candidate, krb5_db_entry **alias_out,
               krb5_db_entry **storage_out, krb5_keyblock *kb_out);
@@ -421,6 +425,7 @@ struct krb5_kdcpreauth_rock_st {
     krb5_data *inner_body;
     krb5_db_entry *client;
     krb5_db_entry *local_tgt;
+    krb5_keyblock *local_tgt_key;
     krb5_key_data *client_key;
     krb5_keyblock *client_keyblock;
     struct kdc_request_state *rstate;
@@ -525,5 +530,12 @@ int check_anon(kdc_realm_t *kdc_active_realm,
 int errcode_to_protocol(krb5_error_code code);
 
 char *data2string(krb5_data *d);
+
+/* Return the current key version of entry, or 0 if it has no keys. */
+static inline krb5_kvno
+current_kvno(krb5_db_entry *entry)
+{
+    return (entry->n_key_data == 0) ? 0 : entry->key_data[0].key_data_kvno;
+}
 
 #endif /* __KRB5_KDC_UTIL__ */

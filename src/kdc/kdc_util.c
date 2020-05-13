@@ -496,6 +496,22 @@ errout:
     return retval;
 }
 
+/* Find the first key data entry (of a valid enctype) of the highest kvno in
+ * entry, and decrypt it into *key_out. */
+krb5_error_code
+get_first_current_key(krb5_context context, krb5_db_entry *entry,
+                      krb5_keyblock *key_out)
+{
+    krb5_error_code ret;
+    krb5_key_data *kd;
+
+    memset(key_out, 0, sizeof(*key_out));
+    ret = krb5_dbe_find_enctype(context, entry, -1, -1, 0, &kd);
+    if (ret)
+        return ret;
+    return krb5_dbe_decrypt_key_data(context, NULL, kd, key_out, NULL);
+}
+
 /*
  * If candidate is the local TGT for realm, set *alias_out to candidate and
  * *storage_out to NULL.  Otherwise, load the local TGT into *storage_out and
@@ -514,7 +530,6 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
     krb5_error_code ret;
     krb5_principal princ;
     krb5_db_entry *storage = NULL, *tgt;
-    krb5_key_data *kd;
 
     *alias_out = NULL;
     *storage_out = NULL;
@@ -535,11 +550,7 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
         tgt = candidate;
     }
 
-    /* Find and decrypt the first valid key of the current kvno. */
-    ret = krb5_dbe_find_enctype(context, tgt, -1, -1, 0, &kd);
-    if (ret)
-        goto cleanup;
-    ret = krb5_dbe_decrypt_key_data(context, NULL, kd, key_out, NULL);
+    ret = get_first_current_key(context, tgt, key_out);
     if (ret)
         goto cleanup;
 

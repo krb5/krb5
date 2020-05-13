@@ -80,7 +80,7 @@ cammac_create(krb5_context context, krb5_enc_tkt_part *enc_tkt,
     if (ret)
         goto cleanup;
     kdc_verifier.princ = NULL;
-    kdc_verifier.kvno = tgt->key_data[0].key_data_kvno;
+    kdc_verifier.kvno = current_kvno(tgt);
     kdc_verifier.enctype = ENCTYPE_NULL;
     kdc_verifier.checksum = kdc_cksum;
 
@@ -149,7 +149,7 @@ cammac_check_kdcver(krb5_context context, krb5_cammac *cammac,
 
     /* Fetch the krbtgt key indicated by the KDC verifier.  Only allow the
      * first krbtgt key of the specified kvno. */
-    if (ver->kvno == tgt->key_data[0].key_data_kvno) {
+    if (ver->kvno == current_kvno(tgt)) {
         key = tgt_key;
     } else {
         if (krb5_dbe_find_enctype(context, tgt, -1, -1, ver->kvno, &kd) != 0)
