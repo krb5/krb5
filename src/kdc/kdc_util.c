@@ -564,6 +564,7 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
     krb5_error_code ret;
     krb5_principal princ;
     krb5_db_entry *storage = NULL, *tgt;
+    krb5_key_data *kd;
 
     *alias_out = NULL;
     *storage_out = NULL;
@@ -584,12 +585,11 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
         tgt = candidate;
     }
 
-    if (tgt->n_key_data == 0) {
-        ret = KRB5_KDB_NO_MATCHING_KEY;
+    /* Find and decrypt the first valid key of the current kvno. */
+    ret = krb5_dbe_find_enctype(context, tgt, -1, -1, 0, &kd);
+    if (ret)
         goto cleanup;
-    }
-    ret = krb5_dbe_decrypt_key_data(context, NULL, &tgt->key_data[0], key_out,
-                                    NULL);
+    ret = krb5_dbe_decrypt_key_data(context, NULL, kd, key_out, NULL);
     if (ret)
         goto cleanup;
 
