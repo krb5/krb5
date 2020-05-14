@@ -176,7 +176,7 @@ wrong password is typed in, ksu fails.
 .INDENT 0.0
 .INDENT 3.5
 During authentication, only the tickets that could be
-obtained without providing a password are cached in in the
+obtained without providing a password are cached in the
 source cache.
 .UNINDENT
 .UNINDENT

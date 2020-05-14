@@ -155,7 +155,7 @@ wrong password is typed in, ksu fails.
 .. note::
 
           During authentication, only the tickets that could be
-          obtained without providing a password are cached in in the
+          obtained without providing a password are cached in the
           source cache.
 
 
