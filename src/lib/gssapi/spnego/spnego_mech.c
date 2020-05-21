@@ -1379,7 +1379,7 @@ acc_ctx_new(OM_uint32 *minor_status,
 		goto cleanup;
 	}
 
-	ret = get_negotiable_mechs(minor_status, sc, spcred, GSS_C_INITIATE);
+	ret = get_negotiable_mechs(minor_status, sc, spcred, GSS_C_ACCEPT);
 	if (ret != GSS_S_COMPLETE) {
 		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
