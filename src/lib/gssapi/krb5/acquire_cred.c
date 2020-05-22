@@ -211,7 +211,7 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
         }
     }
     if (code) {
-        major = GSS_S_CRED_UNAVAIL;
+        major = GSS_S_NO_CRED;
         goto cleanup;
     }
 
@@ -223,7 +223,7 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
                 k5_change_error_message_code(context, code, KG_KEYTAB_NOMATCH);
                 code = KG_KEYTAB_NOMATCH;
             }
-            major = GSS_S_CRED_UNAVAIL;
+            major = GSS_S_NO_CRED;
             goto cleanup;
         }
 
@@ -240,7 +240,7 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
         /* Make sure we have a keytab with keys in it. */
         code = krb5_kt_have_content(context, kt);
         if (code) {
-            major = GSS_S_CRED_UNAVAIL;
+            major = GSS_S_NO_CRED;
             goto cleanup;
         }
     }
@@ -750,7 +750,7 @@ acquire_init_cred(krb5_context context,
 
 error:
     *minor_status = code;
-    return GSS_S_CRED_UNAVAIL;
+    return GSS_S_NO_CRED;
 }
 
 static OM_uint32
@@ -1022,7 +1022,7 @@ kerr:
     k5_mutex_unlock(&cred->lock);
     save_error_info(code, context);
     *minor_status = code;
-    return GSS_S_CRED_UNAVAIL;
+    return GSS_S_NO_CRED;
 }
 
 OM_uint32
@@ -1209,7 +1209,7 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
         code = krb5_cc_resolve(context, value, &ccache);
         if (code != 0) {
             *minor_status = code;
-            ret = GSS_S_CRED_UNAVAIL;
+            ret = GSS_S_NO_CRED;
             goto out;
         }
     }
@@ -1222,7 +1222,7 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
         code = krb5_kt_resolve(context, value, &client_keytab);
         if (code != 0) {
             *minor_status = code;
-            ret = GSS_S_CRED_UNAVAIL;
+            ret = GSS_S_NO_CRED;
             goto out;
         }
     }
@@ -1235,7 +1235,7 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
         code = krb5_kt_resolve(context, value, &keytab);
         if (code != 0) {
             *minor_status = code;
-            ret = GSS_S_CRED_UNAVAIL;
+            ret = GSS_S_NO_CRED;
             goto out;
         }
     }

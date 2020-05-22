@@ -116,14 +116,14 @@ copy_initiator_creds(OM_uint32 *minor_status,
         code = krb5_cc_resolve(context, ccache_name, &ccache);
         if (code != 0) {
             *minor_status = code;
-            major_status = GSS_S_CRED_UNAVAIL;
+            major_status = GSS_S_FAILURE;
             goto cleanup;
         }
         code = krb5_cc_initialize(context, ccache,
                                   kcred->name->princ);
         if (code != 0) {
             *minor_status = code;
-            major_status = GSS_S_CRED_UNAVAIL;
+            major_status = GSS_S_FAILURE;
             goto cleanup;
         }
     }
