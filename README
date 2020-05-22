@@ -70,6 +70,33 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
+Major changes in 1.18.2 (2020-05-21)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a SPNEGO regression where an acceptor using the default
+  credential would improperly filter mechanisms, causing a negotiation
+  failure.
+
+* Fix a bug where the KDC would fail to issue tickets if the local
+  krbtgt principal's first key has a single-DES enctype.
+
+* Add stub functions to allow old versions of OpenSSL libcrypto to
+  link against libkrb5.
+
+* Fix a NegoEx bug where the client name and delegated credential
+  might not be reported.
+
+krb5-1.18.2 changes by ticket ID
+--------------------------------
+
+8898    Fix overzealous SPNEGO src_name/deleg_cred release
+8905    Add stubs for some removed replay cache functions
+8906    KDC can select local TGT key of unsupported enctype
+8908    Fix SPNEGO acceptor mech filtering
+
+
 Major changes in 1.18.1 (2020-04-13)
 ------------------------------------
 
@@ -501,6 +528,7 @@ reports, suggestions, and valuable resources:
     Dilyan Palauzov
     Tom Parker
     Eric Pauly
+    Leonard Peirce
     Ezra Peisach
     Alejandro Perez
     Zoran Pericic
@@ -534,6 +562,7 @@ reports, suggestions, and valuable resources:
     Michael Spang
     Michael Ströder
     Bjørn Tore Sund
+    Ondřej Surý
     Joe Travaglini
     Tim Uglow
     Rathor Vipin
