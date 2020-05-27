@@ -79,7 +79,7 @@ cat - > /tmp/start_servers_local$$ <<\EOF
 if { [catch {
 	source $env(STOP)/testing/tcl/util.t
 	set r $env(REALM)
-	set q $env(QUALNAME)
+	set q $env(HOSTNAME)
 	puts stdout [kadm5_init $env(SRVTCL) mrroot null \
 		[config_params {KADM5_CONFIG_REALM} $r] \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_3 server_handle]

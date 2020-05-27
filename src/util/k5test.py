@@ -193,7 +193,10 @@ Scripts may use the following functions and variables:
 
 * plugins: The plugin directory in the build tree (absolute path).
 
-* hostname: This machine's fully-qualified domain name.
+* hostname: The local hostname as it will initially appear in
+  krb5_sname_to_principal() results.  (Shortname qualification is
+  turned off in the test environment to make this value easy to
+  discover from Python.)
 
 * null_input: A file opened to read /dev/null.
 
@@ -524,23 +527,6 @@ def _find_srctop():
         fail('Cannot find root of krb5 source directory.')
     return os.path.abspath(root)
 
-
-# Return the local hostname as it will be canonicalized by
-# krb5_sname_to_principal.  We can't simply use socket.getfqdn()
-# because it explicitly prefers results containing periods and
-# krb5_sname_to_principal doesn't care.
-def _get_hostname():
-    hostname = socket.gethostname()
-    try:
-        ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
-    except socket.gaierror as e:
-        fail('Local hostname "%s" does not resolve: %s.' % (hostname, e[1]))
-    (family, socktype, proto, canonname, sockaddr) = ai[0]
-    try:
-        name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
-    except socket.gaierror:
-        return canonname.lower()
-    return name[0].lower()
 
 # Parse command line arguments, setting global option variables.  Also
 # sets the global variable args to the positional arguments, which may
@@ -1263,6 +1249,7 @@ _default_krb5_conf = {
     'libdefaults': {
         'default_realm': '$realm',
         'dns_lookup_kdc': 'false',
+        'qualify_shortname': '',
         'plugin_base_dir': '$plugins'},
     'realms': {'$realm': {
             'kdc': '$hostname:$port0',
@@ -1363,7 +1350,7 @@ buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
 runenv = _import_runenv()
-hostname = _get_hostname()
+hostname = socket.gethostname().lower()
 null_input = open(os.devnull, 'r')
 
 # A DB pass is a tuple of: name, kdc_conf.

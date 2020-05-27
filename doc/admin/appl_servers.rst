@@ -115,14 +115,12 @@ Getting DNS information correct
 -------------------------------
 
 Several aspects of Kerberos rely on name service.  When a hostname is
-used to name a service, the Kerberos library canonicalizes the
-hostname using forward and reverse name resolution.  (The reverse name
-resolution step can be turned off using the **rdns** variable in
-:ref:`libdefaults`.)  The result of this canonicalization must match
-the principal entry in the host's keytab, or authentication will fail.
-
-Each host's canonical name must be the fully-qualified host name
-(including the domain), and each host's IP address must
+used to name a service, clients may canonicalize the hostname using
+forward and possibly reverse name resolution.  The result of this
+canonicalization must match the principal entry in the host's keytab,
+or authentication will fail.  To work with all client canonicalization
+configurations, each host's canonical name must be the fully-qualified
+host name (including the domain), and each host's IP address must
 reverse-resolve to the canonical name.
 
 Configuration of hostnames varies by operating system.  On the

@@ -2,7 +2,8 @@ from k5test import *
 
 offline = (len(args) > 0 and args[0] != "no")
 
-conf = {'domain_realm': {'kerberos.org': 'R1',
+conf = {'libdefaults': {'dns_canonicalize_hostname': 'true'},
+        'domain_realm': {'kerberos.org': 'R1',
                          'example.com': 'R2',
                          'mit.edu': 'R3'}}
 no_rdns_conf = {'libdefaults': {'rdns': 'false'}}
@@ -28,7 +29,7 @@ def testbase(host, nametype, princhost, princrealm, env=None):
         fail('Expected %s, got %s' % (expected, out))
 
 def test(host, princhost, princrealm):
-    # Test with the host-based name type in the default environment.
+    # Test with the host-based name type with canonicalization enabled.
     testbase(host, 'srv-hst', princhost, princrealm)
 
 def testnc(host, princhost, princrealm):

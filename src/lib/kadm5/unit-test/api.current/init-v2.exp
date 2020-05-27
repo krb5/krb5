@@ -3,18 +3,14 @@ load_lib lib.t
 api_exit
 api_start
 
-if ![info exists RESOLVE] {
-    set RESOLVE [findfile $objdir/../../../tests/resolve/resolve]
-}
 proc get_hostname { } {
-    global RESOLVE
     global hostname
 
     if {[info exists hostname]} {
 	return 1
     }
 
-    catch "exec $RESOLVE -q >myname" exec_output
+    catch "exec hostname >myname" exec_output
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
 	verbose $exec_output

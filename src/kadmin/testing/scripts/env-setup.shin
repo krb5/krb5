@@ -71,8 +71,8 @@ BSDDB_DUMP=$TESTDIR/util/bsddb_dump; export BSDDB_DUMP
 CLNTTCL=$TESTDIR/util/kadm5_clnt_tcl; export CLNTTCL
 SRVTCL=$TESTDIR/util/kadm5_srv_tcl; export SRVTCL
 
-QUALNAME=`$BUILDTOP/tests/resolve/resolve -q | tr '[A-Z]' '[a-z]'`
-export QUALNAME
+HOSTNAME=`hostname | tr '[A-Z]' '[a-z]'`
+export HOSTNAME
 
 KRB5_CONFIG=$K5ROOT/krb5.conf; export KRB5_CONFIG
 KRB5_KDC_PROFILE=$K5ROOT/kdc.conf; export KRB5_KDC_PROFILE

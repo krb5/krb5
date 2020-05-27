@@ -2,19 +2,19 @@
 	default_realm = __REALM__
 	default_keytab_name = FILE:__K5ROOT__/keytab
 	dns_fallback = no
+	qualify_shortname = ""
 	plugin_base_dir = __PLUGIN_DIR__
 	allow_weak_crypto = true
 
 [realms]
 	__REALM__ = {
-		kdc = __KDCHOST__:1750
-		admin_server = __KDCHOST__:1751
+		kdc = __HOSTNAME__:1750
+		admin_server = __HOSTNAME__:1751
 		database_module = foobar_db2_module_blah
 	}
 
 [domain_realm]
-	__LOCALHOST__ = __REALM__
-	__KDCHOST__ = __REALM__
+	__HOSTNAME__ = __REALM__
 
 [logging]
 	admin_server = FILE:__K5ROOT__/syslog
