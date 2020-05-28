@@ -1533,7 +1533,6 @@ V5_AC_OUTPUT_MAKEFILE(.
 	appl/simple appl/simple/client appl/simple/server
 	appl/gss-sample appl/user_user
 
-	tests tests/resolve tests/asn.1 tests/create tests/hammer
-	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
-	tests/gss-threads tests/misc
+	tests tests/asn.1 tests/create tests/hammer tests/verify tests/gssapi
+	tests/dejagnu tests/threads tests/shlib tests/gss-threads tests/misc
 )

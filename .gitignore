@@ -513,10 +513,6 @@ local.properties
 /src/tests/mkeystash_compat/kdc.conf
 /src/tests/mkeystash_compat/krb5.conf
 
-/src/tests/resolve/addrinfo-test
-/src/tests/resolve/fake-addrinfo-test
-/src/tests/resolve/resolve
-
 /src/tests/verify/kdb5_verify
 
 /src/util/et/compile_et
