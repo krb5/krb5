@@ -45,7 +45,8 @@ def test(testname, life, rlife, exp_life, exp_rlife, env=None):
     if rtime is not None:
         rlife = (rtime - starttime).seconds
         if abs(rlife - exp_rlife) > 5:
-            fail('%s: expected rlife %d, got %d' (testname, exp_rlife, rlife))
+            fail('%s: expected rlife %d, got %d' %
+                 (testname, exp_rlife, rlife))
 
 # Get renewable tickets.
 test('simple', '1h', '2h', 3600, 7200)
