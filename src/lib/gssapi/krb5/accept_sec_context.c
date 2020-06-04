@@ -683,25 +683,20 @@ get_delegation_policy(krb5_context context, krb5_gss_cred_id_t cred,
         delegstr = strdup(cred->delegation_policy);
         if (delegstr == NULL)
             return ENOMEM;
-
-        code = parse_delegation_policy(context, delegstr, cred->usage,
-                                       have_tgt, out_delegation_type);
-        free(delegstr);
-
-        return code;
+    } else {
+        code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                  KRB5_CONF_DELEGATION_POLICY, NULL,
+                                  "client-tgt,proxy-creds", &delegstr);
+        if (code)
+            return code;
+        assert(delegstr != NULL);
     }
-
-    code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
-                              KRB5_CONF_DELEGATION_POLICY, NULL,
-                              "client-tgt,proxy-creds", &delegstr);
-    if (code)
-        return code;
-    assert(delegstr != NULL);
 
     code = parse_delegation_policy(context, delegstr, cred->usage,
                                    have_tgt, out_delegation_type);
 
-    profile_release_string(delegstr);
+    // XXX is this ok?
+    free(delegstr);
 
     return code;
 }
