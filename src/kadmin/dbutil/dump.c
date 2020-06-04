@@ -722,7 +722,7 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     dbentry->fail_auth_count = u5;
     dbentry->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
         KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
-        KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
+        KADM5_PRINC_EXPIRE_TIME | KADM5_PW_EXPIRATION | KADM5_LAST_SUCCESS |
         KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
 
     /* Read tagged data. */
