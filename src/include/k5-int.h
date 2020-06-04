@@ -299,6 +299,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_V4_REALM                     "v4_realm"
 #define KRB5_CONF_VERIFY_AP_REQ_NOFAIL         "verify_ap_req_nofail"
 #define KRB5_CONF_CLIENT_AWARE_GSS_BINDINGS    "client_aware_channel_bindings"
+#define KRB5_CONF_DELEGATION_POLICY            "delegation_policy"
 
 /* Cache configuration variables */
 #define KRB5_CC_CONF_FAST_AVAIL                "fast_avail"

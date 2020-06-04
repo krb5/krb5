@@ -758,7 +758,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                      gss_name_t desired_name, gss_buffer_t password,
                      OM_uint32 time_req, gss_cred_usage_t cred_usage,
                      krb5_ccache ccache, krb5_keytab client_keytab,
-                     krb5_keytab keytab, const char *rcname,
+                     krb5_keytab keytab, const char *rcname, const char *dp,
                      krb5_boolean iakerb, gss_cred_id_t *output_cred_handle,
                      OM_uint32 *time_rec)
 {
@@ -802,6 +802,14 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
         ret = GSS_S_FAILURE;
         *minor_status = (OM_uint32) G_BAD_USAGE;
         goto error_out;
+    }
+
+    if (dp != NULL) {
+        cred->delegation_policy = strdup(dp);
+        if (cred->delegation_policy == NULL) {
+            code = ENOMEM;
+            goto krb_error_out;
+        }
     }
 
     if (name != NULL) {
@@ -922,7 +930,8 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
 
     ret = acquire_cred_context(context, minor_status, desired_name, password,
                                time_req, cred_usage, ccache, NULL, keytab,
-                               NULL, iakerb, output_cred_handle, time_rec);
+                               NULL, NULL, iakerb, output_cred_handle,
+                               time_rec);
 
 out:
     krb5_free_context(context);
@@ -1184,7 +1193,7 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
     krb5_keytab client_keytab = NULL;
     krb5_keytab keytab = NULL;
     krb5_ccache ccache = NULL;
-    const char *rcname, *value;
+    const char *rcname, *value, *delegp;
     OM_uint32 ret;
 
     code = gss_krb5int_initialize_library();
@@ -1244,9 +1253,13 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
     if (GSS_ERROR(ret))
         goto out;
 
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_DELEGP_URN, &delegp);
+    if (GSS_ERROR(ret))
+        goto out;
+
     ret = acquire_cred_context(context, minor_status, desired_name, NULL,
                                time_req, cred_usage, ccache, client_keytab,
-                               keytab, rcname, 0, output_cred_handle,
+                               keytab, rcname, delegp, 0, output_cred_handle,
                                time_rec);
 
 out:

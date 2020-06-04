@@ -218,16 +218,19 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     krb5_gss_cred_id_t cred = NULL;
 
     *output_cred = NULL;
-    k5_mutex_assert_locked(&impersonator_cred->lock);
 
-    if (!kg_is_initiator_cred(impersonator_cred) ||
-        impersonator_cred->name == NULL ||
-        impersonator_cred->impersonator != NULL) {
-        code = G_BAD_USAGE;
-        goto cleanup;
+    if (impersonator_cred != NULL) {
+        k5_mutex_assert_locked(&impersonator_cred->lock);
+
+        if (!kg_is_initiator_cred(impersonator_cred) ||
+            impersonator_cred->name == NULL ||
+            impersonator_cred->impersonator != NULL) {
+            code = G_BAD_USAGE;
+            goto cleanup;
+        }
+
+        assert(impersonator_cred->name->princ != NULL);
     }
-
-    assert(impersonator_cred->name->princ != NULL);
 
     assert(subject_creds != NULL);
     assert(subject_creds->client != NULL);
@@ -261,9 +264,11 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     if (code != 0)
         goto cleanup;
 
-    code = make_proxy_cred(context, cred, impersonator_cred);
-    if (code != 0)
-        goto cleanup;
+    if (impersonator_cred != NULL) {
+        code = make_proxy_cred(context, cred, impersonator_cred);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = krb5_cc_store_cred(context, cred->ccache, subject_creds);
     if (code != 0)

@@ -175,6 +175,7 @@ typedef struct _krb5_gss_cred_id_rec {
     gss_cred_usage_t usage;
     krb5_gss_name_t name;
     krb5_principal impersonator;
+    const char *delegation_policy;
     unsigned int default_identity : 1;
     unsigned int iakerb_mech : 1;
     unsigned int destroy_ccache : 1;
@@ -1284,6 +1285,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_KEYTAB_URN "keytab"
 #define KRB5_CS_CCACHE_URN "ccache"
 #define KRB5_CS_RCACHE_URN "rcache"
+#define KRB5_CS_DELEGP_URN "delegation_policy"
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,
@@ -1434,5 +1436,9 @@ gss_krb5int_get_cred_impersonator(OM_uint32 *minor_status,
                                   const gss_cred_id_t cred_handle,
                                   const gss_OID desired_object,
                                   gss_buffer_set_t *data_set);
+
+typedef enum {
+    DELEG_NONE, DELEG_CLIENT_TGT, DELEG_CLIENT_TICKET, DELEG_PROXY_CREDS
+} delegation_types;
 
 #endif /* _GSSAPIP_KRB5_H_ */

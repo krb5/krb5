@@ -114,19 +114,24 @@
 #ifndef LEAN_CLIENT
 
 static OM_uint32
-create_constrained_deleg_creds(OM_uint32 *minor_status,
+create_constrained_deleg_creds(OM_uint32 *minor_status, krb5_context context,
                                krb5_gss_cred_id_t verifier_cred_handle,
-                               krb5_ticket *ticket,
-                               krb5_gss_cred_id_t *out_cred,
-                               krb5_context context)
+                               krb5_ticket *ticket, delegation_types type,
+                               krb5_gss_cred_id_t *out_cred)
 {
     OM_uint32 major_status;
     krb5_creds krb_creds;
     krb5_data *data;
     krb5_error_code code;
+    krb5_gss_cred_id_t impersonator_creds = verifier_cred_handle;
 
     assert(out_cred != NULL);
-    assert(verifier_cred_handle->usage == GSS_C_BOTH);
+    if (type == DELEG_PROXY_CREDS)
+        assert(verifier_cred_handle->usage == GSS_C_BOTH);
+    else {
+        assert(type == DELEG_CLIENT_TICKET);
+        impersonator_creds = NULL;
+    }
 
     memset(&krb_creds, 0, sizeof(krb_creds));
     krb_creds.client = ticket->enc_part2->client;
@@ -146,7 +151,7 @@ create_constrained_deleg_creds(OM_uint32 *minor_status,
     krb_creds.ticket = *data;
 
     major_status = kg_compose_deleg_cred(minor_status,
-                                         verifier_cred_handle,
+                                         impersonator_creds,
                                          &krb_creds,
                                          GSS_C_INDEFINITE,
                                          out_cred,
@@ -633,6 +638,86 @@ fail:
     return status;
 }
 
+/*
+ * Determine the delegation type to use based on what we have and the policy.
+ */
+static krb5_error_code
+parse_delegation_policy(krb5_context context, char *policy,
+                        gss_cred_usage_t cred_usage, krb5_boolean have_tgt,
+                        delegation_types *out_delegation_type)
+{
+    char *token, *save;
+
+    *out_delegation_type = DELEG_NONE;
+
+    token = strtok_r(policy, ",", &save);
+    while (token != NULL) {
+        if (have_tgt && strcmp(token, "client-tgt") == 0) {
+            *out_delegation_type = DELEG_CLIENT_TGT;
+            break;;
+        }
+        if (strcmp(token, "proxy-creds") == 0 &&
+            (cred_usage == GSS_C_BOTH || cred_usage == GSS_C_INITIATE)) {
+            *out_delegation_type = DELEG_PROXY_CREDS;
+            break;
+        }
+        if (strcmp(token, "client-ticket") == 0) {
+            *out_delegation_type = DELEG_CLIENT_TICKET;
+            break;
+        }
+        token = strtok_r(NULL, ",", &save);
+    }
+
+    return 0;
+}
+
+static krb5_error_code
+get_delegation_policy(krb5_context context, krb5_gss_cred_id_t cred,
+                      krb5_boolean have_tgt,
+                      delegation_types *out_delegation_type)
+{
+    krb5_error_code code;
+    char *delegstr = NULL;
+
+    if (cred->delegation_policy != NULL) {
+        delegstr = strdup(cred->delegation_policy);
+        if (delegstr == NULL)
+            return ENOMEM;
+
+        code = parse_delegation_policy(context, delegstr, cred->usage,
+                                       have_tgt, out_delegation_type);
+        free(delegstr);
+
+        return code;
+    }
+
+    code = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_DELEGATION_POLICY, NULL,
+                              "client-tgt,proxy-creds", &delegstr);
+    if (code)
+        return code;
+    assert(delegstr != NULL);
+
+    code = parse_delegation_policy(context, delegstr, cred->usage,
+                                   have_tgt, out_delegation_type);
+
+    profile_release_string(delegstr);
+
+    return code;
+}
+
+static void free_delegated_creds(krb5_context context,
+                                 krb5_gss_cred_id_t deleg_cred)
+{
+    if (deleg_cred) {
+        if (deleg_cred->ccache)
+            (void)krb5_cc_close(context, deleg_cred->ccache);
+        if (deleg_cred->name)
+            kg_release_name(context, &deleg_cred->name);
+        xfree(deleg_cred);
+    }
+}
+
 static OM_uint32
 kg_accept_krb5(minor_status, context_handle,
                verifier_cred_handle, input_token,
@@ -674,6 +759,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_data scratch;
     gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
     krb5_gss_cred_id_t deleg_cred = NULL;
+    delegation_types delegation_type = DELEG_NONE;
     krb5int_access kaccess;
     int cred_rcache = 0;
     int no_encap = 0;
@@ -867,13 +953,25 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_auth_con_getauthenticator(context, auth_context, &authdat);
 
     major_status = process_checksum(minor_status, context, input_chan_bindings,
-                                    auth_context, ap_req_options,
-                                    authdat, exts,
-                                    delegated_cred_handle ? &deleg_cred : NULL,
-                                    &gss_flags, &code);
+                                    auth_context, ap_req_options, authdat,
+                                    exts, delegated_cred_handle ? &deleg_cred :
+                                    NULL, &gss_flags, &code);
 
     if (major_status != GSS_S_COMPLETE)
         goto fail;
+
+    if (delegated_cred_handle != NULL) {
+        code = get_delegation_policy(context, cred, deleg_cred != NULL,
+                                     &delegation_type);
+        if (code) {
+            major_status = GSS_S_FAILURE;
+            goto fail;
+        }
+        if (delegation_type != DELEG_CLIENT_TGT) {
+            free_delegated_creds(context, deleg_cred);
+            deleg_cred = NULL;
+        }
+    }
 
     major_status = GSS_S_FAILURE;
 
@@ -971,17 +1069,17 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->krb_times = ticket->enc_part2->times; /* struct copy */
     ctx->krb_flags = ticket->enc_part2->flags;
 
-    if (delegated_cred_handle != NULL &&
-        deleg_cred == NULL && /* no unconstrained delegation */
-        cred->usage == GSS_C_BOTH) {
+    if ((delegation_type == DELEG_PROXY_CREDS) ||
+        (delegation_type == DELEG_CLIENT_TICKET)) {
         /*
          * Now, we always fabricate a delegated credentials handle
          * containing the service ticket to ourselves, which can be
          * used for S4U2Proxy.
          */
-        major_status = create_constrained_deleg_creds(minor_status, cred,
-                                                      ticket, &deleg_cred,
-                                                      context);
+        major_status = create_constrained_deleg_creds(minor_status, context,
+                                                      cred, ticket,
+                                                      delegation_type,
+                                                      &deleg_cred);
         if (GSS_ERROR(major_status))
             goto fail;
         ctx->gss_flags |= GSS_C_DELEG_FLAG;
@@ -1204,13 +1302,7 @@ fail:
     if (ctx)
         (void) krb5_gss_delete_sec_context(&tmp_minor_status,
                                            (gss_ctx_id_t *) &ctx, NULL);
-    if (deleg_cred) { /* free memory associated with the deleg credential */
-        if (deleg_cred->ccache)
-            (void)krb5_cc_close(context, deleg_cred->ccache);
-        if (deleg_cred->name)
-            kg_release_name(context, &deleg_cred->name);
-        xfree(deleg_cred);
-    }
+    free_delegated_creds(context, deleg_cred);
     if (token.value)
         xfree(token.value);
     if (name) {
