@@ -80,6 +80,8 @@ krb5_gss_release_cred(minor_status, cred_handle)
     if (cred->password != NULL)
         zapfree(cred->password, strlen(cred->password));
 
+    xfree(cred->delegation_policy);
+
     xfree(cred);
 
     *cred_handle = NULL;
