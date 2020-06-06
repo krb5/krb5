@@ -536,6 +536,13 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         if (s4u_user.user_id.user != NULL && s4u_user.user_id.user->length) {
             code = build_pa_for_user(context, tgtptr, &s4u_user.user_id,
                                      &in_padata[1]);
+            /*
+             * If we couldn't compute the hmac-md5 checksum, send only the
+             * KRB5_PADATA_S4U_X509_USER; this will still work against modern
+             * Windows and MIT KDCs.
+             */
+            if (code == KRB5_CRYPTO_INTERNAL)
+                code = 0;
             if (code != 0) {
                 krb5_free_pa_data(context, in_padata);
                 goto cleanup;
