@@ -302,16 +302,11 @@ verify_s4u2self_reply(krb5_context context,
                                           enc_padata,
                                           KRB5_PADATA_S4U_X509_USER);
 
-    /* XXX this will break newer enctypes with a MIT 1.7 KDC */
     rep_s4u_padata = krb5int_find_pa_data(context,
                                           rep_padata,
                                           KRB5_PADATA_S4U_X509_USER);
-    if (rep_s4u_padata == NULL) {
-        if (not_newer == FALSE || enc_s4u_padata != NULL)
-            return KRB5_KDCREP_MODIFIED;
-        else
-            return 0;
-    }
+    if (rep_s4u_padata == NULL)
+        return (enc_s4u_padata != NULL) ? KRB5_KDCREP_MODIFIED : 0;
 
     data.length = rep_s4u_padata->length;
     data.data = (char *)rep_s4u_padata->contents;
