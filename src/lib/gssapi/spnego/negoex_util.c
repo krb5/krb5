@@ -454,7 +454,7 @@ negoex_parse_token(OM_uint32 *minor, spnego_gss_ctx_id_t ctx,
                    gss_const_buffer_t token,
                    struct negoex_message **messages_out, size_t *count_out)
 {
-    OM_uint32 major;
+    OM_uint32 major = GSS_S_COMPLETE;
     size_t count = 0;
     struct k5input in;
     struct negoex_message *messages = NULL, *newptr;
