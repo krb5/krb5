@@ -660,6 +660,22 @@ kinit_prompter(krb5_context ctx, void *data, const char *name,
     return krb5_prompter_posix(ctx, data, name, banner, num_prompts, prompts);
 }
 
+/* Make a note in ccache that we should attempt to refresh it from the client
+ * keytab at refresh_time. (comes from GSSAPI acquire cred, modified to
+ * make it better fit for kinit) */
+static void
+set_refresh_time(struct k5_data *k5, krb5_timestamp refresh_time)
+{
+    char buf[128];
+    krb5_data d;
+
+    snprintf(buf, sizeof(buf), "%u", (unsigned int)ts2tt(refresh_time));
+    d = string2data(buf);
+    (void)krb5_cc_set_config(k5->ctx, k5->out_cc, NULL, KRB5_CC_CONF_REFRESH_TIME,
+                             &d);
+    krb5_clear_error_message(k5->ctx);
+}
+
 static int
 k5_kinit(struct k_opts *opts, struct k5_data *k5)
 {
@@ -835,6 +851,9 @@ k5_kinit(struct k_opts *opts, struct k5_data *k5)
         }
         if (opts->verbose)
             fprintf(stderr, _("Stored credentials\n"));
+    } else if (opts->rlife) {
+        set_refresh_time(k5,
+	    ts_incr(my_creds.times.endtime, (krb5_timestamp)-300));
     }
     notix = 0;
     if (k5->switch_to_cache) {
