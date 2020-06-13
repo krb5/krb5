@@ -280,8 +280,6 @@ if test $krb5_cv_func_sigprocmask_use = yes; then
 fi
 ])dnl
 dnl
-AC_DEFUN(AC_PROG_ARCHIVE, [AC_CHECK_PROG(ARCHIVE, ar, ar cqv, false)])dnl
-AC_DEFUN(AC_PROG_ARCHIVE_ADD, [AC_CHECK_PROG(ARADD, ar, ar cruv, false)])dnl
 dnl
 dnl check for <dirent.h> -- CHECK_DIRENT
 dnl (may need to be more complex later)
@@ -1035,10 +1033,8 @@ AC_DEFUN(KRB5_BUILD_LIBRARY,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
-AC_REQUIRE([AC_PROG_ARCHIVE])dnl
-AC_REQUIRE([AC_PROG_ARCHIVE_ADD])dnl
 AC_REQUIRE([AC_PROG_INSTALL])dnl
-AC_CHECK_PROG(AR, ar, ar, false)
+AC_CHECK_TOOL(AR, ar, false)
 if test "$AR" = "false"; then
   AC_MSG_ERROR([ar not found in PATH])
 fi
