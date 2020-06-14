@@ -328,4 +328,10 @@ realm.run([kadmin, '-c', realm.ccache, 'cpw', '-randkey', 'none'],
 realm.run([kadmin, '-c', realm.ccache, 'cpw', '-randkey', '-e', 'aes256-cts',
            'none'], expected_code=1, expected_msg=msg)
 
+# Test operations disallowed at the libkadm5 layer.
+realm.run([kadminl, 'delprinc', 'K/M'],
+          expected_code=1, expected_msg='Cannot change protected principal')
+realm.run([kadminl, 'cpw', '-pw', 'pw', 'kadmin/history'],
+          expected_code=1, expected_msg='Cannot change protected principal')
+
 success('kadmin ACL enforcement')

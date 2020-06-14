@@ -537,6 +537,10 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
     if (principal == NULL)
         return EINVAL;
 
+    /* Deleting K/M is mostly unrecoverable, so don't allow it. */
+    if (krb5_principal_compare(handle->context, principal, master_princ))
+        return KADM5_PROTECT_PRINCIPAL;
+
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
         return(ret);
     ret = k5_kadm5_hook_remove(handle->context, handle->hook_handles,
