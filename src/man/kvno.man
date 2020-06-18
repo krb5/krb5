@@ -95,6 +95,19 @@ Specifies that protocol transition is to be used, identifying the
 client principal with the X.509 certificate in \fIcert_file\fP\&.  The
 certificate file must be in PEM format.
 .TP
+\fB\-\-cached\-only\fP
+Only retrieve credentials already present in the cache, not from
+the KDC.
+.TP
+\fB\-\-no\-store\fP
+Do not store retrieved credentials in the cache.  If
+\fB\-\-out\-cache\fP is also specified, credentials will still be
+stored into the output credential cache.
+.TP
+\fB\-\-out\-cache\fP \fIccache\fP
+Initialize \fIccache\fP and store all retrieved credentials into it.
+Do not store acquired credentials in the input cache.
+.TP
 \fB\-\-u2u\fP \fIccache\fP
 Requests a user\-to\-user ticket.  \fIccache\fP must contain a local
 krbtgt ticket for the server principal.  The reported version

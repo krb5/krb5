@@ -74,6 +74,19 @@ OPTIONS
     client principal with the X.509 certificate in *cert_file*.  The
     certificate file must be in PEM format.
 
+**--cached-only**
+    Only retrieve credentials already present in the cache, not from
+    the KDC.
+
+**--no-store**
+    Do not store retrieved credentials in the cache.  If
+    **--out-cache** is also specified, credentials will still be
+    stored into the output credential cache.
+
+**--out-cache** *ccache*
+    Initialize *ccache* and store all retrieved credentials into it.
+    Do not store acquired credentials in the input cache.
+
 **--u2u** *ccache*
     Requests a user-to-user ticket.  *ccache* must contain a local
     krbtgt ticket for the server principal.  The reported version
