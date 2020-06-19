@@ -144,7 +144,7 @@ setup_loop(kadm5_config_params *params, int proponly, verto_ctx **ctx_out)
     *ctx_out = ctx = loop_init(VERTO_EV_TYPE_SIGNAL);
     if (ctx == NULL)
         return ENOMEM;
-    ret = loop_setup_signals(ctx, global_server_handle, NULL);
+    ret = loop_setup_signals(ctx, &global_server_handle, NULL);
     if (ret)
         return ret;
     if (!proponly) {
@@ -171,7 +171,7 @@ setup_loop(kadm5_config_params *params, int proponly, verto_ctx **ctx_out)
             return ret;
     }
 #endif
-    return loop_setup_network(ctx, global_server_handle, progname,
+    return loop_setup_network(ctx, &global_server_handle, progname,
                               DEFAULT_TCP_LISTEN_BACKLOG);
 }
 
@@ -511,6 +511,11 @@ main(int argc, char *argv[])
     if (ret)
         fail_to_start(ret, _("initializing ACL file"));
 
+    /* Since some KDB modules are not fork-safe, we must reinitialize the
+     * server handle after daemonizing. */
+    kadm5_destroy(global_server_handle);
+    global_server_handle = NULL;
+
     if (!nofork && daemon(0, 0) != 0)
         fail_to_start(errno, _("spawning daemon process"));
     if (pid_file != NULL) {
@@ -518,6 +523,12 @@ main(int argc, char *argv[])
         if (ret)
             fail_to_start(ret, _("creating PID file"));
     }
+
+    ret = kadm5_init(context, "kadmind", NULL, NULL, &params,
+                     KADM5_STRUCT_VERSION, KADM5_API_VERSION_4, db_args,
+                     &global_server_handle);
+    if (ret)
+        fail_to_start(ret, _("initializing"));
 
     krb5_klog_syslog(LOG_INFO, _("Seeding random number generator"));
     ret = krb5_c_random_os_entropy(context, strong_random, NULL);
