@@ -127,6 +127,8 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
         goto done;
     }
 
+    krb5_free_principal(handle->context, hist_princ);
+    hist_princ = NULL;
     if ((ret = krb5_parse_name(handle->context, hist_name, &hist_princ)))
         goto done;
 
