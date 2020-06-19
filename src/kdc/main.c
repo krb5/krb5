@@ -1025,9 +1025,13 @@ int main(int argc, char **argv)
         finish_realms();
         return 1;
     }
+
+    /* Clean up realms for now and reinitialize them after daemonizing, since
+     * some KDB modules are not fork-safe. */
+    finish_realms();
+
     if (!nofork && daemon(0, 0)) {
         kdc_err(kcontext, errno, _("while detaching from tty"));
-        finish_realms();
         return 1;
     }
     if (pid_file != NULL) {
@@ -1039,15 +1043,14 @@ int main(int argc, char **argv)
         }
     }
     if (workers > 0) {
-        finish_realms();
         retval = create_workers(ctx, workers);
         if (retval) {
             kdc_err(kcontext, errno, _("creating worker processes"));
             return 1;
         }
-        /* We get here only in a worker child process; re-initialize realms. */
-        initialize_realms(kcontext, argc, argv, NULL);
     }
+
+    initialize_realms(kcontext, argc, argv, NULL);
 
     /* Initialize audit system and audit KDC startup. */
     retval = load_audit_modules(kcontext);
