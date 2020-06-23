@@ -1400,8 +1400,7 @@ kdc_make_s4u2self_rep(krb5_context context,
      * enctypes, including rc4-hmac. A forthcoming workaround for this
      * includes the checksum bytes in the encrypted padata.
      */
-    if ((req_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) &&
-        enctype_requires_etype_info_2(enctype) == FALSE) {
+    if (enctype_requires_etype_info_2(enctype) == FALSE) {
         code = k5_alloc_pa_data(KRB5_PADATA_S4U_X509_USER,
                                 req_s4u_user->cksum.length +
                                 rep_s4u_user.cksum.length, &pa);
