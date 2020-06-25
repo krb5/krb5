@@ -201,7 +201,7 @@ k5_ccselect_free_context(krb5_context context);
 
 krb5_error_code
 k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
-                  int *use_master);
+                  int *use_primary);
 
 krb5_error_code
 k5_init_creds_current_time(krb5_context context, krb5_init_creds_context ctx,
@@ -291,7 +291,7 @@ k5_get_init_creds(krb5_context context, krb5_creds *creds,
                   krb5_principal client, krb5_prompter_fct prompter,
                   void *prompter_data, krb5_deltat start_time,
                   const char *in_tkt_service, krb5_get_init_creds_opt *options,
-                  get_as_key_fn gak, void *gak_data, int *master,
+                  get_as_key_fn gak, void *gak_data, int *primary,
                   krb5_kdc_rep **as_reply);
 
 /*

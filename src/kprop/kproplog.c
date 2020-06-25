@@ -5,7 +5,7 @@
  */
 
 /*
- * This module will parse the update logs on the master or replica servers.
+ * This module will parse the update logs on the primary or replica servers.
  */
 
 #include "k5-int.h"

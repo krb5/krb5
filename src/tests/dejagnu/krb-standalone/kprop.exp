@@ -88,7 +88,7 @@ proc doit { } {
 	return
     }
 
-    # Dump master database.
+    # Dump primary database.
     envstack_push
     setup_kerberos_env kdc
     spawn $KDB5_UTIL dump $tmppwd/replica_datatrans

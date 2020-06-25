@@ -158,7 +158,7 @@ static void load_database(krb5_context context, char *kdb_util,
 static void send_error(krb5_context context, int fd, krb5_error_code err_code,
                        char *err_text);
 static void recv_error(krb5_context context, krb5_data *inbuf);
-static unsigned int backoff_from_master(int *cnt);
+static unsigned int backoff_from_primary(int *cnt);
 static kadm5_ret_t kadm5_get_kiprop_host_srv_name(krb5_context context,
                                                   const char *realm_name,
                                                   char **host_service_name);
@@ -634,7 +634,7 @@ do_iprop()
     kadm5_ret_t retval;
     krb5_principal iprop_svc_principal;
     void *server_handle = NULL;
-    char *iprop_svc_princstr = NULL, *master_svc_princstr = NULL;
+    char *iprop_svc_princstr = NULL, *primary_svc_princstr = NULL;
     unsigned int pollin, backoff_time;
     int backoff_cnt = 0, reinit_cnt = 0;
     struct timeval iprop_start, iprop_end;
@@ -652,9 +652,9 @@ do_iprop()
     if (pollin == 0)
         pollin = 10;
 
-    if (master_svc_princstr == NULL) {
+    if (primary_svc_princstr == NULL) {
         retval = kadm5_get_kiprop_host_srv_name(kpropd_context, realm,
-                                                &master_svc_princstr);
+                                                &primary_svc_princstr);
         if (retval) {
             com_err(progname, retval,
                     _("%s: unable to get kiprop host based "
@@ -692,7 +692,7 @@ reinit:
     }
     retval = kadm5_init_with_skey(kpropd_context, iprop_svc_princstr,
                                   keytab_path,
-                                  master_svc_princstr,
+                                  primary_svc_princstr,
                                   &params,
                                   KADM5_STRUCT_VERSION,
                                   KADM5_API_VERSION_4,
@@ -711,8 +711,8 @@ reinit:
 
             com_err(progname, retval, _(
                         "while attempting to connect"
-                        " to master KDC ... retrying"));
-            backoff_time = backoff_from_master(&reinit_cnt);
+                        " to primary KDC ... retrying"));
+            backoff_time = backoff_from_primary(&reinit_cnt);
             if (debug) {
                 fprintf(stderr, _("Sleeping %d seconds to re-initialize "
                                   "kadm5 (RPC ERROR)\n"), backoff_time);
@@ -732,7 +732,7 @@ reinit:
             com_err(progname, retval,
                     _("while initializing %s interface, retrying"),
                     progname);
-            backoff_time = backoff_from_master(&reinit_cnt);
+            backoff_time = backoff_from_primary(&reinit_cnt);
             if (debug) {
                 fprintf(stderr, _("Sleeping %d seconds to re-initialize "
                                   "kadm5 (krb5kdc not running?)\n"),
@@ -762,7 +762,7 @@ reinit:
 
         /*
          * Get the most recent ulog entry sno + ts, which
-         * we package in the request to the master KDC
+         * we package in the request to the primary KDC
          */
         retval = ulog_get_last(kpropd_context, &mylast);
         if (retval) {
@@ -772,7 +772,7 @@ reinit:
 
         /*
          * Loop continuously on an iprop_get_updates_1(),
-         * so that we can keep probing the master for updates
+         * so that we can keep probing the primary for updates
          * or (if needed) do a full resync of the krb5 db.
          */
 
@@ -858,19 +858,19 @@ reinit:
 
             case UPDATE_ERROR:
                 if (debug)
-                    fprintf(stderr, _("Full resync error from master\n"));
+                    fprintf(stderr, _("Full resync error from primary\n"));
                 syslog(LOG_ERR, _(" Full resync, "
-                       "error returned from master KDC."));
+                       "error returned from primary KDC."));
                 goto error;
 
             default:
                 backoff_cnt = 0;
                 if (debug) {
                     fprintf(stderr,
-                            _("Full resync invalid result from master\n"));
+                            _("Full resync invalid result from primary\n"));
                 }
                 syslog(LOG_ERR, _("Full resync, "
-                                  "invalid return from master KDC."));
+                                  "invalid return from primary KDC."));
                 break;
             }
             break;
@@ -926,8 +926,9 @@ reinit:
 
         case UPDATE_ERROR:
             if (debug)
-                fprintf(stderr, _("get_updates error from master\n"));
-            syslog(LOG_ERR, _("get_updates, error returned from master KDC."));
+                fprintf(stderr, _("get_updates error from primary\n"));
+            syslog(LOG_ERR,
+                   _("get_updates, error returned from primary KDC."));
             goto error;
 
         case UPDATE_BUSY:
@@ -935,25 +936,28 @@ reinit:
              * Exponential backoff
              */
             if (debug)
-                fprintf(stderr, _("get_updates master busy; backoff\n"));
+                fprintf(stderr, _("get_updates primary busy; backoff\n"));
             backoff_cnt++;
             break;
 
         case UPDATE_NIL:
             /*
-             * Master-replica are in sync
+             * Primary-replica are in sync
              */
             if (debug)
-                fprintf(stderr, _("KDC is synchronized with master.\n"));
+                fprintf(stderr, _("KDC is synchronized with primary.\n"));
             backoff_cnt = 0;
             frrequested = 0;
             break;
 
         default:
             backoff_cnt = 0;
-            if (debug)
-                fprintf(stderr, _("get_updates invalid result from master\n"));
-            syslog(LOG_ERR, _("get_updates, invalid return from master KDC."));
+            if (debug) {
+                fprintf(stderr,
+                        _("get_updates invalid result from primary\n"));
+            }
+            syslog(LOG_ERR,
+                   _("get_updates, invalid return from primary KDC."));
             break;
         }
 
@@ -966,10 +970,10 @@ reinit:
          * UPDATE_BUSY signal
          */
         if (backoff_cnt > 0) {
-            backoff_time = backoff_from_master(&backoff_cnt);
+            backoff_time = backoff_from_primary(&backoff_cnt);
             if (debug) {
                 fprintf(stderr, _("Busy signal received "
-                                  "from master, backoff for %d secs\n"),
+                                  "from primary, backoff for %d secs\n"),
                         backoff_time);
             }
             sleep(backoff_time);
@@ -986,11 +990,11 @@ reinit:
 
 error:
     if (debug)
-        fprintf(stderr, _("ERROR returned by master, bailing\n"));
-    syslog(LOG_ERR, _("ERROR returned by master KDC, bailing.\n"));
+        fprintf(stderr, _("ERROR returned by primary, bailing\n"));
+    syslog(LOG_ERR, _("ERROR returned by primary KDC, bailing.\n"));
 done:
     free(iprop_svc_princstr);
-    free(master_svc_princstr);
+    free(primary_svc_princstr);
     krb5_free_default_realm(kpropd_context, def_realm);
     kadm5_destroy(server_handle);
     krb5_db_fini(kpropd_context);
@@ -1001,9 +1005,9 @@ done:
 }
 
 
-/* Do exponential backoff, since master KDC is BUSY or down. */
+/* Do exponential backoff, since primary KDC is BUSY or down. */
 static unsigned int
-backoff_from_master(int *cnt)
+backoff_from_primary(int *cnt)
 {
     unsigned int btime;
 

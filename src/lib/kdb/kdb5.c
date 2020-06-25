@@ -104,13 +104,13 @@ kdb_unlock_list()
     k5_mutex_unlock(&db_lock);
 }
 
-/* Return true if the ulog is mapped in the master role. */
+/* Return true if the ulog is mapped in the primary role. */
 static inline krb5_boolean
 logging(krb5_context context)
 {
     kdb_log_context *log_ctx = context->kdblog_context;
 
-    return log_ctx != NULL && log_ctx->iproprole == IPROP_MASTER &&
+    return log_ctx != NULL && log_ctx->iproprole == IPROP_PRIMARY &&
         log_ctx->ulog != NULL;
 }
 

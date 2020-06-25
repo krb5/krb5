@@ -146,7 +146,7 @@ Release 1.13
      protocol.
  -   Add support for `hierarchical incremental propagation
      <https://k5wiki.kerberos.org/wiki/Projects/Hierarchical_iprop>`_,
-     where replicas can act as intermediates between an upstream master
+     where replicas can act as intermediates between an upstream primary
      and other downstream replicas.
  -   Add support for configuring GSS mechanisms using
      ``/etc/gss/mech.d/*.conf`` files in addition to
@@ -255,9 +255,9 @@ Release 1.14
 
  * Performance:
 
-   - On replica KDCs, poll the master KDC immediately after processing
-     a full resync, and do not require two full resyncs after the
-     master KDC's log file is reset.
+   - On replica KDCs, poll the primary KDC immediately after
+     processing a full resync, and do not require two full resyncs
+     after the primary KDC's log file is reset.
 
 Release 1.15
 
@@ -279,7 +279,7 @@ Release 1.15
 
   - Add DNS auto-discovery of KDC and kpasswd servers from URI
     records, in addition to SRV records.  URI records can convey TCP
-    and UDP servers and master KDC status in a single DNS lookup, and
+    and UDP servers and primary KDC status in a single DNS lookup, and
     can also point to HTTPS proxy servers.
 
   - Add support for password history to the LDAP back end.

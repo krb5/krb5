@@ -200,8 +200,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Attempting password change; {int} tries remaining", tries)
 #define TRACE_GIC_PWD_EXPIRED(c)                                \
     TRACE(c, "Principal expired; getting changepw ticket")
-#define TRACE_GIC_PWD_MASTER(c)                         \
-    TRACE(c, "Retrying AS request with master KDC")
+#define TRACE_GIC_PWD_PRIMARY(c)                        \
+    TRACE(c, "Retrying AS request with primary KDC")
 
 #define TRACE_GSS_CLIENT_KEYTAB_FAIL(c, ret)                            \
     TRACE(c, "Unable to resolve default client keytab: {kerr}", ret)
@@ -379,13 +379,13 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_SENDTO_KDC_ERROR_SET_MESSAGE(c, raddr, err)               \
     TRACE(c, "Error preparing message to send to {raddr}: {errno}",     \
           raddr, err)
-#define TRACE_SENDTO_KDC(c, len, rlm, master, tcp)                     \
+#define TRACE_SENDTO_KDC(c, len, rlm, primary, tcp)                     \
     TRACE(c, "Sending request ({int} bytes) to {data}{str}{str}", len,  \
-          rlm, (master) ? " (master)" : "", (tcp) ? " (tcp only)" : "")
+          rlm, (primary) ? " (primary)" : "", (tcp) ? " (tcp only)" : "")
 #define TRACE_SENDTO_KDC_K5TLS_LOAD_ERROR(c, ret)       \
     TRACE(c, "Error loading k5tls module: {kerr}", ret)
-#define TRACE_SENDTO_KDC_MASTER(c, master)                              \
-    TRACE(c, "Response was{str} from master KDC", (master) ? "" : " not")
+#define TRACE_SENDTO_KDC_PRIMARY(c, primary)                            \
+    TRACE(c, "Response was{str} from primary KDC", (primary) ? "" : " not")
 #define TRACE_SENDTO_KDC_RESOLVING(c, hostname)         \
     TRACE(c, "Resolving hostname {str}", hostname)
 #define TRACE_SENDTO_KDC_RESPONSE(c, len, raddr)                        \

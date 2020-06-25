@@ -32,7 +32,7 @@ for realm in multipass_realms(create_user=False):
     realm.run([kdb5_util, 'load', dumpfile], replica)
     realm.run([kdb5_util, 'stash', '-P', 'master'], replica)
 
-    # Make some changes to the master db.
+    # Make some changes to the primary db.
     realm.addprinc('wakawaka')
 
     # Start kpropd.
@@ -67,7 +67,7 @@ realm.run([kdb5_util, 'dump', dumpfile])
 realm.run([kdb5_util, '-r', realm.realm, 'load', dumpfile], replica2)
 realm.run([kdb5_util, 'load', dumpfile], replica3)
 
-# Make some changes to the master db.
+# Make some changes to the primary db.
 realm.addprinc('wakawaka')
 
 # Test override of default_realm with -r realm argument.

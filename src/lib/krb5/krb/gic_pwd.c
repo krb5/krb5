@@ -182,7 +182,7 @@ krb5_get_init_creds_password(krb5_context context,
                              krb5_get_init_creds_opt *options)
 {
     krb5_error_code ret;
-    int use_master;
+    int use_primary;
     krb5_kdc_rep *as_reply;
     int tries;
     krb5_creds chpw_creds;
@@ -195,7 +195,7 @@ krb5_get_init_creds_password(krb5_context context,
     struct errinfo errsave = EMPTY_ERRINFO;
     char *message;
 
-    use_master = 0;
+    use_primary = 0;
     as_reply = NULL;
     memset(&chpw_creds, 0, sizeof(chpw_creds));
     memset(&gakpw, 0, sizeof(gakpw));
@@ -209,7 +209,7 @@ krb5_get_init_creds_password(krb5_context context,
 
     ret = k5_get_init_creds(context, creds, client, prompter, data, start_time,
                             in_tkt_service, options, krb5_get_as_key_password,
-                            &gakpw, &use_master, &as_reply);
+                            &gakpw, &use_primary, &as_reply);
 
     /* check for success */
 
@@ -223,12 +223,12 @@ krb5_get_init_creds_password(krb5_context context,
         ret == KRB5_LIBOS_PWDINTR || ret == KRB5_LIBOS_CANTREADPWD)
         goto cleanup;
 
-    /* if the reply did not come from the master kdc, try again with
-       the master kdc */
+    /* If the reply did not come from the primary kdc, try again with
+     * the primary kdc. */
 
-    if (!use_master) {
-        TRACE_GIC_PWD_MASTER(context);
-        use_master = 1;
+    if (!use_primary) {
+        TRACE_GIC_PWD_PRIMARY(context);
+        use_primary = 1;
 
         k5_save_ctx_error(context, ret, &errsave);
         if (as_reply) {
@@ -237,22 +237,22 @@ krb5_get_init_creds_password(krb5_context context,
         }
         ret = k5_get_init_creds(context, creds, client, prompter, data,
                                 start_time, in_tkt_service, options,
-                                krb5_get_as_key_password, &gakpw, &use_master,
+                                krb5_get_as_key_password, &gakpw, &use_primary,
                                 &as_reply);
 
         if (ret == 0)
             goto cleanup;
 
-        /* If the master is unreachable, return the error from the replica we
-         * were able to contact and reset the use_master flag. */
+        /* If the primary is unreachable, return the error from the replica we
+         * were able to contact and reset the use_primary flag. */
         if (ret == KRB5_KDC_UNREACH || ret == KRB5_REALM_CANT_RESOLVE ||
             ret == KRB5_REALM_UNKNOWN) {
             ret = k5_restore_ctx_error(context, &errsave);
-            use_master = 0;
+            use_primary = 0;
         }
     }
 
-    /* at this point, we have an error from the master.  if the error
+    /* at this point, we have an error from the primary.  if the error
        is not password expired, or if it is but there's no prompter,
        return this error */
 
@@ -277,7 +277,7 @@ krb5_get_init_creds_password(krb5_context context,
         goto cleanup;
     ret = k5_get_init_creds(context, &chpw_creds, client, prompter, data,
                             start_time, "kadmin/changepw", chpw_opts,
-                            krb5_get_as_key_password, &gakpw, &use_master,
+                            krb5_get_as_key_password, &gakpw, &use_primary,
                             NULL);
     if (ret)
         goto cleanup;
@@ -375,15 +375,14 @@ krb5_get_init_creds_password(krb5_context context,
     if (ret)
         goto cleanup;
 
-    /* the password change was successful.  Get an initial ticket
-       from the master.  this is the last try.  the return from this
-       is final.  */
+    /* The password change was successful.  Get an initial ticket from the
+     * primary.  This is the last try.  The return from this is final. */
 
     TRACE_GIC_PWD_CHANGED(context);
     gakpw.password = &pw0;
     ret = k5_get_init_creds(context, creds, client, prompter, data,
                             start_time, in_tkt_service, options,
-                            krb5_get_as_key_password, &gakpw, &use_master,
+                            krb5_get_as_key_password, &gakpw, &use_primary,
                             &as_reply);
     if (ret)
         goto cleanup;
@@ -433,7 +432,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     krb5_data pw;
     char * server;
     krb5_principal server_princ, client_princ;
-    int use_master = 0;
+    int use_primary = 0;
     krb5_get_init_creds_opt *opts = NULL;
 
     memset(&gakpw, 0, sizeof(gakpw));
@@ -454,7 +453,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
     client_princ = creds->client;
     retval = k5_get_init_creds(context, creds, creds->client,
                                krb5_prompter_posix, NULL, 0, server, opts,
-                               krb5_get_as_key_password, &gakpw, &use_master,
+                               krb5_get_as_key_password, &gakpw, &use_primary,
                                ret_as_reply);
     krb5_free_unparsed_name( context, server);
     krb5_get_init_creds_opt_free(context, opts);

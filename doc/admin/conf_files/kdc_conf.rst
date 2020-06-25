@@ -229,7 +229,7 @@ The following tags may be specified in a [realms] subsection:
 
 **iprop_replica_poll**
     (Delta time string.)  Specifies how often the replica KDC polls
-    for new updates from the master.  The default value is ``2m``
+    for new updates from the primary.  The default value is ``2m``
     (that is, two minutes).  New in release 1.17.
 
 **iprop_slave_poll**
@@ -253,7 +253,7 @@ The following tags may be specified in a [realms] subsection:
     (Port number.)  Specifies the port number to be used for
     incremental propagation.  When **iprop_enable** is true, this
     relation is required in the replica KDC configuration file, and
-    this relation or **iprop_listen** is required in the master
+    this relation or **iprop_listen** is required in the primary
     configuration file, as there is no default port number.  Port
     numbers specified in **iprop_listen** entries will override this
     port number for the :ref:`kadmind(8)` daemon.

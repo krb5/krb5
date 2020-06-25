@@ -238,7 +238,7 @@ static krb5_error_code
 get_init_creds_keytab(krb5_context context, krb5_creds *creds,
                       krb5_principal client, krb5_keytab keytab,
                       krb5_deltat start_time, const char *in_tkt_service,
-                      krb5_get_init_creds_opt *options, int *use_master)
+                      krb5_get_init_creds_opt *options, int *use_primary)
 {
     krb5_error_code ret;
     krb5_init_creds_context ctx = NULL;
@@ -258,7 +258,7 @@ get_init_creds_keytab(krb5_context context, krb5_creds *creds,
     if (ret != 0)
         goto cleanup;
 
-    ret = k5_init_creds_get(context, ctx, use_master);
+    ret = k5_init_creds_get(context, ctx, use_primary);
     if (ret != 0)
         goto cleanup;
 
@@ -282,7 +282,7 @@ krb5_get_init_creds_keytab(krb5_context context,
                            krb5_get_init_creds_opt *options)
 {
     krb5_error_code ret;
-    int use_master;
+    int use_primary;
     krb5_keytab keytab;
     struct errinfo errsave = EMPTY_ERRINFO;
 
@@ -293,12 +293,12 @@ krb5_get_init_creds_keytab(krb5_context context,
         keytab = arg_keytab;
     }
 
-    use_master = 0;
+    use_primary = 0;
 
     /* first try: get the requested tkt from any kdc */
 
     ret = get_init_creds_keytab(context, creds, client, keytab, start_time,
-                                in_tkt_service, options, &use_master);
+                                in_tkt_service, options, &use_primary);
 
     /* check for success */
 
@@ -310,27 +310,27 @@ krb5_get_init_creds_keytab(krb5_context context,
     if ((ret == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
         goto cleanup;
 
-    /* if the reply did not come from the master kdc, try again with
-       the master kdc */
+    /* If the reply did not come from the primary kdc, try again with
+     * the primary kdc. */
 
-    if (!use_master) {
-        use_master = 1;
+    if (!use_primary) {
+        use_primary = 1;
 
         k5_save_ctx_error(context, ret, &errsave);
         ret = get_init_creds_keytab(context, creds, client, keytab,
                                     start_time, in_tkt_service, options,
-                                    &use_master);
+                                    &use_primary);
         if (ret == 0)
             goto cleanup;
 
-        /* If the master is unreachable, return the error from the replica we
+        /* If the primary is unreachable, return the error from the replica we
          * were able to contact. */
         if (ret == KRB5_KDC_UNREACH || ret == KRB5_REALM_CANT_RESOLVE ||
             ret == KRB5_REALM_UNKNOWN)
             ret = k5_restore_ctx_error(context, &errsave);
     }
 
-    /* at this point, we have a response from the master.  Since we don't
+    /* at this point, we have a response from the primary.  Since we don't
        do any prompting or changing for keytabs, that's it. */
 
 cleanup:
@@ -352,7 +352,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     char * server = NULL;
     krb5_keytab keytab;
     krb5_principal client_princ, server_princ;
-    int use_master = 0;
+    int use_primary = 0;
 
     retval = k5_populate_gic_opt(context, &opts, options, addrs, ktypes,
                                  pre_auth_types, creds);
@@ -373,7 +373,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     client_princ = creds->client;
     retval = k5_get_init_creds(context, creds, creds->client,
                                krb5_prompter_posix,  NULL, 0, server, opts,
-                               get_as_key_keytab, (void *)keytab, &use_master,
+                               get_as_key_keytab, (void *)keytab, &use_primary,
                                ret_as_reply);
     krb5_free_unparsed_name( context, server);
     if (retval) {

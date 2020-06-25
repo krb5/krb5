@@ -58,7 +58,7 @@ struct server_entry {
     k5_transport transport;     /* May be 0 for UDP/TCP if hostname set */
     char *uri_path;             /* Used only if transport is HTTPS */
     int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
-    int master;                 /* True, false, or -1 for unknown. */
+    int primary;                /* True, false, or -1 for unknown. */
     size_t addrlen;
     struct sockaddr_storage addr;
 };
@@ -124,10 +124,10 @@ krb5_error_code k5_locate_server(krb5_context, const krb5_data *realm,
 
 krb5_error_code k5_locate_kdc(krb5_context context, const krb5_data *realm,
                               struct serverlist *serverlist,
-                              krb5_boolean get_masters, krb5_boolean no_udp);
+                              krb5_boolean get_primaries, krb5_boolean no_udp);
 
-krb5_boolean k5_kdc_is_master(krb5_context context, const krb5_data *realm,
-                              struct server_entry *server);
+krb5_boolean k5_kdc_is_primary(krb5_context context, const krb5_data *realm,
+                               struct server_entry *server);
 
 void k5_free_serverlist(struct serverlist *);
 

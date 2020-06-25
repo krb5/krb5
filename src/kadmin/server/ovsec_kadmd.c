@@ -536,7 +536,7 @@ main(int argc, char *argv[])
         fail_to_start(ret, _("getting random seed"));
 
     if (params.iprop_enabled == TRUE) {
-        ulog_set_role(context, IPROP_MASTER);
+        ulog_set_role(context, IPROP_PRIMARY);
 
         ret = ulog_map(context, params.iprop_logfile, params.iprop_ulogsize);
         if (ret)

@@ -549,14 +549,14 @@ krb5_init_creds_free(krb5_context context,
 
 krb5_error_code
 k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
-                  int *use_master)
+                  int *use_primary)
 {
     krb5_error_code code;
     krb5_data request;
     krb5_data reply;
     krb5_data realm;
     unsigned int flags = 0;
-    int tcp_only = 0, master = *use_master;
+    int tcp_only = 0, primary = *use_primary;
 
     request.length = 0;
     request.data = NULL;
@@ -580,9 +580,9 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
 
         krb5_free_data_contents(context, &reply);
 
-        master = *use_master;
+        primary = *use_primary;
         code = krb5_sendto_kdc(context, &request, &realm,
-                               &reply, &master, tcp_only);
+                               &reply, &primary, tcp_only);
         if (code != 0)
             break;
 
@@ -594,7 +594,7 @@ k5_init_creds_get(krb5_context context, krb5_init_creds_context ctx,
     krb5_free_data_contents(context, &reply);
     krb5_free_data_contents(context, &realm);
 
-    *use_master = master;
+    *use_primary = primary;
     return code;
 }
 
@@ -603,9 +603,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get(krb5_context context,
                     krb5_init_creds_context ctx)
 {
-    int use_master = 0;
+    int use_primary = 0;
 
-    return k5_init_creds_get(context, ctx, &use_master);
+    return k5_init_creds_get(context, ctx, &use_primary);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -1903,7 +1903,7 @@ k5_get_init_creds(krb5_context context, krb5_creds *creds,
                   krb5_principal client, krb5_prompter_fct prompter,
                   void *prompter_data, krb5_deltat start_time,
                   const char *in_tkt_service, krb5_get_init_creds_opt *options,
-                  get_as_key_fn gak_fct, void *gak_data, int *use_master,
+                  get_as_key_fn gak_fct, void *gak_data, int *use_primary,
                   krb5_kdc_rep **as_reply)
 {
     krb5_error_code code;
@@ -1928,7 +1928,7 @@ k5_get_init_creds(krb5_context context, krb5_creds *creds,
             goto cleanup;
     }
 
-    code = k5_init_creds_get(context, ctx, use_master);
+    code = k5_init_creds_get(context, ctx, use_primary);
     if (code != 0)
         goto cleanup;
 
@@ -1954,7 +1954,7 @@ k5_identify_realm(krb5_context context, krb5_principal client,
     krb5_error_code ret;
     krb5_get_init_creds_opt *opts = NULL;
     krb5_init_creds_context ctx = NULL;
-    int use_master = 0;
+    int use_primary = 0;
 
     *client_out = NULL;
 
@@ -1974,7 +1974,7 @@ k5_identify_realm(krb5_context context, krb5_principal client,
     ctx->identify_realm = TRUE;
     ctx->subject_cert = subject_cert;
 
-    ret = k5_init_creds_get(context, ctx, &use_master);
+    ret = k5_init_creds_get(context, ctx, &use_primary);
     if (ret)
         goto cleanup;
 

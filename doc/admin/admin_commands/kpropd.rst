@@ -24,12 +24,12 @@ DESCRIPTION
 The *kpropd* command runs on the replica KDC server.  It listens for
 update requests made by the :ref:`kprop(8)` program.  If incremental
 propagation is enabled, it periodically requests incremental updates
-from the master KDC.
+from the primary KDC.
 
-When the replica receives a kprop request from the master, kpropd
+When the replica receives a kprop request from the primary, kpropd
 accepts the dumped KDC database and places it in a file, and then runs
 :ref:`kdb5_util(8)` to load the dumped database into the active
-database which is used by :ref:`krb5kdc(8)`.  This allows the master
+database which is used by :ref:`krb5kdc(8)`.  This allows the primary
 Kerberos server to use :ref:`kprop(8)` to propagate its database to
 the replica servers.  Upon a successful download of the KDC database
 file, the replica Kerberos server will have an up-to-date KDC
@@ -52,10 +52,10 @@ compatibility but does nothing.
 
 Incremental propagation may be enabled with the **iprop_enable**
 variable in :ref:`kdc.conf(5)`.  If incremental propagation is
-enabled, the replica periodically polls the master KDC for updates, at
+enabled, the replica periodically polls the primary KDC for updates, at
 an interval determined by the **iprop_replica_poll** variable.  If the
 replica receives updates, kpropd updates its log file with any updates
-from the master.  :ref:`kproplog(8)` can be used to view a summary of
+from the primary.  :ref:`kproplog(8)` can be used to view a summary of
 the update entry log on the replica KDC.  If incremental propagation
 is enabled, the principal ``kiprop/replicahostname@REALM`` (where
 *replicahostname* is the name of the replica KDC host, and *REALM* is
@@ -70,11 +70,11 @@ OPTIONS
 --------
 
 **-r** *realm*
-    Specifies the realm of the master server.
+    Specifies the realm of the primary server.
 
 **-A** *admin_server*
     Specifies the server to be contacted for incremental updates; by
-    default, the master admin server is contacted.
+    default, the primary admin server is contacted.
 
 **-f** *file*
     Specifies the filename where the dumped principal database file is
@@ -95,7 +95,7 @@ OPTIONS
 **-t**
     In standalone mode without incremental propagation, exit after one
     dump file is received.  In incremental propagation mode, exit as
-    soon as the database is up to date, or if the master returns an
+    soon as the database is up to date, or if the primary returns an
     error.
 
 **-P**

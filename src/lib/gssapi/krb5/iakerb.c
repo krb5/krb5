@@ -329,7 +329,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     krb5_data request = empty_data(), reply = empty_data();
     krb5_data realm = empty_data();
     OM_uint32 tmp;
-    int tcp_only, use_master;
+    int tcp_only, use_primary;
     krb5_ui_4 kdc_code;
 
     output_token->length = 0;
@@ -355,9 +355,9 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
         goto cleanup;
 
     for (tcp_only = 0; tcp_only <= 1; tcp_only++) {
-        use_master = 0;
+        use_primary = 0;
         code = krb5_sendto_kdc(ctx->k5c, &request, &realm,
-                               &reply, &use_master, tcp_only);
+                               &reply, &use_primary, tcp_only);
         if (code == 0 && krb5_is_krb_error(&reply)) {
             krb5_error *error;
 

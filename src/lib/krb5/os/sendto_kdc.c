@@ -436,7 +436,7 @@ krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
 
 krb5_error_code
 krb5_sendto_kdc(krb5_context context, const krb5_data *message,
-                const krb5_data *realm, krb5_data *reply_out, int *use_master,
+                const krb5_data *realm, krb5_data *reply_out, int *use_primary,
                 int no_udp)
 {
     krb5_error_code retval, oldret, err;
@@ -460,7 +460,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
      * should probably be returned as well.
      */
 
-    TRACE_SENDTO_KDC(context, message->length, realm, *use_master, no_udp);
+    TRACE_SENDTO_KDC(context, message->length, realm, *use_primary, no_udp);
 
     if (!no_udp && context->udp_pref_limit < 0) {
         int tmp;
@@ -486,7 +486,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     else
         strategy = UDP_LAST;
 
-    retval = k5_locate_kdc(context, realm, &servers, *use_master, no_udp);
+    retval = k5_locate_kdc(context, realm, &servers, *use_primary, no_udp);
     if (retval)
         return retval;
 
@@ -527,10 +527,13 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
                                         retval, realm, message, &reply,
                                         &hook_reply);
         if (oldret && !retval) {
-            /* The hook must set a reply if it overrides an error from
-             * k5_sendto().  Treat this reply as coming from the master KDC. */
+            /*
+             * The hook must set a reply if it overrides an error from
+             * k5_sendto().  Treat this reply as coming from the primary
+             * KDC.
+             */
             assert(hook_reply != NULL);
-            *use_master = 1;
+            *use_primary = 1;
         }
     }
     if (retval)
@@ -544,12 +547,12 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
         reply = empty_data();
     }
 
-    /* Set use_master to 1 if we ended up talking to a master when we didn't
+    /* Set use_primary to 1 if we ended up talking to a primary when we didn't
      * explicitly request to. */
-    if (*use_master == 0) {
-        *use_master = k5_kdc_is_master(context, realm,
-                                       &servers.servers[server_used]);
-        TRACE_SENDTO_KDC_MASTER(context, *use_master);
+    if (*use_primary == 0) {
+        *use_primary = k5_kdc_is_primary(context, realm,
+                                         &servers.servers[server_used]);
+        TRACE_SENDTO_KDC_PRIMARY(context, *use_primary);
     }
 
 cleanup:

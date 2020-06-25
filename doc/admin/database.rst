@@ -477,20 +477,20 @@ Starting with release 1.7, :ref:`kdb5_util(8)` allows the master key
 to be changed using a rollover process, with minimal loss of
 availability.  To roll over the master key, follow these steps:
 
-#. On the master KDC, run ``kdb5_util list_mkeys`` to view the current
-   master key version number (KVNO).  If you have never rolled over
-   the master key before, this will likely be version 1::
+#. On the primary KDC, run ``kdb5_util list_mkeys`` to view the
+   current master key version number (KVNO).  If you have never rolled
+   over the master key before, this will likely be version 1::
 
     $ kdb5_util list_mkeys
     Master keys for Principal: K/M@KRBTEST.COM
     KVNO: 1, Enctype: aes256-cts-hmac-sha384-192, Active on: Thu Jan 01 00:00:00 UTC 1970 *
 
-#. On the master KDC, run ``kdb5_util use_mkey 1`` to ensure that a
+#. On the primary KDC, run ``kdb5_util use_mkey 1`` to ensure that a
    master key activation list is present in the database.  This step
    is unnecessary in release 1.11.4 or later, or if the database was
    initially created with release 1.7 or later.
 
-#. On the master KDC, run ``kdb5_util add_mkey -s`` to create a new
+#. On the primary KDC, run ``kdb5_util add_mkey -s`` to create a new
    master key and write it to the stash file.  Enter a secure password
    when prompted.  If this is the first time you are changing the
    master key, the new key will have version 2.  The new master key
@@ -504,17 +504,17 @@ availability.  To roll over the master key, follow these steps:
    the new master key is present, and then ``kdb5_util stash`` to
    write the new master key to the replica KDC's stash file.
 
-#. On the master KDC, run ``kdb5_util use_mkey 2`` to begin using the
+#. On the primary KDC, run ``kdb5_util use_mkey 2`` to begin using the
    new master key.  Replace ``2`` with the version of the new master
    key, as appropriate.  You can optionally specify a date for the new
    master key to become active; by default, it will become active
    immediately.  Prior to release 1.12, :ref:`kadmind(8)` must be
    restarted for this change to take full effect.
 
-#. On the master KDC, run ``kdb5_util update_princ_encryption``.  This
-   command will iterate over the database and re-encrypt all keys in
-   the new master key.  If the database is large and uses DB2, the
-   master KDC will become unavailable while this command runs, but
+#. On the primary KDC, run ``kdb5_util update_princ_encryption``.
+   This command will iterate over the database and re-encrypt all keys
+   in the new master key.  If the database is large and uses DB2, the
+   primary KDC will become unavailable while this command runs, but
    clients should fail over to replica KDCs (if any are present)
    during this time period.  In release 1.13 and later, you can
    instead run ``kdb5_util -x unlockiter update_princ_encryption`` to
@@ -525,7 +525,7 @@ availability.  To roll over the master key, follow these steps:
    and until all running KDC and kadmind processes have serviced
    requests using updated principal entries.
 
-#. On the master KDC, run ``kdb5_util purge_mkeys`` to clean up the
+#. On the primary KDC, run ``kdb5_util purge_mkeys`` to clean up the
    old master key.
 
 
@@ -784,14 +784,14 @@ Overview
 
 At some very large sites, dumping and transmitting the database can
 take more time than is desirable for changes to propagate from the
-master KDC to the replica KDCs.  The incremental propagation support
+primary KDC to the replica KDCs.  The incremental propagation support
 added in the 1.7 release is intended to address this.
 
-With incremental propagation enabled, all programs on the master KDC
+With incremental propagation enabled, all programs on the primary KDC
 that change the database also write information about the changes to
 an "update log" file, maintained as a circular buffer of a certain
 size.  A process on each replica KDC connects to a service on the
-master KDC (currently implemented in the :ref:`kadmind(8)` server) and
+primary KDC (currently implemented in the :ref:`kadmind(8)` server) and
 periodically requests the changes that have been made since the last
 check.  By default, this check is done every two minutes.
 
@@ -801,41 +801,41 @@ data in the KDC config file (See :ref:`kdc.conf(5)`):
 ====================== =============== ===========================================
 iprop_enable           *boolean*       If *true*, then incremental propagation is enabled, and (as noted below) normal kprop propagation is disabled. The default is *false*.
 iprop_master_ulogsize  *integer*       Indicates the number of entries that should be retained in the update log. The default is 1000; the maximum number is 2500.
-iprop_replica_poll     *time interval* Indicates how often the replica should poll the master KDC for changes to the database. The default is two minutes.
-iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both master and replica configuration files.
+iprop_replica_poll     *time interval* Indicates how often the replica should poll the primary KDC for changes to the database. The default is two minutes.
+iprop_port             *integer*       Specifies the port number to be used for incremental propagation. This is required in both primary and replica configuration files.
 iprop_resync_timeout   *integer*       Specifies the number of seconds to wait for a full propagation to complete. This is optional on replica configurations.  Defaults to 300 seconds (5 minutes).
 iprop_logfile          *file name*     Specifies where the update log file for the realm database is to be stored. The default is to use the *database_name* entry from the realms section of the config file :ref:`kdc.conf(5)`, with *.ulog* appended. (NOTE: If database_name isn't specified in the realms section, perhaps because the LDAP database back end is being used, or the file name is specified in the *dbmodules* section, then the hard-coded default for *database_name* is used. Determination of the *iprop_logfile*  default value will not use values from the *dbmodules* section.)
 ====================== =============== ===========================================
 
-Both master and replica sides must have a principal named
+Both primary and replica sides must have a principal named
 ``kiprop/hostname`` (where *hostname* is the lowercase,
 fully-qualified, canonical name for the host) registered in the
 Kerberos database, and have keys for that principal stored in the
 default keytab file (|keytab|).  The ``kiprop/hostname`` principal may
-have been created automatically for the master KDC, but it must always
-be created for replica KDCs.
+have been created automatically for the primary KDC, but it must
+always be created for replica KDCs.
 
-On the master KDC side, the ``kiprop/hostname`` principal must be
+On the primary KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file :ref:`kadm5.acl(5)`, and given the
 **p** privilege (see :ref:`privileges`).
 
 On the replica KDC side, :ref:`kpropd(8)` should be run.  When
 incremental propagation is enabled, it will connect to the kadmind on
-the master KDC and start requesting updates.
+the primary KDC and start requesting updates.
 
 The normal kprop mechanism is disabled by the incremental propagation
 support.  However, if the replica has been unable to fetch changes
-from the master KDC for too long (network problems, perhaps), the log
-on the master may wrap around and overwrite some of the updates that
+from the primary KDC for too long (network problems, perhaps), the log
+on the primary may wrap around and overwrite some of the updates that
 the replica has not yet retrieved.  In this case, the replica will
-instruct the master KDC to dump the current database out to a file and
-invoke a one-time kprop propagation, with special options to also
+instruct the primary KDC to dump the current database out to a file
+and invoke a one-time kprop propagation, with special options to also
 convey the point in the update log at which the replica should resume
 fetching incremental updates.  Thus, all the keytab and ACL setup
 previously described for kprop propagation is still needed.
 
 If an environment has a large number of replicas, it may be desirable
-to arrange them in a hierarchy instead of having the master serve
+to arrange them in a hierarchy instead of having the primary serve
 updates to every replica.  To do this, run ``kadmind -proponly`` on
 each intermediate replica, and ``kpropd -A upstreamhostname`` on
 downstream replicas to direct each one to the appropriate upstream
@@ -844,11 +844,11 @@ replica.
 There are several known restrictions in the current implementation:
 
 - The incremental update protocol does not transport changes to policy
-  objects.  Any policy changes on the master will result in full
+  objects.  Any policy changes on the primary will result in full
   resyncs to all replicas.
 - The replica's KDB module must support locking; it cannot be using the
   LDAP KDB module.
-- The master and replica must be able to initiate TCP connections in
+- The primary and replica must be able to initiate TCP connections in
   both directions, without an intervening NAT.
 
 
@@ -869,7 +869,7 @@ service.  In the Sun implementation, the service is registered with
 rpcbind (also known as portmapper) and the client looks up the port
 number to contact.  In the MIT implementation, where interaction with
 some modern versions of rpcbind doesn't always work well, the port
-number must be specified in the config file on both the master and
+number must be specified in the config file on both the primary and
 replica sides.
 
 The Sun implementation hard-codes pathnames in ``/var/krb5`` for the

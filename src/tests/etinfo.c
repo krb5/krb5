@@ -121,7 +121,7 @@ main(int argc, char **argv)
     krb5_pa_data **padata;
     krb5_preauthtype pa_type = KRB5_PADATA_NONE;
     unsigned int flags;
-    int master = 0;
+    int primary = 0;
 
     if (argc < 2 || argc > 3) {
         fprintf(stderr, "Usage: %s princname [patype]\n", argv[0]);
@@ -140,7 +140,7 @@ main(int argc, char **argv)
     reply = empty_data();
     check(krb5_init_creds_step(ctx, icc, &reply, &request, &realm, &flags));
     assert(flags == KRB5_INIT_CREDS_STEP_FLAG_CONTINUE);
-    check(krb5_sendto_kdc(ctx, &request, &realm, &reply, &master, 0));
+    check(krb5_sendto_kdc(ctx, &request, &realm, &reply, &primary, 0));
 
     if (decode_krb5_error(&reply, &error) == 0) {
         decode_krb5_padata_sequence(&error->e_data, &padata);

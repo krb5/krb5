@@ -400,7 +400,7 @@ following tags may be specified in the realm's subsection:
 
 **admin_server**
     Identifies the host where the administration server is running.
-    Typically, this is the master Kerberos server.  This tag must be
+    Typically, this is the primary Kerberos server.  This tag must be
     given a value in order to communicate with the :ref:`kadmind(8)`
     server for the realm.
 
@@ -515,10 +515,10 @@ following tags may be specified in the realm's subsection:
     host will be tried.
 
 **master_kdc**
-    Identifies the master KDC(s).  Currently, this tag is used in only
+    Identifies the primary KDC(s).  Currently, this tag is used in only
     one case: If an attempt to get credentials fails because of an
     invalid password, the client software will attempt to contact the
-    master KDC, in case the user's password has just been changed, and
+    primary KDC, in case the user's password has just been changed, and
     the updated database has not been propagated to the replica
     servers yet.
 

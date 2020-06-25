@@ -337,7 +337,7 @@ int main(argc, argv)
         return exit_status;
 
     if (global_params.iprop_enabled == TRUE)
-        ulog_set_role(util_context, IPROP_MASTER);
+        ulog_set_role(util_context, IPROP_PRIMARY);
     else
         ulog_set_role(util_context, IPROP_NULL);
 

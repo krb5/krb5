@@ -1198,7 +1198,7 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_data request = empty_data(), reply = empty_data();
     krb5_data realm = empty_data();
     unsigned int flags = 0;
-    int tcp_only = 0, use_master;
+    int tcp_only = 0, use_primary;
 
     for (;;) {
         /* Get the next request and realm.  Turn on TCP if necessary. */
@@ -1212,9 +1212,9 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
         krb5_free_data_contents(context, &reply);
 
         /* Send it to a KDC for the appropriate realm. */
-        use_master = 0;
+        use_primary = 0;
         code = krb5_sendto_kdc(context, &request, &realm,
-                               &reply, &use_master, tcp_only);
+                               &reply, &use_primary, tcp_only);
         if (code != 0)
             break;
 
