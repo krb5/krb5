@@ -299,6 +299,11 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_NEGOEX_OUTGOING(c, seqnum, typestr, info)                 \
     TRACE(c, "NegoEx sending [{int}]{str}: {str}", (int)seqnum, typestr, info)
 
+#define TRACE_PLUGIN_LOAD_FAIL(c, modname, err)                         \
+    TRACE(c, "Error loading plugin module {str}: {kerr}", modname, err)
+#define TRACE_PLUGIN_LOOKUP_FAIL(c, modname, err)                       \
+    TRACE(c, "Error initializing module {str}: {kerr}", modname, err)
+
 #define TRACE_PREAUTH_CONFLICT(c, name1, name2, patype)                 \
     TRACE(c, "Preauth module {str} conflicts with module {str} for pa " \
           "type {patype}", name1, name2, patype)
