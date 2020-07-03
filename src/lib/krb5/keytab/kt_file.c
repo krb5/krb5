@@ -921,6 +921,8 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
             size = ntohl(size);
 
         if (size < 0) {
+            if (size == INT32_MIN)  /* INT32_MIN inverts to itself. */
+                return KRB5_KT_FORMAT;
             if (fseek(KTFILEP(id), -size, SEEK_CUR)) {
                 return errno;
             }
@@ -1347,6 +1349,8 @@ krb5_ktfileint_find_slot(krb5_context context, krb5_keytab id, krb5_int32 *size_
                 return errno;
         } else if (size < 0) {
             /* Empty record; use if it's big enough, seek past otherwise. */
+            if (size == INT32_MIN)  /* INT32_MIN inverts to itself. */
+                return KRB5_KT_FORMAT;
             size = -size;
             if (size >= *size_needed) {
                 *size_needed = size;

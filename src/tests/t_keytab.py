@@ -185,5 +185,12 @@ test_addent(realm, 'default', '-f -e aes128-cts')
 test_addent(realm, 'exp', '-f')
 test_addent(realm, 'pexp', '-f')
 
-success('Keytab-related tests')
+# Regression test for #8914: INT32_MIN length can cause backwards seek
+mark('invalid record length')
+f = open(realm.keytab, 'wb')
+f.write(b'\x05\x02\x80\x00\x00\x00')
+f.close()
+msg = 'Bad format in keytab while scanning keytab'
+realm.run([klist, '-k'], expected_code=1, expected_msg=msg)
+
 success('Keytab-related tests')
