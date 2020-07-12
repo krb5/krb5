@@ -649,14 +649,11 @@ kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
     data = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_DATA);
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
 
-    if (data == NULL) {
+    /* Do nothing if padding is absent or empty, to allow unwrapping of WinRM
+     * unpadded RC4 tokens using an explicit IOV array. */
+    if (data == NULL || padding == NULL || padding->buffer.length == 0) {
         *minor_status = 0;
         return GSS_S_COMPLETE;
-    }
-
-    if (padding == NULL || padding->buffer.length == 0) {
-        *minor_status = EINVAL;
-        return GSS_S_FAILURE;
     }
 
     p = (unsigned char *)padding->buffer.value;
