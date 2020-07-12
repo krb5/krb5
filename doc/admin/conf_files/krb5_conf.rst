@@ -515,12 +515,16 @@ following tags may be specified in the realm's subsection:
     host will be tried.
 
 **master_kdc**
+    The name for **primary_kdc** prior to release 1.19.  Its value is
+    used as a fallback if **primary_kdc** is not specified.
+
+**primary_kdc**
     Identifies the primary KDC(s).  Currently, this tag is used in only
     one case: If an attempt to get credentials fails because of an
     invalid password, the client software will attempt to contact the
     primary KDC, in case the user's password has just been changed, and
     the updated database has not been propagated to the replica
-    servers yet.
+    servers yet.  New in release 1.19.
 
 **v4_instance_convert**
     This subsection allows the administrator to configure exceptions
@@ -1208,7 +1212,7 @@ Here is an example of a generic krb5.conf file::
             kdc = kerberos-1.mit.edu
             kdc = kerberos-2.mit.edu
             admin_server = kerberos.mit.edu
-            master_kdc = kerberos.mit.edu
+            primary_kdc = kerberos.mit.edu
         }
         EXAMPLE.COM = {
             kdc = kerberos.example.com

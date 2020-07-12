@@ -246,6 +246,11 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     realm_srv_names[2] = name;
     realm_srv_names[3] = 0;
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
+    if (code == PROF_NO_RELATION && strcmp(name, KRB5_CONF_PRIMARY_KDC) == 0) {
+        realm_srv_names[2] = KRB5_CONF_MASTER_KDC;
+        code = profile_get_values(context->profile, realm_srv_names,
+                                  &hostlist);
+    }
     if (code) {
         Tprintf("config file lookup failed: %s\n", error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
@@ -495,8 +500,8 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
     kdc_ports:
         dflport = KRB5_DEFAULT_PORT;
         break;
-    case locate_service_master_kdc:
-        profname = KRB5_CONF_MASTER_KDC;
+    case locate_service_primary_kdc:
+        profname = KRB5_CONF_PRIMARY_KDC;
         goto kdc_ports;
     case locate_service_kadmin:
         profname = KRB5_CONF_ADMIN_SERVER;
@@ -663,7 +668,7 @@ dns_locate_server_uri(krb5_context context, const krb5_data *realm,
         return 0;
 
     switch (svc) {
-    case locate_service_master_kdc:
+    case locate_service_primary_kdc:
         find_primary = TRUE;
         /* Fall through */
     case locate_service_kdc:
@@ -707,7 +712,7 @@ dns_locate_server_srv(krb5_context context, const krb5_data *realm,
     case locate_service_kdc:
         dnsname = "_kerberos";
         break;
-    case locate_service_master_kdc:
+    case locate_service_primary_kdc:
         dnsname = "_kerberos-master";
         break;
     case locate_service_kadmin:
@@ -824,7 +829,7 @@ k5_locate_kdc(krb5_context context, const krb5_data *realm,
 {
     enum locate_service_type stype;
 
-    stype = get_primaries ? locate_service_master_kdc : locate_service_kdc;
+    stype = get_primaries ? locate_service_primary_kdc : locate_service_kdc;
     return k5_locate_server(context, realm, serverlist, stype, no_udp);
 }
 
@@ -838,7 +843,7 @@ k5_kdc_is_primary(krb5_context context, const krb5_data *realm,
     if (server->primary != -1)
         return server->primary;
 
-    if (locate_server(context, realm, &list, locate_service_master_kdc,
+    if (locate_server(context, realm, &list, locate_service_primary_kdc,
                       server->transport) != 0)
         return FALSE;
     found = server_list_contains(&list, server);

@@ -222,10 +222,15 @@ The following tags may be specified in a [realms] subsection:
     (Boolean value.)  Specifies whether incremental database
     propagation is enabled.  The default value is false.
 
-**iprop_master_ulogsize**
+**iprop_ulogsize**
     (Integer.)  Specifies the maximum number of log entries to be
     retained for incremental propagation.  The default value is 1000.
-    Prior to release 1.11, the maximum value was 2500.
+    Prior to release 1.11, the maximum value was 2500.  New in release
+    1.19.
+
+**iprop_master_ulogsize**
+    The name for **iprop_ulogsize** prior to release 1.19.  Its value is
+    used as a fallback if **iprop_ulogsize** is not specified.
 
 **iprop_replica_poll**
     (Delta time string.)  Specifies how often the replica KDC polls

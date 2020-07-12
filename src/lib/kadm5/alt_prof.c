@@ -784,24 +784,25 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
     GET_DELTAT_PARAM(iprop_resync_timeout, KADM5_CONFIG_IPROP_RESYNC_TIMEOUT,
                      KRB5_CONF_IPROP_RESYNC_TIMEOUT, 60 * 5);
 
-    hierarchy[2] = KRB5_CONF_IPROP_MASTER_ULOGSIZE;
-
-    params.iprop_ulogsize = DEF_ULOGENTRIES;
-    params.mask |= KADM5_CONFIG_ULOG_SIZE;
-
     if (params_in->mask & KADM5_CONFIG_ULOG_SIZE) {
         params.mask |= KADM5_CONFIG_ULOG_SIZE;
         params.iprop_ulogsize = params_in->iprop_ulogsize;
     } else {
+        params.iprop_ulogsize = 0;
+        hierarchy[2] = KRB5_CONF_IPROP_ULOGSIZE;
         if (aprofile != NULL &&
-            !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue)) {
-            if (ivalue <= 0)
-                params.iprop_ulogsize = DEF_ULOGENTRIES;
-            else
-                params.iprop_ulogsize = ivalue;
-            params.mask |= KADM5_CONFIG_ULOG_SIZE;
-        }
+            !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue) &&
+            ivalue > 0)
+            params.iprop_ulogsize = ivalue;
+        hierarchy[2] = KRB5_CONF_IPROP_MASTER_ULOGSIZE;
+        if (params.iprop_ulogsize == 0 && aprofile != NULL &&
+            !krb5_aprof_get_int32(aprofile, hierarchy, TRUE, &ivalue) &&
+            ivalue > 0)
+            params.iprop_ulogsize = ivalue;
+        if (params.iprop_ulogsize == 0)
+            params.iprop_ulogsize = DEF_ULOGENTRIES;
     }
+    params.mask |= KADM5_CONFIG_ULOG_SIZE;
 
     GET_DELTAT_PARAM(iprop_poll_time, KADM5_CONFIG_POLL_TIME,
                      KRB5_CONF_IPROP_REPLICA_POLL, -1);
