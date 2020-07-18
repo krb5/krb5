@@ -33,6 +33,7 @@
 #include "auth_con.h"
 #include "authdata.h"
 #include "int-proto.h"
+#include "os-proto.h"
 
 /*
  * essentially the same as krb_rd_req, but uses a decoded AP_REQ as
@@ -351,9 +352,9 @@ try_one_princ(krb5_context context, const krb5_ap_req *req,
  * Store the decrypting key in *keyblock_out if it is not NULL.
  */
 static krb5_error_code
-decrypt_ticket(krb5_context context, const krb5_ap_req *req,
-               krb5_const_principal server, krb5_keytab keytab,
-               krb5_keyblock *keyblock_out)
+decrypt_try_server(krb5_context context, const krb5_ap_req *req,
+                   krb5_const_principal server, krb5_keytab keytab,
+                   krb5_keyblock *keyblock_out)
 {
     krb5_error_code ret;
     krb5_keytab_entry ent;
@@ -439,6 +440,35 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
                            found_tkt_server, found_kvno, found_higher_kvno,
                            found_enctype);
 #endif /* LEAN_CLIENT */
+}
+
+static krb5_error_code
+decrypt_ticket(krb5_context context, const krb5_ap_req *req,
+               krb5_const_principal server, krb5_keytab keytab,
+               krb5_keyblock *keyblock_out)
+{
+    krb5_error_code ret, dret = 0;
+    struct canonprinc iter = { server, .no_hostrealm = TRUE };
+    krb5_const_principal canonprinc;
+
+    /* Don't try to canonicalize if we're going to ignore the hostname, or if
+     * server is null or has a wildcard hostname. */
+    if (context->ignore_acceptor_hostname || server == NULL ||
+        (server->length == 2 && server->data[1].length == 0))
+        return decrypt_try_server(context, req, server, keytab, keyblock_out);
+
+    /* Try each canonicalization candidate for server.  If they all fail,
+     * return the error from the last attempt. */
+    while ((ret = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        dret = decrypt_try_server(context, req, canonprinc, keytab,
+                                  keyblock_out);
+        /* Only continue if we found no keytab entries matching canonprinc. */
+        if (dret != KRB5KRB_AP_ERR_NOKEY)
+            break;
+    }
+    free_canonprinc(&iter);
+    return (ret != 0) ? ret : dret;
 }
 
 static krb5_error_code

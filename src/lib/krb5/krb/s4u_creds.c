@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "os-proto.h"
 
 /* Convert ticket flags to necessary KDC options */
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
@@ -981,10 +982,10 @@ get_target_realm_proxy_tgt(krb5_context context, const krb5_data *realm,
     return 0;
 }
 
-krb5_error_code
-k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
-                           krb5_ccache ccache, krb5_creds *in_creds,
-                           krb5_creds **out_creds)
+static krb5_error_code
+get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
+                        krb5_ccache ccache, krb5_creds *in_creds,
+                        krb5_creds **out_creds)
 {
     krb5_error_code code;
     krb5_flags flags, req_kdcopt = 0;
@@ -1120,21 +1121,10 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
         }
     }
 
-    if (!krb5_principal_compare(context, in_creds->server, tkt->server)) {
-        krb5_free_principal(context, tkt->server);
-        tkt->server = NULL;
-        code = krb5_copy_principal(context, in_creds->server, &tkt->server);
-        if (code)
-            goto cleanup;
-    }
-
     /* Note the authdata we asked for in the output creds. */
     code = krb5_copy_authdata(context, in_creds->authdata, &tkt->authdata);
     if (code)
         goto cleanup;
-
-    if (!(options & KRB5_GC_NO_STORE))
-        (void)krb5_cc_store_cred(context, ccache, tkt);
 
     *out_creds = tkt;
     tkt = NULL;
@@ -1146,6 +1136,48 @@ cleanup:
     krb5_free_pa_data(context, in_padata);
     krb5_free_pa_data(context, enc_padata);
     return code;
+}
+
+krb5_error_code
+k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
+                           krb5_ccache ccache, krb5_creds *in_creds,
+                           krb5_creds **out_creds)
+{
+    krb5_error_code code;
+    krb5_const_principal canonprinc;
+    krb5_creds copy, *creds;
+    struct canonprinc iter = { in_creds->server, .no_hostrealm = TRUE };
+
+    *out_creds = NULL;
+
+    copy = *in_creds;
+    while ((code = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        copy.server = (krb5_principal)canonprinc;
+        code = get_proxy_cred_from_kdc(context, options, ccache, &copy,
+                                       &creds);
+        if (code != KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN)
+            break;
+    }
+    if (!code && canonprinc == NULL)
+        code = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+    free_canonprinc(&iter);
+    if (code)
+        return code;
+
+    krb5_free_principal(context, creds->server);
+    creds->server = NULL;
+    code = krb5_copy_principal(context, in_creds->server, &creds->server);
+    if (code) {
+        krb5_free_creds(context, creds);
+        return code;
+    }
+
+    if (!(options & KRB5_GC_NO_STORE))
+        (void)krb5_cc_store_cred(context, ccache, creds);
+
+    *out_creds = creds;
+    return 0;
 }
 
 /*

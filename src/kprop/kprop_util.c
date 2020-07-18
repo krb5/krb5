@@ -73,26 +73,22 @@ sn2princ_realm(krb5_context context, const char *hostname, const char *sname,
                const char *realm, krb5_principal *princ_out)
 {
     krb5_error_code ret;
-    char *canonhost, localname[MAXHOSTNAMELEN];
+    krb5_principal princ;
 
     *princ_out = NULL;
     assert(sname != NULL && realm != NULL);
 
-    /* If hostname is NULL, use the local hostname. */
-    if (hostname == NULL) {
-        if (gethostname(localname, MAXHOSTNAMELEN) != 0)
-            return SOCKET_ERRNO;
-        hostname = localname;
-    }
-
-    ret = krb5_expand_hostname(context, hostname, &canonhost);
+    ret = krb5_sname_to_principal(context, hostname, sname, KRB5_NT_SRV_HST,
+                                  &princ);
     if (ret)
         return ret;
 
-    ret = krb5_build_principal(context, princ_out, strlen(realm), realm, sname,
-                               canonhost, (char *)NULL);
-    krb5_free_string(context, canonhost);
-    if (!ret)
-        (*princ_out)->type = KRB5_NT_SRV_HST;
-    return ret;
+    ret = krb5_set_principal_realm(context, princ, realm);
+    if (ret) {
+        krb5_free_principal(context, princ);
+        return ret;
+    }
+
+    *princ_out = princ;
+    return 0;
 }

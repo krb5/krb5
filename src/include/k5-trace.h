@@ -229,8 +229,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
           salt, s2kparams)
 #define TRACE_INIT_CREDS_IDENTIFIED_REALM(c, realm)                     \
     TRACE(c, "Identified realm of client principal as {data}", realm)
-#define TRACE_INIT_CREDS_KEYTAB_LOOKUP(c, etypes)               \
-    TRACE(c, "Looked up etypes in keytab: {etypes}", etypes)
+#define TRACE_INIT_CREDS_KEYTAB_LOOKUP(c, princ, etypes)                \
+    TRACE(c, "Found entries for {princ} in keytab: {etypes}", princ, etypes)
 #define TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(c, code)          \
     TRACE(c, "Couldn't lookup etypes in keytab: {kerr}", code)
 #define TRACE_INIT_CREDS_PREAUTH(c)                     \

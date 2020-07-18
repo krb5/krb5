@@ -27,6 +27,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "os-proto.h"
 #include "init_creds_ctx.h"
 
 static krb5_error_code
@@ -85,7 +86,8 @@ get_as_key_keytab(krb5_context context,
 /* Return the list of etypes available for client in keytab. */
 static krb5_error_code
 lookup_etypes_for_keytab(krb5_context context, krb5_keytab keytab,
-                         krb5_principal client, krb5_enctype **etypes_out)
+                         krb5_const_principal client,
+                         krb5_enctype **etypes_out)
 {
     krb5_kt_cursor cursor;
     krb5_keytab_entry entry;
@@ -182,18 +184,37 @@ krb5_init_creds_set_keytab(krb5_context context,
 {
     krb5_enctype *etype_list;
     krb5_error_code ret;
+    struct canonprinc iter = { ctx->request->client, .subst_defrealm = TRUE };
+    krb5_const_principal canonprinc;
+    krb5_principal copy;
     char *name;
 
     ctx->gak_fct = get_as_key_keytab;
     ctx->gak_data = keytab;
 
-    ret = lookup_etypes_for_keytab(context, keytab, ctx->request->client,
-                                   &etype_list);
+    /* We may be authenticating as a host-based principal.  If so, look for
+     * each canonicalization candidate in the keytab. */
+    while ((ret = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        ret = lookup_etypes_for_keytab(context, keytab, canonprinc,
+                                       &etype_list);
+        if (ret || etype_list != NULL)
+            break;
+    }
+    if (!ret && canonprinc != NULL) {
+        /* Authenticate as the principal we found in the keytab. */
+        ret = krb5_copy_principal(context, canonprinc, &copy);
+        if (!ret) {
+            krb5_free_principal(context, ctx->request->client);
+            ctx->request->client = copy;
+        }
+    }
+    free_canonprinc(&iter);
     if (ret) {
         TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(context, ret);
         return 0;
     }
-    TRACE_INIT_CREDS_KEYTAB_LOOKUP(context, etype_list);
+    TRACE_INIT_CREDS_KEYTAB_LOOKUP(context, ctx->request->client, etype_list);
 
     /* Error out if we have no keys for the client principal. */
     if (etype_list == NULL) {

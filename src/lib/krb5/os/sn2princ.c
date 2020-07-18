@@ -85,22 +85,18 @@ qualify_shortname(krb5_context context, const char *host)
     return fqdn;
 }
 
-krb5_error_code
-k5_expand_hostname(krb5_context context, const char *host,
-                   krb5_boolean is_fallback, char **canonhost_out)
+static krb5_error_code
+expand_hostname(krb5_context context, const char *host, krb5_boolean use_dns,
+                char **canonhost_out)
 {
     struct addrinfo *ai = NULL, hint;
     char namebuf[NI_MAXHOST], *qualified = NULL, *copy, *p;
     int err;
     const char *canonhost;
-    krb5_boolean use_dns;
 
     *canonhost_out = NULL;
 
     canonhost = host;
-    use_dns = (context->dns_canonicalize_hostname == CANONHOST_TRUE ||
-               (is_fallback &&
-                context->dns_canonicalize_hostname == CANONHOST_FALLBACK));
     if (use_dns) {
         /* Try a forward lookup of the hostname. */
         memset(&hint, 0, sizeof(hint));
@@ -161,21 +157,135 @@ krb5_error_code KRB5_CALLCONV
 krb5_expand_hostname(krb5_context context, const char *host,
                      char **canonhost_out)
 {
-    return k5_expand_hostname(context, host, FALSE, canonhost_out);
+    int use_dns = (context->dns_canonicalize_hostname == CANONHOST_TRUE);
+
+    return expand_hostname(context, host, use_dns, canonhost_out);
 }
 
-/* If hostname appears to have a :port or :instance trailer (used in MSSQLSvc
- * principals), return a pointer to the separator.  Otherwise return NULL. */
-static const char *
-find_trailer(const char *hostname)
+/* Split data into hostname and trailer (:port or :instance).  Trailers are
+ * used in MSSQLSvc principals. */
+static void
+split_trailer(const krb5_data *data, krb5_data *host, krb5_data *trailer)
 {
-    const char *p = strchr(hostname, ':');
+    char *p = memchr(data->data, ':', data->length);
+    unsigned int tlen = (p == NULL) ? 0 : data->length - (p - data->data);
 
-    /* Look for a single colon followed by one or more characters.  An IPv6
-     * address will have more than one colon, so don't accept that. */
-    if (p == NULL || p[1] == '\0' || strchr(p + 1, ':') != NULL)
-        return NULL;
-    return p;
+    /* Make sure we have a single colon followed by one or more characters.  An
+     * IPv6 address will have more than one colon, so don't accept that. */
+    if (p == NULL || tlen == 1 || memchr(p + 1, ':', tlen - 1) != NULL) {
+        *host = *data;
+        *trailer = empty_data();
+    } else {
+        *host = make_data(data->data, p - data->data);
+        *trailer = make_data(p, tlen);
+    }
+}
+
+static krb5_error_code
+canonicalize_princ(krb5_context context, struct canonprinc *iter,
+                   krb5_boolean use_dns, krb5_const_principal *princ_out)
+{
+    krb5_error_code ret;
+    krb5_data host, trailer;
+    char *hostname = NULL, *canonhost = NULL, *combined = NULL;
+    char **hrealms = NULL;
+
+    *princ_out = NULL;
+
+    assert(iter->princ->length == 2);
+    split_trailer(&iter->princ->data[1], &host, &trailer);
+
+    hostname = k5memdup0(host.data, host.length, &ret);
+    if (hostname == NULL)
+        goto cleanup;
+
+    if (iter->princ->type == KRB5_NT_SRV_HST) {
+        /* Expand the hostname with or without DNS as specified. */
+        ret = expand_hostname(context, hostname, use_dns, &canonhost);
+        if (ret)
+            goto cleanup;
+    } else {
+        canonhost = strdup(hostname);
+        if (canonhost == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+    }
+
+    /* Add the trailer to the expanded hostname. */
+    if (asprintf(&combined, "%s%.*s", canonhost,
+                 trailer.length, trailer.data) < 0) {
+        combined = NULL;
+        ret = ENOMEM;
+        goto cleanup;
+    }
+
+    /* Don't yield the same host part twice. */
+    if (iter->canonhost != NULL && strcmp(iter->canonhost, combined) == 0)
+        goto cleanup;
+
+    free(iter->canonhost);
+    iter->canonhost = combined;
+    combined = NULL;
+
+    /* If the realm is unknown, look up the realm of the expanded hostname. */
+    if (iter->princ->realm.length == 0 && !iter->no_hostrealm) {
+        ret = krb5_get_host_realm(context, canonhost, &hrealms);
+        if (ret)
+            goto cleanup;
+        if (hrealms[0] == NULL) {
+            ret = KRB5_ERR_HOST_REALM_UNKNOWN;
+            goto cleanup;
+        }
+        free(iter->realm);
+        if (*hrealms[0] == '\0' && iter->subst_defrealm) {
+            ret = krb5_get_default_realm(context, &iter->realm);
+            if (ret)
+                goto cleanup;
+        } else {
+            iter->realm = strdup(hrealms[0]);
+            if (iter->realm == NULL) {
+                ret = ENOMEM;
+                goto cleanup;
+            }
+        }
+    }
+
+    iter->copy = *iter->princ;
+    if (iter->realm != NULL)
+        iter->copy.realm = string2data(iter->realm);
+    iter->components[0] = iter->princ->data[0];
+    iter->components[1] = string2data(iter->canonhost);
+    iter->copy.data = iter->components;
+    *princ_out = &iter->copy;
+
+cleanup:
+    free(hostname);
+    free(canonhost);
+    free(combined);
+    krb5_free_host_realm(context, hrealms);
+    return ret;
+}
+
+krb5_error_code
+k5_canonprinc(krb5_context context, struct canonprinc *iter,
+              krb5_const_principal *princ_out)
+{
+    int step = ++iter->step;
+
+    *princ_out = NULL;
+
+    /* If we're not doing fallback, the input principal is canonical. */
+    if (context->dns_canonicalize_hostname != CANONHOST_FALLBACK ||
+        iter->princ->type != KRB5_NT_SRV_HST || iter->princ->length != 2) {
+        *princ_out = (step == 1) ? iter->princ : NULL;
+        return 0;
+    }
+
+    /* Canonicalize without DNS at step 1, with DNS at step 2. */
+    if (step > 2)
+        return 0;
+    return canonicalize_princ(context, iter, step == 2, princ_out);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -185,9 +295,10 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
 {
     krb5_error_code ret;
     krb5_principal princ;
-    const char *realm, *trailer;
-    char **hrealms = NULL, *canonhost = NULL, *hostonly = NULL, *concat = NULL;
+    krb5_const_principal cprinc;
+    krb5_boolean use_dns;
     char localname[MAXHOSTNAMELEN];
+    struct canonprinc iter = { NULL };
 
     *princ_out = NULL;
 
@@ -205,54 +316,26 @@ krb5_sname_to_principal(krb5_context context, const char *hostname,
     if (sname == NULL)
         sname = "host";
 
-    /* If there is a trailer, remove it for now. */
-    trailer = find_trailer(hostname);
-    if (trailer != NULL) {
-        hostonly = k5memdup0(hostname, trailer - hostname, &ret);
-        if (hostonly == NULL)
-            goto cleanup;
-        hostname = hostonly;
-    }
-
-    /* Canonicalize the hostname if appropriate. */
-    if (type == KRB5_NT_SRV_HST) {
-        ret = krb5_expand_hostname(context, hostname, &canonhost);
-        if (ret)
-            goto cleanup;
-        hostname = canonhost;
-    }
-
-    /* Find the realm of the host. */
-    ret = krb5_get_host_realm(context, hostname, &hrealms);
+    /* Build an initial principal with what we have. */
+    ret = krb5_build_principal(context, &princ, 0, KRB5_REFERRAL_REALM,
+                               sname, hostname, (char *)NULL);
     if (ret)
-        goto cleanup;
-    if (hrealms[0] == NULL) {
-        ret = KRB5_ERR_HOST_REALM_UNKNOWN;
-        goto cleanup;
-    }
-    realm = hrealms[0];
-
-    /* If there was a trailer, put it back on the end. */
-    if (trailer != NULL) {
-        if (asprintf(&concat, "%s%s", hostname, trailer) < 0) {
-            ret = ENOMEM;
-            goto cleanup;
-        }
-        hostname = concat;
-    }
-
-    ret = krb5_build_principal(context, &princ, strlen(realm), realm, sname,
-                               hostname, (char *)NULL);
-    if (ret)
-        goto cleanup;
-
+        return ret;
     princ->type = type;
-    *princ_out = princ;
 
-cleanup:
-    free(hostonly);
-    free(canonhost);
-    free(concat);
-    krb5_free_host_realm(context, hrealms);
+    if (type == KRB5_NT_SRV_HST &&
+        context->dns_canonicalize_hostname == CANONHOST_FALLBACK) {
+        /* Delay canonicalization and realm lookup until use. */
+        *princ_out = princ;
+        return 0;
+    }
+
+    use_dns = (context->dns_canonicalize_hostname == CANONHOST_TRUE);
+    iter.princ = princ;
+    ret = canonicalize_princ(context, &iter, use_dns, &cprinc);
+    if (!ret)
+        ret = krb5_copy_principal(context, cprinc, princ_out);
+    free_canonprinc(&iter);
+    krb5_free_principal(context, princ);
     return ret;
 }

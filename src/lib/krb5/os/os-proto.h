@@ -83,6 +83,36 @@ struct sendto_callback_info {
     void *data;
 };
 
+/*
+ * Initialize with all zeros except for princ.  Set no_hostrealm to disable
+ * host-to-realm lookup, which ordinarily happens after canonicalizing the host
+ * part.  Set subst_defrealm to substitute the default realm for the referral
+ * realm after realm lookup (this has no effect if no_hostrealm is set).  Free
+ * with free_canonprinc() when done.
+ */
+struct canonprinc {
+    krb5_const_principal princ;
+    krb5_boolean no_hostrealm;
+    krb5_boolean subst_defrealm;
+    int step;
+    char *canonhost;
+    char *realm;
+    krb5_principal_data copy;
+    krb5_data components[2];
+};
+
+/* Yield one or two candidate canonical principal names for iter, then NULL.
+ * Output names are valid for one iteration and must not be freed. */
+krb5_error_code k5_canonprinc(krb5_context context, struct canonprinc *iter,
+                              krb5_const_principal *princ_out);
+
+static inline void
+free_canonprinc(struct canonprinc *iter)
+{
+    free(iter->canonhost);
+    free(iter->realm);
+}
+
 krb5_error_code k5_expand_hostname(krb5_context context, const char *host,
                                    krb5_boolean is_fallback,
                                    char **canonhost_out);

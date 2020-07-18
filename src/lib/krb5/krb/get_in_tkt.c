@@ -1051,9 +1051,6 @@ krb5_init_creds_init(krb5_context context,
         ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
         ctx->request->client->type = KRB5_NT_WELLKNOWN;
     }
-    code = restart_init_creds_loop(context, ctx, FALSE);
-    if (code)
-        goto cleanup;
 
     *pctx = ctx;
     ctx = NULL;
@@ -1858,6 +1855,10 @@ krb5_init_creds_step(krb5_context context,
             goto copy_realm;
         }
         if (code != 0 || ctx->complete)
+            goto cleanup;
+    } else {
+        code = restart_init_creds_loop(context, ctx, FALSE);
+        if (code)
             goto cleanup;
     }
 
