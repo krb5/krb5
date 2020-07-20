@@ -102,6 +102,11 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
             return KRB5_NO_2ND_TKT;
     }
 
+    /* For S4U2Proxy requests we don't know the impersonated client in this
+     * API, but matching against the second ticket is good enough. */
+    if (options & KRB5_GC_CONSTRAINED_DELEGATION)
+        mcreds->client = NULL;
+
     return 0;
 }
 

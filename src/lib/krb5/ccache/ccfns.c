@@ -96,7 +96,8 @@ krb5_cc_retrieve_cred(krb5_context context, krb5_ccache cache,
     TRACE_CC_RETRIEVE(context, cache, mcreds, ret);
     if (ret != KRB5_CC_NOTFOUND)
         return ret;
-    if (!krb5_is_referral_realm(&mcreds->server->realm))
+    if (mcreds->client == NULL || mcreds->server == NULL ||
+        !krb5_is_referral_realm(&mcreds->server->realm))
         return ret;
 
     /*

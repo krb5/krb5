@@ -1119,6 +1119,13 @@ get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
             code = KRB5KRB_AP_WRONG_PRINC;
             goto cleanup;
         }
+
+        /* Put the original evidence ticket in the output creds. */
+        krb5_free_data_contents(context, &tkt->second_ticket);
+        code = krb5int_copy_data_contents(context, &in_creds->second_ticket,
+                                          &tkt->second_ticket);
+        if (code)
+            goto cleanup;
     }
 
     /* Note the authdata we asked for in the output creds. */
@@ -1145,10 +1152,32 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
 {
     krb5_error_code code;
     krb5_const_principal canonprinc;
-    krb5_creds copy, *creds;
+    krb5_creds mcreds, copy, *creds, *ncreds;
+    krb5_flags fields;
     struct canonprinc iter = { in_creds->server, .no_hostrealm = TRUE };
 
     *out_creds = NULL;
+
+    code = krb5int_construct_matching_creds(context, options, in_creds,
+                                            &mcreds, &fields);
+    if (code != 0)
+        return code;
+
+    ncreds = calloc(1, sizeof(*ncreds));
+    if (ncreds == NULL)
+        return ENOMEM;
+    ncreds->magic = KV5M_CRED;
+
+    code = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds, ncreds);
+    if (code) {
+        free(ncreds);
+    } else {
+        *out_creds = ncreds;
+    }
+
+    if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) ||
+        options & KRB5_GC_CACHED)
+        return code;
 
     copy = *in_creds;
     while ((code = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
@@ -1195,9 +1224,6 @@ krb5_get_credentials_for_proxy(krb5_context context,
                                krb5_creds **out_creds)
 {
     krb5_error_code code;
-    krb5_creds mcreds;
-    krb5_creds *ncreds = NULL;
-    krb5_flags fields;
     krb5_data *evidence_tkt_data = NULL;
     krb5_creds s4u_creds;
 
@@ -1218,30 +1244,6 @@ krb5_get_credentials_for_proxy(krb5_context context,
         code = EINVAL;
         goto cleanup;
     }
-
-    code = krb5int_construct_matching_creds(context, options, in_creds,
-                                            &mcreds, &fields);
-    if (code != 0)
-        goto cleanup;
-
-    ncreds = calloc(1, sizeof(*ncreds));
-    if (ncreds == NULL) {
-        code = ENOMEM;
-        goto cleanup;
-    }
-    ncreds->magic = KV5M_CRED;
-
-    code = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds, ncreds);
-    if (code != 0) {
-        free(ncreds);
-        ncreds = in_creds;
-    } else {
-        *out_creds = ncreds;
-    }
-
-    if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
-        || options & KRB5_GC_CACHED)
-        goto cleanup;
 
     code = encode_krb5_ticket(evidence_tkt, &evidence_tkt_data);
     if (code != 0)

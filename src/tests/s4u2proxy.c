@@ -124,6 +124,9 @@ main(int argc, char **argv)
                                          KRB5_GC_CANONICALIZE, defcc,
                                          &mcred, ev_ticket, &new_cred));
 
+    assert(data_eq(new_cred->second_ticket, ev_cred.ticket));
+    assert(new_cred->second_ticket.length != 0);
+
     /* Store the new cred in the default ccache. */
     check(krb5_cc_store_cred(context, defcc, new_cred));
 

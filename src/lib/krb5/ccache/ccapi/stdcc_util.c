@@ -945,8 +945,13 @@ standard_fields_match(context, mcreds, creds)
     krb5_context context;
     const krb5_creds *mcreds, *creds;
 {
-    return (krb5_principal_compare(context, mcreds->client,creds->client) &&
-            krb5_principal_compare(context, mcreds->server,creds->server));
+    if (mcreds->client != NULL &&
+        !krb5_principal_compare(context, mcreds->client, creds->client))
+        return FALSE;
+    if (mcreds->server != NULL &&
+        !krb5_principal_compare(context, mcreds->server,creds->server))
+        return FALSE;
+    return TRUE;
 }
 
 /* only match the server name portion, not the server realm portion */
@@ -956,19 +961,14 @@ srvname_match(context, mcreds, creds)
     krb5_context context;
     const krb5_creds *mcreds, *creds;
 {
-    krb5_boolean retval;
-    krb5_principal_data p1, p2;
-
-    retval = krb5_principal_compare(context, mcreds->client,creds->client);
-    if (retval != TRUE)
-        return retval;
-    /*
-     * Hack to ignore the server realm for the purposes of the compare.
-     */
-    p1 = *mcreds->server;
-    p2 = *creds->server;
-    p1.realm = p2.realm;
-    return krb5_principal_compare(context, &p1, &p2);
+    if (mcreds->client != NULL &&
+        !krb5_principal_compare(context, mcreds->client, creds->client))
+        return FALSE;
+    if (mcreds->server != NULL &&
+        !krb5_principal_compare_any_realm(context, mcreds->server,
+                                          creds->server))
+        return FALSE;
+    return TRUE;
 }
 
 
