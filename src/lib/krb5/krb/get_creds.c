@@ -48,10 +48,10 @@
  * and options.  The fields of *mcreds will be aliased to the fields
  * of in_creds, so the contents of *mcreds should not be freed.
  */
-krb5_error_code
-krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
-                                 krb5_creds *in_creds, krb5_creds *mcreds,
-                                 krb5_flags *fields)
+static krb5_error_code
+construct_matching_creds(krb5_context context, krb5_flags options,
+                         krb5_creds *in_creds, krb5_creds *mcreds,
+                         krb5_flags *fields)
 {
     if (!in_creds || !in_creds->server || !in_creds->client)
         return EINVAL;
@@ -108,6 +108,50 @@ krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
         mcreds->client = NULL;
 
     return 0;
+}
+
+/* Simple wrapper around krb5_cc_retrieve_cred which allocates the result
+ * container. */
+static krb5_error_code
+cache_get(krb5_context context, krb5_ccache ccache, krb5_flags flags,
+          krb5_creds *in_creds, krb5_creds **out_creds)
+{
+    krb5_error_code code;
+    krb5_creds *creds;
+
+    *out_creds = NULL;
+
+    creds = malloc(sizeof(*creds));
+    if (creds == NULL)
+        return ENOMEM;
+
+    code = krb5_cc_retrieve_cred(context, ccache, flags, in_creds, creds);
+    if (code != 0) {
+        free(creds);
+        return code;
+    }
+
+    *out_creds = creds;
+    return 0;
+}
+
+krb5_error_code
+k5_get_cached_cred(krb5_context context, krb5_flags options,
+                   krb5_ccache ccache, krb5_creds *in_creds,
+                   krb5_creds **creds_out)
+{
+    krb5_error_code code;
+    krb5_creds mcreds;
+    krb5_flags fields;
+
+    *creds_out = NULL;
+
+    code = construct_matching_creds(context, options, in_creds,
+                                    &mcreds, &fields);
+    if (code)
+        return code;
+
+    return cache_get(context, ccache, fields, &mcreds, creds_out);
 }
 
 /*
@@ -233,31 +277,6 @@ cleanup:
     krb5_free_data_contents(context, &out_copy);
     krb5_free_data_contents(context, &realm_copy);
     return code;
-}
-
-/* Simple wrapper around krb5_cc_retrieve_cred which allocates the result
- * container. */
-static krb5_error_code
-cache_get(krb5_context context, krb5_ccache ccache, krb5_flags flags,
-          krb5_creds *in_creds, krb5_creds **out_creds)
-{
-    krb5_error_code code;
-    krb5_creds *creds;
-
-    *out_creds = NULL;
-
-    creds = malloc(sizeof(*creds));
-    if (creds == NULL)
-        return ENOMEM;
-
-    code = krb5_cc_retrieve_cred(context, ccache, flags, in_creds, creds);
-    if (code != 0) {
-        free(creds);
-        return code;
-    }
-
-    *out_creds = creds;
-    return 0;
 }
 
 /*
@@ -1023,18 +1042,13 @@ static krb5_error_code
 check_cache(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
-    krb5_creds mcreds;
-    krb5_flags fields;
     krb5_creds req_in_creds;
 
     /* Check the cache for the originally requested server principal. */
     req_in_creds = *ctx->in_creds;
     req_in_creds.server = ctx->req_server;
-    code = krb5int_construct_matching_creds(context, ctx->req_options,
-                                            &req_in_creds, &mcreds, &fields);
-    if (code)
-        return code;
-    code = cache_get(context, ctx->ccache, fields, &mcreds, &ctx->reply_creds);
+    code = k5_get_cached_cred(context, ctx->req_options, ctx->ccache,
+                              &req_in_creds, &ctx->reply_creds);
     if (code == 0) {
         ctx->state = STATE_COMPLETE;
         return 0;

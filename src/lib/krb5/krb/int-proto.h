@@ -79,9 +79,9 @@ clpreauth_otp_initvt(krb5_context context, int maj_ver, int min_ver,
                      krb5_plugin_vtable vtable);
 
 krb5_error_code
-krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
-                                 krb5_creds *in_creds, krb5_creds *mcreds,
-                                 krb5_flags *fields);
+k5_get_cached_cred(krb5_context context, krb5_flags options,
+                   krb5_ccache ccache, krb5_creds *in_creds,
+                   krb5_creds **creds_out);
 
 #define IS_TGS_PRINC(p) ((p)->length == 2 &&                            \
                          data_eq_string((p)->data[0], KRB5_TGS_NAME))

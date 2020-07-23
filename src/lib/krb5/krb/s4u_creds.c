@@ -1152,29 +1152,12 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
 {
     krb5_error_code code;
     krb5_const_principal canonprinc;
-    krb5_creds mcreds, copy, *creds, *ncreds;
-    krb5_flags fields;
+    krb5_creds copy, *creds;
     struct canonprinc iter = { in_creds->server, .no_hostrealm = TRUE };
 
     *out_creds = NULL;
 
-    code = krb5int_construct_matching_creds(context, options, in_creds,
-                                            &mcreds, &fields);
-    if (code != 0)
-        return code;
-
-    ncreds = calloc(1, sizeof(*ncreds));
-    if (ncreds == NULL)
-        return ENOMEM;
-    ncreds->magic = KV5M_CRED;
-
-    code = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds, ncreds);
-    if (code) {
-        free(ncreds);
-    } else {
-        *out_creds = ncreds;
-    }
-
+    code = k5_get_cached_cred(context, options, ccache, in_creds, out_creds);
     if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) ||
         options & KRB5_GC_CACHED)
         return code;
