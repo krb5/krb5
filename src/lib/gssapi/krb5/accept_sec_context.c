@@ -433,27 +433,30 @@ static const uint8_t null_cb[CB_MD5_LEN];
 /* Look for AP_OPTIONS in authdata.  If present and the options include
  * KERB_AP_OPTIONS_CBT, set *cbt_out to true. */
 static krb5_error_code
-check_cbt(krb5_context context, krb5_authdata **authdata,
+check_cbt(krb5_context context, krb5_authdata *const *authdata,
           krb5_boolean *cbt_out)
 {
     krb5_error_code code;
+    krb5_authdata **ad;
     uint32_t ad_ap_options;
     const uint32_t KERB_AP_OPTIONS_CBT = 0x4000;
 
     *cbt_out = FALSE;
 
     code = krb5_find_authdata(context, NULL, authdata,
-                              KRB5_AUTHDATA_AP_OPTIONS, &authdata);
-    if (code || authdata == NULL)
+                              KRB5_AUTHDATA_AP_OPTIONS, &ad);
+    if (code || ad == NULL)
         return code;
-    if (authdata[1] != NULL || authdata[0]->length != 4)
-        return KRB5KRB_AP_ERR_MSG_TYPE;
+    if (ad[1] != NULL || ad[0]->length != 4) {
+        code = KRB5KRB_AP_ERR_MSG_TYPE;
+    } else {
+        ad_ap_options = load_32_le(ad[0]->contents);
+        if (ad_ap_options & KERB_AP_OPTIONS_CBT)
+            *cbt_out = TRUE;
+    }
 
-    ad_ap_options = load_32_le(authdata[0]->contents);
-    if (ad_ap_options & KERB_AP_OPTIONS_CBT)
-        *cbt_out = TRUE;
-
-    return 0;
+    krb5_free_authdata(context, ad);
+    return code;
 }
 
 /*
