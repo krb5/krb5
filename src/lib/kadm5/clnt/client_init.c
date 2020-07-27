@@ -372,21 +372,9 @@ get_init_creds(kadm5_server_handle_t handle, krb5_principal client,
 {
     kadm5_ret_t code;
     krb5_ccache ccache = NULL;
-    char svcname[BUFSIZ];
+    char *svcname, svcbuf[BUFSIZ];
 
     *server_out = NULL;
-
-    /* NULL svcname means use host-based. */
-    if (svcname_in == NULL) {
-        code = kadm5_get_admin_service_name(handle->context,
-                                            handle->params.realm,
-                                            svcname, sizeof(svcname));
-        if (code)
-            goto error;
-    } else {
-        strncpy(svcname, svcname_in, sizeof(svcname));
-        svcname[sizeof(svcname)-1] = '\0';
-    }
 
     /*
      * Acquire a service ticket for svcname@realm for client, using password
@@ -423,13 +411,19 @@ get_init_creds(kadm5_server_handle_t handle, krb5_principal client,
     }
     handle->lhandle->cache_name = handle->cache_name;
 
+    svcname = (svcname_in != NULL) ? svcname_in : KADM5_ADMIN_SERVICE;
     code = gic_iter(handle, init_type, ccache, client, pass, svcname, realm,
                     server_out);
     if ((code == KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN
          || code == KRB5_CC_NOTFOUND) && svcname_in == NULL) {
-        /* Retry with old host-independent service principal. */
-        code = gic_iter(handle, init_type, ccache, client, pass,
-                        KADM5_ADMIN_SERVICE, realm, server_out);
+        /* Retry with host-based service principal. */
+        code = kadm5_get_admin_service_name(handle->context,
+                                            handle->params.realm,
+                                            svcbuf, sizeof(svcbuf));
+        if (code)
+            goto error;
+        code = gic_iter(handle, init_type, ccache, client, pass, svcbuf, realm,
+                        server_out);
     }
     /* Improved error messages */
     if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) code = KADM5_BAD_PASSWORD;

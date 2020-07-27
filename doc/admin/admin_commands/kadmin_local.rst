@@ -44,9 +44,9 @@ Kerberos principals, password policies, and service key tables
 (keytabs).
 
 The remote kadmin client uses Kerberos to authenticate to kadmind
-using the service principal ``kadmin/ADMINHOST`` (where *ADMINHOST* is
-the fully-qualified hostname of the admin server) or ``kadmin/admin``.
-If the credentials cache contains a ticket for one of these
+using the service principal ``kadmin/admin`` or ``kadmin/ADMINHOST``
+(where *ADMINHOST* is the fully-qualified hostname of the admin
+server).  If the credentials cache contains a ticket for one of these
 principals, and the **-c** credentials_cache option is specified, that
 ticket is used to authenticate to kadmind.  Otherwise, the **-p** and
 **-k** options are used to specify the client Kerberos principal name
@@ -100,10 +100,10 @@ OPTIONS
     fully anonymous operation.
 
 **-c** *credentials_cache*
-    Use *credentials_cache* as the credentials cache.  The
-    cache should contain a service ticket for the ``kadmin/ADMINHOST``
-    (where *ADMINHOST* is the fully-qualified hostname of the admin
-    server) or ``kadmin/admin`` service; it can be acquired with the
+    Use *credentials_cache* as the credentials cache.  The cache
+    should contain a service ticket for the ``kadmin/admin`` or
+    ``kadmin/ADMINHOST`` (where *ADMINHOST* is the fully-qualified
+    hostname of the admin server) service; it can be acquired with the
     :ref:`kinit(1)` program.  If this option is not specified, kadmin
     requests a new service ticket from the KDC, and stores it in its
     own temporary ccache.

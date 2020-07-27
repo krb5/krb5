@@ -26,8 +26,8 @@ local filesystem (or through LDAP).  kadmin.local is necessary to set
 up enough of the database to be able to use the remote version.
 
 kadmin can authenticate to the admin server using the service
-principal ``kadmin/HOST`` (where *HOST* is the hostname of the admin
-server) or ``kadmin/admin``.  If the credentials cache contains a
+principal ``kadmin/admin`` or ``kadmin/HOST`` (where *HOST* is the
+hostname of the admin server).  If the credentials cache contains a
 ticket for either service principal and the **-c** ccache option is
 specified, that ticket is used to authenticate to KADM5.  Otherwise,
 the **-p** and **-k** options are used to specify the client Kerberos
@@ -811,9 +811,9 @@ Both master and replica sides must have a principal named
 ``kiprop/hostname`` (where *hostname* is the lowercase,
 fully-qualified, canonical name for the host) registered in the
 Kerberos database, and have keys for that principal stored in the
-default keytab file (|keytab|).  In release 1.13, the
-``kiprop/hostname`` principal is created automatically for the master
-KDC, but it must still be created for replica KDCs.
+default keytab file (|keytab|).  The ``kiprop/hostname`` principal may
+have been created automatically for the master KDC, but it must always
+be created for replica KDCs.
 
 On the master KDC side, the ``kiprop/hostname`` principal must be
 listed in the kadmind ACL file :ref:`kadm5.acl(5)`, and given the
