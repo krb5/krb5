@@ -3338,20 +3338,19 @@ get_mech_oid(OM_uint32 *minor_status, unsigned char **buff_in, size_t length)
 	OM_uint32	status;
 	gss_OID_desc 	toid;
 	gss_OID		mech_out = NULL;
-	unsigned char		*start, *end;
+	unsigned int	bytes;
+	int		oid_length;
 
 	if (length < 1 || **buff_in != MECH_OID)
 		return (NULL);
-
-	start = *buff_in;
-	end = start + length;
-
 	(*buff_in)++;
-	toid.length = *(*buff_in)++;
+	length--;
 
-	if ((*buff_in + toid.length) > end)
+	oid_length = gssint_get_der_length(buff_in, length, &bytes);
+	if (oid_length < 0 || length - bytes < (size_t)oid_length)
 		return (NULL);
 
+	toid.length = oid_length;
 	toid.elements = *buff_in;
 	*buff_in += toid.length;
 
