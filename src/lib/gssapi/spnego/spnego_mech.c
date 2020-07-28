@@ -3461,14 +3461,14 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in,
 	unsigned char		*start;
 	int i;
 
-	if (**buff_in != SEQUENCE_OF)
+	if (buff_length < 1 || **buff_in != SEQUENCE_OF)
 		return (NULL);
 
 	start = *buff_in;
 	(*buff_in)++;
 
-	length = gssint_get_der_length(buff_in, buff_length, &bytes);
-	if (length < 0 || buff_length - bytes < (unsigned int)length)
+	length = gssint_get_der_length(buff_in, buff_length - 1, &bytes);
+	if (length < 0 || buff_length - 1 - bytes < (unsigned int)length)
 		return NULL;
 
 	major_status = gss_create_empty_oid_set(minor_status,
@@ -3548,11 +3548,11 @@ get_req_flags(unsigned char **buff_in, OM_uint32 bodysize,
 {
 	unsigned int len;
 
-	if (**buff_in != (CONTEXT | 0x01))
+	if (bodysize < 1 || **buff_in != (CONTEXT | 0x01))
 		return (0);
 
 	if (g_get_tag_and_length(buff_in, (CONTEXT | 0x01),
-				bodysize, &len) < 0)
+				 bodysize, &len) < 0 || len != 4)
 		return GSS_S_DEFECTIVE_TOKEN;
 
 	if (*(*buff_in)++ != BIT_STRING)
