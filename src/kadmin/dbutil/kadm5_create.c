@@ -139,60 +139,18 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
     krb5_error_code ret = 0;
-    char *service_name = 0, *kiprop_name = 0, *canonhost = 0;
-    char localname[MAXHOSTNAMELEN];
-
-    if (gethostname(localname, MAXHOSTNAMELEN)) {
-        ret = errno;
-        perror("gethostname");
-        goto clean_and_exit;
-    }
-    ret = krb5_expand_hostname(context, localname, &canonhost);
-    if (ret) {
-        com_err(progname, ret, _("while canonicalizing local hostname"));
-        goto clean_and_exit;
-    }
-    if (asprintf(&service_name, "kadmin/%s", canonhost) < 0) {
-        ret = ENOMEM;
-        fprintf(stderr, _("Out of memory\n"));
-        goto clean_and_exit;
-    }
-    if (asprintf(&kiprop_name, "kiprop/%s", canonhost) < 0) {
-        ret = ENOMEM;
-        fprintf(stderr, _("Out of memory\n"));
-        goto clean_and_exit;
-    }
-
-    if ((ret = add_admin_princ(handle, context,
-                               service_name, realm,
-                               KRB5_KDB_DISALLOW_TGT_BASED |
-                               KRB5_KDB_LOCKDOWN_KEYS,
-                               ADMIN_LIFETIME)))
-        goto clean_and_exit;
 
     if ((ret = add_admin_princ(handle, context,
                                KADM5_ADMIN_SERVICE, realm,
                                KRB5_KDB_DISALLOW_TGT_BASED |
                                KRB5_KDB_LOCKDOWN_KEYS,
                                ADMIN_LIFETIME)))
-        goto clean_and_exit;
+        return ret;
 
-    if ((ret = add_admin_princ(handle, context,
-                               KADM5_CHANGEPW_SERVICE, realm,
-                               KRB5_KDB_DISALLOW_TGT_BASED |
-                               KRB5_KDB_PWCHANGE_SERVICE |
-                               KRB5_KDB_LOCKDOWN_KEYS,
-                               CHANGEPW_LIFETIME)))
-        goto clean_and_exit;
-
-    ret = add_admin_princ(handle, context, kiprop_name, realm, 0, 0);
-
-clean_and_exit:
-    krb5_free_string(context, canonhost);
-    free(service_name);
-    free(kiprop_name);
-
-    return ret;
+    return add_admin_princ(handle, context, KADM5_CHANGEPW_SERVICE, realm,
+                           KRB5_KDB_DISALLOW_TGT_BASED |
+                           KRB5_KDB_PWCHANGE_SERVICE | KRB5_KDB_LOCKDOWN_KEYS,
+                           CHANGEPW_LIFETIME);
 }
 
 /*

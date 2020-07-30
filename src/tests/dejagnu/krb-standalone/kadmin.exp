@@ -1098,10 +1098,11 @@ proc kadmin_test { } {
 	return
     }
 
-    # test fallback to kadmin/admin
-    if {![kadmin_delete_locked_down kadmin/$hostname] \
+    # test fallback to kadmin/hostname
+    if {![kadmin_add_rnd kadmin/$hostname] \
+	    || ![kadmin_delete_locked_down kadmin/admin] \
 	    || ![kadmin_list] \
-	    || ![kadmin_add_rnd kadmin/$hostname -allow_tgs_req] \
+	    || ![kadmin_add_rnd kadmin/admin -allow_tgs_req] \
 	    || ![kadmin_list]} {
 	return
     }

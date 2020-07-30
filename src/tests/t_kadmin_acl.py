@@ -331,6 +331,7 @@ realm.run([kadmin, '-c', realm.ccache, 'cpw', '-randkey', '-e', 'aes256-cts',
 # Test authentication to kadmin/hostname.
 mark('authentication to kadmin/hostname')
 kadmin_hostname = 'kadmin/' + hostname
+realm.addprinc(kadmin_hostname)
 realm.run([kadminl, 'delprinc', 'kadmin/admin'])
 msgs = ('Getting initial credentials for user/admin@KRBTEST.COM',
         'Setting initial creds service to kadmin/admin',

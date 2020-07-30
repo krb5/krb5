@@ -188,6 +188,7 @@ for realm in multidb_realms(kdc_conf=conf, create_user=False,
 
     # Create the principal used to authenticate kpropd to kadmind.
     kiprop_princ = 'kiprop/' + hostname
+    realm.addprinc(kiprop_princ)
     realm.extract_keytab(kiprop_princ, realm.keytab)
 
     # Create the initial replica databases.
