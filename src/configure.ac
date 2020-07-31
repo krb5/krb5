@@ -759,6 +759,7 @@ AC_CACHE_CHECK([for in6addr_any definition in library],
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <stdio.h>
 ],[
   struct sockaddr_in6 in;
   in.sin6_addr = in6addr_any;
