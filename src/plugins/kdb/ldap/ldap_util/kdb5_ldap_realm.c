@@ -1337,7 +1337,7 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
                                                      now, &db_create_princ)))
         goto cleanup;
 
-    entry.attributes = pblock->flags;
+    entry.attributes = pblock->flags | KRB5_KDB_LOCKDOWN_KEYS;
     entry.max_life = pblock->max_life;
     entry.max_renewable_life = pblock->max_rlife;
     entry.expiration = pblock->expiration;
