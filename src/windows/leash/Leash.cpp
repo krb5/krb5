@@ -25,7 +25,6 @@
 #include "reminder.h"
 #include <leasherr.h>
 #include "lglobals.h"
-#include "out2con.h"
 #include <krb5.h>
 #include <com_err.h>
 
@@ -291,7 +290,10 @@ BOOL CLeashApp::InitInstance()
             else if (0 == stricmp(optionParam+1, "console") ||
                      0 == stricmp(optionParam+1, "c"))
             {
-                CreateConsoleEcho();
+                FILE *dummy;
+                AllocConsole();
+                freopen_s(&dummy, "CONOUT$", "w", stderr);
+                freopen_s(&dummy, "CONOUT$", "w", stdout);
             }
             else if (0 == stricmp(optionParam+1, "noribbon"))
             {
