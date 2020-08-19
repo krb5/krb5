@@ -121,8 +121,8 @@ LeashKRB5_renew(void)
     code = pkrb5_get_renewed_creds(ctx, &my_creds, me, cc, NULL);
     pkrb5_cc_set_flags(ctx, cc, KRB5_TC_NOTICKET);
     if (code) {
-        if ( code != KRB5KDC_ERR_ETYPE_NOSUPP ||
-             code != KRB5_KDC_UNREACH)
+        if (code != KRB5KDC_ERR_ETYPE_NOSUPP && code != KRB5_KDC_UNREACH &&
+            code != KRB5_CC_NOTFOUND)
             Leash_krb5_error(code, "krb5_get_renewed_creds()", 0, &ctx, &cc);
         goto cleanup;
     }
