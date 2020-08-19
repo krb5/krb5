@@ -838,33 +838,6 @@ UINT CLeashView::RenewTicket(void * hWnd)
         return 0;
     }
 
-    krb5_error_code code;
-    krb5_ccache mslsa_ccache=0;
-    krb5_principal princ = 0;
-    char * pname = 0;
-
-    if (code = pkrb5_cc_resolve(CLeashApp::m_krbv5_context, "MSLSA:", &mslsa_ccache))
-        goto cleanup;
-
-    if (code = pkrb5_cc_get_principal(CLeashApp::m_krbv5_context, mslsa_ccache, &princ))
-        goto cleanup;
-
-    if (code = pkrb5_unparse_name(CLeashApp::m_krbv5_context, princ, &pname))
-        goto cleanup;
-
-    if ( !strcmp(ticketinfo.Krb5.principal, pname) )
-        m_importedTickets = 1;
-
-  cleanup:
-    if (pname)
-        pkrb5_free_unparsed_name(CLeashApp::m_krbv5_context, pname);
-
-    if (princ)
-        pkrb5_free_principal(CLeashApp::m_krbv5_context, princ);
-
-    if (mslsa_ccache)
-        pkrb5_cc_close(CLeashApp::m_krbv5_context, mslsa_ccache);
-
     // If imported from Kerberos LSA, re-import
     // Otherwise, init the tickets
     if ( m_importedTickets )
