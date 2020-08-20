@@ -10,13 +10,9 @@ SYNOPSIS
 [**-c** *ccache*]
 [**-e** *etype*]
 [**-q**]
-[**-h**]
+[**-u** | **-S** *sname*]
 [**-P**]
-[**-S** *sname*]
-[**-I** *for_user*]
-[**-U** *for_user*]
-[**-F** *cert_file*]
-[**--u2u** *ccache*]
+[[{**-F** *cert_file* | {**-I** | **-U**} *for_user*} [**-P**]] | **--u2u** *ccache*]
 *service1 service2* ...
 
 
@@ -39,13 +35,18 @@ OPTIONS
     of all the services named on the command line.  This is useful in
     certain backward compatibility situations.
 
+**-k** *keytab*
+    Decrypt the acquired tickets using *keytab* to confirm their
+    validity.
+
 **-q**
     Suppress printing output when successful.  If a service ticket
     cannot be obtained, an error message will still be printed and
     kvno will exit with nonzero status.
 
-**-h**
-    Prints a usage statement and exits.
+**-u**
+    Use the unknown name type in requested service principal names.
+    This option Cannot be used with *-S*.
 
 **-P**
     Specifies that the *service1 service2* ...  arguments are to be

@@ -36,13 +36,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\fB\-c\fP \fIccache\fP]
 [\fB\-e\fP \fIetype\fP]
 [\fB\-q\fP]
-[\fB\-h\fP]
+[\fB\-u\fP | \fB\-S\fP \fIsname\fP]
 [\fB\-P\fP]
-[\fB\-S\fP \fIsname\fP]
-[\fB\-I\fP \fIfor_user\fP]
-[\fB\-U\fP \fIfor_user\fP]
-[\fB\-F\fP \fIcert_file\fP]
-[\fB\-\-u2u\fP \fIccache\fP]
+[[{\fB\-F\fP \fIcert_file\fP | {\fB\-I\fP | \fB\-U\fP} \fIfor_user\fP} [\fB\-P\fP]] | \fB\-\-u2u\fP \fIccache\fP]
 \fIservice1 service2\fP ...
 .SH DESCRIPTION
 .sp
@@ -60,13 +56,18 @@ Specifies the enctype which will be requested for the session key
 of all the services named on the command line.  This is useful in
 certain backward compatibility situations.
 .TP
+\fB\-k\fP \fIkeytab\fP
+Decrypt the acquired tickets using \fIkeytab\fP to confirm their
+validity.
+.TP
 \fB\-q\fP
 Suppress printing output when successful.  If a service ticket
 cannot be obtained, an error message will still be printed and
 kvno will exit with nonzero status.
 .TP
-\fB\-h\fP
-Prints a usage statement and exits.
+\fB\-u\fP
+Use the unknown name type in requested service principal names.
+This option Cannot be used with \fI\-S\fP\&.
 .TP
 \fB\-P\fP
 Specifies that the \fIservice1 service2\fP ...  arguments are to be
