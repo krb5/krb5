@@ -38,15 +38,18 @@
 static char *prog;
 static int quiet = 0;
 
+#define XUSAGE_BREAK "\n\t"
+
 static void
 xusage()
 {
-    fprintf(stderr, _("usage: %s [-C] [-u] [-c ccache] [-e etype]\n"), prog);
-    fprintf(stderr, _("\t[-k keytab] [-S sname] [{-I | -U} for_user | "
-                      "[-F cert_file] [-P]]\n"));
-    fprintf(stderr, _("\t[--cached-only] [--no-store] [--out-cache ccache] "
-                      "[--u2u ccache]\n"));
-    fprintf(stderr, _("\tservice1 service2 ...\n"));
+    fprintf(stderr, _("usage: %s [-c ccache] [-e etype] [-k keytab] [-q] "
+                      "[-u | -S sname]" XUSAGE_BREAK
+                      "[[{-F cert_file | {-I | -U} for_user} [-P]] | "
+                      "--u2u ccache]" XUSAGE_BREAK
+                      "[--cached-only] [--no-store] [--out-cache] "
+                      "service1 service2 ...\n"),
+            prog);
     exit(1);
 }
 
