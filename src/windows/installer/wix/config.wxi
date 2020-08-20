@@ -104,9 +104,6 @@
     <?ifndef LeashLockFileLocations?>
         <?define LeashLockFileLocations="0"?>
     <?endif?>
-    <?ifndef LeashMsLsaImport?>
-        <?define LeashMsLsaImport="2"?>
-    <?endif?>
     <?ifndef LeashLifetime?>
         <?define LeashLifetime="0"?>
     <?endif?>

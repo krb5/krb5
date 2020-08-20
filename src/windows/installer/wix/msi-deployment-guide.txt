@@ -180,10 +180,6 @@ Kerberos for Windows
 	Setting: automatic ticket renewal
 	Values : '0' or '1'
 
-    LEASHMSLSAIMPORT
-	Setting: automatic importation of MSLSA credentials
-	Values : '0', '1' or '2'
-
 2.1.3    Leash32 DLL properties
 
     LEASHLIFETIME
@@ -649,23 +645,6 @@ Kerberos for Windows
     Default : 0
 
         If '1', creates any missing configuration files.
-
-    Value   : MsLsaImport
-    Type    : DWORD (0, 1 or 2)
-    Default : 1
-
-        Controls how credentials are imported from the MSLSA cache.
-        This setting can be one of the following.
-
-        0 : Never
-        1 : Always
-        2 : Only if the principal matches
-
-        Note that this setting only controls how the Kerberos 5
-        plug-in handles importing of credentials from the MSLSA cache.
-        Whether or not credentials are imported at start-up is
-        controlled via general NetIDMgr settings as described in
-        section 3.1.1.
 
     Value   : MsLsaList
     Type    : DWORD (0 or 1)

@@ -29,7 +29,6 @@ extern char KRB_HelpFile[_MAX_PATH];
 // Function Prototypes.
 int DoNiftyErrorReport(long errnum, LPSTR what);
 LONG Leash_timesync(int);
-BOOL Leash_ms2mit(BOOL);
 
 // Crap...
 #include <krb5.h>
@@ -247,7 +246,6 @@ cc_free_NC_info,
 /* Must match the values used in Leash32.exe */
 #define LEASH_SETTINGS_REGISTRY_KEY_NAME "Software\\MIT\\Leash32\\Settings"
 #define LEASH_SETTINGS_REGISTRY_VALUE_UPPERCASEREALM   "UpperCaseRealm"
-#define LEASH_SETTINGS_REGISTRY_VALUE_MSLSA_IMPORT     "MsLsaImport"
 
 /* These values are defined and used within Leashw32.dll */
 #define LEASH_REGISTRY_KEY_NAME "Software\\MIT\\Leash"

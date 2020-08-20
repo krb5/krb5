@@ -60,7 +60,6 @@
 <?ifdef UseDefaultProperties?>
     <Property Id="LEASHCREATEMISSINGCONFIG" Admin="yes" Secure="yes">$(var.LeashCreateMissingConfig)</Property>
     <Property Id="LEASHAUTORENEWTICKETS" Admin="yes" Secure="yes">$(var.LeashAutoRenewTickets)</Property>
-    <Property Id="LEASHMSLSAIMPORT" Admin="yes" Secure="yes">$(var.LeashMsLsaImport)</Property>
     <Property Id="LEASHLIFETIME" Admin="yes" Secure="yes">$(var.LeashLifetime)</Property>
     <Property Id="LEASHRENEWTILL" Admin="yes" Secure="yes">$(var.LeashRenewTill)</Property>
     <Property Id="LEASHRENEWABLE" Admin="yes" Secure="yes">$(var.LeashRenewable)</Property>
