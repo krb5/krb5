@@ -143,6 +143,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_audit_state *au_state = NULL;
     krb5_data **auth_indicators = NULL;
     void *ad_info = NULL, *stkt_ad_info = NULL;
+    krb5_principal_data reply_server;
 
     memset(&reply, 0, sizeof(reply));
     memset(&reply_encpart, 0, sizeof(reply_encpart));
@@ -208,6 +209,22 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         goto cleanup;
     }
 
+    /* XXX make sure server here has the proper realm...taken from AP_REQ
+       header? */
+
+    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
+        setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
+        setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
+    }
+
+    au_state->stage = SRVC_PRINC;
+
+    errcode = search_sprinc(kdc_active_realm, request, s_flags, &server,
+                            &status);
+    if (errcode != 0)
+        goto cleanup;
+    sprinc = server->princ;
+
     errcode = get_local_tgt(kdc_context, &sprinc->realm, header_server,
                             &local_tgt, &local_tgt_storage, &local_tgt_key);
     if (errcode) {
@@ -231,22 +248,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
      * use header_ticket freely.  The encrypted part (if any) has been
      * decrypted with the session key.
      */
-
-    au_state->stage = SRVC_PRINC;
-
-    /* XXX make sure server here has the proper realm...taken from AP_REQ
-       header? */
-
-    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
-        setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
-        setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
-    }
-
-    errcode = search_sprinc(kdc_active_realm, request, s_flags, &server,
-                            &status);
-    if (errcode != 0)
-        goto cleanup;
-    sprinc = server->princ;
 
     /* If we got a cross-realm TGS which is not the requested server, we are
      * issuing a referral (or alternate TGT, which we treat similarly). */
@@ -296,8 +297,10 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
 
     /* Aside from cross-realm S4U2Self requests, do not accept header tickets
      * for local users issued by foreign realms. */
-    if (s4u_x509_user == NULL && data_eq(cprinc->realm, sprinc->realm) &&
-        isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+    if (s4u_x509_user == NULL &&
+        isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+        is_local_principal(kdc_context, server, cprinc)) {
+
         krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
         retval = KRB5KDC_ERR_POLICY;
         goto cleanup;
@@ -417,10 +420,15 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         }
     }
 
-    if (is_referral)
-        ticket_reply.server = server->princ;
+    if (is_referral || (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE) &&
+                       is_local_tgs_principal(server->princ)))
+        reply_server = *server->princ;
     else
-        ticket_reply.server = request->server; /* XXX careful for realm... */
+        reply_server = *request->server; /* XXX careful for realm... */
+
+    /* Allow kdb module to canonicalize server realm ^^ */
+    reply_server.realm = server->princ->realm;
+    ticket_reply.server = &reply_server;
 
     enc_tkt_reply.flags = get_ticket_flags(request->kdc_options, client,
                                            server, header_enc_tkt);

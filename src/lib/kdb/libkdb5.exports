@@ -20,6 +20,7 @@ krb5_db_free_authdata_info
 krb5_db_free_principal
 krb5_db_get_age
 krb5_db_get_authdata_info
+krb5_db_is_realm_alias
 krb5_db_get_key_data_kvno
 krb5_db_get_context
 krb5_db_get_principal

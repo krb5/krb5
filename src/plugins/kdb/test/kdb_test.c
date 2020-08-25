@@ -360,33 +360,88 @@ tgtname(krb5_context context, const krb5_data *tgs_realm,
     return princ;
 }
 
-/* Return true if search_for is within context's default realm or is an
- * incoming cross-realm TGS name. */
 static krb5_boolean
-request_for_us(krb5_context context, krb5_const_principal search_for)
+compare_alias_realm(krb5_context context, testhandle h,
+                    krb5_const_principal local_tgs,
+                    const krb5_data *realm)
+{
+    krb5_principal alias_tgs, canon_tgs = NULL;
+    char *alias_krbtgt, *canon;
+    krb5_boolean is_alias = FALSE;
+
+    alias_tgs = tgtname(context, realm, &local_tgs->realm);
+
+    check(krb5_unparse_name_flags(context, alias_tgs,
+                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                  &alias_krbtgt));
+    canon = get_string(h, "alias", alias_krbtgt, NULL);
+
+    if (canon != NULL) {
+        check(krb5_parse_name(context, canon, &canon_tgs));
+        is_alias = krb5_principal_compare(context, local_tgs, canon_tgs);
+    }
+
+    krb5_free_principal(context, alias_tgs);
+    krb5_free_principal(context, canon_tgs);
+    krb5_free_unparsed_name(context, alias_krbtgt);
+    free(canon);
+
+    return is_alias;
+}
+
+static krb5_principal
+get_local_tgs(krb5_context context)
 {
     char *defrealm;
     krb5_data realm;
-    krb5_boolean for_us;
     krb5_principal local_tgs;
 
     check(krb5_get_default_realm(context, &defrealm));
     realm = string2data(defrealm);
     local_tgs = tgtname(context, &realm, &realm);
+
     krb5_free_default_realm(context, defrealm);
 
-    for_us = krb5_realm_compare(context, local_tgs, search_for) ||
-        krb5_principal_compare_any_realm(context, local_tgs, search_for);
+    return local_tgs;
+}
+
+/* Return true if search_for is within context's default realm or is an
+ * incoming cross-realm TGS name. */
+static krb5_boolean
+request_for_us(krb5_context context, testhandle h,
+               krb5_const_principal search_for_req,
+               krb5_principal *out)
+{
+    krb5_boolean for_us;
+    krb5_principal local_tgs, search_for;
+
+    check(krb5_copy_principal(context, search_for_req, &search_for));
+
+    local_tgs = get_local_tgs(context);
+    assert(local_tgs != NULL);
+
+    for_us = krb5_realm_compare(context, local_tgs, search_for_req) ||
+        krb5_principal_compare_any_realm(context, local_tgs, search_for_req);
+
+    if (compare_alias_realm(context, h, local_tgs, &search_for_req->realm)) {
+        for_us = TRUE;
+        krb5_free_data_contents(context, &search_for->realm);
+        check(krb5int_copy_data_contents(context, &local_tgs->realm,
+                                         &search_for->realm));
+    }
+
     krb5_free_principal(context, local_tgs);
+
+    *out = search_for;
     return for_us;
 }
 
 static krb5_error_code
-test_get_principal(krb5_context context, krb5_const_principal search_for,
+test_get_principal(krb5_context context, krb5_const_principal search_for_req,
                    unsigned int flags, krb5_db_entry **entry)
 {
     krb5_error_code ret;
-    krb5_principal princ = NULL, tgtprinc;
+    krb5_principal princ = NULL, search_for = NULL, tgtprinc;
     krb5_principal_data empty_princ = { KV5M_PRINCIPAL };
     testhandle h = context->dal_handle->db_context;
     char *search_name = NULL, *canon = NULL, *flagstr;
@@ -396,7 +451,7 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
 
     *entry = NULL;
 
-    if (!request_for_us(context, search_for))
+    if (!request_for_us(context, h, search_for_req, &search_for))
         return KRB5_KDB_NOENTRY;
 
     check(krb5_unparse_name_flags(context, search_for,
@@ -417,7 +472,8 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
                 princ = NULL;
                 ret = 0;
                 goto cleanup;
-            } else if (flags & KRB5_KDB_FLAG_CANONICALIZE) {
+            } else if ((flags & KRB5_KDB_FLAG_CANONICALIZE) ||
+                       IS_TGS_PRINC(search_for)) {
                 /* Generate a server referral by looking up the TGT for the
                  * canonical name's realm. */
                 tgtprinc = tgtname(context, &princ->realm, &search_for->realm);
@@ -1128,6 +1184,21 @@ test_free_authdata_info(krb5_context context, void *ad_info)
     free_pac_info(context, info);
 }
 
+static krb5_boolean
+test_is_realm_db_alias(krb5_context context, const krb5_data *realm,
+                       const krb5_data *alias)
+{
+    testhandle h = context->dal_handle->db_context;
+    krb5_principal local_tgs;
+    krb5_boolean is_alias;
+
+    local_tgs = get_local_tgs(context);
+    is_alias = compare_alias_realm(context, h, local_tgs, realm);
+    krb5_free_principal(context, local_tgs);
+
+    return is_alias;
+}
+
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
     0,                                      /* minor version number */
@@ -1169,5 +1240,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     test_get_s4u_x509_principal,
     test_allowed_to_delegate_from,
     test_get_authdata_info,
-    test_free_authdata_info
+    test_free_authdata_info,
+    test_is_realm_db_alias
 };

@@ -327,6 +327,7 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->allowed_to_delegate_from = in->allowed_to_delegate_from;
     out->get_authdata_info = in->get_authdata_info;
     out->free_authdata_info = in->free_authdata_info;
+    out->is_realm_alias = in->is_realm_alias;
 
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
@@ -2805,6 +2806,21 @@ krb5_db_free_authdata_info(krb5_context kcontext, void *ad_info)
     if (v->free_authdata_info == NULL)
         return;
     v->free_authdata_info(kcontext, ad_info);
+}
+
+krb5_boolean
+krb5_db_is_realm_alias(krb5_context kcontext, const krb5_data *realm,
+                       const krb5_data *alias)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return FALSE;
+    if (v->is_realm_alias == NULL)
+        return FALSE;
+    return v->is_realm_alias(kcontext, realm, alias);
 }
 
 void

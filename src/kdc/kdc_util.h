@@ -346,6 +346,9 @@ krb5_boolean
 is_client_db_alias(krb5_context context, const krb5_db_entry *entry,
                    krb5_const_principal princ);
 
+krb5_boolean
+is_local_principal(krb5_context context, const krb5_db_entry *entry,
+                   krb5_const_principal princ);
 /* FAST*/
 enum krb5_fast_kdc_flags {
     KRB5_FAST_REPLY_KEY_USED = 0x1,

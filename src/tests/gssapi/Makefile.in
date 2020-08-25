@@ -56,6 +56,7 @@ check-pytests: ccinit ccrefresh t_accname t_add_cred t_bindings t_ccselect \
 	$(RUNPYTEST) $(srcdir)/t_s4u.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_authind.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_negoex.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_realm_alias.py $(PYTESTFLAGS)
 
 ccinit: ccinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccinit ccinit.o $(KRB5_BASE_LIBS)

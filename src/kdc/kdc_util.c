@@ -1407,6 +1407,18 @@ is_client_db_alias(krb5_context context, const krb5_db_entry *entry,
     return is_self;
 }
 
+/* Return true if princ is in the same realm as entry->princ. */
+krb5_boolean
+is_local_principal(krb5_context context, const krb5_db_entry *entry,
+                   krb5_const_principal princ)
+{
+    if (krb5_realm_compare(context, entry->princ, princ))
+        return TRUE;
+
+    return krb5_db_is_realm_alias(context, &entry->princ->realm,
+                                  &princ->realm);
+}
+
 /*
  * Protocol transition (S4U2Self)
  */
@@ -1502,7 +1514,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (data_eq(server->princ->realm, id->user->realm)) {
+    if (is_local_principal(kdc_context, server, id->user)) {
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
 
