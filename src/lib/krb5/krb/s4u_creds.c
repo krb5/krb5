@@ -665,11 +665,13 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         /* Uncanonicalised check */
         code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
                                     ccache, in_creds, out_creds);
-        if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+        if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) ||
+            (options & KRB5_GC_CACHED))
             goto cleanup;
-
-        if ((options & KRB5_GC_CACHED) && !(options & KRB5_GC_CANONICALIZE))
-            goto cleanup;
+    } else if (options & KRB5_GC_CACHED) {
+        /* Fail immediately, since we can't check the cache by certificate. */
+        code = KRB5_CC_NOTFOUND;
+        goto cleanup;
     }
 
     code = s4u_identify_user(context, in_creds, subject_cert, &realm);
@@ -683,8 +685,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         mcreds.client = realm;
         code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
                                     ccache, &mcreds, out_creds);
-        if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
-            || (options & KRB5_GC_CACHED))
+        if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
             goto cleanup;
     }
 
