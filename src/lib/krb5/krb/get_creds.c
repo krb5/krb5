@@ -571,10 +571,12 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     if (ctx->reply_code != 0)
         return try_fallback(context, ctx);
 
-    if (krb5_principal_compare(context, ctx->reply_creds->server,
-                               ctx->server)) {
-        /* We got the ticket we asked for... but we didn't necessarily ask for
-         * it with the right enctypes.  Try a non-referral request if so. */
+    /* Check if we got the ticket we asked for.  Allow the KDC to canonicalize
+     * the realm. */
+    if (krb5_principal_compare_any_realm(context, ctx->reply_creds->server,
+                                         ctx->server)) {
+        /* We didn't necessarily ask for it with the right enctypes.  Try a
+         * non-referral request if so. */
         if (wrong_enctype(context, ctx->reply_creds->keyblock.enctype)) {
             TRACE_TKT_CREDS_WRONG_ENCTYPE(context);
             return begin_non_referral(context, ctx);
