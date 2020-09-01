@@ -106,8 +106,8 @@
 
 KRB5INT_BEGIN_DECLS
 
-#if defined(TARGET_OS_MAC) && TARGET_OS_MAC
-#    pragma pack(push,2)
+#if defined(__APPLE__) && (defined(__ppc__) || defined(__ppc64__) || defined(__i386__) || defined(__x86_64__))
+#pragma pack(push,2)
 #endif
 
 #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 30203
@@ -8552,8 +8552,8 @@ void KRB5_CALLCONV
 krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
                        void *data);
 
-#if defined(TARGET_OS_MAC) && TARGET_OS_MAC
-#    pragma pack(pop)
+#if defined(__APPLE__) && (defined(__ppc__) || defined(__ppc64__) || defined(__i386__) || defined(__x86_64__))
+#pragma pack(pop)
 #endif
 
 KRB5INT_END_DECLS
