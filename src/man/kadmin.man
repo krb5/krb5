@@ -63,9 +63,9 @@ Kerberos principals, password policies, and service key tables
 (keytabs).
 .sp
 The remote kadmin client uses Kerberos to authenticate to kadmind
-using the service principal \fBkadmin/ADMINHOST\fP (where \fIADMINHOST\fP is
-the fully\-qualified hostname of the admin server) or \fBkadmin/admin\fP\&.
-If the credentials cache contains a ticket for one of these
+using the service principal \fBkadmin/admin\fP or \fBkadmin/ADMINHOST\fP
+(where \fIADMINHOST\fP is the fully\-qualified hostname of the admin
+server).  If the credentials cache contains a ticket for one of these
 principals, and the \fB\-c\fP credentials_cache option is specified, that
 ticket is used to authenticate to kadmind.  Otherwise, the \fB\-p\fP and
 \fB\-k\fP options are used to specify the client Kerberos principal name
@@ -115,10 +115,10 @@ principal.  As of release 1.8, the MIT Kerberos KDC only supports
 fully anonymous operation.
 .TP
 \fB\-c\fP \fIcredentials_cache\fP
-Use \fIcredentials_cache\fP as the credentials cache.  The
-cache should contain a service ticket for the \fBkadmin/ADMINHOST\fP
-(where \fIADMINHOST\fP is the fully\-qualified hostname of the admin
-server) or \fBkadmin/admin\fP service; it can be acquired with the
+Use \fIcredentials_cache\fP as the credentials cache.  The cache
+should contain a service ticket for the \fBkadmin/admin\fP or
+\fBkadmin/ADMINHOST\fP (where \fIADMINHOST\fP is the fully\-qualified
+hostname of the admin server) service; it can be acquired with the
 kinit(1) program.  If this option is not specified, kadmin
 requests a new service ticket from the KDC, and stores it in its
 own temporary ccache.
