@@ -405,7 +405,8 @@ convert_to_enterprise(krb5_context context, krb5_principal princ,
     char *str;
 
     *eprinc_out = NULL;
-    code = krb5_unparse_name(context, princ, &str);
+    code = krb5_unparse_name_flags(context, princ,
+                                   KRB5_PRINCIPAL_UNPARSE_DISPLAY, &str);
     if (code != 0)
         return code;
     code = krb5_parse_name_flags(context, str,
@@ -413,6 +414,44 @@ convert_to_enterprise(krb5_context context, krb5_principal princ,
                                  KRB5_PRINCIPAL_PARSE_IGNORE_REALM,
                                  eprinc_out);
     krb5_free_unparsed_name(context, str);
+    return code;
+}
+
+static krb5_error_code
+rewrite_cred_server(krb5_context context, krb5_creds *in_creds,
+                    krb5_const_principal server)
+{
+    krb5_error_code code;
+    krb5_ticket *ticket;
+    krb5_data *data;
+
+    krb5_free_principal(context, in_creds->server);
+    in_creds->server = NULL;
+    code = krb5_copy_principal(context, server, &in_creds->server);
+    if (code)
+        return code;
+
+    code = krb5_decode_ticket(&in_creds->ticket, &ticket);
+    if (code)
+        return code;
+
+    krb5_free_principal(context, ticket->server);
+    ticket->server = NULL;
+    code = krb5_copy_principal(context, server, &ticket->server);
+    if (code) {
+        krb5_free_ticket(context, ticket);
+        return code;
+    }
+
+    code = encode_krb5_ticket(ticket, &data);
+    krb5_free_ticket(context, ticket);
+    if (code)
+        return code;
+
+    krb5_free_data_contents(context, &in_creds->ticket);
+    in_creds->ticket = *data;
+    free(data);
+
     return code;
 }
 
@@ -485,16 +524,25 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     tgtptr = tgt;
 
-    /* Convert the server principal to an enterprise principal, for use with
-     * foreign realms. */
-    code = convert_to_enterprise(context, in_creds->server, &eprinc);
-    if (code != 0)
-        goto cleanup;
-
     /* Make a shallow copy of in_creds with client pointing to the server
      * principal.  We will set s4u_creds.server for each request. */
     s4u_creds = *in_creds;
     s4u_creds.client = in_creds->server;
+
+    /* Convert the server principal to an enterprise principal, for use with
+     * foreign realms. */
+    if (in_creds->client == NULL ||
+        in_creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL ||
+        !krb5_realm_compare(context, in_creds->client, in_creds->server)) {
+        code = convert_to_enterprise(context, in_creds->server, &eprinc);
+        if (code != 0)
+            goto cleanup;
+        sprinc = *eprinc;
+    } else {
+        sprinc = *in_creds->server;
+    }
+
+    s4u_creds.server = &sprinc;
 
     /* Then, walk back the referral path to S4U2Self for user */
     kdcopt = 0;
@@ -545,16 +593,9 @@ krb5_get_self_cred_from_kdc(krb5_context context,
             }
         }
 
-        if (data_eq(tgtptr->server->data[1], in_creds->server->realm)) {
-            /* When asking the server realm, use the real principal. */
-            s4u_creds.server = in_creds->server;
-        } else {
-            /* When asking a foreign realm, use the enterprise principal, with
-             * the realm set to the TGS realm. */
-            sprinc = *eprinc;
-            sprinc.realm = tgtptr->server->data[1];
-            s4u_creds.server = &sprinc;
-        }
+        /* When asking a foreign realm, use the enterprise principal, with
+         * the realm set to the TGS realm. */
+        sprinc.realm = tgtptr->server->data[1];
 
         code = krb5_get_cred_via_tkt_ext(context, tgtptr,
                                          KDC_OPT_CANONICALIZE |
@@ -592,9 +633,17 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         /* Only include a cert in the initial request to the client realm. */
         s4u_user.user_id.subject_cert = empty_data();
 
-        if (krb5_principal_compare(context,
-                                   in_creds->server,
-                                   (*out_creds)->server)) {
+        if (krb5_principal_compare_any_realm(context,
+                                             s4u_creds.server,
+                                             (*out_creds)->server)) {
+            /* Put back the requested server so the caller can find it. */
+            if (!krb5_principal_compare(context, in_creds->server,
+                                        (*out_creds)->server)) {
+                code = rewrite_cred_server(context, *out_creds,
+                                           in_creds->server);
+                if (code)
+                    goto cleanup;
+            }
             /* Verify that the unprotected client name in the reply matches the
              * checksum-protected one from the client realm's KDC padata. */
             if (!krb5_principal_compare(context, (*out_creds)->client,

@@ -164,11 +164,14 @@ kdcconf1 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
                                    'alias': {'enterprise@abc': '@UREALM',
+                                             'user@SREALM': 'user',
+                                             'service/user': 'user',
                                              'user@UREALM': '@UREALM'}}}}
 kdcconf2 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
                                    'alias': {'user@SREALM': '@SREALM',
+                                             'service/user': '@SREALM',
                                              'user@UREALM': 'user',
                                              'enterprise@abc': 'user'}}}}
 r1, r2 = cross_realms(2, xtgts=(),
@@ -192,8 +195,8 @@ msgs = ('Getting credentials user@UREALM -> user@SREALM',
         'Received creds for desired service krbtgt/UREALM@SREALM',
         'via TGT krbtgt/UREALM@SREALM after requesting user\\@SREALM@UREALM',
         'krbtgt/SREALM@UREALM differs from requested user\\@SREALM@UREALM',
-        'via TGT krbtgt/SREALM@UREALM after requesting user@SREALM',
-        'TGS reply is for user@UREALM -> user@SREALM')
+        'via TGT krbtgt/SREALM@UREALM after requesting user\\@SREALM@SREALM',
+        'TGS reply is for user@UREALM -> user\\@SREALM@SREALM')
 r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
        expected_trace=msgs)
 
@@ -209,7 +212,7 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
         '/Additional pre-authentication required',
         'Identified realm of client principal as UREALM',
         'Getting credentials enterprise\\@abc@UREALM -> user@SREALM',
-        'TGS reply is for enterprise\@abc@UREALM -> user@SREALM')
+        'TGS reply is for enterprise\@abc@UREALM -> user\\@SREALM@SREALM')
 r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
        expected_trace=msgs)
 
@@ -287,6 +290,23 @@ r1.run(['./t_s4u', 'c:user@UREALM', '-', r1.keytab])
 r1.run(['./t_s4u', '--spnego', 'c:other', '-', r1.keytab])
 r1.run(['./t_s4u', '--spnego', 'c:user@UREALM', '-', r1.keytab])
 
+mark('Cross realm S4U2Self, kinit as enterprise and SPN')
+
+r1.extract_keytab('user\@SREALM', r1.keytab)
+r1.kinit('user@SREALM', None, ['-E', '-k', '-t', r1.keytab])
+r1.run(['./t_s4u', 'p:other', '-', r1.keytab])
+r1.run(['./t_s4u', 'p:user@UREALM', '-', r1.keytab])
+
+# short enterprise
+r1.kinit('user', None, ['-E', '-k', '-t', r1.keytab])
+r1.run(['./t_s4u', 'p:other', '-', r1.keytab])
+r1.run(['./t_s4u', 'p:user@UREALM', '-', r1.keytab])
+
+r1.extract_keytab('service/user', r1.keytab)
+r1.kinit('service/user', None, ['-k', '-t', r1.keytab])
+r1.run(['./t_s4u', 'p:other', '-', r1.keytab])
+r1.run(['./t_s4u', 'p:user@UREALM', '-', r1.keytab])
+
 r1.stop()
 r2.stop()
 
@@ -311,6 +331,8 @@ a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
                                   'alias': {'rb@A': 'rb',
                                             'rb@B': '@B',
                                             'rb@C': '@B',
+                                            'service1@A': 'service1',
+                                            'impersonator@A': 'impersonator',
                                             'rb2_alias': 'rb2',
                                             'service/rb.a': 'rb',
                                             'service/rb.b': '@B',

@@ -303,7 +303,8 @@ a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'delegation': {'impersonator' : 'resource'},
                                   'princs': a_princs,
-                                  'alias': {'service/rb.b': '@B'}}}}
+                                  'alias': {'service/rb.b': '@B',
+                                            'impersonator@A':'impersonator'}}}}
 
 b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
             'krbtgt/A': {'keys': 'aes128-cts'},
