@@ -1425,6 +1425,25 @@ cleanup:
     return code;
 }
 
+/* Return true if princ canonicalizes to the same principal as canon. */
+static krb5_boolean
+is_client_alias(krb5_context context, krb5_const_principal canon,
+                krb5_const_principal princ)
+{
+    krb5_error_code ret;
+    krb5_db_entry *self;
+    krb5_boolean is_self = FALSE;
+
+    ret = krb5_db_get_principal(context, princ,
+                                KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY, &self);
+    if (!ret) {
+        is_self = krb5_principal_compare(context, canon, self->princ);
+        krb5_db_free_principal(context, self);
+    }
+
+    return is_self;
+}
+
 /*
  * Protocol transition (S4U2Self)
  */
@@ -1443,7 +1462,6 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
 {
     krb5_error_code             code;
     krb5_pa_data                *pa_data;
-    int                         flags;
     krb5_db_entry               *princ;
     krb5_s4u_userid             *id;
 
@@ -1477,51 +1495,11 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     }
     id = &(*s4u_x509_user)->user_id;
 
-    /*
-     * We need to compare the client name in the TGT with the requested
-     * server name. Supporting server name aliases without assuming a
-     * global name service makes this difficult to do.
-     *
-     * The comparison below handles the following cases (note that the
-     * term "principal name" below excludes the realm).
-     *
-     * (1) The requested service is a host-based service with two name
-     *     components, in which case we assume the principal name to
-     *     contain sufficient qualifying information. The realm is
-     *     ignored for the purpose of comparison.
-     *
-     * (2) The requested service name is an enterprise principal name:
-     *     the service principal name is compared with the unparsed
-     *     form of the client name (including its realm).
-     *
-     * (3) The requested service is some other name type: an exact
-     *     match is required.
-     *
-     * An alternative would be to look up the server once again with
-     * FLAG_CANONICALIZE | FLAG_CLIENT_REFERRALS_ONLY set, do an exact
-     * match between the returned name and client_princ. However, this
-     * assumes that the client set FLAG_CANONICALIZE when requesting
-     * the TGT and that we have a global name service.
-     */
-    flags = 0;
-    switch (krb5_princ_type(kdc_context, request->server)) {
-    case KRB5_NT_SRV_HST:                   /* (1) */
-        if (krb5_princ_size(kdc_context, request->server) == 2)
-            flags |= KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
-        break;
-    case KRB5_NT_ENTERPRISE_PRINCIPAL:      /* (2) */
-        flags |= KRB5_PRINCIPAL_COMPARE_ENTERPRISE;
-        break;
-    default:                                /* (3) */
-        break;
-    }
-
-    if (!krb5_principal_compare_flags(kdc_context,
-                                      request->server,
-                                      client_princ,
-                                      flags)) {
-        *status = "INVALID_S4U2SELF_REQUEST";
-        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error code */
+    /* If the server is local, check that the request is for self. */
+    if (!isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) &&
+        !is_client_alias(kdc_context, server->princ, client_princ)) {
+        *status = "INVALID_S4U2SELF_REQUEST_SERVER_MISMATCH";
+        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error */
     }
 
     /*
@@ -1712,9 +1690,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
         }
 
         client_princ = *stkt_authdata_client;
-    } else if (!krb5_principal_compare(kdc_context,
-                                       server->princ, /* after canon */
-                                       server_princ)) {
+    } else if (!is_client_alias(kdc_context, server->princ, server_princ)) {
         *status = "EVIDENCE_TICKET_MISMATCH";
         return KRB5KDC_ERR_SERVER_NOMATCH;
     }
