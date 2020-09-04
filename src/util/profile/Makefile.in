@@ -41,13 +41,13 @@ EXTRADEPSRCS=$(srcdir)/test_load.c $(srcdir)/test_parse.c \
 	$(srcdir)/profile_tcl.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
+MLIBS = $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
 
 LIBBASE=profile
 LIBMAJOR=1
 LIBMINOR=1
 SHLIB_EXPDEPS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-SHLIB_EXPLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPLIBS = $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
 
 PROFILE_HDR=$(BUILDTOP)$(S)include$(S)profile.h
 

@@ -1429,7 +1429,14 @@ else
   COM_ERR_VERSION=k5
   AC_MSG_RESULT(krb5)
 fi
+OLDLIBS="$LIBS"
+COM_ERR_LIB=-lcom_err
 if test $COM_ERR_VERSION = sys; then
+  PKG_CHECK_MODULES(COM_ERR, com_err, [have_com_err=yes], [have_com_err=no])
+  if test "x$have_com_err = xyes"; then
+    COM_ERR_LIB="$COM_ERR_LIBS"
+  fi
+  LIBS="$LIBS $COM_ERR_LIB"
   # check for various functions we need
   AC_CHECK_LIB(com_err, add_error_table, :, AC_MSG_ERROR(cannot find add_error_table in com_err library))
   AC_CHECK_LIB(com_err, remove_error_table, :, AC_MSG_ERROR(cannot find remove_error_table in com_err library))
@@ -1470,6 +1477,8 @@ EOF
   rm -f conf$$e.et
 fi
 AC_SUBST(COM_ERR_VERSION)
+AC_SUBST(COM_ERR_LIB)
+LIBS="$OLDLIBS"
 if test "$COM_ERR_VERSION" = k5 -o "$COM_ERR_VERSION" = intlsys; then
   AC_DEFINE(HAVE_COM_ERR_INTL,1,
             [Define if com_err has compatible gettext support])
