@@ -1589,6 +1589,26 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     (*prompter)(context, data, 0, banner, 0, 0);
 }
 
+/* Display a warning via the prompter if des3-cbc-sha1 was used for either the
+ * reply key or the session key. */
+static void
+warn_des3(krb5_context context, krb5_init_creds_context ctx,
+          krb5_enctype as_key_enctype)
+{
+    const char *banner;
+
+    if (as_key_enctype != ENCTYPE_DES3_CBC_SHA1 &&
+        ctx->cred.keyblock.enctype != ENCTYPE_DES3_CBC_SHA1)
+        return;
+    if (ctx->prompter == NULL)
+        return;
+
+    banner = _("Warning: encryption type des3-cbc-sha1 used for "
+               "authentication is weak and will be disabled");
+    /* PROMPTER_INVOCATION */
+    (*ctx->prompter)(context, ctx->prompter_data, NULL, banner, 0, NULL);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1802,6 +1822,7 @@ init_creds_step_reply(krb5_context context,
     ctx->complete = TRUE;
     warn_pw_expiry(context, ctx->opt, ctx->prompter, ctx->prompter_data,
                    ctx->in_tkt_service, ctx->reply);
+    warn_des3(context, ctx, encrypting_key.enctype);
 
 cleanup:
     krb5_free_pa_data(context, kdc_padata);
