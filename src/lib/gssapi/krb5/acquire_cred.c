@@ -1182,6 +1182,8 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     krb5_keytab keytab = NULL;
     krb5_ccache ccache = NULL;
     const char *rcname, *value;
+    gss_buffer_desc pwbuf;
+    gss_buffer_t password = NULL;
     OM_uint32 ret;
 
     code = gss_krb5int_initialize_library();
@@ -1241,7 +1243,29 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     if (GSS_ERROR(ret))
         goto out;
 
-    ret = acquire_cred_context(context, minor_status, desired_name, NULL,
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_PASSWORD_URN, &value);
+    if (GSS_ERROR(ret))
+        goto out;
+
+    if (value) {
+        /* We must be acquiring an initiator cred with an explicit name.  A
+         * password is mutually exclusive with a client keytab or ccache. */
+        if (desired_name == GSS_C_NO_NAME) {
+            ret = GSS_S_BAD_NAME;
+            goto out;
+        }
+        if (cred_usage == GSS_C_ACCEPT || desired_name == GSS_C_NO_NAME ||
+            ccache != NULL || client_keytab != NULL) {
+            *minor_status = (OM_uint32)G_BAD_USAGE;
+            ret = GSS_S_FAILURE;
+            goto out;
+        }
+        pwbuf.length = strlen(value);
+        pwbuf.value = (void *)value;
+        password = &pwbuf;
+    }
+
+    ret = acquire_cred_context(context, minor_status, desired_name, password,
                                time_req, cred_usage, ccache, client_keytab,
                                keytab, rcname, iakerb, output_cred_handle,
                                time_rec);
