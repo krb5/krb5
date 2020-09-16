@@ -123,24 +123,83 @@ Enctype compatibility
 
 See :ref:`Encryption_types` for additional information about enctypes.
 
-========================== ===== ======== =======
-enctype                    weak? krb5     Windows
-========================== ===== ======== =======
-des-cbc-crc                weak  <1.18    >=2000
-des-cbc-md4                weak  <1.18    ?
-des-cbc-md5                weak  <1.18    >=2000
-des3-cbc-sha1                    >=1.1    none
-arcfour-hmac                     >=1.3    >=2000
-arcfour-hmac-exp           weak  >=1.3    >=2000
-aes128-cts-hmac-sha1-96          >=1.3    >=Vista
-aes256-cts-hmac-sha1-96          >=1.3    >=Vista
-aes128-cts-hmac-sha256-128       >=1.15   none
-aes256-cts-hmac-sha384-192       >=1.15   none
-camellia128-cts-cmac             >=1.9    none
-camellia256-cts-cmac             >=1.9    none
-========================== ===== ======== =======
+========================== ========== ======== =======
+enctype                    weak?      krb5     Windows
+========================== ========== ======== =======
+des-cbc-crc                weak       <1.18    >=2000
+des-cbc-md4                weak       <1.18    ?
+des-cbc-md5                weak       <1.18    >=2000
+des3-cbc-sha1              deprecated >=1.1    none
+arcfour-hmac               deprecated >=1.3    >=2000
+arcfour-hmac-exp           weak       >=1.3    >=2000
+aes128-cts-hmac-sha1-96               >=1.3    >=Vista
+aes256-cts-hmac-sha1-96               >=1.3    >=Vista
+aes128-cts-hmac-sha256-128            >=1.15   none
+aes256-cts-hmac-sha384-192            >=1.15   none
+camellia128-cts-cmac                  >=1.9    none
+camellia256-cts-cmac                  >=1.9    none
+========================== ========== ======== =======
 
 krb5 releases 1.18 and later do not support single-DES.  krb5 releases
 1.8 and later disable the single-DES enctypes by default.  Microsoft
 Windows releases Windows 7 and later disable single-DES enctypes by
 default.
+
+krb5 releases 1.17 and later flag deprecated encryption types
+(including ``des3-cbc-sha1`` and ``arcfour-hmac``) in KDC logs and
+kadmin output.  krb5 release 1.19 issues a warning during initial
+authentication if ``des3-cbc-sha1`` is used.  Future releases will
+disable ``des3-cbc-sha1`` by default and eventually remove support for
+it.
+
+
+Migrating away from older encryption types
+------------------------------------------
+
+Administrator intervention may be required to migrate a realm away
+from legacy encryption types, especially if the realm was created
+using krb5 release 1.2 or earlier.  This migration should be performed
+before upgrading to krb5 versions which disable or remove support for
+legacy encryption types.
+
+If there is a **supported_enctypes** setting in :ref:`kdc.conf(5)` on
+the KDC, make sure that it does not include weak or deprecated
+encryption types.  This will ensure that newly created keys do not use
+those encryption types by default.
+
+Check the ``krbtgt/REALM`` principal using the :ref:`kadmin(1)`
+**getprinc** command.  If it lists a weak or deprecated encryption
+type as the first key, it must be migrated using the procedure in
+:ref:`changing_krbtgt_key`.
+
+Check the ``kadmin/history`` principal, which should have only one key
+entry.  If it uses a weak or deprecated encryption type, it should be
+upgraded following the notes in :ref:`updating_history_key`.
+
+Check the other kadmin principals: kadmin/changepw, kadmin/admin, and
+any kadmin/hostname principals that may exist.  These principals can
+be upgraded with **change_password -randkey** in kadmin.
+
+Check the ``K/M`` entry.  If it uses a weak or deprecated encryption
+type, it should be upgraded following the procedure in
+:ref:`updating_master_key`.
+
+User and service principals using legacy encryption types can be
+enumerated with the :ref:`kdb5_util(8)` **tabdump keyinfo** command.
+
+Service principals can be migrated with a keytab rotation on the
+service host, which can be accomplished using the :ref:`k5srvutil(1)`
+**change** and **delold** commands.  Allow enough time for existing
+tickets to expire between the change and delold operations.
+
+User principals with password-based keys can be migrated with a
+password change.  The realm administrator can set a password
+expiration date using the :ref:`kadmin(1)` **modify_principal
+-pwexpire** command to force a password change.
+
+If a legacy encryption type has not yet been disabled by default in
+the version of krb5 running on the KDC, it can be disabled
+administratively with the **permitted_enctypes** variable.  For
+example, setting **permitted_enctypes** to ``DEFAULT -des3 -rc4`` will
+cause any database keys of the triple-DES and RC4 encryption types to
+be ignored.

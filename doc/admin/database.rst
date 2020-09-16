@@ -252,6 +252,8 @@ be modified by using the **-policy** or **-clearpolicy** flag to
 :ref:`modify_principal`.
 
 
+.. _updating_history_key:
+
 Updating the history key
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -469,6 +471,8 @@ Examples
     ** Database '/usr/local/var/krb5kdc/principal' destroyed.
     shell%
 
+
+.. _updating_master_key:
 
 Updating the master key
 ~~~~~~~~~~~~~~~~~~~~~~~

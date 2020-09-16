@@ -844,17 +844,17 @@ Encryption types
 
 Any tag in the configuration files which requires a list of encryption
 types can be set to some combination of the following strings.
-Encryption types marked as "weak" are available for compatibility but
-not recommended for use.
+Encryption types marked as "weak" and "deprecated" are available for
+compatibility but not recommended for use.
 
 ==================================================== =========================================================
 des3-cbc-raw                                         Triple DES cbc mode raw (weak)
-des3-cbc-sha1 des3-hmac-sha1 des3-cbc-sha1-kd        Triple DES cbc mode with HMAC/sha1
+des3-cbc-sha1 des3-hmac-sha1 des3-cbc-sha1-kd        Triple DES cbc mode with HMAC/sha1 (deprecated)
 aes256-cts-hmac-sha1-96 aes256-cts aes256-sha1       AES-256 CTS mode with 96-bit SHA-1 HMAC
 aes128-cts-hmac-sha1-96 aes128-cts aes128-sha1       AES-128 CTS mode with 96-bit SHA-1 HMAC
 aes256-cts-hmac-sha384-192 aes256-sha2               AES-256 CTS mode with 192-bit SHA-384 HMAC
 aes128-cts-hmac-sha256-128 aes128-sha2               AES-128 CTS mode with 128-bit SHA-256 HMAC
-arcfour-hmac rc4-hmac arcfour-hmac-md5               RC4 with HMAC/MD5
+arcfour-hmac rc4-hmac arcfour-hmac-md5               RC4 with HMAC/MD5 (deprecated)
 arcfour-hmac-exp rc4-hmac-exp arcfour-hmac-md5-exp   Exportable RC4 with HMAC/MD5 (weak)
 camellia256-cts-cmac camellia256-cts                 Camellia-256 CTS mode with CMAC
 camellia128-cts-cmac camellia128-cts                 Camellia-128 CTS mode with CMAC
