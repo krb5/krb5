@@ -400,7 +400,8 @@ test_get_principal(krb5_context context, krb5_const_principal search_for,
         return KRB5_KDB_NOENTRY;
 
     check(krb5_unparse_name_flags(context, search_for,
-                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                  KRB5_PRINCIPAL_UNPARSE_NO_REALM |
+                                  KRB5_PRINCIPAL_UNPARSE_DISPLAY,
                                   &search_name));
     canon = get_string(h, "alias", search_name, NULL);
     if (canon != NULL) {

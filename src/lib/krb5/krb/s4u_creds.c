@@ -531,9 +531,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     /* Convert the server principal to an enterprise principal, for use with
      * foreign realms. */
-    if (in_creds->client == NULL ||
-        in_creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL ||
-        !krb5_realm_compare(context, in_creds->client, in_creds->server)) {
+    if (!data_eq(tgtptr->server->data[1], in_creds->server->realm)) {
         code = convert_to_enterprise(context, in_creds->server, &eprinc);
         if (code != 0)
             goto cleanup;
