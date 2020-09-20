@@ -144,11 +144,9 @@ _kerberos._udp
     the most often.  Normally you should list port 88 on each of your
     KDCs.
 _kerberos._tcp
-    This is for contacting any KDC by TCP.  The MIT KDC by default
-    will not listen on any TCP ports, so unless you've changed the
-    configuration or you're running another KDC implementation, you
-    should leave this unspecified.  If you do enable TCP support,
-    normally you should use port 88.
+    This is for contacting any KDC by TCP.  Normally you should use
+    port 88.  This entry should be omitted if the KDC does not listen
+    on TCP ports, as was the default prior to release 1.13.
 _kerberos-master._udp
     This entry should refer to those KDCs, if any, that will
     immediately see password changes to the Kerberos database.  If a
@@ -163,11 +161,16 @@ _kerberos-master._udp
     not complete at this time, but it will eventually be used by the
     :ref:`kadmin(1)` program and related utilities.  For now, you will
     also need the **admin_server** variable in :ref:`krb5.conf(5)`.
-    _kpasswd._udp This should list port 464 on your primary KDC.  It
-    is used when a user changes her password.  If this entry is not
-    defined but a _kerberos-adm._tcp entry is defined, the client will
-    use the _kerberos-adm._tcp entry with the port number changed
-    to 749.
+_kerberos-master._tcp
+    The corresponding TCP port for _kerberos-master._udp, assuming the
+    primary KDC listens on a TCP port.
+_kpasswd._udp
+    This entry should list port 464 on your primary KDC.  It is used
+    when a user changes her password.  If this entry is not defined
+    but a _kerberos-adm._tcp entry is defined, the client will use the
+    _kerberos-adm._tcp entry with the port number changed to 464.
+_kpasswd._tcp
+    The corresponding TCP port for _kpasswd._udp.
 
 The DNS SRV specification requires that the hostnames listed be the
 canonical names, not aliases.  So, for example, you might include the
