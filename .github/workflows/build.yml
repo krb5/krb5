@@ -1,6 +1,8 @@
 name: Build
 
-on: [push, pull_request]
+on:
+    push: {paths: [src/**, .github/workflows/build.yml]}
+    pull_request: {paths: [src/**, .github/workflows/build.yml]}
 
 jobs:
 
