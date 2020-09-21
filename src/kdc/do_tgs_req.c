@@ -648,7 +648,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
          */
         krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
         krb5_principal client2 = t2enc->client;
-        if (!krb5_principal_compare(kdc_context, request->server, client2)) {
+        if (!is_client_db_alias(kdc_context, server, client2)) {
             altcprinc = client2;
             errcode = KRB5KDC_ERR_SERVER_NOMATCH;
             status = "2ND_TKT_MISMATCH";
