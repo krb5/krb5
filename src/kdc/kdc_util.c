@@ -1425,10 +1425,10 @@ cleanup:
     return code;
 }
 
-/* Return true if princ canonicalizes to the same principal as canon. */
-static krb5_boolean
-is_client_alias(krb5_context context, krb5_const_principal canon,
-                krb5_const_principal princ)
+/* Return true if princ canonicalizes to the same principal as entry's. */
+krb5_boolean
+is_client_db_alias(krb5_context context, const krb5_db_entry *entry,
+                   krb5_const_principal princ)
 {
     krb5_error_code ret;
     krb5_db_entry *self;
@@ -1437,7 +1437,7 @@ is_client_alias(krb5_context context, krb5_const_principal canon,
     ret = krb5_db_get_principal(context, princ,
                                 KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY, &self);
     if (!ret) {
-        is_self = krb5_principal_compare(context, canon, self->princ);
+        is_self = krb5_principal_compare(context, entry->princ, self->princ);
         krb5_db_free_principal(context, self);
     }
 
@@ -1497,7 +1497,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
 
     /* If the server is local, check that the request is for self. */
     if (!isflagset(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) &&
-        !is_client_alias(kdc_context, server->princ, client_princ)) {
+        !is_client_db_alias(kdc_context, server, client_princ)) {
         *status = "INVALID_S4U2SELF_REQUEST_SERVER_MISMATCH";
         return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error */
     }
@@ -1690,7 +1690,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
         }
 
         client_princ = *stkt_authdata_client;
-    } else if (!is_client_alias(kdc_context, server->princ, server_princ)) {
+    } else if (!is_client_db_alias(kdc_context, server, server_princ)) {
         *status = "EVIDENCE_TICKET_MISMATCH";
         return KRB5KDC_ERR_SERVER_NOMATCH;
     }

@@ -343,6 +343,10 @@ log_tgs_badtrans(krb5_context ctx, krb5_principal cprinc,
 void
 log_tgs_alt_tgt(krb5_context context, krb5_principal p);
 
+krb5_boolean
+is_client_db_alias(krb5_context context, const krb5_db_entry *entry,
+                   krb5_const_principal princ);
+
 /* FAST*/
 enum krb5_fast_kdc_flags {
     KRB5_FAST_REPLY_KEY_USED = 0x1,
