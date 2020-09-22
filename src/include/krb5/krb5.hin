@@ -254,7 +254,7 @@ typedef krb5_principal_data * krb5_principal;
 #define KRB5_NT_MS_PRINCIPAL_AND_ID  -129 /**< NT 4 style name */
 #define KRB5_NT_ENT_PRINCIPAL_AND_ID -130 /**< NT 4 style name and SID */
 
-/** Constant version of krb5_principal_data */
+/** Constant version of krb5_principal_data. */
 typedef const krb5_principal_data *krb5_const_principal;
 
 #define krb5_princ_realm(context, princ) (&(princ)->realm)
@@ -1944,7 +1944,7 @@ typedef struct _krb5_ticket_times {
 typedef struct _krb5_authdata {
     krb5_magic magic;
     krb5_authdatatype ad_type; /**< ADTYPE */
-    unsigned int length;       /**< Length of data  */
+    unsigned int length;       /**< Length of data */
     krb5_octet *contents;      /**< Data */
 } krb5_authdata;
 
@@ -2134,7 +2134,7 @@ typedef struct _krb5_ap_rep {
     krb5_enc_data enc_part;     /**< Ciphertext of ApRepEncPart */
 } krb5_ap_rep;
 
-/** Cleartext that is encrypted and put into @c _krb5_ap_rep.  */
+/** Cleartext that is encrypted and put into @c _krb5_ap_rep. */
 typedef struct _krb5_ap_rep_enc_part {
     krb5_magic magic;
     krb5_timestamp ctime;       /**< Client time, seconds portion */
@@ -2163,7 +2163,7 @@ typedef struct _krb5_cred_info {
     krb5_address **caddrs;      /**< Array of pointers to addrs (optional) */
 } krb5_cred_info;
 
-/** Cleartext credentials information.  */
+/** Cleartext credentials information. */
 typedef struct _krb5_cred_enc_part {
     krb5_magic magic;
     krb5_int32 nonce;           /**< Nonce (optional) */
@@ -2244,14 +2244,14 @@ typedef struct _krb5_pa_pac_req {
 typedef struct krb5_replay_data {
     krb5_timestamp      timestamp;  /**< Timestamp, seconds portion */
     krb5_int32          usec;       /**< Timestamp, microseconds portion */
-    krb5_ui_4           seq;        /**< Sequence number  */
+    krb5_ui_4           seq;        /**< Sequence number */
 } krb5_replay_data;
 
 /* Flags for krb5_auth_con_genaddrs(). */
 
 /** Generate the local network address. */
 #define KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR       0x00000001
-/** Generate the remote network address.  */
+/** Generate the remote network address. */
 #define KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR      0x00000002
 /** Generate the local network address and the local port. */
 #define KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR  0x00000004
@@ -6423,7 +6423,7 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen);
 #define KRB5_RECVAUTH_BADAUTHVERS       0x0002
 /* initial ticket api functions */
 
-/** Text for prompt used in prompter callback function.  */
+/** Text for prompt used in prompter callback function. */
 typedef struct _krb5_prompt {
     char *prompt;      /**< The prompt to show to the user */
     int hidden;        /**< Boolean; informative prompt or hidden (e.g. PIN) */
@@ -6483,29 +6483,29 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  * value is required in order to complete the authentication.  The JSON format
  * of the challenge is:
  *
- *  @n {
- *  @n   "service": <string (optional)>,
- *  @n   "tokenInfo": [
- *  @n      {
- *  @n        "flags":     <number>,
- *  @n        "vendor":    <string (optional)>,
- *  @n        "challenge": <string (optional)>,
- *  @n        "length":    <number (optional)>,
- *  @n        "format":    <number (optional)>,
- *  @n        "tokenID":   <string (optional)>,
- *  @n        "algID":     <string (optional)>,
- *  @n      },
- *  @n      ...
- *  @n    ]
- *  @n  }
+ *     {
+ *       "service": <string (optional)>,
+ *       "tokenInfo": [
+ *         {
+ *           "flags":     <number>,
+ *           "vendor":    <string (optional)>,
+ *           "challenge": <string (optional)>,
+ *           "length":    <number (optional)>,
+ *           "format":    <number (optional)>,
+ *           "tokenID":   <string (optional)>,
+ *           "algID":     <string (optional)>,
+ *         },
+ *         ...
+ *       ]
+ *     }
  *
  * The answer to the question MUST be JSON formatted:
  *
- * @n  {
- * @n    "tokeninfo": <number>,
- * @n    "value":     <string (optional)>,
- * @n    "pin":       <string (optional)>,
- * @n  }
+ *     {
+ *       "tokeninfo": <number>,
+ *       "value":     <string (optional)>,
+ *       "pin":       <string (optional)>,
+ *     }
  *
  * For more detail, please see RFC 6560.
  *
@@ -6556,17 +6556,17 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
  * below, and possibly other flags to be added later.  Any resemblance to
  * similarly-named CKF_* values in the PKCS#11 API should not be depended on.
  *
- *  @n {
- *  @n     identity <string> : flags <number>,
- *  @n     ...
- *  @n }
+ *     {
+ *         identity <string> : flags <number>,
+ *         ...
+ *     }
  *
  * The answer to the question MUST be JSON formatted:
  *
- *  @n {
- *  @n     identity <string> : password <string>,
- *  @n     ...
- *  @n }
+ *     {
+ *         identity <string> : password <string>,
+ *         ...
+ *     }
  *
  * @version New in 1.12
  */

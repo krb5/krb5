@@ -25,6 +25,7 @@
 import sys
 import os
 import re
+import textwrap
 
 from lxml import etree
 
@@ -293,8 +294,10 @@ class DoxyTypes(object):
                     result.append('*%s*' % e.strip())
             elif  e.getparent().tag == 'defname':
                 result.append('%s, ' % e.strip())
-            elif  e.getparent().tag == 'linebreak':
-                result.append('\n*%s*\n' % e.strip())
+            elif e.getparent().tag == 'verbatim':
+                result.append('\n::\n\n')
+                result.append(textwrap.indent(e, '    ', lambda x: True))
+                result.append('\n')
 
         result = ' '.join(result)
 
