@@ -252,19 +252,21 @@ check_tgs_s4u2proxy(kdc_realm_t *kdc_active_realm,
 }
 
 static int
-check_tgs_u2u(kdc_realm_t *kdc_active_realm,
-              krb5_kdc_req *req, const char **status)
+check_tgs_u2u(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
+              krb5_const_principal server_princ, const char **status)
 {
+    krb5_const_principal second_server_princ;
+
     if (req->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
         /* Check that second ticket is in request. */
         if (!req->second_ticket || !req->second_ticket[0]) {
             *status = "NO_2ND_TKT";
             return KDC_ERR_BADOPTION;
         }
-        /* Check that second ticket is a TGT. */
-        if (!krb5_principal_compare(kdc_context,
-                                    req->second_ticket[0]->server,
-                                    tgs_server)) {
+        /* Check that second ticket is a TGT to the server realm. */
+        second_server_princ = req->second_ticket[0]->server;
+        if (!is_local_tgs_principal(second_server_princ) ||
+            !data_eq(second_server_princ->data[1], server_princ->realm)) {
             *status = "2ND_TKT_NOT_TGS";
             return KDC_ERR_POLICY;
         }
@@ -353,7 +355,7 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
         return(KRB_AP_ERR_REPEAT);
     }
 
-    errcode = check_tgs_u2u(kdc_active_realm, request, status);
+    errcode = check_tgs_u2u(kdc_active_realm, request, server->princ, status);
     if (errcode != 0)
         return errcode;
 

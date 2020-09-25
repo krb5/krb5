@@ -267,7 +267,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         goto cleanup;
     }
 
-    if (!is_local_principal(kdc_active_realm, header_ticket->server))
+    if (!data_eq(header_server->princ->realm, sprinc->realm))
         setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
     if (is_referral)
         setflag(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL);
@@ -292,6 +292,15 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         au_state->status = status;
         kau_s4u2self(kdc_context, errcode ? FALSE : TRUE, au_state);
         au_state->s4u2self_user = NULL;
+    }
+
+    /* Aside from cross-realm S4U2Self requests, do not accept header tickets
+     * for local users issued by foreign realms. */
+    if (s4u_x509_user == NULL && data_eq(cprinc->realm, sprinc->realm) &&
+        isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
+        krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
+        retval = KRB5KDC_ERR_POLICY;
+        goto cleanup;
     }
 
     if (errcode)
@@ -565,13 +574,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
 
     /*
      * Only add the realm of the presented tgt to the transited list if
-     * it is different than the local realm (cross-realm) and it is different
+     * it is different than the server realm (cross-realm) and it is different
      * than the realm of the client (since the realm of the client is already
      * implicitly part of the transited list and should not be explicitly
      * listed).
      */
-    /* realm compare is like strcmp, but knows how to deal with these args */
-    if (krb5_realm_compare(kdc_context, header_ticket->server, tgs_server) ||
+    if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ||
         krb5_realm_compare(kdc_context, header_ticket->server,
                            enc_tkt_reply.client)) {
         /* tgt issued by local realm or issued by realm of client */

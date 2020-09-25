@@ -600,18 +600,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     state->rock.client = state->client;
 
-    /*
-     * If the backend returned a principal that is not in the local
-     * realm, then we need to refer the client to that realm.
-     */
-    if (!is_local_principal(kdc_active_realm, state->client->princ)) {
-        /* Entry is a referral to another realm */
-        state->status = "REFERRAL";
-        au_state->cl_realm = &state->client->princ->realm;
-        errcode = KRB5KDC_ERR_WRONG_REALM;
-        goto errout;
-    }
-
     au_state->stage = SRVC_PRINC;
 
     s_flags = 0;
@@ -628,6 +616,15 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     } else if (errcode) {
         state->status = "LOOKING_UP_SERVER";
+        goto errout;
+    }
+
+    /* If the KDB module returned a different realm for the client and server,
+     * we need to issue a client realm referral. */
+    if (!data_eq(state->server->princ->realm, state->client->princ->realm)) {
+        state->status = "REFERRAL";
+        au_state->cl_realm = &state->client->princ->realm;
+        errcode = KRB5KDC_ERR_WRONG_REALM;
         goto errout;
     }
 

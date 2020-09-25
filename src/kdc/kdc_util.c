@@ -78,12 +78,6 @@ static krb5_error_code find_server_key(krb5_context,
                                        krb5_kvno, krb5_keyblock **,
                                        krb5_kvno *);
 
-krb5_boolean
-is_local_principal(kdc_realm_t *kdc_active_realm, krb5_const_principal princ1)
-{
-    return krb5_realm_compare(kdc_context, princ1, tgs_server);
-}
-
 /*
  * Returns TRUE if the kerberos principal is the name of a Kerberos ticket
  * service.
@@ -104,13 +98,16 @@ krb5_is_tgs_principal(krb5_const_principal principal)
 krb5_boolean
 is_cross_tgs_principal(krb5_const_principal principal)
 {
-    if (!krb5_is_tgs_principal(principal))
-        return FALSE;
-    if (!data_eq(*krb5_princ_component(kdc_context, principal, 1),
-                 *krb5_princ_realm(kdc_context, principal)))
-        return TRUE;
-    else
-        return FALSE;
+    return krb5_is_tgs_principal(principal) &&
+        !data_eq(principal->data[1], principal->realm);
+}
+
+/* Return true if princ is the name of a local TGS for any realm. */
+krb5_boolean
+is_local_tgs_principal(krb5_const_principal principal)
+{
+    return krb5_is_tgs_principal(principal) &&
+        data_eq(principal->data[1], principal->realm);
 }
 
 /*
@@ -143,17 +140,6 @@ comp_cksum(krb5_context kcontext, krb5_data *source, krb5_ticket *ticket,
     return(0);
 }
 
-/* Return true if padata contains an entry of either S4U2Self type. */
-static inline krb5_boolean
-has_s4u2self_padata(krb5_pa_data **padata)
-{
-    if (krb5int_find_pa_data(NULL, padata, KRB5_PADATA_FOR_USER) != NULL)
-        return TRUE;
-    if (krb5int_find_pa_data(NULL, padata, KRB5_PADATA_S4U_X509_USER) != NULL)
-        return TRUE;
-    return FALSE;
-}
-
 /* If a header ticket is decrypted, *ticket_out is filled in even on error. */
 krb5_error_code
 kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
@@ -170,7 +156,6 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     krb5_authdata **authdata = NULL;
     krb5_data             scratch1;
     krb5_data           * scratch = NULL;
-    krb5_boolean          foreign_server = FALSE;
     krb5_auth_context     auth_context = NULL;
     krb5_authenticator  * authenticator = NULL;
     krb5_checksum       * his_cksum = NULL;
@@ -198,19 +183,6 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
         retval = KRB5KDC_ERR_POLICY;
         goto cleanup;
     }
-
-    /* If the "server" principal in the ticket is not something
-       in the local realm, then we must refuse to service the request
-       if the client claims to be from the local realm.
-
-       If we don't do this, then some other realm's nasty KDC can
-       claim to be authenticating a client from our realm, and we'll
-       give out tickets concurring with it!
-
-       we set a flag here for checking below.
-    */
-    foreign_server = !is_local_principal(kdc_active_realm,
-                                         apreq->ticket->server);
 
     if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
         goto cleanup;
@@ -262,15 +234,6 @@ kdc_process_tgs_req(kdc_realm_t *kdc_active_realm,
     /* Check for a checksum */
     if (!(his_cksum = authenticator->checksum)) {
         retval = KRB5KRB_AP_ERR_INAPP_CKSUM;
-        goto cleanup_authenticator;
-    }
-
-    /* make sure the client is of proper lineage (see above) */
-    if (foreign_server && !has_s4u2self_padata(request->padata) &&
-        is_local_principal(kdc_active_realm, ticket->enc_part2->client)) {
-        /* someone in a foreign realm claiming to be local */
-        krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
-        retval = KRB5KDC_ERR_POLICY;
         goto cleanup_authenticator;
     }
 
@@ -602,12 +565,12 @@ int
 check_anon(kdc_realm_t *kdc_active_realm,
            krb5_principal client, krb5_principal server)
 {
-    /* If restrict_anon is set, reject requests from anonymous to principals
-     * other than the local TGT. */
+    /* If restrict_anon is set, reject requests from anonymous clients to
+     * server principals other than local TGTs. */
     if (kdc_active_realm->realm_restrict_anon &&
         krb5_principal_compare_any_realm(kdc_context, client,
                                          krb5_anonymous_principal()) &&
-        !krb5_principal_compare(kdc_context, server, tgs_server))
+        !is_local_tgs_principal(server))
         return -1;
     return 0;
 }
@@ -1539,7 +1502,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     /*
      * Do not attempt to lookup principals in foreign realms.
      */
-    if (is_local_principal(kdc_active_realm, id->user)) {
+    if (data_eq(server->princ->realm, id->user->realm)) {
         krb5_db_entry no_server;
         krb5_pa_data **e_data = NULL;
 
@@ -1675,8 +1638,7 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
          */
         if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL) ||
             !is_cross_tgs_principal(server->princ) ||
-            !krb5_principal_compare_any_realm(kdc_context, server->princ,
-                                              tgs_server) ||
+            !data_eq(server->princ->data[1], proxy->princ->realm) ||
             !krb5_principal_compare(kdc_context, client_princ, server_princ)) {
             *status = "XREALM_EVIDENCE_TICKET_MISMATCH";
             return KRB5KDC_ERR_BADOPTION;
