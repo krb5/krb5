@@ -644,8 +644,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     au_state->stage = VALIDATE_POL;
 
     if ((errcode = validate_as_request(kdc_active_realm,
-                                       state->request, *state->client,
-                                       *state->server, state->kdc_time,
+                                       state->request, state->client,
+                                       state->server, state->kdc_time,
                                        &state->status, &state->e_data))) {
         errcode += ERROR_TABLE_BASE_krb5;
         goto errout;

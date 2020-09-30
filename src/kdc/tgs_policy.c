@@ -48,7 +48,7 @@ struct tgsflagrule {
 };
 
 /* Service principal TGS policy checking functions */
-typedef int (check_tgs_svc_pol_fn)(krb5_kdc_req *, krb5_db_entry,
+typedef int (check_tgs_svc_pol_fn)(krb5_kdc_req *, krb5_db_entry *,
                                    krb5_ticket *, krb5_timestamp,
                                    const char **);
 
@@ -110,7 +110,7 @@ static const struct tgsflagrule svcdenyrules[] = {
  * A service principal can forbid some TGS-REQ options.
  */
 static int
-check_tgs_svc_deny_opts(krb5_kdc_req *req, krb5_db_entry server,
+check_tgs_svc_deny_opts(krb5_kdc_req *req, krb5_db_entry *server,
                         krb5_ticket *tkt, krb5_timestamp kdc_time,
                         const char **status)
 {
@@ -122,7 +122,7 @@ check_tgs_svc_deny_opts(krb5_kdc_req *req, krb5_db_entry server,
         r = &svcdenyrules[i];
         if (!(r->reqflags & req->kdc_options))
             continue;
-        if (r->checkflag & server.attributes) {
+        if (r->checkflag & server->attributes) {
             *status = r->status;
             return r->err;
         }
@@ -134,20 +134,20 @@ check_tgs_svc_deny_opts(krb5_kdc_req *req, krb5_db_entry server,
  * A service principal can deny all TGS-REQs for it.
  */
 static int
-check_tgs_svc_deny_all(krb5_kdc_req *req, krb5_db_entry server,
+check_tgs_svc_deny_all(krb5_kdc_req *req, krb5_db_entry *server,
                        krb5_ticket *tkt, krb5_timestamp kdc_time,
                        const char **status)
 {
-    if (server.attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+    if (server->attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
         *status = "SERVER LOCKED OUT";
         return KDC_ERR_S_PRINCIPAL_UNKNOWN;
     }
-    if ((server.attributes & KRB5_KDB_DISALLOW_SVR) &&
+    if ((server->attributes & KRB5_KDB_DISALLOW_SVR) &&
         !(req->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY)) {
         *status = "SERVER NOT ALLOWED";
         return KDC_ERR_MUST_USE_USER2USER;
     }
-    if (server.attributes & KRB5_KDB_DISALLOW_TGT_BASED) {
+    if (server->attributes & KRB5_KDB_DISALLOW_TGT_BASED) {
         if (krb5_is_tgs_principal(tkt->server)) {
             *status = "TGT BASED NOT ALLOWED";
             return KDC_ERR_POLICY;
@@ -160,17 +160,17 @@ check_tgs_svc_deny_all(krb5_kdc_req *req, krb5_db_entry server,
  * A service principal can require certain TGT flags.
  */
 static int
-check_tgs_svc_reqd_flags(krb5_kdc_req *req, krb5_db_entry server,
+check_tgs_svc_reqd_flags(krb5_kdc_req *req, krb5_db_entry *server,
                          krb5_ticket *tkt,
                          krb5_timestamp kdc_time, const char **status)
 {
-    if (server.attributes & KRB5_KDB_REQUIRES_HW_AUTH) {
+    if (server->attributes & KRB5_KDB_REQUIRES_HW_AUTH) {
         if (!(tkt->enc_part2->flags & TKT_FLG_HW_AUTH)) {
             *status = "NO HW PREAUTH";
             return KRB_ERR_GENERIC;
         }
     }
-    if (server.attributes & KRB5_KDB_REQUIRES_PRE_AUTH) {
+    if (server->attributes & KRB5_KDB_REQUIRES_PRE_AUTH) {
         if (!(tkt->enc_part2->flags & TKT_FLG_PRE_AUTH)) {
             *status = "NO PREAUTH";
             return KRB_ERR_GENERIC;
@@ -180,10 +180,10 @@ check_tgs_svc_reqd_flags(krb5_kdc_req *req, krb5_db_entry server,
 }
 
 static int
-check_tgs_svc_time(krb5_kdc_req *req, krb5_db_entry server, krb5_ticket *tkt,
+check_tgs_svc_time(krb5_kdc_req *req, krb5_db_entry *server, krb5_ticket *tkt,
                    krb5_timestamp kdc_time, const char **status)
 {
-    if (server.expiration && ts_after(kdc_time, server.expiration)) {
+    if (server->expiration && ts_after(kdc_time, server->expiration)) {
         *status = "SERVICE EXPIRED";
         return KDC_ERR_SERVICE_EXP;
     }
@@ -191,8 +191,9 @@ check_tgs_svc_time(krb5_kdc_req *req, krb5_db_entry server, krb5_ticket *tkt,
 }
 
 static int
-check_tgs_svc_policy(krb5_kdc_req *req, krb5_db_entry server, krb5_ticket *tkt,
-                     krb5_timestamp kdc_time, const char **status)
+check_tgs_svc_policy(krb5_kdc_req *req, krb5_db_entry *server,
+                     krb5_ticket *tkt, krb5_timestamp kdc_time,
+                     const char **status)
 {
     int errcode;
     size_t i;
@@ -317,7 +318,7 @@ check_tgs_tgt(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
 
 int
 validate_tgs_request(kdc_realm_t *kdc_active_realm,
-                     krb5_kdc_req *request, krb5_db_entry server,
+                     krb5_kdc_req *request, krb5_db_entry *server,
                      krb5_ticket *ticket, krb5_timestamp kdc_time,
                      const char **status, krb5_pa_data ***e_data)
 {
@@ -367,8 +368,8 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
     }
 
     /* Perform KDB module policy checks. */
-    ret = krb5_db_check_policy_tgs(kdc_context, request, &server,
-                                   ticket, status, e_data);
+    ret = krb5_db_check_policy_tgs(kdc_context, request, server, ticket,
+                                   status, e_data);
     if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
         return errcode_to_protocol(ret);
 

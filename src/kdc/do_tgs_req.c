@@ -259,7 +259,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         goto cleanup;
 
     if ((retval = validate_tgs_request(kdc_active_realm,
-                                       request, *server, header_ticket,
+                                       request, server, header_ticket,
                                        kdc_time, &status, &e_data))) {
         if (retval == KDC_ERR_POLICY || retval == KDC_ERR_BADOPTION)
             au_state->violation = PROT_CONSTRAINT;
