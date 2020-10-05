@@ -84,9 +84,14 @@ validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
                      const char **, krb5_pa_data ***);
 
 int
-validate_tgs_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
-                      krb5_ticket *, krb5_timestamp,
-                      const char **, krb5_pa_data ***);
+validate_tgs_request(kdc_realm_t *kdc_active_realm,
+                     krb5_kdc_req *request, krb5_db_entry *server,
+                     krb5_ticket *ticket, const krb5_ticket *stkt,
+                     krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
+                     krb5_pa_s4u_x509_user *s4u_x509_user,
+                     krb5_db_entry *s4u2self_client,
+                     krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                     const char **status, krb5_pa_data ***e_data);
 
 krb5_flags
 get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
@@ -262,12 +267,9 @@ return_enc_padata(krb5_context context,
 krb5_error_code
 kdc_process_s4u2self_req (kdc_realm_t *kdc_active_realm,
                           krb5_kdc_req *request,
-                          krb5_const_principal client_princ,
-                          unsigned int c_flags,
                           const krb5_db_entry *server,
                           krb5_keyblock *tgs_subkey,
                           krb5_keyblock *tgs_session,
-                          krb5_timestamp kdc_time,
                           krb5_pa_s4u_x509_user **s4u2self_req,
                           krb5_db_entry **princ_ptr,
                           const char **status);
@@ -461,6 +463,9 @@ struct krb5_kdcpreauth_rock_st {
 
 /* TGS-REQ options which are not compatible with referrals */
 #define NO_REFERRAL_OPTION (NON_TGT_OPTION | KDC_OPT_ENC_TKT_IN_SKEY)
+
+/* Options incompatible with AS and S4U2Self requests */
+#define AS_INVALID_OPTIONS (NO_REFERRAL_OPTION | KDC_OPT_CNAME_IN_ADDL_TKT)
 
 /*
  * Mask of KDC options that request the corresponding ticket flag with
