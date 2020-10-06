@@ -47,4 +47,20 @@ msgs = ('Getting initial credentials for %s' % realm.user_princ,
 realm.run(['./t_credstore', '-i', 'u:' + realm.user_princ, 'password',
            password('user')], expected_trace=msgs)
 
+mark('verify')
+msgs = ('Getting initial credentials for %s' % realm.user_princ,
+        'Storing %s -> %s in MEMORY:' % (realm.user_princ, realm.krbtgt_princ),
+        'Getting credentials %s -> %s' % (realm.user_princ, service_cs),
+        'Storing %s -> %s in MEMORY:' % (realm.user_princ, service_cs))
+realm.run(['./t_credstore', '-i', 'u:' + realm.user_princ, 'password',
+           password('user'), 'keytab', servicekeytab, 'verify',
+           service_cs], expected_trace=msgs)
+# Try again with verification failing due to key mismatch.
+realm.run([kadminl, 'cpw', '-randkey', service_cs])
+realm.run([kadminl, 'modprinc', '-kvno', '1', service_cs])
+errmsg = 'Cannot decrypt ticket for %s' % service_cs
+realm.run(['./t_credstore', '-i', 'u:' + realm.user_princ, 'password',
+           password('user'), 'keytab', servicekeytab, 'verify',
+           service_cs], expected_code=1, expected_msg=errmsg)
+
 success('Credential store tests')

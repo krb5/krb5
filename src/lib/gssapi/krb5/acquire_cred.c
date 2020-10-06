@@ -595,9 +595,27 @@ kg_cred_set_initial_refresh(krb5_context context, krb5_gss_cred_id_rec *cred,
     set_refresh_time(context, cred->ccache, refresh);
 }
 
+struct verify_params {
+    krb5_principal princ;
+    krb5_keytab keytab;
+};
+
+static krb5_error_code
+verify_initial_cred(krb5_context context, krb5_creds *creds,
+                    const struct verify_params *verify)
+{
+    krb5_verify_init_creds_opt vopts;
+
+    krb5_verify_init_creds_opt_init(&vopts);
+    krb5_verify_init_creds_opt_set_ap_req_nofail(&vopts, TRUE);
+    return krb5_verify_init_creds(context, creds, verify->princ,
+                                  verify->keytab, NULL, &vopts);
+}
+
 /* Get initial credentials using the supplied password or client keytab. */
 static krb5_error_code
-get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
+get_initial_cred(krb5_context context, const struct verify_params *verify,
+                 krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
     krb5_get_init_creds_opt *opt = NULL;
@@ -621,6 +639,11 @@ get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
     }
     if (code)
         goto cleanup;
+    if (cred->password != NULL && verify != NULL) {
+        code = verify_initial_cred(context, &creds, verify);
+        if (code)
+            goto cleanup;
+    }
     kg_cred_set_initial_refresh(context, cred, &creds.times);
     cred->have_tgt = TRUE;
     cred->expire = creds.times.endtime;
@@ -632,7 +655,9 @@ cleanup:
 
 /* Get initial credentials if we ought to and are able to. */
 static krb5_error_code
-maybe_get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
+maybe_get_initial_cred(krb5_context context,
+                       const struct verify_params *verify,
+                       krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
 
@@ -642,7 +667,7 @@ maybe_get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
 
     /* Get creds if we have none or if it's time to refresh. */
     if (cred->expire == 0 || kg_cred_time_to_refresh(context, cred)) {
-        code = get_initial_cred(context, cred);
+        code = get_initial_cred(context, verify, cred);
         /* If we were trying to refresh and failed, we can keep going. */
         if (code && cred->expire == 0)
             return code;
@@ -652,11 +677,10 @@ maybe_get_initial_cred(krb5_context context, krb5_gss_cred_id_rec *cred)
 }
 
 static OM_uint32
-acquire_init_cred(krb5_context context,
-                  OM_uint32 *minor_status,
-                  krb5_ccache req_ccache,
-                  gss_buffer_t password,
+acquire_init_cred(krb5_context context, OM_uint32 *minor_status,
+                  krb5_ccache req_ccache, gss_buffer_t password,
                   krb5_keytab client_keytab,
+                  const struct verify_params *verify,
                   krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
@@ -741,7 +765,7 @@ acquire_init_cred(krb5_context context,
     }
 #endif
 
-    code = maybe_get_initial_cred(context, cred);
+    code = maybe_get_initial_cred(context, verify, cred);
     if (code)
         goto error;
 
@@ -759,6 +783,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                      OM_uint32 time_req, gss_cred_usage_t cred_usage,
                      krb5_ccache ccache, krb5_keytab client_keytab,
                      krb5_keytab keytab, const char *rcname,
+                     const struct verify_params *verify,
                      krb5_boolean iakerb, gss_cred_id_t *output_cred_handle,
                      OM_uint32 *time_rec)
 {
@@ -828,7 +853,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
      */
     if (cred_usage == GSS_C_INITIATE || cred_usage == GSS_C_BOTH) {
         ret = acquire_init_cred(context, minor_status, ccache, password,
-                                client_keytab, cred);
+                                client_keytab, verify, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -922,7 +947,8 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
 
     ret = acquire_cred_context(context, minor_status, desired_name, password,
                                time_req, cred_usage, ccache, NULL, keytab,
-                               NULL, iakerb, output_cred_handle, time_rec);
+                               NULL, NULL, iakerb, output_cred_handle,
+                               time_rec);
 
 out:
     krb5_free_context(context);
@@ -1012,7 +1038,7 @@ kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
     }
 
     /* Resolve name to ccache and possibly get initial credentials. */
-    code = maybe_get_initial_cred(context, cred);
+    code = maybe_get_initial_cred(context, NULL, cred);
     if (code)
         goto kerr;
 
@@ -1181,7 +1207,10 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     krb5_keytab client_keytab = NULL;
     krb5_keytab keytab = NULL;
     krb5_ccache ccache = NULL;
+    krb5_principal verify_princ = NULL;
     const char *rcname, *value;
+    struct verify_params vparams = { NULL };
+    const struct verify_params *verify = NULL;
     gss_buffer_desc pwbuf;
     gss_buffer_t password = NULL;
     OM_uint32 ret;
@@ -1265,10 +1294,33 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
         password = &pwbuf;
     }
 
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_VERIFY_URN, &value);
+    if (GSS_ERROR(ret))
+        goto out;
+    if (value != NULL) {
+        if (iakerb || password == NULL) {
+            /* Only valid if acquiring cred with password, and not supported
+             * with IAKERB. */
+            *minor_status = G_BAD_USAGE;
+            ret = GSS_S_FAILURE;
+            goto out;
+        }
+        if (*value != '\0') {
+            code = krb5_parse_name(context, value, &verify_princ);
+            if (code != 0) {
+                *minor_status = code;
+                ret = GSS_S_FAILURE;
+                goto out;
+            }
+        }
+        vparams.princ = verify_princ;
+        vparams.keytab = keytab;
+        verify = &vparams;
+    }
     ret = acquire_cred_context(context, minor_status, desired_name, password,
                                time_req, cred_usage, ccache, client_keytab,
-                               keytab, rcname, iakerb, output_cred_handle,
-                               time_rec);
+                               keytab, rcname, verify, iakerb,
+                               output_cred_handle, time_rec);
 
 out:
     if (ccache != NULL)
@@ -1277,6 +1329,7 @@ out:
         krb5_kt_close(context, client_keytab);
     if (keytab != NULL)
         krb5_kt_close(context, keytab);
+    krb5_free_principal(context, verify_princ);
     krb5_free_context(context);
     return ret;
 }
