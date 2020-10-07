@@ -209,7 +209,7 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
         '/Additional pre-authentication required',
         'Identified realm of client principal as UREALM',
         'Getting credentials enterprise\\@abc@UREALM -> user@SREALM',
-        'TGS reply is for enterprise\@abc@UREALM -> user@SREALM')
+        'TGS reply is for enterprise\\@abc@UREALM -> user@SREALM')
 r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
        expected_trace=msgs)
 

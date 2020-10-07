@@ -385,7 +385,6 @@ import socket
 import string
 import subprocess
 import sys
-import imp
 
 # Used when most things go wrong (other than programming errors) so
 # that the user sees an error message rather than a Python traceback,
@@ -599,14 +598,6 @@ def _build_env():
     # or localized times.
     env['LC_ALL'] = 'C'
     return env
-
-
-def _import_runenv():
-    global buildtop
-    runenv_py = os.path.join(buildtop, 'runenv.py')
-    if not os.path.exists(runenv_py):
-        fail('You must run "make runenv.py" in %s first.' % buildtop)
-    return imp.load_source('runenv', runenv_py)
 
 
 # Merge the nested dictionaries cfg1 and cfg2 into a new dictionary.
@@ -1349,9 +1340,13 @@ _last_cmd_output = None
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
-runenv = _import_runenv()
 hostname = socket.gethostname().lower()
 null_input = open(os.devnull, 'r')
+
+if not os.path.exists(os.path.join(buildtop, 'runenv.py')):
+    fail('You must run "make runenv.py" in %s first.' % buildtop)
+sys.path = [buildtop] + sys.path
+import runenv
 
 # A DB pass is a tuple of: name, kdc_conf.
 _dbpasses = [('db2', None)]

@@ -117,14 +117,14 @@ kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
 r1, r2 = cross_realms(2, xtgts=(),
                       args=({'kdc_conf': kdcconf, 'create_kdb': False}, None),
                       create_host=False)
-r2.addprinc('abc\@XYZ', 'pw')
+r2.addprinc('abc\\@XYZ', 'pw')
 r1.start_kdc()
 r1.kinit('user', expected_code=1,
          expected_msg='not found in Kerberos database')
 r1.kinit('user', password('user'), ['-C'])
 r1.klist('user@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 r1.kinit('abc@XYZ', 'pw', ['-E'])
-r1.klist('abc\@XYZ@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
+r1.klist('abc\\@XYZ@KRBTEST2.COM', 'krbtgt/KRBTEST2.COM')
 
 # Test that disable_encrypted_timestamp persists across client
 # referrals.  (This test relies on SPAKE not being enabled by default

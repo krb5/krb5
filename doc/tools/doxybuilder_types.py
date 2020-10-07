@@ -111,7 +111,7 @@ class DoxyTypes(object):
         # remove  macros
         t_definition = re.sub('KRB5_CALLCONV_C', '', t_definition)
         t_definition = re.sub('KRB5_CALLCONV', '', t_definition)
-        t_definition = re.sub('\*', '\\*', t_definition)
+        t_definition = re.sub(r'\*', '\\*', t_definition)
         # handle fp
         if t_type[1].find('(') >= 0:
               t_type = (t_type[0],None)
@@ -161,7 +161,7 @@ class DoxyTypes(object):
         # remove  macros
         v_definition = re.sub('KRB5_CALLCONV_C', '', v_definition)
         v_definition = re.sub('KRB5_CALLCONV', '', v_definition)
-        v_definition = re.sub('\*', '\\*', v_definition)
+        v_definition = re.sub(r'\*', '\\*', v_definition)
 
         variable_descr = {'category': 'variable',
                           'definition': v_definition,
@@ -193,7 +193,7 @@ class DoxyTypes(object):
             if prm_list is not None:
                 prm_str = prm_str.join(prm_list)
             d_signature = " %s (%s) " % (d_name , prm_str)
-            d_signature = re.sub(', \)', ')', d_signature).strip()
+            d_signature = re.sub(r', \)', ')', d_signature).strip()
 
         if len(node.xpath('./initializer')) > 0:
             len_ref = len(node.xpath('./initializer/ref'))

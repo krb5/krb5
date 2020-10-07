@@ -4,7 +4,7 @@ import re
 # Run "kvno server" with a fresh set of client tickets, then check that the
 # enctypes in the service ticket match the expected values.
 etypes_re = re.compile(r'server@[^\n]+\n\tEtype \(skey, tkt\): '
-                       '([^,]+), ([^\s]+)')
+                       r'([^,]+), ([^\s]+)')
 def test_kvno(realm, expected_skey, expected_tkt):
     realm.kinit(realm.user_princ, password('user'))
     realm.run([kvno, 'server'])
