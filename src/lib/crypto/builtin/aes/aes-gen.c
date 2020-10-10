@@ -17,7 +17,8 @@ struct {
     unsigned char input[4*16];
     unsigned char output[4*16];
 } test_case[NTESTS];
-aes_ctx ctx, dctx;
+aes_encrypt_ctx ctx;
+aes_decrypt_ctx dctx;
 
 static void init ()
 {
@@ -32,10 +33,10 @@ static void init ()
 	    test_case[i].input[j] = 0xff & rand();
 	}
 
-    r = aes_enc_key (key, sizeof(key), &ctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
-    r = aes_dec_key (key, sizeof(key), &dctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_encrypt_key128(key, &ctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_decrypt_key128(key, &dctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
 }
 
 static void hexdump(const unsigned char *ptr, size_t len)
@@ -60,26 +61,26 @@ static void fips_test ()
     };
     unsigned char output[16];
     unsigned char tmp[16];
-    aes_ctx fipsctx;
+    aes_crypt_ctx fipsctx;
     int r;
 
     printf ("FIPS test:\nkey:");
     hexdump (fipskey, 16);
     printf ("\ninput:");
     hexdump (input, 16);
-    r = aes_enc_key (fipskey, sizeof(fipskey), &fipsctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
-    r = aes_enc_blk (input, output, &fipsctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_encrypt_key128(fipskey, &fipsctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_encrypt(input, output, &fipsctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     printf ("\noutput:");
     hexdump (output, 16);
     printf ("\n");
     if (memcmp(expected, output, 16))
 	fprintf(stderr, "wrong results!!!\n"), exit (1);
-    r = aes_dec_key (fipskey, sizeof(fipskey), &fipsctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
-    r = aes_dec_blk (output, tmp, &fipsctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_decrypt_key128(fipskey, &fipsctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_decrypt(output, tmp, &fipsctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     if (memcmp(input, tmp, 16))
 	fprintf(stderr, "decryption failed!!\n"), exit(1);
     printf ("ok.\n\n");
@@ -98,8 +99,8 @@ ecb_enc (unsigned char *out, unsigned char *in, unsigned int len)
 {
     unsigned int i, r;
     for (i = 0; i < len; i += 16) {
-	r = aes_enc_blk (in + i, out + i, &ctx);
-	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+	r = aes_encrypt(in + i, out + i, &ctx);
+	if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     }
     if (i != len) abort ();
 }
@@ -109,8 +110,8 @@ ecb_dec (unsigned char *out, unsigned char *in, unsigned int len)
 {
     unsigned int i, r;
     for (i = 0; i < len; i += 16) {
-	r = aes_dec_blk (in + i, out + i, &dctx);
-	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+	r = aes_decrypt(in + i, out + i, &dctx);
+	if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     }
     if (i != len) abort ();
 }
@@ -132,8 +133,8 @@ cbc_enc (unsigned char *out, unsigned char *in, unsigned char *iv,
 	D(in+i);
 	xor (tmp, tmp, in + i);
 	D(tmp);
-	r = aes_enc_blk (tmp, out + i, &ctx);
-	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+	r = aes_encrypt(tmp, out + i, &ctx);
+	if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
 	memcpy (tmp, out + i, B);
 	D(out+i);
     }
@@ -148,8 +149,8 @@ cbc_dec (unsigned char *out, unsigned char *in, unsigned char *iv,
     unsigned char tmp[B];
     memcpy (tmp, iv, B);
     for (i = 0; i < len; i += B) {
-	r = aes_dec_blk (in + i, tmp, &dctx);
-	if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+	r = aes_decrypt(in + i, tmp, &dctx);
+	if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
 	xor (tmp, tmp, iv);
 	iv = in + i;
 	memcpy (out + i, tmp, B);
@@ -180,16 +181,16 @@ cts_enc (unsigned char *out, unsigned char *in, unsigned char *iv,
     D(in);
     xor (pn1, in, iv);
     D(pn1);
-    r = aes_enc_blk (pn1, cn, &ctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_encrypt(pn1, cn, &ctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     D(cn);
     memset (pn, 0, sizeof(pn));
     memcpy (pn, in+B, len-B);
     D(pn);
     xor (pn, pn, cn);
     D(pn);
-    r = aes_enc_blk (pn, cn1, &ctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_encrypt(pn, cn1, &ctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     D(cn1);
     memcpy(out, cn1, B);
     memcpy(out+B, cn, len-B);
@@ -215,14 +216,14 @@ cts_dec (unsigned char *out, unsigned char *in, unsigned char *iv,
 	abort ();
 
     memcpy (cn1, in, B);
-    r = aes_dec_blk (cn1, pn, &dctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_decrypt(cn1, pn, &dctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     memset (cn, 0, sizeof(cn));
     memcpy (cn, in+B, len-B);
     xor (pn, pn, cn);
     memcpy (cn+len-B, pn+len-B, 2*B-len);
-    r = aes_dec_blk (cn, pn1, &dctx);
-    if (!r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
+    r = aes_decrypt(cn, pn1, &dctx);
+    if (r) fprintf(stderr, "error, line %d\n", __LINE__), exit(1);
     xor (pn1, pn1, iv);
     memcpy(out, pn1, B);
     memcpy(out+B, pn, len-B);

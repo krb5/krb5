@@ -37,18 +37,18 @@
  * defined to OpenSSL equivalents when the OpenSSL back end headers are
  * used.
  */
-void krb5int_aes_enc_blk(void);
-void krb5int_aes_enc_key(void);
+void k5_aes_encrypt(void);
+void k5_aes_encrypt_key256(void);
 void k5_sha256_final(void);
 void k5_sha256_init(void);
 void k5_sha256_update(void);
 
-void krb5int_aes_enc_blk(void)
+void k5_aes_encrypt(void)
 {
     abort();
 }
 
-void krb5int_aes_enc_key(void)
+void k5_aes_encrypt_key256(void)
 {
     abort();
 }

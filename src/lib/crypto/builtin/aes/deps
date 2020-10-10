@@ -2,8 +2,10 @@
 # Generated makefile dependencies follow.
 #
 aescrypt.so aescrypt.po $(OUTPRE)aescrypt.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h aes.h aescrypt.c aesopt.h
-aestab.so aestab.po $(OUTPRE)aestab.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  aes.h aesopt.h aestab.c
-aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  aes.h aeskey.c aesopt.h
+  aes.h aescrypt.c aesopt.h aestab.h brg_endian.h brg_types.h
+aestab.so aestab.po $(OUTPRE)aestab.$(OBJEXT): aes.h \
+  aesopt.h aestab.c aestab.h brg_endian.h brg_types.h
+aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): aes.h \
+  aeskey.c aesopt.h aestab.h brg_endian.h brg_types.h
+aes_ni.so aes_ni.po $(OUTPRE)aes_ni.$(OBJEXT): aes.h \
+  aes_ni.c aes_ni.h aesopt.h brg_endian.h brg_types.h

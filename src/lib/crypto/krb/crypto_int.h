@@ -490,9 +490,9 @@ void krb5int_crypto_impl_cleanup(void);
  * the default PRNG module (prng_fortuna.c), crypto_mod.h must #define or
  * prototype the following symbols:
  *
- *   aes_ctx - Stack-allocatable type for an AES-128 or AES-256 key schedule
- *   krb5int_aes_enc_key(key, keybits, ctxptr) -- initialize a key schedule
- *   krb5int_aes_enc_blk(in, out, ctxptr) -- encrypt a block
+ *   aes_encrypt_ctx - Stack-allocatable type for an AES-256 key schedule
+ *   k5_aes_encrypt_key256(key, ctxptr) -- initialize an AES-256 key schedule
+ *   k5_aes_encrypt(in, out, ctxptr) -- encrypt a block
  *   SHA256_CTX - Stack-allocatable type for a SHA-256 hash state
  *   k5_sha256_init(ctxptr) - Initialize a hash state
  *   k5_sha256_update(ctxptr, data, size) -- Hash some data

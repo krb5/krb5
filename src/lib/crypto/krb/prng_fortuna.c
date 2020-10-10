@@ -106,7 +106,7 @@ struct fortuna_state
     /* Generator state. */
     unsigned char counter[AES256_BLOCKSIZE];
     unsigned char key[AES256_KEYSIZE];
-    aes_ctx ciph;
+    aes_encrypt_ctx ciph;
 
     /* Accumulator state. */
     SHA256_CTX pool[NUM_POOLS];
@@ -179,7 +179,7 @@ inc_counter(struct fortuna_state *st)
 static void
 encrypt_counter(struct fortuna_state *st, unsigned char *dst)
 {
-    krb5int_aes_enc_blk(st->counter, dst, &st->ciph);
+    k5_aes_encrypt(st->counter, dst, &st->ciph);
     inc_counter(st);
 }
 
@@ -197,7 +197,7 @@ generator_reseed(struct fortuna_state *st, const unsigned char *data,
     shad256_update(&ctx, data, len);
     shad256_result(&ctx, st->key);
     zap(&ctx, sizeof(ctx));
-    krb5int_aes_enc_key(st->key, AES256_KEYSIZE, &st->ciph);
+    k5_aes_encrypt_key256(st->key, &st->ciph);
 
     /* Increment counter. */
     inc_counter(st);
@@ -209,7 +209,7 @@ change_key(struct fortuna_state *st)
 {
     encrypt_counter(st, st->key);
     encrypt_counter(st, st->key + AES256_BLOCKSIZE);
-    krb5int_aes_enc_key(st->key, AES256_KEYSIZE, &st->ciph);
+    k5_aes_encrypt_key256(st->key, &st->ciph);
 }
 
 /* Output pseudo-random data from the generator. */

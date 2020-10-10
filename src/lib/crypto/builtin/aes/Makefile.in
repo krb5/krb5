@@ -49,6 +49,7 @@ aes-gen: aes-gen.o $(GEN_OBJS)
 
 run-aes-gen: aes-gen
 	./aes-gen > kresults.out
+	cmp kresults.out $(srcdir)/kresults.expected
 
 check: run-aes-gen
 
