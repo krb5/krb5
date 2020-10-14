@@ -89,7 +89,7 @@ if ('krbtgt/A@A') not in out:
 
 mark('tgs-req tests')
 
-ra.kinit('user@A', None, ['-F', '-k', '-t', ra.keytab])
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
 ra.run([kvno, 'krbtgt/NBA'])
 out = ra.run([klist, ])
 if 'Ticket server:' in out:
@@ -97,17 +97,51 @@ if 'Ticket server:' in out:
 if 'krbtgt/NBA@A' not in out:
     fail('Unexpected missing ticket')
 
-ra.kinit('user@A', None, ['-F', '-k', '-t', ra.keytab])
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
 ra.run([kvno, '-C', 'krbtgt/NBA'], env=alias_realms)
 out = ra.run([klist, ])
 if ('Ticket server: %s' % 'krbtgt/A@A') not in out:
     fail('Unexpected no canonicalization')
 
-ra.kinit('user@A', None, ['-F', '-k', '-t', ra.keytab])
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
+ra.run([kvno, 'krbtgt/NBA@NBA'], env=alias_realms)
+out = ra.run([klist, ])
+if ('Ticket server: %s' % 'krbtgt/NBA@A') not in out:
+    fail('Unexpected no realm canonicalization')
+
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
 ra.run([kvno, '-C', 'krbtgt/NBA@NBA'], env=alias_realms)
 out = ra.run([klist, ])
 if ('Ticket server: %s' % 'krbtgt/A@A') not in out:
     fail('Unexpected no canonicalization')
+
+
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
+ra.run([kvno, 'krbtgt/NBB'], env=alias_realms)
+out = ra.run([klist, ])
+if ('Ticket server: %s' % 'krbtgt/NBB@B') not in out:
+    fail('Unexpected no realm canonicalization')
+
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
+ra.run([kvno, '-C', 'krbtgt/NBB'], env=alias_realms)
+out = ra.run([klist, ])
+if ('Ticket server: %s' % 'krbtgt/B@B') not in out:
+    fail('Unexpected no canonicalization')
+
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
+ra.run([kvno, 'krbtgt/NBB@NBB'], env=alias_realms)
+out = ra.run([klist, ])
+if ('Ticket server: %s' % 'krbtgt/NBB@B') not in out:
+    fail('Unexpected no realm canonicalization')
+
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
+ra.run([kvno, '-C', 'krbtgt/NBB@NBB'], env=alias_realms)
+out = ra.run([klist, ])
+if ('Ticket server: %s' % 'krbtgt/B@B') not in out:
+    fail('Unexpected no canonicalization')
+
+# XXX if this line is missing we get "The ticket isn't for us"
+ra.kinit('user@A', None, ['-k', '-t', ra.keytab])
 
 ra.run([kvno, 'rba@NBA'], env=alias_realms)
 out = ra.run([klist, ])
