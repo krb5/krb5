@@ -182,6 +182,7 @@ struct as_req_state {
     const krb5_fulladdr *local_addr;
     const krb5_fulladdr *remote_addr;
     krb5_data **auth_indicators;
+    krb5_principal_data reply_server;
 
     krb5_error_code preauth_err;
 
@@ -674,10 +675,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE) &&
         krb5_is_tgs_principal(state->request->server) &&
         krb5_is_tgs_principal(state->server->princ)) {
-        state->ticket_reply.server = state->server->princ;
+        state->reply_server = *state->server->princ;
     } else {
-        state->ticket_reply.server = state->request->server;
+        state->reply_server = *state->request->server;
     }
+    /* Allow kdb module to canonicalize ticket server realm */
+    state->reply_server.realm = state->server->princ->realm;
+    state->ticket_reply.server = &state->reply_server;
 
     /* Copy options that request the corresponding ticket flags. */
     state->enc_tkt_reply.flags = get_ticket_flags(state->request->kdc_options,
