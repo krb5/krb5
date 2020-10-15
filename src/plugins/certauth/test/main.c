@@ -171,6 +171,9 @@ test2_authorize(krb5_context context, krb5_certauth_moddata moddata,
 
     ret = krb5_dbe_get_string(context, (krb5_db_entry *)db_entry, "hwauth",
                               &strval);
+    if (ret)
+        goto cleanup;
+
     ret = (strval != NULL) ? KRB5_CERTAUTH_HWAUTH : 0;
     krb5_dbe_free_string(context, strval);
 

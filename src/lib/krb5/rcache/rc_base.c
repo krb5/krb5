@@ -56,6 +56,8 @@ k5_rc_default(krb5_context context, krb5_rcache *rc_out)
                            &profstr) == 0 && profstr != NULL) {
         ret = k5_expand_path_tokens(context, profstr, &rcname);
         profile_release_string(profstr);
+        if (ret)
+            return ret;
         ret = k5_rc_resolve(context, rcname, rc_out);
         free(rcname);
         return ret;

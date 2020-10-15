@@ -671,7 +671,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket = NULL;
     const gss_OID_desc *mech_used = NULL;
-    OM_uint32 major_status = GSS_S_FAILURE;
+    OM_uint32 major_status;
     OM_uint32 tmp_minor_status;
     krb5_error krb_error_data;
     krb5_data scratch;
@@ -877,8 +877,6 @@ kg_accept_krb5(minor_status, context_handle,
 
     if (major_status != GSS_S_COMPLETE)
         goto fail;
-
-    major_status = GSS_S_FAILURE;
 
     if (exts->iakerb.conv && !exts->iakerb.verified) {
         major_status = GSS_S_BAD_SIG;

@@ -713,7 +713,6 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         } else if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) {
             goto cleanup;
         }
-        code = 0;
     }
 
     /* Note the authdata we asked for in the output creds. */
