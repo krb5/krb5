@@ -80,6 +80,7 @@ eighth_byte(unsigned char *b)
             ((b[6] & 1) << 7));
 }
 
+#if 0
 krb5_error_code
 k5_rand2key_des(const krb5_data *randombits, krb5_keyblock *keyblock)
 {
@@ -116,3 +117,4 @@ k5_rand2key_des3(const krb5_data *randombits, krb5_keyblock *keyblock)
     }
     return 0;
 }
+#endif

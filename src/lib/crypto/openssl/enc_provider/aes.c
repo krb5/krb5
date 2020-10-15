@@ -27,7 +27,7 @@
 #include "crypto_int.h"
 #include <openssl/evp.h>
 #include <openssl/aes.h>
-#include <openssl/modes.h>
+//#include <openssl/modes.h>
 
 /* proto's */
 static krb5_error_code
@@ -125,6 +125,214 @@ cbc_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     zap(oblock, BLOCK_SIZE);
     return (ret == 1) ? 0 : KRB5_CRYPTO_INTERNAL;
 }
+
+
+/** The CTS mode is not implemented in BoringSSL.
+  * So, copy the implementation from OpenSSL here.
+  */
+
+/* ====================================================================
+ * Copyright (c) 2008 The OpenSSL Project.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgment:
+ *    "This product includes software developed by the OpenSSL Project
+ *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+ *
+ * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+ *    endorse or promote products derived from this software without
+ *    prior written permission. For written permission, please contact
+ *    openssl-core@openssl.org.
+ *
+ * 5. Products derived from this software may not be called "OpenSSL"
+ *    nor may "OpenSSL" appear in their names without prior written
+ *    permission of the OpenSSL Project.
+ *
+ * 6. Redistributions of any form whatsoever must retain the following
+ *    acknowledgment:
+ *    "This product includes software developed by the OpenSSL Project
+ *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+ * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ==================================================================== */
+
+typedef void (*block128_f)(const uint8_t in[16], uint8_t out[16],
+                           const AES_KEY *key);
+
+typedef void (*cbc128_f)(const uint8_t *in, uint8_t *out, size_t len,
+                         const AES_KEY *key, uint8_t ivec[16], int enc);
+
+static size_t CRYPTO_cts128_encrypt(const unsigned char *in, unsigned char *out,
+                             size_t len, const void *key,
+                             unsigned char ivec[16], cbc128_f cbc)
+{
+    size_t residue;
+    union {
+        size_t align;
+        unsigned char c[16];
+    } tmp;
+
+    if (len <= 16)
+        return 0;
+
+    if ((residue = len % 16) == 0)
+        residue = 16;
+
+    len -= residue;
+
+    (*cbc) (in, out, len, key, ivec, 1);
+
+    in += len;
+    out += len;
+
+#if defined(CBC_HANDLES_TRUNCATED_IO)
+    memcpy(tmp.c, out - 16, 16);
+    (*cbc) (in, out - 16, residue, key, ivec, 1);
+    memcpy(out, tmp.c, residue);
+#else
+    memset(tmp.c, 0, sizeof(tmp));
+    memcpy(tmp.c, in, residue);
+    memcpy(out, out - 16, residue);
+    (*cbc) (tmp.c, out - 16, 16, key, ivec, 1);
+#endif
+    return len + residue;
+}
+
+static size_t CRYPTO_cts128_encrypt_block(const unsigned char *in,
+                                   unsigned char *out, size_t len,
+                                   const void *key, unsigned char ivec[16],
+                                   block128_f block)
+{
+    size_t residue, n;
+
+    if (len <= 16)
+        return 0;
+
+    if ((residue = len % 16) == 0)
+        residue = 16;
+
+    len -= residue;
+
+    CRYPTO_cbc128_encrypt(in, out, len, key, ivec, block);
+
+    in += len;
+    out += len;
+
+    for (n = 0; n < residue; ++n)
+        ivec[n] ^= in[n];
+    (*block) (ivec, ivec, key);
+    memcpy(out, out - 16, residue);
+    memcpy(out - 16, ivec, 16);
+
+    return len + residue;
+}
+
+static size_t CRYPTO_cts128_decrypt(const unsigned char *in, unsigned char *out,
+                             size_t len, const void *key,
+                             unsigned char ivec[16], cbc128_f cbc)
+{
+    size_t residue;
+    union {
+        size_t align;
+        unsigned char c[32];
+    } tmp;
+
+    if (len <= 16)
+        return 0;
+
+    if ((residue = len % 16) == 0)
+        residue = 16;
+
+    len -= 16 + residue;
+
+    if (len) {
+        (*cbc) (in, out, len, key, ivec, 0);
+        in += len;
+        out += len;
+    }
+
+    memset(tmp.c, 0, sizeof(tmp));
+    /*
+     * this places in[16] at &tmp.c[16] and decrypted block at &tmp.c[0]
+     */
+    (*cbc) (in, tmp.c, 16, key, tmp.c + 16, 0);
+
+    memcpy(tmp.c, in + 16, residue);
+#if defined(CBC_HANDLES_TRUNCATED_IO)
+    (*cbc) (tmp.c, out, 16 + residue, key, ivec, 0);
+#else
+    (*cbc) (tmp.c, tmp.c, 32, key, ivec, 0);
+    memcpy(out, tmp.c, 16 + residue);
+#endif
+    return 16 + len + residue;
+}
+
+size_t CRYPTO_cts128_decrypt_block(const unsigned char *in,
+                                   unsigned char *out, size_t len,
+                                   const void *key, unsigned char ivec[16],
+                                   block128_f block)
+{
+    size_t residue, n;
+    union {
+        size_t align;
+        unsigned char c[32];
+    } tmp;
+
+    if (len <= 16)
+        return 0;
+
+    if ((residue = len % 16) == 0)
+        residue = 16;
+
+    len -= 16 + residue;
+
+    if (len) {
+        CRYPTO_cbc128_decrypt(in, out, len, key, ivec, block);
+        in += len;
+        out += len;
+    }
+
+    (*block) (in, tmp.c + 16, key);
+
+    memcpy(tmp.c, tmp.c + 16, 16);
+    memcpy(tmp.c, in + 16, residue);
+    (*block) (tmp.c, tmp.c, key);
+
+    for (n = 0; n < 16; ++n) {
+        unsigned char c = in[n];
+        out[n] = tmp.c[n] ^ ivec[n];
+        ivec[n] = c;
+    }
+    for (residue += 16; n < residue; ++n)
+        out[n] = tmp.c[n] ^ in[n];
+
+    return 16 + len + residue;
+}
+
+
 
 static krb5_error_code
 cts_encr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
