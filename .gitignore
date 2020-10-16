@@ -471,6 +471,7 @@ local.properties
 
 /src/tests/gssapi/ccinit
 /src/tests/gssapi/ccrefresh
+/src/tests/gssapi/reload
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_add_cred
 /src/tests/gssapi/t_ccselect

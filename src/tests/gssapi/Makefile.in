@@ -8,7 +8,7 @@ LOCALINCLUDES = -I$(srcdir)/../../lib/gssapi/mechglue \
 	-I$(srcdir)/../../lib/gssapi/generic -I../../lib/gssapi/krb5 \
 	-I../../lib/gssapi/generic
 
-SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
+SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c $(srcdir)/reload.c \
 	$(srcdir)/t_accname.c $(srcdir)/t_add_cred.c $(srcdir)/t_ccselect.c \
 	$(srcdir)/t_ciflags.c $(srcdir)/t_context.c $(srcdir)/t_credstore.c \
 	$(srcdir)/t_enctypes.c $(srcdir)/t_err.c $(srcdir)/t_export_cred.c \
@@ -21,7 +21,7 @@ SRCS=	$(srcdir)/ccinit.c $(srcdir)/ccrefresh.c $(srcdir)/common.c \
 	$(srcdir)/t_s4u2proxy_krb5.c $(srcdir)/t_saslname.c \
 	$(srcdir)/t_spnego.c $(srcdir)/t_srcattrs.c
 
-OBJS=	ccinit.o ccrefresh.o common.o t_accname.o t_add_cred.o t_ccselect.o \
+OBJS=	ccinit.o ccrefresh.o common.o reload.o t_accname.o t_add_cred.o t_ccselect.o \
 	t_ciflags.o t_context.o t_credstore.o t_enctypes.o t_err.o \
 	t_export_cred.o t_export_name.o t_gssexts.o t_imp_cred.o t_imp_name.o \
 	t_invalid.o t_inq_cred.o t_inq_ctx.o t_inq_mechs_name.o t_iov.o \
@@ -37,11 +37,12 @@ all: ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags t_context \
 	t_iov t_lifetime t_namingexts t_oid t_pcontok t_prf t_s4u \
 	t_s4u2proxy_krb5 t_saslname t_spnego t_srcattrs
 
-check-unix: t_oid
+check-unix: t_oid reload
 	$(RUN_TEST) ./t_invalid
 	$(RUN_TEST) ./t_oid
 	$(RUN_TEST) ./t_prf
 	$(RUN_TEST) ./t_imp_name
+	if [ -r $(TOPLIBD)/libgssapi_krb5.so ]; then $(RUN_TEST) ./reload; fi
 
 check-pytests: ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags \
 	t_context t_credstore t_enctypes t_err t_export_cred t_export_name \
@@ -60,6 +61,8 @@ ccinit: ccinit.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccinit ccinit.o $(KRB5_BASE_LIBS)
 ccrefresh: ccrefresh.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccrefresh ccrefresh.o $(KRB5_BASE_LIBS)
+reload: reload.o
+	$(CC_LINK) -o $@ reload.o $(DL_LIB)
 t_accname: t_accname.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_accname.o $(COMMON_LIBS)
 t_add_cred: t_add_cred.o $(COMMON_DEPS)
@@ -118,7 +121,7 @@ t_srcattrs: t_srcattrs.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_srcattrs.o $(COMMON_LIBS)
 
 clean:
-	$(RM) ccinit ccrefresh t_accname t_add_cred t_ccselect t_ciflags
+	$(RM) ccinit ccrefresh reload t_accname t_add_cred t_ccselect t_ciflags
 	$(RM) t_context t_credstore t_enctypes t_err t_export_cred
 	$(RM) t_export_name t_gssexts t_imp_cred t_imp_name t_invalid
 	$(RM) t_inq_cred t_inq_ctx t_inq_mechs_name t_iov t_lifetime
