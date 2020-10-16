@@ -326,6 +326,7 @@ int gss_spnegoint_lib_init(void)
 
 void gss_spnegoint_lib_fini(void)
 {
+	k5_key_delete(K5_KEY_GSS_SPNEGO_STATUS);
 }
 
 static OM_uint32
