@@ -303,7 +303,6 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
 {
     krb5_error_code code;
     krb5_gss_ctx_id_rec *ctx = 0;
-    krb5_timestamp now;
     krb5_gss_name_t name = NULL;
     krb5_ui_4 nonce = 0;
     krb5_data ap_rep;
@@ -319,12 +318,6 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
         *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
 
     ctx = (krb5_gss_ctx_id_rec *)*context_handle;
-
-    code = krb5_timeofday(ctx->k5_context, &now);
-    if (code != 0) {
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
 
     ap_rep.data = input_token->value;
     ap_rep.length = input_token->length;
@@ -352,10 +345,8 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     if (mech_type)
         *mech_type = ctx->mech_used;
 
-    if (time_rec) {
-        *time_rec = ts_delta(ctx->krb_times.endtime, now) +
-            ctx->k5_context->clockskew;
-    }
+    if (time_rec)
+        *time_rec = ctx_lifetime(ctx->k5_context, ctx);
 
     /* Never return GSS_C_DELEG_FLAG since we don't support DCE credential
      * delegation yet. */
@@ -666,7 +657,6 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_gss_name_t name = NULL;
     krb5_ui_4 gss_flags = 0;
     krb5_gss_ctx_id_rec *ctx = NULL;
-    krb5_timestamp now;
     gss_buffer_desc token;
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket = NULL;
@@ -996,11 +986,6 @@ kg_accept_krb5(minor_status, context_handle,
         ctx->seq_recv = seq_temp;
     }
 
-    if ((code = krb5_timeofday(context, &now))) {
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
-
     code = g_seqstate_init(&ctx->seqstate, ctx->seq_recv,
                            (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
                            (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0,
@@ -1161,10 +1146,8 @@ kg_accept_krb5(minor_status, context_handle,
     if (mech_type)
         *mech_type = (gss_OID) mech_used;
 
-    /* Add the maximum allowable clock skew as a grace period for context
-     * expiration, just as we do for the ticket. */
     if (time_rec)
-        *time_rec = ts_delta(ctx->krb_times.endtime, now) + context->clockskew;
+        *time_rec = ctx_lifetime(context, ctx);
 
     if (ret_flags)
         *ret_flags = ctx->gss_flags;
