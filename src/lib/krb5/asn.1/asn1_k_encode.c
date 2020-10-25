@@ -334,11 +334,6 @@ decode_lr_type(const taginfo *t, const uint8_t *asn1, size_t len, void *p)
         return ret;
     if (val > INT32_MAX || val < INT32_MIN)
         return ASN1_OVERFLOW;
-#ifdef KRB5_GENEROUS_LR_TYPE
-    /* If type is in the 128-255 range, treat it as a negative 8-bit value. */
-    if (val >= 128 && val <= 255)
-        val -= 256;
-#endif
     *(int32_t *)p = val;
     return 0;
 }
