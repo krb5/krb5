@@ -1168,16 +1168,13 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
     return code;
 }
 
-OM_uint32 KRB5_CALLCONV
-krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
-                           const gss_name_t desired_name,
-                           OM_uint32 time_req,
-                           const gss_OID_set desired_mechs,
-                           gss_cred_usage_t cred_usage,
-                           gss_const_key_value_set_t cred_store,
-                           gss_cred_id_t *output_cred_handle,
-                           gss_OID_set *actual_mechs,
-                           OM_uint32 *time_rec)
+static OM_uint32
+acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
+                  OM_uint32 time_req, const gss_OID_set desired_mechs,
+                  gss_cred_usage_t cred_usage,
+                  gss_const_key_value_set_t cred_store, krb5_boolean iakerb,
+                  gss_cred_id_t *output_cred_handle,
+                  gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
     krb5_context context = NULL;
     krb5_error_code code = 0;
@@ -1246,7 +1243,7 @@ krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
 
     ret = acquire_cred_context(context, minor_status, desired_name, NULL,
                                time_req, cred_usage, ccache, client_keytab,
-                               keytab, rcname, 0, output_cred_handle,
+                               keytab, rcname, iakerb, output_cred_handle,
                                time_rec);
 
 out:
@@ -1258,4 +1255,38 @@ out:
         krb5_kt_close(context, keytab);
     krb5_free_context(context);
     return ret;
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_from(OM_uint32 *minor_status,
+                           const gss_name_t desired_name,
+                           OM_uint32 time_req,
+                           const gss_OID_set desired_mechs,
+                           gss_cred_usage_t cred_usage,
+                           gss_const_key_value_set_t cred_store,
+                           gss_cred_id_t *output_cred_handle,
+                           gss_OID_set *actual_mechs,
+                           OM_uint32 *time_rec)
+{
+    return acquire_cred_from(minor_status, desired_name, time_req,
+                             desired_mechs, cred_usage, cred_store,
+                             FALSE, output_cred_handle, actual_mechs,
+                             time_rec);
+}
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred_from(OM_uint32 *minor_status,
+                             const gss_name_t desired_name,
+                             OM_uint32 time_req,
+                             const gss_OID_set desired_mechs,
+                             gss_cred_usage_t cred_usage,
+                             gss_const_key_value_set_t cred_store,
+                             gss_cred_id_t *output_cred_handle,
+                             gss_OID_set *actual_mechs,
+                             OM_uint32 *time_rec)
+{
+    return acquire_cred_from(minor_status, desired_name, time_req,
+                             desired_mechs, cred_usage, cred_store,
+                             TRUE, output_cred_handle, actual_mechs,
+                             time_rec);
 }

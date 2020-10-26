@@ -549,6 +549,17 @@ iakerb_gss_acquire_cred_with_password(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred_from(OM_uint32 *minor_status,
+                             const gss_name_t desired_name,
+                             OM_uint32 time_req,
+                             const gss_OID_set desired_mechs,
+                             gss_cred_usage_t cred_usage,
+                             gss_const_key_value_set_t cred_store,
+                             gss_cred_id_t *output_cred_handle,
+                             gss_OID_set *actual_mechs,
+                             OM_uint32 *time_rec);
+
 OM_uint32 KRB5_CALLCONV krb5_gss_release_cred
 (OM_uint32*,       /* minor_status */
  gss_cred_id_t*    /* cred_handle */
