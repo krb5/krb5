@@ -167,7 +167,6 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
     return status;
 }
 
-/* We cannot interpose this function as mech_type is an output parameter. */
 OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
     OM_uint32           *minor_status,
     const gss_buffer_t   sasl_mech_name,
@@ -175,6 +174,7 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
 {
     OM_uint32       status, tmpMinor;
     gss_OID_set     mechSet = GSS_C_NO_OID_SET;
+    int             interposed = FALSE;
     size_t          i;
 
     if (minor_status != NULL)
@@ -190,11 +190,29 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
     if (status != GSS_S_COMPLETE)
         return status;
 
+again:
     for (i = 0, status = GSS_S_BAD_MECH; i < mechSet->count; i++) {
         gss_mechanism mech;
         char mappedName[OID_SASL_NAME_LENGTH + 1];
 
         mech = gssint_get_mechanism(&mechSet->elements[i]);
+        if (interposed) {
+            gss_mechanism selected_mech;
+            gss_OID selected_type;
+            OM_uint32 tmpMajor;
+
+            tmpMajor = gssint_select_mech_type(&tmpMinor, &mech->mech_type,
+                                               &selected_type);
+            if (tmpMajor != GSS_S_COMPLETE)
+                continue;
+
+            selected_mech = gssint_get_mechanism(selected_type);
+            if (selected_mech == mech)
+                continue;
+
+            mech = selected_mech;
+        }
+
         if (mech != NULL && mech->gss_inquire_mech_for_saslname != NULL) {
             status = mech->gss_inquire_mech_for_saslname(minor_status,
                                                          sasl_mech_name,
@@ -213,6 +231,11 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
             status = GSS_S_COMPLETE;
             break;
         }
+    }
+
+    if (status != GSS_S_COMPLETE && interposed != TRUE) {
+        interposed = TRUE;
+        goto again;
     }
 
     gss_release_oid_set(&tmpMinor, &mechSet);
