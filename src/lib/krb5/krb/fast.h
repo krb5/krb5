@@ -37,6 +37,7 @@ struct krb5int_fast_request_state {
     krb5_ui_4 fast_state_flags;
     krb5_ui_4 fast_options;
     krb5_int32 nonce;
+    krb5_boolean is_referral;
 };
 
 #define KRB5INT_FAST_DO_FAST     (1l<<0)  /* Perform FAST */

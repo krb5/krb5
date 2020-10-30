@@ -683,6 +683,8 @@ k5_upgrade_to_fast_p(krb5_context context,
         return FALSE; /* Already using FAST. */
     if (!(state->fast_state_flags & KRB5INT_FAST_ARMOR_AVAIL))
         return FALSE;
+    if (!state->is_referral)
+        return FALSE;
     if (krb5int_find_pa_data(context, padata, KRB5_PADATA_FX_FAST) != NULL)
         return TRUE;
     return FALSE;

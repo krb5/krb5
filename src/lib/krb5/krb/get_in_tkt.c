@@ -1693,6 +1693,8 @@ init_creds_step_reply(krb5_context context,
         } else if (canon_flag && is_referral(context, ctx->err_reply,
                                              ctx->request->client)) {
             TRACE_INIT_CREDS_REFERRAL(context, &ctx->err_reply->client->realm);
+            ctx->fast_state->is_referral = TRUE;
+
             /* Rewrite request.client with realm from error reply */
             krb5_free_data_contents(context, &ctx->request->client->realm);
             code = krb5int_copy_data_contents(context,
