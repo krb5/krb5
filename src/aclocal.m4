@@ -13,11 +13,7 @@ fi
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 # echo "Looking for $srcdir/$ac_config_fragdir"
-if test -d "$srcdir/$ac_config_fragdir"; then
-  AC_CONFIG_AUX_DIR(K5_TOPDIR/config)
-else
-  AC_MSG_ERROR([can not find config/ directory in $ac_reltopdir])
-fi
+AC_CONFIG_AUX_DIR(K5_TOPDIR/config)
 ])dnl
 dnl
 dnl Version info.
