@@ -61,11 +61,9 @@
 #include <string.h>
 
 /* need struct timeval */
-#if HAVE_TIME_H && (!HAVE_SYS_TIME_H || TIME_WITH_SYS_TIME)
-# include <time.h>
-#endif
+#include <time.h>
 #if HAVE_SYS_TIME_H
-# include <sys/time.h>
+#include <sys/time.h>
 #endif
 
 #include <gssapi/gssapi_generic.h>

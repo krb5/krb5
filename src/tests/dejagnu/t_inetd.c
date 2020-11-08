@@ -128,7 +128,7 @@ main(argc, argv)
 
     /* Don't wait for a child signal... Otherwise dejagnu gets confused */
 #ifdef POSIX_SIGNALS
-    csig.sa_handler = (RETSIGTYPE (*)())0;
+    csig.sa_handler = SIG_IGN;
     sigemptyset(&csig.sa_mask);
     csig.sa_flags = 0;
     sigaction(SIGCHLD, &csig, (struct sigaction *)0);
