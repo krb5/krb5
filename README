@@ -73,6 +73,43 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.17.2 (2020-11-17)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a denial of service vulnerability when decoding Kerberos
+  protocol messages.
+
+* Fix a locking issue with the LMDB KDB module which could cause KDC
+  and kadmind processes to lose access to the database.
+
+* Fix an assertion failure when libgssapi_krb5 is repeatedly loaded
+  and unloaded while libkrb5support remains loaded.
+
+* Fix a null deference when processing a CAMMAC with an invalid
+  service verifier.
+
+krb5-1.17.2 changes by ticket ID
+--------------------------------
+
+8614    Assertion failure when repeatedly loading libgssapi_krb5
+8856    Null dereference in CAMMAC processing
+8861    Fix LDAP policy enforcement of pw_expiration
+8864    Fix error handling in gssint_mechglue_init()
+8872    Put KDB authdata first
+8873    Don't assume OpenSSL failures are memory errors
+8877    Cannot remove require_auth attribute with LDAP KDB module
+8882    kdb5_util load ignores password expiration with LDAP KDB module
+8894    Correct formatting of trace log microseconds
+8918    KDC and kadmind fork with DB open, breaking LMDB KDB module
+8933    Fix input length checking in SPNEGO DER decoding
+8936    Set lockdown attribute when creating LDAP KDB
+8938    Leash crashes on failure to auto-renew tickets
+8939    Suppress Leash error popup on MSLSA renew failure
+8959    Add recursion limit for ASN.1 indefinite lengths
+8960    Fix compatibility with upcoming autoconf 2.70
+
 Major changes in 1.17.1 (2019-12-11)
 ------------------------------------
 
@@ -397,6 +434,7 @@ reports, suggestions, and valuable resources:
     Brian Almeida
     Michael B Allen
     Pooja Anil
+    Jeffrey Arbuckle
     Heinz-Ado Arnolds
     Derek Atkins
     Mark Bannister
@@ -429,6 +467,7 @@ reports, suggestions, and valuable resources:
     Sylvain Cortes
     Ian Crowther
     Arran Cudbard-Bell
+    Adam Dabrowski
     Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
@@ -518,6 +557,7 @@ reports, suggestions, and valuable resources:
     Nuno Lopes
     Todd Lubin
     Ryan Lynch
+    Glenn Machin
     Roland Mainz
     Sorin Manolache
     Andrei Maslennikov
@@ -535,6 +575,7 @@ reports, suggestions, and valuable resources:
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
+    Demi Obenour
     Felipe Ortega
     Michael Osipov
     Andrej Ota
@@ -575,6 +616,7 @@ reports, suggestions, and valuable resources:
     Michael Ströder
     Bjørn Tore Sund
     Joe Travaglini
+    Sergei Trofimovich
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko
