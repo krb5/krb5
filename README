@@ -70,6 +70,35 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
+Major changes in 1.18.3 (2020-11-17)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a denial of service vulnerability when decoding Kerberos
+  protocol messages.
+
+* Fix a locking issue with the LMDB KDB module which could cause KDC
+  and kadmind processes to lose access to the database.
+
+* Fix an assertion failure when libgssapi_krb5 is repeatedly loaded
+  and unloaded while libkrb5support remains loaded.
+
+krb5-1.18.3 changes by ticket ID
+--------------------------------
+
+7476    updated manual page for kvno
+8614    Assertion failure when repeatedly loading libgssapi_krb5
+8882    kdb5_util load ignores password expiration with LDAP KDB module
+8918    KDC and kadmind fork with DB open, breaking LMDB KDB module
+8926    Allow gss_unwrap_iov() of unpadded RC4 tokens
+8933    Fix input length checking in SPNEGO DER decoding
+8936    Set lockdown attribute when creating LDAP KDB
+8938    Leash crashes on failure to auto-renew tickets
+8939    Suppress Leash error popup on MSLSA renew failure
+8959    Add recursion limit for ASN.1 indefinite lengths
+8960    Fix compatibility with upcoming autoconf 2.70
+
 Major changes in 1.18.2 (2020-05-21)
 ------------------------------------
 
@@ -411,6 +440,7 @@ reports, suggestions, and valuable resources:
     Sylvain Cortes
     Ian Crowther
     Arran Cudbard-Bell
+    Adam Dabrowski
     Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
@@ -520,6 +550,7 @@ reports, suggestions, and valuable resources:
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
+    Demi Obenour
     Felipe Ortega
     Michael Osipov
     Andrej Ota
@@ -564,6 +595,7 @@ reports, suggestions, and valuable resources:
     Bjørn Tore Sund
     Ondřej Surý
     Joe Travaglini
+    Sergei Trofimovich
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko

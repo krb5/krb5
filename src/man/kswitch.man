@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KSWITCH" "1" " " "1.18.2" "MIT Kerberos"
+.TH "KSWITCH" "1" " " "1.18.3" "MIT Kerberos"
 .SH NAME
 kswitch \- switch primary ticket cache
 .

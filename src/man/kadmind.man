@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KADMIND" "8" " " "1.18.2" "MIT Kerberos"
+.TH "KADMIND" "8" " " "1.18.3" "MIT Kerberos"
 .SH NAME
 kadmind \- KADM5 administration server
 .
