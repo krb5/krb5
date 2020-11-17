@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.17.1\n"
+"Project-Id-Version: mit-krb5 1.17.1-kfw-4.2-beta2-mit\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-11 11:46-0500\n"
+"POT-Creation-Date: 2020-11-17 00:57-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3278,6 +3278,7 @@ msgid "%s: %s while initializing context, aborting\n"
 msgstr ""
 
 #: ../../src/kadmin/server/ovsec_kadmd.c:462
+#: ../../src/kadmin/server/ovsec_kadmd.c:531
 msgid "initializing"
 msgstr ""
 
@@ -3321,41 +3322,41 @@ msgstr ""
 msgid "initializing ACL file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:515
+#: ../../src/kadmin/server/ovsec_kadmd.c:520
 msgid "spawning daemon process"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:519
+#: ../../src/kadmin/server/ovsec_kadmd.c:524
 msgid "creating PID file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:522
+#: ../../src/kadmin/server/ovsec_kadmd.c:533
 msgid "Seeding random number generator"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:525
+#: ../../src/kadmin/server/ovsec_kadmd.c:536
 msgid "getting random seed"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:532
+#: ../../src/kadmin/server/ovsec_kadmd.c:543
 msgid "mapping update log"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:536
+#: ../../src/kadmin/server/ovsec_kadmd.c:547
 #, c-format
 msgid "%s: create IPROP svc (PROG=%d, VERS=%d)\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:544
+#: ../../src/kadmin/server/ovsec_kadmd.c:555
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:546 ../../src/kdc/main.c:1047
+#: ../../src/kadmin/server/ovsec_kadmd.c:557 ../../src/kdc/main.c:1050
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:549
+#: ../../src/kadmin/server/ovsec_kadmd.c:560
 msgid "finished, exiting"
 msgstr ""
 
@@ -3697,27 +3698,27 @@ msgstr ""
 msgid "while initializing network"
 msgstr ""
 
-#: ../../src/kdc/main.c:1015
+#: ../../src/kdc/main.c:1020
 msgid "while detaching from tty"
 msgstr ""
 
-#: ../../src/kdc/main.c:1022
+#: ../../src/kdc/main.c:1026
 msgid "while creating PID file"
 msgstr ""
 
-#: ../../src/kdc/main.c:1031
+#: ../../src/kdc/main.c:1034
 msgid "creating worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:1041
+#: ../../src/kdc/main.c:1044
 msgid "while loading audit plugin module(s)"
 msgstr ""
 
-#: ../../src/kdc/main.c:1045
+#: ../../src/kdc/main.c:1048
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1053
+#: ../../src/kdc/main.c:1056
 msgid "shutting down"
 msgstr ""
 
@@ -5117,23 +5118,23 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1814
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1815
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1819
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1820
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1824
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1825
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1829
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1830
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1834
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1835
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
@@ -5220,7 +5221,7 @@ msgstr ""
 msgid "Password may not match principal name"
 msgstr ""
 
-#: ../../src/lib/kadm5/srv/server_kdb.c:195
+#: ../../src/lib/kadm5/srv/server_kdb.c:197
 msgid "History entry contains no key data"
 msgstr ""
 
@@ -6253,76 +6254,76 @@ msgstr ""
 msgid "%s option value missing"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:671
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:679
 msgid "DN is out of the realm subtree"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:703
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:711
 msgid "ldap object is already kerberized"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:797
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:805
 msgid "Principal does not belong to the default realm"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:865
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:873
 #, c-format
 msgid ""
 "operation can not continue, more than one entry with principal name \"%s\" "
 "found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:928
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:936
 #, c-format
 msgid "'%s' not found"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:992
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1000
 #, c-format
 msgid ""
 "link information can not be set/updated as the kerberos principal belongs to "
 "an ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1007
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1015
 #, c-format
 msgid "Failed getting object references"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1014
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1022
 #, c-format
 msgid "kerberos principal is already linked to a ldap object"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1352
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1348
 msgid "ticket policy object value: "
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1400
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1396
 #, c-format
 msgid "Principal delete failed (trying to replace entry): %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1410
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1406
 #, c-format
 msgid "Principal add failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1448
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1444
 #, c-format
 msgid "User modification failed: %s"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1521
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1517
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_realm.c:294
 msgid "Error reading ticket policy"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1651
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1647
 msgid "unable to decode stored principal key data"
 msgstr ""
 
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1709
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_principal2.c:1705
 msgid "unable to decode stored principal pw history"
 msgstr ""
 
