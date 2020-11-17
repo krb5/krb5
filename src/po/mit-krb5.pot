@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.18.2\n"
+"Project-Id-Version: mit-krb5 1.18.2-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-21 20:18-0400\n"
+"POT-Creation-Date: 2020-11-16 22:39-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,8 +99,8 @@ msgid "while destroying cache %s"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:190
-#: ../../src/clients/kswitch/kswitch.c:107 ../../src/clients/kvno/kvno.c:295
-#: ../../src/clients/kvno/kvno.c:482 ../../src/kadmin/cli/keytab.c:373
+#: ../../src/clients/kswitch/kswitch.c:107 ../../src/clients/kvno/kvno.c:299
+#: ../../src/clients/kvno/kvno.c:486 ../../src/kadmin/cli/keytab.c:373
 #: ../../src/kadmin/dbutil/kdb5_util.c:544
 #, c-format
 msgid "while parsing principal name %s"
@@ -411,7 +411,7 @@ msgstr ""
 msgid "while setting up KDB keytab for realm %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:733 ../../src/clients/kvno/kvno.c:473
+#: ../../src/clients/kinit/kinit.c:733 ../../src/clients/kvno/kvno.c:477
 #, c-format
 msgid "resolving keytab %s"
 msgstr ""
@@ -1211,116 +1211,106 @@ msgstr ""
 msgid "while switching to credential cache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:44
+#: ../../src/clients/kvno/kvno.c:46
 #, c-format
-msgid "usage: %s [-C] [-u] [-c ccache] [-e etype]\n"
+msgid "usage: %s [-c ccache] [-e etype] [-k keytab] [-q] [-u | -S sname]"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:45
-#, c-format
-msgid "\t[-k keytab] [-S sname] [{-I | -U} for_user | [-F cert_file] [-P]]\n"
-msgstr ""
-
-#: ../../src/clients/kvno/kvno.c:47
-#, c-format
-msgid "\t[--u2u ccache] service1 service2 ...\n"
-msgstr ""
-
-#: ../../src/clients/kvno/kvno.c:110 ../../src/clients/kvno/kvno.c:118
+#: ../../src/clients/kvno/kvno.c:114 ../../src/clients/kvno/kvno.c:122
 #, c-format
 msgid "Options -u and -S are mutually exclusive\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:146
+#: ../../src/clients/kvno/kvno.c:150
 #, c-format
 msgid "Options --u2u and -I|-U|-F are mutually exclusive\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:152
+#: ../../src/clients/kvno/kvno.c:156
 #, c-format
 msgid ""
 "Option -P (constrained delegation) requires option -I|-U|-F (protocol "
 "transition)\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:226
+#: ../../src/clients/kvno/kvno.c:230
 msgid "No begin line not found"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:238
+#: ../../src/clients/kvno/kvno.c:242
 msgid "No end line found"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:249
+#: ../../src/clients/kvno/kvno.c:253
 msgid "Unexpected header line"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:259
+#: ../../src/clients/kvno/kvno.c:263
 msgid "Invalid base64"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:303
+#: ../../src/clients/kvno/kvno.c:307
 #, c-format
 msgid "while formatting parsed principal name for '%s'"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:317
+#: ../../src/clients/kvno/kvno.c:321
 msgid "client and server principal names must match"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:334
+#: ../../src/clients/kvno/kvno.c:338
 #, c-format
 msgid "while getting credentials for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:341
+#: ../../src/clients/kvno/kvno.c:345
 #, c-format
 msgid "while decoding ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:352
+#: ../../src/clients/kvno/kvno.c:356
 #, c-format
 msgid "while decrypting ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:356
+#: ../../src/clients/kvno/kvno.c:360
 #, c-format
 msgid "%s: kvno = %d, keytab entry valid\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:361
+#: ../../src/clients/kvno/kvno.c:365
 #, c-format
 msgid "%s: kvno = %d\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:376
+#: ../../src/clients/kvno/kvno.c:380
 #, c-format
 msgid "%s: constrained delegation failed"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:447 ../../src/kadmin/cli/kadmin.c:311
+#: ../../src/clients/kvno/kvno.c:451 ../../src/kadmin/cli/kadmin.c:311
 msgid "while initializing krb5 library"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:454
+#: ../../src/clients/kvno/kvno.c:458
 msgid "while converting etype"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:466
+#: ../../src/clients/kvno/kvno.c:470
 msgid "while opening ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:490
+#: ../../src/clients/kvno/kvno.c:494
 #, c-format
 msgid "while reading certificate file %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:500
+#: ../../src/clients/kvno/kvno.c:504
 #, c-format
 msgid "while getting user-to-user ticket from %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:509
+#: ../../src/clients/kvno/kvno.c:513
 msgid "while getting client principal name"
 msgstr ""
 
@@ -3301,6 +3291,7 @@ msgid "%s: %s while initializing context, aborting\n"
 msgstr ""
 
 #: ../../src/kadmin/server/ovsec_kadmd.c:462
+#: ../../src/kadmin/server/ovsec_kadmd.c:531
 msgid "initializing"
 msgstr ""
 
@@ -3344,41 +3335,41 @@ msgstr ""
 msgid "initializing ACL file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:515
+#: ../../src/kadmin/server/ovsec_kadmd.c:520
 msgid "spawning daemon process"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:519
+#: ../../src/kadmin/server/ovsec_kadmd.c:524
 msgid "creating PID file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:522
+#: ../../src/kadmin/server/ovsec_kadmd.c:533
 msgid "Seeding random number generator"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:525
+#: ../../src/kadmin/server/ovsec_kadmd.c:536
 msgid "getting random seed"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:532
+#: ../../src/kadmin/server/ovsec_kadmd.c:543
 msgid "mapping update log"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:536
+#: ../../src/kadmin/server/ovsec_kadmd.c:547
 #, c-format
 msgid "%s: create IPROP svc (PROG=%d, VERS=%d)\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:544
+#: ../../src/kadmin/server/ovsec_kadmd.c:555
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:546 ../../src/kdc/main.c:1061
+#: ../../src/kadmin/server/ovsec_kadmd.c:557 ../../src/kdc/main.c:1064
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:549
+#: ../../src/kadmin/server/ovsec_kadmd.c:560
 msgid "finished, exiting"
 msgstr ""
 
@@ -3730,27 +3721,27 @@ msgstr ""
 msgid "while initializing network"
 msgstr ""
 
-#: ../../src/kdc/main.c:1029
+#: ../../src/kdc/main.c:1034
 msgid "while detaching from tty"
 msgstr ""
 
-#: ../../src/kdc/main.c:1036
+#: ../../src/kdc/main.c:1040
 msgid "while creating PID file"
 msgstr ""
 
-#: ../../src/kdc/main.c:1045
+#: ../../src/kdc/main.c:1048
 msgid "creating worker processes"
 msgstr ""
 
-#: ../../src/kdc/main.c:1055
+#: ../../src/kdc/main.c:1058
 msgid "while loading audit plugin module(s)"
 msgstr ""
 
-#: ../../src/kdc/main.c:1059
+#: ../../src/kdc/main.c:1062
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1067
+#: ../../src/kdc/main.c:1070
 msgid "shutting down"
 msgstr ""
 
@@ -5150,79 +5141,79 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1822
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1823
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1824
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1825
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1826
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1827
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1828
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1829
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1830
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1831
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1832
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1833
 msgid "Invalid NegoEx signature"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1834
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1835
 msgid "Invalid NegoEx message type"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1836
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1837
 msgid "Invalid NegoEx message size"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1838
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1839
 msgid "Invalid NegoEx conversation ID"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1840
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1841
 msgid "NegoEx authentication scheme not found"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1842
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1843
 msgid "Missing NegoEx negotiate message"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1844
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1845
 msgid "Missing NegoEx authentication protocol request message"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1846
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1847
 msgid "No mutually supported NegoEx authentication schemes"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1848
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1849
 msgid "No NegoEx verify key"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1850
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1851
 msgid "Unknown NegoEx checksum scheme"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1852
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1853
 msgid "Invalid NegoEx checksum"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1854
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1855
 msgid "Unsupported critical NegoEx extension"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1856
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1857
 msgid "Unsupported NegoEx version"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1858
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1859
 msgid "NegoEx message out of sequence"
 msgstr ""
 
@@ -5309,7 +5300,7 @@ msgstr ""
 msgid "Password may not match principal name"
 msgstr ""
 
-#: ../../src/lib/kadm5/srv/server_kdb.c:195
+#: ../../src/lib/kadm5/srv/server_kdb.c:197
 msgid "History entry contains no key data"
 msgstr ""
 
