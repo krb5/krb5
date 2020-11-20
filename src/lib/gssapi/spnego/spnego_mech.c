@@ -375,7 +375,7 @@ spnego_gss_acquire_cred_from(OM_uint32 *minor_status,
 			     OM_uint32 *time_rec)
 {
 	OM_uint32 status, tmpmin;
-	gss_OID_set amechs;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
 	gss_cred_id_t mcred = NULL;
 	spnego_gss_cred_id_t spcred = NULL;
 	dsyslog("Entering spnego_gss_acquire_cred\n");
