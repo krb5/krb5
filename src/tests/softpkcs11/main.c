@@ -2073,6 +2073,177 @@ C_GenerateRandom(CK_SESSION_HANDLE hSession,
 }
 
 
+#define	no_C_InitPIN			\
+    (CK_RV(*)(CK_SESSION_HANDLE, 	\
+    unsigned char *, unsigned long))	\
+	func_not_supported
+
+#define	no_C_SetPIN			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long))	\
+	func_not_supported
+
+#define	no_C_GetOperationState		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_SetOperationState		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    CK_OBJECT_HANDLE, CK_OBJECT_HANDLE))\
+	func_not_supported
+
+#define	no_C_CreateObject		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_ATTRIBUTE *, unsigned long,	\
+    CK_OBJECT_HANDLE *))		\
+	func_not_supported
+
+#define	no_C_CopyObject			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_OBJECT_HANDLE, CK_ATTRIBUTE *,	\
+    unsigned long, CK_OBJECT_HANDLE *))	\
+	func_not_supported
+
+#define	no_C_DestroyObject		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_OBJECT_HANDLE))			\
+	func_not_supported
+
+#define	no_C_GetObjectSize		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_OBJECT_HANDLE, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_SetAttributeValue		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_OBJECT_HANDLE, CK_ATTRIBUTE *,	\
+    unsigned long))			\
+	func_not_supported
+
+#define	no_C_Digest			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define no_C_DigestUpdate		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long))	\
+	func_not_supported
+
+#define	no_C_DigestKey			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_OBJECT_HANDLE))			\
+	func_not_supported
+
+#define	no_C_DigestFinal		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_SignRecoverInit		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_OBJECT_HANDLE))	\
+	func_not_supported
+
+#define	no_C_SignRecover		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_VerifyRecoverInit		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_OBJECT_HANDLE))	\
+	func_not_supported
+
+#define	no_C_VerifyRecover		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_DigestEncryptUpdate	\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_DecryptDigestUpdate	\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_SignEncryptUpdate		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_DecryptVerifyUpdate	\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_GenerateKey		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_ATTRIBUTE *,	\
+    unsigned long, CK_OBJECT_HANDLE *))	\
+	func_not_supported
+
+#define	no_C_GenerateKeyPair		\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_ATTRIBUTE *,	\
+    unsigned long, CK_ATTRIBUTE *,	\
+    unsigned long, CK_OBJECT_HANDLE *,	\
+    CK_OBJECT_HANDLE *))		\
+	func_not_supported
+
+#define	no_C_WrapKey			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_OBJECT_HANDLE,	\
+    CK_OBJECT_HANDLE,			\
+    unsigned char *, unsigned long *))	\
+	func_not_supported
+
+#define	no_C_UnwrapKey			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_OBJECT_HANDLE,	\
+    unsigned char *, unsigned long,	\
+    CK_ATTRIBUTE *, unsigned long,	\
+    CK_OBJECT_HANDLE *))		\
+	func_not_supported
+
+#define	no_C_DeriveKey			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    CK_MECHANISM *, CK_OBJECT_HANDLE,	\
+    CK_ATTRIBUTE *, unsigned long,	\
+    CK_OBJECT_HANDLE *))		\
+	func_not_supported
+
+#define	no_C_SeedRandom			\
+    (CK_RV(*)(CK_SESSION_HANDLE,	\
+    unsigned char *, unsigned long))	\
+	func_not_supported
+
+#define	no_C_GetFunctionStatus		\
+    (CK_RV(*)(CK_SESSION_HANDLE))	\
+	func_not_supported
+
+#define	no_C_CancnelFunction		\
+    (CK_RV(*)(CK_SESSION_HANDLE))	\
+	func_not_supported
+
+#define	no_C_WaitForSlotEvent		\
+    (CK_RV(*)(CK_FLAGS, CK_SLOT_ID_PTR,	\
+    CK_VOID_PTR))			\
+	func_not_supported
+
 CK_FUNCTION_LIST funcs = {
     { 2, 11 },
     C_Initialize,
@@ -2085,22 +2256,22 @@ CK_FUNCTION_LIST funcs = {
     C_GetMechanismList,
     C_GetMechanismInfo,
     C_InitToken,
-    (void *)func_not_supported, /* C_InitPIN */
-    (void *)func_not_supported, /* C_SetPIN */
+    no_C_InitPIN,	/* C_InitPIN */
+    no_C_SetPIN,	/* C_SetPIN */
     C_OpenSession,
     C_CloseSession,
     C_CloseAllSessions,
     C_GetSessionInfo,
-    (void *)func_not_supported, /* C_GetOperationState */
-    (void *)func_not_supported, /* C_SetOperationState */
+    no_C_GetOperationState, /* C_GetOperationState */
+    no_C_SetOperationState, /* C_SetOperationState */
     C_Login,
     C_Logout,
-    (void *)func_not_supported, /* C_CreateObject */
-    (void *)func_not_supported, /* C_CopyObject */
-    (void *)func_not_supported, /* C_DestroyObject */
-    (void *)func_not_supported, /* C_GetObjectSize */
+    no_C_CreateObject, /* C_CreateObject */
+    no_C_CopyObject, /* C_CopyObject */
+    no_C_DestroyObject, /* C_DestroyObject */
+    no_C_GetObjectSize, /* C_GetObjectSize */
     C_GetAttributeValue,
-    (void *)func_not_supported, /* C_SetAttributeValue */
+    no_C_SetAttributeValue, /* C_SetAttributeValue */
     C_FindObjectsInit,
     C_FindObjects,
     C_FindObjectsFinal,
@@ -2113,34 +2284,34 @@ CK_FUNCTION_LIST funcs = {
     C_DecryptUpdate,
     C_DecryptFinal,
     C_DigestInit,
-    (void *)func_not_supported, /* C_Digest */
-    (void *)func_not_supported, /* C_DigestUpdate */
-    (void *)func_not_supported, /* C_DigestKey */
-    (void *)func_not_supported, /* C_DigestFinal */
+    no_C_Digest, /* C_Digest */
+    no_C_DigestUpdate, /* C_DigestUpdate */
+    no_C_DigestKey, /* C_DigestKey */
+    no_C_DigestFinal, /* C_DigestFinal */
     C_SignInit,
     C_Sign,
     C_SignUpdate,
     C_SignFinal,
-    (void *)func_not_supported, /* C_SignRecoverInit */
-    (void *)func_not_supported, /* C_SignRecover */
+    no_C_SignRecoverInit, /* C_SignRecoverInit */
+    no_C_SignRecover, /* C_SignRecover */
     C_VerifyInit,
     C_Verify,
     C_VerifyUpdate,
     C_VerifyFinal,
-    (void *)func_not_supported, /* C_VerifyRecoverInit */
-    (void *)func_not_supported, /* C_VerifyRecover */
-    (void *)func_not_supported, /* C_DigestEncryptUpdate */
-    (void *)func_not_supported, /* C_DecryptDigestUpdate */
-    (void *)func_not_supported, /* C_SignEncryptUpdate */
-    (void *)func_not_supported, /* C_DecryptVerifyUpdate */
-    (void *)func_not_supported, /* C_GenerateKey */
-    (void *)func_not_supported, /* C_GenerateKeyPair */
-    (void *)func_not_supported, /* C_WrapKey */
-    (void *)func_not_supported, /* C_UnwrapKey */
-    (void *)func_not_supported, /* C_DeriveKey */
-    (void *)func_not_supported, /* C_SeedRandom */
+    no_C_VerifyRecoverInit, /* C_VerifyRecoverInit */
+    no_C_VerifyRecover, /* C_VerifyRecover */
+    no_C_DigestEncryptUpdate, /* C_DigestEncryptUpdate */
+    no_C_DecryptDigestUpdate, /* C_DecryptDigestUpdate */
+    no_C_SignEncryptUpdate, /* C_SignEncryptUpdate */
+    no_C_DecryptVerifyUpdate, /* C_DecryptVerifyUpdate */
+    no_C_GenerateKey, /* C_GenerateKey */
+    no_C_GenerateKeyPair, /* C_GenerateKeyPair */
+    no_C_WrapKey, /* C_WrapKey */
+    no_C_UnwrapKey, /* C_UnwrapKey */
+    no_C_DeriveKey, /* C_DeriveKey */
+    no_C_SeedRandom, /* C_SeedRandom */
     C_GenerateRandom,
-    (void *)func_not_supported, /* C_GetFunctionStatus */
-    (void *)func_not_supported, /* C_CancelFunction */
-    (void *)func_not_supported  /* C_WaitForSlotEvent */
+    no_C_GetFunctionStatus, /* C_GetFunctionStatus */
+    no_C_CancnelFunction, /* C_CancelFunction */
+    no_C_WaitForSlotEvent /* C_WaitForSlotEvent */
 };
