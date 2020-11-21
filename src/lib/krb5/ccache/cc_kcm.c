@@ -981,8 +981,10 @@ kcm_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
         k5_buf_add_len(&req.reqbuf, id, KCM_UUID_LEN);
         ret = kcmio_call(context, data->io, &req);
         /* Continue if the cache has been deleted. */
-        if (ret == KRB5_CC_END)
+        if (ret == KRB5_CC_END || ret == KRB5_FCC_NOFILE) {
+            ret = 0;
             continue;
+        }
         if (ret)
             goto cleanup;
         ret = kcmreq_get_name(&req, &name);
