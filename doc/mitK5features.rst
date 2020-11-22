@@ -533,6 +533,67 @@ Release 1.18
   - The test suite incorporates soft-pkcs11 so that PKINIT PKCS11
     support can always be tested.
 
+Release 1.19
+
+* Administrator experience:
+
+  - When a client keytab is present, the GSSAPI krb5 mech will refresh
+    credentials even if the current credentials were acquired
+    manually.
+
+  - It is now harder to accidentally delete the K/M entry from a KDB.
+
+* Developer experience:
+
+  - gss_acquire_cred_from() now supports the "password" and "verify"
+    options, allowing credentials to be acquired via password and
+    verified using a keytab key.
+
+  - When an application accepts a GSS security context, the new
+    GSS_C_CHANNEL_BOUND_FLAG will be set if the initiator and acceptor
+    both provided matching channel bindings.
+
+  - Added the GSS_KRB5_NT_X509_CERT name type, allowing S4U2Self
+    requests to identify the desired client principal by certificate.
+
+  - PKINIT certauth modules can now cause the hw-authent flag to be
+    set in issued tickets.
+
+  - The krb5_init_creds_step() API will now issue the same password
+    expiration warnings as krb5_get_init_creds_password().
+
+* Protocol evolution:
+
+  - Added client and KDC support for Microsoft's Resource-Based
+    Constrained Delegation, which allows cross-realm S4U2Proxy
+    requests.  A third-party database module is required for KDC
+    support.
+
+  - kadmin/admin is now the preferred server principal name for kadmin
+    connections, and the host-based form is no longer created by
+    default.  The client will still try the host-based form as a
+    fallback.
+
+  - Added client and server support for Microsoft's
+    KERB_AP_OPTIONS_CBT extension, which causes channel bindings to be
+    required for the initiator if the acceptor provided them.  The
+    client will send this option if the client_aware_gss_bindings
+    profile option is set.
+
+User experience:
+
+  - The default setting of dns_canonicalize_realm is now "fallback".
+    Hostnames provided from applications will be tried in principal
+    names as given (possibly with shortname qualification), falling
+    back to the canonicalized name.
+
+  - kinit will now issue a warning if the des3-cbc-sha1 encryption
+    type is used in the reply.  This encryption type will be
+    deprecated and removed in future releases.
+
+  - Added kvno flags --out-cache, --no-store, and --cached-only
+    (inspired by Heimdal's kgetcred).
+
 `Pre-authentication mechanisms`
 
 - PW-SALT                                         :rfc:`4120#section-5.2.7.3`
