@@ -9,9 +9,13 @@ SYNOPSIS
 **kvno**
 [**-c** *ccache*]
 [**-e** *etype*]
+[**-k** *keytab*]
 [**-q**]
 [**-u** | **-S** *sname*]
 [**-P**]
+[**--cached-only**]
+[**--no-store**]
+[**--out-cache** *cache*]
 [[{**-F** *cert_file* | {**-I** | **-U**} *for_user*} [**-P**]] | **--u2u** *ccache*]
 *service1 service2* ...
 

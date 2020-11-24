@@ -35,9 +35,13 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBkvno\fP
 [\fB\-c\fP \fIccache\fP]
 [\fB\-e\fP \fIetype\fP]
+[\fB\-k\fP \fIkeytab\fP]
 [\fB\-q\fP]
 [\fB\-u\fP | \fB\-S\fP \fIsname\fP]
 [\fB\-P\fP]
+[\fB\-\-cached\-only\fP]
+[\fB\-\-no\-store\fP]
+[\fB\-\-out\-cache\fP \fIcache\fP]
 [[{\fB\-F\fP \fIcert_file\fP | {\fB\-I\fP | \fB\-U\fP} \fIfor_user\fP} [\fB\-P\fP]] | \fB\-\-u2u\fP \fIccache\fP]
 \fIservice1 service2\fP ...
 .SH DESCRIPTION
