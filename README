@@ -64,17 +64,133 @@ and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary
 way to interact with our bug database is via email.
 
-DES no longer supported
------------------------
+Triple-DES transition
+---------------------
 
-Beginning with the krb5-1.18 release, single-DES encryption types are
-no longer supported.
+Beginning with the krb5-1.19 release, a warning will be issued if
+initial credentials are acquired using the des3-cbc-sha1 encryption
+type.  In future releases, this encryption type will be disabled by
+default and eventually removed.
+
+Beginning with the krb5-1.18 release, single-DES encryption types have
+been removed.
 
 Major changes in 1.19
 ---------------------
 
+Administrator experience:
+
+* When a client keytab is present, the GSSAPI krb5 mech will refresh
+  credentials even if the current credentials were acquired manually.
+
+* It is now harder to accidentally delete the K/M entry from a KDB.
+
+Developer experience:
+
+* gss_acquire_cred_from() now supports the "password" and "verify"
+  options, allowing credentials to be acquired via password and
+  verified using a keytab key.
+
+* When an application accepts a GSS security context, the new
+  GSS_C_CHANNEL_BOUND_FLAG will be set if the initiator and acceptor
+  both provided matching channel bindings.
+
+* Added the GSS_KRB5_NT_X509_CERT name type, allowing S4U2Self
+  requests to identify the desired client principal by certificate.
+
+* PKINIT certauth modules can now cause the hw-authent flag to be set
+  in issued tickets.
+
+* The krb5_init_creds_step() API will now issue the same password
+  expiration warnings as krb5_get_init_creds_password().
+
+Protocol evolution:
+
+* Added client and KDC support for Microsoft's Resource-Based
+  Constrained Delegation, which allows cross-realm S4U2Proxy requests.
+  A third-party database module is required for KDC support.
+
+* kadmin/admin is now the preferred server principal name for kadmin
+  connections, and the host-based form is no longer created by
+  default.  The client will still try the host-based form as a
+  fallback.
+
+* Added client and server support for Microsoft's KERB_AP_OPTIONS_CBT
+  extension, which causes channel bindings to be required for the
+  initiator if the acceptor provided them.  The client will send this
+  option if the client_aware_gss_bindings profile option is set.
+
+User experience:
+
+* The default setting of dns_canonicalize_realm is now "fallback".
+  Hostnames provided from applications will be tried in principal
+  names as given (possibly with shortname qualification), falling back
+  to the canonicalized name.
+
+* kinit will now issue a warning if the des3-cbc-sha1 encryption type
+  is used in the reply.  This encryption type will be deprecated and
+  removed in future releases.
+
+* Added kvno flags --out-cache, --no-store, and --cached-only
+  (inspired by Heimdal's kgetcred).
+
 krb5-1.19 changes by ticket ID
 ------------------------------
+
+7976    Client keytab does not refresh manually obtained ccaches
+8871    Zero length fields when freeing object contents
+8879    Allow certauth modules to set hw-authent flag
+8885    PKINIT calls responder twice
+8890    Add finalization safety check to com_err
+8893    Do expiration warnings for all init_creds APIs
+8897    Pass gss_localname() through SPNEGO
+8899    Implement GSS_C_CHANNEL_BOUND_FLAG
+8900    Implement KERB_AP_OPTIONS_CBT (server side)
+8901    Stop reporting krb5 mech from IAKERB
+8902    Omit KDC indicator check for S4U2Self requests
+8904    Add KRB5_PRINCIPAL_PARSE_NO_DEF_REALM flag
+8907    Pass channel bindings through SPNEGO
+8909    Return GSS_S_NO_CRED from krb5 gss_acquire_cred
+8910    Building with --enable-static fails when Yasm is available
+8911    Default dns_canonicalize_hostname to "fallback"
+8912    Omit PA_FOR_USER if we can't compute its checksum
+8913    Deleting master key principal entry shouldn't be possible
+8914    Invalid negative record length in keytab file
+8915    Try to find <target>-ar when cross compiling
+8917    Add three kvno options from Heimdal kgetcred
+8919    Interop with Heimdal KDC for S4U2Self requests
+8920    Fix KDC choice to send encrypted S4U_X509_USER
+8921    Use the term "primary KDC" in source and docs
+8922    Trace plugin module loading errors
+8923    Add GSS_KRB5_NT_X509_CERT name type
+8927    getdate.y %type warnings with bison 3.5
+8928    Fix three configure tests for Xcode 12
+8929    Ignore bad enctypes in krb5_string_to_keysalts()
+8930    Expand dns_canonicalize_host=fallback support
+8931    Cache S4U2Proxy requests by second ticket
+8932    Do proper length decoding in SPNEGO gss_get_oid()
+8934    Try kadmin/admin first in libkadm5clnt
+8935    Don't create hostbased principals in new KDBs
+8937    Fix Leash console option
+8940    Remove Leash import functionality
+8942    Fix KRB5_GC_CACHED for S4U2Self requests
+8943    Allow KDC to canonicalize realm in TGS client
+8944    Harmonize macOS pack declarations with Heimdal
+8946    Improve KDC alias checking for S4U requests
+8947    Warn when des3-cbc-sha1 is used for initial auth
+8948    Update SRV record documentation
+8950    Document enctype migration
+8951    Allow aliases when matching U2U second ticket
+8952    Fix doc issues with newer Doxygen and Sphinx
+8953    Move more KDC checks to validate_tgs_request()
+8954    Update Gladman AES code to a version with a clearer license
+8957    Use PKG_CHECK_MODULES for system library com_err
+8961    Fix gss_acquire_cred_from() IAKERB handling
+8962    Add password option to cred store
+8963    Add verify option to cred store
+8964    Add GSS credential store documentation
+8965    Install shared libraries as executable
+8966    Improve duplicate checking in gss_add_cred()
 
 Acknowledgements
 ----------------
@@ -171,6 +287,7 @@ The following external contributors have provided code, patches, bug
 reports, suggestions, and valuable resources:
 
     Ian Abbott
+    Daniel Albers
     Brandon Allbery
     Russell Allbery
     Brian Almeida
@@ -182,6 +299,7 @@ reports, suggestions, and valuable resources:
     Mark Bannister
     David Bantz
     Alex Baule
+    Nikhil Benesch
     David Benjamin
     Thomas Bernard
     Adam Bernstein
@@ -189,6 +307,7 @@ reports, suggestions, and valuable resources:
     Jeff Blaine
     Toby Blake
     Radoslav Bodo
+    Alexander Bokovoy
     Sumit Bose
     Emmanuel Bouillon
     Isaac Boukris
@@ -201,6 +320,7 @@ reports, suggestions, and valuable resources:
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
+    Rachit Chokshi
     Seemant Choudhary
     Howard Chu
     Andrea Cirulli
@@ -210,11 +330,13 @@ reports, suggestions, and valuable resources:
     Sylvain Cortes
     Ian Crowther
     Arran Cudbard-Bell
+    Adam Dabrowski
     Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
     Alex Dehnert
+    Misty De Meo
     Mark Deneen
     Günther Deschner
     John Devitofranceschi
@@ -242,6 +364,7 @@ reports, suggestions, and valuable resources:
     Sebastian Galiano
     Marcus Granado
     Dylan Gray
+    Norm Green
     Scott Grizzard
     Helmut Grohne
     Steve Grubb
@@ -284,6 +407,7 @@ reports, suggestions, and valuable resources:
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
+    Harshawardhan Kulkarni
     Tomas Kuthan
     Pierre Labastie
     Andreas Ladanyi
@@ -299,6 +423,7 @@ reports, suggestions, and valuable resources:
     Nuno Lopes
     Todd Lubin
     Ryan Lynch
+    Glenn Machin
     Roland Mainz
     Sorin Manolache
     Robert Marshall
@@ -309,6 +434,7 @@ reports, suggestions, and valuable resources:
     Cameron Meadors
     Alexey Melnikov
     Franklyn Mendez
+    Mantas Mikulėnas
     Markus Moeller
     Kyle Moffett
     Paul Moore
@@ -316,7 +442,9 @@ reports, suggestions, and valuable resources:
     Michael Morony
     Zbysek Mraz
     Edward Murrell
+    Joshua Neuheisel
     Nikos Nikoleris
+    Demi Obenour
     Felipe Ortega
     Michael Osipov
     Andrej Ota
@@ -325,6 +453,7 @@ reports, suggestions, and valuable resources:
     Dilyan Palauzov
     Tom Parker
     Eric Pauly
+    Leonard Peirce
     Ezra Peisach
     Alejandro Perez
     Zoran Pericic
@@ -345,6 +474,8 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Joshua Schaeffer
+    Alexander Scheel
+    Jens Schleusener
     Andreas Schneider
     Paul Seyfert
     Tom Shaw
@@ -357,7 +488,10 @@ reports, suggestions, and valuable resources:
     Michael Spang
     Michael Ströder
     Bjørn Tore Sund
+    Ondřej Surý
     Joe Travaglini
+    Sergei Trofimovich
+    Greg Troxel
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko
@@ -376,6 +510,7 @@ reports, suggestions, and valuable resources:
     Nicolas Williams
     Ross Wilper
     Augustin Wolf
+    Garrett Wollman
     David Woodhouse
     Tsu-Phong Wu
     Xu Qiang
