@@ -76,10 +76,6 @@ char *kprop_port = NULL;
 static krb5_context context;
 static char *progname;
 
-#ifdef USE_PASSWORD_SERVER
-void kadm5_set_use_password_server(void);
-#endif
-
 static void
 usage()
 {
@@ -396,10 +392,6 @@ main(int argc, char *argv[])
             params.mask |= KADM5_CONFIG_MKEY_FROM_KBD;
         } else if (strcmp(*argv, "-nofork") == 0) {
             nofork = 1;
-#ifdef USE_PASSWORD_SERVER
-        } else if (strcmp(*argv, "-passwordserver") == 0) {
-            kadm5_set_use_password_server();
-#endif
 #ifndef DISABLE_IPROP
         } else if (strcmp(*argv, "-proponly") == 0) {
             proponly = 1;
