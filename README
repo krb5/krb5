@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.19
+                   Kerberos Version 5, Release 1.20
 
                             Release Notes
                         The MIT Kerberos Team
@@ -70,10 +70,10 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
-Major changes in 1.19
+Major changes in 1.20
 ---------------------
 
-krb5-1.19 changes by ticket ID
+krb5-1.20 changes by ticket ID
 ------------------------------
 
 Acknowledgements
@@ -171,6 +171,7 @@ The following external contributors have provided code, patches, bug
 reports, suggestions, and valuable resources:
 
     Ian Abbott
+    Daniel Albers
     Brandon Allbery
     Russell Allbery
     Brian Almeida
@@ -182,6 +183,7 @@ reports, suggestions, and valuable resources:
     Mark Bannister
     David Bantz
     Alex Baule
+    Nikhil Benesch
     David Benjamin
     Thomas Bernard
     Adam Bernstein
@@ -189,6 +191,7 @@ reports, suggestions, and valuable resources:
     Jeff Blaine
     Toby Blake
     Radoslav Bodo
+    Alexander Bokovoy
     Sumit Bose
     Emmanuel Bouillon
     Isaac Boukris
@@ -201,6 +204,7 @@ reports, suggestions, and valuable resources:
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
+    Rachit Chokshi
     Seemant Choudhary
     Howard Chu
     Andrea Cirulli
@@ -210,11 +214,13 @@ reports, suggestions, and valuable resources:
     Sylvain Cortes
     Ian Crowther
     Arran Cudbard-Bell
+    Adam Dabrowski
     Jeff D'Angelo
     Nalin Dahyabhai
     Mark Davies
     Dennis Davis
     Alex Dehnert
+    Misty De Meo
     Mark Deneen
     Günther Deschner
     John Devitofranceschi
@@ -242,6 +248,7 @@ reports, suggestions, and valuable resources:
     Sebastian Galiano
     Marcus Granado
     Dylan Gray
+    Norm Green
     Scott Grizzard
     Helmut Grohne
     Steve Grubb
@@ -284,6 +291,7 @@ reports, suggestions, and valuable resources:
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
+    Harshawardhan Kulkarni
     Tomas Kuthan
     Pierre Labastie
     Andreas Ladanyi
@@ -299,6 +307,7 @@ reports, suggestions, and valuable resources:
     Nuno Lopes
     Todd Lubin
     Ryan Lynch
+    Glenn Machin
     Roland Mainz
     Sorin Manolache
     Robert Marshall
@@ -309,6 +318,7 @@ reports, suggestions, and valuable resources:
     Cameron Meadors
     Alexey Melnikov
     Franklyn Mendez
+    Mantas Mikulėnas
     Markus Moeller
     Kyle Moffett
     Paul Moore
@@ -316,7 +326,9 @@ reports, suggestions, and valuable resources:
     Michael Morony
     Zbysek Mraz
     Edward Murrell
+    Joshua Neuheisel
     Nikos Nikoleris
+    Demi Obenour
     Felipe Ortega
     Michael Osipov
     Andrej Ota
@@ -325,6 +337,7 @@ reports, suggestions, and valuable resources:
     Dilyan Palauzov
     Tom Parker
     Eric Pauly
+    Leonard Peirce
     Ezra Peisach
     Alejandro Perez
     Zoran Pericic
@@ -345,6 +358,8 @@ reports, suggestions, and valuable resources:
     Mike Roszkowski
     Guillaume Rousse
     Joshua Schaeffer
+    Alexander Scheel
+    Jens Schleusener
     Andreas Schneider
     Paul Seyfert
     Tom Shaw
@@ -357,7 +372,10 @@ reports, suggestions, and valuable resources:
     Michael Spang
     Michael Ströder
     Bjørn Tore Sund
+    Ondřej Surý
     Joe Travaglini
+    Sergei Trofimovich
+    Greg Troxel
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko
@@ -376,6 +394,7 @@ reports, suggestions, and valuable resources:
     Nicolas Williams
     Ross Wilper
     Augustin Wolf
+    Garrett Wollman
     David Woodhouse
     Tsu-Phong Wu
     Xu Qiang
