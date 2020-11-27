@@ -173,6 +173,7 @@ k5_plugin_register_dyn
 k5_rc_close
 k5_rc_get_name
 k5_rc_resolve
+k5_rc_store
 k5_size_auth_context
 k5_size_authdata
 k5_size_authdata_context
