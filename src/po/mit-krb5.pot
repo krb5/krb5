@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.19-prerelease\n"
+"Project-Id-Version: mit-krb5 1.20-prerelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-02 16:48-0400\n"
+"POT-Creation-Date: 2020-11-29 16:58-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr ""
 #: ../../src/clients/klist/klist.c:239 ../../src/clients/ksu/main.c:135
 #: ../../src/clients/ksu/main.c:141 ../../src/clients/kswitch/kswitch.c:94
 #: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:953
-#: ../../src/kprop/kprop.c:102 ../../src/kprop/kpropd.c:1057
+#: ../../src/kprop/kprop.c:102 ../../src/kprop/kpropd.c:1061
 msgid "while initializing krb5"
 msgstr ""
 
@@ -646,7 +646,7 @@ msgid "while retrieving a ticket"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:672 ../../src/clients/ksu/ccache.c:440
-#: ../../src/kprop/kpropd.c:1204 ../../src/kprop/kpropd.c:1269
+#: ../../src/kprop/kpropd.c:1208 ../../src/kprop/kpropd.c:1273
 msgid "while unparsing client name"
 msgstr ""
 
@@ -3433,11 +3433,11 @@ msgstr ""
 msgid "AS_REQ : handle_authdata (%d)"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:613
+#: ../../src/kdc/do_tgs_req.c:602
 msgid "not checking transit path"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:630
+#: ../../src/kdc/do_tgs_req.c:619
 #, c-format
 msgid "TGS_REQ : handle_authdata (%d)"
 msgstr ""
@@ -3558,20 +3558,16 @@ msgstr ""
 msgid "Incorrect password in encrypted challenge"
 msgstr ""
 
-#: ../../src/kdc/kdc_util.c:197
+#: ../../src/kdc/kdc_util.c:182
 msgid "TGS_REQ: SESSION KEY or MUTUAL"
 msgstr ""
 
-#: ../../src/kdc/kdc_util.c:272
-msgid "PROCESS_TGS: failed lineage check"
-msgstr ""
-
-#: ../../src/kdc/kdc_util.c:424
+#: ../../src/kdc/kdc_util.c:380
 #, c-format
 msgid "TGS_REQ: UNKNOWN SERVER: server='%s'"
 msgstr ""
 
-#: ../../src/kdc/kdc_util.c:795
+#: ../../src/kdc/kdc_util.c:748
 #, c-format
 msgid "Required auth indicators not present in ticket: %s"
 msgstr ""
@@ -3793,7 +3789,7 @@ msgstr ""
 msgid "while connecting to server"
 msgstr ""
 
-#: ../../src/kprop/kprop.c:274 ../../src/kprop/kpropd.c:1194
+#: ../../src/kprop/kprop.c:274 ../../src/kprop/kpropd.c:1198
 msgid "while getting local socket address"
 msgstr ""
 
@@ -3810,7 +3806,7 @@ msgid "while authenticating to server"
 msgstr ""
 
 #: ../../src/kprop/kprop.c:314 ../../src/kprop/kprop.c:513
-#: ../../src/kprop/kpropd.c:1506
+#: ../../src/kprop/kpropd.c:1510
 #, c-format
 msgid "Generic remote error: %s\n"
 msgstr ""
@@ -4087,7 +4083,7 @@ msgid "kadm5 initialization failed!\n"
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:713
-msgid "while attempting to connect to master KDC ... retrying"
+msgid "while attempting to connect to primary KDC ... retrying"
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:717
@@ -4171,20 +4167,20 @@ msgstr ""
 
 #: ../../src/kprop/kpropd.c:861
 #, c-format
-msgid "Full resync error from master\n"
+msgid "Full resync error from primary\n"
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:862
-msgid " Full resync, error returned from master KDC."
+msgid " Full resync, error returned from primary KDC."
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:870
 #, c-format
-msgid "Full resync invalid result from master\n"
+msgid "Full resync invalid result from primary\n"
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:872
-msgid "Full resync, invalid return from master KDC."
+msgid "Full resync, invalid return from primary KDC."
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:888
@@ -4223,174 +4219,174 @@ msgstr ""
 
 #: ../../src/kprop/kpropd.c:929
 #, c-format
-msgid "get_updates error from master\n"
+msgid "get_updates error from primary\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:930
-msgid "get_updates, error returned from master KDC."
+#: ../../src/kprop/kpropd.c:931
+msgid "get_updates, error returned from primary KDC."
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:938
+#: ../../src/kprop/kpropd.c:939
 #, c-format
-msgid "get_updates master busy; backoff\n"
+msgid "get_updates primary busy; backoff\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:947
+#: ../../src/kprop/kpropd.c:948
 #, c-format
-msgid "KDC is synchronized with master.\n"
+msgid "KDC is synchronized with primary.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:955
+#: ../../src/kprop/kpropd.c:957
 #, c-format
-msgid "get_updates invalid result from master\n"
+msgid "get_updates invalid result from primary\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:956
-msgid "get_updates, invalid return from master KDC."
+#: ../../src/kprop/kpropd.c:960
+msgid "get_updates, invalid return from primary KDC."
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:971
+#: ../../src/kprop/kpropd.c:975
 #, c-format
-msgid "Busy signal received from master, backoff for %d secs\n"
+msgid "Busy signal received from primary, backoff for %d secs\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:978
+#: ../../src/kprop/kpropd.c:982
 #, c-format
 msgid "Waiting for %d seconds before checking for updates again\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:989
+#: ../../src/kprop/kpropd.c:993
 #, c-format
-msgid "ERROR returned by master, bailing\n"
+msgid "ERROR returned by primary, bailing\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:990
-msgid "ERROR returned by master KDC, bailing.\n"
+#: ../../src/kprop/kpropd.c:994
+msgid "ERROR returned by primary KDC, bailing.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1107
+#: ../../src/kprop/kpropd.c:1111
 msgid "copying db args"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1132
+#: ../../src/kprop/kpropd.c:1136
 msgid "Unable to get default realm"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1139
+#: ../../src/kprop/kpropd.c:1143
 msgid "Unable to set default realm"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1149
+#: ../../src/kprop/kpropd.c:1153
 msgid "while trying to construct my service name"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1156
+#: ../../src/kprop/kpropd.c:1160
 msgid "while allocating filename for temp file"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1164
+#: ../../src/kprop/kpropd.c:1168
 msgid "while initializing"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1172
+#: ../../src/kprop/kpropd.c:1176
 msgid "Unable to map log!\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1214
+#: ../../src/kprop/kpropd.c:1218
 #, c-format
 msgid "Error in krb5_auth_con_ini: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1222
+#: ../../src/kprop/kpropd.c:1226
 #, c-format
 msgid "Error in krb5_auth_con_setflags: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1235
+#: ../../src/kprop/kpropd.c:1239
 #, c-format
 msgid "Error in krb5_auth_con_setaddrs: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1243
+#: ../../src/kprop/kpropd.c:1247
 #, c-format
 msgid "Error in krb5_kt_resolve: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1252
+#: ../../src/kprop/kpropd.c:1256
 #, c-format
 msgid "Error in krb5_recvauth: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1259
+#: ../../src/kprop/kpropd.c:1263
 #, c-format
 msgid "Error in krb5_copy_prinicpal: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1276
+#: ../../src/kprop/kpropd.c:1280
 msgid "while unparsing ticket etype"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1280
+#: ../../src/kprop/kpropd.c:1284
 #, c-format
 msgid "authenticated client: %s (etype == %s)\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1359
+#: ../../src/kprop/kpropd.c:1363
 msgid "while reading size of database from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1369
+#: ../../src/kprop/kpropd.c:1373
 msgid "while decoding database size from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1382
+#: ../../src/kprop/kpropd.c:1386
 msgid "while initializing i_vector"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1387
+#: ../../src/kprop/kpropd.c:1391
 #, c-format
 msgid "Full propagation transfer started.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1440
+#: ../../src/kprop/kpropd.c:1444
 #, c-format
 msgid "Full propagation transfer finished.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1501
+#: ../../src/kprop/kpropd.c:1505
 msgid "while decoding error packet from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1510
+#: ../../src/kprop/kpropd.c:1514
 msgid "signaled from server"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1512
+#: ../../src/kprop/kpropd.c:1516
 #, c-format
 msgid "Error text from client: %s\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1561
+#: ../../src/kprop/kpropd.c:1565
 #, c-format
 msgid "while trying to fork %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1565
+#: ../../src/kprop/kpropd.c:1569
 #, c-format
 msgid "while trying to exec %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1572
+#: ../../src/kprop/kpropd.c:1576
 #, c-format
 msgid "while waiting for %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1578
+#: ../../src/kprop/kpropd.c:1582
 #, c-format
 msgid "%s load terminated"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1584
+#: ../../src/kprop/kpropd.c:1588
 #, c-format
 msgid "%s returned a bad exit status (%d)"
 msgstr ""
@@ -5143,79 +5139,79 @@ msgstr ""
 msgid "An expected per-message token was not received"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1823
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1824
 msgid "SPNEGO cannot find mechanisms to negotiate"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1825
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1826
 msgid "SPNEGO failed to acquire creds"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1827
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1828
 msgid "SPNEGO acceptor did not select a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1829
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1830
 msgid "SPNEGO failed to negotiate a mechanism"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1831
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1832
 msgid "SPNEGO acceptor did not return a valid token"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1833
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1834
 msgid "Invalid NegoEx signature"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1835
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1836
 msgid "Invalid NegoEx message type"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1837
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1838
 msgid "Invalid NegoEx message size"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1839
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1840
 msgid "Invalid NegoEx conversation ID"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1841
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1842
 msgid "NegoEx authentication scheme not found"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1843
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1844
 msgid "Missing NegoEx negotiate message"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1845
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1846
 msgid "Missing NegoEx authentication protocol request message"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1847
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1848
 msgid "No mutually supported NegoEx authentication schemes"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1849
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1850
 msgid "No NegoEx verify key"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1851
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1852
 msgid "Unknown NegoEx checksum scheme"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1853
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1854
 msgid "Invalid NegoEx checksum"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1855
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1856
 msgid "Unsupported critical NegoEx extension"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1857
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1858
 msgid "Unsupported NegoEx version"
 msgstr ""
 
-#: ../../src/lib/gssapi/spnego/spnego_mech.c:1859
+#: ../../src/lib/gssapi/spnego/spnego_mech.c:1860
 msgid "NegoEx message out of sequence"
 msgstr ""
 
@@ -5586,11 +5582,17 @@ msgstr ""
 msgid "Warning: Your password will expire in %d days on %s"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1796
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1606
+msgid ""
+"Warning: encryption type des3-cbc-sha1 used for authentication is weak and "
+"will be disabled"
+msgstr ""
+
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1816
 msgid "Failed to store credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1891
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1912
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -5798,7 +5800,7 @@ msgstr ""
 msgid "Encryption type %s not permitted"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/s4u_creds.c:1044
+#: ../../src/lib/krb5/krb/s4u_creds.c:1043
 msgid "Realm specified but S4U2Proxy must use referral realm"
 msgstr ""
 
@@ -5816,7 +5818,7 @@ msgstr ""
 msgid "variable missing }"
 msgstr ""
 
-#: ../../src/lib/krb5/os/locate_kdc.c:813
+#: ../../src/lib/krb5/os/locate_kdc.c:818
 #, c-format
 msgid "Cannot find KDC for realm \"%.*s\""
 msgstr ""
@@ -6174,12 +6176,12 @@ msgid "Unable to read Realm"
 msgstr ""
 
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/kdb_ldap.c:214
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_create.c:72
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_create.c:71
 msgid "Error processing LDAP DB params"
 msgstr ""
 
 #: ../../src/plugins/kdb/ldap/libkdb_ldap/kdb_ldap.c:220
-#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_create.c:78
+#: ../../src/plugins/kdb/ldap/libkdb_ldap/ldap_create.c:77
 msgid "Error reading LDAP server params"
 msgstr ""
 
@@ -8522,7 +8524,7 @@ msgid "ASN.1 bad return from gmtime"
 msgstr ""
 
 #: ../lib/krb5/error_tables/asn1_err.c:34
-msgid "ASN.1 non-constructed indefinite encoding"
+msgid "ASN.1 indefinite encoding"
 msgstr ""
 
 #: ../lib/krb5/error_tables/asn1_err.c:35
