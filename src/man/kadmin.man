@@ -74,7 +74,7 @@ it requests a service ticket from the KDC, and uses that service
 ticket to authenticate to kadmind.
 .sp
 Since kadmin.local directly accesses the KDC database, it usually must
-be run directly on the master KDC with sufficient permissions to read
+be run directly on the primary KDC with sufficient permissions to read
 the KDC database.  If the KDC database uses the LDAP database module,
 kadmin.local can be run on any host which can access the LDAP server.
 .SH OPTIONS
