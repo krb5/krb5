@@ -286,3 +286,134 @@ krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
 
     return 0;
 }
+
+static krb5_error_code
+k5_pac_sign_ticket(krb5_context context,const krb5_pac pac,
+                   krb5_data *scratch, const krb5_keyblock *privsvr)
+{
+    krb5_error_code ret;
+    krb5_data ticket_cksum;
+    krb5_cksumtype ticket_cksumtype;
+    krb5_crypto_iov iov[2];
+
+    /* Create zeroed buffer for checksum */
+    ret = k5_insert_checksum(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                             privsvr, &ticket_cksumtype);
+    if (ret != 0)
+        return ret;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                               &ticket_cksum);
+    if (ret != 0)
+        return ret;
+
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data.data = scratch->data;
+    iov[0].data.length = scratch->length;
+
+    iov[1].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
+    iov[1].data.data = ticket_cksum.data + PAC_SIGNATURE_DATA_LENGTH;
+    iov[1].data.length = ticket_cksum.length - PAC_SIGNATURE_DATA_LENGTH;
+
+    ret = krb5_c_make_checksum_iov(context, ticket_cksumtype,
+                                    privsvr, KRB5_KEYUSAGE_APP_DATA_CKSUM,
+                                    iov, sizeof(iov)/sizeof(iov[0]));
+    if (ret != 0)
+        return ret;
+
+    store_32_le(ticket_cksumtype, ticket_cksum.data);
+
+    return 0;
+}
+
+/* Set *out to an AD-IF-RELEVANT authdata element containing a PAC authdata
+ * element with contents pac_data. */
+static krb5_error_code
+encode_pac_ad(krb5_context context, krb5_data *pac_data, krb5_authdata **out)
+{
+    krb5_error_code ret;
+    krb5_authdata pac_ad;
+    krb5_authdata *container[2];
+    krb5_authdata **encoded_container = NULL;
+    char single_zero = '\0';
+    krb5_data dummy;
+
+    dummy.length = 1;
+    dummy.data = &single_zero;
+
+    if (pac_data == NULL)
+        pac_data = &dummy;
+
+    pac_ad.magic = KV5M_AUTHDATA;
+    pac_ad.ad_type = KRB5_AUTHDATA_WIN2K_PAC;
+    pac_ad.contents = (krb5_octet *)pac_data->data;;
+    pac_ad.length = pac_data->length;
+    container[0] = &pac_ad;
+    container[1] = NULL;
+
+    ret = krb5_encode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                         container, &encoded_container);
+    if (ret)
+        return ret;
+
+    *out = encoded_container[0];
+    free(encoded_container);
+
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_sign_ticket(krb5_context context, krb5_ticket *ticket, const krb5_pac pac,
+                       krb5_timestamp authtime, krb5_const_principal principal,
+                       const krb5_keyblock *server, const krb5_keyblock *privsvr,
+                       krb5_boolean with_realm)
+{
+    krb5_error_code ret;
+    krb5_data *scratch = NULL, pac_data;
+    krb5_authdata **authdata = NULL, **ad = NULL;
+    int i = 0;
+
+    if (ticket->enc_part2 == NULL) {
+        ret = krb5_decrypt_tkt_part(context, server, ticket);
+            if (ret) goto cleanup;
+    }
+
+    authdata = ticket->enc_part2->authorization_data;
+    for (i = 0; authdata && authdata[i]; i++);
+
+    ad = (krb5_authdata **) malloc((i + 2) * sizeof(krb5_authdata *));
+    if (ad == NULL)
+        return ENOMEM;
+
+    for (i = 0; authdata && authdata[i]; i++)
+        ad[i + 1] = authdata[i];
+    ad[i + 1] = NULL;
+
+    ret = encode_pac_ad(context, NULL, ad);
+    if (ret) goto cleanup;
+
+    krb5_free_authdata(context, ticket->enc_part2->authorization_data);
+    ticket->enc_part2->authorization_data = ad;
+
+    ret = encode_krb5_enc_tkt_part(ticket->enc_part2, &scratch);
+    if (ret) goto cleanup;
+
+    ret = k5_pac_sign_ticket(context, pac, scratch, privsvr);
+    if (ret) goto cleanup;
+
+    ret = krb5_pac_sign_ext(context, pac, authtime, principal, server,
+                            privsvr, with_realm, &pac_data);
+    if (ret) goto cleanup;
+
+    free(ad[0]->contents);
+    free(ad[0]);
+    ret = encode_pac_ad(context, &pac_data, ad);
+    if (ret) goto cleanup;
+
+cleanup:
+    if (ret)
+        ticket->enc_part2->authorization_data = authdata;
+    krb5_free_data(context, scratch);
+    krb5_free_data_contents(context, &pac_data);
+    return ret;
+}

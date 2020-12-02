@@ -465,6 +465,8 @@ krb5_is_permitted_enctype
 krb5_is_referral_realm
 krb5_is_thread_safe
 krb5_kdc_rep_decrypt_proc
+krb5_kdc_sign_ticket
+krb5_kdc_verify_ticket
 krb5_kt_add_entry
 krb5_kt_client_default
 krb5_kt_close

@@ -644,6 +644,123 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     return ret;
 }
 
+static krb5_error_code
+k5_pac_verify_ticket(krb5_context context, const krb5_pac pac,
+                       const krb5_data *ticket, const krb5_keyblock *privsvr)
+{
+    krb5_error_code ret;
+    krb5_checksum checksum;
+    krb5_data checksum_data;
+    krb5_boolean valid;
+    krb5_octet *p;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                               &checksum_data);
+    if (ret != 0)
+        return ret;
+
+    if (checksum_data.length < PAC_SIGNATURE_DATA_LENGTH)
+        return KRB5_BAD_MSIZE;
+
+    p = (krb5_octet *)checksum_data.data;
+    checksum.checksum_type = load_32_le(p);
+    checksum.length = checksum_data.length - PAC_SIGNATURE_DATA_LENGTH;
+    checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
+    if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
+        return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
+    ret = krb5_c_verify_checksum(context, privsvr,
+                                 KRB5_KEYUSAGE_APP_DATA_CKSUM,
+                                 ticket, &checksum, &valid);
+
+    if (ret != 0) {
+        return ret;
+    }
+
+    if (valid == FALSE)
+        ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+
+    return ret;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_verify_ticket(krb5_context context, krb5_ticket *ticket,
+                       krb5_timestamp authtime, krb5_const_principal principal,
+                       const krb5_keyblock *server, const krb5_keyblock *privsvr,
+                       krb5_boolean with_realm)
+{
+    krb5_error_code ret;
+    krb5_pac pac = NULL;
+    krb5_data *scratch = NULL;
+    krb5_authdata **authdata, *ad = NULL, *adp = NULL, orig;
+    krb5_authdata **decoded_container = NULL;
+    krb5_authdata **recoded_container = NULL;
+    unsigned char single_zero = '\0';
+    int i = 0, j = 0;
+
+    if (ticket->enc_part2 == NULL) {
+        ret = krb5_decrypt_tkt_part(context, server, ticket);
+            if (ret) goto cleanup;
+    }
+
+    authdata = ticket->enc_part2->authorization_data;
+
+    for (i = 0; authdata[i]; i++) {
+        if (authdata[i]->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
+            continue;
+        ad = authdata[i];
+
+        ret = krb5_decode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                             ad, &decoded_container);
+        if (ret) goto cleanup;
+
+        for (j = 0; decoded_container[j]; j++) {
+            if (decoded_container[j]->ad_type != KRB5_AUTHDATA_WIN2K_PAC)
+                continue;
+            adp = decoded_container[j];
+        }
+        if (adp != NULL)
+            break;
+
+        krb5_free_authdata(context, decoded_container);
+        decoded_container = NULL;
+    }
+
+    if (adp == NULL) {
+        ret = KRB5KRB_AP_ERR_INAPP_CKSUM;
+        goto cleanup;
+    }
+
+    ret = krb5_pac_parse(context, adp->contents, adp->length, &pac);
+    if (ret) goto cleanup;
+
+    orig = *adp;
+    adp->length = 1;
+    adp->contents = &single_zero;
+    ret = krb5_encode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                         decoded_container, &recoded_container);
+    *adp = orig;
+    if (ret) goto cleanup;
+
+    authdata[i] = recoded_container[0];
+    ret = encode_krb5_enc_tkt_part(ticket->enc_part2, &scratch);
+    authdata[i] = ad;
+    if (ret) goto cleanup;
+
+    ret = k5_pac_verify_ticket(context, pac, scratch, privsvr);
+    if (ret) goto cleanup;
+
+    ret = krb5_pac_verify_ext(context, pac, authtime, principal, server,
+                              privsvr, with_realm);
+cleanup:
+    if (pac != NULL)
+        krb5_pac_free(context, pac);
+    krb5_free_data(context, scratch);
+    krb5_free_authdata(context, decoded_container);
+    krb5_free_authdata(context, recoded_container);
+    return ret;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_pac_verify(krb5_context context,
                 const krb5_pac pac,
