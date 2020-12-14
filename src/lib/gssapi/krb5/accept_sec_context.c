@@ -216,7 +216,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
         goto cleanup;
 
-    if ((retval = krb5_cc_store_cred(context, ccache, creds[0])))
+    if ((retval = k5_cc_store_primary_cred(context, ccache, creds[0])))
         goto cleanup;
 
     /* generate a delegated credential handle */

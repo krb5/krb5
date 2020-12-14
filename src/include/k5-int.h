@@ -308,6 +308,7 @@ typedef unsigned char   u_char;
 #define KRB5_CC_CONF_PA_TYPE                   "pa_type"
 #define KRB5_CC_CONF_PROXY_IMPERSONATOR        "proxy_impersonator"
 #define KRB5_CC_CONF_REFRESH_TIME              "refresh_time"
+#define KRB5_CC_CONF_START_REALM               "start_realm"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -1905,6 +1906,9 @@ krb5_ser_unpack_bytes(krb5_octet *, size_t, krb5_octet **, size_t *);
 
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(krb5_context, krb5_ccache *);
+
+krb5_error_code
+k5_cc_store_primary_cred(krb5_context, krb5_ccache, krb5_creds *);
 
 /* Fill in the buffer with random alphanumeric data. */
 krb5_error_code
