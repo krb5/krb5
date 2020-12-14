@@ -1796,7 +1796,7 @@ init_creds_step_reply(krb5_context context,
         code = krb5_cc_initialize(context, out_ccache, ctx->cred.client);
         if (code != 0)
             goto cc_cleanup;
-        code = krb5_cc_store_cred(context, out_ccache, &ctx->cred);
+        code = k5_cc_store_primary_cred(context, out_ccache, &ctx->cred);
         if (code != 0)
             goto cc_cleanup;
         if (fast_avail) {

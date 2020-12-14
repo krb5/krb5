@@ -130,6 +130,9 @@ realm.run([kvno, realm.host_princ])
 out = realm.run(['./adata', realm.host_princ])
 if '97:' in out:
     fail('auth indicators seen in anonymous PKINIT ticket')
+# Verify start_realm setting and test referrals TGS request.
+realm.run([klist, '-C'], expected_msg='start_realm = KRBTEST.COM')
+realm.run([kvno, '-S', 'host', hostname])
 
 # Test anonymous kadmin.
 mark('anonymous kadmin')

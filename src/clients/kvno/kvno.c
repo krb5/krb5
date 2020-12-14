@@ -561,7 +561,10 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
                 }
                 initialized = 1;
             }
-            ret = krb5_cc_store_cred(context, out_ccache, creds);
+            if (count == 1)
+                ret = k5_cc_store_primary_cred(context, out_ccache, creds);
+            else
+                ret = krb5_cc_store_cred(context, out_ccache, creds);
             if (ret) {
                 com_err(prog, ret, _("while storing creds in output ccache"));
                 exit(1);

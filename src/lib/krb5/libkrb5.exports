@@ -125,6 +125,7 @@ k5_add_pa_data_from_data
 k5_alloc_pa_data
 k5_authind_decode
 k5_build_conf_principals
+k5_cc_store_primary_cred
 k5_ccselect_free_context
 k5_change_error_message_code
 k5_etypes_contains

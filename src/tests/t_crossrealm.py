@@ -77,6 +77,14 @@ r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
                                 {'realm': 'B.X'}))
 test_kvno(r1, r3.host_princ, 'KDC domain walk')
 check_klist(r1, (tgt(r1, r1), r3.host_princ))
+
+# Test start_realm in this setup.
+r1.run([kvno, '--out-cache', r1.ccache, r2.krbtgt_princ])
+r1.run([klist, '-C'], expected_msg='config: start_realm = X')
+msgs = ('Requesting TGT krbtgt/B.X@X using TGT krbtgt/X@X',
+        'Received TGT for service realm: krbtgt/B.X@X')
+r1.run([kvno, r3.host_princ], expected_trace=msgs)
+
 stop(r1, r2, r3)
 
 # Test client capaths.  The client in A will ask for a cross TGT to D,
