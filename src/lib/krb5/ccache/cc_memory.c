@@ -108,6 +108,7 @@ typedef struct _krb5_mcc_data {
     k5_cc_mutex lock;
     krb5_principal prin;
     krb5_mcc_link *link;
+    krb5_mcc_link **tail;       /* Where to store next added cred */
     /* Time offsets for clock-skewed clients.  */
     krb5_int32 time_offset;
     krb5_int32 usec_offset;
@@ -159,6 +160,7 @@ empty_mcc_cache(krb5_context context, krb5_mcc_data *d)
         free(curr);
     }
     d->link = NULL;
+    d->tail = &d->link;
     d->generation++;
     krb5_free_principal(context, d->prin);
     d->prin = NULL;
@@ -470,6 +472,7 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
         return KRB5_CC_NOMEM;
     }
     d->link = NULL;
+    d->tail = &d->link;
     d->prin = NULL;
     d->time_offset = 0;
     d->usec_offset = 0;
@@ -665,13 +668,17 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
     new_node = malloc(sizeof(krb5_mcc_link));
     if (new_node == NULL)
         return ENOMEM;
+    new_node->next = NULL;
     err = krb5_copy_creds(ctx, creds, &new_node->creds);
     if (err)
         goto cleanup;
+
+    /* Place the new node at the tail of the list. */
     k5_cc_mutex_lock(ctx, &mptr->lock);
-    new_node->next = mptr->link;
-    mptr->link = new_node;
+    *mptr->tail = new_node;
+    mptr->tail = &new_node->next;
     k5_cc_mutex_unlock(ctx, &mptr->lock);
+
     return 0;
 cleanup:
     free(new_node);
