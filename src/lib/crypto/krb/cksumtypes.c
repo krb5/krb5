@@ -76,7 +76,7 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_arcfour, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
-
+#if 0
     { CKSUMTYPE_CMAC_CAMELLIA128,
       "cmac-camellia128", { 0 }, "CMAC Camellia128 key",
       &krb5int_enc_camellia128, NULL,
@@ -88,7 +88,7 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_camellia256, NULL,
       krb5int_dk_cmac_checksum, NULL,
       16, 16, 0 },
-
+#endif
     { CKSUMTYPE_HMAC_SHA256_128_AES128,
       "hmac-sha256-128-aes128", { 0 }, "HMAC-SHA256 AES128 key",
       &krb5int_enc_aes128, &krb5int_hash_sha256,

@@ -446,7 +446,9 @@ extern const struct krb5_hash_provider krb5int_hash_sha384;
 void k5_des_fixup_key_parity(unsigned char *keybits);
 
 /* Return true if keybits is a weak or semi-weak DES key. */
+#if 0
 krb5_boolean k5_des_is_weak_key(unsigned char *keybits);
+#endif
 
 /* Compute an HMAC using the provided hash function, key, and data, storing the
  * result into output (caller-allocated). */
