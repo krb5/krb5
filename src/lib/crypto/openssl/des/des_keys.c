@@ -33,8 +33,10 @@ k5_des_fixup_key_parity(unsigned char *keybits)
     DES_set_odd_parity((DES_cblock *)keybits);
 }
 
+#if 0
 krb5_boolean
 k5_des_is_weak_key(unsigned char *keybits)
 {
     return DES_is_weak_key((DES_cblock *)keybits);
 }
+#endif
