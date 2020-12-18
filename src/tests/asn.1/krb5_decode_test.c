@@ -104,6 +104,7 @@ int main(argc, argv)
     }                                                                   \
     test(1,typestring);                                                 \
     printf("%s\n",description);                                         \
+    krb5_free_data_contents(test_context, &code);                       \
 } while (0)
 
     /****************************************************************/
