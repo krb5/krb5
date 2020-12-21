@@ -1240,6 +1240,7 @@ _default_krb5_conf = {
     'libdefaults': {
         'default_realm': '$realm',
         'dns_lookup_kdc': 'false',
+        'dns_canonicalize_hostname': 'fallback',
         'qualify_shortname': '',
         'plugin_base_dir': '$plugins'},
     'realms': {'$realm': {
