@@ -386,4 +386,9 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
                            krb5_ccache ccache, krb5_creds *in_creds,
                            krb5_creds **out_creds);
 
+/* Return true if mprinc will match any hostname in a host-based principal name
+ * (possibly due to ignore_acceptor_hostname) with krb5_sname_match(). */
+krb5_boolean
+k5_sname_wildcard_host(krb5_context context, krb5_const_principal mprinc);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

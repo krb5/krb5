@@ -8,8 +8,9 @@ for realm in multipass_realms():
     realm.run(['./t_iov', '-s', 'p:' + realm.host_princ])
     realm.run(['./t_pcontok', 'p:' + realm.host_princ])
 
+realm = K5Realm(krb5_conf={'libdefaults': {'rdns': 'false'}})
+
 # Test gss_add_cred().
-realm = K5Realm()
 realm.run(['./t_add_cred'])
 
 ### Test acceptor name behavior.
@@ -59,6 +60,27 @@ realm.run(['./t_accname', 'p:' + realm.host_princ,
 realm.run(['./t_accname', 'p:host/-nomatch-',
            'h:host@%s' % socket.gethostname()], expected_code=1,
           expected_msg=' not found in keytab')
+
+# If possible, test with an acceptor name requiring fallback to match
+# against a keytab entry.  Forward-canonicalize the hostname, relying
+# on the rdns=false realm setting.
+try:
+    ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
+    (family, socktype, proto, canonname, sockaddr) = ai[0]
+except socket.gaierror:
+    canonname = hostname
+if canonname != hostname:
+    os.rename(realm.keytab, realm.keytab + '.save')
+    canonprinc = 'host/' + canonname
+    realm.run([kadminl, 'addprinc', '-randkey', canonprinc])
+    realm.extract_keytab(canonprinc, realm.keytab)
+    # Use the canonical name for the initiator's target name, since
+    # host/hostname exists in the KDB (but not the keytab).
+    realm.run(['./t_accname', 'h:host@' + canonname, 'h:host@' + hostname])
+    os.rename(realm.keytab + '.save', realm.keytab)
+else:
+    skipped('GSS acceptor name fallback test',
+            '%s does not canonicalize to a different name' % hostname)
 
 # Test krb5_gss_import_cred.
 realm.run(['./t_imp_cred', 'p:service1/barack'])
