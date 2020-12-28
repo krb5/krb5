@@ -159,6 +159,7 @@ k5_internalize_keyblock
 k5_internalize_principal
 k5_is_string_numeric
 k5_kt_get_principal
+k5_kt_have_match
 k5_localauth_free_context
 k5_locate_kdc
 k5_marshal_cred

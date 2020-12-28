@@ -127,9 +127,7 @@ check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
 {
     krb5_error_code code;
     krb5_keytab_entry ent;
-    krb5_kt_cursor cursor;
     krb5_principal accprinc = NULL;
-    krb5_boolean match;
     char *princname;
 
     if (name->service == NULL) {
@@ -149,26 +147,14 @@ check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
         return code;
 
     /* Scan the keytab for host-based entries matching accprinc. */
-    code = krb5_kt_start_seq_get(context, kt, &cursor);
-    if (code)
-        goto cleanup;
-    while ((code = krb5_kt_next_entry(context, kt, &ent, &cursor)) == 0) {
-        match = krb5_sname_match(context, accprinc, ent.principal);
-        (void)krb5_free_keytab_entry_contents(context, &ent);
-        if (match)
-            break;
-    }
-    (void)krb5_kt_end_seq_get(context, kt, &cursor);
-    if (code == KRB5_KT_END) {
-        code = KRB5_KT_NOTFOUND;
+    code = k5_kt_have_match(context, kt, accprinc);
+    if (code == KRB5_KT_NOTFOUND) {
         if (krb5_unparse_name(context, accprinc, &princname) == 0) {
             k5_setmsg(context, code, _("No key table entry found matching %s"),
                       princname);
             free(princname);
         }
     }
-
-cleanup:
     krb5_free_principal(context, accprinc);
     return code;
 }
