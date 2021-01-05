@@ -2,7 +2,7 @@ K5_AC_INIT([aclocal.m4])
 
 # If $runstatedir isn't set by autoconf (<2.70), set it manually.
 if test x"$runstatedir" = x; then
-  runstatedir=$localstatedir/run
+  runstatedir='${localstatedir}/run'
 fi
 AC_SUBST(runstatedir)
 
