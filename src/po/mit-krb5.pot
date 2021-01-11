@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.19-beta1\n"
+"Project-Id-Version: mit-krb5 1.19-beta1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-30 01:36-0500\n"
+"POT-Creation-Date: 2021-01-11 12:27-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1322,7 +1322,7 @@ msgstr ""
 msgid "while initializing output ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:566
+#: ../../src/clients/kvno/kvno.c:569
 msgid "while storing creds in output ccache"
 msgstr ""
 
@@ -5072,7 +5072,7 @@ msgstr ""
 msgid "Unknown %s (field = %d)"
 msgstr ""
 
-#: ../../src/lib/gssapi/krb5/acquire_cred.c:165
+#: ../../src/lib/gssapi/krb5/acquire_cred.c:153
 #, c-format
 msgid "No key table entry found matching %s"
 msgstr ""
@@ -5457,7 +5457,7 @@ msgstr ""
 msgid "Key table file '%s' not found"
 msgstr ""
 
-#: ../../src/lib/krb5/keytab/ktfns.c:127
+#: ../../src/lib/krb5/keytab/ktfns.c:129
 #, c-format
 msgid "Keytab %s is nonexistent or empty"
 msgstr ""
@@ -5795,7 +5795,7 @@ msgid ""
 "decrypt ticket"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/rd_req_dec.c:886
+#: ../../src/lib/krb5/krb/rd_req_dec.c:884
 #, c-format
 msgid "Encryption type %s not permitted"
 msgstr ""
