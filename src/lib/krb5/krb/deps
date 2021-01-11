@@ -1150,7 +1150,7 @@ sname_match.so sname_match.po $(OUTPRE)sname_match.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  sname_match.c
+  int-proto.h sname_match.c
 srv_dec_tkt.so srv_dec_tkt.po $(OUTPRE)srv_dec_tkt.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
