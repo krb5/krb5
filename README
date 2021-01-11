@@ -122,11 +122,6 @@ Protocol evolution:
 
 User experience:
 
-* The default setting of dns_canonicalize_realm is now "fallback".
-  Hostnames provided from applications will be tried in principal
-  names as given (possibly with shortname qualification), falling back
-  to the canonicalized name.
-
 * kinit will now issue a warning if the des3-cbc-sha1 encryption type
   is used in the reply.  This encryption type will be deprecated and
   removed in future releases.
@@ -138,6 +133,7 @@ krb5-1.19 changes by ticket ID
 ------------------------------
 
 7976    Client keytab does not refresh manually obtained ccaches
+8332    Referral and cross-realm TGS requests fail with anonymous cache
 8871    Zero length fields when freeing object contents
 8879    Allow certauth modules to set hw-authent flag
 8885    PKINIT calls responder twice
@@ -191,6 +187,11 @@ krb5-1.19 changes by ticket ID
 8964    Add GSS credential store documentation
 8965    Install shared libraries as executable
 8966    Improve duplicate checking in gss_add_cred()
+8967    Continue on KRB5_FCC_NOFILE in KCM cache iteration
+8969    Update kvno(1) synopsis with missing options
+8971    Implement fallback for GSS acceptor names
+8973    Revert dns_canonicalize_hostname default to true
+8975    Incorrect runstatedir substitution affecting "make install"
 
 Acknowledgements
 ----------------
@@ -391,6 +392,7 @@ reports, suggestions, and valuable resources:
     Holger Isenberg
     Spencer Jackson
     Diogenes S. Jesus
+    Mike Jetzer
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
