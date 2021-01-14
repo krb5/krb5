@@ -3119,6 +3119,42 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_ccache ccache, krb5_creds *in_creds,
                      krb5_creds **out_creds);
 
+/**
+ * Serialize a @c krb5_creds object.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  creds           The credentials object to serialize
+ * @param [out] data_out        The serialized credentials
+ *
+ * Serialize @a creds in the format used by the FILE ccache format (vesion 4)
+ * and KCM ccache protocol.
+ *
+ * Use krb5_free_data() to free @a data_out when it is no longer needed.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_marshal_credentials(krb5_context context, krb5_creds *in_creds,
+                         krb5_data **data_out);
+
+/**
+ * Deserialize a @c krb5_creds object.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  data            The serialized credentials
+ * @param [out] creds_out       The resulting creds object
+ *
+ * Deserialize @a data to credentials in the format used by the FILE ccache
+ * format (vesion 4) and KCM ccache protocol.
+ *
+ * Use krb5_free_creds() to free @a creds_out when it is no longer needed.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_unmarshal_credentials(krb5_context context, const krb5_data *data,
+                           krb5_creds **creds_out);
+
 /** @deprecated Replaced by krb5_get_validated_creds. */
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_validate(krb5_context context, krb5_flags options,

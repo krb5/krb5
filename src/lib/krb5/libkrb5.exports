@@ -490,6 +490,7 @@ krb5_lock_file
 krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
+krb5_marshal_credentials
 krb5_mcc_ops
 krb5_merge_authdata
 krb5_mk_1cred
@@ -592,6 +593,7 @@ krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string
 krb5_unlock_file
+krb5_unmarshal_credentials
 krb5_unpack_full_ipaddr
 krb5_unparse_name
 krb5_unparse_name_ext
