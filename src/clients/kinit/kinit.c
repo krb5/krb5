@@ -139,32 +139,20 @@ const char *shopts = "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:";
 static void
 usage()
 {
-    fprintf(stderr, "Usage: %s [-V] "
-            "[-l lifetime] [-s start_time] "
-            USAGE_BREAK
-            "[-r renewable_life] "
-            "[-f | -F | --forwardable | --noforwardable] "
-            USAGE_BREAK
-            "[-p | -P | --proxiable | --noproxiable] "
-            USAGE_BREAK
-            "-n "
-            "[-a | -A | --addresses | --noaddresses] "
-            USAGE_BREAK
-            "[--request-pac | --no-request-pac] "
-            USAGE_BREAK
-            "[-C | --canonicalize] "
-            USAGE_BREAK
-            "[-E | --enterprise] "
-            USAGE_BREAK
-            "[-v] [-R] "
-            "[-k [-i|-t keytab_file]] "
-            "[-c cachename] "
-            USAGE_BREAK
-            "[-S service_name] [-T ticket_armor_cache]"
-            USAGE_BREAK
-            "[-X <attribute>[=<value>]] [principal]"
-            "\n\n",
-            progname);
+    fprintf(stderr,
+            _("Usage: %s [-V] [-l lifetime] [-s start_time] "
+              "[-r renewable_life]"
+              USAGE_BREAK
+              "[-f | -F] [-p | -P] [-n] [-a | -A] [-C] [-E]"
+              USAGE_BREAK
+              "[--request-pac | --no-request-pac] "
+              USAGE_BREAK
+              "[-v] [-R] [-k [-i|-t keytab_file]] [-c cachename]"
+              USAGE_BREAK
+              "[-S service_name] [-I input_ccache] [-T ticket_armor_cache]"
+              USAGE_BREAK
+              "[-X <attribute>[=<value>]] [principal]"
+              "\n\n"), progname);
 
     fprintf(stderr, "    options:\n");
     fprintf(stderr, _("\t-V verbose\n"));
@@ -187,8 +175,11 @@ usage()
     fprintf(stderr, _("\t-t filename of keytab to use\n"));
     fprintf(stderr, _("\t-c Kerberos 5 cache name\n"));
     fprintf(stderr, _("\t-S service\n"));
+    fprintf(stderr, _("\t-I input credential cache\n"));
     fprintf(stderr, _("\t-T armor credential cache\n"));
     fprintf(stderr, _("\t-X <attribute>[=<value>]\n"));
+    fprintf(stderr,
+            _("\t--{,no}-request-pac request KDC include/exclude a PAC\n"));
     exit(2);
 }
 

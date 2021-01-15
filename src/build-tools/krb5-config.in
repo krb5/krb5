@@ -70,8 +70,7 @@ while test $# != 0; do
 	--defktname)
 	    do_defktname=1
 	    ;;
-	--deps)
-	    do_deps=1
+	--deps) # historically a no-op
 	    ;;
 	--exec-prefix)
 	    do_exec_prefix=1

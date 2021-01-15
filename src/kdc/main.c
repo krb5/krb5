@@ -605,7 +605,7 @@ usage(char *name)
 {
     fprintf(stderr,
             _("usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
-              "\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
+              "\t\t[-T time_offset] [-m] [-k masterenctype]\n"
               "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
               "\t\t[-n] [-w numworkers] [/]\n\n"
               "where,\n"
@@ -697,7 +697,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
      * twice if worker processes are used, so we must initialize optind.
      */
     optind = 1;
-    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:T:X3")) != -1) {
+    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:P:p:nw:4:T:X3")) != -1) {
         switch(c) {
         case 'x':
             db_args_size++;

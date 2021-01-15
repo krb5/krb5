@@ -83,7 +83,8 @@ static void
 usage()
 {
     fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] "
-                      "[-a [-n]]] [-k [-t] [-K]] [name]\n"), progname);
+                      "[-a [-n]]] [-k [-i] [-t] [-K]] [-C] [name]\n"),
+            progname);
     fprintf(stderr, _("\t-c specifies credentials cache\n"));
     fprintf(stderr, _("\t-k specifies keytab\n"));
     fprintf(stderr, _("\t   (Default is credentials cache)\n"));
@@ -103,6 +104,7 @@ usage()
     fprintf(stderr, _("\toptions for keytabs:\n"));
     fprintf(stderr, _("\t\t-t shows keytab entry timestamps\n"));
     fprintf(stderr, _("\t\t-K shows keytab entry keys\n"));
+    fprintf(stderr, _("\t\t-C includes configuration data entries\n"));
     exit(1);
 }
 

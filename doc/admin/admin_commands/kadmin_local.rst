@@ -607,7 +607,7 @@ expression.
 
 This command requires the **list** privilege.
 
-Alias: **listprincs**, **get_principals**, **get_princs**
+Alias: **listprincs**, **get_principals**, **getprincs**
 
 Example::
 
@@ -631,7 +631,7 @@ Displays string attributes on *principal*.
 
 This command requires the **inquire** privilege.
 
-Alias: **getstr**
+Alias: **getstrs**
 
 .. _get_strings_end:
 
@@ -828,7 +828,7 @@ tabs.
 
 This command requires the **inquire** privilege.
 
-Alias: getpol
+Alias: **getpol**
 
 Examples::
 
@@ -922,6 +922,8 @@ An entry for each of the principal's unique encryption types is added,
 ignoring multiple keys with the same encryption type but different
 salt types.
 
+Alias: **xst**
+
 Example::
 
     kadmin: ktadd -k /tmp/foo-new-keytab host/foo.mit.edu
@@ -956,6 +958,8 @@ The options are:
 
 **-q**
     Display less verbose information.
+
+Alias: **ktrem**
 
 Example::
 

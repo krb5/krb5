@@ -167,11 +167,11 @@ static void
 usage()
 {
     fprintf(stderr,
-            _("\nUsage: %s [-r realm] [-s keytab] [-dS] [-f replica_file]\n"),
+            _("\nUsage: %s [-r realm] [-s keytab] [-d] [-D] [-S]\n"
+              "\t[-f replica_file] [-F kerberos_db_file ]\n"
+              "\t[-p kdb5_util_pathname] [-x db_args]* [-P port]\n"
+              "\t[-a acl_file] [-A admin_server] [--pid-file=pid_file]\n"),
             progname);
-    fprintf(stderr, _("\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"));
-    fprintf(stderr, _("\t[-x db_args]* [-P port] [-a acl_file]\n"));
-    fprintf(stderr, _("\t[-A admin_server] [--pid-file=pid_file]\n"));
     exit(1);
 }
 

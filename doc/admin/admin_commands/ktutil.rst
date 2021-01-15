@@ -23,9 +23,11 @@ COMMANDS
 list
 ~~~~
 
-    **list**
+    **list** [**-t**] [**-k**] [**-e**]
 
-Displays the current keylist.
+Displays the current keylist.  If **-t**, **-k**, and/or **-e** are
+specified, also display the timestamp, key contents, or enctype
+(respectively).
 
 Alias: **l**
 
