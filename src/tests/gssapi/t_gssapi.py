@@ -8,7 +8,7 @@ for realm in multipass_realms():
     realm.run(['./t_iov', '-s', 'p:' + realm.host_princ])
     realm.run(['./t_pcontok', 'p:' + realm.host_princ])
 
-realm = K5Realm(krb5_conf={'libdefaults': {'rdns': 'false'}})
+realm = K5Realm()
 
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
@@ -62,13 +62,8 @@ realm.run(['./t_accname', 'p:host/-nomatch-',
           expected_msg=' not found in keytab')
 
 # If possible, test with an acceptor name requiring fallback to match
-# against a keytab entry.  Forward-canonicalize the hostname, relying
-# on the rdns=false realm setting.
-try:
-    ai = socket.getaddrinfo(hostname, None, 0, 0, 0, socket.AI_CANONNAME)
-    (family, socktype, proto, canonname, sockaddr) = ai[0]
-except socket.gaierror:
-    canonname = hostname
+# against a keytab entry.
+canonname = canonicalize_hostname(hostname)
 if canonname != hostname:
     os.rename(realm.keytab, realm.keytab + '.save')
     canonprinc = 'host/' + canonname

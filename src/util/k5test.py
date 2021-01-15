@@ -155,6 +155,10 @@ Scripts may use the following functions and variables:
 * password(name): Return a weakly random password based on name.  The
   password will be consistent across calls with the same name.
 
+* canonicalize_hostname(name, rdns=True): Return the DNS
+  canonicalization of name, optionally using reverse DNS.  On error,
+  return name converted to lowercase.
+
 * stop_daemon(proc): Stop a daemon process started with
   realm.start_server() or realm.start_in_inetd().  Only necessary if
   the port needs to be reused; daemon processes will be stopped
@@ -456,6 +460,24 @@ def which(progname):
 def password(name):
     """Choose a weakly random password from name, consistent across calls."""
     return name + str(os.getpid())
+
+
+def canonicalize_hostname(name, rdns=True):
+    """Canonicalize name using DNS, optionally with reverse DNS."""
+    try:
+        ai = socket.getaddrinfo(name, None, 0, 0, 0, socket.AI_CANONNAME)
+    except socket.gaierror as e:
+        return name.lower()
+    (family, socktype, proto, canonname, sockaddr) = ai[0]
+
+    if not rdns:
+        return canonname.lower()
+
+    try:
+        rname = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
+    except socket.gaierror:
+        return canonname.lower()
+    return rname[0].lower()
 
 
 # Exit handler which ensures processes are cleaned up and, on failure,
