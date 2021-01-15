@@ -123,11 +123,11 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
 /* Try to verify that keytab contains at least one entry for name.  Return 0 if
  * it does, KRB5_KT_NOTFOUND if it doesn't, or another error as appropriate. */
 static krb5_error_code
-check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
+check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name,
+             krb5_principal mprinc)
 {
     krb5_error_code code;
     krb5_keytab_entry ent;
-    krb5_principal accprinc = NULL;
     char *princname;
 
     if (name->service == NULL) {
@@ -141,21 +141,15 @@ check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
     if (kt->ops->start_seq_get == NULL)
         return 0;
 
-    /* Get the partial principal for the acceptor name. */
-    code = kg_acceptor_princ(context, name, &accprinc);
-    if (code)
-        return code;
-
-    /* Scan the keytab for host-based entries matching accprinc. */
-    code = k5_kt_have_match(context, kt, accprinc);
+    /* Scan the keytab for host-based entries matching mprinc. */
+    code = k5_kt_have_match(context, kt, mprinc);
     if (code == KRB5_KT_NOTFOUND) {
-        if (krb5_unparse_name(context, accprinc, &princname) == 0) {
+        if (krb5_unparse_name(context, mprinc, &princname) == 0) {
             k5_setmsg(context, code, _("No key table entry found matching %s"),
                       princname);
             free(princname);
         }
     }
-    krb5_free_principal(context, accprinc);
     return code;
 }
 
@@ -202,8 +196,14 @@ acquire_accept_cred(krb5_context context, OM_uint32 *minor_status,
     }
 
     if (cred->name != NULL) {
+        code = kg_acceptor_princ(context, cred->name, &cred->acceptor_mprinc);
+        if (code) {
+            major = GSS_S_FAILURE;
+            goto cleanup;
+        }
+
         /* Make sure we have keys matching the desired name in the keytab. */
-        code = check_keytab(context, kt, cred->name);
+        code = check_keytab(context, kt, cred->name, cred->acceptor_mprinc);
         if (code) {
             if (code == KRB5_KT_NOTFOUND) {
                 k5_change_error_message_code(context, code, KG_KEYTAB_NOMATCH);
@@ -324,7 +324,6 @@ static krb5_boolean
 can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
-    krb5_keytab_entry entry;
 
     if (cred->password != NULL)
         return TRUE;
@@ -336,20 +335,21 @@ can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
     if (cred->name == NULL)
         return !krb5_kt_have_content(context, cred->client_keytab);
 
-    /* Check if we have a keytab key for the client principal. */
-    code = krb5_kt_get_entry(context, cred->client_keytab, cred->name->princ,
-                             0, 0, &entry);
-    if (code) {
-        krb5_clear_error_message(context);
-        return FALSE;
-    }
-    krb5_free_keytab_entry_contents(context, &entry);
-    return TRUE;
+    /*
+     * Check if we have a keytab key for the client principal.  This is a bit
+     * more permissive than we really want because krb5_kt_have_match()
+     * supports wildcarding and obeys ignore_acceptor_hostname, but that should
+     * generally be harmless.
+     */
+    code = k5_kt_have_match(context, cred->client_keytab, cred->name->princ);
+    return code == 0;
 }
 
-/* Scan cred->ccache for name, expiry time, impersonator, refresh time. */
+/* Scan cred->ccache for name, expiry time, impersonator, refresh time.  If
+ * check_name is true, verify the cache name against the credential name. */
 static krb5_error_code
-scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred)
+scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
+            krb5_boolean check_name)
 {
     krb5_error_code code;
     krb5_ccache ccache = cred->ccache;
@@ -365,22 +365,30 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred)
     if (code)
         return code;
 
-    /* Credentials cache principal must match the initiator name. */
     code = krb5_cc_get_principal(context, ccache, &ccache_princ);
     if (code != 0)
         goto cleanup;
-    if (cred->name != NULL &&
-        !krb5_principal_compare(context, ccache_princ, cred->name->princ)) {
-        code = KG_CCACHE_NOMATCH;
-        goto cleanup;
-    }
 
-    /* Save the ccache principal as the credential name if not already set. */
-    if (!cred->name) {
+    if (cred->name == NULL) {
+        /* Save the ccache principal as the credential name. */
         code = kg_init_name(context, ccache_princ, NULL, NULL, NULL,
                             KG_INIT_NAME_NO_COPY, &cred->name);
         if (code)
             goto cleanup;
+        ccache_princ = NULL;
+    } else {
+        /* Check against the desired name if needed. */
+        if (check_name) {
+            if (!k5_sname_compare(context, cred->name->princ, ccache_princ)) {
+                code = KG_CCACHE_NOMATCH;
+                goto cleanup;
+            }
+        }
+
+        /* Replace the credential name principal with the canonical client
+         * principal, retaining acceptor_mprinc if set. */
+        krb5_free_principal(context, cred->name->princ);
+        cred->name->princ = ccache_princ;
         ccache_princ = NULL;
     }
 
@@ -447,7 +455,7 @@ get_cache_for_name(krb5_context context, krb5_gss_cred_id_rec *cred)
     assert(cred->name != NULL && cred->ccache == NULL);
 #ifdef USE_LEASH
     code = get_ccache_leash(context, cred->name->princ, &cred->ccache);
-    return code ? code : scan_ccache(context, cred);
+    return code ? code : scan_ccache(context, cred, TRUE);
 #else
     /* Check first whether we can acquire tickets, to avoid overwriting the
      * extended error message from krb5_cc_cache_match. */
@@ -456,7 +464,7 @@ get_cache_for_name(krb5_context context, krb5_gss_cred_id_rec *cred)
     /* Look for an existing cache for the client principal. */
     code = krb5_cc_cache_match(context, cred->name->princ, &cred->ccache);
     if (code == 0)
-        return scan_ccache(context, cred);
+        return scan_ccache(context, cred, FALSE);
     if (code != KRB5_CC_NOTFOUND || !can_get)
         return code;
     krb5_clear_error_message(context);
@@ -633,6 +641,13 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
     kg_cred_set_initial_refresh(context, cred, &creds.times);
     cred->have_tgt = TRUE;
     cred->expire = creds.times.endtime;
+
+    /* Steal the canonical client principal name from creds and save it in the
+     * credential name, retaining acceptor_mprinc if set. */
+    krb5_free_principal(context, cred->name->princ);
+    cred->name->princ = creds.client;
+    creds.client = NULL;
+
     krb5_free_cred_contents(context, &creds);
 cleanup:
     krb5_get_init_creds_opt_free(context, opt);
@@ -721,7 +736,7 @@ acquire_init_cred(krb5_context context, OM_uint32 *minor_status,
 
     if (cred->ccache != NULL) {
         /* The caller specified a ccache; check what's in it. */
-        code = scan_ccache(context, cred);
+        code = scan_ccache(context, cred, TRUE);
         if (code == KRB5_FCC_NOFILE) {
             /* See if we can get initial creds.  If the caller didn't specify
              * a name, pick one from the client keytab. */
@@ -984,7 +999,7 @@ kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
             }
         }
         if (cred->ccache != NULL) {
-            code = scan_ccache(context, cred);
+            code = scan_ccache(context, cred, FALSE);
             if (code)
                 goto kerr;
         }
@@ -996,7 +1011,7 @@ kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
         code = krb5int_cc_default(context, &cred->ccache);
         if (code)
             goto kerr;
-        code = scan_ccache(context, cred);
+        code = scan_ccache(context, cred, FALSE);
         if (code == KRB5_FCC_NOFILE) {
             /* Default ccache doesn't exist; fall through to client keytab. */
             krb5_cc_close(context, cred->ccache);

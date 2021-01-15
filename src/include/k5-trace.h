@@ -105,6 +105,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 
 #endif /* DISABLE_TRACING */
 
+#define TRACE_CC_CACHE_MATCH(c, princ, ret)                             \
+    TRACE(c, "Matching {princ} in collection with result: {kerr}",      \
+          princ, ret)
 #define TRACE_CC_DESTROY(c, cache)                      \
     TRACE(c, "Destroying ccache {ccache}", cache)
 #define TRACE_CC_GEN_NEW(c, cache)                                      \

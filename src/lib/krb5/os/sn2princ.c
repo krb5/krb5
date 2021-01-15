@@ -277,7 +277,8 @@ k5_canonprinc(krb5_context context, struct canonprinc *iter,
 
     /* If we're not doing fallback, the input principal is canonical. */
     if (context->dns_canonicalize_hostname != CANONHOST_FALLBACK ||
-        iter->princ->type != KRB5_NT_SRV_HST || iter->princ->length != 2) {
+        iter->princ->type != KRB5_NT_SRV_HST || iter->princ->length != 2 ||
+        iter->princ->data[1].length == 0) {
         *princ_out = (step == 1) ? iter->princ : NULL;
         return 0;
     }
@@ -286,6 +287,26 @@ k5_canonprinc(krb5_context context, struct canonprinc *iter,
     if (step > 2)
         return 0;
     return canonicalize_princ(context, iter, step == 2, princ_out);
+}
+
+krb5_boolean
+k5_sname_compare(krb5_context context, krb5_const_principal sname,
+                 krb5_const_principal princ)
+{
+    krb5_error_code ret;
+    struct canonprinc iter = { sname, .subst_defrealm = TRUE };
+    krb5_const_principal canonprinc = NULL;
+    krb5_boolean match = FALSE;
+
+    while ((ret = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        if (krb5_principal_compare(context, canonprinc, princ)) {
+            match = TRUE;
+            break;
+        }
+    }
+    free_canonprinc(&iter);
+    return match;
 }
 
 krb5_error_code KRB5_CALLCONV

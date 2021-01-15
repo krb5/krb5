@@ -2406,4 +2406,13 @@ void k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
 #define k5_prependmsg krb5_prepend_error_message
 #define k5_wrapmsg krb5_wrap_error_message
 
+/*
+ * Like krb5_principal_compare(), but with canonicalization of sname if
+ * fallback is enabled.  This function should be avoided if multiple matches
+ * are required, since repeated canonicalization is inefficient.
+ */
+krb5_boolean
+k5_sname_compare(krb5_context context, krb5_const_principal sname,
+                 krb5_const_principal princ);
+
 #endif /* _KRB5_INT_H */

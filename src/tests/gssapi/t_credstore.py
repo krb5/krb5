@@ -15,6 +15,38 @@ msgs = ('Storing %s -> %s in %s' % (service_cs, realm.krbtgt_princ,
 realm.run(['./t_credstore', '-s', 'p:' + service_cs, 'ccache', storagecache,
            'keytab', servicekeytab], expected_trace=msgs)
 
+mark('matching')
+scc = 'FILE:' + os.path.join(realm.testdir, 'service_cache')
+realm.kinit(realm.host_princ, flags=['-k', '-c', scc])
+realm.run(['./t_credstore', '-i', 'p:' + realm.host_princ, 'ccache', scc])
+realm.run(['./t_credstore', '-i', 'h:host', 'ccache', scc])
+realm.run(['./t_credstore', '-i', 'h:host@' + hostname, 'ccache', scc])
+realm.run(['./t_credstore', '-i', 'p:wrong', 'ccache', scc],
+          expected_code=1, expected_msg='does not match desired name')
+realm.run(['./t_credstore', '-i', 'h:host@-nomatch-', 'ccache', scc],
+          expected_code=1, expected_msg='does not match desired name')
+realm.run(['./t_credstore', '-i', 'h:svc', 'ccache', scc],
+          expected_code=1, expected_msg='does not match desired name')
+
+mark('matching (fallback)')
+canonname = canonicalize_hostname(hostname)
+if canonname != hostname:
+    canonprinc = 'host/%s@%s' % (canonname, realm.realm)
+    realm.addprinc(canonprinc)
+    realm.extract_keytab(canonprinc, realm.keytab)
+    realm.kinit(canonprinc, flags=['-k', '-c', scc])
+    realm.run(['./t_credstore', '-i', 'h:host', 'ccache', scc])
+    realm.run(['./t_credstore', '-i', 'h:host@' + hostname, 'ccache', scc])
+    realm.run(['./t_credstore', '-i', 'h:host@' + canonname, 'ccache', scc])
+    realm.run(['./t_credstore', '-i', 'p:' + canonprinc, 'ccache', scc])
+    realm.run(['./t_credstore', '-i', 'p:' + realm.host_princ, 'ccache', scc],
+              expected_code=1, expected_msg='does not match desired name')
+    realm.run(['./t_credstore', '-i', 'h:host@-nomatch-', 'ccache', scc],
+              expected_code=1, expected_msg='does not match desired name')
+else:
+    skipped('fallback matching test',
+            '%s does not canonicalize to a different name' % hostname)
+
 mark('rcache')
 # t_credstore -r should produce a replay error normally, but not with
 # rcache set to "none:".

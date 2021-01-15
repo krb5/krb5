@@ -182,6 +182,7 @@ k5_size_authdata_context
 k5_size_context
 k5_size_keyblock
 k5_size_principal
+k5_sname_compare
 k5_unmarshal_cred
 k5_unmarshal_princ
 k5_unwrap_cammac_svc

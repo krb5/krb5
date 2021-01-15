@@ -683,7 +683,6 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
-    krb5_principal accprinc = NULL;
     krb5_ap_req *request = NULL;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
@@ -849,17 +848,9 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
-    if (!cred->default_identity) {
-        if ((code = kg_acceptor_princ(context, cred->name, &accprinc))) {
-            major_status = GSS_S_FAILURE;
-            goto fail;
-        }
-    }
-
-    code = krb5_rd_req_decoded(context, &auth_context, request, accprinc,
-                               cred->keytab, &ap_req_options, NULL);
-
-    krb5_free_principal(context, accprinc);
+    code = krb5_rd_req_decoded(context, &auth_context, request,
+                               cred->acceptor_mprinc, cred->keytab,
+                               &ap_req_options, NULL);
     if (code) {
         major_status = GSS_S_FAILURE;
         goto fail;

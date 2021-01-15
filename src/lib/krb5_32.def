@@ -507,3 +507,4 @@ EXPORTS
 ; new in 1.20
 	krb5_marshal_credentials			@472
 	krb5_unmarshal_credentials			@473
+	k5_sname_compare				@474 ; PRIVATE GSSAPI

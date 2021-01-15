@@ -30,6 +30,7 @@
 
 #include "cc-int.h"
 #include "../krb/int-proto.h"
+#include "../os/os-proto.h"
 
 #include <assert.h>
 
@@ -141,18 +142,18 @@ krb5_cccol_cursor_free(krb5_context context,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_cc_cache_match(krb5_context context, krb5_principal client,
-                    krb5_ccache *cache_out)
+static krb5_error_code
+match_caches(krb5_context context, krb5_const_principal client,
+             krb5_ccache *cache_out)
 {
     krb5_error_code ret;
     krb5_cccol_cursor cursor;
     krb5_ccache cache = NULL;
     krb5_principal princ;
-    char *name;
     krb5_boolean eq;
 
     *cache_out = NULL;
+
     ret = krb5_cccol_cursor_new(context, &cursor);
     if (ret)
         return ret;
@@ -169,20 +170,52 @@ krb5_cc_cache_match(krb5_context context, krb5_principal client,
         krb5_cc_close(context, cache);
     }
     krb5_cccol_cursor_free(context, &cursor);
+
     if (ret)
         return ret;
-    if (cache == NULL) {
-        ret = krb5_unparse_name(context, client, &name);
-        if (ret == 0) {
-            k5_setmsg(context, KRB5_CC_NOTFOUND,
+    if (cache == NULL)
+        return KRB5_CC_NOTFOUND;
+
+    *cache_out = cache;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_cache_match(krb5_context context, krb5_principal client,
+                    krb5_ccache *cache_out)
+{
+    krb5_error_code ret;
+    struct canonprinc iter = { client, .subst_defrealm = TRUE };
+    krb5_const_principal canonprinc = NULL;
+    krb5_ccache cache = NULL;
+    char *name;
+
+    *cache_out = NULL;
+
+    while ((ret = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        ret = match_caches(context, canonprinc, &cache);
+        if (ret != KRB5_CC_NOTFOUND)
+            break;
+    }
+    free_canonprinc(&iter);
+
+    if (ret == 0 && canonprinc == NULL) {
+        ret = KRB5_CC_NOTFOUND;
+        if (krb5_unparse_name(context, client, &name) == 0) {
+            k5_setmsg(context, ret,
                       _("Can't find client principal %s in cache collection"),
                       name);
             krb5_free_unparsed_name(context, name);
         }
-        ret = KRB5_CC_NOTFOUND;
-    } else
-        *cache_out = cache;
-    return ret;
+    }
+
+    TRACE_CC_CACHE_MATCH(context, client, ret);
+    if (ret)
+        return ret;
+
+    *cache_out = cache;
+    return 0;
 }
 
 /* Store the error state for code from context into errsave, but only if code
