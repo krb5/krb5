@@ -26,6 +26,12 @@
 
 #include "crypto_int.h"
 
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#include <sanitizer/msan_interface.h>
+#endif
+#endif
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
@@ -120,6 +126,13 @@ k5_get_os_entropy(unsigned char *buf, size_t len, int strong)
             /* ENOSYS or other unrecoverable failure */
             break;
         }
+
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+        __msan_unpoison(buf, r);
+#endif
+#endif
+
         len -= r;
         buf += r;
     }
