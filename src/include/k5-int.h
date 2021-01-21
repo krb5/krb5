@@ -205,6 +205,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DISABLE_ENCRYPTED_TIMESTAMP  "disable_encrypted_timestamp"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS         "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT              "disable_lockout"
+#define KRB5_CONF_DISABLE_PAC                  "disable_pac"
 #define KRB5_CONF_DNS_CANONICALIZE_HOSTNAME    "dns_canonicalize_hostname"
 #define KRB5_CONF_DNS_FALLBACK                 "dns_fallback"
 #define KRB5_CONF_DNS_LOOKUP_KDC               "dns_lookup_kdc"
@@ -816,21 +817,6 @@ typedef struct _krb5_ad_kdcissued {
     krb5_authdata **elements;
 } krb5_ad_kdcissued;
 
-typedef struct _krb5_ad_signedpath_data {
-    krb5_principal client;
-    krb5_timestamp authtime;
-    krb5_principal *delegated;
-    krb5_pa_data **method_data;
-    krb5_authdata **authorization_data;
-} krb5_ad_signedpath_data;
-
-typedef struct _krb5_ad_signedpath {
-    krb5_enctype enctype;
-    krb5_checksum checksum;
-    krb5_principal *delegated;
-    krb5_pa_data **method_data;
-} krb5_ad_signedpath;
-
 typedef struct _krb5_iakerb_header {
     krb5_data target_realm;
     krb5_data *cookie;
@@ -949,7 +935,6 @@ void KRB5_CALLCONV krb5_free_fast_req(krb5_context, krb5_fast_req *);
 void KRB5_CALLCONV krb5_free_fast_finished(krb5_context, krb5_fast_finished *);
 void KRB5_CALLCONV krb5_free_fast_response(krb5_context, krb5_fast_response *);
 void KRB5_CALLCONV krb5_free_ad_kdcissued(krb5_context, krb5_ad_kdcissued *);
-void KRB5_CALLCONV krb5_free_ad_signedpath(krb5_context, krb5_ad_signedpath *);
 void KRB5_CALLCONV krb5_free_iakerb_header(krb5_context, krb5_iakerb_header *);
 void KRB5_CALLCONV krb5_free_iakerb_finished(krb5_context,
                                              krb5_iakerb_finished *);
@@ -1514,12 +1499,6 @@ krb5_error_code
 encode_krb5_ad_kdcissued(const krb5_ad_kdcissued *, krb5_data **);
 
 krb5_error_code
-encode_krb5_ad_signedpath(const krb5_ad_signedpath *, krb5_data **);
-
-krb5_error_code
-encode_krb5_ad_signedpath_data(const krb5_ad_signedpath_data *, krb5_data **);
-
-krb5_error_code
 encode_krb5_otp_tokeninfo(const krb5_otp_tokeninfo *, krb5_data **);
 
 krb5_error_code
@@ -1694,9 +1673,6 @@ decode_krb5_fast_response(const krb5_data *, krb5_fast_response **);
 
 krb5_error_code
 decode_krb5_ad_kdcissued(const krb5_data *, krb5_ad_kdcissued **);
-
-krb5_error_code
-decode_krb5_ad_signedpath(const krb5_data *, krb5_ad_signedpath **);
 
 krb5_error_code
 decode_krb5_iakerb_header(const krb5_data *, krb5_iakerb_header **);
@@ -2414,5 +2390,13 @@ void k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
 krb5_boolean
 k5_sname_compare(krb5_context context, krb5_const_principal sname,
                  krb5_const_principal princ);
+
+krb5_pac k5_get_pac(krb5_context context, krb5_authdata **authdata);
+
+krb5_error_code k5_verify_pac_signatures(krb5_context context,
+                                         unsigned int flags,
+                                         krb5_ticket *ticket,
+                                         krb5_const_principal princ,
+                                         krb5_keyblock *tgt_key);
 
 #endif /* _KRB5_INT_H */

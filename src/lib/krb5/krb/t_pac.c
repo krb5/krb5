@@ -678,23 +678,23 @@ test_pac_ticket_signature(krb5_context context)
     krb5_ticket *ticket;
     krb5_authdata **authdata = NULL, **authdata1, **authdata2;
     krb5_pac pac, pac2;
-    time_t atime = 1610148307;
     uint32_t *list;
     size_t len, i;
+    krb5_data data;
 
     ret = krb5_decode_ticket(&ticket_data, &ticket);
     if (ret)
         err(context, ret, "while decoding ticket");
 
-    /* In this test the server is also the client */
-    ret = krb5_kdc_verify_ticket(context, ticket, atime, ticket->server,
+    /* In this test, the server is also the client. */
+    ret = krb5_kdc_verify_ticket(context, ticket, NULL,
                                  &ticket_sig_server_key,
-                                 &ticket_sig_krbtgt_key, FALSE);
+                                 &ticket_sig_krbtgt_key);
     if (ret)
         err(context, ret, "while verifying ticket");
 
-    ret = krb5_find_authdata(context, ticket->enc_part2->authorization_data, NULL,
-                             KRB5_AUTHDATA_WIN2K_PAC, &authdata);
+    ret = krb5_find_authdata(context, ticket->enc_part2->authorization_data,
+                             NULL, KRB5_AUTHDATA_WIN2K_PAC, &authdata);
     if (ret)
         err(context, ret, "in find_authdata");
 
@@ -707,13 +707,13 @@ test_pac_ticket_signature(krb5_context context)
     if (ret)
         err(context, ret, "in pac_parse");
 
-    /* We know there is only a PAC in this test's tictet */
+    /* We know there is only a PAC in this test's tictet. */
     authdata1 = ticket->enc_part2->authorization_data;
     ticket->enc_part2->authorization_data = NULL;
 
-    ret = krb5_kdc_sign_ticket(context, ticket, pac, atime,
-                               ticket->server, &ticket_sig_server_key,
-                               &ticket_sig_krbtgt_key, FALSE);
+    ret = krb5_kdc_sign_ticket(context, ticket, pac, NULL,
+                               &ticket_sig_server_key,
+                               &ticket_sig_krbtgt_key);
     if (ret)
         err(context, ret, "while signing ticket");
 
@@ -725,7 +725,7 @@ test_pac_ticket_signature(krb5_context context)
     assert(memcmp(authdata1[0]->contents, authdata2[0]->contents,
                   authdata1[0]->length) == 0);
 
-    /* This tests adding signatures to a new PAC */
+    /* Test adding signatures to a new PAC. */
     ret = krb5_pac_init(context, &pac2);
     if (ret)
         err(context, ret, "krb5_pac_init");
@@ -735,9 +735,7 @@ test_pac_ticket_signature(krb5_context context)
         err(context, ret, "krb5_pac_get_types");
 
     for (i = 0; i < len; i++) {
-        krb5_data data;
-
-        /* skip server_cksum, privsvr_cksum, and ticket_cksum */
+        /* Skip server_cksum, privsvr_cksum, and ticket_cksum. */
         if (list[i] == 6 || list[i] == 7 || list[i] == 16)
             continue;
 
@@ -748,6 +746,7 @@ test_pac_ticket_signature(krb5_context context)
         ret = krb5_pac_add_buffer(context, pac2, list[i], &data);
         if (ret)
             err(context, ret, "krb5_pac_add_buffer");
+
         krb5_free_data_contents(context, &data);
     }
     free(list);
@@ -756,16 +755,16 @@ test_pac_ticket_signature(krb5_context context)
     krb5_free_authdata(context,ticket->enc_part2->authorization_data);
     ticket->enc_part2->authorization_data = NULL;
 
-    ret = krb5_kdc_sign_ticket(context, ticket, pac2, atime,
-                               ticket->server, &ticket_sig_server_key,
-                               &ticket_sig_krbtgt_key, FALSE);
+    ret = krb5_kdc_sign_ticket(context, ticket, pac2, NULL,
+                               &ticket_sig_server_key,
+                               &ticket_sig_krbtgt_key);
     if (ret)
         err(context, ret, "while signing ticket");
 
-    /* We can't compare the data since the order of the buffers may differ */
-    ret = krb5_kdc_verify_ticket(context, ticket, atime, ticket->server,
+    /* We can't compare the data since the order of the buffers may differ. */
+    ret = krb5_kdc_verify_ticket(context, ticket, NULL,
                                  &ticket_sig_server_key,
-                                 &ticket_sig_krbtgt_key, FALSE);
+                                 &ticket_sig_krbtgt_key);
     if (ret)
         err(context, ret, "while verifying ticket");
 

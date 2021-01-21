@@ -1490,41 +1490,54 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
 krb5_error_code
 kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
                           krb5_kdc_req *request,
-                          const krb5_enc_tkt_part *t2enc,
+                          krb5_ticket *stkt,
                           krb5_db_entry *krbtgt, krb5_keyblock *krbtgt_key,
                           const krb5_db_entry *server,
                           krb5_keyblock *server_key,
                           krb5_const_principal server_princ,
                           const krb5_db_entry *proxy,
                           krb5_const_principal proxy_princ,
-                          void *ad_info, void **stkt_ad_info,
                           krb5_principal *stkt_authdata_client,
                           const char **status)
 {
     krb5_error_code errcode;
     krb5_boolean support_rbcd;
-    krb5_principal client_princ = t2enc->client;
+    krb5_pac t2_pac;
+    const krb5_enc_tkt_part *t2enc = stkt->enc_part2;
+    krb5_principal client_princ = t2enc->client, t2_pac_princ = NULL;
+    char *t2_pac_princname = NULL;
 
     /* Check if the client supports resource-based constrained delegation. */
     errcode = kdc_get_pa_pac_rbcd(kdc_context, request->padata, &support_rbcd);
     if (errcode)
         return errcode;
 
-    errcode = krb5_db_get_authdata_info(kdc_context, flags,
-                                        t2enc->authorization_data,
-                                        t2enc->client, proxy_princ, server_key,
-                                        krbtgt_key, krbtgt,
-                                        t2enc->times.authtime, stkt_ad_info,
-                                        stkt_authdata_client);
-    if (errcode != 0 && errcode != KRB5_PLUGIN_OP_NOTSUPP) {
+    t2_pac = k5_get_pac(kdc_context, t2enc->authorization_data);
+    if (t2_pac == NULL) {
         *status = "NOT_ALLOWED_TO_DELEGATE";
-        return errcode;
+        return KRB5KDC_ERR_BADOPTION;
     }
 
-    /* For RBCD we require that both client and impersonator's authdata have
-     * been verified. */
-    if (errcode != 0 || ad_info == NULL)
-        support_rbcd = FALSE;
+    errcode = k5_verify_pac_signatures(kdc_context, flags, stkt, NULL,
+                                       krbtgt_key);
+    if (errcode) {
+        *status = "NOT_ALLOWED_TO_DELEGATE";
+        goto done;
+    }
+
+    errcode = krb5_pac_get_client_info(kdc_context, t2_pac, NULL,
+                                       &t2_pac_princname);
+    if (errcode) {
+        *status = "NOT_ALLOWED_TO_DELEGATE";
+        goto done;
+    }
+
+    errcode = krb5_parse_name(kdc_context, t2_pac_princname, &t2_pac_princ);
+    if (errcode) {
+        *status = "NOT_ALLOWED_TO_DELEGATE";
+        goto done;
+    }
+    *stkt_authdata_client = t2_pac_princ;
 
     /* For an RBCD final request, the KDB module must be able to recover the
      * reply ticket client name from the evidence ticket authorization data. */
@@ -1532,7 +1545,8 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
         if (*stkt_authdata_client == NULL ||
             (*stkt_authdata_client)->realm.length == 0) {
             *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-            return KRB5KDC_ERR_BADOPTION;
+            errcode = KRB5KDC_ERR_BADOPTION;
+            goto done;
         }
 
         client_princ = *stkt_authdata_client;
@@ -1545,10 +1559,9 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
                                                     server, proxy_princ);
         if (errcode != 0 && errcode != KRB5KDC_ERR_POLICY &&
             errcode != KRB5_PLUGIN_OP_NOTSUPP)
-            return errcode;
+            goto done;
 
         if (errcode == 0) {
-
             /*
              * In legacy constrained-delegation, the evidence ticket must be
              * forwardable.  This check deliberately causes an error response
@@ -1558,28 +1571,49 @@ kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
              */
             if (!isflagset(t2enc->flags, TKT_FLG_FORWARDABLE)) {
                 *status = "EVIDENCE_TKT_NOT_FORWARDABLE";
-                return KRB5KDC_ERR_BADOPTION;
+                errcode = KRB5KDC_ERR_BADOPTION;
+                goto done;
             }
 
-            return 0;
+            goto done;
         }
         /* Fall back to resource-based constrained-delegation. */
     }
 
     if (!support_rbcd) {
         *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-        return KRB5KDC_ERR_BADOPTION;
+        errcode = KRB5KDC_ERR_BADOPTION;
+        goto done;
     }
 
     /* If we are issuing a referral, the KDC in the resource realm will check
      * if delegation is allowed. */
-    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL))
-        return 0;
+    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
+        errcode = 0;
+        goto done;
+    }
 
+    /* Our clients always request RBCD, but whether we support it in the KDC
+     * is KDB-dependent. */
     errcode = krb5_db_allowed_to_delegate_from(kdc_context, client_princ,
-                                               server_princ, ad_info, proxy);
-    if (errcode)
+                                               server_princ, t2_pac, proxy);
+    if (errcode == KRB5_PLUGIN_OP_NOTSUPP) {
+        *status = "UNSUPPOTED_S4U2PROXY_REQUEST";
+        errcode = KRB5KDC_ERR_BADOPTION;
+        goto done;
+    } else if (errcode) {
         *status = "NOT_ALLOWED_TO_DELEGATE";
+        goto done;
+    }
+
+    errcode = 0;
+done:
+    krb5_pac_free(kdc_context, t2_pac);
+    free(t2_pac_princname);
+    if (errcode) {
+        krb5_free_principal(kdc_context, t2_pac_princ);
+        *stkt_authdata_client = NULL;
+    }
     return errcode;
 }
 

@@ -208,6 +208,13 @@ The following tags may be specified in a [realms] subsection:
     if there is no policy assigned to the principal, no dictionary
     checks of passwords will be performed.
 
+**disable_pac**
+    (Boolean value.)  If true, the KDC will not issue PACs for this
+    realm.  This will disable S4U2Proxy (constrained delegation)
+    support; note, however, that only some KDBs support S4U2Proxy.  The
+    default is false, which will permit the KDC to issue PACs for this
+    realm.  New in release 1.20.
+
 **encrypted_challenge_indicator**
     (String.)  Specifies the authentication indicator value that the KDC
     asserts into tickets obtained using FAST encrypted challenge

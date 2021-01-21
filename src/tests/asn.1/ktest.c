@@ -560,28 +560,6 @@ ktest_make_sample_ad_kdcissued(krb5_ad_kdcissued *p)
 }
 
 void
-ktest_make_sample_ad_signedpath_data(krb5_ad_signedpath_data *p)
-{
-    ktest_make_sample_principal(&p->client);
-    p->authtime = SAMPLE_TIME;
-    p->delegated = ealloc(2 * sizeof(krb5_principal));
-    ktest_make_sample_principal(&p->delegated[0]);
-    p->delegated[1] = NULL;
-    ktest_make_sample_authorization_data(&p->authorization_data);
-    ktest_make_sample_pa_data_array(&p->method_data);
-}
-
-void
-ktest_make_sample_ad_signedpath(krb5_ad_signedpath *p)
-{
-    p->enctype = 1;
-    ktest_make_sample_checksum(&p->checksum);
-    p->delegated = ealloc(2 * sizeof(krb5_principal));
-    p->delegated[1] = NULL;
-    ktest_make_sample_pa_data_array(&p->method_data);
-}
-
-void
 ktest_make_sample_iakerb_header(krb5_iakerb_header *ih)
 {
     ktest_make_sample_data(&(ih->target_realm));
@@ -1529,39 +1507,6 @@ ktest_empty_ad_kdcissued(krb5_ad_kdcissued *p)
     free(p->ad_checksum.contents);
     ktest_destroy_principal(&p->i_principal);
     ktest_destroy_authorization_data(&p->elements);
-}
-
-void
-ktest_empty_ad_signedpath_data(krb5_ad_signedpath_data *p)
-{
-    int i;
-
-    ktest_destroy_principal(&p->client);
-    if (p->delegated != NULL) {
-        for (i = 0; p->delegated[i] != NULL; i++) {
-            krb5_principal princ = p->delegated[i];
-            ktest_destroy_principal(&princ);
-        }
-        free(p->delegated);
-    }
-    ktest_destroy_pa_data_array(&p->method_data);
-    ktest_destroy_authorization_data(&p->authorization_data);
-}
-
-void
-ktest_empty_ad_signedpath(krb5_ad_signedpath *p)
-{
-    int i;
-
-    free(p->checksum.contents);
-    if (p->delegated != NULL) {
-        for (i = 0; p->delegated[i] != NULL; i++) {
-            krb5_principal princ = p->delegated[i];
-            ktest_destroy_principal(&princ);
-        }
-        free(p->delegated);
-    }
-    ktest_destroy_pa_data_array(&p->method_data);
 }
 
 void

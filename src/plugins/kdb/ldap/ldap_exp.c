@@ -76,12 +76,10 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* promote_db */                        NULL,
     /* decrypt_key_data */                  NULL,
     /* encrypt_key_data */                  NULL,
-    /* sign_authdata */                     NULL,
     /* check_transited_realms */            NULL,
     /* check_policy_as */                   krb5_ldap_check_policy_as,
     /* check_policy_tgs */                  NULL,
     /* audit_as_req */                      krb5_ldap_audit_as_req,
     /* refresh_config */                    NULL,
-    /* check_allowed_to_delegate */         krb5_ldap_check_allowed_to_delegate
-
+    /* check_allowed_to_delegate */         krb5_ldap_check_allowed_to_delegate,
 };
