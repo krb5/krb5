@@ -598,6 +598,8 @@ test_order(krb5_context context, const char *name)
                "second cred does not match", "principal_compare");
     krb5_free_cred_contents(context, &creds);
 
+    krb5_cc_end_seq_get(context, id, &cursor);
+    krb5_cc_close(context, id);
     free_test_cred(context);
 }
 
