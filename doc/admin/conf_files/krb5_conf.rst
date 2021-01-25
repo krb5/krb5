@@ -546,15 +546,12 @@ following tags may be specified in the realm's subsection:
 [domain_realm]
 ~~~~~~~~~~~~~~
 
-The [domain_realm] section provides a translation from a domain name
-or hostname to a Kerberos realm name.  The tag name can be a host name
-or domain name, where domain names are indicated by a prefix of a
-period (``.``).  The value of the relation is the Kerberos realm name
-for that particular host or domain.  A host name relation implicitly
-provides the corresponding domain name relation, unless an explicit domain
-name relation is provided.  The Kerberos realm may be
+The [domain_realm] section provides a translation from hostnames to
+Kerberos realms.  Each tag is a domain name, providing the mapping for
+that domain and all subdomains.  If the tag begins with a period
+(``.``) then it applies only to subdomains.  The Kerberos realm may be
 identified either in the realms_ section or using DNS SRV records.
-Host names and domain names should be in lower case.  For example::
+Tag names should be in lower case.  For example::
 
     [domain_realm]
         crash.mit.edu = TEST.ATHENA.MIT.EDU
