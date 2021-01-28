@@ -183,6 +183,13 @@ realm.kinit(realm.user_princ,
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Try using multiple configured pkinit_identities, to make sure we
+# fall back to the second one when the first one cannot be read.
+id_conf = {'realms': {'$realm': {'pkinit_identities': [file_identity + 'X',
+                                                       file_identity]}}}
+id_env = realm.special_env('idconf', False, krb5_conf=id_conf)
+realm.kinit(realm.user_princ, expected_trace=msgs, env=id_env)
+
 # Try again using RSA instead of DH.
 mark('FILE identity, no password, RSA')
 realm.kinit(realm.user_princ,

@@ -3748,7 +3748,7 @@ pkinit_open_session(krb5_context context,
             pkinit_set_deferred_id(&cctx->deferred_ids,
                                    p11name, tinfo.flags, NULL);
             free(p11name);
-            return KRB5KRB_ERR_GENERIC;
+            return 0;
         }
         /* Look up a responder-supplied password for the token. */
         password = pkinit_find_deferred_id(cctx->deferred_ids, p11name);
@@ -4552,11 +4552,9 @@ pkinit_get_certs_pkcs11(krb5_context context,
     id_cryptoctx->slotid = idopts->slotid;
     id_cryptoctx->pkcs11_method = 1;
 
-    if (pkinit_open_session(context, id_cryptoctx)) {
-        pkiDebug("can't open pkcs11 session\n");
-        if (!id_cryptoctx->defer_id_prompt)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
+    r = pkinit_open_session(context, id_cryptoctx);
+    if (r != 0)
+        return r;
     if (id_cryptoctx->defer_id_prompt) {
         /*
          * We need to reset all of the PKCS#11 state, so that the next time we

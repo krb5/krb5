@@ -1123,10 +1123,9 @@ PKINIT krb5.conf options
 **pkinit_identities**
     Specifies the location(s) to be used to find the user's X.509
     identity information.  If this option is specified multiple times,
-    the first valid value is used; this can be used to specify an
-    environment variable (with **ENV:**\ *envvar*) followed by a
-    default value.  Note that these values are not used if the user
-    specifies **X509_user_identity** on the command line.
+    each value is attempted in order until certificates are found.
+    Note that these values are not used if the user specifies
+    **X509_user_identity** on the command line.
 
 **pkinit_kdc_hostname**
     The presence of this option indicates that the client is willing

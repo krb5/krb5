@@ -378,7 +378,7 @@ process_option_identity(krb5_context context,
                         pkinit_req_crypto_context req_cryptoctx,
                         pkinit_identity_opts *idopts,
                         pkinit_identity_crypto_context id_cryptoctx,
-                        const char *value)
+                        krb5_principal princ, const char *value)
 {
     const char *residual;
     int idtype;
@@ -424,7 +424,7 @@ process_option_identity(krb5_context context,
     switch (idtype) {
     case IDTYPE_ENVVAR:
         return process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-                                       idopts, id_cryptoctx,
+                                       idopts, id_cryptoctx, princ,
                                        secure_getenv(residual));
         break;
     case IDTYPE_FILE:
@@ -450,7 +450,16 @@ process_option_identity(krb5_context context,
         retval = EINVAL;
         break;
     }
-    return retval;
+    if (retval)
+        return retval;
+
+    retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx, idopts,
+                               id_cryptoctx, princ, TRUE);
+    if (retval)
+        return retval;
+
+    crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx, id_cryptoctx);
+    return 0;
 }
 
 static krb5_error_code
@@ -525,12 +534,13 @@ pkinit_identity_initialize(krb5_context context,
         if (idopts->identity != NULL) {
             retval = process_option_identity(context, plg_cryptoctx,
                                              req_cryptoctx, idopts,
-                                             id_cryptoctx, idopts->identity);
+                                             id_cryptoctx, princ,
+                                             idopts->identity);
         } else if (idopts->identity_alt != NULL) {
             for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++) {
                 retval = process_option_identity(context, plg_cryptoctx,
                                                  req_cryptoctx, idopts,
-                                                 id_cryptoctx,
+                                                 id_cryptoctx, princ,
                                                  idopts->identity_alt[i]);
             }
         } else {
@@ -540,16 +550,6 @@ pkinit_identity_initialize(krb5_context context,
             pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
             goto errout;
         }
-        if (retval)
-            goto errout;
-
-        retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
-                                   idopts, id_cryptoctx, princ, TRUE);
-        if (retval)
-            goto errout;
-
-        crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-                              id_cryptoctx);
     } else {
         /* We're the anonymous principal. */
         retval = 0;
