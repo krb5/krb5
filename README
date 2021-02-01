@@ -75,8 +75,8 @@ default and eventually removed.
 Beginning with the krb5-1.18 release, single-DES encryption types have
 been removed.
 
-Major changes in 1.19
----------------------
+Major changes in 1.19 (2021-02-01)
+----------------------------------
 
 Administrator experience:
 
