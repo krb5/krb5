@@ -3450,6 +3450,10 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
  * @note The realm in a Kerberos @a name cannot contain slash, colon,
  * or NULL characters.
  *
+ * Beginning with release 1.20, the name type of the principal will be inferred
+ * as @c KRB5_NT_SRV_INST or @c KRB5_NT_WELLKNOWN based on the principal name.
+ * The type will be @c KRB5_NT_PRINCIPAL if a type cannot be inferred.
+ *
  * Use krb5_free_principal() to free @a principal_out when it is no longer
  * needed.
  *
@@ -4013,6 +4017,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
  * empty component with this function).  Call krb5_free_principal() to free
  * allocated memory for principal when it is no longer needed.
  *
+ * Beginning with release 1.20, the name type of the principal will be inferred
+ * as @c KRB5_NT_SRV_INST or @c KRB5_NT_WELLKNOWN based on the principal name.
+ * The type will be @c KRB5_NT_PRINCIPAL if a type cannot be inferred.
+ *
  * @code
  * Example of how to build principal WELLKNOWN/ANONYMOUS@R
  *     krb5_build_principal_ext(context, &principal, strlen("R"), "R",
@@ -4041,6 +4049,10 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
  * @param [in]  ...             List of char * components, ending with NULL
  *
  * Call krb5_free_principal() to free @a princ when it is no longer needed.
+ *
+ * Beginning with release 1.20, the name type of the principal will be inferred
+ * as @c KRB5_NT_SRV_INST or @c KRB5_NT_WELLKNOWN based on the principal name.
+ * The type will be @c KRB5_NT_PRINCIPAL if a type cannot be inferred.
  *
  * @note krb5_build_principal() and krb5_build_principal_alloc_va() perform the
  * same task.  krb5_build_principal() takes variadic arguments.

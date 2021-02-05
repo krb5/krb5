@@ -136,7 +136,7 @@ bld_pr_ext.so bld_pr_ext.po $(OUTPRE)bld_pr_ext.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  bld_pr_ext.c
+  bld_pr_ext.c int-proto.h
 bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -147,7 +147,7 @@ bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  bld_princ.c
+  bld_princ.c int-proto.h
 brand.so brand.po $(OUTPRE)brand.$(OBJEXT): $(top_srcdir)/patchlevel.h \
   brand.c
 chk_trans.so chk_trans.po $(OUTPRE)chk_trans.$(OBJEXT): \
@@ -741,7 +741,7 @@ parse.so parse.po $(OUTPRE)parse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h parse.c
+  $(top_srcdir)/include/socket-utils.h int-proto.h parse.c
 parse_host_string.so parse_host_string.po $(OUTPRE)parse_host_string.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

@@ -112,6 +112,10 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
+    /* The test vectors in RFC 8636 implicitly use NT-PRINCIPAL names. */
+    u_principal->type = KRB5_NT_PRINCIPAL;
+    v_principal->type = KRB5_NT_PRINCIPAL;
+
     /* set-up the as_req and and pk_as_rep data */
     memset(twenty_as, 0xaa, sizeof(twenty_as));
     memset(eighteen_bs, 0xbb, sizeof(eighteen_bs));

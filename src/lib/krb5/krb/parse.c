@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Scan name and allocate a shell principal with enough space in each field.
@@ -218,7 +219,8 @@ krb5_parse_name_flags(krb5_context context, const char *name,
     }
 
     princ->type = (enterprise) ? KRB5_NT_ENTERPRISE_PRINCIPAL :
-        KRB5_NT_PRINCIPAL;
+        k5_infer_principal_type(princ);
+
     princ->magic = KV5M_PRINCIPAL;
     *principal_out = princ;
     princ = NULL;

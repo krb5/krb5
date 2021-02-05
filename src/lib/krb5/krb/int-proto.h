@@ -391,4 +391,8 @@ k5_get_proxy_cred_from_kdc(krb5_context context, krb5_flags options,
 krb5_boolean
 k5_sname_wildcard_host(krb5_context context, krb5_const_principal mprinc);
 
+/* Guess the appropriate name-type for a principal based on the name. */
+krb5_int32
+k5_infer_principal_type(krb5_principal princ);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

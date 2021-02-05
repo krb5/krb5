@@ -506,12 +506,7 @@ build_in_tkt_name(krb5_context context,
         if (ret)
             return ret;
     }
-    /*
-     * Windows Server 2008 R2 RODC insists on TGS principal names having the
-     * right name type.
-     */
-    if (server->length == 2 && data_eq_string(server->data[0], KRB5_TGS_NAME))
-        server->type = KRB5_NT_SRV_INST;
+
     *server_out = server;
     return 0;
 }
