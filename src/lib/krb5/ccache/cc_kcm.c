@@ -61,6 +61,17 @@ struct uuid_list {
     size_t pos;
 };
 
+struct cred_list {
+    krb5_creds *creds;
+    size_t count;
+    size_t pos;
+};
+
+struct kcm_cursor {
+    struct uuid_list *uuids;
+    struct cred_list *creds;
+};
+
 struct kcmio {
     SOCKET fd;
 #ifdef __APPLE__
@@ -490,6 +501,69 @@ free_uuid_list(struct uuid_list *uuids)
 }
 
 static void
+free_cred_list(struct cred_list *list)
+{
+    size_t i;
+
+    if (list == NULL)
+        return;
+
+    /* Creds are transferred to the caller as list->pos is incremented, so we
+     * can start freeing there. */
+    for (i = list->pos; i < list->count; i++)
+        krb5_free_cred_contents(NULL, &list->creds[i]);
+    free(list->creds);
+    free(list);
+}
+
+/* Fetch a cred list from req->reply. */
+static krb5_error_code
+kcmreq_get_cred_list(struct kcmreq *req, struct cred_list **creds_out)
+{
+    struct cred_list *list;
+    const unsigned char *data;
+    krb5_error_code ret = 0;
+    size_t count, len, i;
+
+    *creds_out = NULL;
+
+    /* Check a rough bound on the count to prevent very large allocations. */
+    count = k5_input_get_uint32_be(&req->reply);
+    if (count > req->reply.len / 4)
+        return KRB5_KCM_MALFORMED_REPLY;
+
+    list = malloc(sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+
+    list->creds = NULL;
+    list->count = count;
+    list->pos = 0;
+    list->creds = k5calloc(count, sizeof(*list->creds), &ret);
+    if (list->creds == NULL) {
+        free(list);
+        return ret;
+    }
+
+    for (i = 0; i < count; i++) {
+        len = k5_input_get_uint32_be(&req->reply);
+        data = k5_input_get_bytes(&req->reply, len);
+        if (data == NULL)
+            break;
+        ret = k5_unmarshal_cred(data, len, 4, &list->creds[i]);
+        if (ret)
+            break;
+    }
+    if (i < count) {
+        free_cred_list(list);
+        return (ret == ENOMEM) ? ENOMEM : KRB5_KCM_MALFORMED_REPLY;
+    }
+
+    *creds_out = list;
+    return 0;
+}
+
+static void
 kcmreq_free(struct kcmreq *req)
 {
     k5_buf_free(&req->reqbuf);
@@ -753,33 +827,53 @@ kcm_start_seq_get(krb5_context context, krb5_ccache cache,
 {
     krb5_error_code ret;
     struct kcmreq req = EMPTY_KCMREQ;
-    struct uuid_list *uuids;
+    struct uuid_list *uuids = NULL;
+    struct cred_list *creds = NULL;
+    struct kcm_cursor *cursor;
 
     *cursor_out = NULL;
 
     get_kdc_offset(context, cache);
 
-    kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
+    kcmreq_init(&req, KCM_OP_GET_CRED_LIST, cache);
     ret = cache_call(context, cache, &req);
-    if (ret)
+    if (ret == 0) {
+        /* GET_CRED_LIST is available. */
+        ret = kcmreq_get_cred_list(&req, &creds);
+        if (ret)
+            goto cleanup;
+    } else if (ret == KRB5_FCC_INTERNAL) {
+        /* Fall back to GET_CRED_UUID_LIST. */
+        kcmreq_free(&req);
+        kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
+        ret = cache_call(context, cache, &req);
+        if (ret)
+            goto cleanup;
+        ret = kcmreq_get_uuid_list(&req, &uuids);
+        if (ret)
+            goto cleanup;
+    } else {
         goto cleanup;
-    ret = kcmreq_get_uuid_list(&req, &uuids);
-    if (ret)
+    }
+
+    cursor = k5alloc(sizeof(*cursor), &ret);
+    if (cursor == NULL)
         goto cleanup;
-    *cursor_out = (krb5_cc_cursor)uuids;
+    cursor->uuids = uuids;
+    cursor->creds = creds;
+    *cursor_out = (krb5_cc_cursor)cursor;
 
 cleanup:
     kcmreq_free(&req);
     return ret;
 }
 
-static krb5_error_code KRB5_CALLCONV
-kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
-              krb5_creds *cred_out)
+static krb5_error_code
+next_cred_by_uuid(krb5_context context, krb5_ccache cache,
+                  struct uuid_list *uuids, krb5_creds *cred_out)
 {
     krb5_error_code ret;
     struct kcmreq req;
-    struct uuid_list *uuids = (struct uuid_list *)*cursor;
 
     memset(cred_out, 0, sizeof(*cred_out));
 
@@ -798,10 +892,38 @@ kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
 }
 
 static krb5_error_code KRB5_CALLCONV
+kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
+              krb5_creds *cred_out)
+{
+    struct kcm_cursor *c = (struct kcm_cursor *)*cursor;
+    struct cred_list *list;
+
+    if (c->uuids != NULL)
+        return next_cred_by_uuid(context, cache, c->uuids, cred_out);
+
+    list = c->creds;
+    if (list->pos >= list->count)
+        return KRB5_CC_END;
+
+    /* Transfer memory ownership of one cred to the caller. */
+    *cred_out = list->creds[list->pos];
+    memset(&list->creds[list->pos], 0, sizeof(*list->creds));
+    list->pos++;
+
+    return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
 kcm_end_seq_get(krb5_context context, krb5_ccache cache,
                 krb5_cc_cursor *cursor)
 {
-    free_uuid_list((struct uuid_list *)*cursor);
+    struct kcm_cursor *c = *cursor;
+
+    if (c == NULL)
+        return 0;
+    free_uuid_list(c->uuids);
+    free_cred_list(c->creds);
+    free(c);
     *cursor = NULL;
     return 0;
 }

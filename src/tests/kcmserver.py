@@ -23,6 +23,7 @@
 #         traceback.print_exception(etype, value, tb, file=f)
 # sys.excepthook = ehook
 
+import optparse
 import select
 import socket
 import struct
@@ -49,12 +50,14 @@ class KCMOpcodes(object):
     SET_DEFAULT_CACHE = 21
     GET_KDC_OFFSET = 22
     SET_KDC_OFFSET = 23
+    GET_CRED_LIST = 13001
 
 
 class KRB5Errors(object):
     KRB5_CC_END = -1765328242
     KRB5_CC_NOSUPP = -1765328137
     KRB5_FCC_NOFILE = -1765328189
+    KRB5_FCC_INTERNAL = -1765328188
 
 
 def make_uuid():
@@ -183,6 +186,14 @@ def op_set_kdc_offset(argbytes):
     return 0, b''
 
 
+def op_get_cred_list(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    cache = get_cache(name)
+    creds = [cache.creds[u] for u in cache.cred_uuids]
+    return 0, (struct.pack('>L', len(creds)) +
+               b''.join(struct.pack('>L', len(c)) + c for c in creds))
+
+
 ophandlers = {
     KCMOpcodes.GEN_NEW : op_gen_new,
     KCMOpcodes.INITIALIZE : op_initialize,
@@ -197,7 +208,8 @@ ophandlers = {
     KCMOpcodes.GET_DEFAULT_CACHE : op_get_default_cache,
     KCMOpcodes.SET_DEFAULT_CACHE : op_set_default_cache,
     KCMOpcodes.GET_KDC_OFFSET : op_get_kdc_offset,
-    KCMOpcodes.SET_KDC_OFFSET : op_set_kdc_offset
+    KCMOpcodes.SET_KDC_OFFSET : op_set_kdc_offset,
+    KCMOpcodes.GET_CRED_LIST : op_get_cred_list
 }
 
 # Read and respond to a request from the socket s.
@@ -215,7 +227,11 @@ def service_request(s):
 
     majver, minver, op = struct.unpack('>BBH', req[:4])
     argbytes = req[4:]
-    code, payload = ophandlers[op](argbytes)
+
+    if op in ophandlers:
+        code, payload = ophandlers[op](argbytes)
+    else:
+        code, payload = KRB5Errors.KRB5_FCC_INTERNAL, b''
 
     # The KCM response is the code (4 bytes) and the response payload.
     # The Heimdal IPC response is the length of the KCM response (4
@@ -226,9 +242,15 @@ def service_request(s):
     s.sendall(hipc_response)
     return True
 
+parser = optparse.OptionParser()
+parser.add_option('-c', '--credlist', action='store_true', dest='credlist',
+                  default=False, help='Support KCM_OP_GET_CRED_LIST')
+(options, args) = parser.parse_args()
+if not options.credlist:
+    del ophandlers[KCMOpcodes.GET_CRED_LIST]
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-server.bind(sys.argv[1])
+server.bind(args[0])
 server.listen(5)
 select_input = [server,]
 sys.stderr.write('starting...\n')

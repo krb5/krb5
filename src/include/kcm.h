@@ -51,9 +51,9 @@
  *
  * All replies begin with a 32-bit big-endian reply code.
  *
- * Parameters are appended to the request or reply with no delimiters.  Flags
- * and time offsets are stored as 32-bit big-endian integers.  Names are
- * marshalled as zero-terminated strings.  Principals and credentials are
+ * Parameters are appended to the request or reply with no delimiters.  Flags,
+ * time offsets, and lengths are stored as 32-bit big-endian integers.  Names
+ * are marshalled as zero-terminated strings.  Principals and credentials are
  * marshalled in the v4 FILE ccache format.  UUIDs are 16 bytes.  UUID lists
  * are not delimited, so nothing can come after them.
  */
@@ -89,7 +89,11 @@ typedef enum kcm_opcode {
     KCM_OP_HAVE_NTLM_CRED,
     KCM_OP_DEL_NTLM_CRED,
     KCM_OP_DO_NTLM_AUTH,
-    KCM_OP_GET_NTLM_USER_LIST
+    KCM_OP_GET_NTLM_USER_LIST,
+
+    /* MIT extensions */
+    KCM_OP_MIT_EXTENSION_BASE = 13000,
+    KCM_OP_GET_CRED_LIST,       /* (name) -> (count, count*{len, cred}) */
 } kcm_opcode;
 
 #endif /* KCM_H */

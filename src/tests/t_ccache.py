@@ -125,10 +125,18 @@ def collection_test(realm, ccname):
 
 
 collection_test(realm, 'DIR:' + os.path.join(realm.testdir, 'cc'))
+
+# Test KCM without and with GET_CRED_LIST support.
 kcmserver_path = os.path.join(srctop, 'tests', 'kcmserver.py')
-realm.start_server([sys.executable, kcmserver_path, kcm_socket_path],
+kcmd = realm.start_server([sys.executable, kcmserver_path, kcm_socket_path],
+                          'starting...')
+collection_test(realm, 'KCM:')
+stop_daemon(kcmd)
+os.remove(kcm_socket_path)
+realm.start_server([sys.executable, kcmserver_path, '-c', kcm_socket_path],
                    'starting...')
 collection_test(realm, 'KCM:')
+
 if test_keyring:
     def cleanup_keyring(anchor, name):
         out = realm.run(['keyctl', 'list', anchor])
