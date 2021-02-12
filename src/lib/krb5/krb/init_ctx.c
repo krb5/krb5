@@ -376,6 +376,17 @@ krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes)
     return 0;
 }
 
+/* Old name for above function.  This is not a public API, but Samba (as of
+ * 2021-02-12) uses this name if it finds it in the library. */
+krb5_error_code
+krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes);
+
+krb5_error_code
+krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
+{
+    return krb5_set_default_tgs_enctypes(context, etypes);
+}
+
 /*
  * Add etype to, or remove etype from, the zero-terminated list *list_ptr,
  * reallocating if the list size changes.  Filter out weak enctypes if
