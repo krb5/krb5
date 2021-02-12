@@ -568,6 +568,7 @@ krb5_set_config_files
 krb5_set_debugging_time
 krb5_set_default_realm
 krb5_set_default_tgs_enctypes
+krb5_set_default_tgs_ktypes
 krb5_set_error_message
 krb5_set_password
 krb5_set_password_using_ccache
