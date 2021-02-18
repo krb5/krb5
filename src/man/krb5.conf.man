@@ -1291,10 +1291,9 @@ The default is 2048.
 \fBpkinit_identities\fP
 Specifies the location(s) to be used to find the user\(aqs X.509
 identity information.  If this option is specified multiple times,
-the first valid value is used; this can be used to specify an
-environment variable (with \fBENV:\fP\fIenvvar\fP) followed by a
-default value.  Note that these values are not used if the user
-specifies \fBX509_user_identity\fP on the command line.
+each value is attempted in order until certificates are found.
+Note that these values are not used if the user specifies
+\fBX509_user_identity\fP on the command line.
 .TP
 \fBpkinit_kdc_hostname\fP
 The presence of this option indicates that the client is willing
