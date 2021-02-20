@@ -141,18 +141,13 @@ usage()
 {
     fprintf(stderr,
             _("Usage: %s [-V] [-l lifetime] [-s start_time] "
-              "[-r renewable_life]"
-              USAGE_BREAK
-              "[-f | -F] [-p | -P] [-n] [-a | -A] [-C] [-E]"
-              USAGE_BREAK
-              "[--request-pac | --no-request-pac] "
-              USAGE_BREAK
-              "[-v] [-R] [-k [-i|-t keytab_file]] [-c cachename]"
-              USAGE_BREAK
-              "[-S service_name] [-I input_ccache] [-T ticket_armor_cache]"
-              USAGE_BREAK
-              "[-X <attribute>[=<value>]] [principal]"
-              "\n\n"), progname);
+              "[-r renewable_life]\n"
+              "\t[-f | -F] [-p | -P] [-n] [-a | -A] [-C] [-E]\n"
+              "\t[--request-pac | --no-request-pac]\n"
+              "\t[-v] [-R] [-k [-i|-t keytab_file]] [-c cachename]\n"
+              "\t[-S service_name] [-I input_ccache] [-T ticket_armor_cache]\n"
+              "\t[-X <attribute>[=<value>]] [principal]\n"
+              "\n"), progname);
 
     fprintf(stderr, "    options:\n");
     fprintf(stderr, _("\t-V verbose\n"));
