@@ -42,11 +42,13 @@ V4 srvtab files are no longer supported.)
 .SS list
 .INDENT 0.0
 .INDENT 3.5
-\fBlist\fP
+\fBlist\fP [\fB\-t\fP] [\fB\-k\fP] [\fB\-e\fP]
 .UNINDENT
 .UNINDENT
 .sp
-Displays the current keylist.
+Displays the current keylist.  If \fB\-t\fP, \fB\-k\fP, and/or \fB\-e\fP are
+specified, also display the timestamp, key contents, or enctype
+(respectively).
 .sp
 Alias: \fBl\fP
 .SS read_kt

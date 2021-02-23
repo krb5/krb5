@@ -36,6 +36,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 [\fB\-A\fP]
 [\fB\-q\fP]
 [\fB\-c\fP \fIcache_name\fP]
+[\fB\-p\fP \fIprinc_name\fP]
 .SH DESCRIPTION
 .sp
 The kdestroy utility destroys the user\(aqs active Kerberos authorization

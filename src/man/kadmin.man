@@ -649,7 +649,7 @@ expression.
 .sp
 This command requires the \fBlist\fP privilege.
 .sp
-Alias: \fBlistprincs\fP, \fBget_principals\fP, \fBget_princs\fP
+Alias: \fBlistprincs\fP, \fBget_principals\fP, \fBgetprincs\fP
 .sp
 Example:
 .INDENT 0.0
@@ -678,7 +678,7 @@ Displays string attributes on \fIprincipal\fP\&.
 .sp
 This command requires the \fBinquire\fP privilege.
 .sp
-Alias: \fBgetstr\fP
+Alias: \fBgetstrs\fP
 .SS set_string
 .INDENT 0.0
 .INDENT 3.5
@@ -885,7 +885,7 @@ tabs.
 .sp
 This command requires the \fBinquire\fP privilege.
 .sp
-Alias: getpol
+Alias: \fBgetpol\fP
 .sp
 Examples:
 .INDENT 0.0
@@ -994,6 +994,8 @@ An entry for each of the principal\(aqs unique encryption types is added,
 ignoring multiple keys with the same encryption type but different
 salt types.
 .sp
+Alias: \fBxst\fP
+.sp
 Example:
 .INDENT 0.0
 .INDENT 3.5
@@ -1035,6 +1037,8 @@ used.
 \fB\-q\fP
 Display less verbose information.
 .UNINDENT
+.sp
+Alias: \fBktrem\fP
 .sp
 Example:
 .INDENT 0.0

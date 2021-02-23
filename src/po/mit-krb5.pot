@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mit-krb5 1.20-prerelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-11 12:29-0500\n"
+"POT-Creation-Date: 2021-02-23 17:55-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,7 +55,7 @@ msgid "Other credential caches present, use -A to destroy all\n"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:110
-#: ../../src/clients/kinit/kinit.c:346 ../../src/clients/ksu/main.c:296
+#: ../../src/clients/kinit/kinit.c:332 ../../src/clients/ksu/main.c:296
 #, c-format
 msgid "Only one -c option allowed\n"
 msgstr ""
@@ -66,7 +66,7 @@ msgid "Only one -p option allowed\n"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:125
-#: ../../src/clients/kinit/kinit.c:374 ../../src/clients/klist/klist.c:176
+#: ../../src/clients/kinit/kinit.c:360 ../../src/clients/klist/klist.c:178
 #, c-format
 msgid "Kerberos 4 is no longer supported\n"
 msgstr ""
@@ -77,7 +77,7 @@ msgid "-A option is exclusive with -p option\n"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:150
-#: ../../src/clients/klist/klist.c:239 ../../src/clients/ksu/main.c:135
+#: ../../src/clients/klist/klist.c:241 ../../src/clients/ksu/main.c:135
 #: ../../src/clients/ksu/main.c:141 ../../src/clients/kswitch/kswitch.c:94
 #: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:941
 #: ../../src/kprop/kprop.c:101 ../../src/kprop/kpropd.c:1061
@@ -85,7 +85,7 @@ msgid "while initializing krb5"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:157
-#: ../../src/clients/klist/klist.c:246
+#: ../../src/clients/klist/klist.c:248
 msgid "while setting default cache name"
 msgstr ""
 
@@ -99,8 +99,8 @@ msgid "while destroying cache %s"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:190
-#: ../../src/clients/kswitch/kswitch.c:107 ../../src/clients/kvno/kvno.c:313
-#: ../../src/clients/kvno/kvno.c:519 ../../src/kadmin/cli/keytab.c:373
+#: ../../src/clients/kswitch/kswitch.c:107 ../../src/clients/kvno/kvno.c:311
+#: ../../src/clients/kvno/kvno.c:517 ../../src/kadmin/cli/keytab.c:373
 #: ../../src/kadmin/dbutil/kdb5_util.c:544
 #, c-format
 msgid "while parsing principal name %s"
@@ -112,7 +112,7 @@ msgid "while finding cache for %s"
 msgstr ""
 
 #: ../../src/clients/kdestroy/kdestroy.c:204
-#: ../../src/clients/klist/klist.c:460
+#: ../../src/clients/klist/klist.c:462
 msgid "while resolving ccache"
 msgstr ""
 
@@ -130,357 +130,379 @@ msgstr ""
 msgid "Ticket cache %cNOT%c destroyed!\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:170
+#: ../../src/clients/kinit/kinit.c:143
+#, c-format
+msgid ""
+"Usage: %s [-V] [-l lifetime] [-s start_time] [-r renewable_life]\n"
+"\t[-f | -F] [-p | -P] [-n] [-a | -A] [-C] [-E]\n"
+"\t[--request-pac | --no-request-pac]\n"
+"\t[-v] [-R] [-k [-i|-t keytab_file]] [-c cachename]\n"
+"\t[-S service_name] [-I input_ccache] [-T ticket_armor_cache]\n"
+"\t[-X <attribute>[=<value>]] [principal]\n"
+"\n"
+msgstr ""
+
+#: ../../src/clients/kinit/kinit.c:153
 #, c-format
 msgid "\t-V verbose\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:171
+#: ../../src/clients/kinit/kinit.c:154
 #, c-format
 msgid "\t-l lifetime\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:172
+#: ../../src/clients/kinit/kinit.c:155
 #, c-format
 msgid "\t-s start time\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:173
+#: ../../src/clients/kinit/kinit.c:156
 #, c-format
 msgid "\t-r renewable lifetime\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:174
+#: ../../src/clients/kinit/kinit.c:157
 #, c-format
 msgid "\t-f forwardable\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:175
+#: ../../src/clients/kinit/kinit.c:158
 #, c-format
 msgid "\t-F not forwardable\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:176
+#: ../../src/clients/kinit/kinit.c:159
 #, c-format
 msgid "\t-p proxiable\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:177
+#: ../../src/clients/kinit/kinit.c:160
 #, c-format
 msgid "\t-P not proxiable\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:178
+#: ../../src/clients/kinit/kinit.c:161
 #, c-format
 msgid "\t-n anonymous\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:179
+#: ../../src/clients/kinit/kinit.c:162
 #, c-format
 msgid "\t-a include addresses\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:180
+#: ../../src/clients/kinit/kinit.c:163
 #, c-format
 msgid "\t-A do not include addresses\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:181
+#: ../../src/clients/kinit/kinit.c:164
 #, c-format
 msgid "\t-v validate\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:182
+#: ../../src/clients/kinit/kinit.c:165
 #, c-format
 msgid "\t-R renew\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:183
+#: ../../src/clients/kinit/kinit.c:166
 #, c-format
 msgid "\t-C canonicalize\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:184
+#: ../../src/clients/kinit/kinit.c:167
 #, c-format
 msgid "\t-E client is enterprise principal name\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:185
+#: ../../src/clients/kinit/kinit.c:168
 #, c-format
 msgid "\t-k use keytab\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:186
+#: ../../src/clients/kinit/kinit.c:169
 #, c-format
 msgid "\t-i use default client keytab (with -k)\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:187
+#: ../../src/clients/kinit/kinit.c:170
 #, c-format
 msgid "\t-t filename of keytab to use\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:188
+#: ../../src/clients/kinit/kinit.c:171
 #, c-format
 msgid "\t-c Kerberos 5 cache name\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:189
+#: ../../src/clients/kinit/kinit.c:172
 #, c-format
 msgid "\t-S service\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:190
+#: ../../src/clients/kinit/kinit.c:173
+#, c-format
+msgid "\t-I input credential cache\n"
+msgstr ""
+
+#: ../../src/clients/kinit/kinit.c:174
 #, c-format
 msgid "\t-T armor credential cache\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:191
+#: ../../src/clients/kinit/kinit.c:175
 #, c-format
 msgid "\t-X <attribute>[=<value>]\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:264 ../../src/clients/kinit/kinit.c:272
+#: ../../src/clients/kinit/kinit.c:177
+#, c-format
+msgid "\t--{,no}-request-pac request KDC include/exclude a PAC\n"
+msgstr ""
+
+#: ../../src/clients/kinit/kinit.c:250 ../../src/clients/kinit/kinit.c:258
 #, c-format
 msgid "Bad lifetime value %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:306
+#: ../../src/clients/kinit/kinit.c:292
 #, c-format
 msgid "Bad start time value %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:324
+#: ../../src/clients/kinit/kinit.c:310
 #, c-format
 msgid "Only one -t option allowed.\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:332
+#: ../../src/clients/kinit/kinit.c:318
 #, c-format
 msgid "Only one armor_ccache\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:354
+#: ../../src/clients/kinit/kinit.c:340
 #, c-format
 msgid "Only one -I option allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:363
+#: ../../src/clients/kinit/kinit.c:349
 msgid "while adding preauth option"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:389
+#: ../../src/clients/kinit/kinit.c:375
 #, c-format
 msgid "Only one of -f and -F allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:393
+#: ../../src/clients/kinit/kinit.c:379
 #, c-format
 msgid "Only one of -p and -P allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:397
+#: ../../src/clients/kinit/kinit.c:383
 #, c-format
 msgid "Only one of --request-pac and --no-request-pac allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:402
+#: ../../src/clients/kinit/kinit.c:388
 #, c-format
 msgid "Only one of -a and -A allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:406
+#: ../../src/clients/kinit/kinit.c:392
 #, c-format
 msgid "Only one of -t and -i allowed\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:412
+#: ../../src/clients/kinit/kinit.c:398
 #, c-format
 msgid "keytab specified, forcing -k\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:415 ../../src/clients/klist/klist.c:214
+#: ../../src/clients/kinit/kinit.c:401 ../../src/clients/klist/klist.c:216
 #, c-format
 msgid "Extra arguments (starting with \"%s\").\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:441
+#: ../../src/clients/kinit/kinit.c:427
 msgid "while initializing Kerberos 5 library"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:449 ../../src/clients/kinit/kinit.c:603
+#: ../../src/clients/kinit/kinit.c:435 ../../src/clients/kinit/kinit.c:589
 #, c-format
 msgid "resolving ccache %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:454
+#: ../../src/clients/kinit/kinit.c:440
 #, c-format
 msgid "Using specified cache: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:462
+#: ../../src/clients/kinit/kinit.c:448
 msgid "while getting default ccache"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:476 ../../src/clients/kinit/kinit.c:555
+#: ../../src/clients/kinit/kinit.c:462 ../../src/clients/kinit/kinit.c:541
 #: ../../src/clients/kpasswd/kpasswd.c:30 ../../src/clients/ksu/main.c:249
 #, c-format
 msgid "when parsing name %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:484 ../../src/kadmin/dbutil/kdb5_util.c:309
+#: ../../src/clients/kinit/kinit.c:470 ../../src/kadmin/dbutil/kdb5_util.c:309
 #: ../../src/kprop/kprop.c:155
 #: ../../src/plugins/kdb/ldap/ldap_util/kdb5_ldap_util.c:395
 msgid "while getting default realm"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:495
+#: ../../src/clients/kinit/kinit.c:481
 msgid "while building principal"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:503
+#: ../../src/clients/kinit/kinit.c:489
 msgid "When resolving the default client keytab"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:510
+#: ../../src/clients/kinit/kinit.c:496
 msgid "When determining client principal name from keytab"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:519
+#: ../../src/clients/kinit/kinit.c:505
 msgid "when creating default server principal name"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:526
+#: ../../src/clients/kinit/kinit.c:512
 #, c-format
 msgid "(principal %s)"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:529
+#: ../../src/clients/kinit/kinit.c:515
 msgid "for local services"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:550 ../../src/clients/kpasswd/kpasswd.c:42
+#: ../../src/clients/kinit/kinit.c:536 ../../src/clients/kpasswd/kpasswd.c:42
 #, c-format
 msgid "Unable to identify user\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:564 ../../src/clients/kswitch/kswitch.c:113
+#: ../../src/clients/kinit/kinit.c:550 ../../src/clients/kswitch/kswitch.c:113
 #, c-format
 msgid "while searching for ccache for %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:570
+#: ../../src/clients/kinit/kinit.c:556
 #, c-format
 msgid "Using existing cache: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:579
+#: ../../src/clients/kinit/kinit.c:565
 msgid "while generating new ccache"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:583
+#: ../../src/clients/kinit/kinit.c:569
 #, c-format
 msgid "Using new cache: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:595
+#: ../../src/clients/kinit/kinit.c:581
 #, c-format
 msgid "Using default cache: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:608
+#: ../../src/clients/kinit/kinit.c:594
 #, c-format
 msgid "Using specified input cache: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:615 ../../src/clients/ksu/krb_auth_su.c:160
+#: ../../src/clients/kinit/kinit.c:601 ../../src/clients/ksu/krb_auth_su.c:160
 msgid "when unparsing name"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:619
+#: ../../src/clients/kinit/kinit.c:605
 #, c-format
 msgid "Using principal: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:700
+#: ../../src/clients/kinit/kinit.c:686
 msgid "getting local addresses"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:724
+#: ../../src/clients/kinit/kinit.c:710
 #, c-format
 msgid "while setting up KDB keytab for realm %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:733 ../../src/clients/kvno/kvno.c:510
+#: ../../src/clients/kinit/kinit.c:719 ../../src/clients/kvno/kvno.c:508
 #, c-format
 msgid "resolving keytab %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:738
+#: ../../src/clients/kinit/kinit.c:724
 #, c-format
 msgid "Using keytab: %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:742
+#: ../../src/clients/kinit/kinit.c:728
 msgid "resolving default client keytab"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:752
+#: ../../src/clients/kinit/kinit.c:738
 #, c-format
 msgid "while setting '%s'='%s'"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:757
+#: ../../src/clients/kinit/kinit.c:743
 #, c-format
 msgid "PA Option %s = %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:798
+#: ../../src/clients/kinit/kinit.c:784
 msgid "getting initial credentials"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:801
+#: ../../src/clients/kinit/kinit.c:787
 msgid "validating credentials"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:804
+#: ../../src/clients/kinit/kinit.c:790
 msgid "renewing credentials"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:812
+#: ../../src/clients/kinit/kinit.c:798
 #, c-format
 msgid "%s: Password incorrect while %s\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:815
+#: ../../src/clients/kinit/kinit.c:801
 #, c-format
 msgid "while %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:824
+#: ../../src/clients/kinit/kinit.c:810
 #, c-format
 msgid "when initializing cache %s"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:829
+#: ../../src/clients/kinit/kinit.c:815
 #, c-format
 msgid "Initialized cache\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:833
+#: ../../src/clients/kinit/kinit.c:819
 msgid "while storing credentials"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:837
+#: ../../src/clients/kinit/kinit.c:823
 #, c-format
 msgid "Stored credentials\n"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:843
+#: ../../src/clients/kinit/kinit.c:829
 msgid "while switching to new ccache"
 msgstr ""
 
-#: ../../src/clients/kinit/kinit.c:898
+#: ../../src/clients/kinit/kinit.c:884
 #, c-format
 msgid "Authenticated to Kerberos v5\n"
 msgstr ""
@@ -488,144 +510,149 @@ msgstr ""
 #: ../../src/clients/klist/klist.c:85
 #, c-format
 msgid ""
-"Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] [-a [-n]]] [-k [-t] [-K]] "
-"[name]\n"
-msgstr ""
-
-#: ../../src/clients/klist/klist.c:87
-#, c-format
-msgid "\t-c specifies credentials cache\n"
+"Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] [-a [-n]]] [-k [-i] [-t] "
+"[-K]] [-C] [name]\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:88
 #, c-format
-msgid "\t-k specifies keytab\n"
+msgid "\t-c specifies credentials cache\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:89
 #, c-format
-msgid "\t   (Default is credentials cache)\n"
+msgid "\t-k specifies keytab\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:90
 #, c-format
-msgid "\t-i uses default client keytab if no name given\n"
+msgid "\t   (Default is credentials cache)\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:91
 #, c-format
-msgid "\t-l lists credential caches in collection\n"
+msgid "\t-i uses default client keytab if no name given\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:92
 #, c-format
-msgid "\t-A shows content of all credential caches\n"
+msgid "\t-l lists credential caches in collection\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:93
 #, c-format
-msgid "\t-e shows the encryption type\n"
+msgid "\t-A shows content of all credential caches\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:94
 #, c-format
-msgid "\t-V shows the Kerberos version and exits\n"
+msgid "\t-e shows the encryption type\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:95
 #, c-format
-msgid "\toptions for credential caches:\n"
+msgid "\t-V shows the Kerberos version and exits\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:96
 #, c-format
-msgid "\t\t-d shows the submitted authorization data types\n"
+msgid "\toptions for credential caches:\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:98
+#: ../../src/clients/klist/klist.c:97
 #, c-format
-msgid "\t\t-f shows credentials flags\n"
+msgid "\t\t-d shows the submitted authorization data types\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:99
 #, c-format
-msgid "\t\t-s sets exit status based on valid tgt existence\n"
+msgid "\t\t-f shows credentials flags\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:101
+#: ../../src/clients/klist/klist.c:100
 #, c-format
-msgid "\t\t-a displays the address list\n"
+msgid "\t\t-s sets exit status based on valid tgt existence\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:102
 #, c-format
-msgid "\t\t\t-n do not reverse-resolve\n"
+msgid "\t\t-a displays the address list\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:103
 #, c-format
-msgid "\toptions for keytabs:\n"
+msgid "\t\t\t-n do not reverse-resolve\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:104
 #, c-format
-msgid "\t\t-t shows keytab entry timestamps\n"
+msgid "\toptions for keytabs:\n"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:105
 #, c-format
+msgid "\t\t-t shows keytab entry timestamps\n"
+msgstr ""
+
+#: ../../src/clients/klist/klist.c:106
+#, c-format
 msgid "\t\t-K shows keytab entry keys\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:223
+#: ../../src/clients/klist/klist.c:107
+#, c-format
+msgid "\t\t-C includes configuration data entries\n"
+msgstr ""
+
+#: ../../src/clients/klist/klist.c:225
 #, c-format
 msgid "%s version %s\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:276
+#: ../../src/clients/klist/klist.c:278
 msgid "while getting default client keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:282
+#: ../../src/clients/klist/klist.c:284
 msgid "while getting default keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:288 ../../src/kadmin/cli/keytab.c:103
+#: ../../src/clients/klist/klist.c:290 ../../src/kadmin/cli/keytab.c:103
 #, c-format
 msgid "while resolving keytab %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:295 ../../src/kadmin/cli/keytab.c:87
+#: ../../src/clients/klist/klist.c:297 ../../src/kadmin/cli/keytab.c:87
 msgid "while getting keytab name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:303 ../../src/kadmin/cli/keytab.c:422
+#: ../../src/clients/klist/klist.c:305 ../../src/kadmin/cli/keytab.c:422
 msgid "while starting keytab scan"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:326 ../../src/clients/klist/klist.c:482
+#: ../../src/clients/klist/klist.c:328 ../../src/clients/klist/klist.c:484
 #: ../../src/clients/ksu/ccache.c:455 ../../src/kadmin/dbutil/dump.c:487
 #: ../../src/kadmin/dbutil/tabdump.c:549
 msgid "while unparsing principal name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:348 ../../src/kadmin/cli/keytab.c:466
+#: ../../src/clients/klist/klist.c:350 ../../src/kadmin/cli/keytab.c:466
 msgid "while scanning keytab"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:353 ../../src/kadmin/cli/keytab.c:471
+#: ../../src/clients/klist/klist.c:355 ../../src/kadmin/cli/keytab.c:471
 msgid "while ending keytab scan"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:370 ../../src/clients/klist/klist.c:433
+#: ../../src/clients/klist/klist.c:372 ../../src/clients/klist/klist.c:435
 msgid "while listing ccache collection"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:409
+#: ../../src/clients/klist/klist.c:411
 msgid "(Expired)"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:486
+#: ../../src/clients/klist/klist.c:488
 #, c-format
 msgid ""
 "Ticket cache: %s:%s\n"
@@ -633,82 +660,82 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:498
+#: ../../src/clients/klist/klist.c:500
 msgid "while starting to retrieve tickets"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:512
+#: ../../src/clients/klist/klist.c:514
 msgid "while finishing ticket retrieval"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:517
+#: ../../src/clients/klist/klist.c:519
 msgid "while retrieving a ticket"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:672 ../../src/clients/ksu/ccache.c:440
+#: ../../src/clients/klist/klist.c:674 ../../src/clients/ksu/ccache.c:440
 #: ../../src/kprop/kpropd.c:1208 ../../src/kprop/kpropd.c:1273
 msgid "while unparsing client name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:677 ../../src/clients/ksu/ccache.c:445
+#: ../../src/clients/klist/klist.c:679 ../../src/clients/ksu/ccache.c:445
 #: ../../src/kprop/kprop.c:189
 msgid "while unparsing server name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:708 ../../src/clients/ksu/ccache.c:470
+#: ../../src/clients/klist/klist.c:710 ../../src/clients/ksu/ccache.c:470
 #, c-format
 msgid "\tfor client %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:720 ../../src/clients/ksu/ccache.c:479
+#: ../../src/clients/klist/klist.c:722 ../../src/clients/ksu/ccache.c:479
 msgid "renew until "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:732 ../../src/clients/ksu/ccache.c:489
+#: ../../src/clients/klist/klist.c:734 ../../src/clients/ksu/ccache.c:489
 #, c-format
 msgid "Flags: %s"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:747
+#: ../../src/clients/klist/klist.c:749
 #, c-format
 msgid "Etype (skey, tkt): %s, "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:759
+#: ../../src/clients/klist/klist.c:761
 #, c-format
 msgid "AD types: "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:775
+#: ../../src/clients/klist/klist.c:777
 #, c-format
 msgid "\tAddresses: (none)\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:777
+#: ../../src/clients/klist/klist.c:779
 #, c-format
 msgid "\tAddresses: "
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:795
+#: ../../src/clients/klist/klist.c:797
 msgid "while unparsing ticket server name"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:798
+#: ../../src/clients/klist/klist.c:800
 #, c-format
 msgid "\tTicket server: %s\n"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:826 ../../src/clients/klist/klist.c:836
+#: ../../src/clients/klist/klist.c:828 ../../src/clients/klist/klist.c:838
 #, c-format
 msgid "broken address (type %d length %d)"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:845
+#: ../../src/clients/klist/klist.c:847
 #, c-format
 msgid "unknown addrtype %d"
 msgstr ""
 
-#: ../../src/clients/klist/klist.c:854
+#: ../../src/clients/klist/klist.c:856
 #, c-format
 msgid "unprintable address (type %d, error %d %s)"
 msgstr ""
@@ -1211,118 +1238,121 @@ msgstr ""
 msgid "while switching to credential cache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:46
+#: ../../src/clients/kvno/kvno.c:44
 #, c-format
-msgid "usage: %s [-c ccache] [-e etype] [-k keytab] [-q] [-u | -S sname]"
+msgid ""
+"usage: %s [-c ccache] [-e etype] [-k keytab] [-q] [-u | -S sname]\n"
+"\t[[{-F cert_file | {-I | -U} for_user} [-P]] | --u2u ccache]\n"
+"\t[--cached-only] [--no-store] [--out-cache] service1 service2 ...\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:119 ../../src/clients/kvno/kvno.c:127
+#: ../../src/clients/kvno/kvno.c:117 ../../src/clients/kvno/kvno.c:125
 #, c-format
 msgid "Options -u and -S are mutually exclusive\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:161
+#: ../../src/clients/kvno/kvno.c:159
 #, c-format
 msgid "Options --u2u and -I|-U|-F are mutually exclusive\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:167
+#: ../../src/clients/kvno/kvno.c:165
 #, c-format
 msgid ""
 "Option -P (constrained delegation) requires option -I|-U|-F (protocol "
 "transition)\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:242
+#: ../../src/clients/kvno/kvno.c:240
 msgid "No begin line not found"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:254
+#: ../../src/clients/kvno/kvno.c:252
 msgid "No end line found"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:265
+#: ../../src/clients/kvno/kvno.c:263
 msgid "Unexpected header line"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:275
+#: ../../src/clients/kvno/kvno.c:273
 msgid "Invalid base64"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:321
+#: ../../src/clients/kvno/kvno.c:319
 #, c-format
 msgid "while formatting parsed principal name for '%s'"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:335
+#: ../../src/clients/kvno/kvno.c:333
 msgid "client and server principal names must match"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:351
+#: ../../src/clients/kvno/kvno.c:349
 #, c-format
 msgid "while getting credentials for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:358
+#: ../../src/clients/kvno/kvno.c:356
 #, c-format
 msgid "while decoding ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:369
+#: ../../src/clients/kvno/kvno.c:367
 #, c-format
 msgid "while decrypting ticket for %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:373
+#: ../../src/clients/kvno/kvno.c:371
 #, c-format
 msgid "%s: kvno = %d, keytab entry valid\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:378
+#: ../../src/clients/kvno/kvno.c:376
 #, c-format
 msgid "%s: kvno = %d\n"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:393
+#: ../../src/clients/kvno/kvno.c:391
 #, c-format
 msgid "%s: constrained delegation failed"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:476 ../../src/kadmin/cli/kadmin.c:311
+#: ../../src/clients/kvno/kvno.c:474 ../../src/kadmin/cli/kadmin.c:311
 msgid "while initializing krb5 library"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:483
+#: ../../src/clients/kvno/kvno.c:481
 msgid "while converting etype"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:495
+#: ../../src/clients/kvno/kvno.c:493
 msgid "while opening ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:502
+#: ../../src/clients/kvno/kvno.c:500
 msgid "while resolving output ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:527
+#: ../../src/clients/kvno/kvno.c:525
 #, c-format
 msgid "while reading certificate file %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:537
+#: ../../src/clients/kvno/kvno.c:535
 #, c-format
 msgid "while getting user-to-user ticket from %s"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:546
+#: ../../src/clients/kvno/kvno.c:544
 msgid "while getting client principal name"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:559
+#: ../../src/clients/kvno/kvno.c:557
 msgid "while initializing output ccache"
 msgstr ""
 
-#: ../../src/clients/kvno/kvno.c:569
+#: ../../src/clients/kvno/kvno.c:567
 msgid "while storing creds in output ccache"
 msgstr ""
 
@@ -1331,8 +1361,10 @@ msgstr ""
 msgid ""
 "Usage: %s [-r realm] [-p principal] [-q query] [clnt|local args]\n"
 "              [command args...]\n"
-"\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]|[-n]\n"
-"\tlocal args: [-x db_args]* [-d dbname] [-e \"enc:salt ...\"] [-m]where,\n"
+"\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]|[-n] [-"
+"O | -N]\n"
+"\tlocal args: [-x db_args]* [-d dbname] [-e \"enc:salt ...\"] [-m] [-w "
+"password] where,\n"
 "\t[-x db_args]* - any number of database specific arguments.\n"
 "\t\t\tLook at each database documentation for supported arguments\n"
 msgstr ""
@@ -2258,132 +2290,132 @@ msgstr ""
 msgid "%s: Unknown iprop dump version %d\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1201 ../../src/kadmin/dbutil/dump.c:1439
+#: ../../src/kadmin/dbutil/dump.c:1195 ../../src/kadmin/dbutil/dump.c:1431
 #, c-format
 msgid "OV dump format not supported\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1222 ../../src/kadmin/dbutil/dump.c:1450
+#: ../../src/kadmin/dbutil/dump.c:1217 ../../src/kadmin/dbutil/dump.c:1443
 #, c-format
 msgid "Iprop not enabled\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1259
+#: ../../src/kadmin/dbutil/dump.c:1254
 msgid "Conditional dump is an undocumented option for use only for iprop dumps"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1272
+#: ../../src/kadmin/dbutil/dump.c:1267
 msgid "Database not currently opened!"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1286 ../../src/kadmin/dbutil/kdb5_stash.c:116
+#: ../../src/kadmin/dbutil/dump.c:1281 ../../src/kadmin/dbutil/kdb5_stash.c:116
 #: ../../src/kadmin/dbutil/kdb5_util.c:445
 msgid "while reading master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1292
+#: ../../src/kadmin/dbutil/dump.c:1287
 msgid "while verifying master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1311 ../../src/kadmin/dbutil/dump.c:1321
+#: ../../src/kadmin/dbutil/dump.c:1306 ../../src/kadmin/dbutil/dump.c:1316
 msgid "while reading new master key"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1315
+#: ../../src/kadmin/dbutil/dump.c:1310
 #, c-format
 msgid "Please enter new master key....\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1339
+#: ../../src/kadmin/dbutil/dump.c:1334
 #, c-format
 msgid "while opening %s for writing"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1354
+#: ../../src/kadmin/dbutil/dump.c:1349
 msgid "while reading update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1369 ../../src/kadmin/dbutil/dump.c:1377
+#: ../../src/kadmin/dbutil/dump.c:1364 ../../src/kadmin/dbutil/dump.c:1372
 #, c-format
 msgid "performing %s dump"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1407
+#: ../../src/kadmin/dbutil/dump.c:1402
 #, c-format
 msgid "%s: error processing line %d of %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1459
+#: ../../src/kadmin/dbutil/dump.c:1452
 msgid "while parsing options"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1474
+#: ../../src/kadmin/dbutil/dump.c:1467
 #, c-format
 msgid "while opening %s"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1479 ../../src/kadmin/dbutil/dump.c:1575
+#: ../../src/kadmin/dbutil/dump.c:1472 ../../src/kadmin/dbutil/dump.c:1568
 msgid "standard input"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1484
+#: ../../src/kadmin/dbutil/dump.c:1477
 #, c-format
 msgid "%s: can't read dump header in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1492 ../../src/kadmin/dbutil/dump.c:1506
+#: ../../src/kadmin/dbutil/dump.c:1485 ../../src/kadmin/dbutil/dump.c:1499
 #, c-format
 msgid "%s: dump header bad in %s\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1515
+#: ../../src/kadmin/dbutil/dump.c:1508
 #, c-format
 msgid "Could not open iprop ulog\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1520
+#: ../../src/kadmin/dbutil/dump.c:1513
 #, c-format
 msgid "%s: dump version %s can only be loaded with the -update flag\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1529 ../../src/kadmin/dbutil/dump.c:1534
+#: ../../src/kadmin/dbutil/dump.c:1522 ../../src/kadmin/dbutil/dump.c:1527
 msgid "computing parameters for database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1540
+#: ../../src/kadmin/dbutil/dump.c:1533
 msgid "while creating database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1549
+#: ../../src/kadmin/dbutil/dump.c:1542
 msgid "while opening database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1559
+#: ../../src/kadmin/dbutil/dump.c:1552
 msgid "while permanently locking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1577
+#: ../../src/kadmin/dbutil/dump.c:1570
 #, c-format
 msgid "%s: %s restore failed\n"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1582
+#: ../../src/kadmin/dbutil/dump.c:1575
 msgid "while unlocking database"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1592 ../../src/kadmin/dbutil/dump.c:1611
+#: ../../src/kadmin/dbutil/dump.c:1585 ../../src/kadmin/dbutil/dump.c:1604
 msgid "while reinitializing update log"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1602
+#: ../../src/kadmin/dbutil/dump.c:1595
 msgid "while making newly loaded database live"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1618
+#: ../../src/kadmin/dbutil/dump.c:1611
 msgid "while writing update log header"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/dump.c:1632
+#: ../../src/kadmin/dbutil/dump.c:1625
 #, c-format
 msgid "while deleting bad database %s"
 msgstr ""
@@ -2845,10 +2877,10 @@ msgid ""
 "\tcreate  [-s]\n"
 "\tdestroy [-f]\n"
 "\tstash   [-f keyfile]\n"
-"\tdump    [-old|-b6|-b7|-r13|-r18] [-verbose]\n"
+"\tdump    [-b7|-r13|-r18] [-verbose]\n"
 "\t        [-mkey_convert] [-new_mkey_file mkey_file]\n"
 "\t        [-rev] [-recurse] [filename [princs...]]\n"
-"\tload    [-old|-b6|-b7|-r13|-r18] [-verbose] [-update] filename\n"
+"\tload    [-b7|-r13|-r18] [-hash] [-verbose] [-update] filename\n"
 "\tark     [-e etype_list] principal\n"
 "\tadd_mkey [-e etype] [-s]\n"
 "\tuse_mkey kvno [time]\n"
@@ -2968,7 +3000,7 @@ msgstr ""
 msgid "opening %s for writing"
 msgstr ""
 
-#: ../../src/kadmin/dbutil/tabdump.c:659
+#: ../../src/kadmin/dbutil/tabdump.c:655
 msgid "performing tabular dump"
 msgstr ""
 
@@ -3217,7 +3249,7 @@ msgstr ""
 msgid "gss_to_krb5_name: failed display_name status %d"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:86
+#: ../../src/kadmin/server/ovsec_kadmd.c:82
 #, c-format
 msgid ""
 "Usage: kadmind [-x db_args]* [-r realm] [-m] [-nofork] [-port port-number]\n"
@@ -3229,149 +3261,149 @@ msgid ""
 "\t\t\tLook at each database documentation for supported arguments\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:110
+#: ../../src/kadmin/server/ovsec_kadmd.c:106
 #, c-format
 msgid "%s: %s while %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:112
+#: ../../src/kadmin/server/ovsec_kadmd.c:108
 #, c-format
 msgid "%s while %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:114
+#: ../../src/kadmin/server/ovsec_kadmd.c:110
 #, c-format
 msgid "%s: %s, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:115
+#: ../../src/kadmin/server/ovsec_kadmd.c:111
 #, c-format
 msgid "%s, aborting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:282
+#: ../../src/kadmin/server/ovsec_kadmd.c:278
 #, c-format
 msgid ""
 "WARNING! Forged/garbled request: %s, claimed client = %.*s%s, server = %.*s"
 "%s, addr = %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:288
+#: ../../src/kadmin/server/ovsec_kadmd.c:284
 #, c-format
 msgid ""
 "WARNING! Forged/garbled request: %d, claimed client = %.*s%s, server = %.*s"
 "%s, addr = %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:302
+#: ../../src/kadmin/server/ovsec_kadmd.c:298
 #, c-format
 msgid "Miscellaneous RPC error: %s, %s"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:318
+#: ../../src/kadmin/server/ovsec_kadmd.c:314
 #, c-format
 msgid "%s Cannot decode status %d"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:336
+#: ../../src/kadmin/server/ovsec_kadmd.c:332
 #, c-format
 msgid "Authentication attempt failed: %s, GSS-API error strings are:"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:341
+#: ../../src/kadmin/server/ovsec_kadmd.c:337
 msgid "   GSS-API error strings complete."
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:379
+#: ../../src/kadmin/server/ovsec_kadmd.c:375
 #, c-format
 msgid "%s: cannot initialize. Not enough memory\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:451
+#: ../../src/kadmin/server/ovsec_kadmd.c:443
 #, c-format
 msgid "%s: %s while initializing context, aborting\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:462
-#: ../../src/kadmin/server/ovsec_kadmd.c:531
+#: ../../src/kadmin/server/ovsec_kadmd.c:454
+#: ../../src/kadmin/server/ovsec_kadmd.c:523
 msgid "initializing"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:466
+#: ../../src/kadmin/server/ovsec_kadmd.c:458
 msgid "getting config parameters"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:468
+#: ../../src/kadmin/server/ovsec_kadmd.c:460
 msgid "Missing required realm configuration"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:470
+#: ../../src/kadmin/server/ovsec_kadmd.c:462
 msgid "Missing required ACL file configuration"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:472
+#: ../../src/kadmin/server/ovsec_kadmd.c:464
 msgid "-proponly can only be used when iprop_enable is true"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:478
+#: ../../src/kadmin/server/ovsec_kadmd.c:470
 msgid "initializing network"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:483
+#: ../../src/kadmin/server/ovsec_kadmd.c:475
 msgid "Cannot build GSSAPI auth names"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:487
+#: ../../src/kadmin/server/ovsec_kadmd.c:479
 msgid "Cannot set up KDB keytab"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:490
+#: ../../src/kadmin/server/ovsec_kadmd.c:482
 msgid "Cannot set GSSAPI authentication names"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:507
+#: ../../src/kadmin/server/ovsec_kadmd.c:499
 msgid "Cannot initialize GSSAPI service name"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:512
+#: ../../src/kadmin/server/ovsec_kadmd.c:504
 msgid "initializing ACL file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:520
+#: ../../src/kadmin/server/ovsec_kadmd.c:512
 msgid "spawning daemon process"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:524
+#: ../../src/kadmin/server/ovsec_kadmd.c:516
 msgid "creating PID file"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:533
+#: ../../src/kadmin/server/ovsec_kadmd.c:525
 msgid "Seeding random number generator"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:536
+#: ../../src/kadmin/server/ovsec_kadmd.c:528
 msgid "getting random seed"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:543
+#: ../../src/kadmin/server/ovsec_kadmd.c:535
 msgid "mapping update log"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:547
+#: ../../src/kadmin/server/ovsec_kadmd.c:539
 #, c-format
 msgid "%s: create IPROP svc (PROG=%d, VERS=%d)\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:555
+#: ../../src/kadmin/server/ovsec_kadmd.c:547
 msgid "starting"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:557 ../../src/kdc/main.c:1052
+#: ../../src/kadmin/server/ovsec_kadmd.c:549 ../../src/kdc/main.c:1052
 #, c-format
 msgid "%s: starting...\n"
 msgstr ""
 
-#: ../../src/kadmin/server/ovsec_kadmd.c:560
+#: ../../src/kadmin/server/ovsec_kadmd.c:552
 msgid "finished, exiting"
 msgstr ""
 
@@ -3650,7 +3682,7 @@ msgstr ""
 #, c-format
 msgid ""
 "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
-"\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
+"\t\t[-T time_offset] [-m] [-k masterenctype]\n"
 "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
 "\t\t[-n] [-w numworkers] [/]\n"
 "\n"
@@ -3901,22 +3933,10 @@ msgstr ""
 #, c-format
 msgid ""
 "\n"
-"Usage: %s [-r realm] [-s keytab] [-dS] [-f replica_file]\n"
-msgstr ""
-
-#: ../../src/kprop/kpropd.c:172
-#, c-format
-msgid "\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"
-msgstr ""
-
-#: ../../src/kprop/kpropd.c:173
-#, c-format
-msgid "\t[-x db_args]* [-P port] [-a acl_file]\n"
-msgstr ""
-
-#: ../../src/kprop/kpropd.c:174
-#, c-format
-msgid "\t[-A admin_server] [--pid-file=pid_file]\n"
+"Usage: %s [-r realm] [-s keytab] [-d] [-D] [-S]\n"
+"\t[-f replica_file] [-F kerberos_db_file ]\n"
+"\t[-p kdb5_util_pathname] [-x db_args]* [-P port]\n"
+"\t[-a acl_file] [-A admin_server] [--pid-file=pid_file]\n"
 msgstr ""
 
 #: ../../src/kprop/kpropd.c:230
@@ -5068,7 +5088,7 @@ msgstr ""
 msgid "Unknown %s (field = %d)"
 msgstr ""
 
-#: ../../src/lib/gssapi/krb5/acquire_cred.c:153
+#: ../../src/lib/gssapi/krb5/acquire_cred.c:148
 #, c-format
 msgid "No key table entry found matching %s"
 msgstr ""
@@ -5424,16 +5444,16 @@ msgstr ""
 msgid "Credentials cache keyring '%s' not found"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:178
+#: ../../src/lib/krb5/ccache/cccursor.c:207
 #, c-format
 msgid "Can't find client principal %s in cache collection"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:258
+#: ../../src/lib/krb5/ccache/cccursor.c:291
 msgid "No Kerberos credentials available"
 msgstr ""
 
-#: ../../src/lib/krb5/ccache/cccursor.c:264
+#: ../../src/lib/krb5/ccache/cccursor.c:297
 #, c-format
 msgid "No Kerberos credentials available (default cache: %s)"
 msgstr ""
@@ -5563,32 +5583,32 @@ msgstr ""
 msgid "Reply has wrong form of session key for anonymous request"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1576
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1571
 #, c-format
 msgid "Warning: Your password will expire in less than one hour on %s"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1580
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1575
 #, c-format
 msgid "Warning: Your password will expire in %d hour%s on %s"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1584
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1579
 #, c-format
 msgid "Warning: Your password will expire in %d days on %s"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1606
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1601
 msgid ""
 "Warning: encryption type des3-cbc-sha1 used for authentication is weak and "
 "will be disabled"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1816
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1811
 msgid "Failed to store credentials"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/get_in_tkt.c:1912
+#: ../../src/lib/krb5/krb/get_in_tkt.c:1907
 #, c-format
 msgid "Client '%s' not found in Kerberos database"
 msgstr ""
@@ -5617,12 +5637,12 @@ msgstr ""
 msgid "%.*s%s%s.  Please try again.\n"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/parse.c:201
+#: ../../src/lib/krb5/krb/parse.c:202
 #, c-format
 msgid "Principal %s is missing required realm"
 msgstr ""
 
-#: ../../src/lib/krb5/krb/parse.c:213
+#: ../../src/lib/krb5/krb/parse.c:214
 #, c-format
 msgid "Principal %s has realm present"
 msgstr ""
@@ -6582,17 +6602,17 @@ msgstr ""
 msgid "Cannot read key file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5183
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5181
 #, c-format
 msgid "Cannot open file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5190
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5188
 #, c-format
 msgid "Cannot read file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5800
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5798
 #, c-format
 msgid "unknown code 0x%x"
 msgstr ""
@@ -6606,7 +6626,7 @@ msgstr ""
 msgid "Internal error parsing X509_user_identity\n"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_identity.c:539
+#: ../../src/plugins/preauth/pkinit/pkinit_identity.c:549
 msgid "No user identity options specified"
 msgstr ""
 
