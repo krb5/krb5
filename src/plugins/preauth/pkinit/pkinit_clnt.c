@@ -1101,6 +1101,11 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     }
 
     if (processing_request) {
+        if (reqctx->idopts->anchors == NULL) {
+            krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                                   _("No pkinit_anchors supplied"));
+            return KRB5_PREAUTH_FAILED;
+        }
         pkinit_client_profile(context, plgctx, reqctx, cb, rock,
                               &request->server->realm);
         /* Pull in PINs and passwords for identities which we deferred

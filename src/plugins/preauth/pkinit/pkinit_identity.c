@@ -576,8 +576,9 @@ pkinit_identity_prompt(krb5_context context,
                        int do_matching,
                        krb5_principal princ)
 {
-    krb5_error_code retval = EINVAL;
+    krb5_error_code retval = 0;
     const char *signer_identity;
+    krb5_boolean valid;
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
@@ -630,22 +631,36 @@ pkinit_identity_prompt(krb5_context context,
             goto errout;
     } /* Not anonymous principal */
 
+    /* Require at least one successful anchor if any are specified. */
+    valid = FALSE;
     for (i = 0; idopts->anchors != NULL && idopts->anchors[i] != NULL; i++) {
         retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
                                        idopts, id_cryptoctx,
                                        idopts->anchors[i], CATYPE_ANCHORS);
-        if (retval)
-            goto errout;
+        if (!retval)
+            valid = TRUE;
     }
+    if (retval && !valid)
+        goto errout;
+    krb5_clear_error_message(context);
+    retval = 0;
+
+    /* Require at least one successful intermediate if any are specified. */
+    valid = FALSE;
     for (i = 0; idopts->intermediates != NULL
              && idopts->intermediates[i] != NULL; i++) {
         retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
                                        idopts, id_cryptoctx,
                                        idopts->intermediates[i],
                                        CATYPE_INTERMEDIATES);
-        if (retval)
-            goto errout;
+        if (!retval)
+            valid = TRUE;
     }
+    if (retval && !valid)
+        goto errout;
+    krb5_clear_error_message(context);
+    retval = 0;
+
     for (i = 0; idopts->crls != NULL && idopts->crls[i] != NULL; i++) {
         retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
                                        idopts, id_cryptoctx, idopts->crls[i],
