@@ -3123,7 +3123,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
  * Serialize a @c krb5_creds object.
  *
  * @param [in]  context         Library context
- * @param [in]  creds           The credentials object to serialize
+ * @param [in]  in_creds        The credentials object to serialize
  * @param [out] data_out        The serialized credentials
  *
  * Serialize @a creds in the format used by the FILE ccache format (vesion 4)
@@ -3665,12 +3665,9 @@ krb5_address_compare(krb5_context context, const krb5_address *addr1,
  * @param [in] addr1            First address
  * @param [in] addr2            Second address
  *
- * @retval
- *  0 The two addresses are the same
- * @retval
- *  \< 0 First address is less than second
- * @retval
- *  \> 0 First address is greater than second
+ * @retval 0 if The two addresses are the same
+ * @retval < 0 First address is less than second
+ * @retval > 0 First address is greater than second
  */
 int KRB5_CALLCONV
 krb5_address_order(krb5_context context, const krb5_address *addr1,
@@ -8498,14 +8495,14 @@ krb5_set_trace_filename(krb5_context context, const char *filename);
  * @param [in]  realm           The realm the message will be sent to
  * @param [in]  message         The original message to be sent to the KDC
  * @param [out] new_message_out Optional replacement message to be sent
- * @param [out] reply_out       Optional synthetic reply
+ * @param [out] new_reply_out   Optional synthetic reply
  *
  * If the hook function returns an error code, the KDC communication will be
  * aborted and the error code will be returned to the library operation which
  * initiated the communication.
  *
- * If the hook function sets @a reply_out, @a message will not be sent to the
- * KDC, and the given reply will used instead.
+ * If the hook function sets @a new_reply_out, @a message will not be sent to
+ * the KDC, and the given reply will used instead.
  *
  * If the hook function sets @a new_message_out, the given message will be sent
  * to the KDC in place of @a message.
