@@ -42,7 +42,8 @@
 #include <ctype.h>
 #include <errno.h>
 #ifndef _WIN32
-#include <glob.h>
+#include <sys/types.h>
+#include <dirent.h>
 #endif
 
 #define	M_DEFAULT	"default"
@@ -61,7 +62,7 @@
 #ifndef MECH_CONF
 #define	MECH_CONF "/etc/gss/mech"
 #endif
-#define MECH_CONF_PATTERN MECH_CONF ".d/*.conf"
+#define MECH_CONF_DIR MECH_CONF ".d"
 
 /* Local functions */
 static void addConfigEntry(const char *oidStr, const char *oid,
@@ -477,14 +478,17 @@ load_if_changed(const char *pathname, time_t last, time_t *highest)
 
 #ifndef _WIN32
 /* Try to load any config files which have changed since the last call.  Config
- * files are MECH_CONF and any files matching MECH_CONF_PATTERN. */
+ * files are MECH_CONF and any files matching found in MECH_CONF_DIR. */
 static void
 loadConfigFiles()
 {
-	glob_t globbuf;
 	time_t highest = 0, now;
-	char **path;
+	char *path;
 	const char *val;
+	DIR *mech_dir;
+	struct dirent *dp;
+	int e;
+	struct stat st;
 
 	/* Don't glob and stat more than once per second. */
 	if (time(&now) == (time_t)-1 || now == g_confLastCall)
@@ -499,12 +503,23 @@ loadConfigFiles()
 
 	load_if_changed(MECH_CONF, g_confFileModTime, &highest);
 
-	memset(&globbuf, 0, sizeof(globbuf));
-	if (glob(MECH_CONF_PATTERN, 0, NULL, &globbuf) == 0) {
-		for (path = globbuf.gl_pathv; *path != NULL; path++)
-			load_if_changed(*path, g_confFileModTime, &highest);
+	mech_dir = opendir(MECH_CONF_DIR);
+	if (mech_dir != NULL) {
+		while ((dp = readdir(mech_dir)) != NULL) {
+			path = NULL;
+			e = asprintf(&path, "%s/%s",
+					MECH_CONF_DIR, dp->d_name);
+			if (e == -1)
+				continue;
+
+			e = stat(path, &st);
+			if ((e == 0) && S_ISREG(st.st_mode))
+				load_if_changed(path, g_confFileModTime,
+						&highest);
+			free(path);
+		}
+		closedir(mech_dir);
 	}
-	globfree(&globbuf);
 
 	g_confFileModTime = highest;
 }
