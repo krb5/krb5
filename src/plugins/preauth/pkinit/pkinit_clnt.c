@@ -1105,8 +1105,6 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                                    _("No pkinit_anchors supplied"));
             return KRB5_PREAUTH_FAILED;
         }
-        pkinit_client_profile(context, plgctx, reqctx, cb, rock,
-                              &request->server->realm);
         /* Pull in PINs and passwords for identities which we deferred
          * loading earlier. */
         retval = pkinit_client_parse_answers(context, moddata, modreq,

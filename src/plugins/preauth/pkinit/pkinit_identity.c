@@ -333,6 +333,8 @@ parse_fs_options(krb5_context context,
     if (key_filename == NULL)
         goto cleanup;
 
+    free(idopts->cert_filename);
+    free(idopts->key_filename);
     idopts->cert_filename = cert_filename;
     idopts->key_filename = key_filename;
     cert_filename = key_filename = NULL;
@@ -355,10 +357,12 @@ parse_pkcs12_options(krb5_context context,
     if (residual == NULL || residual[0] == '\0')
         return 0;
 
+    free(idopts->cert_filename);
     idopts->cert_filename = strdup(residual);
     if (idopts->cert_filename == NULL)
         goto cleanup;
 
+    free(idopts->key_filename);
     idopts->key_filename = strdup(residual);
     if (idopts->key_filename == NULL)
         goto cleanup;
@@ -438,6 +442,7 @@ process_option_identity(krb5_context context,
         break;
 #endif
     case IDTYPE_DIR:
+        free(idopts->cert_filename);
         idopts->cert_filename = strdup(residual);
         if (idopts->cert_filename == NULL)
             retval = ENOMEM;
