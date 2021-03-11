@@ -2249,6 +2249,71 @@ Leash_get_default_preserve_kinit_settings(
     return 1;
 }
 
+static
+BOOL
+get_show_password_prompt(
+    HKEY hBaseKey,
+    DWORD * result
+    )
+{
+    return get_DWORD_from_registry(hBaseKey,
+                                   LEASH_REGISTRY_KEY_NAME,
+                                   LEASH_REGISTRY_VALUE_SHOW_PASSWORD_PROMPT,
+                                   result);
+}
+
+DWORD
+Leash_reset_show_password_prompt(
+    )
+{
+    HKEY hKey;
+    LONG rc;
+
+    rc = RegOpenKeyEx(HKEY_CURRENT_USER, LEASH_SETTINGS_REGISTRY_KEY_NAME, 0, KEY_WRITE, &hKey);
+    if (rc)
+        return rc;
+
+    rc = RegDeleteValue(hKey, LEASH_REGISTRY_VALUE_SHOW_PASSWORD_PROMPT);
+    RegCloseKey(hKey);
+
+    return rc;
+}
+
+DWORD
+Leash_set_show_password_prompt(
+    DWORD onoff
+    )
+{
+    HKEY hKey;
+    LONG rc;
+
+    rc = RegCreateKeyEx(HKEY_CURRENT_USER, LEASH_REGISTRY_KEY_NAME, 0,
+                        0, 0, KEY_WRITE, 0, &hKey, 0);
+    if (rc)
+        return rc;
+
+    rc = RegSetValueEx(hKey, LEASH_REGISTRY_VALUE_SHOW_PASSWORD_PROMPT, 0, REG_DWORD,
+                       (LPBYTE) &onoff, sizeof(DWORD));
+    RegCloseKey(hKey);
+
+    return rc;
+}
+
+DWORD
+Leash_get_show_password_prompt(
+    )
+{
+    HMODULE hmLeash;
+    DWORD result;
+
+    if (get_show_password_prompt(HKEY_CURRENT_USER, &result) ||
+        get_show_password_prompt(HKEY_LOCAL_MACHINE, &result))
+    {
+        return result;
+    }	
+    return 0;
+}
+
 void
 Leash_reset_defaults(void)
 {
@@ -2266,6 +2331,7 @@ Leash_reset_defaults(void)
     Leash_reset_default_renew_max();
     Leash_reset_default_uppercaserealm();
     Leash_reset_default_preserve_kinit_settings();
+	Leash_reset_show_password_prompt();
 }
 
 static void

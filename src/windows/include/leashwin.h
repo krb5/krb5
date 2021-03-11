@@ -205,6 +205,9 @@ DWORD Leash_reset_default_mslsa_import();
 DWORD Leash_get_default_preserve_kinit_settings();
 DWORD Leash_set_default_preserve_kinit_settings(DWORD onoff);
 DWORD Leash_reset_default_preserve_kinit_settings();
+DWORD Leash_get_show_password_prompt();
+DWORD Leash_set_show_password_prompt(DWORD onoff);
+DWORD Leash_reset_show_password_prompt();
 #ifdef __cplusplus
 }
 #endif

@@ -415,6 +415,8 @@ DECL_FUNC_PTR(Leash_timesync);
 DECL_FUNC_PTR(Leash_get_default_uppercaserealm);
 DECL_FUNC_PTR(Leash_set_default_uppercaserealm);
 DECL_FUNC_PTR(Leash_renew);
+DECL_FUNC_PTR(Leash_get_show_password_prompt);
+DECL_FUNC_PTR(Leash_set_show_password_prompt);
 
 FUNC_INFO leash_fi[] = {
     MAKE_FUNC_INFO(Leash_kdestroy),
@@ -426,6 +428,8 @@ FUNC_INFO leash_fi[] = {
     MAKE_FUNC_INFO(Leash_get_default_uppercaserealm),
     MAKE_FUNC_INFO(Leash_set_default_uppercaserealm),
     MAKE_FUNC_INFO(Leash_renew),
+	MAKE_FUNC_INFO(Leash_get_show_password_prompt),	
+	MAKE_FUNC_INFO(Leash_set_show_password_prompt),	
     END_FUNC_INFO
 };
 

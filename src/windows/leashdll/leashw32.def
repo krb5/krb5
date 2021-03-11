@@ -69,6 +69,9 @@ EXPORTS
     Leash_importable
     Leash_renew
     Leash_reset_defaults
-
+	Leash_get_show_password_prompt		
+	Leash_set_show_password_prompt
+	Leash_reset_show_password_prompt	
+	
 	; XXX - These have to go...
     not_an_API_Leash_AcquireInitialTicketsIfNeeded

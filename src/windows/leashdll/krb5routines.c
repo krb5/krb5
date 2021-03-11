@@ -243,7 +243,10 @@ DWORD                       publicIP
 	pkrb5_get_init_creds_opt_set_proxiable(options,
                                            proxiable ? 1 : 0);
 	pkrb5_get_init_creds_opt_set_renew_life(options,
-                                            renew_life);
+                                            renew_life);											
+	pkrb5_get_init_creds_opt_set_change_password_prompt(options, 
+														Leash_get_show_password_prompt());											
+														
     if (addressless)
         pkrb5_get_init_creds_opt_set_address_list(options,NULL);
     else {
