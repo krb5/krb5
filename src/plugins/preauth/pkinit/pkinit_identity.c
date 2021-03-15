@@ -30,7 +30,6 @@
  */
 
 #include "pkinit.h"
-#include <dlfcn.h>
 #include <dirent.h>
 
 static void

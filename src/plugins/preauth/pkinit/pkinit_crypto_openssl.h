@@ -84,7 +84,7 @@ struct _pkinit_identity_crypto_context {
     char *token_label;
     char *cert_label;
     /* These are crypto-specific */
-    void *p11_module;
+    struct plugin_file_handle *p11_module;
     CK_SESSION_HANDLE session;
     CK_FUNCTION_LIST_PTR p11;
     uint8_t *cert_id;

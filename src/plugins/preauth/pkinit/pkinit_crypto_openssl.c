@@ -33,7 +33,6 @@
 #include "pkinit_crypto_openssl.h"
 #include "k5-buf.h"
 #include "k5-hex.h"
-#include <dlfcn.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <arpa/inet.h>
@@ -102,8 +101,8 @@ static krb5_error_code pkinit_login
  CK_TOKEN_INFO *tip, const char *password);
 static krb5_error_code pkinit_open_session
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx);
-static void * pkinit_C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p);
-static CK_RV pkinit_C_UnloadModule(void *handle);
+static struct plugin_file_handle *pkinit_C_LoadModule
+(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p);
 #ifdef SILLYDECRYPT
 CK_RV pkinit_C_Decrypt
 (pkinit_identity_crypto_context id_cryptoctx,
@@ -1006,7 +1005,7 @@ pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx)
         ctx->p11 = NULL;
     }
     if (ctx->p11_module != NULL) {
-        pkinit_C_UnloadModule(ctx->p11_module);
+        krb5int_close_plugin(ctx->p11_module);
         ctx->p11_module = NULL;
     }
     free(ctx->p11_module_name);
@@ -3548,33 +3547,35 @@ prepare_enc_data(const uint8_t *indata, int indata_len, uint8_t **outdata,
 }
 
 #ifndef WITHOUT_PKCS11
-static void *
+static struct plugin_file_handle *
 pkinit_C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p)
 {
-    void *handle;
+    struct plugin_file_handle *handle;
     CK_RV (*getflist)(CK_FUNCTION_LIST_PTR_PTR);
+    struct errinfo einfo = EMPTY_ERRINFO;
+    void (*sym)();
+    long err;
+    CK_RV rv;
 
     pkiDebug("loading module \"%s\"... ", modname);
-    handle = dlopen(modname, RTLD_NOW);
-    if (handle == NULL) {
+    if (krb5int_open_plugin(modname, &handle, &einfo) != 0) {
         pkiDebug("not found\n");
         return NULL;
     }
-    getflist = (CK_RV (*)(CK_FUNCTION_LIST_PTR_PTR)) dlsym(handle, "C_GetFunctionList");
-    if (getflist == NULL || (*getflist)(p11p) != CKR_OK) {
-        dlclose(handle);
+
+    err = krb5int_get_plugin_func(handle, "C_GetFunctionList", &sym, &einfo);
+    k5_clear_error(&einfo);
+    if (!err) {
+        getflist = (CK_RV (*)())sym;
+        rv = (*getflist)(p11p);
+    }
+    if (err || rv != CKR_OK) {
+        krb5int_close_plugin(handle);
         pkiDebug("failed\n");
         return NULL;
     }
     pkiDebug("ok\n");
     return handle;
-}
-
-static CK_RV
-pkinit_C_UnloadModule(void *handle)
-{
-    dlclose(handle);
-    return CKR_OK;
 }
 
 static krb5_error_code
