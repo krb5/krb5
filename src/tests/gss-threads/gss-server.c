@@ -782,9 +782,6 @@ main(int argc, char **argv)
 
         stmp = create_socket(port);
         if (stmp >= 0) {
-            if (listen(stmp, max_threads == 1 ? 0 : max_threads) < 0)
-                perror("listening on socket");
-
             do {
                 struct _work_plan * work = malloc(sizeof(struct _work_plan));
 

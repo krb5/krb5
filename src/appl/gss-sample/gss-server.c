@@ -766,8 +766,6 @@ main(int argc, char **argv)
         int     stmp;
 
         if ((stmp = create_socket(port)) >= 0) {
-            if (listen(stmp, max_threads == 1 ? 0 : max_threads) < 0)
-                perror("listening on socket");
             fprintf(stderr, "starting...\n");
 
             do {
