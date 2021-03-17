@@ -1964,7 +1964,7 @@ crypto_retrieve_X509_sans(krb5_context context,
     krb5_principal *princs = NULL;
     char **upns = NULL;
     unsigned char **dnss = NULL;
-    unsigned int i, num_found = 0, num_sans = 0;
+    unsigned int i, num_sans = 0;
     X509_EXTENSION *ext = NULL;
     GENERAL_NAMES *ialt = NULL;
     GENERAL_NAME *gen = NULL;
@@ -2047,7 +2047,6 @@ crypto_retrieve_X509_sans(krb5_context context,
                              __FUNCTION__);
                 } else {
                     p++;
-                    num_found++;
                 }
             } else if (upns != NULL &&
                        OBJ_cmp(plgctx->id_ms_san_upn,
@@ -2058,6 +2057,7 @@ crypto_retrieve_X509_sans(krb5_context context,
                 upns[u] = k5memdup0(name.data, name.length, &ret);
                 if (upns[u] == NULL)
                     goto cleanup;
+                u++;
             } else {
                 pkiDebug("%s: unrecognized othername oid in SAN\n",
                          __FUNCTION__);
@@ -2079,7 +2079,6 @@ crypto_retrieve_X509_sans(krb5_context context,
                              __FUNCTION__);
                 } else {
                     d++;
-                    num_found++;
                 }
             }
             break;
