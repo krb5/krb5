@@ -32,6 +32,7 @@
 #include "k5-int.h"
 #include "pkinit_crypto_openssl.h"
 #include "k5-buf.h"
+#include "k5-err.h"
 #include "k5-hex.h"
 #include <unistd.h>
 #include <dirent.h>
@@ -101,8 +102,6 @@ static krb5_error_code pkinit_login
  CK_TOKEN_INFO *tip, const char *password);
 static krb5_error_code pkinit_open_session
 (krb5_context context, pkinit_identity_crypto_context id_cryptoctx);
-static struct plugin_file_handle *pkinit_C_LoadModule
-(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p);
 #ifdef SILLYDECRYPT
 CK_RV pkinit_C_Decrypt
 (pkinit_identity_crypto_context id_cryptoctx,
@@ -143,8 +142,8 @@ static int
 wrap_signeddata(unsigned char *data, unsigned int data_len,
                 unsigned char **out, unsigned int *out_len);
 
-static char *
-pkinit_pkcs11_code_to_text(int err);
+static const char *
+pkcs11err(int err);
 
 
 #ifdef HAVE_OPENSSL_CMS
@@ -1195,11 +1194,10 @@ cms_signeddata_create(krb5_context context,
             }
             certstack = X509_STORE_CTX_get1_chain(certctx);
             size = sk_X509_num(certstack);
-            pkiDebug("size of certificate chain = %d\n", size);
             for(i = 0; i < size - 1; i++) {
                 X509 *x = sk_X509_value(certstack, i);
                 X509_NAME_oneline(X509_get_subject_name(x), buf, sizeof(buf));
-                pkiDebug("cert #%d: %s\n", i, buf);
+                TRACE_PKINIT_CERT_CHAIN_NAME(context, (int)i, buf);
                 sk_X509_push(cert_stack, X509_dup(x));
             }
             X509_STORE_CTX_free(certctx);
@@ -1988,20 +1986,16 @@ crypto_retrieve_X509_sans(krb5_context context,
 
     X509_NAME_oneline(X509_get_subject_name(cert),
                       buf, sizeof(buf));
-    pkiDebug("%s: looking for SANs in cert = %s\n", __FUNCTION__, buf);
 
     l = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1);
     if (l < 0)
         return 0;
 
     if (!(ext = X509_get_ext(cert, l)) || !(ialt = X509V3_EXT_d2i(ext))) {
-        pkiDebug("%s: found no subject alt name extensions\n", __FUNCTION__);
+        TRACE_PKINIT_SAN_CERT_NONE(context, buf);
         goto cleanup;
     }
     num_sans = sk_GENERAL_NAME_num(ialt);
-
-    pkiDebug("%s: found %d subject alt name extension(s)\n", __FUNCTION__,
-             num_sans);
 
     /* OK, we're likely returning something. Allocate return values */
     if (princs_ret != NULL) {
@@ -2088,6 +2082,8 @@ crypto_retrieve_X509_sans(krb5_context context,
         }
     }
     sk_GENERAL_NAME_pop_free(ialt, GENERAL_NAME_free);
+
+    TRACE_PKINIT_SAN_CERT_COUNT(context, (int)num_sans, p, u, d, buf);
 
     retval = 0;
     if (princs != NULL && *princs != NULL) {
@@ -3547,34 +3543,47 @@ prepare_enc_data(const uint8_t *indata, int indata_len, uint8_t **outdata,
 
 #ifndef WITHOUT_PKCS11
 static struct plugin_file_handle *
-pkinit_C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p)
+load_pkcs11_module(krb5_context context, const char *modname,
+                   CK_FUNCTION_LIST_PTR_PTR p11p)
 {
-    struct plugin_file_handle *handle;
+    struct plugin_file_handle *handle = NULL;
     CK_RV (*getflist)(CK_FUNCTION_LIST_PTR_PTR);
     struct errinfo einfo = EMPTY_ERRINFO;
+    const char *errmsg = NULL;
     void (*sym)();
     long err;
     CK_RV rv;
 
-    pkiDebug("loading module \"%s\"... ", modname);
-    if (krb5int_open_plugin(modname, &handle, &einfo) != 0) {
-        pkiDebug("not found\n");
-        return NULL;
+    TRACE_PKINIT_PKCS11_OPEN(context, modname);
+    err = krb5int_open_plugin(modname, &handle, &einfo);
+    if (err) {
+        errmsg = k5_get_error(&einfo, err);
+        TRACE_PKINIT_PKCS11_OPEN_FAILED(context, errmsg);
+        goto error;
     }
 
     err = krb5int_get_plugin_func(handle, "C_GetFunctionList", &sym, &einfo);
-    k5_clear_error(&einfo);
-    if (!err) {
-        getflist = (CK_RV (*)())sym;
-        rv = (*getflist)(p11p);
+    if (err) {
+        errmsg = k5_get_error(&einfo, err);
+        TRACE_PKINIT_PKCS11_GETSYM_FAILED(context, errmsg);
+        goto error;
     }
-    if (err || rv != CKR_OK) {
-        krb5int_close_plugin(handle);
-        pkiDebug("failed\n");
-        return NULL;
+
+    getflist = (CK_RV (*)())sym;
+    rv = (*getflist)(p11p);
+    if (rv != CKR_OK) {
+        TRACE_PKINIT_PKCS11_GETFLIST_FAILED(context, pkcs11err(rv));
+        goto error;
     }
-    pkiDebug("ok\n");
+
     return handle;
+
+error:
+    k5_free_error(&einfo, errmsg);
+    k5_clear_error(&einfo);
+    if (handle != NULL)
+        krb5int_close_plugin(handle);
+    return NULL;
 }
 
 static krb5_error_code
@@ -3631,7 +3640,7 @@ pkinit_login(krb5_context context,
                                        (u_char *) rdat.data, rdat.length);
 
         if (r != CKR_OK) {
-            pkiDebug("C_Login: %s\n", pkinit_pkcs11_code_to_text(r));
+            TRACE_PKINIT_PKCS11_LOGIN_FAILED(context, pkcs11err(r));
             r = KRB5KDC_ERR_PREAUTH_FAILED;
         }
     }
@@ -3657,22 +3666,24 @@ pkinit_open_session(krb5_context context,
         return 0; /* session already open */
 
     /* Load module */
-    cctx->p11_module =
-        pkinit_C_LoadModule(cctx->p11_module_name, &cctx->p11);
+    cctx->p11_module = load_pkcs11_module(context, cctx->p11_module_name,
+                                          &cctx->p11);
     if (cctx->p11_module == NULL)
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
     /* Init */
     if ((r = cctx->p11->C_Initialize(NULL)) != CKR_OK) {
-        pkiDebug("C_Initialize: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_Initialize: %s\n", pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
     /* Get the list of available slots */
     if (cctx->p11->C_GetSlotList(TRUE, NULL, &count) != CKR_OK)
         return KRB5KDC_ERR_PREAUTH_FAILED;
-    if (count == 0)
+    if (count == 0) {
+        TRACE_PKINIT_PKCS11_NO_TOKEN(context);
         return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
     slotlist = calloc(count, sizeof(CK_SLOT_ID));
     if (slotlist == NULL)
         return ENOMEM;
@@ -3688,13 +3699,13 @@ pkinit_open_session(krb5_context context,
         /* Open session */
         if ((r = cctx->p11->C_OpenSession(slotlist[i], CKF_SERIAL_SESSION,
                                           NULL, NULL, &cctx->session)) != CKR_OK) {
-            pkiDebug("C_OpenSession: %s\n", pkinit_pkcs11_code_to_text(r));
+            pkiDebug("C_OpenSession: %s\n", pkcs11err(r));
             return KRB5KDC_ERR_PREAUTH_FAILED;
         }
 
         /* Get token info */
         if ((r = cctx->p11->C_GetTokenInfo(slotlist[i], &tinfo)) != CKR_OK) {
-            pkiDebug("C_GetTokenInfo: %s\n", pkinit_pkcs11_code_to_text(r));
+            pkiDebug("C_GetTokenInfo: %s\n", pkcs11err(r));
             return KRB5KDC_ERR_PREAUTH_FAILED;
         }
 
@@ -3706,8 +3717,8 @@ pkinit_open_session(krb5_context context,
         }
         label_len = cp - tinfo.label;
 
-        pkiDebug("open_session: slotid %d token \"%.*s\"\n",
-                 (int)slotlist[i], (int)label_len, tinfo.label);
+        TRACE_PKINIT_PKCS11_SLOT(context, (int)slotlist[i], (int)label_len,
+                                 tinfo.label);
         if (cctx->token_label == NULL ||
             (strlen(cctx->token_label) == label_len &&
              memcmp(cctx->token_label, tinfo.label, label_len) == 0))
@@ -3716,7 +3727,7 @@ pkinit_open_session(krb5_context context,
     }
     if (i >= count) {
         free(slotlist);
-        pkiDebug("open_session: no matching token found\n");
+        TRACE_PKINIT_PKCS11_NO_MATCH_TOKEN(context);
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
     cctx->slotid = slotlist[i];
@@ -3825,13 +3836,13 @@ pkinit_find_private_key(pkinit_identity_crypto_context id_cryptoctx,
     r = id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session, attrs, nattrs);
     if (r != CKR_OK) {
         pkiDebug("krb5_pkinit_sign_data: C_FindObjectsInit: %s\n",
-                 pkinit_pkcs11_code_to_text(r));
+                 pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
     r = id_cryptoctx->p11->C_FindObjects(id_cryptoctx->session, objp, 1, &count);
     id_cryptoctx->p11->C_FindObjectsFinal(id_cryptoctx->session);
-    pkiDebug("found %d private keys (%s)\n", (int) count, pkinit_pkcs11_code_to_text(r));
+    pkiDebug("found %d private keys (%s)\n", (int)count, pkcs11err(r));
     if (r != CKR_OK || count < 1)
         return KRB5KDC_ERR_PREAUTH_FAILED;
     return 0;
@@ -3944,7 +3955,7 @@ pkinit_decode_data_pkcs11(krb5_context context,
     r = pkinit_C_Decrypt(id_cryptoctx, (CK_BYTE_PTR) data, (CK_ULONG) data_len,
                          cp, &len);
     if (r != CKR_OK) {
-        pkiDebug("C_Decrypt: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_Decrypt: %s\n", pkcs11err(r));
         if (r == CKR_BUFFER_TOO_SMALL)
             pkiDebug("decrypt %d needs %d\n", (int) data_len, (int) len);
         return KRB5KDC_ERR_PREAUTH_FAILED;
@@ -4024,7 +4035,7 @@ pkinit_sign_data_pkcs11(krb5_context context,
 
     if ((r = id_cryptoctx->p11->C_SignInit(id_cryptoctx->session, &mech,
                                            obj)) != CKR_OK) {
-        pkiDebug("C_SignInit: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_SignInit: %s\n", pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
@@ -4047,7 +4058,7 @@ pkinit_sign_data_pkcs11(krb5_context context,
                                       (CK_ULONG) data_len, cp, &len);
     }
     if (r != CKR_OK) {
-        pkiDebug("C_Sign: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_Sign: %s\n", pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
     pkiDebug("sign %d -> %d\n", (int) data_len, (int) len);
@@ -4578,7 +4589,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 #else
     if ((r = id_cryptoctx->p11->C_GetMechanismList(id_cryptoctx->slotid, NULL,
                                                    &count)) != CKR_OK || count <= 0) {
-        pkiDebug("C_GetMechanismList: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_GetMechanismList: %s\n", pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
     mechp = malloc(count * sizeof (CK_MECHANISM_TYPE));
@@ -4635,7 +4646,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 
     r = id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session, attrs, nattrs);
     if (r != CKR_OK) {
-        pkiDebug("C_FindObjectsInit: %s\n", pkinit_pkcs11_code_to_text(r));
+        pkiDebug("C_FindObjectsInit: %s\n", pkcs11err(r));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
@@ -4661,7 +4672,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 
         if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
                                                         obj, attrs, 2)) != CKR_OK && r != CKR_BUFFER_TOO_SMALL) {
-            pkiDebug("C_GetAttributeValue: %s\n", pkinit_pkcs11_code_to_text(r));
+            pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(r));
             return KRB5KDC_ERR_PREAUTH_FAILED;
         }
         cert = (CK_BYTE_PTR) malloc((size_t) attrs[0].ulValueLen + 1);
@@ -4679,7 +4690,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 
         if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
                                                         obj, attrs, 2)) != CKR_OK) {
-            pkiDebug("C_GetAttributeValue: %s\n", pkinit_pkcs11_code_to_text(r));
+            pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(r));
             return KRB5KDC_ERR_PREAUTH_FAILED;
         }
 
@@ -5348,12 +5359,12 @@ crypto_load_cas_and_crls(krb5_context context,
 {
     switch (idtype) {
     case IDTYPE_FILE:
-        TRACE_PKINIT_LOAD_FROM_FILE(context);
+        TRACE_PKINIT_LOAD_FROM_FILE(context, id);
         return load_cas_and_crls(context, plg_cryptoctx, req_cryptoctx,
                                  id_cryptoctx, catype, id);
         break;
     case IDTYPE_DIR:
-        TRACE_PKINIT_LOAD_FROM_DIR(context);
+        TRACE_PKINIT_LOAD_FROM_DIR(context, id);
         return load_cas_and_crls_dir(context, plg_cryptoctx, req_cryptoctx,
                                      id_cryptoctx, catype, id);
         break;
@@ -5784,19 +5795,18 @@ print_pubkey(BIGNUM * key, char *msg)
 }
 #endif
 
-static char *
-pkinit_pkcs11_code_to_text(int err)
+static const char *
+pkcs11err(int err)
 {
     int i;
-    static char uc[32];
 
     for (i = 0; pkcs11_errstrings[i].text != NULL; i++)
         if (pkcs11_errstrings[i].code == err)
             break;
     if (pkcs11_errstrings[i].text != NULL)
         return (pkcs11_errstrings[i].text);
-    snprintf(uc, sizeof(uc), _("unknown code 0x%x"), err);
-    return (uc);
+
+    return "unknown PKCS11 error";
 }
 
 /*

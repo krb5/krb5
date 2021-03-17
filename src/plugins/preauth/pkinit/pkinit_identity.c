@@ -387,8 +387,7 @@ process_option_identity(krb5_context context,
     int idtype;
     krb5_error_code retval = 0;
 
-    pkiDebug("%s: processing value '%s'\n",
-             __FUNCTION__, value ? value : "NULL");
+    TRACE_PKINIT_IDENTITY_OPTION(context, value);
     if (value == NULL)
         return EINVAL;
 
