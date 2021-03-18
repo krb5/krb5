@@ -286,6 +286,7 @@ krb5_cc_start_seq_get
 krb5_cc_store_cred
 krb5_cc_support_switch
 krb5_cc_switch
+krb5_cc_notification_path
 krb5_cccol_cursor_free
 krb5_cccol_cursor_new
 krb5_cccol_cursor_next

@@ -790,4 +790,5 @@ const krb5_cc_ops krb5_mcc_ops = {
     krb5_mcc_lock,
     krb5_mcc_unlock,
     NULL, /* switch_to */
+    NULL, /* notification_file */
 };

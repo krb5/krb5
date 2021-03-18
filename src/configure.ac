@@ -1485,6 +1485,15 @@ if test "x$with_krb5_config" != xno; then
 		: "${DEFCKTNAME=`$with_krb5_config --defcktname`}"
 	fi
 fi
+
+# Setup the notification path
+AC_ARG_WITH([notification-path],
+  [AS_HELP_STRING([--with-notification-path=PATH],
+   [path to the directory with user notification file])])
+if test x"$with_notification_path" != x; then
+  AC_DEFINE_UNQUOTED(NOTIFICATION_PATH, ["$with_notification_path"], [Notification path])
+fi
+
 dnl The outer brackets around the case statement prevent m4 from eating the
 dnl brackets in the glob patterns.
 if test "${DEFCCNAME+set}" != set; then

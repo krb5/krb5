@@ -2208,5 +2208,6 @@ const krb5_cc_ops krb5_lcc_ops = {
     NULL, /* lock */
     NULL, /* unlock */
     NULL, /* switch_to */
+    NULL, /* notification_file */
 };
 #endif /* _WIN32 */

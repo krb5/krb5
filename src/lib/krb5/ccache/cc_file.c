@@ -1314,6 +1314,33 @@ interpret_errno(krb5_context context, int errnum)
     return ret;
 }
 
+static krb5_error_code KRB5_CALLCONV
+fcc_notification_file(krb5_context context,
+                      krb5_ccache cache,
+                      char **file)
+{
+    fcc_data *data = cache->data;
+    const char *name;
+
+    if (data == NULL || data->filename == NULL) {
+        return KRB5_CC_NOTFOUND;
+    }
+
+    /* /path/ccache -> ccache */
+
+    name = strrchr(data->filename, '/');
+    if (name == NULL || name[0] != '/') {
+        return KRB5_FCC_INTERNAL;
+    }
+
+    *file = strdup(name);
+    if (*file == NULL) {
+        return KRB5_CC_NOMEM;
+    }
+
+    return 0;
+}
+
 const krb5_cc_ops krb5_fcc_ops = {
     0,
     "FILE",
@@ -1340,6 +1367,7 @@ const krb5_cc_ops krb5_fcc_ops = {
     fcc_lock,
     fcc_unlock,
     NULL, /* switch_to */
+    fcc_notification_file,
 };
 
 #if defined(_WIN32)
@@ -1410,4 +1438,5 @@ const krb5_cc_ops krb5_cc_file_ops = {
     fcc_lock,
     fcc_unlock,
     NULL, /* switch_to */
+    NULL, /* notification_file */
 };

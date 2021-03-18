@@ -4572,6 +4572,24 @@ krb5_boolean KRB5_CALLCONV
 krb5_cc_support_switch(krb5_context context, const char *type);
 
 /**
+ * Retrieve path to the ccache notification file. The file is touched everytime
+ * the ccache or the collection that the ccache is part of has changed.
+ *
+ * You can setup a file system watch (e.g. inotify) on the path and
+ * watch for the file events (IN_ATTRIB) to monitor activity of the ccache.
+ *
+ * @param [in] context          Library context
+ * @param [in] cache            Credential cache handle
+ * @param [out] path            Notification file path
+ *
+ * @retval 0              Success. Path is set to the notification file path.
+ * @retval KRB5_CC_NOSUPP Notifications are not supported by this ccache.
+ * @return Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cc_notification_path(krb5_context context, krb5_ccache cache, char **path);
+
+/**
  * Find a credential cache with a specified client principal.
  *
  * @param [in]  context         Library context

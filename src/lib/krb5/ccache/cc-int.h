@@ -217,6 +217,7 @@ struct _krb5_cc_ops {
     krb5_error_code (KRB5_CALLCONV *lock)(krb5_context, krb5_ccache);
     krb5_error_code (KRB5_CALLCONV *unlock)(krb5_context, krb5_ccache);
     krb5_error_code (KRB5_CALLCONV *switch_to)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *notification_file)(krb5_context, krb5_ccache, char **);
 };
 
 extern const krb5_cc_ops *krb5_cc_dfl_ops;

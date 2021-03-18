@@ -1680,6 +1680,19 @@ cleanup:
     return ret;
 }
 
+static krb5_error_code KRB5_CALLCONV
+krcc_notification_file(krb5_context context,
+                       krb5_ccache cache,
+                       char **file)
+{
+    *file = strdup("keyring");
+    if (*file == NULL) {
+        return KRB5_CC_NOMEM;
+    }
+
+    return 0;
+}
+
 /*
  * ccache implementation storing credentials in the Linux keyring facility
  * The default is to put them at the session keyring level.
@@ -1712,6 +1725,7 @@ const krb5_cc_ops krb5_krcc_ops = {
     krcc_lock,
     krcc_unlock,
     krcc_switch_to,
+    krcc_notification_file,
 };
 
 #else /* !USE_KEYRING_CCACHE */
@@ -1737,6 +1751,7 @@ const krb5_cc_ops krb5_krcc_ops = {
     NULL,
     NULL,
     NULL,                       /* added after 1.4 release */
+    NULL,
     NULL,
     NULL,
     NULL,

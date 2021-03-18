@@ -1044,6 +1044,19 @@ kcm_switch_to(krb5_context context, krb5_ccache cache)
     return ret;
 }
 
+static krb5_error_code KRB5_CALLCONV
+kcm_notification_file(krb5_context context,
+                      krb5_ccache cache,
+                      char **file)
+{
+    *file = strdup("kcm");
+    if (*file == NULL) {
+        return KRB5_CC_NOMEM;
+    }
+
+    return 0;
+}
+
 const krb5_cc_ops krb5_kcm_ops = {
     0,
     "KCM",
@@ -1070,6 +1083,7 @@ const krb5_cc_ops krb5_kcm_ops = {
     kcm_lock,
     kcm_unlock,
     kcm_switch_to,
+    kcm_notification_file,
 };
 
 #endif /* not _WIN32 */

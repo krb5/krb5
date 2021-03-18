@@ -731,6 +731,53 @@ cleanup:
     return ret;
 }
 
+static krb5_error_code KRB5_CALLCONV
+dcc_notification_file(krb5_context context,
+                      krb5_ccache cache,
+                      char **file)
+{
+    dcc_data *data = cache->data;
+    krb5_error_code ret;
+    char *dup = NULL;
+    char *name;
+
+    if (data == NULL || data->residual == NULL) {
+        return KRB5_CC_NOTFOUND;
+    }
+
+    /* /path/ccol/ccache -> ccol */
+
+    dup = strdup(data->residual);
+    if (dup == NULL) {
+        ret = KRB5_CC_NOMEM;
+        goto done;
+    }
+
+    name = strrchr(dup, '/');
+    if (name == NULL || name[0] != '/') {
+        ret = KRB5_FCC_INTERNAL;
+        goto done;
+    }
+    *name = '\0';
+
+    name = strrchr(dup, '/');
+    if (name == NULL || name[0] != '/') {
+        ret = KRB5_FCC_INTERNAL;
+        goto done;
+    }
+
+    *file = strdup(name + 1);
+    if (*file == NULL) {
+        ret = KRB5_CC_NOMEM;
+    }
+
+    ret = 0;
+
+done:
+    free(dup);
+    return ret;
+}
+
 const krb5_cc_ops krb5_dcc_ops = {
     0,
     "DIR",
@@ -757,6 +804,7 @@ const krb5_cc_ops krb5_dcc_ops = {
     dcc_lock,
     dcc_unlock,
     dcc_switch_to,
+    dcc_notification_file,
 };
 
 #endif /* not _WIN32 */

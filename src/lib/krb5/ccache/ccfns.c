@@ -27,6 +27,67 @@
 #include "k5-int.h"
 #include "cc-int.h"
 #include "../krb/int-proto.h"
+#include "../os/os-proto.h"
+
+static krb5_error_code
+krb5_cc_notify_build_path(krb5_context context, krb5_ccache cache, char **path)
+{
+#ifndef NOTIFICATION_PATH
+    return KRB5_CC_NOSUPP;
+#else
+    krb5_error_code kret;
+    char *filename;
+    char *expanded;
+    int ret;
+
+    if (cache->ops->notification_file == NULL) {
+        return KRB5_CC_NOSUPP;
+    }
+
+    kret = k5_expand_path_tokens(context, NOTIFICATION_PATH, &expanded);
+    if (kret != 0) {
+        return kret;
+    }
+
+    kret = cache->ops->notification_file(context, cache, &filename);
+    if (kret != 0) {
+        return kret;
+    }
+
+    if (filename == NULL || filename[0] == '\0') {
+        free(filename);
+        return KRB5_CC_NOSUPP;
+    }
+
+    ret = asprintf(path, "%s/.krb5-%s", expanded, filename);
+    free(filename);
+    free(expanded);
+    if (ret <= 0) {
+        return KRB5_CC_NOMEM;
+    }
+
+    return 0;
+#endif
+}
+
+static void
+krb5_cc_notify(krb5_context context, krb5_ccache cache, krb5_error_code err)
+{
+    krb5_error_code kret;
+    char *path;
+
+    if (err != 0) {
+        return;
+    }
+
+    kret = krb5_cc_notify_build_path(context, cache, &path);
+    if (kret != 0) {
+        return;
+    }
+
+    utimes(path, NULL);
+    free(path);
+}
 
 const char * KRB5_CALLCONV
 krb5_cc_get_name(krb5_context context, krb5_ccache cache)
@@ -66,8 +127,14 @@ krb5_cc_initialize(krb5_context context, krb5_ccache cache,
 krb5_error_code KRB5_CALLCONV
 krb5_cc_destroy(krb5_context context, krb5_ccache cache)
 {
+    krb5_error_code ret;
+
     TRACE_CC_DESTROY(context, cache);
-    return cache->ops->destroy(context, cache);
+    /* kdestroy will also destroy the cache object so
+     * we have to notify in advance */
+    krb5_cc_notify(context, cache, 0);
+    ret = cache->ops->destroy(context, cache);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -80,8 +147,12 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_store_cred(krb5_context context, krb5_ccache cache,
                    krb5_creds *creds)
 {
+    krb5_error_code ret;
+
     TRACE_CC_STORE(context, cache, creds);
-    return cache->ops->store(context, cache, creds);
+    ret = cache->ops->store(context, cache, creds);
+    krb5_cc_notify(context, cache, ret);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -143,8 +214,12 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                     krb5_creds *creds)
 {
+    krb5_error_code ret;
+
     TRACE_CC_REMOVE(context, cache, creds);
-    return cache->ops->remove_cred(context, cache, flags, creds);
+    ret = cache->ops->remove_cred(context, cache, flags, creds);
+    krb5_cc_notify(context, cache, ret);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -297,6 +372,27 @@ krb5_cc_switch(krb5_context context, krb5_ccache cache)
     if (cache->ops->switch_to == NULL)
         return 0;
     return cache->ops->switch_to(context, cache);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_notification_path(krb5_context context, krb5_ccache cache, char **path)
+{
+    krb5_error_code kret;
+    int fd;
+
+    kret = krb5_cc_notify_build_path(context, cache, path);
+    if (kret != 0) {
+        return kret;
+    }
+
+    fd = open(*path, O_CREAT, 0600);
+    if (fd == -1) {
+        free(*path);
+        return KRB5_CC_IO;
+    }
+    close(fd);
+
+    return 0;
 }
 
 krb5_error_code
