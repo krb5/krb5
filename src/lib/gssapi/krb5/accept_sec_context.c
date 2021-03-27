@@ -982,7 +982,7 @@ kg_accept_krb5(minor_status, context_handle,
     {
         krb5_int32 seq_temp;
         krb5_auth_con_getremoteseqnumber(context, auth_context, &seq_temp);
-        ctx->seq_recv = seq_temp;
+        ctx->seq_recv = (uint32_t)seq_temp;
     }
 
     if ((code = krb5_timeofday(context, &now))) {
@@ -1065,7 +1065,7 @@ kg_accept_krb5(minor_status, context_handle,
         }
 
         krb5_auth_con_getlocalseqnumber(context, auth_context, &seq_temp);
-        ctx->seq_send = seq_temp & 0xffffffffL;
+        ctx->seq_send = (uint32_t)seq_temp;
 
         if (cfx_generate_subkey) {
             /* Get the new acceptor subkey.  With the code above, there

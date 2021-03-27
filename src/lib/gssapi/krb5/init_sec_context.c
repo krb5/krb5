@@ -631,7 +631,7 @@ kg_new_connection(
         }
 
         krb5_auth_con_getlocalseqnumber(context, ctx->auth_context, &seq_temp);
-        ctx->seq_send = seq_temp;
+        ctx->seq_send = (uint32_t)seq_temp;
         code = krb5_auth_con_getsendsubkey(context, ctx->auth_context,
                                            &keyblock);
         if (code != 0)
