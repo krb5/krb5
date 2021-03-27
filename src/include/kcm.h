@@ -87,7 +87,7 @@ typedef enum kcm_opcode {
     KCM_OP_INITIALIZE,          /*          (name, princ) -> ()          */
     KCM_OP_DESTROY,             /*                 (name) -> ()          */
     KCM_OP_STORE,               /*           (name, cred) -> ()          */
-    KCM_OP_RETRIEVE,
+    KCM_OP_RETRIEVE,            /* (name, flags, credtag) -> (cred)      */
     KCM_OP_GET_PRINCIPAL,       /*                 (name) -> (princ)     */
     KCM_OP_GET_CRED_UUID_LIST,  /*                 (name) -> (uuid, ...) */
     KCM_OP_GET_CRED_BY_UUID,    /*           (name, uuid) -> (cred)      */

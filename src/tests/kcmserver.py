@@ -40,6 +40,7 @@ class KCMOpcodes(object):
     INITIALIZE = 4
     DESTROY = 5
     STORE = 6
+    RETRIEVE = 7
     GET_PRINCIPAL = 8
     GET_CRED_UUID_LIST = 9
     GET_CRED_BY_UUID = 10
@@ -54,6 +55,7 @@ class KCMOpcodes(object):
 
 
 class KRB5Errors(object):
+    KRB5_CC_NOTFOUND = -1765328243
     KRB5_CC_END = -1765328242
     KRB5_CC_NOSUPP = -1765328137
     KRB5_FCC_NOFILE = -1765328189
@@ -86,9 +88,27 @@ def get_cache(name):
     return cache
 
 
+def unpack_data(argbytes):
+    dlen, = struct.unpack('>L', argbytes[:4])
+    return argbytes[4:dlen+4], argbytes[dlen+4:]
+
+
 def unmarshal_name(argbytes):
     offset = argbytes.find(b'\0')
     return argbytes[0:offset], argbytes[offset+1:]
+
+
+def unmarshal_princ(argbytes):
+    # Ignore the type at argbytes[0:4].
+    ncomps, = struct.unpack('>L', argbytes[4:8])
+    realm, rest = unpack_data(argbytes[8:])
+    comps = []
+    for i in range(ncomps):
+        comp, rest = unpack_data(rest)
+        comps.append(comp)
+    # Asssume no quoting is needed.
+    princ = b'/'.join(comps) + b'@' + realm
+    return princ, rest
 
 
 def op_gen_new(argbytes):
@@ -124,6 +144,22 @@ def op_store(argbytes):
     cache.creds[uuid] = cred
     cache.cred_uuids.append(uuid)
     return 0, b''
+
+
+def op_retrieve(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    # Ignore the flags at rest[0:4] and the header at rest[4:8].
+    # Assume there are client and server creds in the tag and match
+    # only against them.
+    cprinc, rest = unmarshal_princ(rest[8:])
+    sprinc, rest = unmarshal_princ(rest)
+    cache = get_cache(name)
+    for cred in (cache.creds[u] for u in cache.cred_uuids):
+        cred_cprinc, rest = unmarshal_princ(cred)
+        cred_sprinc, rest = unmarshal_princ(rest)
+        if cred_cprinc == cprinc and cred_sprinc == sprinc:
+            return 0, cred
+    return KRB5Errors.KRB5_CC_NOTFOUND, b''
 
 
 def op_get_principal(argbytes):
@@ -199,6 +235,7 @@ ophandlers = {
     KCMOpcodes.INITIALIZE : op_initialize,
     KCMOpcodes.DESTROY : op_destroy,
     KCMOpcodes.STORE : op_store,
+    KCMOpcodes.RETRIEVE : op_retrieve,
     KCMOpcodes.GET_PRINCIPAL : op_get_principal,
     KCMOpcodes.GET_CRED_UUID_LIST : op_get_cred_uuid_list,
     KCMOpcodes.GET_CRED_BY_UUID : op_get_cred_by_uuid,
@@ -243,10 +280,11 @@ def service_request(s):
     return True
 
 parser = optparse.OptionParser()
-parser.add_option('-c', '--credlist', action='store_true', dest='credlist',
-                  default=False, help='Support KCM_OP_GET_CRED_LIST')
+parser.add_option('-f', '--fallback', action='store_true', dest='fallback',
+                  default=False, help='Do not support RETRIEVE/GET_CRED_LIST')
 (options, args) = parser.parse_args()
-if not options.credlist:
+if options.fallback:
+    del ophandlers[KCMOpcodes.RETRIEVE]
     del ophandlers[KCMOpcodes.GET_CRED_LIST]
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)

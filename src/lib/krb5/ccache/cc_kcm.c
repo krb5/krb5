@@ -826,9 +826,55 @@ static krb5_error_code KRB5_CALLCONV
 kcm_retrieve(krb5_context context, krb5_ccache cache, krb5_flags flags,
              krb5_creds *mcred, krb5_creds *cred_out)
 {
-    /* There is a KCM opcode for retrieving creds, but Heimdal's client doesn't
-     * use it.  It causes the KCM daemon to actually make a TGS request. */
-    return k5_cc_retrieve_cred_default(context, cache, flags, mcred, cred_out);
+    krb5_error_code ret;
+    struct kcmreq req = EMPTY_KCMREQ;
+    krb5_creds cred;
+    krb5_enctype *enctypes = NULL;
+
+    memset(&cred, 0, sizeof(cred));
+
+    /* Include KCM_GC_CACHED in flags to prevent Heimdal's sssd from making a
+     * TGS request itself. */
+    kcmreq_init(&req, KCM_OP_RETRIEVE, cache);
+    k5_buf_add_uint32_be(&req.reqbuf, map_tcflags(flags) | KCM_GC_CACHED);
+    k5_marshal_mcred(&req.reqbuf, mcred);
+    ret = cache_call(context, cache, &req);
+
+    /* Fall back to iteration if the server does not support retrieval. */
+    if (ret == KRB5_FCC_INTERNAL || ret == KRB5_CC_IO) {
+        ret = k5_cc_retrieve_cred_default(context, cache, flags, mcred,
+                                          cred_out);
+        goto cleanup;
+    }
+    if (ret)
+        goto cleanup;
+
+    ret = k5_unmarshal_cred(req.reply.ptr, req.reply.len, 4, &cred);
+    if (ret)
+        goto cleanup;
+
+    /* In rare cases we might retrieve a credential with a session key this
+     * context can't support, in which case we must retry using iteration. */
+    if (flags & KRB5_TC_SUPPORTED_KTYPES) {
+        ret = krb5_get_tgs_ktypes(context, cred.server, &enctypes);
+        if (ret)
+            goto cleanup;
+        if (!k5_etypes_contains(enctypes, cred.keyblock.enctype)) {
+            ret = k5_cc_retrieve_cred_default(context, cache, flags, mcred,
+                                              cred_out);
+            goto cleanup;
+        }
+    }
+
+    *cred_out = cred;
+    memset(&cred, 0, sizeof(cred));
+
+cleanup:
+    kcmreq_free(&req);
+    krb5_free_cred_contents(context, &cred);
+    free(enctypes);
+    /* Heimdal's KCM returns KRB5_CC_END if no cred is found. */
+    return (ret == KRB5_CC_END) ? KRB5_CC_NOTFOUND : map_invalid(ret);
 }
 
 static krb5_error_code KRB5_CALLCONV
