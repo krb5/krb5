@@ -110,6 +110,40 @@ map_invalid(krb5_error_code code)
         KRB5_KCM_MALFORMED_REPLY : code;
 }
 
+/*
+ * Map an MIT krb5 KRB5_TC flag word to the equivalent Heimdal flag word.  Note
+ * that there is no MIT krb5 equivalent for Heimdal's KRB5_TC_DONT_MATCH_REALM
+ * (which is like KRB5_TC_MATCH_SRV_NAMEONLY but also applies to the client
+ * principal) and no Heimdal equivalent for MIT krb5's KRB5_TC_SUPPORTED_KTYPES
+ * (which matches against enctypes from the krb5_context rather than the
+ * matching cred).
+ */
+static inline krb5_flags
+map_tcflags(krb5_flags mitflags)
+{
+    krb5_flags heimflags = 0;
+
+    if (mitflags & KRB5_TC_MATCH_TIMES)
+        heimflags |= KCM_TC_MATCH_TIMES;
+    if (mitflags & KRB5_TC_MATCH_IS_SKEY)
+        heimflags |= KCM_TC_MATCH_IS_SKEY;
+    if (mitflags & KRB5_TC_MATCH_FLAGS)
+        heimflags |= KCM_TC_MATCH_FLAGS;
+    if (mitflags & KRB5_TC_MATCH_TIMES_EXACT)
+        heimflags |= KCM_TC_MATCH_TIMES_EXACT;
+    if (mitflags & KRB5_TC_MATCH_FLAGS_EXACT)
+        heimflags |= KCM_TC_MATCH_FLAGS_EXACT;
+    if (mitflags & KRB5_TC_MATCH_AUTHDATA)
+        heimflags |= KCM_TC_MATCH_AUTHDATA;
+    if (mitflags & KRB5_TC_MATCH_SRV_NAMEONLY)
+        heimflags |= KCM_TC_MATCH_SRV_NAMEONLY;
+    if (mitflags & KRB5_TC_MATCH_2ND_TKT)
+        heimflags |= KCM_TC_MATCH_2ND_TKT;
+    if (mitflags & KRB5_TC_MATCH_KTYPE)
+        heimflags |= KCM_TC_MATCH_KEYTYPE;
+    return heimflags;
+}
+
 /* Begin a request for the given opcode.  If cache is non-null, supply the
  * cache name as a request parameter. */
 static void
@@ -936,7 +970,7 @@ kcm_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
     struct kcmreq req;
 
     kcmreq_init(&req, KCM_OP_REMOVE_CRED, cache);
-    k5_buf_add_uint32_be(&req.reqbuf, flags);
+    k5_buf_add_uint32_be(&req.reqbuf, map_tcflags(flags));
     k5_marshal_mcred(&req.reqbuf, mcred);
     ret = cache_call(context, cache, &req);
     kcmreq_free(&req);

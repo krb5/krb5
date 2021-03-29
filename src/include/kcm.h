@@ -56,7 +56,26 @@
  * are marshalled as zero-terminated strings.  Principals and credentials are
  * marshalled in the v4 FILE ccache format.  UUIDs are 16 bytes.  UUID lists
  * are not delimited, so nothing can come after them.
+ *
+ * Flag words must use Heimdal flag values, which are not the same as MIT krb5
+ * values for KRB5_GC and KRB5_TC constants.  The same flag word may contain
+ * both kinds of flags in Heimdal, but not in MIT krb5.  Defines for the
+ * applicable Heimdal flag values are given below using KCM_GC and KCM_TC
+ * prefixes.
  */
+
+#define KCM_GC_CACHED                   (1U << 0)
+
+#define KCM_TC_DONT_MATCH_REALM         (1U << 31)
+#define KCM_TC_MATCH_KEYTYPE            (1U << 30)
+#define KCM_TC_MATCH_SRV_NAMEONLY       (1U << 29)
+#define KCM_TC_MATCH_FLAGS_EXACT        (1U << 28)
+#define KCM_TC_MATCH_FLAGS              (1U << 27)
+#define KCM_TC_MATCH_TIMES_EXACT        (1U << 26)
+#define KCM_TC_MATCH_TIMES              (1U << 25)
+#define KCM_TC_MATCH_AUTHDATA           (1U << 24)
+#define KCM_TC_MATCH_2ND_TKT            (1U << 23)
+#define KCM_TC_MATCH_IS_SKEY            (1U << 22)
 
 /* Opcodes without comments are currently unused in the MIT client
  * implementation. */
