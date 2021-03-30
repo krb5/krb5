@@ -876,7 +876,7 @@ kcm_start_seq_get(krb5_context context, krb5_ccache cache,
         ret = kcmreq_get_cred_list(&req, &creds);
         if (ret)
             goto cleanup;
-    } else if (ret == KRB5_FCC_INTERNAL) {
+    } else if (ret == KRB5_FCC_INTERNAL || ret == KRB5_CC_IO) {
         /* Fall back to GET_CRED_UUID_LIST. */
         kcmreq_free(&req);
         kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
