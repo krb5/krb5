@@ -84,6 +84,15 @@ all-prerecurse: all-libobjs
 
 all-windows: $(OBJS)
 
+t_kadm5clnt: t_kadm5.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_kadm5.o $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
+t_kadm5srv: t_kadm5.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_kadm5.o $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+
+check-pytests: t_kadm5clnt t_kadm5srv
+	$(RUNPYTEST) $(srcdir)/t_kadm5.py $(PYTESTFLAGS)
+
 generate-files-mac-prerecurse: includes
 
 check-windows:

@@ -1277,7 +1277,7 @@ _default_kdc_conf = {
             'iprop_port': '$port4',
             'key_stash_file': '$testdir/stash',
             'acl_file': '$testdir/acl',
-            'dictfile': '$testdir/dictfile',
+            'dict_file': '$testdir/dictfile',
             'kadmind_port': '$port1',
             'kpasswd_port': '$port2',
             'kdc_listen': '$port0',
