@@ -59,7 +59,7 @@ kadm5_ret_t
 kadm5_create_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
 {
     kadm5_server_handle_t handle = server_handle;
-    osa_policy_ent_rec  pent;
+    osa_policy_ent_rec  pent, *check_pol;
     int                 ret;
     char                *p;
 
@@ -78,6 +78,14 @@ kadm5_create_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
         ret = validate_allowed_keysalts(entry->allowed_keysalts);
         if (ret)
             return ret;
+    }
+
+    ret = krb5_db_get_policy(handle->context, entry->policy, &check_pol);
+    if (!ret) {
+        krb5_db_free_policy(handle->context, check_pol);
+        return KADM5_DUP;
+    } else if (ret != KRB5_KDB_NOENTRY) {
+        return ret;
     }
 
     memset(&pent, 0, sizeof(pent));
