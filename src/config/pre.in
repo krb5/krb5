@@ -228,16 +228,8 @@ KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/gssapi \
 	$(KRB5_INCDIR)/gssrpc
 
-#
-# Macros used by the KADM5 (OV-based) unit test system.
-# XXX check which of these are actually used!
-#
 SKIPTESTS	= $(BUILDTOP)/skiptests
-TESTDIR		= $(BUILDTOP)/kadmin/testing
-STESTDIR	= $(top_srcdir)/kadmin/testing
-ENV_SETUP	= $(TESTDIR)/scripts/env-setup.sh
-CLNTTCL		= $(TESTDIR)/util/kadm5_clnt_tcl
-SRVTCL		= $(TESTDIR)/util/kadm5_srv_tcl
+
 # Dejagnu variables.
 # We have to set the host with --host so that setup_xfail will work.
 # If we don't set it, then the host type used is "native", which
@@ -249,14 +241,6 @@ RUNTEST		= runtest $(DEJAFLAGS)
 RUNPYTEST	= PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON)
 
-START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER) $(TEST_PATH)
-START_SERVERS_LOCAL = $(STESTDIR)/scripts/start_servers_local
-
-STOP_SERVERS	= $(STESTDIR)/scripts/stop_servers $(TEST_SERVER) $(TEST_PATH)
-STOP_SERVERS_LOCAL = $(STESTDIR)/scripts/stop_servers_local
-#
-# End of macros for the KADM5 unit test system.
-#
 
 transform = @program_transform_name@
 

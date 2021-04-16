@@ -991,33 +991,9 @@ ath_compat=
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 ath_compat=compat,)
-# The following are tests for the presence of programs required for
-# kadmin testing.
-AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
-AC_CHECK_PROG(have_PERL,perl,perl)
-if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
-	DO_TEST=ok
-fi
-AC_SUBST(DO_TEST)
 
-# The following are substituted into kadmin/testing/scripts/env-setup.sh
-RBUILD=`pwd`
-AC_SUBST(RBUILD)
-case "$srcdir" in
-/*)	S_TOP=$srcdir ;;
-*)	S_TOP=`pwd`/$srcdir ;;
-esac
-AC_SUBST(S_TOP)
-AC_PATH_PROG(EXPECT,expect)
-# For kadmin/testing/util/Makefile.in
-if test "$TCL_LIBS" != "" ;  then
-	DO_ALL=tcl
-fi
-AC_SUBST(DO_ALL)
 KRB5_AC_PRIOCNTL_HACK
-K5_GEN_FILE(kadmin/testing/scripts/env-setup.sh:kadmin/testing/scripts/env-setup.shin)
-# for lib/kadm5
-AC_CHECK_PROG(RUNTEST,runtest,runtest)
+
 AC_CHECK_PROG(PERL,perl,perl)
 
 # lib/gssapi
@@ -1552,7 +1528,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/rpc lib/rpc/unit-test
 
-	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv lib/kadm5/unit-test
+	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv
 	lib/krad
 	lib/apputils
 
@@ -1588,7 +1564,6 @@ V5_AC_OUTPUT_MAKEFILE(.
 	clients/kdestroy clients/kpasswd clients/ksu clients/kswitch
 
 	kadmin kadmin/cli kadmin/dbutil kadmin/ktutil kadmin/server
-	kadmin/testing kadmin/testing/scripts kadmin/testing/util
 
 	appl
 	appl/sample appl/sample/sclient appl/sample/sserver

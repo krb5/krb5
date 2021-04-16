@@ -1,6 +1,6 @@
 mydir=lib$(S)kadm5
 BUILDTOP=$(REL)..$(S)..
-SUBDIRS = clnt srv unit-test
+SUBDIRS = clnt srv
 
 ##DOSBUILDTOP = ..\..
 
@@ -98,6 +98,7 @@ generate-files-mac-prerecurse: includes
 check-windows:
 
 clean-unix:: clean-libobjs
+	$(RM) t_kadm5clnt t_kadm5srv t_kadm5.o
 
 clean-windows::
 

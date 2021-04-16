@@ -253,22 +253,6 @@ local.properties
 
 /src/kadmin/server/kadmind
 
-/src/kadmin/testing/admin_*
-/src/kadmin/testing/init-*
-/src/kadmin/testing/kadmin_*
-/src/kadmin/testing/krb5-test-root/
-
-/src/kadmin/testing/scripts/compare_dump.pl
-/src/kadmin/testing/scripts/env-setup.sh
-/src/kadmin/testing/scripts/env-setup.stamp
-/src/kadmin/testing/scripts/make-host-keytab.pl
-/src/kadmin/testing/scripts/qualname.pl
-/src/kadmin/testing/scripts/simple_dump.pl
-/src/kadmin/testing/scripts/verify_xrunner_report.pl
-
-/src/kadmin/testing/util/kadm5_clnt_tcl
-/src/kadmin/testing/util/kadm5_srv_tcl
-
 /src/kdc/kdc5_err.[ch]
 /src/kdc/krb5kdc
 /src/kdc/rtest
@@ -331,10 +315,6 @@ local.properties
 
 /src/lib/kadm5/chpass_util_strings.[ch]
 /src/lib/kadm5/kadm_err.[ch]
-
-/src/lib/kadm5/unit-test/*.log
-/src/lib/kadm5/unit-test/*.sum
-/src/lib/kadm5/unit-test/*-test
 
 /src/lib/kdb/adb_err.[ch]
 
