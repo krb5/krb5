@@ -71,7 +71,7 @@ kadm5_create_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
         return EINVAL;
     if(strlen(entry->policy) == 0)
         return KADM5_BAD_POLICY;
-    if (!(mask & KADM5_POLICY))
+    if (!(mask & KADM5_POLICY) || (mask & ~ALL_POLICY_MASK))
         return KADM5_BAD_MASK;
     if ((mask & KADM5_POLICY_ALLOWED_KEYSALTS) &&
         entry->allowed_keysalts != NULL) {
@@ -258,7 +258,7 @@ kadm5_modify_policy(void *server_handle, kadm5_policy_ent_t entry, long mask)
         return EINVAL;
     if(strlen(entry->policy) == 0)
         return KADM5_BAD_POLICY;
-    if((mask & KADM5_POLICY))
+    if ((mask & KADM5_POLICY) || (mask & ~ALL_POLICY_MASK))
         return KADM5_BAD_MASK;
     if ((mask & KADM5_POLICY_ALLOWED_KEYSALTS) &&
         entry->allowed_keysalts != NULL) {
