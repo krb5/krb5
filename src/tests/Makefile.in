@@ -147,6 +147,7 @@ check-pytests: unlockiter s4u2self
 	$(RUNPYTEST) $(srcdir)/t_referral.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_skew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keytab.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kadmin.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadmin_acl.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kadmin_parsing.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdb.py $(PYTESTFLAGS)
