@@ -67,7 +67,7 @@ open_file(krb5_context context, int *fd_out)
             return ret;
     }
 
-    *fd_out = open(O_CREAT | O_RDWR | O_BINARY, 0600);
+    *fd_out = open(fname, O_CREAT | O_RDWR | O_BINARY, 0600);
     ret = (*fd_out < 0) ? errno : 0;
     if (ret) {
         k5_setmsg(context, ret, "%s (filename: %s)",
