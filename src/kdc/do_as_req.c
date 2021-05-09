@@ -261,12 +261,13 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         goto egress;
     }
 
-    errcode = handle_authdata(kdc_context, state->c_flags, state->client,
+    errcode = handle_authdata(kdc_active_realm, state->c_flags, state->client,
                               state->server, NULL, state->local_tgt,
                               &state->local_tgt_key, &state->client_keyblock,
                               &state->server_keyblock, NULL, state->req_pkt,
-                              state->request, NULL, NULL, NULL,
-                              &state->auth_indicators, &state->enc_tkt_reply);
+                              state->request, NULL, NULL,
+                              &state->auth_indicators, NULL,
+                              &state->ticket_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),
                          errcode);

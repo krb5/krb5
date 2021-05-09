@@ -73,6 +73,7 @@ typedef struct __kdc_realm_data {
     krb5_deltat         realm_maxrlife; /* Maximum renewable life for realm */
     krb5_boolean        realm_reject_bad_transit; /* Accept unverifiable transited_realm ? */
     krb5_boolean        realm_restrict_anon;  /* Anon to local TGT only */
+    krb5_boolean        realm_disable_pac; /* Prevent issuance of PACs. */
 } kdc_realm_t;
 
 struct server_handle {

@@ -656,25 +656,6 @@ krb5_db_get_key_data_kvno( krb5_context    context,
                            int             count,
                            krb5_key_data * data);
 
-krb5_error_code krb5_db_sign_authdata(krb5_context kcontext,
-                                      unsigned int flags,
-                                      krb5_const_principal client_princ,
-                                      krb5_const_principal server_princ,
-                                      krb5_db_entry *client,
-                                      krb5_db_entry *server,
-                                      krb5_db_entry *header_server,
-                                      krb5_db_entry *local_tgt,
-                                      krb5_keyblock *client_key,
-                                      krb5_keyblock *server_key,
-                                      krb5_keyblock *header_key,
-                                      krb5_keyblock *local_tgt_key,
-                                      krb5_keyblock *session_key,
-                                      krb5_timestamp authtime,
-                                      krb5_authdata **tgt_auth_data,
-                                      void *ad_info,
-                                      krb5_data ***auth_indicators,
-                                      krb5_authdata ***signed_auth_data);
-
 krb5_error_code krb5_db_check_transited_realms(krb5_context kcontext,
                                                const krb5_data *tr_contents,
                                                const krb5_data *client_realm,
@@ -717,22 +698,8 @@ krb5_error_code krb5_db_get_s4u_x509_principal(krb5_context kcontext,
 krb5_error_code krb5_db_allowed_to_delegate_from(krb5_context context,
                                                  krb5_const_principal client,
                                                  krb5_const_principal server,
-                                                 void *server_ad_info,
+                                                 krb5_pac server_pac,
                                                  const krb5_db_entry *proxy);
-
-krb5_error_code krb5_db_get_authdata_info(krb5_context context,
-                                          unsigned int flags,
-                                          krb5_authdata **in_authdata,
-                                          krb5_const_principal client_princ,
-                                          krb5_const_principal server_princ,
-                                          krb5_keyblock *server_key,
-                                          krb5_keyblock *krbtgt_key,
-                                          krb5_db_entry *krbtgt,
-                                          krb5_timestamp authtime,
-                                          void **ad_info_out,
-                                          krb5_principal *client_out);
-
-void krb5_db_free_authdata_info(krb5_context context, void *ad_info);
 
 /**
  * Sort an array of @a krb5_key_data keys in descending order by their kvno.
@@ -746,6 +713,12 @@ void krb5_db_free_authdata_info(krb5_context context, void *ad_info);
  */
 void
 krb5_dbe_sort_key_data(krb5_key_data *key_data, size_t key_data_length);
+
+krb5_error_code
+krb5_db_issue_pac(krb5_context context, unsigned int flags,
+                  krb5_const_principal client_princ, krb5_db_entry *client,
+                  krb5_timestamp authtime, krb5_pac old_pac,
+                  krb5_pac new_pac);
 
 /* default functions. Should not be directly called */
 /*
@@ -894,7 +867,7 @@ krb5_error_code krb5_db_register_keytab(krb5_context context);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 8
+#define KRB5_KDB_DAL_MAJOR_VERSION 9
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1014,8 +987,8 @@ typedef struct _kdb_vftabl {
      *
      * KRB5_KDB_FLAG_INCLUDE_PAC: Set by the KDC during an AS request when the
      *     client requested PAC information during padata, and during most TGS
-     *     requests.  Indicates that the module should include PAC information
-     *     when its sign_authdata method is invoked.
+     *     requests.  Indicates that the module should later handle a pac when
+     *     its issue_pac method is invoked.
      *
      * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY: Set by the KDC when looking up the
      *     client entry in an AS request.  Affects how the module should return
@@ -1275,91 +1248,6 @@ typedef struct _kdb_vftabl {
                                         int keyver, krb5_key_data *key_data);
 
     /*
-     * Optional: Generate signed authorization data, such as a Windows PAC, for
-     * the ticket to be returned to the client.  Place the signed authorization
-     * data, if any, in *signed_auth_data.  This function will be invoked for
-     * an AS request if the client included padata requesting a PAC.  This
-     * function will be invoked for a TGS request if there is authorization
-     * data in the TGT, if the client is from another realm, or if the TGS
-     * request is an S4U2Self or S4U2Proxy request.  This function will not be
-     * invoked during TGS requests if the server principal has the
-     * no_auth_data_required attribute set.  Input parameters are:
-     *
-     *   flags: The flags used to look up the client principal.
-     *
-     *   client_princ: For S4U2Self and S4U2Proxy TGS requests, the client
-     *     principal requested by the service; for regular TGS requests, the
-     *     possibly-canonicalized client principal.
-     *
-     *   server_princ: The server principal in the request.
-     *
-     *   client: The DB entry of the client if it is in the local realm, NULL
-     *     if not.  For S4U2Self and S4U2Proxy TGS requests, this is the DB
-     *     entry for the client principal requested by the service.
-     *
-     *   server: The DB entry of the service principal, or of a cross-realm
-     *     krbtgt principal in case of referral.
-     *
-     *   header_server: For S4U2Proxy requests, the DB entry of the second
-     *     ticket server.  For other TGS requests, the DB entry of the header
-     *     ticket server.  For AS requests, NULL.
-     *
-     *   local_tgt: the DB entry of the local krbtgt principal.
-     *
-     *   client_key: The reply key for the KDC request, before any FAST armor
-     *     is applied.  For AS requests, this may be the client's long-term key
-     *     or a key chosen by a preauth mechanism.  For TGS requests, this may
-     *     be the subkey found in the AP-REQ or the session key of the TGT.
-     *
-     *   server_key: The server key used to encrypt the returned ticket.
-     *
-     *   header_key: For S4U2Proxy requests, the key used to decrypt the second
-     *     ticket.  For TGS requests, the key used to decrypt the header
-     *     ticket.  For AS requests, NULL.
-     *
-     *   local_tgt_key: The decrypted first key of local_tgt.
-     *
-     *   session_key: The session key of the ticket being granted to the
-     *     requestor.
-     *
-     *   authtime: The timestamp of the original client authentication time.
-     *     For AS requests, this is the current time.  For TGS requests, this
-     *     is the authtime of the subject ticket (TGT or S4U2Proxy evidence
-     *     ticket).
-     *
-     *   tgt_auth_data: For TGS requests, the authorization data present in the
-     *     subject ticket.  For AS requests, NULL.
-     *
-     *   ad_info: For TGS requests, the parsed authorization data if obtained
-     *     by get_authdata_info method from the authorization data present in
-     *     the subject ticket.  Otherwise NULL.
-     *
-     *   auth_indicators: Points to NULL or a null-terminated list of krb5_data
-     *     pointers, each containing an authentication indicator (RFC 8129).
-     *     The method may modify this list, or free it and replace
-     *     *auth_indicators with NULL, to change which auth indicators will be
-     *     included in the ticket.
-     */
-    krb5_error_code (*sign_authdata)(krb5_context kcontext,
-                                     unsigned int flags,
-                                     krb5_const_principal client_princ,
-                                     krb5_const_principal server_princ,
-                                     krb5_db_entry *client,
-                                     krb5_db_entry *server,
-                                     krb5_db_entry *header_server,
-                                     krb5_db_entry *local_tgt,
-                                     krb5_keyblock *client_key,
-                                     krb5_keyblock *server_key,
-                                     krb5_keyblock *header_key,
-                                     krb5_keyblock *local_tgt_key,
-                                     krb5_keyblock *session_key,
-                                     krb5_timestamp authtime,
-                                     krb5_authdata **tgt_auth_data,
-                                     void *ad_info,
-                                     krb5_data ***auth_indicators,
-                                     krb5_authdata ***signed_auth_data);
-
-    /*
      * Optional: Perform a policy check on a cross-realm ticket's transited
      * field.  Return 0 if the check authoritatively succeeds,
      * KRB5_PLUGIN_NO_HANDLE to use the core transited-checking mechanisms, or
@@ -1467,13 +1355,13 @@ typedef struct _kdb_vftabl {
     /*
      * Optional: Perform a policy check on server being allowed to obtain
      * tickets from client to proxy.  This method is similar to
-     * check_allowed_to_delegate, but it operates on the target server DB entry
-     * (called "proxy" here as in Microsoft's protocol documentation) rather
-     * than the intermediate server entry.  server_ad_info represents the
-     * authdata of the intermediate server, as returned by the
-     * get_authdata_info method on the header ticket.  Return 0 if policy
-     * allows the delegation, or an appropriate error (such as
-     * KRB5KDC_ERR_POLICY) if not.
+     * check_allowed_to_delegate, but it operates on the target server DB
+     * entry (called "proxy" here as in Microsoft's protocol documentation)
+     * rather than the intermediate server entry.  server_pac is the
+     * (verified) PAC from the authdata of the intermediate server; modules
+     * are not responsible for verifying the PAC.  Return 0 if policy allows
+     * the delegation, or an appropriate error (such as KRB5KDC_ERR_POLICY) if
+     * not.
      *
      * This method is called for S4U2Proxy requests and implements the
      * resource-based constrained delegation variant, which can support
@@ -1485,46 +1373,36 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*allowed_to_delegate_from)(krb5_context context,
                                                 krb5_const_principal client,
                                                 krb5_const_principal server,
-                                                void *server_ad_info,
+                                                krb5_pac server_pac,
                                                 const krb5_db_entry *proxy);
 
     /*
-     * Optional: Perform verification and policy checks on authorization data,
-     * such as a Windows PAC, based on the request client lookup flags.  Return
-     * 0 if all checks have passed.  Optionally return a representation of the
-     * authdata in *ad_info_out, to be consumed by allowed_to_delegate_from and
-     * sign_authdata.  Returning *ad_info_out is required to support
-     * resource-based constrained delegation.
+     * Optional: Add buffers to new_pac before it is signed.  If there was an
+     * old PAC, verify its contents as well.  Return 0 if all checks have
+     * passed, or an appropriate error code for failure.
      *
-     * If the KRB5_KDB_FLAG_CONSTRAINED_DELEGATION bit is set, a PAC must be
-     * provided and verified, and an error should be returned if the client is
-     * not allowed to delegate.  If the KRB5_KDB_FLAG_CROSS_REALM bit is also
-     * set, set *client_out to the client name in the PAC; this indicates the
-     * requested client principal for a cross-realm S4U2Proxy request.
+     * If non-NULL, old_pac has already had appropriate signatures validated.
+     * The KDC will handle signing new_pac.  When issue_pac is called, new_pac
+     * is already an allocated, minimal PAC, meaning that all buffers have
+     * been copied over from the old PAC (except checksums and client_info),
+     * and that delegation_info has been updated appropriately.  Modules
+     * should call krb5_pac_add_buffer directly to add any other buffers.
      *
-     * This method is called for TGS requests on the authorization data from
-     * the header ticket.  For S4U2Proxy requests it is also called on the
-     * authorization data from the evidence ticket.  If the
-     * KRB5_KDB_FLAG_PROTOCOL_TRANSITION bit is set in flags, the authdata is
-     * from the header ticket of an S4U2Self referral request, and the supplied
-     * client_princ is the requested client.
+     * flags conveys additional information about the client's request.
+     * It is a bitmask of KRB5_KDB_FLAG_* values above.  Implementers are
+     * responsible for compliance to MS-PAC and MS-SFU.
+     *
+     * This function will not be called for ticket modifications, or during
+     * TGS requests if the server principal has the no_auth_data_required
+     * attribute set.
      */
-    krb5_error_code (*get_authdata_info)(krb5_context context,
-                                         unsigned int flags,
-                                         krb5_authdata **in_authdata,
-                                         krb5_const_principal client_princ,
-                                         krb5_const_principal server_princ,
-                                         krb5_keyblock *server_key,
-                                         krb5_keyblock *krbtgt_key,
-                                         krb5_db_entry *krbtgt,
-                                         krb5_timestamp authtime,
-                                         void **ad_info_out,
-                                         krb5_principal *client_out);
+    krb5_error_code (*issue_pac)(krb5_context context, unsigned int flags,
+                                 krb5_const_principal client_princ,
+                                 krb5_db_entry *client,
+                                 krb5_timestamp authtime, krb5_pac old_pac,
+                                 krb5_pac new_pac);
 
-    void (*free_authdata_info)(krb5_context context,
-                               void *ad_info);
-
-    /* End of minor version 0 for major version 8. */
+    /* End of minor version 0 for major version 9. */
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */

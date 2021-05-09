@@ -334,6 +334,11 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     free(svalue);
     svalue = NULL;
 
+    hierarchy[2] = KRB5_CONF_DISABLE_PAC;
+    if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE,
+                               &rdp->realm_disable_pac))
+        rdp->realm_disable_pac = FALSE;
+
     /*
      * We've got our parameters, now go and setup our realm context.
      */

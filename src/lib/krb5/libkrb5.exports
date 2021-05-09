@@ -1,6 +1,5 @@
 _krb5_conf_boolean
 decode_krb5_ad_kdcissued
-decode_krb5_ad_signedpath
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
 decode_krb5_ap_req
@@ -53,8 +52,6 @@ decode_krb5_ticket
 decode_krb5_typed_data
 decode_utf8_strings
 encode_krb5_ad_kdcissued
-encode_krb5_ad_signedpath_data
-encode_krb5_ad_signedpath
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
 encode_krb5_ap_req
@@ -323,7 +320,6 @@ krb5_expand_hostname
 krb5_fcc_ops
 krb5_find_authdata
 krb5_free_ad_kdcissued
-krb5_free_ad_signedpath
 krb5_free_address
 krb5_free_addresses
 krb5_free_ap_rep
@@ -465,6 +461,8 @@ krb5_is_permitted_enctype
 krb5_is_referral_realm
 krb5_is_thread_safe
 krb5_kdc_rep_decrypt_proc
+krb5_kdc_sign_ticket
+krb5_kdc_verify_ticket
 krb5_kt_add_entry
 krb5_kt_client_default
 krb5_kt_close

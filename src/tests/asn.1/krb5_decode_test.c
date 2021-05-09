@@ -999,14 +999,6 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_ad_signedpath */
-    {
-        setup(krb5_ad_signedpath,ktest_make_sample_ad_signedpath);
-        decode_run("ad_signedpath","","30 3E A0 03 02 01 01 A1 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34 A3 26 30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61",decode_krb5_ad_signedpath,ktest_equal_ad_signedpath,krb5_free_ad_signedpath);
-        ktest_empty_ad_signedpath(&ref);
-    }
-
-    /****************************************************************/
     /* decode_iakerb_header */
     {
         setup(krb5_iakerb_header,ktest_make_sample_iakerb_header);

@@ -11,7 +11,7 @@ realm = K5Realm(krb5_conf=conf)
 # container.
 mark('baseline authdata')
 out = realm.run(['./adata', realm.host_princ])
-if '?512: ' not in out or '^-42: Hello' not in out:
+if '^-42: Hello' not in out:
     fail('expected authdata not seen for basic request')
 
 # Requested authdata is copied into the ticket, with KDC-only types
