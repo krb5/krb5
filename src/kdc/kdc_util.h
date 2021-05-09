@@ -546,4 +546,22 @@ current_kvno(krb5_db_entry *entry)
     return (entry->n_key_data == 0) ? 0 : entry->key_data[0].key_data_kvno;
 }
 
+/* MS-PAC section 2.9 */
+struct pac_s4u_delegation_info {
+    char *proxy_target;
+    uint32_t transited_services_length;
+    char **transited_services;
+};
+
+/* Leaves room for one additional service. */
+krb5_error_code
+ndr_dec_delegation_info(krb5_data *data,
+                        struct pac_s4u_delegation_info **res);
+
+krb5_error_code
+ndr_enc_delegation_info(struct pac_s4u_delegation_info *in,
+                        krb5_data *out);
+
+void ndr_free_delegation_info(struct pac_s4u_delegation_info **in);
+
 #endif /* __KRB5_KDC_UTIL__ */
