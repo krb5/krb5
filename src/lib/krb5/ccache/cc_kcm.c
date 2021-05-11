@@ -144,6 +144,20 @@ map_tcflags(krb5_flags mitflags)
     return heimflags;
 }
 
+/*
+ * Return true if code could indicate an unsupported operation.  Heimdal's KCM
+ * returns KRB5_FCC_INTERNAL.  sssd's KCM daemon (as of sssd 2.4) returns
+ * KRB5_CC_NO_SUPP if it recognizes the operation but does not implement it,
+ * and KRB5_CC_IO if it doesn't recognize the operation (which is unfortunate
+ * since it could also indicate a communication failure).
+ */
+static krb5_boolean
+unsupported_op_error(krb5_error_code code)
+{
+    return code == KRB5_FCC_INTERNAL || code == KRB5_CC_IO ||
+        code == KRB5_CC_NOSUPP;
+}
+
 /* Begin a request for the given opcode.  If cache is non-null, supply the
  * cache name as a request parameter. */
 static void
@@ -841,7 +855,7 @@ kcm_retrieve(krb5_context context, krb5_ccache cache, krb5_flags flags,
     ret = cache_call(context, cache, &req);
 
     /* Fall back to iteration if the server does not support retrieval. */
-    if (ret == KRB5_FCC_INTERNAL || ret == KRB5_CC_IO) {
+    if (unsupported_op_error(ret)) {
         ret = k5_cc_retrieve_cred_default(context, cache, flags, mcred,
                                           cred_out);
         goto cleanup;
@@ -922,7 +936,7 @@ kcm_start_seq_get(krb5_context context, krb5_ccache cache,
         ret = kcmreq_get_cred_list(&req, &creds);
         if (ret)
             goto cleanup;
-    } else if (ret == KRB5_FCC_INTERNAL || ret == KRB5_CC_IO) {
+    } else if (unsupported_op_error(ret)) {
         /* Fall back to GET_CRED_UUID_LIST. */
         kcmreq_free(&req);
         kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
