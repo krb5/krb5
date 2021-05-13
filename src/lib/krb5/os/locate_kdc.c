@@ -98,6 +98,22 @@ _krb5_use_dns_realm(krb5_context context)
                          DEFAULT_LOOKUP_REALM);
 }
 
+static krb5_error_code
+get_sitename(krb5_context context, const krb5_data *realm, char **out)
+{
+    krb5_error_code ret;
+    char *realmstr;
+
+    *out = NULL;
+    realmstr = k5memdup0(realm->data, realm->length, &ret);
+    if (realmstr == NULL)
+        return ret;
+    ret = profile_get_string(context->profile, KRB5_CONF_REALMS,
+                             realmstr, KRB5_CONF_SITENAME, NULL, out);
+    free(realmstr);
+    return ret;
+}
+
 #endif /* KRB5_DNS_LOOKUP */
 
 /* Free up everything pointed to by the serverlist structure, but don't
@@ -328,9 +344,14 @@ locate_srv_dns_1(krb5_context context, const krb5_data *realm,
     struct srv_dns_entry *head = NULL, *entry = NULL;
     krb5_error_code code = 0;
     k5_transport transport;
+    char *sitename;
 
+    code = get_sitename(context, realm, &sitename);
+    if (code)
+        return code;
     code = krb5int_make_srv_query_realm(context, realm, service, protocol,
-                                        &head);
+                                        sitename, &head);
+    free(sitename);
     if (code)
         return 0;
 
@@ -616,11 +637,15 @@ locate_uri(krb5_context context, const krb5_data *realm,
     krb5_error_code ret;
     k5_transport transport, host_trans;
     struct srv_dns_entry *answers, *entry;
-    char *host;
+    char *host, *sitename;
     const char *host_field, *path;
     int port, def_port, primary;
 
-    ret = k5_make_uri_query(context, realm, req_service, &answers);
+    ret = get_sitename(context, realm, &sitename);
+    if (ret)
+        return ret;
+    ret = k5_make_uri_query(context, realm, req_service, sitename, &answers);
+    free(sitename);
     if (ret || answers == NULL)
         return ret;
 
