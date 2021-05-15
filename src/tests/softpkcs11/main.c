@@ -413,47 +413,83 @@ add_object_attribute(struct st_object *o,
     return CKR_OK;
 }
 
+#ifdef HAVE_EVP_PKEY_GET_BN_PARAM
+
+/* Declare owner pointers since EVP_PKEY_get_bn_param() gives us copies. */
+#define DECLARE_BIGNUM(name) BIGNUM *name = NULL
+#define RELEASE_BIGNUM(bn) BN_clear_free(bn)
 static CK_RV
-add_pubkey_info(struct st_object *o, CK_KEY_TYPE key_type, EVP_PKEY *key)
+get_bignums(EVP_PKEY *key, BIGNUM **n, BIGNUM **e)
 {
-    switch (key_type) {
-    case CKK_RSA: {
-        CK_BYTE *modulus = NULL;
-        size_t modulus_len = 0;
-        CK_ULONG modulus_bits = 0;
-        CK_BYTE *exponent = NULL;
-        size_t exponent_len = 0;
-        const RSA *rsa;
-        const BIGNUM *n, *e;
+    if (EVP_PKEY_get_bn_param(key, "n", n) == 0 ||
+        EVP_PKEY_get_bn_param(key, "e", e) == 0)
+        return CKR_DEVICE_ERROR;
 
-        rsa = EVP_PKEY_get0_RSA(key);
-        RSA_get0_key(rsa, &n, &e, NULL);
-        modulus_bits = BN_num_bits(n);
-
-        modulus_len = BN_num_bytes(n);
-        modulus = malloc(modulus_len);
-        BN_bn2bin(n, modulus);
-
-        exponent_len = BN_num_bytes(e);
-        exponent = malloc(exponent_len);
-        BN_bn2bin(e, exponent);
-
-        add_object_attribute(o, 0, CKA_MODULUS, modulus, modulus_len);
-        add_object_attribute(o, 0, CKA_MODULUS_BITS,
-                             &modulus_bits, sizeof(modulus_bits));
-        add_object_attribute(o, 0, CKA_PUBLIC_EXPONENT,
-                             exponent, exponent_len);
-
-        free(modulus);
-        free(exponent);
-    }
-    default:
-        /* XXX */
-        break;
-    }
     return CKR_OK;
 }
 
+#else
+
+/* Declare const pointers since the old API gives us aliases. */
+#define DECLARE_BIGNUM(name) const BIGNUM *name
+#define RELEASE_BIGNUM(bn)
+static CK_RV
+get_bignums(EVP_PKEY *key, const BIGNUM **n, const BIGNUM **e)
+{
+    const RSA *rsa;
+
+    rsa = EVP_PKEY_get0_RSA(key);
+    RSA_get0_key(rsa, n, e, NULL);
+
+    return CKR_OK;
+}
+
+#endif
+
+static CK_RV
+add_pubkey_info(struct st_object *o, CK_KEY_TYPE key_type, EVP_PKEY *key)
+{
+    CK_BYTE *modulus = NULL, *exponent = 0;
+    size_t modulus_len = 0, exponent_len = 0;
+    CK_ULONG modulus_bits = 0;
+    CK_RV ret;
+    DECLARE_BIGNUM(n);
+    DECLARE_BIGNUM(e);
+
+    if (key_type != CKK_RSA)
+        abort();
+
+    ret = get_bignums(key, &n, &e);
+    if (ret != CKR_OK)
+        goto done;
+
+    modulus_bits = BN_num_bits(n);
+    modulus_len = BN_num_bytes(n);
+    exponent_len = BN_num_bytes(e);
+
+    modulus = malloc(modulus_len);
+    exponent = malloc(exponent_len);
+    if (modulus == NULL || exponent == NULL) {
+        ret = CKR_DEVICE_MEMORY;
+        goto done;
+    }
+
+    BN_bn2bin(n, modulus);
+    BN_bn2bin(e, exponent);
+
+    add_object_attribute(o, 0, CKA_MODULUS, modulus, modulus_len);
+    add_object_attribute(o, 0, CKA_MODULUS_BITS, &modulus_bits,
+                         sizeof(modulus_bits));
+    add_object_attribute(o, 0, CKA_PUBLIC_EXPONENT, exponent, exponent_len);
+
+    ret = CKR_OK;
+done:
+    free(modulus);
+    free(exponent);
+    RELEASE_BIGNUM(n);
+    RELEASE_BIGNUM(e);
+    return ret;
+}
 
 static int
 pem_callback(char *buf, int num, int w, void *key)

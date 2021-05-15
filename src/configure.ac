@@ -1148,6 +1148,7 @@ int i = 1;
 ])], k5_cv_openssl_version_okay=yes, k5_cv_openssl_version_okay=no)])
   old_LIBS="$LIBS"
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_CHECK_FUNCS(EVP_PKEY_get_bn_param)
   LIBS="$old_LIBS"
 fi
 if test "$k5_cv_openssl_version_okay" = yes && (test "$enable_pkinit" = yes || test "$enable_pkinit" = try); then
