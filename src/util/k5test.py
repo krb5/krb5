@@ -867,6 +867,13 @@ def stop_daemon(proc):
         _daemons.remove(proc)
 
 
+def await_daemon_exit(proc):
+    code = proc.wait()
+    _daemons.remove(proc)
+    if code != 0:
+        fail('Daemon process %d exited with status %d' % (proc.pid, code))
+
+
 class K5Realm(object):
     """An object representing a functional krb5 test realm."""
 
@@ -1034,7 +1041,7 @@ class K5Realm(object):
             port = self.server_port()
         if env is None:
             env = self.env
-        inetd_args = [t_inetd, str(port)] + args
+        inetd_args = [t_inetd, str(port), args[0]] + args
         return _start_daemon(inetd_args, env, 'Ready!')
 
     def create_kdb(self):

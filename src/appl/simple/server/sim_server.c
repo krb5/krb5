@@ -161,6 +161,7 @@ main(int argc, char *argv[])
     }
 
     printf("starting...\n");
+    fflush(stdout);
 
 #ifdef DEBUG
     printf("socket has port # %d\n", ntohs(s_sock.sin_port));
