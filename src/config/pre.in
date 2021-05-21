@@ -230,14 +230,6 @@ KRB5_INCSUBDIRS = \
 
 SKIPTESTS	= $(BUILDTOP)/skiptests
 
-# Dejagnu variables.
-# We have to set the host with --host so that setup_xfail will work.
-# If we don't set it, then the host type used is "native", which
-# doesn't match "*-*-*".
-host=@krb5_cv_host@
-DEJAFLAGS	= --debug --srcdir $(srcdir) --host $(host)
-RUNTEST		= runtest $(DEJAFLAGS)
-
 RUNPYTEST	= PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON)
 

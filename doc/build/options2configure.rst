@@ -360,8 +360,6 @@ Optional packages
 
 **-**\ **-with-readline**
     Compile and link against GNU readline, as an alternative to libedit.
-    Building with readline breaks the dejagnu test suite, which is a
-    subset of the tests run by 'make check'.
 
 **-**\ **-with-system-verto**
     Use an installed version of libverto.  If the libverto header and

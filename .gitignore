@@ -436,13 +436,6 @@ local.properties
 
 /src/tests/create/kdb5_mkdums
 
-/src/tests/dejagnu/dbg.log
-/src/tests/dejagnu/krb.log
-/src/tests/dejagnu/krb.sum
-/src/tests/dejagnu/runenv.vals
-/src/tests/dejagnu/site.exp
-/src/tests/dejagnu/tmpdir/
-
 /src/tests/gss-threads/gss-client
 /src/tests/gss-threads/gss-server
 

@@ -1175,14 +1175,6 @@ AC_SUBST(PKINIT)
 # for lib/apputils
 AC_REPLACE_FUNCS(daemon)
 
-# for tests/
-if test x"$RUNTEST" != x; then
-	HAVE_RUNTEST=yes
-else
-	HAVE_RUNTEST=no
-fi
-AC_SUBST(HAVE_RUNTEST)
-
 # For Python tests.  Python version 3.2.4 is required as prior
 # versions do not accept string input to subprocess.Popen.communicate
 # when universal_newlines is set.
@@ -1364,7 +1356,6 @@ fi
 
 # Compile with libedit support in ss by default if available.  Compile
 # with readline only if asked, to avoid a default GPL dependency.
-# Building with readline also breaks the dejagnu test suite.
 AC_ARG_WITH([libedit],
   [AS_HELP_STRING([--without-libedit], [do not compile with libedit])],
   [], [with_libedit=default])
@@ -1571,5 +1562,5 @@ V5_AC_OUTPUT_MAKEFILE(.
 	appl/gss-sample appl/user_user
 
 	tests tests/asn.1 tests/create tests/hammer tests/verify tests/gssapi
-	tests/dejagnu tests/threads tests/shlib tests/gss-threads tests/misc
+	tests/threads tests/shlib tests/gss-threads tests/misc
 )

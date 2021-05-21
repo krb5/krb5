@@ -76,9 +76,6 @@ main(argc, argv)
     int one = 1;
     struct sockaddr_in l_inaddr, f_inaddr;  /* local, foreign address */
     socklen_t namelen = sizeof(f_inaddr);
-#ifdef POSIX_SIGNALS
-    struct sigaction csig;
-#endif
 
     progname = argv[0];
 
@@ -125,16 +122,6 @@ main(argc, argv)
     dup2(acc, 2);
     close(sock);
     sock = 0;
-
-    /* Don't wait for a child signal... Otherwise dejagnu gets confused */
-#ifdef POSIX_SIGNALS
-    csig.sa_handler = SIG_IGN;
-    sigemptyset(&csig.sa_mask);
-    csig.sa_flags = 0;
-    sigaction(SIGCHLD, &csig, (struct sigaction *)0);
-#else
-    signal(SIGCHLD, SIG_IGN);
-#endif
 
     if(execv(path, &argv[3]))
         fprintf(stderr, "t_inetd: Could not exec %s\n", path);
