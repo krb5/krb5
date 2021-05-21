@@ -57,7 +57,7 @@ if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
     skipped('anonymous ticket authdata tests', 'PKINIT not built')
 else:
     # Set up a realm with PKINIT support and get anonymous tickets.
-    certs = os.path.join(srctop, 'tests', 'dejagnu', 'pkinit-certs')
+    certs = os.path.join(srctop, 'tests', 'pkinit-certs')
     ca_pem = os.path.join(certs, 'ca.pem')
     kdc_pem = os.path.join(certs, 'kdc.pem')
     privkey_pem = os.path.join(certs, 'privkey.pem')

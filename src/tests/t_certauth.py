@@ -4,7 +4,7 @@ from k5test import *
 if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
     skip_rest('certauth tests', 'PKINIT module not built')
 
-certs = os.path.join(srctop, 'tests', 'dejagnu', 'pkinit-certs')
+certs = os.path.join(srctop, 'tests', 'pkinit-certs')
 ca_pem = os.path.join(certs, 'ca.pem')
 kdc_pem = os.path.join(certs, 'kdc.pem')
 privkey_pem = os.path.join(certs, 'privkey.pem')

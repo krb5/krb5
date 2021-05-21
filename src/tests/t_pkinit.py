@@ -7,7 +7,7 @@ if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
 soft_pkcs11 = os.path.join(buildtop, 'tests', 'softpkcs11', 'softpkcs11.so')
 
 # Construct a krb5.conf fragment configuring pkinit.
-certs = os.path.join(srctop, 'tests', 'dejagnu', 'pkinit-certs')
+certs = os.path.join(srctop, 'tests', 'pkinit-certs')
 ca_pem = os.path.join(certs, 'ca.pem')
 kdc_pem = os.path.join(certs, 'kdc.pem')
 user_pem = os.path.join(certs, 'user.pem')

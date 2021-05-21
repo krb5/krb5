@@ -422,6 +422,7 @@ local.properties
 /src/tests/s2p
 /src/tests/s4u2proxy
 /src/tests/s4u2self
+/src/tests/t_inetd
 /src/tests/unlockiter
 
 /src/tests/asn.1/expected_encode.out
@@ -440,7 +441,6 @@ local.properties
 /src/tests/dejagnu/krb.sum
 /src/tests/dejagnu/runenv.vals
 /src/tests/dejagnu/site.exp
-/src/tests/dejagnu/t_inetd
 /src/tests/dejagnu/tmpdir/
 
 /src/tests/gss-threads/gss-client

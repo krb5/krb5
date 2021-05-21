@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/dejagnu/t_inetd.c */
+/* tests/t_inetd.c */
 /*
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

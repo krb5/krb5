@@ -8,10 +8,12 @@ RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 
 OBJS= adata.o etinfo.o forward.o gcred.o hist.o hooks.o hrealm.o \
 	icinterleave.o icred.o kdbtest.o localauth.o plugorder.o rdreq.o \
-	replay.o responder.o s2p.o s4u2self.o s4u2proxy.o unlockiter.o
+	replay.o responder.o s2p.o s4u2self.o s4u2proxy.o t_inetd.o \
+	unlockiter.o
 EXTRADEPSRCS= adata.c etinfo.c forward.c gcred.c hist.c hooks.c hrealm.c \
 	icinterleave.c icred.c kdbtest.c localauth.c plugorder.c rdreq.c \
-	replay.c responder.c s2p.c s4u2self.c s4u2proxy.c unlockiter.c
+	replay.c responder.c s2p.c s4u2self.c s4u2proxy.c t_inetd.c \
+	unlockiter.c
 
 TEST_DB = ./testdb
 TEST_REALM = FOO.TEST.REALM
@@ -78,9 +80,14 @@ s4u2self: s4u2self.o $(KRB5_BASE_DEPLIBS)
 s4u2proxy: s4u2proxy.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ s4u2proxy.o $(KRB5_BASE_LIBS)
 
+t_inetd: t_inetd.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_inetd.o $(LIBS) $(KRB5_BASE_LIBS)
+
 unlockiter: unlockiter.o $(KDB5_DEPLIBS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ unlockiter.o $(KDB5_LIBS) $(KADMSRV_LIBS) \
 		$(KRB5_BASE_LIBS)
+
+all-unix: t_inetd
 
 check-unix: kdb_check
 
@@ -184,7 +191,7 @@ check-pytests: unlockiter s4u2self
 clean:
 	$(RM) adata etinfo forward gcred hist hooks hrealm icinterleave icred
 	$(RM) kdbtest localauth plugorder rdreq replay responder s2p s4u2proxy
-	$(RM) unlockiter s4u2self
+	$(RM) s4u2self t_inetd unlockiter
 	$(RM) krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log
