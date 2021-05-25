@@ -46,6 +46,7 @@ typedef struct otp_state_st otp_state;
 typedef struct token_st token;
 
 /* Opaque to otp_state.c, visible to main.c */
+struct challenge_state;
 struct verify_state;
 
 krb5_error_code
@@ -61,14 +62,27 @@ otp_state_parse_config(otp_state *state, const char *config_str,
 void
 otp_state_free_config(token *config);
 
+krb5_boolean
+otp_state_challenge_required(token *config);
+
+/* On success and some failures, takes ownership of *config and *cstate and
+ * sets them to NULL.  Asynchronously calls otp_verify_done() when complete. */
+void
+otp_state_challenge(otp_state *state, verto_ctx *ctx, token **config,
+                    struct challenge_state **cstate);
+
 /* On success and some failures, takes ownership of *config and *vstate and
  * sets them to NULL.  Asynchronously calls otp_verify_done() when complete. */
 void
-otp_state_verify(otp_state *state, verto_ctx *ctx,
-                 const krb5_pa_otp_req *request, token **config,
+otp_state_verify(otp_state *state, verto_ctx *ctx, const krb5_pa_otp_req *req,
+                 krb5_data *radius_state, token **config,
                  struct verify_state **vstate);
 
-/* Provided by main.c.  Must free vstate. */
+/* Provided by main.c.  Must free cstate and vstate respectively. */
+void
+otp_challenge_done(krb5_error_code retval, struct challenge_state *cstate,
+                   otp_response response, const krb5_data *radius_state,
+                   const krb5_data *message);
 void
 otp_verify_done(krb5_error_code retval, struct verify_state *vstate,
                 otp_response response, char *const *indicators);

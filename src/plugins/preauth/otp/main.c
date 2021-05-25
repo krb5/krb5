@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "k5-input.h"
 #include "k5-json.h"
 #include <krb5/preauth_plugin.h>
 #include "otp_state.h"
@@ -38,6 +39,17 @@
 
 static krb5_preauthtype otp_pa_type_list[] =
   { KRB5_PADATA_OTP_REQUEST, 0 };
+
+struct challenge_state {
+    krb5_context context;
+    krb5_kdcpreauth_callbacks cb;
+    krb5_kdcpreauth_rock rock;
+    unsigned int nonce_length;
+    otp_state *state;
+    krb5_preauthtype pa_type;
+    krb5_kdcpreauth_edata_respond_fn respond;
+    void *arg;
+};
 
 struct verify_state {
     krb5_context context;
@@ -199,46 +211,87 @@ otp_flags(krb5_context context, krb5_preauthtype pa_type)
     return PA_REPLACES_KEY;
 }
 
+static krb5_error_code
+otp_store_cookie(krb5_context context,
+                 krb5_kdcpreauth_callbacks cb,
+                 krb5_kdcpreauth_rock rock,
+                 const krb5_data *state)
+{
+    struct k5buf buf;
+    krb5_data cookie;
+
+    k5_buf_init_dynamic_zap(&buf);
+
+    /* Marshal the version and state. */
+    k5_buf_add_uint16_be(&buf, 1);
+    k5_buf_add_len(&buf, state->data, state->length);
+
+    if (buf.data == NULL) {
+        return ENOMEM;
+    }
+
+    cookie = make_data(buf.data, buf.len);
+
+    return cb->set_cookie(context, rock, KRB5_PADATA_OTP_REQUEST, &cookie);
+}
+
+static krb5_error_code
+otp_parse_cookie(krb5_context context,
+                 krb5_kdcpreauth_callbacks cb,
+                 krb5_kdcpreauth_rock rock,
+                 krb5_data *state_out)
+{
+    krb5_data cookie;
+    struct k5input in;
+    int version;
+    krb5_data state;
+
+    if (!cb->get_cookie(context, rock, KRB5_PADATA_OTP_REQUEST, &cookie)) {
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    k5_input_init(&in, cookie.data, cookie.length);
+
+    /* Parse and check the version. */
+    version = k5_input_get_uint16_be(&in);
+    if (version != 1) {
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    state = make_data((char *)in.ptr, in.len);
+
+    if (in.status) {
+        return in.status;
+    }
+
+    *state_out = state;
+
+    return 0;
+}
+
 static void
-otp_edata(krb5_context context, krb5_kdc_req *request,
-          krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-          krb5_kdcpreauth_moddata moddata, krb5_preauthtype pa_type,
-          krb5_kdcpreauth_edata_respond_fn respond, void *arg)
+edata_respond(krb5_context context, unsigned int nonce_length,
+              const krb5_data *challenge_message,
+              krb5_kdcpreauth_edata_respond_fn respond, void *arg)
 {
     krb5_otp_tokeninfo ti, *tis[2] = { &ti, NULL };
-    krb5_keyblock *armor_key = NULL;
     krb5_pa_otp_challenge chl;
     krb5_pa_data *pa = NULL;
     krb5_error_code retval;
     krb5_data *encoding;
-    otp_state *state = (otp_state *)moddata;
-    token *config = NULL;
 
-    /* Determine if OTP is enabled for the client principal. */
-    retval = get_otp_config(context, state, cb, rock, &config);
-    if (retval == 0 && config == NULL)
-        retval = ENOENT;
-    if (retval != 0)
-        goto out;
-
-    /* Get the armor key.  This indicates the length of random data to use in
-     * the nonce. */
-    armor_key = cb->fast_armor(context, rock);
-    if (armor_key == NULL) {
-        retval = ENOENT;
-        goto out;
-    }
-
-    /* Build the (mostly empty) challenge. */
+    /* Build the mostly empty challenge.  Include challenge_message if set. */
     memset(&ti, 0, sizeof(ti));
     memset(&chl, 0, sizeof(chl));
     chl.tokeninfo = tis;
     ti.format = -1;
     ti.length = -1;
     ti.iteration_count = -1;
+    if (challenge_message != NULL)
+        ti.challenge = *challenge_message;
 
     /* Generate the nonce. */
-    retval = nonce_generate(context, armor_key->length, &chl.nonce);
+    retval = nonce_generate(context, nonce_length, &chl.nonce);
     if (retval != 0)
         goto out;
 
@@ -257,8 +310,105 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     free(encoding);
 
 out:
-    otp_state_free_config(config);
     (*respond)(arg, retval, pa);
+}
+
+void
+otp_challenge_done(krb5_error_code retval, struct challenge_state *c,
+                   otp_response response, const krb5_data *radius_state,
+                   const krb5_data *message)
+{
+    if (retval == 0 && response != otp_response_success)
+        retval = KRB5_PREAUTH_FAILED;
+    if (retval != 0)
+        goto done;
+
+    /*
+     * Remember the RADIUS state so it can be set in the Access-Request message
+     * sent by otp_verify(), allowing the RADIUS server to associate the
+     * message with its internal state.
+     */
+    retval = otp_store_cookie(c->context, c->cb, c->rock, radius_state);
+    if (retval != 0)
+        goto done;
+
+    edata_respond(c->context, c->nonce_length, message, c->respond, c->arg);
+
+done:
+    if (retval != 0)
+        c->respond(c->arg, retval, NULL);
+
+    free(c);
+}
+
+static void
+edata_challenge(krb5_context context, otp_state *state,
+                krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+                unsigned int nonce_length, token **config,
+                krb5_kdcpreauth_edata_respond_fn respond, void *arg)
+{
+    struct challenge_state *cstate;
+    krb5_error_code retval;
+
+    cstate = k5alloc(sizeof(*cstate), &retval);
+    if (cstate == NULL) {
+        (*respond)(arg, retval, NULL);
+        return;
+    }
+
+    cstate->context = context;
+    cstate->cb = cb;
+    cstate->rock = rock;
+    cstate->nonce_length = nonce_length;
+    cstate->respond = respond;
+    cstate->arg = arg;
+
+    /* Takes ownership of *config and cstate; calls otp_challenge_done() when
+     * complete. */
+    otp_state_challenge(state, cb->event_context(context, rock), config,
+                        &cstate);
+}
+
+static void
+otp_edata(krb5_context context, krb5_kdc_req *request,
+          krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+          krb5_kdcpreauth_moddata moddata, krb5_preauthtype pa_type,
+          krb5_kdcpreauth_edata_respond_fn respond, void *arg)
+{
+    krb5_error_code retval;
+    otp_state *state = (otp_state *)moddata;
+    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
+    unsigned int nonce_length;
+    token *config = NULL;
+
+    /* Get the armor key.  This indicates the length of random data to use in
+     * the nonce, and ensures that FAST is in use. */
+    if (armor_key == NULL) {
+        (*respond)(arg, ENOENT, NULL);
+        return;
+    }
+    nonce_length = armor_key->length;
+
+    /* Determine if OTP is enabled for the client principal. */
+    retval = get_otp_config(context, state, cb, rock, &config);
+    if (retval == 0 && config == NULL)
+        retval = ENOENT;
+    if (retval != 0) {
+        (*respond)(arg, retval, NULL);
+        return;
+    }
+
+    if (otp_state_challenge_required(config)) {
+        /* Set up a RADIUS challenge request and respond asynchronously.
+         * (Takes ownership of config.) */
+        edata_challenge(context, state, cb, rock, nonce_length, &config,
+                        respond, arg);
+    } else {
+        /* Respond synchronously with a trivial OTP challenge. */
+        edata_respond(context, nonce_length, NULL, respond, arg);
+    }
+
+    otp_state_free_config(config);
 }
 
 void
@@ -296,7 +446,7 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_pa_otp_req *req = NULL;
     struct verify_state *vstate = NULL;
     krb5_error_code retval;
-    krb5_data d, plaintext;
+    krb5_data d, plaintext, radius_state = empty_data();
     otp_state *state = (otp_state *)moddata;
     token *config = NULL;
 
@@ -348,14 +498,20 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     /* Get the client principal's OTP token configuration. */
     retval = get_otp_config(context, state, cb, rock, &config);
     if (retval == 0 && config == NULL)
-        retval = KRB5_PREAUTH_FAILED;
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
     if (retval != 0)
         goto cleanup;
 
+    if (otp_state_challenge_required(config) &&
+        otp_parse_cookie(context, cb, rock, &radius_state) != 0) {
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
+    }
+
     /* Send the request (takes ownership of config and vstate and responds to
      * the KDC code asynchronously). */
-    otp_state_verify(state, cb->event_context(context, rock), req, &config,
-                     &vstate);
+    otp_state_verify(state, cb->event_context(context, rock), req,
+                     &radius_state, &config, &vstate);
 
 cleanup:
     k5_free_pa_otp_req(context, req);

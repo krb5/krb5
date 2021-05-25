@@ -48,6 +48,8 @@ radius_attributes = '''
 ATTRIBUTE    User-Name    1    string
 ATTRIBUTE    User-Password   2    octets
 ATTRIBUTE    Service-Type    6    integer
+ATTRIBUTE    Reply-Message   18   string
+ATTRIBUTE    State           24   octets
 ATTRIBUTE    NAS-Identifier  32    string
 '''
 
@@ -65,7 +67,8 @@ class RadiusDaemon(Process):
         addr = self._args[0]
         secrfile = self._args[1]
         pswd = self._args[2]
-        outq = self._args[3]
+        challenge = self._args[3]
+        outq = self._args[4]
 
         if secrfile:
             with open(secrfile, 'rb') as file:
@@ -90,11 +93,21 @@ class RadiusDaemon(Process):
 
         reply = pkt.CreateReply()
         replyq = {'user': usernm, 'pass': passwd}
-        if passwd == [pswd]:
+
+        if challenge and 'State' not in pkt.keys():
+            # Send Access-Challenge for the initial request.
+            reply.code = packet.AccessChallenge
+            reply['State'] = b'My State'
+            reply['Reply-Message'] = 'My Challenge'
+            replyq['challenge'] = True
+            replyq['reply'] = True
+        elif passwd == [pswd]:
             reply.code = packet.AccessAccept
+            replyq['challenge'] = False
             replyq['reply'] = True
         else:
             reply.code = packet.AccessReject
+            replyq['challenge'] = False
             replyq['reply'] = False
 
         outq.put(replyq)
@@ -103,6 +116,10 @@ class RadiusDaemon(Process):
         else:
             sock.sendto(reply.ReplyPacket(), addr)
         sock.close()
+
+        # Wait for another request if we sent a challenge.
+        if challenge and 'State' not in pkt.keys():
+            self.run()
 
 class UDPRadiusDaemon(RadiusDaemon):
     def listen(self, addr):
@@ -139,23 +156,31 @@ class UnixRadiusDaemon(RadiusDaemon):
                 if (remain <= 0):
                     return (buf, conn, None)
 
-def verify(daemon, queue, reply, usernm, passwd):
+def verify(daemon, queue, reply, usernm, passwd, challenge):
     try:
         data = queue.get(timeout=1)
     except Empty:
         sys.stderr.write("ERROR: Packet not received by daemon!\n")
         daemon.terminate()
         sys.exit(1)
+
     assert data['reply'] is reply
     assert data['user'] == [usernm]
-    assert data['pass'] == [passwd]
+    assert data['challenge'] == challenge
+    if passwd is None:
+        assert data['pass'] == []
+    else:
+        assert data['pass'] == [passwd]
+
     daemon.join()
 
 # Compose a single token configuration.
-def otpconfig_1(toktype, username=None, indicators=None):
+def otpconfig_1(toktype, username=None, indicators=None, challenge=None):
     val = '{"type": "%s"' % toktype
     if username is not None:
         val += ', "username": "%s"' % username
+    if challenge is not None:
+        val += ', "challenge": %s' % ('true' if challenge else 'false')
     if indicators is not None:
         qind = ['"%s"' % s for s in indicators]
         jsonlist = '[' + ', '.join(qind) + ']'
@@ -165,8 +190,8 @@ def otpconfig_1(toktype, username=None, indicators=None):
 
 # Compose a token configuration list suitable for the "otp" string
 # attribute.
-def otpconfig(toktype, username=None, indicators=None):
-    return '[' + otpconfig_1(toktype, username, indicators) + ']'
+def otpconfig(toktype, username=None, indicators=None, challenge=None):
+    return '[' + otpconfig_1(toktype, username, indicators, challenge) + ']'
 
 prefix = "/tmp/%d" % os.getpid()
 secret_file = prefix + ".secret"
@@ -192,35 +217,38 @@ server_addr = '127.0.0.1:' + str(realm.portbase + 9)
 
 ## Test UDP fail / custom username
 mark('UDP fail / custom username')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
+daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', False,
+                               queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
            otpconfig('udp', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
-verify(daemon, queue, False, 'custom', 'reject')
+verify(daemon, queue, False, 'custom', 'reject', False)
 
 ## Test UDP success / standard username
 mark('UDP success / standard username')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
+daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', False,
+                               queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('udp')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept', False)
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.run(['./adata', realm.krbtgt_princ],
           expected_msg='+97: [indotp1, indotp2]')
 
 # Repeat with an indicators override in the string attribute.
 mark('auth indicator override')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
+daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', False,
+                               queue))
 daemon.start()
 queue.get()
 oconf = otpconfig('udp', indicators=['indtok1', 'indtok2'])
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept', False)
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.run(['./adata', realm.krbtgt_princ],
           expected_msg='+97: [indtok1, indtok2]')
@@ -235,30 +263,32 @@ except AssertionError:
 
 ## Test Unix fail / custom username
 mark('Unix socket fail / custom username')
-daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', False, queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
            otpconfig('unix', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
-verify(daemon, queue, False, 'custom', 'reject')
+verify(daemon, queue, False, 'custom', 'reject', False)
 
 ## Test Unix success / standard username
 mark('Unix socket success / standard username')
-daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', False, queue))
 daemon.start()
 queue.get()
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('unix')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ, 'accept')
+verify(daemon, queue, True, realm.user_princ, 'accept', False)
 
 ## Regression test for #8708: test with the standard username and two
 ## tokens configured, with the first rejecting and the second
 ## accepting.  With the bug, the KDC incorrectly rejects the request
 ## and then performs invalid memory accesses, most likely crashing.
 queue2 = Queue()
-daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', queue))
-daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', queue2))
+daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', False,
+                                queue))
+daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', False,
+                                 queue2))
 daemon1.start()
 queue.get()
 daemon2.start()
@@ -266,7 +296,30 @@ queue2.get()
 oconf = '[' + otpconfig_1('udp') + ', ' + otpconfig_1('unix') + ']'
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
 realm.kinit(realm.user_princ, 'accept2', flags=flags)
-verify(daemon1, queue, False, realm.user_princ.split('@')[0], 'accept2')
-verify(daemon2, queue2, True, realm.user_princ, 'accept2')
+verify(daemon1, queue, False, realm.user_princ.split('@')[0], 'accept2', False)
+verify(daemon2, queue2, True, realm.user_princ, 'accept2', False)
+
+## Test Access-Challenge required.
+mark('Access-Challenge required')
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', True, queue))
+daemon.start()
+queue.get()
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+           otpconfig('unix', challenge=True)])
+realm.kinit(realm.user_princ, 'accept', flags=flags,
+            expected_msg='My Challenge')
+verify(daemon, queue, True, realm.user_princ, None, True)
+queue.get()
+verify(daemon, queue, True, realm.user_princ, 'accept', False)
+
+## Test Access-Challenge explicitly not required.
+mark('Access-Challenge not required')
+daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', False, queue))
+daemon.start()
+queue.get()
+realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+           otpconfig('unix', challenge=False)])
+realm.kinit(realm.user_princ, 'accept', flags=flags)
+verify(daemon, queue, True, realm.user_princ, 'accept', False)
 
 success('OTP tests')

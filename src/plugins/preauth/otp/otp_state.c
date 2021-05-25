@@ -57,6 +57,7 @@ typedef struct token_type_st {
 
 struct token_st {
     const token_type *type;
+    krb5_boolean challenge;
     krb5_data username;
     char **indicators;
 };
@@ -65,6 +66,7 @@ typedef struct request_st {
     otp_state *state;
     token *tokens;
     ssize_t index;
+    struct challenge_state *cstate;
     struct verify_state *vstate;
     krad_attrset *attrs;
 } request;
@@ -406,6 +408,7 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
     const token_type *type = NULL;
     char *username = NULL, **indicators = NULL;
     krb5_error_code retval;
+    krb5_boolean challenge = FALSE;
     k5_json_value val;
     size_t i;
     int flags;
@@ -436,6 +439,11 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
             return retval;
     }
 
+    /* Get the RADIUS-challenge-required flag. */
+    val = k5_json_object_get(obj, "challenge");
+    if (val != NULL && k5_json_get_tid(val) == K5_JSON_TID_BOOL)
+        challenge = k5_json_bool_value(val);
+
     /* Get the authentication indicators if specified. */
     val = k5_json_object_get(obj, "indicators");
     if (val != NULL) {
@@ -449,6 +457,7 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
     out->type = type;
     out->username = string2data(username);
     out->indicators = indicators;
+    out->challenge = challenge;
     return 0;
 }
 
@@ -644,6 +653,12 @@ otp_state_free_config(token *config)
     tokens_free(config);
 }
 
+krb5_boolean
+otp_state_challenge_required(token *config)
+{
+    return config[0].challenge;
+}
+
 static krb5_error_code
 request_send(request *req, krad_cb callback)
 {
@@ -698,6 +713,76 @@ error:
 }
 
 static void
+on_challenge(krb5_error_code retval, const krad_packet *rqst,
+             const krad_packet *resp, void *data)
+{
+    request *req = data;
+    const krb5_data *msg, *state;
+
+    req->index++;
+
+    if (retval != 0)
+        goto error;
+
+    /* If we received a challenge packet, success! */
+    if (krad_packet_get_code(resp) == KRAD_CODE_ACCESS_CHALLENGE) {
+        msg = krad_packet_get_attr(resp, krad_attr_name2num("Reply-Message"),
+                                   0);
+        state = krad_packet_get_attr(resp, krad_attr_name2num("State"), 0);
+
+        /* Both attributes must be set. */
+        if (msg == NULL || state == NULL)
+            goto error;
+
+        otp_challenge_done(retval, req->cstate, otp_response_success,
+                           state, msg);
+        request_free(req);
+        return;
+    }
+
+    /* If we have no more tokens to try, failure! */
+    if (req->tokens[req->index].type == NULL)
+        goto error;
+
+    /* Try the next token. */
+    retval = request_send(req, on_challenge);
+    if (retval != 0)
+        goto error;
+
+    return;
+
+error:
+    otp_challenge_done(retval, req->cstate, otp_response_fail, NULL, NULL);
+    request_free(req);
+}
+
+void
+otp_state_challenge(otp_state *state, verto_ctx *ctx, token **config,
+                    struct challenge_state **cstate)
+{
+    krb5_error_code retval;
+    request *rqst = NULL;
+
+    retval = begin_request(state, ctx, config, &rqst);
+    if (retval != 0)
+        goto error;
+    rqst->cstate = *cstate;
+
+    /* Send a password-less Access-Request and expect Access-Challenge in the
+     * response. */
+    retval = request_send(rqst, on_challenge);
+    if (retval != 0)
+        goto error;
+
+    *cstate = NULL;
+    return;
+
+error:
+    request_free(rqst);
+    otp_challenge_done(retval, *cstate, otp_response_fail, NULL, NULL);
+}
+
+static void
 on_verify(krb5_error_code retval, const krad_packet *rqst,
           const krad_packet *resp, void *data)
 {
@@ -738,7 +823,8 @@ error:
 
 void
 otp_state_verify(otp_state *state, verto_ctx *ctx, const krb5_pa_otp_req *req,
-                 token **config, struct verify_state **vstate)
+                 krb5_data *radius_state, token **config,
+                 struct verify_state **vstate)
 {
     krb5_error_code retval;
     request *rqst = NULL;
@@ -752,6 +838,13 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, const krb5_pa_otp_req *req,
                               &req->otp_value);
     if (retval != 0)
         goto error;
+
+    if (radius_state->length > 0) {
+        retval = krad_attrset_add(rqst->attrs, krad_attr_name2num("State"),
+                                  radius_state);
+        if (retval != 0)
+            goto error;
+    }
 
     retval = request_send(rqst, on_verify);
     if (retval != 0)

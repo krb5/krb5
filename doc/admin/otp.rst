@@ -31,6 +31,7 @@ Token types are defined in either :ref:`krb5.conf(5)` or
             retries = <integer> (default: 3)
             strip_realm = <boolean> (default: true)
             indicator = <string> (default: none)
+            challenge = <boolean> (default: false)
         }
 
 If the server field begins with '/', it will be interpreted as a UNIX
@@ -48,6 +49,10 @@ If an indicator field is present, tickets issued using this token type
 will be annotated with the specified authentication indicator (see
 :ref:`auth_indicator`).  This key may be specified multiple times to
 add multiple indicators.
+
+If the challenge field is true then the a challenge message is obtained from the
+RADIUS server first. This message is presented to the user before asking for an
+authentication token.
 
 
 The default token type

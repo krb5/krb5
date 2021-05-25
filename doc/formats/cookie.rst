@@ -95,3 +95,13 @@ records, including none; a second-factor type need not create a state
 field if it does not need one, and no record is created for SF-NONE.
 For other cookies, there must be exactly one second-factor record
 corresponding to the factor type chosen by the client.
+
+OTP cookie format (version 1)
+-------------------------------
+
+Inside an OTP pre-authentication plugin, a data value of type 142 contains state
+of RADIUS authentication if challenge field of an OTP token type is set to true.
+This data is the concatenation of the following:
+
+* a two-byte big-endian version number with the value 1
+* a RADIUS state (rest of the cookie)
