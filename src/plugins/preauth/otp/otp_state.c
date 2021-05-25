@@ -636,8 +636,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         goto error;
 
     /* If we received an accept packet, success! */
-    if (krad_packet_get_code(resp) ==
-        krad_code_name2num("Access-Accept")) {
+    if (krad_packet_check_code(resp, "Access-Accept")) {
         indicators = tok->indicators;
         if (indicators == NULL)
             indicators = tok->type->indicators;
