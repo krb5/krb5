@@ -46,6 +46,11 @@ typedef void
 (*otp_cb)(void *data, krb5_error_code retval, otp_response response,
           char *const *indicators);
 
+typedef void
+(*otp_challenge_cb)(void *data, krb5_error_code retval,
+                    otp_response response, const krb5_data *radius_state,
+                    const krb5_data *message);
+
 krb5_error_code
 otp_state_new(krb5_context ctx, otp_state **self);
 
@@ -55,6 +60,15 @@ otp_state_free(otp_state *self);
 void
 otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
                  const char *config, const krb5_pa_otp_req *request,
-                 otp_cb cb, void *data);
+                 otp_cb cb, krb5_data *radius_state, void *data);
+
+void
+otp_state_challenge(otp_state *state, verto_ctx *ctx,
+                    krb5_const_principal princ, const char *config,
+                    otp_challenge_cb cb, void *data);
+
+krb5_error_code
+otp_challenge_required(otp_state *state, const char *config,
+                       krb5_boolean *is_required);
 
 #endif /* OTP_H_ */
