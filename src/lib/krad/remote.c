@@ -445,7 +445,7 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
 {
     krad_packet *tmp = NULL;
     krb5_error_code retval;
-    request *r;
+    request *r, *new_request = NULL;
 
     if (rr->info->ai_socktype == SOCK_STREAM)
         retries = 0;
@@ -464,7 +464,7 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
     }
 
     timeout = timeout / (retries + 1);
-    retval = request_new(rr, tmp, timeout, retries, cb, data, &r);
+    retval = request_new(rr, tmp, timeout, retries, cb, data, &new_request);
     if (retval != 0)
         goto error;
 
@@ -472,12 +472,13 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
     if (retval != 0)
         goto error;
 
-    K5_TAILQ_INSERT_TAIL(&rr->list, r, list);
+    K5_TAILQ_INSERT_TAIL(&rr->list, new_request, list);
     if (pkt != NULL)
         *pkt = tmp;
     return 0;
 
 error:
+    free(new_request);
     krad_packet_free(tmp);
     return retval;
 }

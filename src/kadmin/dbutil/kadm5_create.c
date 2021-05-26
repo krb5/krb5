@@ -185,21 +185,24 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
 int add_admin_princ(void *handle, krb5_context context,
                     char *name, char *realm, int attrs, int lifetime)
 {
-    char *fullname;
+    char *fullname = NULL;
     krb5_error_code ret;
     kadm5_principal_ent_rec ent;
     long flags;
+    int fret;
 
     memset(&ent, 0, sizeof(ent));
 
     if (asprintf(&fullname, "%s@%s", name, realm) < 0) {
         com_err(progname, ENOMEM, _("while appending realm to principal"));
-        return ERR;
+        fret = ERR;
+        goto cleanup;
     }
     ret = krb5_parse_name(context, fullname, &ent.principal);
     if (ret) {
         com_err(progname, ret, _("while parsing admin principal name"));
-        return(ERR);
+        fret = ERR;
+        goto cleanup;
     }
     ent.max_life = lifetime;
     ent.attributes = attrs;
@@ -210,13 +213,13 @@ int add_admin_princ(void *handle, krb5_context context,
     ret = kadm5_create_principal(handle, &ent, flags, NULL);
     if (ret && ret != KADM5_DUP) {
         com_err(progname, ret, _("while creating principal %s"), fullname);
-        krb5_free_principal(context, ent.principal);
-        free(fullname);
-        return ERR;
+        fret = ERR;
+        goto cleanup;
     }
 
+    fret = OK;
+cleanup:
     krb5_free_principal(context, ent.principal);
     free(fullname);
-
-    return OK;
+    return fret;
 }

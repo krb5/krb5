@@ -170,8 +170,10 @@ s4u2proxy_export_authdata(krb5_context kcontext,
         return code;
 
     authdata[0] = k5alloc(sizeof(krb5_authdata), &code);
-    if (authdata[0] == NULL)
+    if (authdata[0] == NULL) {
+        free(authdata);
         return code;
+    }
 
     code = encode_krb5_ad_signedpath(&sp, &data);
     if (code != 0) {

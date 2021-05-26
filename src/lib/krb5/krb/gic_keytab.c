@@ -182,7 +182,7 @@ krb5_init_creds_set_keytab(krb5_context context,
                            krb5_init_creds_context ctx,
                            krb5_keytab keytab)
 {
-    krb5_enctype *etype_list;
+    krb5_enctype *etype_list = NULL;
     krb5_error_code ret;
     struct canonprinc iter = { ctx->request->client, .subst_defrealm = TRUE };
     krb5_const_principal canonprinc;
@@ -212,6 +212,7 @@ krb5_init_creds_set_keytab(krb5_context context,
     free_canonprinc(&iter);
     if (ret) {
         TRACE_INIT_CREDS_KEYTAB_LOOKUP_FAILED(context, ret);
+        free(etype_list);
         return 0;
     }
     TRACE_INIT_CREDS_KEYTAB_LOOKUP(context, ctx->request->client, etype_list);

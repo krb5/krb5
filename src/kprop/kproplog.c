@@ -398,28 +398,36 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, uint32_t ulogentries,
     }
 }
 
-/* Return a read-only mmap of the ulog, or NULL on failure.  Assumes fd is
- * released on process exit. */
+/* Return a read-only mmap of the ulog, or NULL on failure. */
 static kdb_hlog_t *
-map_ulog(const char *filename)
+map_ulog(const char *filename, int *fd_out)
 {
     int fd;
     struct stat st;
-    kdb_hlog_t *ulog;
+    kdb_hlog_t *ulog = MAP_FAILED;
+
+    *fd_out = -1;
 
     fd = open(filename, O_RDONLY);
     if (fd == -1)
         return NULL;
-    if (fstat(fd, &st) < 0)
+    if (fstat(fd, &st) < 0) {
+        close(fd);
         return NULL;
+    }
     ulog = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    return (ulog == MAP_FAILED) ? NULL : ulog;
+    if (ulog == MAP_FAILED) {
+        close(fd);
+        return NULL;
+    }
+    *fd_out = fd;
+    return ulog;
 }
 
 int
 main(int argc, char **argv)
 {
-    int c;
+    int c, ulog_fd = -1;
     unsigned int verbose = 0;
     bool_t headeronly = FALSE, reset = FALSE;
     uint32_t entry = 0;
@@ -480,7 +488,7 @@ main(int argc, char **argv)
         goto done;
     }
 
-    ulog = map_ulog(params.iprop_logfile);
+    ulog = map_ulog(params.iprop_logfile, &ulog_fd);
     if (ulog == NULL) {
         fprintf(stderr, _("Unable to map log file %s\n\n"),
                 params.iprop_logfile);
@@ -546,6 +554,7 @@ main(int argc, char **argv)
     printf("\n");
 
 done:
+    close(ulog_fd);
     kadm5_free_config_params(context, &params);
     krb5_free_context(context);
     return 0;

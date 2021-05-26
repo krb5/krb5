@@ -1449,8 +1449,11 @@ krb5_db_setup_mkey_name(krb5_context context, const char *keyname,
     if (asprintf(&fname, "%s%s%s", keyname, REALM_SEP_STRING, realm) < 0)
         return ENOMEM;
 
-    if ((retval = krb5_parse_name(context, fname, principal)))
+    retval = krb5_parse_name(context, fname, principal);
+    if (retval) {
+        free(fname);
         return retval;
+    }
     if (fullname)
         *fullname = fname;
     else

@@ -217,7 +217,7 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
         /* rdlen - 4 bytes remain after the priority and weight. */
         uri->host = k5memdup0(p, rdlen - 4, &ret);
         if (uri->host == NULL) {
-            ret = errno;
+            free(uri);
             goto out;
         }
 

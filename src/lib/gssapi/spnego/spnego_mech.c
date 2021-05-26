@@ -3485,11 +3485,9 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in,
 
 		major_status = gss_add_oid_set_member(minor_status,
 						      temp, &returned_mechSet);
-		if (major_status == GSS_S_COMPLETE) {
+		if (major_status == GSS_S_COMPLETE)
 			set_length += returned_mechSet->elements[i].length +2;
-			if (generic_gss_release_oid(minor_status, &temp))
-				map_errcode(minor_status);
-		}
+		generic_gss_release_oid(minor_status, &temp);
 	}
 
 	return (returned_mechSet);

@@ -162,17 +162,14 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     }
 
     errcode = kdc_make_rstate(kdc_active_realm, &state);
-    if (errcode !=0) {
-        krb5_free_kdc_req(kdc_context, request);
-        return errcode;
-    }
+    if (errcode != 0)
+        goto cleanup;
 
     /* Initialize audit state. */
     errcode = kau_init_kdc_req(kdc_context, request, from, &au_state);
-    if (errcode) {
-        krb5_free_kdc_req(kdc_context, request);
-        return errcode;
-    }
+    if (errcode)
+        goto cleanup;
+
     /* Seed the audit trail with the request ID and basic information. */
     kau_tgs_req(kdc_context, TRUE, au_state);
 
@@ -733,11 +730,13 @@ cleanup:
     if (errcode)
         emsg = krb5_get_error_message (kdc_context, errcode);
 
-    au_state->status = status;
-    if (!errcode)
-        au_state->reply = &reply;
-    kau_tgs_req(kdc_context, errcode ? FALSE : TRUE, au_state);
-    kau_free_kdc_req(au_state);
+    if (au_state != NULL) {
+        au_state->status = status;
+        if (!errcode)
+            au_state->reply = &reply;
+        kau_tgs_req(kdc_context, errcode ? FALSE : TRUE, au_state);
+        kau_free_kdc_req(au_state);
+    }
 
     log_tgs_req(kdc_context, from, request, &reply, cprinc,
                 sprinc, altcprinc, authtime,
@@ -747,7 +746,7 @@ cleanup:
         emsg = NULL;
     }
 
-    if (errcode) {
+    if (errcode && state != NULL) {
         int got_err = 0;
         if (status == 0) {
             status = krb5_get_error_message (kdc_context, errcode);

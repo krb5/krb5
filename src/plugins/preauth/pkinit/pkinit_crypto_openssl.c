@@ -3653,14 +3653,15 @@ static krb5_error_code
 pkinit_open_session(krb5_context context,
                     pkinit_identity_crypto_context cctx)
 {
-    CK_ULONG i, r;
+    CK_ULONG i, pret;
     unsigned char *cp;
     size_t label_len;
     CK_ULONG count = 0;
-    CK_SLOT_ID_PTR slotlist;
+    CK_SLOT_ID_PTR slotlist = NULL;
     CK_TOKEN_INFO tinfo;
-    char *p11name;
+    char *p11name = NULL;
     const char *password;
+    krb5_error_code ret;
 
     if (cctx->p11_module != NULL)
         return 0; /* session already open */
@@ -3672,8 +3673,9 @@ pkinit_open_session(krb5_context context,
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
     /* Init */
-    if ((r = cctx->p11->C_Initialize(NULL)) != CKR_OK) {
-        pkiDebug("C_Initialize: %s\n", pkcs11err(r));
+    pret = cctx->p11->C_Initialize(NULL);
+    if (pret != CKR_OK) {
+        pkiDebug("C_Initialize: %s\n", pkcs11err(pret));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
@@ -3687,8 +3689,10 @@ pkinit_open_session(krb5_context context,
     slotlist = calloc(count, sizeof(CK_SLOT_ID));
     if (slotlist == NULL)
         return ENOMEM;
-    if (cctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK)
-        return KRB5KDC_ERR_PREAUTH_FAILED;
+    if (cctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK) {
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
+    }
 
     /* Look for the given token label, or if none given take the first one */
     for (i = 0; i < count; i++) {
@@ -3697,16 +3701,20 @@ pkinit_open_session(krb5_context context,
             continue;
 
         /* Open session */
-        if ((r = cctx->p11->C_OpenSession(slotlist[i], CKF_SERIAL_SESSION,
-                                          NULL, NULL, &cctx->session)) != CKR_OK) {
-            pkiDebug("C_OpenSession: %s\n", pkcs11err(r));
-            return KRB5KDC_ERR_PREAUTH_FAILED;
+        pret = cctx->p11->C_OpenSession(slotlist[i], CKF_SERIAL_SESSION,
+                                        NULL, NULL, &cctx->session);
+        if (pret != CKR_OK) {
+            pkiDebug("C_OpenSession: %s\n", pkcs11err(pret));
+            ret = KRB5KDC_ERR_PREAUTH_FAILED;
+            goto cleanup;
         }
 
         /* Get token info */
-        if ((r = cctx->p11->C_GetTokenInfo(slotlist[i], &tinfo)) != CKR_OK) {
-            pkiDebug("C_GetTokenInfo: %s\n", pkcs11err(r));
-            return KRB5KDC_ERR_PREAUTH_FAILED;
+        pret = cctx->p11->C_GetTokenInfo(slotlist[i], &tinfo);
+        if (pret != CKR_OK) {
+            pkiDebug("C_GetTokenInfo: %s\n", pkcs11err(pret));
+            ret = KRB5KDC_ERR_PREAUTH_FAILED;
+            goto cleanup;
         }
 
         /* tinfo.label is zero-filled but not necessarily zero-terminated.
@@ -3726,12 +3734,11 @@ pkinit_open_session(krb5_context context,
         cctx->p11->C_CloseSession(cctx->session);
     }
     if (i >= count) {
-        free(slotlist);
         TRACE_PKINIT_PKCS11_NO_MATCH_TOKEN(context);
-        return KRB5KDC_ERR_PREAUTH_FAILED;
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
     }
     cctx->slotid = slotlist[i];
-    free(slotlist);
     pkiDebug("open_session: slotid %d (%lu of %d)\n", (int)cctx->slotid,
              i + 1, (int) count);
 
@@ -3751,23 +3758,26 @@ pkinit_open_session(krb5_context context,
                              (int)label_len, tinfo.label) < 0)
                     p11name = NULL;
             }
-        } else {
-            p11name = NULL;
         }
         if (cctx->defer_id_prompt) {
             /* Supply the identity name to be passed to the responder. */
             pkinit_set_deferred_id(&cctx->deferred_ids,
                                    p11name, tinfo.flags, NULL);
-            free(p11name);
-            return 0;
+            ret = 0;
+            goto cleanup;
         }
         /* Look up a responder-supplied password for the token. */
         password = pkinit_find_deferred_id(cctx->deferred_ids, p11name);
-        free(p11name);
-        r = pkinit_login(context, cctx, &tinfo, password);
+        ret = pkinit_login(context, cctx, &tinfo, password);
+        if (ret)
+            goto cleanup;
     }
 
-    return r;
+    ret = 0;
+cleanup:
+    free(slotlist);
+    free(p11name);
+    return ret;
 }
 
 /*

@@ -632,7 +632,7 @@ krb5_error_code
 do_iprop()
 {
     kadm5_ret_t retval;
-    krb5_principal iprop_svc_principal;
+    krb5_principal iprop_svc_principal = NULL;
     void *server_handle = NULL;
     char *iprop_svc_princstr = NULL, *primary_svc_princstr = NULL;
     unsigned int pollin, backoff_time;
@@ -652,16 +652,13 @@ do_iprop()
     if (pollin == 0)
         pollin = 10;
 
-    if (primary_svc_princstr == NULL) {
-        retval = kadm5_get_kiprop_host_srv_name(kpropd_context, realm,
-                                                &primary_svc_princstr);
-        if (retval) {
-            com_err(progname, retval,
-                    _("%s: unable to get kiprop host based "
-                      "service name for realm %s\n"),
-                    progname, realm);
-            return retval;
-        }
+    retval = kadm5_get_kiprop_host_srv_name(kpropd_context, realm,
+                                            &primary_svc_princstr);
+    if (retval) {
+        com_err(progname, retval, _("%s: unable to get kiprop host based "
+                                    "service name for realm %s\n"),
+                progname, realm);
+        goto done;
     }
 
     retval = sn2princ_realm(kpropd_context, NULL, KIPROP_SVC_NAME, realm,
@@ -669,7 +666,7 @@ do_iprop()
     if (retval) {
         com_err(progname, retval,
                 _("while trying to construct host service principal"));
-        return retval;
+        goto done;
     }
 
     retval = krb5_unparse_name(kpropd_context, iprop_svc_principal,
@@ -677,10 +674,8 @@ do_iprop()
     if (retval) {
         com_err(progname, retval,
                 _("while canonicalizing principal name"));
-        krb5_free_principal(kpropd_context, iprop_svc_principal);
-        return retval;
+        goto done;
     }
-    krb5_free_principal(kpropd_context, iprop_svc_principal);
 
 reinit:
     /*
@@ -995,6 +990,7 @@ error:
 done:
     free(iprop_svc_princstr);
     free(primary_svc_princstr);
+    krb5_free_principal(kpropd_context, iprop_svc_principal);
     krb5_free_default_realm(kpropd_context, def_realm);
     kadm5_destroy(server_handle);
     krb5_db_fini(kpropd_context);

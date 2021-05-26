@@ -785,6 +785,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     char                        *polname = NULL;
     OPERATION optype;
     krb5_boolean                found_entry = FALSE;
+    char                        *filter = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -833,7 +834,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     if (entry->mask & KADM5_LOAD) {
         unsigned int     tree = 0;
         int              numlentries = 0;
-        char             *filter = NULL;
 
         /*  A load operation is special, will do a mix-in (add krbprinc
          *  attrs to a non-krb object entry) if an object exists with a
@@ -864,7 +864,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             if (st == LDAP_SUCCESS) {
                 numlentries = ldap_count_entries(ld, result);
                 if (numlentries > 1) {
-                    free(filter);
                     st = EINVAL;
                     k5_setmsg(context, st,
                               _("operation can not continue, more than one "
@@ -880,7 +879,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                             if ((principal_dn = ldap_get_dn(ld, ent)) == NULL) {
                                 ldap_get_option (ld, LDAP_OPT_RESULT_CODE, &st);
                                 st = set_ldap_error (context, st, 0);
-                                free(filter);
                                 goto cleanup;
                             }
                         }
@@ -889,7 +887,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             } else if (st != LDAP_NO_SUCH_OBJECT) {
                 /* could not perform search, return with failure */
                 st = set_ldap_error (context, st, 0);
-                free(filter);
                 goto cleanup;
             }
             ldap_msgfree(result);
@@ -899,8 +896,6 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
              * be created.
              */
         } /* end for (tree = 0; principal_dn == ... */
-
-        free(filter);
 
         if (found_entry == FALSE && principal_dn != NULL) {
             /*
@@ -1450,6 +1445,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
     }
 
 cleanup:
+    free(filter);
     if (user)
         free(user);
 

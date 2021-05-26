@@ -722,8 +722,10 @@ add_connection(struct conn_state **conns, k5_transport transport,
 
         if (*udpbufp == NULL) {
             *udpbufp = malloc(MAX_DGRAM_SIZE);
-            if (*udpbufp == 0)
+            if (*udpbufp == NULL) {
+                free(state);
                 return ENOMEM;
+            }
         }
         state->in.buf = *udpbufp;
         state->in.bufsize = MAX_DGRAM_SIZE;
