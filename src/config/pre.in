@@ -403,14 +403,6 @@ RUN_VARS=@KRB5_RUN_VARS@
 RUN_TEST=$(RUN_SETUP) KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf \
     LC_ALL=C $(VALGRIND)
 
-#
-# variables for --with-tcl=
-TCL_LIBS	= @TCL_LIBS@
-TCL_LIBPATH	= @TCL_LIBPATH@
-TCL_RPATH	= @TCL_RPATH@
-TCL_MAYBE_RPATH = @TCL_MAYBE_RPATH@
-TCL_INCLUDES	= @TCL_INCLUDES@
-
 # Crypto and PRNG back-end selections
 CRYPTO_IMPL	= @CRYPTO_IMPL@
 PRNG_ALG	= @PRNG_ALG@

@@ -950,16 +950,6 @@ The following notice applies to ``src/util/profile/argv_parse.c`` and
 
 -------------------
 
-The following notice applies to SWIG-generated code in
-``src/util/profile/profile_tcl.c``:
-
-    Copyright |copy| 1999-2000, The University of Chicago
-
-    This file may be freely redistributed without license or fee provided
-    this copyright message remains intact.
-
--------------------
-
 The following notice applies to portiions of ``src/lib/rpc`` and
 ``src/include/gssrpc``:
 

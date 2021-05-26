@@ -636,7 +636,6 @@ OTHEREXCLUDES = \
 	util/et/com_err.h \
 	util/profile/prof_int.h \
 	util/profile/profile.hin \
-	util/profile/profile_tcl.c \
 	util/support/fnmatch.c \
 	util/verto \
 	util/k5ev

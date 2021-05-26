@@ -518,7 +518,6 @@ local.properties
 /src/util/profile/modtest.conf
 /src/util/profile/prof_err.[ch]
 /src/util/profile/profile.h
-/src/util/profile/profile_tcl
 /src/util/profile/test?.ini
 /src/util/profile/test_include_dir/
 /src/util/profile/test_load

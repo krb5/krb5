@@ -98,7 +98,6 @@ fi
 # configuration options.
 
 KRB5_LIB_AUX
-AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
 
@@ -923,13 +922,6 @@ AC_CHECK_TYPES([struct rt_msghdr], , , [
 # Tests for 64-bit edwards25519 code.
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_TYPES([__int128_t, __uint128_t])
-
-# stuff for util/profile
-
-# AC_KRB5_TCL already done
-DO_TCL=
-test "$TCL_LIBS" != "" && DO_TCL=ok
-AC_SUBST(DO_TCL)
 
 # types libdb2 wants
 
