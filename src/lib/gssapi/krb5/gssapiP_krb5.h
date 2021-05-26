@@ -380,8 +380,7 @@ OM_uint32 kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status);
 OM_uint32 kg_caller_provided_ccache_name (OM_uint32 *minor_status,
                                           int *out_caller_provided_name);
 
-OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status,
-                              const char **out_name);
+OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status, char **out_name);
 
 OM_uint32 kg_set_ccache_name (OM_uint32 *minor_status,
                               const char *name);

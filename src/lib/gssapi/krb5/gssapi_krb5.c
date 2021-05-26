@@ -253,46 +253,31 @@ kg_caller_provided_ccache_name (OM_uint32 *minor_status,
 }
 
 OM_uint32
-kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
+kg_get_ccache_name(OM_uint32 *minor_status, char **out_name)
 {
-    const char *name = NULL;
-    OM_uint32 err = 0;
     char *kg_ccache_name;
+    const char *def_name;
+    OM_uint32 err;
+    krb5_context context;
+
+    *out_name = NULL;
 
     kg_ccache_name = k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME);
-
     if (kg_ccache_name != NULL) {
-        name = strdup(kg_ccache_name);
-        if (name == NULL)
-            err = ENOMEM;
+        *out_name = strdup(kg_ccache_name);
+        err = (*out_name == NULL) ? ENOMEM : 0;
     } else {
-        krb5_context context = NULL;
-
-        /* Reset the context default ccache (see text above), and then
-           retrieve it.  */
+        /* Use the default ccache name. */
         err = krb5_gss_init_context(&context);
-        if (!err)
-            err = krb5_cc_set_default_name (context, NULL);
-        if (!err) {
-            name = krb5_cc_default_name(context);
-            if (name) {
-                name = strdup(name);
-                if (name == NULL)
-                    err = ENOMEM;
-            }
-        }
-        if (err && context)
-            save_error_info(err, context);
-        if (context)
-            krb5_free_context(context);
+        if (err)
+            goto cleanup;
+        def_name = krb5_cc_default_name(context);
+        *out_name = (def_name != NULL) ? strdup(def_name) : NULL;
+        err = (*out_name == NULL) ? ENOMEM : 0;
+        krb5_free_context(context);
     }
 
-    if (!err) {
-        if (out_name) {
-            *out_name = name;
-        }
-    }
-
+cleanup:
     *minor_status = err;
     return (*minor_status == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
 }
