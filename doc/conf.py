@@ -98,8 +98,15 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
+# When we can rely on Sphinx 1.8 (released Sep 2018) we can just set:
+#   html_css_files = ['kerb.css']
+# But in the meantime, we add this file using either a way that works
+# after 1.8 or a way that works before 4.0.
 def setup(app):
-    app.add_stylesheet('kerb.css')
+    if callable(getattr(app, 'add_css_file', None)):
+        app.add_css_file('kerb.css')
+    else:
+        app.add_stylesheet('kerb.css')
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
