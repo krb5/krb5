@@ -220,12 +220,12 @@ static void
 remote_shutdown(krad_remote *rr)
 {
     krb5_error_code retval;
-    request *r;
+    request *r, *next;
 
     remote_disconnect(rr);
 
     /* Start timers for all unsent packets. */
-    K5_TAILQ_FOREACH(r, &rr->list, list) {
+    K5_TAILQ_FOREACH_SAFE(r, &rr->list, list, next) {
         if (r->timer == NULL) {
             retval = request_start_timer(r, rr->vctx);
             if (retval != 0)
