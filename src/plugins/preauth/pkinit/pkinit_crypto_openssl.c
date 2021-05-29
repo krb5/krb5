@@ -4511,6 +4511,89 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
 }
 
 static krb5_error_code
+load_one_cert(CK_FUNCTION_LIST_PTR p11, CK_SESSION_HANDLE session,
+              pkinit_identity_opts *idopts, pkinit_cred_info *cred_out)
+{
+    krb5_error_code ret;
+    CK_ATTRIBUTE attrs[2];
+    CK_BYTE_PTR cert = NULL, cert_id = NULL;
+    CK_RV pret;
+    const unsigned char *cp;
+    CK_OBJECT_HANDLE obj;
+    CK_ULONG count;
+    X509 *x = NULL;
+    pkinit_cred_info cred;
+
+    *cred_out = NULL;
+
+    /* Look for X.509 cert. */
+    pret = p11->C_FindObjects(session, &obj, 1, &count);
+    if (pret != CKR_OK || count <= 0)
+        return 0;
+
+    /* Get cert and id len. */
+    attrs[0].type = CKA_VALUE;
+    attrs[0].pValue = NULL;
+    attrs[0].ulValueLen = 0;
+    attrs[1].type = CKA_ID;
+    attrs[1].pValue = NULL;
+    attrs[1].ulValueLen = 0;
+    pret = p11->C_GetAttributeValue(session, obj, attrs, 2);
+    if (pret != CKR_OK && pret != CKR_BUFFER_TOO_SMALL) {
+        pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(pret));
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
+    }
+
+    /* Allocate buffers and read the cert and id. */
+    cert = k5alloc(attrs[0].ulValueLen + 1, &ret);
+    if (cert == NULL)
+        goto cleanup;
+    cert_id = k5alloc(attrs[1].ulValueLen + 1, &ret);
+    if (cert_id == NULL)
+        goto cleanup;
+    attrs[0].type = CKA_VALUE;
+    attrs[0].pValue = cert;
+    attrs[1].type = CKA_ID;
+    attrs[1].pValue = cert_id;
+    pret = p11->C_GetAttributeValue(session, obj, attrs, 2);
+    if (pret != CKR_OK) {
+        pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(pret));
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
+    }
+
+    pkiDebug("cert: size %d, id %d, idlen %d\n", (int)attrs[0].ulValueLen,
+             (int)cert_id[0], (int)attrs[1].ulValueLen);
+
+    cp = (unsigned char *)cert;
+    x = d2i_X509(NULL, &cp, (int)attrs[0].ulValueLen);
+    if (x == NULL) {
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        goto cleanup;
+    }
+
+    cred = k5alloc(sizeof(struct _pkinit_cred_info), &ret);
+    if (cred == NULL)
+        goto cleanup;
+
+    cred->name = reassemble_pkcs11_name(idopts);
+    cred->cert = x;
+    cred->key = NULL;
+    cred->cert_id = cert_id;
+    cred->cert_id_len = attrs[1].ulValueLen;
+
+    *cred_out = cred;
+    cert_id = NULL;
+    ret = 0;
+
+cleanup:
+    free(cert);
+    free(cert_id);
+    return ret;
+}
+
+static krb5_error_code
 pkinit_get_certs_pkcs11(krb5_context context,
                         pkinit_plg_crypto_context plg_cryptoctx,
                         pkinit_req_crypto_context req_cryptoctx,
@@ -4518,20 +4601,13 @@ pkinit_get_certs_pkcs11(krb5_context context,
                         pkinit_identity_crypto_context id_cryptoctx,
                         krb5_principal princ)
 {
-#ifdef PKINIT_USE_MECH_LIST
-    CK_MECHANISM_TYPE_PTR mechp;
-    CK_MECHANISM_INFO info;
-#endif
     CK_OBJECT_CLASS cls;
-    CK_OBJECT_HANDLE obj;
     CK_ATTRIBUTE attrs[4];
-    CK_ULONG count;
     CK_CERTIFICATE_TYPE certtype;
-    CK_BYTE_PTR cert = NULL, cert_id;
-    const unsigned char *cp;
-    int i, r;
+    int i;
     unsigned int nattrs;
-    X509 *x = NULL;
+    krb5_error_code ret;
+    CK_RV pret;
 
     /* Copy stuff from idopts -> id_cryptoctx */
     if (idopts->p11_module_name != NULL) {
@@ -4552,20 +4628,20 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
     /* Convert the ascii cert_id string into a binary blob */
     if (idopts->cert_id_string != NULL) {
-        r = k5_hex_decode(idopts->cert_id_string,
-                          &id_cryptoctx->cert_id, &id_cryptoctx->cert_id_len);
-        if (r != 0) {
+        ret = k5_hex_decode(idopts->cert_id_string, &id_cryptoctx->cert_id,
+                            &id_cryptoctx->cert_id_len);
+        if (ret) {
             pkiDebug("Failed to convert certid string [%s]\n",
                      idopts->cert_id_string);
-            return r;
+            return ret;
         }
     }
     id_cryptoctx->slotid = idopts->slotid;
     id_cryptoctx->pkcs11_method = 1;
 
-    r = pkinit_open_session(context, id_cryptoctx);
-    if (r != 0)
-        return r;
+    ret = pkinit_open_session(context, id_cryptoctx);
+    if (ret)
+        return ret;
     if (id_cryptoctx->defer_id_prompt) {
         /*
          * We need to reset all of the PKCS#11 state, so that the next time we
@@ -4577,56 +4653,23 @@ pkinit_get_certs_pkcs11(krb5_context context,
         return 0;
     }
 
-#ifndef PKINIT_USE_MECH_LIST
     /*
      * We'd like to use CKM_SHA1_RSA_PKCS for signing if it's available, but
      * many cards seems to be confused about whether they are capable of
      * this or not. The safe thing seems to be to ignore the mechanism list,
      * always use CKM_RSA_PKCS and calculate the sha1 digest ourselves.
      */
-
     id_cryptoctx->mech = CKM_RSA_PKCS;
-#else
-    if ((r = id_cryptoctx->p11->C_GetMechanismList(id_cryptoctx->slotid, NULL,
-                                                   &count)) != CKR_OK || count <= 0) {
-        pkiDebug("C_GetMechanismList: %s\n", pkcs11err(r));
-        return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
-    mechp = malloc(count * sizeof (CK_MECHANISM_TYPE));
-    if (mechp == NULL)
-        return ENOMEM;
-    if ((r = id_cryptoctx->p11->C_GetMechanismList(id_cryptoctx->slotid,
-                                                   mechp, &count)) != CKR_OK)
-        return KRB5KDC_ERR_PREAUTH_FAILED;
-    for (i = 0; i < count; i++) {
-        if ((r = id_cryptoctx->p11->C_GetMechanismInfo(id_cryptoctx->slotid,
-                                                       mechp[i], &info)) != CKR_OK)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-#ifdef DEBUG_MECHINFO
-        pkiDebug("mech %x flags %x\n", (int) mechp[i], (int) info.flags);
-        if ((info.flags & (CKF_SIGN|CKF_DECRYPT)) == (CKF_SIGN|CKF_DECRYPT))
-            pkiDebug("  this mech is good for sign & decrypt\n");
-#endif
-        if (mechp[i] == CKM_RSA_PKCS) {
-            /* This seems backwards... */
-            id_cryptoctx->mech =
-                (info.flags & CKF_SIGN) ? CKM_SHA1_RSA_PKCS : CKM_RSA_PKCS;
-        }
-    }
-    free(mechp);
-
-    pkiDebug("got %d mechs from card\n", (int) count);
-#endif
 
     cls = CKO_CERTIFICATE;
     attrs[0].type = CKA_CLASS;
     attrs[0].pValue = &cls;
-    attrs[0].ulValueLen = sizeof cls;
+    attrs[0].ulValueLen = sizeof(cls);
 
     certtype = CKC_X_509;
     attrs[1].type = CKA_CERTIFICATE_TYPE;
     attrs[1].pValue = &certtype;
-    attrs[1].ulValueLen = sizeof certtype;
+    attrs[1].ulValueLen = sizeof(certtype);
 
     nattrs = 2;
 
@@ -4644,80 +4687,33 @@ pkinit_get_certs_pkcs11(krb5_context context,
         nattrs++;
     }
 
-    r = id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session, attrs, nattrs);
-    if (r != CKR_OK) {
-        pkiDebug("C_FindObjectsInit: %s\n", pkcs11err(r));
+    pret = id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session, attrs,
+                                                nattrs);
+    if (pret != CKR_OK) {
+        pkiDebug("C_FindObjectsInit: %s\n", pkcs11err(pret));
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    for (i = 0; ; i++) {
-        if (i >= MAX_CREDS_ALLOWED)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-
-        /* Look for x.509 cert */
-        if ((r = id_cryptoctx->p11->C_FindObjects(id_cryptoctx->session,
-                                                  &obj, 1, &count)) != CKR_OK || count <= 0) {
-            id_cryptoctx->creds[i] = NULL;
-            break;
-        }
-
-        /* Get cert and id len */
-        attrs[0].type = CKA_VALUE;
-        attrs[0].pValue = NULL;
-        attrs[0].ulValueLen = 0;
-
-        attrs[1].type = CKA_ID;
-        attrs[1].pValue = NULL;
-        attrs[1].ulValueLen = 0;
-
-        if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
-                                                        obj, attrs, 2)) != CKR_OK && r != CKR_BUFFER_TOO_SMALL) {
-            pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(r));
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        }
-        cert = (CK_BYTE_PTR) malloc((size_t) attrs[0].ulValueLen + 1);
-        cert_id = (CK_BYTE_PTR) malloc((size_t) attrs[1].ulValueLen + 1);
-        if (cert == NULL || cert_id == NULL)
-            return ENOMEM;
-
-        /* Read the cert and id off the card */
-
-        attrs[0].type = CKA_VALUE;
-        attrs[0].pValue = cert;
-
-        attrs[1].type = CKA_ID;
-        attrs[1].pValue = cert_id;
-
-        if ((r = id_cryptoctx->p11->C_GetAttributeValue(id_cryptoctx->session,
-                                                        obj, attrs, 2)) != CKR_OK) {
-            pkiDebug("C_GetAttributeValue: %s\n", pkcs11err(r));
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        }
-
-        pkiDebug("cert %d size %d id %d idlen %d\n", i,
-                 (int) attrs[0].ulValueLen, (int) cert_id[0],
-                 (int) attrs[1].ulValueLen);
-
-        cp = (unsigned char *) cert;
-        x = d2i_X509(NULL, &cp, (int) attrs[0].ulValueLen);
-        if (x == NULL)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        id_cryptoctx->creds[i] = malloc(sizeof(struct _pkinit_cred_info));
+    for (i = 0; i < MAX_CREDS_ALLOWED; i++) {
+        ret = load_one_cert(id_cryptoctx->p11, id_cryptoctx->session, idopts,
+                            &id_cryptoctx->creds[i]);
+        if (ret)
+            return ret;
         if (id_cryptoctx->creds[i] == NULL)
-            return KRB5KDC_ERR_PREAUTH_FAILED;
-        id_cryptoctx->creds[i]->name = reassemble_pkcs11_name(idopts);
-        id_cryptoctx->creds[i]->cert = x;
-        id_cryptoctx->creds[i]->key = NULL;
-        id_cryptoctx->creds[i]->cert_id = cert_id;
-        id_cryptoctx->creds[i]->cert_id_len = attrs[1].ulValueLen;
-        free(cert);
+            break;
     }
+    if (i == MAX_CREDS_ALLOWED)
+        return KRB5KDC_ERR_PREAUTH_FAILED;
+
     id_cryptoctx->p11->C_FindObjectsFinal(id_cryptoctx->session);
-    if (cert == NULL)
+
+    /* Check if we found no certs. */
+    if (id_cryptoctx->creds[0] == NULL)
         return KRB5KDC_ERR_PREAUTH_FAILED;
     return 0;
 }
-#endif
+
+#endif /* !WITHOUT_PKCS11 */
 
 
 static void
