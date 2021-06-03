@@ -505,17 +505,6 @@ k5_begin(struct k_opts *opts, struct k5_data *k5)
                     _("when creating default server principal name"));
             goto cleanup;
         }
-        if (k5->me->realm.data[0] == 0) {
-            ret = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
-            if (ret == 0) {
-                com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                        _("(principal %s)"), k5->name);
-            } else {
-                com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                        _("for local services"));
-            }
-            goto cleanup;
-        }
     } else if (k5->out_cc != NULL) {
         /* If the output ccache is initialized, use its principal. */
         if (krb5_cc_get_principal(k5->ctx, k5->out_cc, &princ) == 0)
