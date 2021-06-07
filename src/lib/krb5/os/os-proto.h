@@ -85,10 +85,15 @@ struct sendto_callback_info {
 
 /*
  * Initialize with all zeros except for princ.  Set no_hostrealm to disable
- * host-to-realm lookup, which ordinarily happens after canonicalizing the host
- * part.  Set subst_defrealm to substitute the default realm for the referral
- * realm after realm lookup (this has no effect if no_hostrealm is set).  Free
- * with free_canonprinc() when done.
+ * host-to-realm lookup, which ordinarily happens during fallback processing
+ * after canonicalizing the host part.  Set subst_defrealm to substitute the
+ * default realm for the referral realm after realm lookup.  Do not set both
+ * flags.  Free with free_canonprinc() when done.
+ *
+ * no_hostrealm only applies if fallback processing is in use
+ * (dns_canonicalize_hostname = fallback).  It will not remove the realm if
+ * krb5_sname_to_principal() already canonicalized the hostname and looked up a
+ * realm.  subst_defrealm applies whether or not fallback processing is in use.
  */
 struct canonprinc {
     krb5_const_principal princ;
