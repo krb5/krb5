@@ -51,4 +51,16 @@ for i in range(200):
     realm.run_kadmin(['addprinc', '-randkey', 'foo%d' % i])
 realm.run_kadmin(['listprincs'], expected_msg='foo199')
 
+# Test kadmin -k with the default principal, with and without
+# fallback.  This operation requires canonicalization against the
+# keytab in krb5_get_init_creds_keytab() as the
+# krb5_sname_to_principal() result won't have a realm.  Try with and
+# without without fallback processing since the code paths are
+# different.
+mark('kadmin -k')
+realm.run([kadmin, '-k', 'getprinc', realm.host_princ])
+no_canon_conf = {'libdefaults': {'dns_canonicalize_hostname': 'false'}}
+no_canon = realm.special_env('no_canon', False, krb5_conf=no_canon_conf)
+realm.run([kadmin, '-k', 'getprinc', realm.host_princ], env=no_canon)
+
 success('kadmin and kpasswd tests')

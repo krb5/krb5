@@ -221,9 +221,16 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         return KADM5_MISSING_KRB5_CONF_PARAMS;
     }
 
+    /*
+     * Parse the client name.  If it has an empty realm, it is almost certainly
+     * a host-based principal using DNS fallback processing or the referral
+     * realm, so give it the appropriate name type for canonicalization.
+     */
     code = krb5_parse_name(handle->context, client_name, &client);
     if (code)
         goto error;
+    if (init_type == INIT_SKEY && client->realm.length == 0)
+        client->type = KRB5_NT_SRV_HST;
 
     /*
      * Get credentials.  Also does some fallbacks in case kadmin/fqdn
