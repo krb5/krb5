@@ -17,6 +17,7 @@ jobs:
                       os: ubuntu-18.04
                       compiler: clang
                       makevars: CPPFLAGS=-Werror
+                      configureopts: --enable-asan
                     - name: linux-clang-openssl
                       os: ubuntu-18.04
                       compiler: clang
