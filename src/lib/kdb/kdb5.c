@@ -675,6 +675,8 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
         return status;
     status = v->init_module(kcontext, section, db_args, mode);
     free(section);
+    if (status)
+        (void)krb5_db_fini(kcontext);
     return status;
 }
 
@@ -702,6 +704,8 @@ krb5_db_create(krb5_context kcontext, char **db_args)
         return status;
     status = v->create(kcontext, section, db_args);
     free(section);
+    if (status)
+        (void)krb5_db_fini(kcontext);
     return status;
 }
 
