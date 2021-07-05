@@ -117,6 +117,79 @@ r1.stop()
 r2.stop()
 r3.stop()
 
+#
+# Test the behavior of GSS_KRB5_CRED_NO_TRANSIT_CHECK_X
+# First we define all possible capaths explicitly
+# as capaths_all. This will be used by default.
+#
+# Then we define capaths_ax_first_hop, which
+# has just the first hops from A.X to the others,
+# this will allow the client code to get a service
+# ticket for a service in D.X, but doesn't allow
+# the acceptor part to pass the transited check.
+#
+capaths_none = {
+  'capaths': None,
+}
+capaths_all = {
+  'capaths': {
+    'A.X': {
+      'D.X': ['B.X', 'C.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+    'B.X': {
+      'A.X': ['.'],
+      'C.X': ['.'],
+      'D.X': ['C.X'],
+    },
+    'C.X': {
+      'D.X': ['.'],
+      'B.X': ['.'],
+      'A.X': ['B.X'],
+    },
+    'D.X': {
+      'A.X': ['C.X', 'B.X'],
+      'B.X': ['C.X'],
+      'C.X': ['.'],
+    }
+  }
+}
+capaths_ax_first_hop = {
+  'capaths': {
+    'A.X': {
+      'D.X': ['B.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+  }
+}
+r1args = { 'realm': 'A.X', 'krb5_conf': capaths_all, 'create_user': True }
+r2args = { 'realm': 'B.X', 'krb5_conf': capaths_all }
+r3args = { 'realm': 'C.X', 'krb5_conf': capaths_all }
+noreject = {'realms': {'$realm': {'reject_bad_transit': 'false'}}}
+r4args = { 'realm': 'D.X', 'krb5_conf': capaths_none, 'kdc_conf': noreject, 'create_host': True }
+
+r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
+                              create_user=False, create_host=False,
+                              args=[r1args, r2args, r3args, r4args])
+os.rename(r4.keytab, r1.keytab)
+# We create a special environment for the client on A.X
+r1client = r1.special_env('client', False, krb5_conf=capaths_ax_first_hop)
+# It will get a service ticket, but the acceptor fail to verify the
+# transited path.
+r1.run(['./t_accname', 'p:' + r4.host_princ, 'h:host'],
+   env=r1client,
+   expected_code=1,
+   expected_msg='Illegal cross-realm ticket')
+# With GSS_KRB5_CRED_NO_TRANSIT_CHECK_X it bypasses the check
+r1.run(['./t_accname', 'p:' + r4.host_princ, 'h:host', 'no_transit_check'],
+   env=r1client)
+r1.stop()
+r2.stop()
+r3.stop()
+r4.stop()
+
 ### Test gss_inquire_cred behavior.
 
 realm = K5Realm()
