@@ -87,7 +87,8 @@ ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     }
 
     /* Check for a configured FAST ec auth indicator. */
-    realmstr = k5memdup0(realm.data, realm.length, &retval);
+    if (retval == 0)
+        realmstr = k5memdup0(realm.data, realm.length, &retval);
     if (realmstr != NULL)
         retval = profile_get_string(context->profile, KRB5_CONF_REALMS,
                                     realmstr,
