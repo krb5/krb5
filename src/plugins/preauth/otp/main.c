@@ -164,27 +164,6 @@ nonce_generate(krb5_context ctx, unsigned int length, krb5_data *nonce_out)
     return 0;
 }
 
-static void
-on_response(void *data, krb5_error_code retval, otp_response response,
-            char *const *indicators)
-{
-    struct request_state rs = *(struct request_state *)data;
-    char *const *ind;
-
-    free(data);
-
-    if (retval == 0 && response != otp_response_success)
-        retval = KRB5_PREAUTH_FAILED;
-
-    if (retval == 0)
-        rs.enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-
-    for (ind = indicators; ind != NULL && *ind != NULL && retval == 0; ind++)
-        retval = rs.preauth_cb->add_auth_indicator(rs.context, rs.rock, *ind);
-
-    rs.respond(rs.arg, retval, NULL, NULL, NULL);
-}
-
 static krb5_error_code
 otp_init(krb5_context context, krb5_kdcpreauth_moddata *moddata_out,
          const char **realmnames)
@@ -269,7 +248,7 @@ out:
     (*respond)(arg, retval, pa);
 }
 
-static void
+void
 otp_edata_challenge_done(void *data, krb5_error_code retval,
                          otp_response response, const krb5_data *radius_state,
                          const krb5_data *message)
@@ -333,8 +312,7 @@ otp_edata_challenge(krb5_context context, krb5_kdc_req *request,
     edata_state->arg = arg;
 
     otp_state_challenge((otp_state *)moddata, cb->event_context(context, rock),
-                        cb->client_name(context, rock), config,
-                        otp_edata_challenge_done, edata_state);
+                        cb->client_name(context, rock), config, edata_state);
 }
 
 static void
@@ -382,6 +360,27 @@ done:
     if (retval != 0) {
         (*respond)(arg, retval, NULL);
     }
+}
+
+void
+otp_verify_done(void *data, krb5_error_code retval, otp_response response,
+                char *const *indicators)
+{
+    struct request_state rs = *(struct request_state *)data;
+    char *const *ind;
+
+    free(data);
+
+    if (retval == 0 && response != otp_response_success)
+        retval = KRB5_PREAUTH_FAILED;
+
+    if (retval == 0)
+        rs.enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+
+    for (ind = indicators; ind != NULL && *ind != NULL && retval == 0; ind++)
+        retval = rs.preauth_cb->add_auth_indicator(rs.context, rs.rock, *ind);
+
+    rs.respond(rs.arg, retval, NULL, NULL, NULL);
 }
 
 static void
@@ -472,7 +471,7 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
 
     /* Send the request. */
     otp_state_verify((otp_state *)moddata, cb->event_context(context, rock),
-                     cb->client_name(context, rock), config, req, on_response,
+                     cb->client_name(context, rock), config, req,
                      &radius_state, rs);
     cb->free_string(context, rock, config);
 

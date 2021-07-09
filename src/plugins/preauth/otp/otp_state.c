@@ -66,7 +66,6 @@ typedef struct request_st {
     otp_state *state;
     token *tokens;
     ssize_t index;
-    void *cb;
     void *data;
     krad_attrset *attrs;
 } request;
@@ -642,7 +641,6 @@ callback(krb5_error_code retval, const krad_packet *rqst,
     request *req = data;
     token *tok = &req->tokens[req->index];
     char *const *indicators;
-    otp_cb cb = req->cb;
 
     req->index++;
 
@@ -654,7 +652,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         indicators = tok->indicators;
         if (indicators == NULL)
             indicators = tok->type->indicators;
-        cb(req->data, retval, otp_response_success, indicators);
+        otp_verify_done(req->data, retval, otp_response_success, indicators);
         request_free(req);
         return;
     }
@@ -672,7 +670,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
     return;
 
 error:
-    cb(req->data, retval, otp_response_fail, NULL);
+    otp_verify_done(req->data, retval, otp_response_fail, NULL);
     request_free(req);
 }
 
@@ -699,7 +697,7 @@ request_send(request *req, krad_cb on_response)
 }
 
 static request *
-request_create(otp_state *state, void *cb, krb5_const_principal princ,
+request_create(otp_state *state, krb5_const_principal princ,
                const char *config, void *data)
 {
     krb5_error_code retval;
@@ -713,7 +711,6 @@ request_create(otp_state *state, void *cb, krb5_const_principal princ,
 
     req->state = state;
     req->data = data;
-    req->cb = cb;
 
     retval = krad_attrset_copy(state->attrs, &req->attrs);
     if (retval != 0) {
@@ -741,7 +738,7 @@ error:
 void
 otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
                  const char *config, const krb5_pa_otp_req *req,
-                 otp_cb cb, krb5_data *radius_state, void *data)
+                 krb5_data *radius_state, void *data)
 {
     krb5_error_code retval;
     request *rqst = NULL;
@@ -752,7 +749,7 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
             goto error;
     }
 
-    rqst = request_create(state, cb, princ, config, data);
+    rqst = request_create(state, princ, config, data);
     if (rqst == NULL) {
         retval = ENOMEM;
         goto error;
@@ -778,7 +775,7 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
     return;
 
 error:
-    (*cb)(data, retval, otp_response_fail, NULL);
+    otp_verify_done(data, retval, otp_response_fail, NULL);
     request_free(rqst);
 }
 
@@ -789,7 +786,6 @@ on_challenge(krb5_error_code retval, const krad_packet *rqst,
     request *req = data;
     const krb5_data *msg;
     const krb5_data *state;
-    otp_challenge_cb cb = req->cb;
 
     req->index++;
 
@@ -807,7 +803,7 @@ on_challenge(krb5_error_code retval, const krad_packet *rqst,
             goto error;
         }
 
-        cb(req->data, retval, otp_response_success, state, msg);
+        otp_edata_challenge_done(req->data, retval, otp_response_success, state, msg);
         request_free(req);
         return;
     }
@@ -826,14 +822,13 @@ on_challenge(krb5_error_code retval, const krad_packet *rqst,
     return;
 
 error:
-    (*cb)(req->data, retval, otp_response_fail, NULL, NULL);
+    otp_edata_challenge_done(req->data, retval, otp_response_fail, NULL, NULL);
     request_free(req);
 }
 
 void
 otp_state_challenge(otp_state *state, verto_ctx *ctx,
-                    krb5_const_principal princ, const char *config,
-                    otp_challenge_cb cb, void *data)
+                    krb5_const_principal princ, const char *config, void *data)
 {
     krb5_error_code retval;
     request *rqst = NULL;
@@ -845,7 +840,7 @@ otp_state_challenge(otp_state *state, verto_ctx *ctx,
         }
     }
 
-    rqst = request_create(state, cb, princ, config, data);
+    rqst = request_create(state, princ, config, data);
     if (rqst == NULL) {
         retval = ENOMEM;
         goto error;
@@ -862,7 +857,7 @@ otp_state_challenge(otp_state *state, verto_ctx *ctx,
     return;
 
 error:
-    (*cb)(data, retval, otp_response_fail, NULL, NULL);
+    otp_edata_challenge_done(data, retval, otp_response_fail, NULL, NULL);
     request_free(rqst);
 }
 
