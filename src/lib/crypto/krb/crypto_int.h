@@ -276,8 +276,6 @@ krb5_error_code krb5int_aes2_string_to_key(const struct krb5_keytypes *enc,
 /* Random to key */
 krb5_error_code k5_rand2key_direct(const krb5_data *randombits,
                                    krb5_keyblock *keyblock);
-krb5_error_code k5_rand2key_des(const krb5_data *randombits,
-                                krb5_keyblock *keyblock);
 krb5_error_code k5_rand2key_des3(const krb5_data *randombits,
                                  krb5_keyblock *keyblock);
 
@@ -444,9 +442,6 @@ extern const struct krb5_hash_provider krb5int_hash_sha384;
 
 /* Set the parity bits to the correct values in keybits. */
 void k5_des_fixup_key_parity(unsigned char *keybits);
-
-/* Return true if keybits is a weak or semi-weak DES key. */
-krb5_boolean k5_des_is_weak_key(unsigned char *keybits);
 
 /* Compute an HMAC using the provided hash function, key, and data, storing the
  * result into output (caller-allocated). */
