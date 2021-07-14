@@ -601,3 +601,29 @@ krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
     krb5_free_enctypes(context, list);
     return ret;
 }
+
+
+krb5_error_code KRB5_CALLCONV
+k5_get_sitename(krb5_context context, const char *realm, char **out)
+{
+    krb5_error_code ret = 0;
+    char *def_realm = NULL;
+
+    *out = NULL;
+
+    ret = krb5_get_default_realm(context, &def_realm);
+    if (ret)
+        return ret;
+
+    if (realm == NULL || (def_realm && strcmp(realm, def_realm) == 0))
+        ret = profile_get_string(context->profile, KRB5_CONF_LIBDEFAULTS,
+                                 KRB5_CONF_SITENAME, NULL, NULL, out);
+
+    if (ret == 0 && *out == NULL)
+        ret = profile_get_string(context->profile, KRB5_CONF_REALMS,
+                                 realm ? realm : def_realm,
+                                 KRB5_CONF_SITENAME, NULL, out);
+
+    krb5_free_default_realm(context, def_realm);
+    return ret;
+}

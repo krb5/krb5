@@ -316,9 +316,20 @@ locate_srv_dns_1(krb5_context context, const krb5_data *realm,
     struct srv_dns_entry *head = NULL, *entry = NULL;
     krb5_error_code code = 0;
     k5_transport transport;
+    char *realmname;
+    char *sitename;
 
-    code = krb5int_make_srv_query_realm(context, realm, service, protocol,
-                                        &head);
+    if ((realmname = malloc(realm->length + 1)) == NULL)
+        return ENOMEM;
+    if (realm->length)
+        memcpy(realmname, realm->data, realm->length);
+    realmname[realm->length] = '\0';
+
+    code = k5_get_sitename(context, realmname, &sitename);
+    free(realmname);
+    if (code == 0)
+        code = krb5int_make_srv_query_realm(context, realm, service, protocol,
+                                            sitename, &head);
     if (code)
         return 0;
 
@@ -604,11 +615,21 @@ locate_uri(krb5_context context, const krb5_data *realm,
     krb5_error_code ret;
     k5_transport transport, host_trans;
     struct srv_dns_entry *answers, *entry;
-    char *host;
+    char *host, *sitename, *realmname;
     const char *host_field, *path;
     int port, def_port, primary;
 
-    ret = k5_make_uri_query(context, realm, req_service, &answers);
+
+    if ((realmname = malloc(realm->length + 1)) == NULL)
+        return ENOMEM;
+    if (realm->length)
+        memcpy(realmname, realm->data, realm->length);
+    realmname[realm->length] = '\0';
+
+    ret = k5_get_sitename(context, realmname, &sitename);
+    free(realmname);
+    if (ret == 0)
+        ret = k5_make_uri_query(context, realm, req_service, sitename, &answers);
     if (ret || answers == NULL)
         return ret;
 

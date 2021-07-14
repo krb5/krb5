@@ -470,6 +470,10 @@ _
 The default value for the client is \fBedwards25519\fP\&.  The default
 value for the KDC is empty.  New in release 1.17.
 .TP
+\fBsitename\fP
+Specifies the name of the host's site for the purpose of DNS-based
+KDC discovery.
+.TP
 \fBticket_lifetime\fP
 (duration string.)  Sets the default lifetime for initial
 ticket requests.  The default value is 1 day.
@@ -637,6 +641,10 @@ invalid password, the client software will attempt to contact the
 primary KDC, in case the user\(aqs password has just been changed, and
 the updated database has not been propagated to the replica
 servers yet.  New in release 1.19.
+.TP
+\fBsitename\fP
+Specifies the name of the host's site for the purpose of DNS-based
+KDC discovery for this realm.
 .TP
 \fBv4_instance_convert\fP
 This subsection allows the administrator to configure exceptions

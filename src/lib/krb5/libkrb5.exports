@@ -150,6 +150,7 @@ k5_free_pa_spake
 k5_free_serverlist
 k5_free_spake_factor
 k5_hostrealm_free_context
+k5_get_sitename
 k5_init_trace
 k5_internalize_auth_context
 k5_internalize_authdata

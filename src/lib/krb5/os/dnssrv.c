@@ -49,7 +49,7 @@ krb5int_free_srv_dns_data (struct srv_dns_entry *p)
  * be NULL. */
 static char *
 make_lookup_name(const krb5_data *realm, const char *service,
-                 const char *protocol)
+                 const char *protocol, const char *sitename)
 {
     struct k5buf buf;
 
@@ -60,6 +60,8 @@ make_lookup_name(const krb5_data *realm, const char *service,
     k5_buf_add_fmt(&buf, "%s.", service);
     if (protocol != NULL)
         k5_buf_add_fmt(&buf, "%s.", protocol);
+    if (sitename != NULL)
+        k5_buf_add_fmt(&buf, "%s._sites.", sitename);
     k5_buf_add_len(&buf, realm->data, realm->length);
 
     /*
@@ -119,6 +121,7 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
 krb5_error_code
 krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
                              const char *service, const char *protocol,
+                             const char *sitename,
                              struct srv_dns_entry **answers)
 {
     char *name = NULL;
@@ -128,7 +131,7 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
 
     *answers = NULL;
 
-    name = make_lookup_name(realm, service, protocol);
+    name = make_lookup_name(realm, service, protocol, sitename);
     if (name == NULL)
         return 0;
 
@@ -136,6 +139,11 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
 
     st = DnsQuery_UTF8(name, DNS_TYPE_SRV, DNS_QUERY_STANDARD, NULL, &records,
                        NULL);
+    if (st != ERROR_SUCCESS && sitename) {
+        free(name);
+        return krb5int_make_srv_query_realm(context, realm, service,
+                                            protocol, NULL, answers);
+    }
     if (st != ERROR_SUCCESS)
         return 0;
 
@@ -176,7 +184,8 @@ cleanup:
 /* Query the URI RR, collecting weight, priority, and target. */
 krb5_error_code
 k5_make_uri_query(krb5_context context, const krb5_data *realm,
-                  const char *service, struct srv_dns_entry **answers)
+                  const char *service, const char *sitename,
+                  struct srv_dns_entry **answers)
 {
     const unsigned char *p = NULL, *base = NULL;
     char *name = NULL;
@@ -188,13 +197,17 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
     *answers = NULL;
 
     /* Construct service.realm. */
-    name = make_lookup_name(realm, service, NULL);
+    name = make_lookup_name(realm, service, NULL, sitename);
     if (name == NULL)
         return 0;
 
     TRACE_DNS_URI_SEND(context, name);
 
     size = krb5int_dns_init(&ds, name, C_IN, T_URI);
+    if (size < 0 && sitename) {
+        free(name);
+        return k5_make_uri_query(context, realm, service, NULL, answers);
+    }
     if (size < 0)
         goto out;
 
@@ -242,6 +255,7 @@ out:
 krb5_error_code
 krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
                              const char *service, const char *protocol,
+                             const char *sitename,
                              struct srv_dns_entry **answers)
 {
     const unsigned char *p = NULL, *base = NULL;
@@ -262,13 +276,18 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
      *
      */
 
-    name = make_lookup_name(realm, service, protocol);
+    name = make_lookup_name(realm, service, protocol, sitename);
     if (name == NULL)
         return 0;
 
     TRACE_DNS_SRV_SEND(context, name);
 
     size = krb5int_dns_init(&ds, name, C_IN, T_SRV);
+    if (size < 0 && sitename) {
+        free(name);
+        return krb5int_make_srv_query_realm(context, realm, service, protocol,
+                                            NULL, answers);
+    }
     if (size < 0)
         goto out;
 
