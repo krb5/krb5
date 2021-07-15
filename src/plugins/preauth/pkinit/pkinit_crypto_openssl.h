@@ -46,6 +46,10 @@
 #include <openssl/asn1.h>
 #include <openssl/pem.h>
 #include <openssl/asn1t.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/core_names.h>
+#include <openssl/decoder.h>
+#endif
 
 #define DN_BUF_LEN  256
 #define MAX_CREDS_ALLOWED 20

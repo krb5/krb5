@@ -253,8 +253,19 @@ compat_get0_DH(const EVP_PKEY *pkey)
 
 #endif
 
-/* Convert *dh to an EVP_PKEY object, free it, and set it to NULL.  On error,
- * return NULL and do not free or change *dh. */
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+/* OpenSSL 3.0 changes several preferred function names. */
+#define EVP_PKEY_parameters_eq EVP_PKEY_cmp_parameters
+#define EVP_MD_CTX_get0_md EVP_MD_CTX_md
+#define EVP_PKEY_get_size EVP_PKEY_size
+#define EVP_PKEY_get_bits EVP_PKEY_bits
+
+/*
+ * Convert *dh to an EVP_PKEY object, taking ownership of *dh and setting it to
+ * NULL.  On error, return NULL and do not take ownership of or change *dh.
+ * OpenSSL 3.0 deprecates the low-level DH interfaces, so this helper will only
+ * be used with prior versions.
+ */
 static EVP_PKEY *
 dh_to_pkey(DH **dh)
 {
@@ -270,6 +281,7 @@ dh_to_pkey(DH **dh)
     *dh = NULL;
     return pkey;
 }
+#endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
 
 /* Encode a bignum as an ASN.1 integer in DER. */
 static int
@@ -336,6 +348,26 @@ params_valid(EVP_PKEY *params)
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+static EVP_PKEY *
+decode_dh_params(const krb5_data *params_der)
+{
+    EVP_PKEY *pkey = NULL;
+    const uint8_t *inptr = (uint8_t *)params_der->data;
+    size_t len = params_der->length;
+    OSSL_DECODER_CTX *dctx;
+    int ok;
+
+    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", "type-specific", "DHX",
+                                         EVP_PKEY_KEY_PARAMETERS, NULL, NULL);
+    if (dctx == NULL)
+        return NULL;
+
+    ok = OSSL_DECODER_from_data(dctx, &inptr, &len);
+    OSSL_DECODER_CTX_free(dctx);
+    return ok ? pkey : NULL;
+}
+#else
 static EVP_PKEY *
 decode_dh_params(const krb5_data *params_der)
 {
@@ -348,6 +380,7 @@ decode_dh_params(const krb5_data *params_der)
     DH_free(dh);
     return pkey;
 }
+#endif
 
 static krb5_error_code
 encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
@@ -549,7 +582,13 @@ cleanup:
 
 /* Attempt to specify padded Diffie-Hellman result derivation.  Don't error out
  * if this fails since we also detect short results and adjust them. */
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+static void
+set_padded_derivation(EVP_PKEY_CTX *ctx)
+{
+    EVP_PKEY_CTX_set_dh_pad(ctx, 1);
+}
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 static void
 set_padded_derivation(EVP_PKEY_CTX *ctx)
 {
@@ -572,7 +611,7 @@ dh_result(EVP_PKEY *pkey, EVP_PKEY *peer,
     EVP_PKEY_CTX *derive_ctx = NULL;
     int ok = 0;
     uint8_t *buf = NULL;
-    size_t len, dh_size = EVP_PKEY_size(pkey);
+    size_t len, dh_size = EVP_PKEY_get_size(pkey);
 
     *result_out = NULL;
     *len_out = 0;
@@ -608,6 +647,25 @@ cleanup:
     return ok;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+static int
+dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
+{
+    BIGNUM *pubkey_bn = NULL;
+    int len, ok;
+    uint8_t *buf;
+
+    if (!EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, &pubkey_bn))
+        return 0;
+    ok = encode_bn_der(pubkey_bn, &buf, &len);
+    BN_free(pubkey_bn);
+    if (ok) {
+        *pubkey_out = buf;
+        *len_out = len;
+    }
+    return ok;
+}
+#else
 static int
 dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
 {
@@ -626,6 +684,7 @@ dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
     *len_out = len;
     return 1;
 }
+#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 /* OpenSSL 1.1 and later will copy the q parameter when generating keys. */
@@ -673,6 +732,44 @@ cleanup:
     return pkey;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+static EVP_PKEY *
+compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
+{
+    EVP_PKEY *pkey = NULL, *pkey_ret = NULL;
+    BIGNUM *pubkey_bn = NULL;
+    uint8_t *pubkey_bin = NULL;
+    int binlen;
+
+    pkey = EVP_PKEY_dup(params);
+    if (pkey == NULL)
+        goto cleanup;
+
+    pubkey_bn = decode_bn_der(pubkey_der, der_len);
+    if (pubkey_bn == NULL)
+        goto cleanup;
+    binlen = EVP_PKEY_get_size(pkey);
+    pubkey_bin = malloc(binlen);
+    if (pubkey_bin == NULL)
+        goto cleanup;
+    if (BN_bn2binpad(pubkey_bn, pubkey_bin, binlen) != binlen)
+        goto cleanup;
+    if (EVP_PKEY_set1_encoded_public_key(pkey, pubkey_bin, binlen) != 1)
+        goto cleanup;
+
+    pkey_ret = pkey;
+    pkey = NULL;
+
+cleanup:
+    EVP_PKEY_free(pkey);
+    BN_free(pubkey_bn);
+    free(pubkey_bin);
+    return pkey_ret;
+}
+
+#else /* OPENSSL_VERSION_NUMBER < 0x30000000L */
+
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 static DH *
 dup_dh_params(DH *src)
@@ -711,7 +808,7 @@ compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
     if (pubkey_bn == NULL)
         goto cleanup;
 
-    dhparams = (DH *)EVP_PKEY_get0_DH(params);
+    dhparams = EVP_PKEY_get0_DH(params);
     if (dhparams == NULL)
         goto cleanup;
     dh = dup_dh_params(dhparams);
@@ -728,6 +825,8 @@ cleanup:
     DH_free(dh);
     return pkey;
 }
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
 
 static struct pkcs11_errstrings {
     short code;
@@ -1573,7 +1672,7 @@ cms_signeddata_create(krb5_context context,
             goto cleanup;
         EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
         EVP_DigestUpdate(ctx, data, data_len);
-        md_tmp = EVP_MD_CTX_md(ctx);
+        md_tmp = EVP_MD_CTX_get0_md(ctx);
         EVP_DigestFinal_ex(ctx, md_data, &md_len);
         EVP_MD_CTX_free(ctx);
 
@@ -2558,22 +2657,28 @@ pkinit_octetstring2key(krb5_context context,
     unsigned char counter;
     size_t keybytes, keylength, offset;
     krb5_data random_data;
+    EVP_MD_CTX *sha1_ctx = NULL;
 
-    if ((buf = malloc(dh_key_len)) == NULL) {
-        retval = ENOMEM;
+    buf = k5alloc(dh_key_len, &retval);
+    if (buf == NULL)
+        goto cleanup;
+
+    sha1_ctx = EVP_MD_CTX_new();
+    if (sha1_ctx == NULL) {
+        retval = KRB5_CRYPTO_INTERNAL;
         goto cleanup;
     }
-    memset(buf, 0, dh_key_len);
 
     counter = 0;
     offset = 0;
     do {
-        SHA_CTX c;
-
-        SHA1_Init(&c);
-        SHA1_Update(&c, &counter, 1);
-        SHA1_Update(&c, key, dh_key_len);
-        SHA1_Final(md, &c);
+        if (!EVP_DigestInit(sha1_ctx, EVP_sha1()) ||
+            !EVP_DigestUpdate(sha1_ctx, &counter, 1) ||
+            !EVP_DigestUpdate(sha1_ctx, key, dh_key_len) ||
+            !EVP_DigestFinal(sha1_ctx, md, NULL)) {
+            retval = KRB5_CRYPTO_INTERNAL;
+            goto cleanup;
+        }
 
         if (dh_key_len - offset < sizeof(md))
             memcpy(buf + offset, md, dh_key_len - offset);
@@ -2592,11 +2697,9 @@ pkinit_octetstring2key(krb5_context context,
         goto cleanup;
 
     key_block->length = keylength;
-    key_block->contents = malloc(keylength);
-    if (key_block->contents == NULL) {
-        retval = ENOMEM;
+    key_block->contents = k5alloc(keylength, &retval);
+    if (key_block->contents == NULL)
         goto cleanup;
-    }
 
     random_data.length = keybytes;
     random_data.data = (char *)buf;
@@ -2604,6 +2707,7 @@ pkinit_octetstring2key(krb5_context context,
     retval = krb5_c_random_to_key(context, etype, &random_data, key_block);
 
 cleanup:
+    EVP_MD_CTX_free(sha1_ctx);
     free(buf);
     /* If this is an error return, free the allocated keyblock, if any */
     if (retval) {
@@ -2919,11 +3023,11 @@ check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, EVP_PKEY *pkey,
                    int nbits)
 {
     if (nbits == 1024)
-        return EVP_PKEY_cmp_parameters(cryptoctx->dh_1024, pkey) == 1;
+        return EVP_PKEY_parameters_eq(cryptoctx->dh_1024, pkey) == 1;
     else if (nbits == 2048)
-        return EVP_PKEY_cmp_parameters(cryptoctx->dh_2048, pkey) == 1;
+        return EVP_PKEY_parameters_eq(cryptoctx->dh_2048, pkey) == 1;
     else if (nbits == 4096)
-        return EVP_PKEY_cmp_parameters(cryptoctx->dh_4096, pkey) == 1;
+        return EVP_PKEY_parameters_eq(cryptoctx->dh_4096, pkey) == 1;
     return 0;
 }
 
@@ -2946,7 +3050,7 @@ server_check_dh(krb5_context context,
     }
 
     /* KDC SHOULD check to see if the key parameters satisfy its policy */
-    dh_prime_bits = EVP_PKEY_bits(client_pkey);
+    dh_prime_bits = EVP_PKEY_get_bits(client_pkey);
     if (minbits && dh_prime_bits < minbits) {
         pkiDebug("client sent dh params with %d bits, we require %d\n",
                  dh_prime_bits, minbits);
@@ -3244,7 +3348,7 @@ pkinit_process_td_dh_params(krb5_context context,
         params = decode_dh_params(&algId[i]->parameters);
         if (params == NULL)
             continue;
-        dh_prime_bits = EVP_PKEY_bits(params);
+        dh_prime_bits = EVP_PKEY_get_bits(params);
         /* Skip any parameters shorter than the previous size. */
         if (dh_prime_bits < old_dh_size)
             continue;
@@ -3706,8 +3810,10 @@ pkinit_decode_data_fs(krb5_context context,
     X509 *cert = sk_X509_value(id_cryptoctx->my_certs,
                                id_cryptoctx->cert_index);
     EVP_PKEY *pkey = id_cryptoctx->my_key;
-    uint8_t *buf;
-    int buf_len, decrypt_len;
+    EVP_PKEY_CTX *ctx = NULL;
+    uint8_t *buf = NULL;
+    size_t buf_len = 0;
+    int ok;
 
     *decoded_data = NULL;
     *decoded_data_len = 0;
@@ -3717,21 +3823,40 @@ pkinit_decode_data_fs(krb5_context context,
         return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    buf_len = EVP_PKEY_size(pkey);
-    buf = malloc(buf_len + 10);
-    if (buf == NULL)
+    ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (ctx == NULL)
         return KRB5KDC_ERR_PREAUTH_FAILED;
 
-    decrypt_len = EVP_PKEY_decrypt_old(buf, data, data_len, pkey);
-    if (decrypt_len <= 0) {
-        pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
-        free(buf);
-        return KRB5KDC_ERR_PREAUTH_FAILED;
+    ok = EVP_PKEY_decrypt_init(ctx);
+    if (!ok)
+        goto cleanup;
+
+    /* Get the length of the eventual output. */
+    ok = EVP_PKEY_decrypt(ctx, NULL, &buf_len, data, data_len);
+    if (!ok) {
+        pkiDebug("unable to decrypt received data\n");
+        goto cleanup;
+    }
+
+    buf = malloc(buf_len);
+    if (buf == NULL) {
+        ok = 0;
+        goto cleanup;
+    }
+
+    ok = EVP_PKEY_decrypt(ctx, buf, &buf_len, data, data_len);
+    if (!ok) {
+        pkiDebug("unable to decrypt received data\n");
+        goto cleanup;
     }
 
     *decoded_data = buf;
-    *decoded_data_len = decrypt_len;
-    return 0;
+    *decoded_data_len = buf_len;
+    buf = NULL;
+cleanup:
+    zapfree(buf, buf_len);
+    EVP_PKEY_CTX_free(ctx);
+    return ok ? 0 : KRB5KDC_ERR_PREAUTH_FAILED;
 }
 
 #ifndef WITHOUT_PKCS11
