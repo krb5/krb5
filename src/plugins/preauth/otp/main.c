@@ -39,7 +39,7 @@
 static krb5_preauthtype otp_pa_type_list[] =
   { KRB5_PADATA_OTP_REQUEST, 0 };
 
-struct request_state {
+struct verify_state {
     krb5_context context;
     krb5_kdcpreauth_verify_respond_fn respond;
     void *arg;
@@ -153,25 +153,24 @@ nonce_generate(krb5_context ctx, unsigned int length, krb5_data *nonce_out)
     return 0;
 }
 
-static void
-on_response(void *data, krb5_error_code retval, otp_response response,
-            char *const *indicators)
+static krb5_error_code
+get_otp_config(krb5_context context, otp_state *state,
+               krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+               token **config_out)
 {
-    struct request_state rs = *(struct request_state *)data;
-    char *const *ind;
+    krb5_error_code retval;
+    krb5_const_principal princ = cb->client_name(context, rock);
+    char *config_str;
 
-    free(data);
+    *config_out = NULL;
 
-    if (retval == 0 && response != otp_response_success)
-        retval = KRB5_PREAUTH_FAILED;
+    retval = cb->get_string(context, rock, "otp", &config_str);
+    if (retval != 0 || config_str == NULL)
+        return retval;
 
-    if (retval == 0)
-        rs.enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-
-    for (ind = indicators; ind != NULL && *ind != NULL && retval == 0; ind++)
-        retval = rs.preauth_cb->add_auth_indicator(rs.context, rs.rock, *ind);
-
-    rs.respond(rs.arg, retval, NULL, NULL, NULL);
+    retval = otp_state_parse_config(state, config_str, princ, config_out);
+    cb->free_string(context, rock, config_str);
+    return retval;
 }
 
 static krb5_error_code
@@ -212,15 +211,15 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     krb5_pa_data *pa = NULL;
     krb5_error_code retval;
     krb5_data *encoding;
-    char *config;
+    otp_state *state = (otp_state *)moddata;
+    token *config = NULL;
 
-    /* Determine if otp is enabled for the user. */
-    retval = cb->get_string(context, rock, "otp", &config);
+    /* Determine if OTP is enabled for the client principal. */
+    retval = get_otp_config(context, state, cb, rock, &config);
     if (retval == 0 && config == NULL)
         retval = ENOENT;
     if (retval != 0)
         goto out;
-    cb->free_string(context, rock, config);
 
     /* Get the armor key.  This indicates the length of random data to use in
      * the nonce. */
@@ -258,7 +257,32 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     free(encoding);
 
 out:
+    otp_state_free_config(config);
     (*respond)(arg, retval, pa);
+}
+
+void
+otp_verify_done(krb5_error_code retval, struct verify_state *v,
+                otp_response response, char *const *indicators)
+{
+    char *const *ind;
+
+    if (retval == 0 && response != otp_response_success)
+        retval = KRB5_PREAUTH_FAILED;
+    if (retval)
+        goto cleanup;
+
+    for (ind = indicators; ind != NULL && *ind != NULL; ind++) {
+        retval = v->preauth_cb->add_auth_indicator(v->context, v->rock, *ind);
+        if (retval)
+            goto cleanup;
+    }
+
+    v->enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
+
+cleanup:
+    v->respond(v->arg, retval, NULL, NULL, NULL);
+    free(v);
 }
 
 static void
@@ -270,17 +294,18 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
 {
     krb5_keyblock *armor_key = NULL;
     krb5_pa_otp_req *req = NULL;
-    struct request_state *rs;
+    struct verify_state *vstate = NULL;
     krb5_error_code retval;
     krb5_data d, plaintext;
-    char *config;
+    otp_state *state = (otp_state *)moddata;
+    token *config = NULL;
 
     /* Get the FAST armor key. */
     armor_key = cb->fast_armor(context, rock);
     if (armor_key == NULL) {
         retval = KRB5KDC_ERR_PREAUTH_FAILED;
         com_err("otp", retval, "No armor key found when verifying padata");
-        goto error;
+        goto cleanup;
     }
 
     /* Decode the request. */
@@ -288,14 +313,14 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     retval = decode_krb5_pa_otp_req(&d, &req);
     if (retval != 0) {
         com_err("otp", retval, "Unable to decode OTP request");
-        goto error;
+        goto cleanup;
     }
 
     /* Decrypt the nonce from the request. */
     retval = decrypt_encdata(context, armor_key, req, &plaintext);
     if (retval != 0) {
         com_err("otp", retval, "Unable to decrypt nonce");
-        goto error;
+        goto cleanup;
     }
 
     /* Verify the nonce or timestamp. */
@@ -305,42 +330,42 @@ otp_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_free_data_contents(context, &plaintext);
     if (retval != 0) {
         com_err("otp", retval, "Unable to verify nonce or timestamp");
-        goto error;
+        goto cleanup;
     }
 
     /* Create the request state.  Save the response callback, and the
      * enc_tkt_reply pointer so we can set the TKT_FLG_PRE_AUTH flag later. */
-    rs = k5alloc(sizeof(struct request_state), &retval);
-    if (rs == NULL)
-        goto error;
-    rs->context = context;
-    rs->arg = arg;
-    rs->respond = respond;
-    rs->enc_tkt_reply = enc_tkt_reply;
-    rs->preauth_cb = cb;
-    rs->rock = rock;
+    vstate = k5alloc(sizeof(*vstate), &retval);
+    if (vstate == NULL)
+        goto cleanup;
+    vstate->context = context;
+    vstate->arg = arg;
+    vstate->respond = respond;
+    vstate->enc_tkt_reply = enc_tkt_reply;
+    vstate->preauth_cb = cb;
+    vstate->rock = rock;
 
-    /* Get the principal's OTP configuration string. */
-    retval = cb->get_string(context, rock, "otp", &config);
+    /* Get the client principal's OTP token configuration. */
+    retval = get_otp_config(context, state, cb, rock, &config);
     if (retval == 0 && config == NULL)
         retval = KRB5_PREAUTH_FAILED;
-    if (retval != 0) {
-        free(rs);
-        goto error;
-    }
+    if (retval != 0)
+        goto cleanup;
 
-    /* Send the request. */
-    otp_state_verify((otp_state *)moddata, cb->event_context(context, rock),
-                     cb->client_name(context, rock), config, req, on_response,
-                     rs);
-    cb->free_string(context, rock, config);
+    /* Send the request (takes ownership of config and vstate and responds to
+     * the KDC code asynchronously). */
+    otp_state_verify(state, cb->event_context(context, rock), req, &config,
+                     &vstate);
 
+cleanup:
     k5_free_pa_otp_req(context, req);
-    return;
+    otp_state_free_config(config);
+    free(vstate);
 
-error:
-    k5_free_pa_otp_req(context, req);
-    (*respond)(arg, retval, NULL, NULL, NULL);
+    /* Respond synchronously if we didn't set up an async response via
+     * otp_state_verify(). */
+    if (retval != 0)
+        (*respond)(arg, retval, NULL, NULL, NULL);
 }
 
 static krb5_error_code

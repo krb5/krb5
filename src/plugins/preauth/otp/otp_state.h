@@ -41,10 +41,12 @@ typedef enum otp_response {
     /* Other values reserved for responses like next token or new pin. */
 } otp_response;
 
+/* Opaque to main.c, visible to otp_state.c */
 typedef struct otp_state_st otp_state;
-typedef void
-(*otp_cb)(void *data, krb5_error_code retval, otp_response response,
-          char *const *indicators);
+typedef struct token_st token;
+
+/* Opaque to otp_state.c, visible to main.c */
+struct verify_state;
 
 krb5_error_code
 otp_state_new(krb5_context ctx, otp_state **self);
@@ -52,9 +54,23 @@ otp_state_new(krb5_context ctx, otp_state **self);
 void
 otp_state_free(otp_state *self);
 
+krb5_error_code
+otp_state_parse_config(otp_state *state, const char *config_str,
+                       krb5_const_principal princ, token **config_out);
+
 void
-otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
-                 const char *config, const krb5_pa_otp_req *request,
-                 otp_cb cb, void *data);
+otp_state_free_config(token *config);
+
+/* On success and some failures, takes ownership of *config and *vstate and
+ * sets them to NULL.  Asynchronously calls otp_verify_done() when complete. */
+void
+otp_state_verify(otp_state *state, verto_ctx *ctx,
+                 const krb5_pa_otp_req *request, token **config,
+                 struct verify_state **vstate);
+
+/* Provided by main.c.  Must free vstate. */
+void
+otp_verify_done(krb5_error_code retval, struct verify_state *vstate,
+                otp_response response, char *const *indicators);
 
 #endif /* OTP_H_ */

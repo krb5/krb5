@@ -55,18 +55,17 @@ typedef struct token_type_st {
     char **indicators;
 } token_type;
 
-typedef struct token_st {
+struct token_st {
     const token_type *type;
     krb5_data username;
     char **indicators;
-} token;
+};
 
 typedef struct request_st {
     otp_state *state;
     token *tokens;
     ssize_t index;
-    otp_cb cb;
-    void *data;
+    struct verify_state *vstate;
     krad_attrset *attrs;
 } request;
 
@@ -76,8 +75,6 @@ struct otp_state_st {
     krad_client *radius;
     krad_attrset *attrs;
 };
-
-static void request_send(request *req);
 
 static krb5_error_code
 read_secret_file(const char *secret_file, char **secret)
@@ -620,9 +617,89 @@ otp_state_free(otp_state *self)
     free(self);
 }
 
+krb5_error_code
+otp_state_parse_config(otp_state *state, const char *config_str,
+                       krb5_const_principal princ, token **config_out)
+{
+    krb5_error_code retval;
+    char *name;
+
+    *config_out = NULL;
+
+    retval = tokens_decode(state->ctx, princ, state->types, config_str,
+                           config_out);
+    if (retval != 0) {
+        if (krb5_unparse_name(state->ctx, princ, &name) == 0) {
+            com_err("otp", retval,
+                    "Can't decode otp config string for principal '%s'", name);
+            krb5_free_unparsed_name(state->ctx, name);
+        }
+    }
+    return retval;
+}
+
+void
+otp_state_free_config(token *config)
+{
+    tokens_free(config);
+}
+
+static krb5_error_code
+request_send(request *req, krad_cb callback)
+{
+    krb5_error_code retval;
+    token *tok = &req->tokens[req->index];
+    const token_type *t = tok->type;
+
+    retval = krad_attrset_add(req->attrs, KRAD_ATTR_USER_NAME, &tok->username);
+    if (retval != 0)
+        return retval;
+
+    retval = krad_client_send(req->state->radius, KRAD_CODE_ACCESS_REQUEST,
+                              req->attrs, t->server, t->secret, t->timeout,
+                              t->retries, callback, req);
+    krad_attrset_del(req->attrs, KRAD_ATTR_USER_NAME, 0);
+    return retval;
+}
+
+static krb5_error_code
+begin_request(otp_state *state, verto_ctx *vctx, token **config,
+              request **req_out)
+{
+    krb5_error_code retval;
+    request *req = NULL;
+
+    *req_out = NULL;
+
+    if (state->radius == NULL) {
+        retval = krad_client_new(state->ctx, vctx, &state->radius);
+        if (retval != 0)
+            goto error;
+    }
+
+    req = k5alloc(sizeof(*req), &retval);
+    if (req == NULL)
+        return retval;
+
+    req->state = state;
+
+    retval = krad_attrset_copy(state->attrs, &req->attrs);
+    if (retval != 0)
+        goto error;
+
+    req->tokens = *config;
+    *config = NULL;
+    *req_out = req;
+    return 0;
+
+error:
+    request_free(req);
+    return retval;
+}
+
 static void
-callback(krb5_error_code retval, const krad_packet *rqst,
-         const krad_packet *resp, void *data)
+on_verify(krb5_error_code retval, const krad_packet *rqst,
+          const krad_packet *resp, void *data)
 {
     request *req = data;
     token *tok = &req->tokens[req->index];
@@ -638,7 +715,7 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         indicators = tok->indicators;
         if (indicators == NULL)
             indicators = tok->type->indicators;
-        req->cb(req->data, retval, otp_response_success, indicators);
+        otp_verify_done(retval, req->vstate, otp_response_success, indicators);
         request_free(req);
         return;
     }
@@ -648,87 +725,42 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         goto error;
 
     /* Try the next token. */
-    request_send(req);
-    return;
-
-error:
-    req->cb(req->data, retval, otp_response_fail, NULL);
-    request_free(req);
-}
-
-static void
-request_send(request *req)
-{
-    krb5_error_code retval;
-    token *tok = &req->tokens[req->index];
-    const token_type *t = tok->type;
-
-    retval = krad_attrset_add(req->attrs, KRAD_ATTR_USER_NAME, &tok->username);
-    if (retval != 0)
-        goto error;
-
-    retval = krad_client_send(req->state->radius, KRAD_CODE_ACCESS_REQUEST,
-                              req->attrs, t->server, t->secret, t->timeout,
-                              t->retries, callback, req);
-    krad_attrset_del(req->attrs, KRAD_ATTR_USER_NAME, 0);
-    if (retval != 0)
+    retval = request_send(req, on_verify);
+    if (retval)
         goto error;
 
     return;
 
 error:
-    req->cb(req->data, retval, otp_response_fail, NULL);
+    otp_verify_done(retval, req->vstate, otp_response_fail, NULL);
     request_free(req);
 }
 
 void
-otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
-                 const char *config, const krb5_pa_otp_req *req,
-                 otp_cb cb, void *data)
+otp_state_verify(otp_state *state, verto_ctx *ctx, const krb5_pa_otp_req *req,
+                 token **config, struct verify_state **vstate)
 {
     krb5_error_code retval;
     request *rqst = NULL;
-    char *name;
 
-    if (state->radius == NULL) {
-        retval = krad_client_new(state->ctx, ctx, &state->radius);
-        if (retval != 0)
-            goto error;
-    }
-
-    rqst = calloc(1, sizeof(request));
-    if (rqst == NULL) {
-        (*cb)(data, ENOMEM, otp_response_fail, NULL);
-        return;
-    }
-    rqst->state = state;
-    rqst->data = data;
-    rqst->cb = cb;
-
-    retval = krad_attrset_copy(state->attrs, &rqst->attrs);
+    retval = begin_request(state, ctx, config, &rqst);
     if (retval != 0)
         goto error;
+    rqst->vstate = *vstate;
 
     retval = krad_attrset_add(rqst->attrs, KRAD_ATTR_USER_PASSWORD,
                               &req->otp_value);
     if (retval != 0)
         goto error;
 
-    retval = tokens_decode(state->ctx, princ, state->types, config,
-                           &rqst->tokens);
-    if (retval != 0) {
-        if (krb5_unparse_name(state->ctx, princ, &name) == 0) {
-            com_err("otp", retval,
-                    "Can't decode otp config string for principal '%s'", name);
-            krb5_free_unparsed_name(state->ctx, name);
-        }
+    retval = request_send(rqst, on_verify);
+    if (retval != 0)
         goto error;
-    }
 
-    request_send(rqst);
+    *vstate = NULL;
     return;
 
 error:
-    (*cb)(data, retval, otp_response_fail, NULL);
     request_free(rqst);
+    otp_verify_done(retval, *vstate, otp_response_fail, NULL);
 }
