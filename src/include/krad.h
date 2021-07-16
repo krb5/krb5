@@ -219,6 +219,10 @@ krad_packet_encode(const krad_packet *pkt);
 krad_code
 krad_packet_get_code(const krad_packet *pkt);
 
+/* Return true if the packet code matches given code. */
+krb5_boolean
+krad_packet_check_code(const krad_packet *pkt, const char *code);
+
 /* Get the specified attribute. */
 const krb5_data *
 krad_packet_get_attr(const krad_packet *pkt, krad_attr type, size_t indx);

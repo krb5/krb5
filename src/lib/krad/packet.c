@@ -463,6 +463,12 @@ krad_packet_get_code(const krad_packet *pkt)
     return pkt_code_get(pkt);
 }
 
+krb5_boolean
+krad_packet_check_code(const krad_packet *pkt, const char *code)
+{
+    return krad_packet_get_code(pkt) == krad_code_name2num(code);
+}
+
 const krb5_data *
 krad_packet_get_attr(const krad_packet *pkt, krad_attr type, size_t indx)
 {

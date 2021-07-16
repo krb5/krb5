@@ -57,6 +57,7 @@ typedef struct token_type_st {
 
 typedef struct token_st {
     const token_type *type;
+    krb5_boolean challenge;
     krb5_data username;
     char **indicators;
 } token;
@@ -65,7 +66,6 @@ typedef struct request_st {
     otp_state *state;
     token *tokens;
     ssize_t index;
-    otp_cb cb;
     void *data;
     krad_attrset *attrs;
 } request;
@@ -77,7 +77,7 @@ struct otp_state_st {
     krad_attrset *attrs;
 };
 
-static void request_send(request *req);
+static krb5_error_code request_send(request *req, krad_cb on_response);
 
 static krb5_error_code
 read_secret_file(const char *secret_file, char **secret)
@@ -409,6 +409,7 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
     const token_type *type = NULL;
     char *username = NULL, **indicators = NULL;
     krb5_error_code retval;
+    krb5_boolean challenge;
     k5_json_value val;
     size_t i;
     int flags;
@@ -432,11 +433,21 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
         username = strdup(k5_json_string_utf8(val));
         if (username == NULL)
             return ENOMEM;
-    } else {
+    } else if (princ != NULL) {
         flags = type->strip_realm ? KRB5_PRINCIPAL_UNPARSE_NO_REALM : 0;
         retval = krb5_unparse_name_flags(ctx, princ, flags, &username);
         if (retval != 0)
             return retval;
+    } else {
+        username = NULL;
+    }
+
+    /* Get the challenge flag. */
+    val = k5_json_object_get(obj, "challenge");
+    if (val != NULL && k5_json_get_tid(val) == K5_JSON_TID_BOOL) {
+        challenge = k5_json_bool_value((k5_json_bool)val);
+    } else {
+        challenge = FALSE;
     }
 
     /* Get the authentication indicators if specified. */
@@ -450,8 +461,9 @@ token_decode(krb5_context ctx, krb5_const_principal princ,
     }
 
     out->type = type;
-    out->username = string2data(username);
+    out->username = username != NULL ? string2data(username) : empty_data();
     out->indicators = indicators;
+    out->challenge = challenge;
     return 0;
 }
 
@@ -636,12 +648,11 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         goto error;
 
     /* If we received an accept packet, success! */
-    if (krad_packet_get_code(resp) ==
-        krad_code_name2num("Access-Accept")) {
+    if (krad_packet_check_code(resp, "Access-Accept")) {
         indicators = tok->indicators;
         if (indicators == NULL)
             indicators = tok->type->indicators;
-        req->cb(req->data, retval, otp_response_success, indicators);
+        otp_verify_done(req->data, retval, otp_response_success, indicators);
         request_free(req);
         return;
     }
@@ -651,16 +662,20 @@ callback(krb5_error_code retval, const krad_packet *rqst,
         goto error;
 
     /* Try the next token. */
-    request_send(req);
+    retval = request_send(req, callback);
+    if (retval != 0) {
+        goto error;
+    }
+
     return;
 
 error:
-    req->cb(req->data, retval, otp_response_fail, NULL);
+    otp_verify_done(req->data, retval, otp_response_fail, NULL);
     request_free(req);
 }
 
-static void
-request_send(request *req)
+static krb5_error_code
+request_send(request *req, krad_cb on_response)
 {
     krb5_error_code retval;
     token *tok = &req->tokens[req->index];
@@ -668,59 +683,42 @@ request_send(request *req)
 
     retval = krad_attrset_add(req->attrs, krad_attr_name2num("User-Name"),
                               &tok->username);
-    if (retval != 0)
-        goto error;
+    if (retval != 0) {
+        return retval;
+    }
 
     retval = krad_client_send(req->state->radius,
                               krad_code_name2num("Access-Request"), req->attrs,
                               t->server, t->secret, t->timeout, t->retries,
-                              callback, req);
+                              on_response, req);
     krad_attrset_del(req->attrs, krad_attr_name2num("User-Name"), 0);
-    if (retval != 0)
-        goto error;
 
-    return;
-
-error:
-    req->cb(req->data, retval, otp_response_fail, NULL);
-    request_free(req);
+    return retval;
 }
 
-void
-otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
-                 const char *config, const krb5_pa_otp_req *req,
-                 otp_cb cb, void *data)
+static request *
+request_create(otp_state *state, krb5_const_principal princ,
+               const char *config, void *data)
 {
     krb5_error_code retval;
-    request *rqst = NULL;
+    request *req;
     char *name;
 
-    if (state->radius == NULL) {
-        retval = krad_client_new(state->ctx, ctx, &state->radius);
-        if (retval != 0)
-            goto error;
+    req = calloc(1, sizeof(request));
+    if (req == NULL) {
+        return NULL;
     }
 
-    rqst = calloc(1, sizeof(request));
-    if (rqst == NULL) {
-        (*cb)(data, ENOMEM, otp_response_fail, NULL);
-        return;
+    req->state = state;
+    req->data = data;
+
+    retval = krad_attrset_copy(state->attrs, &req->attrs);
+    if (retval != 0) {
+        goto error;
     }
-    rqst->state = state;
-    rqst->data = data;
-    rqst->cb = cb;
-
-    retval = krad_attrset_copy(state->attrs, &rqst->attrs);
-    if (retval != 0)
-        goto error;
-
-    retval = krad_attrset_add(rqst->attrs, krad_attr_name2num("User-Password"),
-                              &req->otp_value);
-    if (retval != 0)
-        goto error;
 
     retval = tokens_decode(state->ctx, princ, state->types, config,
-                           &rqst->tokens);
+                           &req->tokens);
     if (retval != 0) {
         if (krb5_unparse_name(state->ctx, princ, &name) == 0) {
             com_err("otp", retval,
@@ -730,10 +728,163 @@ otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
         goto error;
     }
 
-    request_send(rqst);
+    return req;
+
+error:
+    request_free(req);
+    return NULL;
+}
+
+void
+otp_state_verify(otp_state *state, verto_ctx *ctx, krb5_const_principal princ,
+                 const char *config, const krb5_pa_otp_req *req,
+                 krb5_data *radius_state, void *data)
+{
+    krb5_error_code retval;
+    request *rqst = NULL;
+
+    if (state->radius == NULL) {
+        retval = krad_client_new(state->ctx, ctx, &state->radius);
+        if (retval != 0)
+            goto error;
+    }
+
+    rqst = request_create(state, princ, config, data);
+    if (rqst == NULL) {
+        retval = ENOMEM;
+        goto error;
+    }
+
+    retval = krad_attrset_add(rqst->attrs, krad_attr_name2num("User-Password"),
+                              &req->otp_value);
+    if (retval != 0)
+        goto error;
+
+    if (radius_state->data != NULL) {
+        retval = krad_attrset_add(rqst->attrs, krad_attr_name2num("State"),
+                                  radius_state);
+        if (retval != 0)
+            goto error;
+    }
+
+    retval = request_send(rqst, callback);
+    if (retval != 0) {
+        goto error;
+    }
+
     return;
 
 error:
-    (*cb)(data, retval, otp_response_fail, NULL);
+    otp_verify_done(data, retval, otp_response_fail, NULL);
     request_free(rqst);
+}
+
+static void
+on_challenge(krb5_error_code retval, const krad_packet *rqst,
+             const krad_packet *resp, void *data)
+{
+    request *req = data;
+    const krb5_data *msg;
+    const krb5_data *state;
+
+    req->index++;
+
+    if (retval != 0) {
+        goto error;
+    }
+
+    /* If we received an challenge packet, success! */
+    if (krad_packet_check_code(resp, "Access-Challenge")) {
+        msg = krad_packet_get_attr(resp, krad_attr_name2num("Reply-Message"), 0);
+        state = krad_packet_get_attr(resp, krad_attr_name2num("State"), 0);
+
+        /* Both attributes must be set. */
+        if (msg == NULL || state == NULL) {
+            goto error;
+        }
+
+        otp_edata_challenge_done(req->data, retval, otp_response_success, state, msg);
+        request_free(req);
+        return;
+    }
+
+    /* If we have no more tokens to try, failure! */
+    if (req->tokens[req->index].type == NULL) {
+        goto error;
+    }
+
+    /* Try the next token. */
+    retval = request_send(req, on_challenge);
+    if (retval != 0) {
+        goto error;
+    }
+
+    return;
+
+error:
+    otp_edata_challenge_done(req->data, retval, otp_response_fail, NULL, NULL);
+    request_free(req);
+}
+
+void
+otp_state_challenge(otp_state *state, verto_ctx *ctx,
+                    krb5_const_principal princ, const char *config, void *data)
+{
+    krb5_error_code retval;
+    request *rqst = NULL;
+
+    if (state->radius == NULL) {
+        retval = krad_client_new(state->ctx, ctx, &state->radius);
+        if (retval != 0) {
+            goto error;
+        }
+    }
+
+    rqst = request_create(state, princ, config, data);
+    if (rqst == NULL) {
+        retval = ENOMEM;
+        goto error;
+    }
+
+    /* Send a password-less Access-Request and expect Access-Challeng
+     * as response. */
+
+    retval = request_send(rqst, on_challenge);
+    if (retval != 0) {
+        goto error;
+    }
+
+    return;
+
+error:
+    otp_edata_challenge_done(data, retval, otp_response_fail, NULL, NULL);
+    request_free(rqst);
+}
+
+krb5_error_code
+otp_challenge_required(otp_state *state, const char *config,
+                       krb5_boolean *is_required)
+{
+    krb5_error_code retval;
+    token *tokens;
+
+    /* Read the challenge flag from the otp config string. Value of the first
+     * token is used. If there are multiple tokens, the challenge flag from
+     * the first token is used anyway - we can't know which token will be used
+     * for a successful authentication, we expect that either all require
+     * challenge or none of them. */
+
+    retval = tokens_decode(state->ctx, NULL, state->types, config, &tokens);
+    if (retval != 0) {
+        return retval;
+    }
+
+    if (tokens == NULL || tokens[0].type == NULL) {
+        *is_required = FALSE;
+    } else {
+        *is_required = tokens[0].challenge;
+    }
+
+    tokens_free(tokens);
+    return 0;
 }
