@@ -40,7 +40,11 @@ static char sccsid[] = "@(#)clnt_generic.c 1.4 87/08/11 (C) 1987 SMI";
 #include <string.h>
 #include <gssrpc/rpc.h>
 #include <sys/socket.h>
-#include <sys/errno.h>
+#ifdef __HAIKU__
+#  include <errno.h>
+#else
+#  include <sys/errno.h>
+#endif
 #include <netdb.h>
 
 /*

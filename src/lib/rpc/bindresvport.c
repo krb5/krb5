@@ -37,7 +37,11 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/errno.h>
+#ifdef __HAIKU__
+#  include <errno.h>
+#else
+#  include <sys/errno.h>
+#endif
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <gssrpc/rpc.h>

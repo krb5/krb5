@@ -1022,16 +1022,19 @@ AC_DEFUN(AC_LIBRARY_NET, [
    AC_CHECK_FUNC(gethostbyname, , [
      # Some OSes (eg. Solaris) place it in libnsl:
      AC_CHECK_LIB(nsl, gethostbyname, , [
-       # Some strange OSes (SINIX) have it in libsocket:
-       AC_CHECK_LIB(socket, gethostbyname, , [
-          # Unfortunately libsocket sometimes depends on libnsl.
-          # AC_CHECK_LIB's API is essentially broken so the following
-          # ugliness is necessary:
-          AC_CHECK_LIB(socket, gethostbyname,
+       # Haiku has it in libnetwork
+       AC_CHECK_LIB(network, gethostbyname, , [
+         # Some strange OSes (SINIX) have it in libsocket:
+         AC_CHECK_LIB(socket, gethostbyname, , [
+           # Unfortunately libsocket sometimes depends on libnsl.
+           # AC_CHECK_LIB's API is essentially broken so the following
+           # ugliness is necessary:
+           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
                [AC_CHECK_LIB(resolv, gethostbyname,
-			     LIBS="-lresolv $LIBS" )],
+                 LIBS="-lresolv $LIBS" )],
              -lnsl)
+         ])
        ])
      ])
    ])
