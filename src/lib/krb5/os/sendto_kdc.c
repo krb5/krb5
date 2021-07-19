@@ -873,7 +873,7 @@ start_connection(krb5_context context, struct conn_state *state,
                  struct sendto_callback_info *callback_info)
 {
     int fd, e, type;
-    static const int one = 1;
+    static int one = 1;
     static const struct linger lopt = { 0, 0 };
 
     type = socktype_for_transport(state->addr.transport);
@@ -882,7 +882,7 @@ start_connection(krb5_context context, struct conn_state *state,
         return -1;              /* try other hosts */
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
-    ioctlsocket(fd, FIONBIO, (const void *) &one);
+    ioctlsocket(fd, FIONBIO, (void *) &one);
     if (state->addr.transport == TCP) {
         setsockopt(fd, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt));
         TRACE_SENDTO_KDC_TCP_CONNECT(context, &state->addr);
