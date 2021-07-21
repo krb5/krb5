@@ -197,9 +197,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
         mechs = GSS_C_NO_OID_SET;
     }
 
-    if (cred_handle == GSS_C_NO_CREDENTIAL)
-        krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
-
+    krb5_gss_release_cred(minor_status, &defcred);
     krb5_free_context(context);
     *minor_status = 0;
     return((lifetime == 0)?GSS_S_CREDENTIALS_EXPIRED:GSS_S_COMPLETE);
