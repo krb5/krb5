@@ -5,11 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifdef __HAIKU__
-#  include <errno.h>
-#else
-# include <sys/errno.h>
-#endif
+#include <errno.h>
 
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
