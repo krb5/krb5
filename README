@@ -70,6 +70,27 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
+Major changes in 1.18.4 (2021-07-22)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a denial of service attack against the KDC encrypted challenge
+  code [CVE-2021-36222].
+
+* Fix a memory leak when gss_inquire_cred() is called without a
+  credential handle.
+
+krb5-1.18.4 changes by ticket ID
+--------------------------------
+
+8975    Incorrect runstatedir substitution affecting "make install"
+9005    Fix argument type errors on Windows
+9007    Fix KDC null deref on bad encrypted challenge
+9014    Using locking in MEMORY krb5_cc_get_principal()
+9015    Fix use-after-free during krad remote_shutdown()
+9016    Memory leak in krb5_gss_inquire_cred
+
 Major changes in 1.18.3 (2020-11-17)
 ------------------------------------
 
@@ -422,6 +443,7 @@ reports, suggestions, and valuable resources:
     Sumit Bose
     Emmanuel Bouillon
     Isaac Boukris
+    Pavel Březina
     Philip Brown
     Samuel Cabrero
     Michael Calmer
@@ -513,6 +535,7 @@ reports, suggestions, and valuable resources:
     Patrik Kis
     Martin Kittel
     Thomas Klausner
+    Tomasz Kłoczko
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
@@ -594,11 +617,13 @@ reports, suggestions, and valuable resources:
     Michael Ströder
     Bjørn Tore Sund
     Ondřej Surý
+    Joseph Sutton
     Joe Travaglini
     Sergei Trofimovich
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko
+    Thomas Wagner
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
