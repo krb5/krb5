@@ -21,8 +21,10 @@
 # or implied warranty.
 
 from k5test import *
+import tempfile
 
-kcm_socket_path = os.path.join(os.getcwd(), 'testdir', 'kcm')
+socketdir = tempfile.TemporaryDirectory()
+kcm_socket_path = os.path.join(socketdir.name, 'kcm')
 conf = {'libdefaults': {'kcm_socket': kcm_socket_path,
                         'kcm_mach_service': '-'}}
 realm = K5Realm(krb5_conf=conf)
