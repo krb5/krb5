@@ -668,6 +668,10 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     }
 
     /* Get memory for flattened principal name */
+    if (u2 > UINT_MAX / 2) {
+        load_err(fname, *linenop, _("cannot allocate principal (too large)"));
+        goto fail;
+    }
     name = malloc(u2 + 1);
     if (name == NULL)
         goto fail;
@@ -682,6 +686,10 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     dbentry->n_tl_data = u3;
 
     /* Get memory for key list */
+    if (u4 > INT16_MAX) {
+        load_err(fname, *linenop, _("invalid key_data size"));
+        goto fail;
+    }
     if (u4 && (kp = calloc(u4, sizeof(krb5_key_data))) == NULL)
         goto fail;
 
@@ -769,13 +777,17 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
             load_err(fname, *linenop, _("unsupported key_data_ver version"));
             goto fail;
         }
+        if (t2 < 0 || t2 > UINT16_MAX) {
+            load_err(fname, *linenop, _("invalid kvno"));
+            goto fail;
+        }
 
         kd->key_data_ver = t1;
         kd->key_data_kvno = t2;
 
         for (j = 0; j < t1; j++) {
             nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
-            if (nread != 2 || t4 < 0) {
+            if (nread != 2 || t4 < 0 || t4 > UINT16_MAX) {
                 load_err(fname, *linenop,
                          _("cannot read key type and length"));
                 goto fail;
