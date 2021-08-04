@@ -33,7 +33,7 @@
 #include "cc-int.h"
 #include "ccapi_util.h"
 
-#if defined(USE_CCAPI)
+#if defined(USE_CCAPI) || defined(USE_CCAPI_MACOS)
 
 static void
 free_cc_data_list(cc_data **list)

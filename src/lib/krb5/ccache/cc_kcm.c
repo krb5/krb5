@@ -720,6 +720,23 @@ kcm_get_name(krb5_context context, krb5_ccache cache)
     return ((struct kcm_cache_data *)cache->data)->residual;
 }
 
+/* Fetch the primary name within the collection.  The result is only valid for
+ * the lifetime of req and should not be freed. */
+static krb5_error_code
+get_primary_name(krb5_context context, struct kcmreq *req, struct kcmio *io,
+                 const char **name_out)
+{
+    krb5_error_code ret;
+
+    *name_out = NULL;
+
+    kcmreq_init(req, KCM_OP_GET_DEFAULT_CACHE, NULL);
+    ret = kcmio_call(context, io, req);
+    if (ret)
+        return ret;
+    return kcmreq_get_name(req, name_out);
+}
+
 static krb5_error_code KRB5_CALLCONV
 kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
 {
@@ -735,11 +752,7 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
         goto cleanup;
 
     if (*residual == '\0') {
-        kcmreq_init(&req, KCM_OP_GET_DEFAULT_CACHE, NULL);
-        ret = kcmio_call(context, io, &req);
-        if (ret)
-            goto cleanup;
-        ret = kcmreq_get_name(&req, &defname);
+        ret = get_primary_name(context, &req, io, &defname);
         if (ret)
             goto cleanup;
         residual = defname;
@@ -747,6 +760,31 @@ kcm_resolve(krb5_context context, krb5_ccache *cache_out, const char *residual)
 
     ret = make_cache(context, residual, io, cache_out);
     io = NULL;
+
+cleanup:
+    kcmio_close(io);
+    kcmreq_free(&req);
+    return ret;
+}
+
+krb5_error_code
+k5_kcm_primary_name(krb5_context context, char **name_out)
+{
+    krb5_error_code ret;
+    struct kcmreq req = EMPTY_KCMREQ;
+    struct kcmio *io = NULL;
+    const char *name;
+
+    *name_out = NULL;
+
+    ret = kcmio_connect(context, &io);
+    if (ret)
+        goto cleanup;
+    ret = get_primary_name(context, &req, io, &name);
+    if (ret)
+        goto cleanup;
+    *name_out = strdup(name);
+    ret = (*name_out == NULL) ? ENOMEM : 0;
 
 cleanup:
     kcmio_close(io);

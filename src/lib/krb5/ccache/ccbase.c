@@ -87,6 +87,12 @@ static struct krb5_cc_typelist cc_kcm_entry = { &krb5_kcm_ops, NEXT };
 #define NEXT &cc_kcm_entry
 #endif /* not _WIN32 */
 
+#ifdef USE_CCAPI_MACOS
+extern const krb5_cc_ops krb5_api_macos_ops;
+static struct krb5_cc_typelist cc_macos_entry = { &krb5_api_macos_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_macos_entry
+#endif /* USE_CCAPI_MACOS */
 
 #define INITIAL_TYPEHEAD (NEXT)
 static struct krb5_cc_typelist *cc_typehead = INITIAL_TYPEHEAD;

@@ -36,6 +36,7 @@ STLIBOBJS= \
 	ccselect_hostname.o \
 	ccselect_k5identity.o \
 	ccselect_realm.o \
+	cc_api_macos.o \
 	cc_dir.o \
 	cc_retr.o \
 	cc_file.o \
@@ -56,6 +57,7 @@ OBJS=	$(OUTPRE)ccapi_util.$(OBJEXT) \
 	$(OUTPRE)ccselect_hostname.$(OBJEXT) \
 	$(OUTPRE)ccselect_k5identity.$(OBJEXT) \
 	$(OUTPRE)ccselect_realm.$(OBJEXT) \
+	$(OUTPRE)cc_api_macos.$(OBJEXT) \
 	$(OUTPRE)cc_dir.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
@@ -76,6 +78,7 @@ SRCS=	$(srcdir)/ccapi_util.c \
 	$(srcdir)/ccselect_hostname.c \
 	$(srcdir)/ccselect_k5identity.c \
 	$(srcdir)/ccselect_realm.c \
+	$(srcdir)/cc_api_macos.c \
 	$(srcdir)/cc_dir.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/cc_file.c \

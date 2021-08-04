@@ -166,6 +166,9 @@ k5_marshal_mcred(struct k5buf *buf, krb5_creds *mcred);
 void
 k5_marshal_princ(struct k5buf *buf, int version, krb5_principal princ);
 
+krb5_error_code
+k5_kcm_primary_name(krb5_context context, char **name_out);
+
 /*
  * Per-type ccache cursor.
  */

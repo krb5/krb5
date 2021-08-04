@@ -1406,12 +1406,39 @@ if test "${localedir+set}" != set; then
 fi
 AC_SUBST(localedir)
 
-# For KCM lib/krb5/ccache to build KCM Mach RPC support for macOS only.
-case $host in
-*-*-darwin* | *-*-rhapsody*) OSX=osx ;;
-*)                           OSX=no ;;
-esac
+# Determine the default macOS ccache type and whether to build the KCM
+# Mach RPC support.
+MACOS_FRAMEWORK=
+dnl The outer brackets around the case statement prevent m4 from
+dnl eating the brackets in the glob patterns, but also prevent us from
+dnl using AC_DEFINE within the body.
+[case $host in
+*-*-darwin[0-9].* | *-*-darwin10.*)
+  # Use the normal default cache type for macOS 10.6 (Darwin 10) and
+  # prior.  Build the KCM Mach RPC support.
+  OSX=osx
+  ;;
+*-*-darwin*)
+  # macOS 10.6 (Darwin 11) uses the KCM type by default.  macOS 11
+  # (Darwin 20) uses an xpc-based cache type called XCACHE by default.
+  # We can access either of these collections via a macos-specific
+  # implementation of the API cache type.  Build the KCM Mach RPC
+  # support.
+  OSX=osx
+  macos_defccname=API:
+  MACOS_FRAMEWORK="-framework Kerberos"
+  ;;
+*)
+  # This is not macOS; do not build the Mach RPC support and use the
+  # normal default cache type.
+  OSX=no
+  ;;
+esac]
+if test "$macos_defccname" = API:; then
+  AC_DEFINE(USE_CCAPI_MACOS, 1, [Define to build macOS CCAPI client])
+fi
 AC_SUBST(OSX)
+AC_SUBST(MACOS_FRAMEWORK)
 
 # Build-time default ccache, keytab, and client keytab names.  These
 # can be given as variable arguments DEFCCNAME, DEFKTNAME, and
@@ -1435,20 +1462,10 @@ if test "x$with_krb5_config" != xno; then
 		: "${DEFCKTNAME=`$with_krb5_config --defcktname`}"
 	fi
 fi
-dnl The outer brackets around the case statement prevent m4 from eating the
-dnl brackets in the glob patterns.
 if test "${DEFCCNAME+set}" != set; then
-	[case $host in
-	*-*-darwin[0-9].* | *-*-darwin10.*)
-		# Use the normal default for macOS 10.6 (Darwin 10) and prior.
-		;;
-	*-*-darwin*)
-		# For macOS 10.7 (Darwin 11) and later, the native ccache uses
-		# the KCM daemon.
-		DEFCCNAME=KCM:
-		;;
-	esac]
-	if test "${DEFCCNAME+set}" != set; then
+	if test "${macos_defccname+set}" = set; then
+		DEFCCNAME=$macos_defccname
+	else
 		DEFCCNAME=FILE:/tmp/krb5cc_%{uid}
 	fi
 fi
