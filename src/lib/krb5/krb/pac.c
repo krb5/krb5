@@ -596,6 +596,7 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     krb5_checksum checksum;
     krb5_boolean valid;
     krb5_octet *p;
+    size_t cksumlen;
 
     ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_PRIVSVR_CHECKSUM,
                                &privsvr_checksum);
@@ -615,10 +616,18 @@ k5_pac_verify_kdc_checksum(krb5_context context,
 
     p = (krb5_octet *)privsvr_checksum.data;
     checksum.checksum_type = load_32_le(p);
-    checksum.length = privsvr_checksum.length - PAC_SIGNATURE_DATA_LENGTH;
-    checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
     if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
         return KRB5KRB_AP_ERR_INAPP_CKSUM;
+
+    /* There may be an RODCIdentifier trailer (see [MS-PAC] 2.8), so look up
+     * the length of the checksum by its type. */
+    ret = krb5_c_checksum_length(context, checksum.checksum_type, &cksumlen);
+    if (ret)
+        return ret;
+    if (cksumlen > privsvr_checksum.length - PAC_SIGNATURE_DATA_LENGTH)
+        return KRB5_BAD_MSIZE;
+    checksum.length = cksumlen;
+    checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
 
     server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
     server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
