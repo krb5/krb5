@@ -1378,9 +1378,6 @@ krb5_error_code
 encode_krb5_ticket(const krb5_ticket *rep, krb5_data **code);
 
 krb5_error_code
-encode_krb5_enc_tkt_part(const krb5_enc_tkt_part *rep, krb5_data **code);
-
-krb5_error_code
 encode_krb5_enc_kdc_rep_part(const krb5_enc_kdc_rep_part *rep,
                              krb5_data **code);
 
@@ -1587,9 +1584,6 @@ decode_krb5_ticket(const krb5_data *code, krb5_ticket **rep);
 
 krb5_error_code
 decode_krb5_encryption_key(const krb5_data *output, krb5_keyblock **rep);
-
-krb5_error_code
-decode_krb5_enc_tkt_part(const krb5_data *output, krb5_enc_tkt_part **rep);
 
 krb5_error_code
 decode_krb5_enc_kdc_rep_part(const krb5_data *output,

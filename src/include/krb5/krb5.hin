@@ -8597,6 +8597,13 @@ void KRB5_CALLCONV
 krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
                        void *data);
 
+krb5_error_code KRB5_CALLCONV
+encode_krb5_enc_tkt_part(const krb5_enc_tkt_part *rep, krb5_data **code);
+
+krb5_error_code KRB5_CALLCONV
+decode_krb5_enc_tkt_part(const krb5_data *output, krb5_enc_tkt_part **rep);
+
+
 #if defined(__APPLE__) && (defined(__ppc__) || defined(__ppc64__) || defined(__i386__) || defined(__x86_64__))
 #pragma pack(pop)
 #endif

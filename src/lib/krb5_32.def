@@ -133,6 +133,7 @@ EXPORTS
 	krb5_free_data				@129
 	krb5_free_data_contents			@130
 	krb5_free_default_realm			@131
+	krb5_free_enc_tkt_part			@132
 	krb5_free_error				@133
 	krb5_free_host_realm			@135
 	krb5_free_keyblock			@136
@@ -270,7 +271,6 @@ EXPORTS
 	krb5_auth_con_set_req_cksumtype		@36	; PRIVATE GSSAPI krb5.hin
 	krb5_kt_free_entry			@192	; PRIVATE GSSAPI krb5.hin
 	k5_rc_close				@217	; PRIVATE GSSAPI krb5.hin
-	krb5_free_enc_tkt_part			@132	; PRIVATE GSSAPI krb5.hin
 	krb5_decrypt_tkt_part			@108	; PRIVATE GSSAPI krb5.hin
 
 	krb5_set_error_message			@242
@@ -508,3 +508,7 @@ EXPORTS
 	krb5_marshal_credentials			@472
 	krb5_unmarshal_credentials			@473
 	k5_sname_compare				@474 ; PRIVATE GSSAPI
+
+;
+	encode_krb5_enc_tkt_part			@475
+	decode_krb5_enc_tkt_part			@476
