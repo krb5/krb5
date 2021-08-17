@@ -1235,6 +1235,43 @@ kcm_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
 }
 
 static krb5_error_code KRB5_CALLCONV
+kcm_replace(krb5_context context, krb5_ccache cache, krb5_principal princ,
+            krb5_creds **creds)
+{
+    krb5_error_code ret;
+    struct kcmreq req = EMPTY_KCMREQ;
+    size_t pos;
+    uint8_t *lenptr;
+    int ncreds, i;
+    krb5_os_context octx = &context->os_context;
+    int32_t offset;
+
+    kcmreq_init(&req, KCM_OP_REPLACE, cache);
+    offset = (octx->os_flags & KRB5_OS_TOFFSET_VALID) ? octx->time_offset : 0;
+    k5_buf_add_uint32_be(&req.reqbuf, offset);
+    k5_marshal_princ(&req.reqbuf, 4, princ);
+    for (ncreds = 0; creds[ncreds] != NULL; ncreds++);
+    k5_buf_add_uint32_be(&req.reqbuf, ncreds);
+    for (i = 0; creds[i] != NULL; i++) {
+        /* Store a dummy length, then fix it up after marshalling the cred. */
+        pos = req.reqbuf.len;
+        k5_buf_add_uint32_be(&req.reqbuf, 0);
+        k5_marshal_cred(&req.reqbuf, 4, creds[i]);
+        if (k5_buf_status(&req.reqbuf) == 0) {
+            lenptr = (uint8_t *)req.reqbuf.data + pos;
+            store_32_be(req.reqbuf.len - (pos + 4), lenptr);
+        }
+    }
+    ret = cache_call(context, cache, &req);
+    kcmreq_free(&req);
+
+    if (unsupported_op_error(ret))
+        return k5_nonatomic_replace(context, cache, princ, creds);
+
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV
 kcm_lock(krb5_context context, krb5_ccache cache)
 {
     k5_cc_mutex_lock(context, &((struct kcm_cache_data *)cache->data)->lock);
@@ -1281,7 +1318,7 @@ const krb5_cc_ops krb5_kcm_ops = {
     kcm_ptcursor_new,
     kcm_ptcursor_next,
     kcm_ptcursor_free,
-    NULL, /* move */
+    kcm_replace,
     NULL, /* wasdefault */
     kcm_lock,
     kcm_unlock,

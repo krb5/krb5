@@ -52,6 +52,7 @@ class KCMOpcodes(object):
     GET_KDC_OFFSET = 22
     SET_KDC_OFFSET = 23
     GET_CRED_LIST = 13001
+    REPLACE = 13002
 
 
 class KRB5Errors(object):
@@ -88,27 +89,28 @@ def get_cache(name):
     return cache
 
 
-def unpack_data(argbytes):
-    dlen, = struct.unpack('>L', argbytes[:4])
-    return argbytes[4:dlen+4], argbytes[dlen+4:]
-
-
 def unmarshal_name(argbytes):
     offset = argbytes.find(b'\0')
     return argbytes[0:offset], argbytes[offset+1:]
 
 
-def unmarshal_princ(argbytes):
-    # Ignore the type at argbytes[0:4].
-    ncomps, = struct.unpack('>L', argbytes[4:8])
-    realm, rest = unpack_data(argbytes[8:])
-    comps = []
+# Find the bounds of a marshalled principal, returning it and the
+# remainder of argbytes.
+def extract_princ(argbytes):
+    ncomps, rlen = struct.unpack('>LL', argbytes[4:12])
+    pos = 12 + rlen
     for i in range(ncomps):
-        comp, rest = unpack_data(rest)
-        comps.append(comp)
-    # Asssume no quoting is needed.
-    princ = b'/'.join(comps) + b'@' + realm
-    return princ, rest
+        clen, = struct.unpack('>L', argbytes[pos:pos+4])
+        pos += 4 + clen
+    return argbytes[0:pos], argbytes[pos:]
+
+
+# Return true if the marshalled principals p1 and p2 name the same
+# principal.
+def princ_eq(p1, p2):
+    # Ignore the name-types at bytes 0..3.  The remaining bytes should
+    # be identical if the principals are the same.
+    return p1[4:] == p2[4:]
 
 
 def op_gen_new(argbytes):
@@ -151,13 +153,13 @@ def op_retrieve(argbytes):
     # Ignore the flags at rest[0:4] and the header at rest[4:8].
     # Assume there are client and server creds in the tag and match
     # only against them.
-    cprinc, rest = unmarshal_princ(rest[8:])
-    sprinc, rest = unmarshal_princ(rest)
+    cprinc, rest = extract_princ(rest[8:])
+    sprinc, rest = extract_princ(rest)
     cache = get_cache(name)
     for cred in (cache.creds[u] for u in cache.cred_uuids):
-        cred_cprinc, rest = unmarshal_princ(cred)
-        cred_sprinc, rest = unmarshal_princ(rest)
-        if cred_cprinc == cprinc and cred_sprinc == sprinc:
+        cred_cprinc, rest = extract_princ(cred)
+        cred_sprinc, rest = extract_princ(rest)
+        if princ_eq(cred_cprinc, cprinc) and princ_eq(cred_sprinc, sprinc):
             return 0, cred
     return KRB5Errors.KRB5_CC_NOTFOUND, b''
 
@@ -230,6 +232,31 @@ def op_get_cred_list(argbytes):
                b''.join(struct.pack('>L', len(c)) + c for c in creds))
 
 
+def op_replace(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    offset, = struct.unpack('>L', rest[0:4])
+    princ, rest = extract_princ(rest[4:])
+    ncreds, = struct.unpack('>L', rest[0:4])
+    rest = rest[4:]
+    creds = []
+    for i in range(ncreds):
+        len, = struct.unpack('>L', rest[0:4])
+        creds.append(rest[4:4+len])
+        rest = rest[4+len:]
+
+    cache = get_cache(name)
+    cache.princ = princ
+    cache.cred_uuids = []
+    cache.creds = {}
+    cache.time_offset = offset
+    for i in range(ncreds):
+        uuid = make_uuid()
+        cache.creds[uuid] = creds[i]
+        cache.cred_uuids.append(uuid)
+
+    return 0, b''
+
+
 ophandlers = {
     KCMOpcodes.GEN_NEW : op_gen_new,
     KCMOpcodes.INITIALIZE : op_initialize,
@@ -246,7 +273,8 @@ ophandlers = {
     KCMOpcodes.SET_DEFAULT_CACHE : op_set_default_cache,
     KCMOpcodes.GET_KDC_OFFSET : op_get_kdc_offset,
     KCMOpcodes.SET_KDC_OFFSET : op_set_kdc_offset,
-    KCMOpcodes.GET_CRED_LIST : op_get_cred_list
+    KCMOpcodes.GET_CRED_LIST : op_get_cred_list,
+    KCMOpcodes.REPLACE : op_replace
 }
 
 # Read and respond to a request from the socket s.
@@ -281,11 +309,13 @@ def service_request(s):
 
 parser = optparse.OptionParser()
 parser.add_option('-f', '--fallback', action='store_true', dest='fallback',
-                  default=False, help='Do not support RETRIEVE/GET_CRED_LIST')
+                  default=False,
+                  help='Do not support RETRIEVE/GET_CRED_LIST/REPLACE')
 (options, args) = parser.parse_args()
 if options.fallback:
     del ophandlers[KCMOpcodes.RETRIEVE]
     del ophandlers[KCMOpcodes.GET_CRED_LIST]
+    del ophandlers[KCMOpcodes.REPLACE]
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 server.bind(args[0])

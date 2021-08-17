@@ -454,7 +454,7 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
     krb5_error_code ret;
     int i, errors, flags, initialized = 0;
     krb5_enctype etype;
-    krb5_ccache ccache, out_ccache = NULL;
+    krb5_ccache ccache, mcc, out_ccache = NULL;
     krb5_principal me;
     krb5_keytab keytab = NULL;
     krb5_principal for_user_princ = NULL;
@@ -545,6 +545,14 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
         exit(1);
     }
 
+    if (out_ccache != NULL) {
+        ret = krb5_cc_new_unique(context, "MEMORY", NULL, &mcc);
+        if (ret) {
+            com_err(prog, ret, _("while creating temporary output ccache"));
+            exit(1);
+        }
+    }
+
     errors = 0;
     for (i = 0; i < count; i++) {
         if (kvno(names[i], ccache, me, etype, keytab, sname, options, unknown,
@@ -552,7 +560,7 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
             errors++;
         } else if (out_ccache != NULL) {
             if (!initialized) {
-                ret = krb5_cc_initialize(context, out_ccache, creds->client);
+                ret = krb5_cc_initialize(context, mcc, creds->client);
                 if (ret) {
                     com_err(prog, ret, _("while initializing output ccache"));
                     exit(1);
@@ -560,9 +568,9 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
                 initialized = 1;
             }
             if (count == 1)
-                ret = k5_cc_store_primary_cred(context, out_ccache, creds);
+                ret = k5_cc_store_primary_cred(context, mcc, creds);
             else
-                ret = krb5_cc_store_cred(context, out_ccache, creds);
+                ret = krb5_cc_store_cred(context, mcc, creds);
             if (ret) {
                 com_err(prog, ret, _("while storing creds in output ccache"));
                 exit(1);
@@ -570,6 +578,14 @@ do_v5_kvno(int count, char *names[], char * ccachestr, char *etypestr,
         }
 
         krb5_free_creds(context, creds);
+    }
+
+    if (!errors && out_ccache != NULL) {
+        ret = krb5_cc_move(context, mcc, out_ccache);
+        if (ret) {
+            com_err(prog, ret, _("while writing output ccache"));
+            exit(1);
+        }
     }
 
     if (keytab != NULL)

@@ -439,16 +439,40 @@ read_header(krb5_context context, FILE *fp, int *version_out)
     return 0;
 }
 
+static void
+marshal_header(krb5_context context, struct k5buf *buf, krb5_principal princ)
+{
+    krb5_os_context os_ctx = &context->os_context;
+    int version = context->fcc_default_format - FVNO_BASE;
+    uint16_t fields_len;
+
+    version = context->fcc_default_format - FVNO_BASE;
+    k5_buf_add_uint16_be(buf, FVNO_BASE + version);
+    if (version >= 4) {
+        /* Add tagged header fields. */
+        fields_len = 0;
+        if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
+            fields_len += 12;
+        k5_buf_add_uint16_be(buf, fields_len);
+        if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
+            /* Add time offset tag. */
+            k5_buf_add_uint16_be(buf, FCC_TAG_DELTATIME);
+            k5_buf_add_uint16_be(buf, 8);
+            k5_buf_add_uint32_be(buf, os_ctx->time_offset);
+            k5_buf_add_uint32_be(buf, os_ctx->usec_offset);
+        }
+    }
+    k5_marshal_princ(buf, version, princ);
+}
+
 /* Create or overwrite the cache file with a header and default principal. */
 static krb5_error_code KRB5_CALLCONV
 fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 {
     krb5_error_code ret;
-    krb5_os_context os_ctx = &context->os_context;
     fcc_data *data = id->data;
-    uint16_t fields_len;
     ssize_t nwritten;
-    int st, flags, version, fd = -1;
+    int st, flags, fd = -1;
     struct k5buf buf = EMPTY_K5BUF;
     krb5_boolean file_locked = FALSE;
 
@@ -482,23 +506,7 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 
     /* Prepare the header and principal in buf. */
     k5_buf_init_dynamic(&buf);
-    version = context->fcc_default_format - FVNO_BASE;
-    k5_buf_add_uint16_be(&buf, FVNO_BASE + version);
-    if (version >= 4) {
-        /* Add tagged header fields. */
-        fields_len = 0;
-        if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
-            fields_len += 12;
-        k5_buf_add_uint16_be(&buf, fields_len);
-        if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
-            /* Add time offset tag. */
-            k5_buf_add_uint16_be(&buf, FCC_TAG_DELTATIME);
-            k5_buf_add_uint16_be(&buf, 8);
-            k5_buf_add_uint32_be(&buf, os_ctx->time_offset);
-            k5_buf_add_uint32_be(&buf, os_ctx->usec_offset);
-        }
-    }
-    k5_marshal_princ(&buf, version, princ);
+    marshal_header(context, &buf, princ);
     ret = k5_buf_status(&buf);
     if (ret)
         goto cleanup;
@@ -1260,6 +1268,64 @@ fcc_unlock(krb5_context context, krb5_ccache id)
     return 0;
 }
 
+static krb5_error_code KRB5_CALLCONV
+fcc_replace(krb5_context context, krb5_ccache id, krb5_principal princ,
+            krb5_creds **creds)
+{
+    krb5_error_code ret;
+    fcc_data *data = id->data;
+    char *tmpname = NULL;
+    int i, st, fd = -1, version = context->fcc_default_format - FVNO_BASE;
+    ssize_t nwritten;
+    struct k5buf buf = EMPTY_K5BUF;
+    krb5_boolean tmpfile_exists = FALSE;
+
+    if (asprintf(&tmpname, "%s.XXXXXX", data->filename) < 0)
+        return ENOMEM;
+    fd = mkstemp(tmpname);
+    if (fd < 0)
+        goto errno_cleanup;
+    tmpfile_exists = TRUE;
+
+    k5_buf_init_dynamic_zap(&buf);
+    marshal_header(context, &buf, princ);
+    for (i = 0; creds[i] != NULL; i++)
+        k5_marshal_cred(&buf, version, creds[i]);
+    ret = k5_buf_status(&buf);
+    if (ret)
+        goto cleanup;
+
+    nwritten = write(fd, buf.data, buf.len);
+    if (nwritten == -1)
+        goto errno_cleanup;
+    if ((size_t)nwritten != buf.len) {
+        ret = KRB5_CC_IO;
+        goto cleanup;
+    }
+    st = close(fd);
+    fd = -1;
+    if (st != 0)
+        goto errno_cleanup;
+
+    st = rename(tmpname, data->filename);
+    if (st != 0)
+        goto errno_cleanup;
+    tmpfile_exists = FALSE;
+
+cleanup:
+    k5_buf_free(&buf);
+    if (fd != -1)
+        close(fd);
+    if (tmpfile_exists)
+        unlink(tmpname);
+    free(tmpname);
+    return ret;
+
+errno_cleanup:
+    ret = interpret_errno(context, errno);
+    goto cleanup;
+}
+
 /* Translate a system errno value to a Kerberos com_err code. */
 static krb5_error_code
 interpret_errno(krb5_context context, int errnum)
@@ -1335,7 +1401,7 @@ const krb5_cc_ops krb5_fcc_ops = {
     fcc_ptcursor_new,
     fcc_ptcursor_next,
     fcc_ptcursor_free,
-    NULL, /* move */
+    fcc_replace,
     NULL, /* wasdefault */
     fcc_lock,
     fcc_unlock,
@@ -1405,7 +1471,7 @@ const krb5_cc_ops krb5_cc_file_ops = {
     fcc_ptcursor_new,
     fcc_ptcursor_next,
     fcc_ptcursor_free,
-    NULL, /* move */
+    fcc_replace,
     NULL, /* wasdefault */
     fcc_lock,
     fcc_unlock,

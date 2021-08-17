@@ -29,6 +29,11 @@ conf = {'libdefaults': {'kcm_socket': kcm_socket_path,
                         'kcm_mach_service': '-'}}
 realm = K5Realm(krb5_conf=conf)
 
+realm.addprinc('contest')
+realm.extract_keytab('contest', realm.keytab)
+realm.run(['./conccache', realm.ccache + '.contest', 'contest',
+           realm.host_princ])
+
 keyctl = which('keyctl')
 out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
 test_keyring = (keyctl is not None and

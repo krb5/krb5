@@ -6,13 +6,13 @@ SUBDIRS = asn.1 create hammer verify gssapi shlib gss-threads misc threads \
 RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 	GSS_MECH_CONFIG=mech.conf LC_ALL=C $(VALGRIND)
 
-OBJS= adata.o etinfo.o forward.o gcred.o hist.o hooks.o hrealm.o \
+OBJS= adata.o conccache.o etinfo.o forward.o gcred.o hist.o hooks.o hrealm.o \
 	icinterleave.o icred.o kdbtest.o localauth.o plugorder.o rdreq.o \
 	replay.o responder.o s2p.o s4u2self.o s4u2proxy.o t_inetd.o \
 	unlockiter.o
-EXTRADEPSRCS= adata.c etinfo.c forward.c gcred.c hist.c hooks.c hrealm.c \
-	icinterleave.c icred.c kdbtest.c localauth.c plugorder.c rdreq.c \
-	replay.c responder.c s2p.c s4u2self.c s4u2proxy.c t_inetd.c \
+EXTRADEPSRCS= adata.c conccache.c etinfo.c forward.c gcred.c hist.c hooks.c \
+	hrealm.c icinterleave.c icred.c kdbtest.c localauth.c plugorder.c \
+	rdreq.c replay.c responder.c s2p.c s4u2self.c s4u2proxy.c t_inetd.c \
 	unlockiter.c
 
 TEST_DB = ./testdb
@@ -27,6 +27,9 @@ KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
 
 adata: adata.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ adata.o $(KRB5_BASE_LIBS)
+
+conccache: conccache.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ conccache.o $(KRB5_BASE_LIBS)
 
 etinfo: etinfo.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ etinfo.o $(KRB5_BASE_LIBS)
@@ -125,9 +128,9 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_DB_TEST) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
 
-check-pytests: adata etinfo forward gcred hist hooks hrealm icinterleave icred
-check-pytests: kdbtest localauth plugorder rdreq replay responder s2p s4u2proxy
-check-pytests: unlockiter s4u2self
+check-pytests: adata conccache etinfo forward gcred hist hooks hrealm
+check-pytests: icinterleave icred kdbtest localauth plugorder rdreq replay
+check-pytests: responder s2p s4u2proxy unlockiter s4u2self
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_hooks.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)
@@ -190,9 +193,9 @@ check-pytests: unlockiter s4u2self
 	$(RUNPYTEST) $(srcdir)/t_replay.py $(PYTESTFLAGS)
 
 clean:
-	$(RM) adata etinfo forward gcred hist hooks hrealm icinterleave icred
-	$(RM) kdbtest localauth plugorder rdreq replay responder s2p s4u2proxy
-	$(RM) s4u2self t_inetd unlockiter
+	$(RM) adata conccache etinfo forward gcred hist hooks hrealm
+	$(RM) icinterleave icred kdbtest localauth plugorder rdreq replay
+	$(RM) responder s2p s4u2proxy s4u2self t_inetd unlockiter
 	$(RM) krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox ldap
 	$(RM) au.log

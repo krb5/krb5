@@ -113,6 +113,8 @@ typedef enum kcm_opcode {
     /* MIT extensions */
     KCM_OP_MIT_EXTENSION_BASE = 13000,
     KCM_OP_GET_CRED_LIST,       /* (name) -> (count, count*{len, cred}) */
+    KCM_OP_REPLACE,             /* (name, offset, princ,
+                                 *  count, count*{len, cred}) -> () */
 } kcm_opcode;
 
 #endif /* KCM_H */

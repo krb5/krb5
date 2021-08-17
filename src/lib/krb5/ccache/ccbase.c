@@ -348,50 +348,103 @@ krb5int_cc_typecursor_free(krb5_context context, krb5_cc_typecursor *t)
     return 0;
 }
 
+krb5_error_code
+k5_nonatomic_replace(krb5_context context, krb5_ccache ccache,
+                     krb5_principal princ, krb5_creds **creds)
+{
+    krb5_error_code ret;
+    int i;
+
+    ret = krb5_cc_initialize(context, ccache, princ);
+    for (i = 0; !ret && creds[i] != NULL; creds++)
+        ret = krb5_cc_store_cred(context, ccache, creds[i]);
+    return ret;
+}
+
+static krb5_error_code
+read_creds(krb5_context context, krb5_ccache ccache, krb5_creds ***creds_out)
+{
+    krb5_error_code ret;
+    krb5_cc_cursor cur = NULL;
+    krb5_creds **list = NULL, *cred = NULL, **newptr;
+    int i;
+
+    *creds_out = NULL;
+
+    ret = krb5_cc_start_seq_get(context, ccache, &cur);
+    if (ret)
+        goto cleanup;
+
+    /* Allocate one extra entry so that list remains valid for freeing after
+     * we add the next entry and before we reallocate it. */
+    list = k5calloc(2, sizeof(*list), &ret);
+    if (list == NULL)
+        goto cleanup;
+
+    i = 0;
+    for (;;) {
+        cred = k5alloc(sizeof(*cred), &ret);
+        if (cred == NULL)
+            goto cleanup;
+        ret = krb5_cc_next_cred(context, ccache, &cur, cred);
+        if (ret == KRB5_CC_END)
+            break;
+        if (ret)
+            goto cleanup;
+        list[i++] = cred;
+        list[i] = NULL;
+        cred = NULL;
+
+        newptr = realloc(list, (i + 2) * sizeof(*list));
+        if (newptr == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        list = newptr;
+        list[i + 1] = NULL;
+    }
+    ret = 0;
+
+    *creds_out = list;
+    list = NULL;
+
+cleanup:
+    if (cur != NULL)
+        (void)krb5_cc_end_seq_get(context, ccache, &cur);
+    krb5_free_tgt_creds(context, list);
+    free(cred);
+    return ret;
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
 {
-    krb5_error_code ret = 0;
+    krb5_error_code ret;
     krb5_principal princ = NULL;
+    krb5_creds **creds = NULL;
 
     TRACE_CC_MOVE(context, src, dst);
-    ret = k5_cccol_lock(context);
-    if (ret) {
-        return ret;
-    }
-
-    ret = k5_cc_lock(context, src);
-    if (ret) {
-        k5_cccol_unlock(context);
-        return ret;
-    }
 
     ret = krb5_cc_get_principal(context, src, &princ);
-    if (!ret) {
-        ret = krb5_cc_initialize(context, dst, princ);
-    }
-    if (ret) {
-        k5_cc_unlock(context, src);
-        k5_cccol_unlock(context);
-        return ret;
-    }
+    if (ret)
+        goto cleanup;
 
-    ret = k5_cc_lock(context, dst);
-    if (!ret) {
-        ret = krb5_cc_copy_creds(context, src, dst);
-        k5_cc_unlock(context, dst);
-    }
+    ret = read_creds(context, src, &creds);
+    if (ret)
+        goto cleanup;
 
-    k5_cc_unlock(context, src);
-    if (!ret) {
-        ret = krb5_cc_destroy(context, src);
-    }
-    k5_cccol_unlock(context);
-    if (princ) {
-        krb5_free_principal(context, princ);
-        princ = NULL;
-    }
+    if (dst->ops->replace == NULL)
+        ret = k5_nonatomic_replace(context, dst, princ, creds);
+    else
+        ret = dst->ops->replace(context, dst, princ, creds);
+    if (ret)
+        goto cleanup;
 
+    ret = krb5_cc_destroy(context, src);
+
+cleanup:
+    krb5_free_principal(context, princ);
+    krb5_free_tgt_creds(context, creds);
     return ret;
 }
 
