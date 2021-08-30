@@ -57,6 +57,16 @@
 #define KRAD_SERVICE_TYPE_CALL_CHECK 10
 #define KRAD_SERVICE_TYPE_CALLBACK_ADMINISTRATIVE 11
 
+#define KRAD_CODE_ACCESS_REQUEST 1
+#define KRAD_CODE_ACCESS_ACCEPT 2
+#define KRAD_CODE_ACCESS_REJECT 3
+#define KRAD_CODE_ACCESS_CHALLENGE 11
+
+#define KRAD_ATTR_USER_NAME 1
+#define KRAD_ATTR_USER_PASSWORD 2
+#define KRAD_ATTR_SERVICE_TYPE 6
+#define KRAD_ATTR_NAS_IDENTIFIER 32
+
 typedef struct krad_attrset_st krad_attrset;
 typedef struct krad_packet_st krad_packet;
 typedef struct krad_client_st krad_client;

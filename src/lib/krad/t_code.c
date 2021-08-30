@@ -34,19 +34,19 @@ main()
 {
     const char *tmp;
 
-    insist(krad_code_name2num("Access-Request") == 1);
-    insist(krad_code_name2num("Access-Accept") == 2);
-    insist(krad_code_name2num("Access-Reject") == 3);
+    insist(krad_code_name2num("Access-Request") == KRAD_CODE_ACCESS_REQUEST);
+    insist(krad_code_name2num("Access-Accept") == KRAD_CODE_ACCESS_ACCEPT);
+    insist(krad_code_name2num("Access-Reject") == KRAD_CODE_ACCESS_REJECT);
 
-    tmp = krad_code_num2name(1);
+    tmp = krad_code_num2name(KRAD_CODE_ACCESS_REQUEST);
     insist(tmp != NULL);
     insist(strcmp(tmp, "Access-Request") == 0);
 
-    tmp = krad_code_num2name(2);
+    tmp = krad_code_num2name(KRAD_CODE_ACCESS_ACCEPT);
     insist(tmp != NULL);
     insist(strcmp(tmp, "Access-Accept") == 0);
 
-    tmp = krad_code_num2name(3);
+    tmp = krad_code_num2name(KRAD_CODE_ACCESS_REJECT);
     insist(tmp != NULL);
     insist(strcmp(tmp, "Access-Reject") == 0);
 

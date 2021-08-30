@@ -62,22 +62,20 @@ make_packet(krb5_context ctx, const krb5_data *username,
     if (retval != 0)
         goto out;
 
-    retval = krad_attrset_add(set, krad_attr_name2num("User-Name"), username);
+    retval = krad_attrset_add(set, KRAD_ATTR_USER_NAME, username);
     if (retval != 0)
         goto out;
 
-    retval = krad_attrset_add(set, krad_attr_name2num("User-Password"),
-                              password);
+    retval = krad_attrset_add(set, KRAD_ATTR_USER_PASSWORD, password);
     if (retval != 0)
         goto out;
 
-    retval = krad_packet_new_request(ctx, "foo",
-                                     krad_code_name2num("Access-Request"),
+    retval = krad_packet_new_request(ctx, "foo", KRAD_CODE_ACCESS_REQUEST,
                                      set, iterator, &i, &tmp);
     if (retval != 0)
         goto out;
 
-    data = krad_packet_get_attr(tmp, krad_attr_name2num("User-Name"), 0);
+    data = krad_packet_get_attr(tmp, KRAD_ATTR_USER_NAME, 0);
     if (data == NULL) {
         retval = ENOENT;
         goto out;
@@ -143,7 +141,7 @@ do_auth(krb5_context ctx, struct addrinfo *ai, const char *secret,
         goto out;
     }
 
-    *auth = krad_packet_get_code(rsp) == krad_code_name2num("Access-Accept");
+    *auth = krad_packet_get_code(rsp) == KRAD_CODE_ACCESS_ACCEPT;
 
 out:
     krad_packet_free(rsp);
