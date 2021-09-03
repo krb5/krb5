@@ -9,8 +9,8 @@ service_cs = 'service/cs@%s' % realm.realm
 realm.addprinc(service_cs)
 realm.extract_keytab(service_cs, servicekeytab)
 realm.kinit(service_cs, None, ['-k', '-t', servicekeytab])
-msgs = ('Storing %s -> %s in %s' % (service_cs, realm.krbtgt_princ,
-                                    storagecache),
+msgs = ('Storing %s -> %s in MEMORY:' % (service_cs, realm.krbtgt_princ),
+        'Moving ccache MEMORY:',
         'Retrieving %s from FILE:%s' % (service_cs, servicekeytab))
 realm.run(['./t_credstore', '-s', 'p:' + service_cs, 'ccache', storagecache,
            'keytab', servicekeytab], expected_trace=msgs)

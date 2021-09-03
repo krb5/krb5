@@ -252,10 +252,8 @@ The following options are supported by the krb5 mechanism:
 
 * **ccache**: For acquiring initiator credentials, the name of the
   :ref:`credential cache <ccache_definition>` to which the handle will
-  refer.  For storing credentials, the name of the cache where the
-  credentials should be stored.  If a collection name is given, the
-  primary cache of the collection will be used; this behavior may
-  change in future releases to select a cache from the collection.
+  refer.  For storing credentials, the name of the cache or collection
+  where the credentials will be stored (see below).
 
 * **client_keytab**: For acquiring initiator credentials, the name of
   the :ref:`keytab <keytab_definition>` which will be used, if
@@ -284,6 +282,15 @@ The following options are supported by the krb5 mechanism:
   keytab.  The value may be the name of a principal in the keytab, or
   the empty string.  If the empty string is given, any ``host``
   service principal in the keytab may be used.  (New in release 1.19.)
+
+In release 1.20 or later, if a collection name is specified for
+**cache** in a call to gss_store_cred_into(), an existing cache for
+the client principal within the collection will be selected, or a new
+cache will be created within the collection.  If *overwrite_cred* is
+false and the selected credential cache already exists, a
+**GSS_S_DUPLICATE_ELEMENT** error will be returned.  If *default_cred*
+is true, the primary cache of the collection will be switched to the
+selected cache.
 
 
 Importing and exporting credentials

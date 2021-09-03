@@ -119,7 +119,7 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Initializing {ccache} with default princ {princ}",    \
           cache, princ)
 #define TRACE_CC_MOVE(c, src, dst)                                      \
-    TRACE(c, "Moving contents of ccache {src} to {dst}", src, dst)
+    TRACE(c, "Moving ccache {ccache} to {ccache}", src, dst)
 #define TRACE_CC_NEW_UNIQUE(c, type)                            \
     TRACE(c, "Resolving unique ccache of type {str}", type)
 #define TRACE_CC_REMOVE(c, cache, creds)                        \
