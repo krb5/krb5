@@ -380,7 +380,7 @@ typedef krb5_error_code
 
 typedef struct krb5_kdcpreauth_vtable_st {
     /* Mandatory: name of module. */
-    char *name;
+    const char *name;
 
     /* Mandatory: pointer to zero-terminated list of pa_types which this module
      * can provide services for. */
