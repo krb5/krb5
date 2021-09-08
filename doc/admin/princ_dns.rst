@@ -115,3 +115,12 @@ any key in its keytab when accepting a connection, rather than looking
 for the keytab entry that matches the host's own idea of its name
 (typically the name that ``gethostname()`` returns).  This requires
 krb5-1.10 or later.
+
+OpenLDAP (ldapsearch, etc.)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OpenLDAP's SASL implementation performs reverse DNS lookup in order to
+canonicalize service principal names, even if **rdns** is set to
+``false`` in the Kerberos configuration.  To disable this behavior,
+add ``SASL_NOCANON on`` to ``ldap.conf``, or set the
+``LDAPSASL_NOCANON`` environment variable.
