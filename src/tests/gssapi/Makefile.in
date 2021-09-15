@@ -67,7 +67,7 @@ ccinit: ccinit.o $(KRB5_BASE_DEPLIBS)
 ccrefresh: ccrefresh.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o ccrefresh ccrefresh.o $(KRB5_BASE_LIBS)
 reload: reload.o
-	$(CC_LINK) -o $@ reload.o $(DL_LIB)
+	$(CC_LINK) -o $@ reload.o $(LIBS) $(DL_LIB)
 t_accname: t_accname.o $(COMMON_DEPS)
 	$(CC_LINK) -o $@ t_accname.o $(COMMON_LIBS)
 t_add_cred: t_add_cred.o $(COMMON_DEPS)
