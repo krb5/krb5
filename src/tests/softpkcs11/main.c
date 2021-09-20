@@ -1590,7 +1590,8 @@ C_Encrypt(CK_SESSION_HANDLE hSession,
 
     ret = CKR_OK;
 out:
-    OPENSSL_clear_free(buffer, buffer_len);
+    OPENSSL_cleanse(buffer, buffer_len);
+    OPENSSL_free(buffer);
     EVP_PKEY_CTX_free(ctx);
     return ret;
 }
@@ -1732,7 +1733,8 @@ C_Decrypt(CK_SESSION_HANDLE hSession,
 
     ret = CKR_OK;
 out:
-    OPENSSL_clear_free(buffer, buffer_len);
+    OPENSSL_cleanse(buffer, buffer_len);
+    OPENSSL_free(buffer);
     EVP_PKEY_CTX_free(ctx);
     return ret;
 }
@@ -1879,7 +1881,8 @@ C_Sign(CK_SESSION_HANDLE hSession,
 
     ret = CKR_OK;
 out:
-    OPENSSL_clear_free(buffer, buffer_len);
+    OPENSSL_cleanse(buffer, buffer_len);
+    OPENSSL_free(buffer);
     EVP_PKEY_CTX_free(ctx);
     return ret;
 }
