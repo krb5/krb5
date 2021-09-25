@@ -615,7 +615,9 @@ test_encrypt_key_data(krb5_context context, const krb5_keyblock *mkey,
 static krb5_error_code
 test_issue_pac(krb5_context context, unsigned int flags,
                krb5_const_principal client_princ, krb5_db_entry *client,
-               krb5_timestamp authtime, krb5_pac old_pac, krb5_pac new_pac)
+               krb5_keyblock *client_key, krb5_db_entry *server,
+               krb5_db_entry *krb5tgt, krb5_timestamp authtime,
+               krb5_pac old_pac, krb5_pac new_pac)
 {
     uint8_t nd = 1;
     krb5_data data = empty_data();

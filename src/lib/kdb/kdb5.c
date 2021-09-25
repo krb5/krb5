@@ -2764,7 +2764,9 @@ krb5_dbe_sort_key_data(krb5_key_data *key_data, size_t key_data_length)
 krb5_error_code
 krb5_db_issue_pac(krb5_context context, unsigned int flags,
                   krb5_const_principal client_princ, krb5_db_entry *client,
-                  krb5_timestamp authtime, krb5_pac old_pac, krb5_pac new_pac)
+                  krb5_keyblock *client_key, krb5_db_entry *server,
+                  krb5_db_entry *krbtgt, krb5_timestamp authtime,
+                  krb5_pac old_pac, krb5_pac new_pac)
 {
     krb5_error_code ret;
     kdb_vftabl *v;
@@ -2774,6 +2776,6 @@ krb5_db_issue_pac(krb5_context context, unsigned int flags,
         return ret;
     if (v->issue_pac == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->issue_pac(context, flags, client_princ, client, authtime,
-                        old_pac, new_pac);
+    return v->issue_pac(context, flags, client_princ, client, client_key,
+                        server, krbtgt, authtime, old_pac, new_pac);
 }

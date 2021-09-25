@@ -515,6 +515,7 @@ handle_pac(krb5_context context, unsigned int flags,
     krb5_pac old_pac = NULL, new_pac = NULL;
     krb5_const_principal client_princ = NULL, verify_princ = NULL;
     krb5_keyblock *verify_key = subject_key;
+    krb5_db_entry *relevant_krbtgt = subject_server;
     krb5_ui_4 *types;
     size_t num_buffers = 0, i;
     krb5_data data = empty_data();
@@ -532,8 +533,10 @@ handle_pac(krb5_context context, unsigned int flags,
         ret = 0;
         goto done;
     } else if (old_pac != NULL) {
-        if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)
+        if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) {
             verify_key = local_tgt_key;
+            relevant_krbtgt = local_tgt;
+        }
 
         if (client == NULL)
             verify_princ = altcprinc;
@@ -554,7 +557,8 @@ handle_pac(krb5_context context, unsigned int flags,
         ret = krb5_db_issue_pac(context, flags,
                                 /* TODO: fix this */
                                 (client != NULL) ? client->princ : new_ticket->enc_part2->client,
-                                client, authtime, old_pac, new_pac);
+                                client, verify_key, server, relevant_krbtgt,
+                                authtime, old_pac, new_pac);
         if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
             goto done;
     }
