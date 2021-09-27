@@ -405,7 +405,6 @@ RUN_TEST=$(RUN_SETUP) KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf \
 
 # Crypto and PRNG back-end selections
 CRYPTO_IMPL	= @CRYPTO_IMPL@
-PRNG_ALG	= @PRNG_ALG@
 
 # TLS implementation selection
 TLS_IMPL	= @TLS_IMPL@

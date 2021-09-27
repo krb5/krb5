@@ -33,7 +33,4 @@
 #ifndef CRYPTO_MOD_H
 #define CRYPTO_MOD_H
 
-#include <aes/aes.h>
-#include <sha2/sha2.h>
-
 #endif /* CRYPTO_MOD_H */

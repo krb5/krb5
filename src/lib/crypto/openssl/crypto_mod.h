@@ -44,11 +44,4 @@
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #endif
 
-#define aes_encrypt_ctx AES_KEY
-#define k5_aes_encrypt_key256(k, ctx) AES_set_encrypt_key(k, 256, ctx)
-#define k5_aes_encrypt(in, out, ctx) AES_encrypt(in, out, ctx)
-#define k5_sha256_init SHA256_Init
-#define k5_sha256_update SHA256_Update
-#define k5_sha256_final SHA256_Final
-
 #endif /* CRYPTO_MOD_H */

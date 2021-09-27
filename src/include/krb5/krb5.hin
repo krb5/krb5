@@ -464,27 +464,14 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /* Microsoft netlogon */
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /**< RFC 4757 */
 
-/*
- * The following are entropy source designations. Whenever
- * krb5_C_random_add_entropy is called, one of these source ids is passed in.
- * This allows the library to better estimate bits of entropy in the sample and
- * to keep track of what sources of entropy have contributed enough entropy.
- * Sources marked internal MUST NOT be used by applications outside the
- * Kerberos library
- */
-
+/* Constants for the deprecated krb5_c_random_add_entropy() */
 enum {
-    KRB5_C_RANDSOURCE_OLDAPI = 0, /*calls to krb5_C_RANDOM_SEED (INTERNAL)*/
-    KRB5_C_RANDSOURCE_OSRAND = 1, /* /dev/random or equivalent (internal)*/
-    KRB5_C_RANDSOURCE_TRUSTEDPARTY = 2, /* From KDC or other trusted party*/
-    /*
-     * This source should be used carefully; data in this category
-     * should be from a third party trusted to give random bits
-     * For example keys issued by the KDC in the application server.
-     */
-    KRB5_C_RANDSOURCE_TIMING = 3, /* Timing of operations*/
-    KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL = 4, /*Protocol data possibly from attacker*/
-    KRB5_C_RANDSOURCE_MAX = 5 /*Do not use; maximum source ID*/
+    KRB5_C_RANDSOURCE_OLDAPI = 0,
+    KRB5_C_RANDSOURCE_OSRAND = 1,
+    KRB5_C_RANDSOURCE_TRUSTEDPARTY = 2,
+    KRB5_C_RANDSOURCE_TIMING = 3,
+    KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL = 4,
+    KRB5_C_RANDSOURCE_MAX = 5
 };
 
 #ifndef krb5_roundup
@@ -765,19 +752,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,
                      krb5_data *random_data, krb5_keyblock *k5_random_key);
 
-/**
- * Add entropy to the pseudo-random number generator.
- *
- * @param [in] context          Library context
- * @param [in] randsource       Entropy source (see KRB5_RANDSOURCE types)
- * @param [in] data             Data
- *
- * Contribute entropy to the PRNG used by krb5 crypto operations.  This may or
- * may not affect the output of the next crypto operation requiring random
- * data.
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
+/** @deprecated This call is no longer necessary. */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
                           const krb5_data *data);
@@ -797,24 +772,11 @@ krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data);
 
-/**
- * Collect entropy from the OS if possible.
- *
- * @param [in]  context         Library context
- * @param [in]  strong          Strongest available source of entropy
- * @param [out] success         1 if OS provides entropy, 0 otherwise
- *
- * If @a strong is non-zero, this function attempts to use the strongest
- * available source of entropy.  Setting this flag may cause the function to
- * block on some operating systems.  Good uses include seeding the PRNG for
- * kadmind and realm setup.
- *
- * @retval 0 Success; otherwise - Kerberos error codes
- */
+/** @deprecated This call is no longer necessary. */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success);
 
-/** @deprecated Replaced by krb5_c_* API family. */
+/** @deprecated This call is no longer necessary. */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data);
 

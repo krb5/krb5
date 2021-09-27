@@ -292,16 +292,11 @@ local.properties
 /src/lib/crypto/crypto_tests/t_nfold
 /src/lib/crypto/crypto_tests/t_prf
 /src/lib/crypto/crypto_tests/t_prf.output
-/src/lib/crypto/crypto_tests/t_prng
-/src/lib/crypto/crypto_tests/t_prng.output
 /src/lib/crypto/crypto_tests/t_sha2
 /src/lib/crypto/crypto_tests/t_short
 /src/lib/crypto/crypto_tests/t_str2key
 /src/lib/crypto/crypto_tests/vk.txt
 /src/lib/crypto/crypto_tests/vt.txt
-
-/src/lib/crypto/krb/t_fortuna
-/src/lib/crypto/krb/t_fortuna.output
 
 /src/lib/gssapi/merged-gssapi-header.h
 

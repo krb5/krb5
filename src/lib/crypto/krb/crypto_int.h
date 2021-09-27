@@ -25,7 +25,7 @@
  */
 
 /* This header is the entry point for libk5crypto sources, and also documents
- * requirements for crypto modules and PRNG modules.  */
+ * requirements for crypto modules. */
 
 #ifndef CRYPTO_INT_H
 #define CRYPTO_INT_H
@@ -481,48 +481,10 @@ int krb5int_crypto_impl_init(void);
 void krb5int_crypto_impl_cleanup(void);
 
 /*
- * Modules must provide a crypto_mod.h header at the top level.  To work with
- * the default PRNG module (prng_fortuna.c), crypto_mod.h must #define or
- * prototype the following symbols:
- *
- *   aes_encrypt_ctx - Stack-allocatable type for an AES-256 key schedule
- *   k5_aes_encrypt_key256(key, ctxptr) -- initialize an AES-256 key schedule
- *   k5_aes_encrypt(in, out, ctxptr) -- encrypt a block
- *   SHA256_CTX - Stack-allocatable type for a SHA-256 hash state
- *   k5_sha256_init(ctxptr) - Initialize a hash state
- *   k5_sha256_update(ctxptr, data, size) -- Hash some data
- *   k5_sha256_final(ctxptr, out) -- Finalize a state, writing hash into out
- *
- * These functions must never fail on valid inputs, and contexts must remain
- * valid across forks.  If the module cannot meet those constraints, then it
- * should provide its own PRNG module and the build system should ensure that
- * it is used.
- *
- * The function symbols named above are also in the library export list (so
- * they can be used by the t_fortuna.c test code), so even if the module
- * defines them away or doesn't work with Fortuna, the module must provide
- * stubs; see stubs.c in the openssl module for examples.
+ * Modules must provide a crypto_mod.h header at the top level.
  */
 
 #include <crypto_mod.h>
-
-/*** PRNG module declarations ***/
-
-/*
- * PRNG modules must implement the following APIs from krb5.h:
- *   krb5_c_random_add_entropy
- *   krb5_c_random_make_octets
- *   krb5_c_random_os_entropy
- *
- * PRNG modules should implement these functions.  They are called from the
- * crypto library init and cleanup functions, and can be used to setup and tear
- * down static state without thread safety concerns.
- */
-int k5_prng_init(void);
-void k5_prng_cleanup(void);
-
-/* Used by PRNG modules to gather OS entropy.  Returns true on success. */
-krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len, int strong);
 
 /*** Inline helper functions ***/
 

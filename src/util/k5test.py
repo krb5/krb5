@@ -1046,7 +1046,7 @@ class K5Realm(object):
 
     def create_kdb(self):
         global kdb5_util
-        self.run([kdb5_util, 'create', '-W', '-s', '-P', 'master'])
+        self.run([kdb5_util, 'create', '-s', '-P', 'master'])
 
     def start_kdc(self, args=[], env=None):
         global krb5kdc
@@ -1067,7 +1067,7 @@ class K5Realm(object):
             env = self.env
         assert(self._kadmind_proc is None)
         dump_path = os.path.join(self.testdir, 'dump')
-        self._kadmind_proc = _start_daemon([kadmind, '-nofork', '-W',
+        self._kadmind_proc = _start_daemon([kadmind, '-nofork',
                                             '-p', kdb5_util, '-K', kprop,
                                             '-F', dump_path], env,
                                            'starting...')

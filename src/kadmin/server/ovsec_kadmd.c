@@ -349,7 +349,7 @@ main(int argc, char *argv[])
     const char *pid_file = NULL;
     char **db_args = NULL, **tmpargs;
     const char *acl_file;
-    int ret, i, db_args_size = 0, strong_random = 1, proponly = 0;
+    int ret, i, db_args_size = 0, proponly = 0;
 
     setlocale(LC_ALL, "");
     setvbuf(stderr, NULL, _IONBF, 0);
@@ -408,7 +408,7 @@ main(int argc, char *argv[])
                 usage();
             pid_file = *argv;
         } else if (strcmp(*argv, "-W") == 0) {
-            strong_random = 0;
+            /* Ignore (deprecated weak random option). */
         } else if (strcmp(*argv, "-p") == 0) {
             argc--, argv++;
             if (!argc)
@@ -521,11 +521,6 @@ main(int argc, char *argv[])
                      &global_server_handle);
     if (ret)
         fail_to_start(ret, _("initializing"));
-
-    krb5_klog_syslog(LOG_INFO, _("Seeding random number generator"));
-    ret = krb5_c_random_os_entropy(context, strong_random, NULL);
-    if (ret)
-        fail_to_start(ret, _("getting random seed"));
 
     if (params.iprop_enabled == TRUE) {
         ulog_set_role(context, IPROP_PRIMARY);

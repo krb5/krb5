@@ -157,12 +157,6 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
 {
     krb5_context ctx = 0;
     krb5_error_code retval;
-    struct {
-        krb5_timestamp now;
-        krb5_int32 now_usec;
-        long pid;
-    } seed_data;
-    krb5_data seed;
     int tmp;
     char *plugin_dir = NULL;
 
@@ -242,17 +236,6 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     if (retval)
         goto cleanup;
     ctx->dns_canonicalize_hostname = tmp;
-
-    /* initialize the prng (not well, but passable) */
-    if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
-        goto cleanup;
-    if ((retval = krb5_crypto_us_timeofday(&seed_data.now, &seed_data.now_usec)))
-        goto cleanup;
-    seed_data.pid = getpid ();
-    seed.length = sizeof(seed_data);
-    seed.data = (char *) &seed_data;
-    if ((retval = krb5_c_random_add_entropy(ctx, KRB5_C_RANDSOURCE_TIMING, &seed)))
-        goto cleanup;
 
     ctx->default_realm = 0;
     get_integer(ctx, KRB5_CONF_CLOCKSKEW, DEFAULT_CLOCKSKEW, &tmp);

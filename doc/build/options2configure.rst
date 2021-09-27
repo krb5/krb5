@@ -337,11 +337,6 @@ Optional packages
     implemented crypto backend is ``openssl``.  (See
     :ref:`mitK5features`)
 
-**-**\ **-with-prng-alg=**\ *ALG*
-    Use specified PRNG algorithm.  For example, to use the OS native
-    prng specify ``--with-prng-alg=os``.  The default is ``fortuna``.
-    (See :ref:`mitK5features`)
-
 **-**\ **-without-libedit**
     Do not compile and link against libedit.  Some utilities will no
     longer offer command history or completion in interactive mode if

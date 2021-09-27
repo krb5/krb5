@@ -54,7 +54,6 @@ STLIBOBJS=\
 	prf_dk.o		\
 	prf_rc4.o		\
 	prng.o			\
-	prng_$(PRNG_ALG).o	\
 	random_to_key.o		\
 	s2k_pbkdf2.o		\
 	s2k_rc4.o		\
@@ -113,7 +112,6 @@ OBJS=\
 	$(OUTPRE)prf_dk.$(OBJEXT)		\
 	$(OUTPRE)prf_rc4.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
-	$(OUTPRE)prng_$(PRNG_ALG).$(OBJEXT)	\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)s2k_pbkdf2.$(OBJEXT)		\
 	$(OUTPRE)s2k_rc4.$(OBJEXT)		\
@@ -172,7 +170,6 @@ SRCS=\
 	$(srcdir)/prf_dk.c		\
 	$(srcdir)/prf_rc4.c		\
 	$(srcdir)/prng.c 		\
-	$(srcdir)/prng_$(PRNG_ALG).c	\
 	$(srcdir)/cf2.c 		\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/s2k_pbkdf2.c		\
@@ -180,7 +177,6 @@ SRCS=\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_key.c	\
-	$(srcdir)/t_fortuna.c		\
 	$(srcdir)/valid_cksumtype.c	\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
@@ -192,17 +188,7 @@ includes: depend
 
 depend: $(SRCS)
 
-check-unix: t_fortuna
-	if [ $(PRNG_ALG) = fortuna ]; then \
-		$(RUN_TEST) ./t_fortuna > t_fortuna.output && \
-		cmp t_fortuna.output $(srcdir)/t_fortuna.expected; \
-	fi
-
-t_fortuna: t_fortuna.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_fortuna.o $(K5CRYPTO_LIB) $(SUPPORT_LIB) $(LIBS)
-
 clean-unix:: clean-libobjs
-	$(RM) t_fortuna.o t_fortuna t_fortuna.output
 
 @lib_frag@
 @libobj_frag@

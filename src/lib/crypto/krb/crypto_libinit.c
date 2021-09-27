@@ -10,10 +10,6 @@ MAKE_FINI_FUNCTION(cryptoint_cleanup_library);
 
 int cryptoint_initialize_library (void)
 {
-    int err;
-    err = k5_prng_init();
-    if (err)
-        return err;
     return krb5int_crypto_impl_init();
 }
 
@@ -30,6 +26,5 @@ void cryptoint_cleanup_library (void)
 {
     if (!INITIALIZER_RAN(cryptoint_initialize_library))
         return;
-    k5_prng_cleanup();
     krb5int_crypto_impl_cleanup();
 }

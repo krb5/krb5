@@ -285,18 +285,6 @@ AC_SUBST(CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL_CFLAGS)
 AC_SUBST(CRYPTO_IMPL_LIBS)
 
-AC_ARG_WITH([prng-alg],
-  [AS_HELP_STRING([--with-prng-alg=ALG],
-                  [use specified PRNG algorithm. @<:@fortuna@:>@])],
-  [PRNG_ALG=$withval
-   AC_MSG_NOTICE(k5crypto will use '$withval')],
-  [PRNG_ALG=fortuna])
-AC_CONFIG_COMMANDS(PRNG_ALG, , PRNG_ALG=$PRNG_ALG)
-AC_SUBST(PRNG_ALG)
-if test "$PRNG_ALG" = fortuna; then
-	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
-fi
-
 # WITH_TLS_IMPL
 
 AC_ARG_WITH([tls-impl],

@@ -33,8 +33,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-static krb5_int32 last_usec = 0, last_os_random = 0;
-
 static krb5_error_code make_too_big_error(kdc_realm_t *kdc_active_realm,
                                           krb5_data **out);
 
@@ -88,34 +86,6 @@ finish_dispatch_cache(void *arg, krb5_error_code code, krb5_data *response)
 #endif
 
     finish_dispatch(state, code, response);
-}
-
-static void
-reseed_random(krb5_context kdc_err_context)
-{
-    krb5_error_code retval;
-    krb5_timestamp now;
-    krb5_int32 now_usec, usec_difference;
-    krb5_data data;
-
-    retval = krb5_crypto_us_timeofday(&now, &now_usec);
-    if (retval == 0) {
-        usec_difference = now_usec - last_usec;
-        if (last_os_random == 0)
-            last_os_random = now;
-        /* Grab random data from OS every hour*/
-        if (ts_delta(now, last_os_random) >= 60 * 60) {
-            krb5_c_random_os_entropy(kdc_err_context, 0, NULL);
-            last_os_random = now;
-        }
-
-        data.length = sizeof(krb5_int32);
-        data.data = (void *)&usec_difference;
-
-        krb5_c_random_add_entropy(kdc_err_context,
-                                  KRB5_C_RANDSOURCE_TIMING, &data);
-        last_usec = now_usec;
-    }
 }
 
 void
@@ -172,7 +142,6 @@ dispatch(void *cb, const krb5_fulladdr *local_addr,
      * is currently being processed. */
     kdc_insert_lookaside(kdc_err_context, pkt, NULL);
 #endif
-    reseed_random(kdc_err_context);
 
     /* try TGS_REQ first; they are more common! */
 
