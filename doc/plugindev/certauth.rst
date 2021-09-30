@@ -18,7 +18,10 @@ authorization status and optionally outputs a list of authentication
 indicator strings to be added to the ticket.  Beginning in release
 1.19, the authorize method can request that the hardware
 authentication bit be set in the ticket by returning
-**KRB5_CERTAUTH_HWAUTH**.  A module must use its own internal or
+**KRB5_CERTAUTH_HWAUTH**.  Beginning in release 1.20, the authorize method
+can return **KRB5_CERTAUTH_HWAUTH_PASS** to request that the hardware
+authentication bit be set in the ticket but otherwise defer authorization
+to another certauth module.  A module must use its own internal or
 library-provided ASN.1 certificate decoder.
 
 A module can optionally create and destroy module data with the

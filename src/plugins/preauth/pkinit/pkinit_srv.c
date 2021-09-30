@@ -349,8 +349,8 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
      * Check the certificate against each certauth module.  For the certificate
      * to be authorized at least one module must return 0 or
      * KRB5_CERTAUTH_HWAUTH, and no module can return an error code other than
-     * KRB5_PLUGIN_NO_HANDLE (pass).  Add indicators from modules that return 0
-     * or pass.
+     * KRB5_PLUGIN_NO_HANDLE (pass) or KRB5_CERTAUTH_HWAUTH_PASS (pass but
+     * set hw-authent).  Add indicators from all modules.
      */
     ret = KRB5_PLUGIN_NO_HANDLE;
     for (i = 0; certauth_modules != NULL && certauth_modules[i] != NULL; i++) {
@@ -362,6 +362,8 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
             accepted = TRUE;
         else if (ret == KRB5_CERTAUTH_HWAUTH)
             accepted = hwauth = TRUE;
+        else if (ret == KRB5_CERTAUTH_HWAUTH_PASS)
+            hwauth = TRUE;
         else if (ret != KRB5_PLUGIN_NO_HANDLE)
             goto cleanup;
 
