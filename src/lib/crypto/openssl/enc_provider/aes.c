@@ -25,6 +25,9 @@
  */
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_AES
+
 #include <openssl/evp.h>
 #include <openssl/aes.h>
 #include <openssl/modes.h>
@@ -301,3 +304,5 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_init_state,
     krb5int_default_free_state
 };
+
+#endif /* K5_OPENSSL_AES */

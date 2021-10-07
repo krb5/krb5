@@ -52,6 +52,9 @@
 
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_HMAC
+
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
@@ -162,3 +165,5 @@ krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
 {
     return krb5int_hmac_keyblock(hash, &key->keyblock, data, num_data, output);
 }
+
+#endif /* K5_OPENSSL_HMAC */

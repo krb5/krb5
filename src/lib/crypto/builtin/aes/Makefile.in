@@ -1,5 +1,6 @@
 mydir=lib$(S)crypto$(S)builtin$(S)aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../../krb $(CRYPTO_IMPL_CFLGAS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = builtin\aes
@@ -51,7 +52,9 @@ run-aes-gen: aes-gen
 	./aes-gen > kresults.out
 	cmp kresults.out $(srcdir)/kresults.expected
 
-check: run-aes-gen
+check-unix: check-@CRYPTO_BUILTIN_TESTS@
+check-no:
+check-yes: run-aes-gen
 
 
 clean-unix:: clean-libobjs

@@ -27,6 +27,8 @@
 #include "crypto_int.h"
 #include "camellia.h"
 
+#ifdef K5_BUILTIN_CAMELLIA
+
 /*
  * Private per-key data to cache after first generation.  We don't want to mess
  * with the imported Camellia implementation too much, so we'll just use two
@@ -313,3 +315,5 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     krb5int_default_free_state,
     camellia_key_cleanup
 };
+
+#endif /* K5_BUILTIN_CAMELLIA */

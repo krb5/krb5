@@ -263,27 +263,29 @@ AC_SUBST(audit_plugin)
 
 # WITH_CRYPTO_IMPL
 
-CRYPTO_IMPL="builtin"
+CRYPTO_IMPL=builtin
 AC_ARG_WITH([crypto-impl],
   [AS_HELP_STRING([--with-crypto-impl=IMPL],
     [use specified crypto implementation @<:@builtin@:>@])],
   [CRYPTO_IMPL=$withval
-   AC_MSG_NOTICE(k5crypto will use '$withval')],
-  [withval=builtin])
-case "$withval" in
+   AC_MSG_NOTICE(k5crypto will use '$withval')])
+
+CRYPTO_BUILTIN_TESTS=no
+case $CRYPTO_IMPL in
 builtin)
+  CRYPTO_BUILTIN_TESTS=yes
   ;;
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_DEFINE([CRYPTO_OPENSSL], 1, [Define to use OpenSSL crypto library])
   ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
   ;;
 esac
-AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
-AC_SUBST(CRYPTO_IMPL)
-AC_SUBST(CRYPTO_IMPL_CFLAGS)
-AC_SUBST(CRYPTO_IMPL_LIBS)
+AC_SUBST([CRYPTO_IMPL_CFLAGS])
+AC_SUBST([CRYPTO_IMPL_LIBS])
+AC_SUBST([CRYPTO_BUILTIN_TESTS])
 
 # WITH_TLS_IMPL
 
@@ -1482,14 +1484,14 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib lib/kdb
 
-	lib/crypto lib/crypto/krb lib/crypto/$CRYPTO_IMPL
-	lib/crypto/$CRYPTO_IMPL/enc_provider
-	lib/crypto/$CRYPTO_IMPL/hash_provider
-	lib/crypto/$CRYPTO_IMPL/des
-	lib/crypto/$CRYPTO_IMPL/md4 lib/crypto/$CRYPTO_IMPL/md5
-        lib/crypto/$CRYPTO_IMPL/sha1 lib/crypto/$CRYPTO_IMPL/sha2
-	lib/crypto/$CRYPTO_IMPL/aes lib/crypto/$CRYPTO_IMPL/camellia
-	lib/crypto/crypto_tests
+	lib/crypto lib/crypto/krb lib/crypto/crypto_tests
+	lib/crypto/builtin lib/crypto/builtin/des
+	lib/crypto/builtin/aes lib/crypto/builtin/camellia
+	lib/crypto/builtin/md4 lib/crypto/builtin/md5
+	lib/crypto/builtin/sha1 lib/crypto/builtin/sha2
+	lib/crypto/builtin/enc_provider lib/crypto/builtin/hash_provider
+	lib/crypto/openssl lib/crypto/openssl/des
+	lib/crypto/openssl/enc_provider lib/crypto/openssl/hash_provider
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os

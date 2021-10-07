@@ -25,6 +25,9 @@
  */
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_HMAC
+
 #include <openssl/x509.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
@@ -52,3 +55,5 @@ krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
                            md, out->length, (unsigned char *)out->data);
     return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }
+
+#endif /* K5_OPENSSL_HMAC */

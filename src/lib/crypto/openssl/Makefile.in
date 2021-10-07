@@ -1,23 +1,20 @@
 mydir=lib$(S)crypto$(S)openssl
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=camellia des aes md4 md5  sha1 sha2 enc_provider hash_provider
-LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)
+SUBDIRS=des enc_provider hash_provider
+LOCALINCLUDES=-I$(srcdir)/../krb $(CRYPTO_IMPL_CFLAGS)
 
 STLIBOBJS=\
 	hmac.o	\
-	init.o	\
 	pbkdf2.o \
 	sha256.o
 
 OBJS=\
 	$(OUTPRE)hmac.$(OBJEXT)	\
-	$(OUTPRE)init.$(OBJEXT)	\
 	$(OUTPRE)pbkdf2.$(OBJEXT) \
 	$(OUTPRE)sha256.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/hmac.c	\
-	$(srcdir)/init.c	\
 	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/sha256.c
 

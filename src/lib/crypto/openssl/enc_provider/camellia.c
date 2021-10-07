@@ -29,6 +29,8 @@
 #include <openssl/camellia.h>
 #include <openssl/modes.h>
 
+#ifdef K5_OPENSSL_CAMELLIA
+
 static krb5_error_code
 cbc_enc(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
         size_t num_data);
@@ -357,3 +359,5 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     krb5int_camellia_init_state,
     krb5int_default_free_state
 };
+
+#endif /* K5_OPENSSL_CAMELLIA */

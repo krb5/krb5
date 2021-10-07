@@ -1,6 +1,5 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../$(CRYPTO_IMPL)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR = krb
@@ -21,7 +20,6 @@ STLIBOBJS=\
 	cmac.o			\
 	coll_proof_cksum.o	\
 	crypto_length.o		\
-	crypto_libinit.o	\
 	default_state.o 	\
 	decrypt.o		\
 	decrypt_iov.o		\
@@ -79,7 +77,6 @@ OBJS=\
 	$(OUTPRE)cmac.$(OBJEXT)			\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
-	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
 	$(OUTPRE)decrypt.$(OBJEXT)		\
 	$(OUTPRE)decrypt_iov.$(OBJEXT)		\
@@ -137,7 +134,6 @@ SRCS=\
 	$(srcdir)/cmac.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/crypto_length.c	\
-	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c 	\
 	$(srcdir)/decrypt.c		\
 	$(srcdir)/decrypt_iov.c		\

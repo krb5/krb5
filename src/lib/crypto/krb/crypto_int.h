@@ -32,6 +32,36 @@
 
 #include <k5-int.h>
 
+#if defined(CRYPTO_OPENSSL)
+
+#define K5_OPENSSL_AES
+#define K5_OPENSSL_CAMELLIA
+#define K5_OPENSSL_DES
+#define K5_OPENSSL_DES_KEY_PARITY
+#define K5_OPENSSL_HMAC
+#define K5_OPENSSL_MD4
+#define K5_OPENSSL_MD5
+#define K5_OPENSSL_PBKDF2
+#define K5_OPENSSL_RC4
+#define K5_OPENSSL_SHA1
+#define K5_OPENSSL_SHA2
+
+#else
+
+#define K5_BUILTIN_AES
+#define K5_BUILTIN_CAMELLIA
+#define K5_BUILTIN_DES
+#define K5_BUILTIN_DES_KEY_PARITY
+#define K5_BUILTIN_HMAC
+#define K5_BUILTIN_MD4
+#define K5_BUILTIN_MD5
+#define K5_BUILTIN_PBKDF2
+#define K5_BUILTIN_RC4
+#define K5_BUILTIN_SHA1
+#define K5_BUILTIN_SHA2
+
+#endif
+
 /* Enc providers and hash providers specify well-known ciphers and hashes to be
  * implemented by the crypto module. */
 
@@ -475,16 +505,6 @@ krb5_error_code krb5int_camellia_cbc_mac(krb5_key key,
                                          const krb5_crypto_iov *data,
                                          size_t num_data, const krb5_data *iv,
                                          krb5_data *output);
-
-/* These can be used to safely set up and tear down module global state. */
-int krb5int_crypto_impl_init(void);
-void krb5int_crypto_impl_cleanup(void);
-
-/*
- * Modules must provide a crypto_mod.h header at the top level.
- */
-
-#include <crypto_mod.h>
 
 /*** Inline helper functions ***/
 

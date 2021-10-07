@@ -3,9 +3,7 @@
 #
 aead.so aead.po $(OUTPRE)aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -16,9 +14,7 @@ aead.so aead.po $(OUTPRE)aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 block_size.so block_size.po $(OUTPRE)block_size.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -28,9 +24,7 @@ block_size.so block_size.po $(OUTPRE)block_size.$(OBJEXT): \
   block_size.c crypto_int.h
 cf2.so cf2.po $(OUTPRE)cf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -41,9 +35,7 @@ cf2.so cf2.po $(OUTPRE)cf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 checksum_dk_cmac.so checksum_dk_cmac.po $(OUTPRE)checksum_dk_cmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -54,9 +46,7 @@ checksum_dk_cmac.so checksum_dk_cmac.po $(OUTPRE)checksum_dk_cmac.$(OBJEXT): \
 checksum_dk_hmac.so checksum_dk_hmac.po $(OUTPRE)checksum_dk_hmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -67,9 +57,7 @@ checksum_dk_hmac.so checksum_dk_hmac.po $(OUTPRE)checksum_dk_hmac.$(OBJEXT): \
 checksum_etm.so checksum_etm.po $(OUTPRE)checksum_etm.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -80,9 +68,7 @@ checksum_etm.so checksum_etm.po $(OUTPRE)checksum_etm.$(OBJEXT): \
 checksum_hmac_md5.so checksum_hmac_md5.po $(OUTPRE)checksum_hmac_md5.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -93,9 +79,7 @@ checksum_hmac_md5.so checksum_hmac_md5.po $(OUTPRE)checksum_hmac_md5.$(OBJEXT): 
 checksum_unkeyed.so checksum_unkeyed.po $(OUTPRE)checksum_unkeyed.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -106,9 +90,7 @@ checksum_unkeyed.so checksum_unkeyed.po $(OUTPRE)checksum_unkeyed.$(OBJEXT): \
 checksum_length.so checksum_length.po $(OUTPRE)checksum_length.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -119,9 +101,7 @@ checksum_length.so checksum_length.po $(OUTPRE)checksum_length.$(OBJEXT): \
 cksumtype_to_string.so cksumtype_to_string.po $(OUTPRE)cksumtype_to_string.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -132,9 +112,7 @@ cksumtype_to_string.so cksumtype_to_string.po $(OUTPRE)cksumtype_to_string.$(OBJ
 cksumtypes.so cksumtypes.po $(OUTPRE)cksumtypes.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -144,9 +122,7 @@ cksumtypes.so cksumtypes.po $(OUTPRE)cksumtypes.$(OBJEXT): \
   cksumtypes.c crypto_int.h
 cmac.so cmac.po $(OUTPRE)cmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -157,9 +133,7 @@ cmac.so cmac.po $(OUTPRE)cmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -170,9 +144,7 @@ coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): \
 crypto_length.so crypto_length.po $(OUTPRE)crypto_length.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -180,25 +152,10 @@ crypto_length.so crypto_length.po $(OUTPRE)crypto_length.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   crypto_int.h crypto_length.c
-crypto_libinit.so crypto_libinit.po $(OUTPRE)crypto_libinit.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crypto_int.h crypto_libinit.c
 default_state.so default_state.po $(OUTPRE)default_state.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -208,9 +165,7 @@ default_state.so default_state.po $(OUTPRE)default_state.$(OBJEXT): \
   crypto_int.h default_state.c
 decrypt.so decrypt.po $(OUTPRE)decrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -221,9 +176,7 @@ decrypt.so decrypt.po $(OUTPRE)decrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 decrypt_iov.so decrypt_iov.po $(OUTPRE)decrypt_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -233,9 +186,7 @@ decrypt_iov.so decrypt_iov.po $(OUTPRE)decrypt_iov.$(OBJEXT): \
   crypto_int.h decrypt_iov.c
 derive.so derive.po $(OUTPRE)derive.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -245,9 +196,7 @@ derive.so derive.po $(OUTPRE)derive.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/socket-utils.h crypto_int.h derive.c
 encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -258,9 +207,7 @@ encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 encrypt_iov.so encrypt_iov.po $(OUTPRE)encrypt_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -271,9 +218,7 @@ encrypt_iov.so encrypt_iov.po $(OUTPRE)encrypt_iov.$(OBJEXT): \
 encrypt_length.so encrypt_length.po $(OUTPRE)encrypt_length.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -284,9 +229,7 @@ encrypt_length.so encrypt_length.po $(OUTPRE)encrypt_length.$(OBJEXT): \
 enctype_util.so enctype_util.po $(OUTPRE)enctype_util.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -297,9 +240,7 @@ enctype_util.so enctype_util.po $(OUTPRE)enctype_util.$(OBJEXT): \
 enc_dk_cmac.so enc_dk_cmac.po $(OUTPRE)enc_dk_cmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -310,9 +251,7 @@ enc_dk_cmac.so enc_dk_cmac.po $(OUTPRE)enc_dk_cmac.$(OBJEXT): \
 enc_dk_hmac.so enc_dk_hmac.po $(OUTPRE)enc_dk_hmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -322,9 +261,7 @@ enc_dk_hmac.so enc_dk_hmac.po $(OUTPRE)enc_dk_hmac.$(OBJEXT): \
   crypto_int.h enc_dk_hmac.c
 enc_etm.so enc_etm.po $(OUTPRE)enc_etm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -334,9 +271,7 @@ enc_etm.so enc_etm.po $(OUTPRE)enc_etm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/socket-utils.h crypto_int.h enc_etm.c
 enc_raw.so enc_raw.po $(OUTPRE)enc_raw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -346,9 +281,7 @@ enc_raw.so enc_raw.po $(OUTPRE)enc_raw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/socket-utils.h crypto_int.h enc_raw.c
 enc_rc4.so enc_rc4.po $(OUTPRE)enc_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -358,9 +291,7 @@ enc_rc4.so enc_rc4.po $(OUTPRE)enc_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/socket-utils.h crypto_int.h enc_rc4.c
 etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -370,9 +301,7 @@ etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/socket-utils.h crypto_int.h etypes.c
 key.so key.po $(OUTPRE)key.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -383,9 +312,7 @@ key.so key.po $(OUTPRE)key.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 keyblocks.so keyblocks.po $(OUTPRE)keyblocks.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -396,9 +323,7 @@ keyblocks.so keyblocks.po $(OUTPRE)keyblocks.$(OBJEXT): \
 keyed_cksum.so keyed_cksum.po $(OUTPRE)keyed_cksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -409,9 +334,7 @@ keyed_cksum.so keyed_cksum.po $(OUTPRE)keyed_cksum.$(OBJEXT): \
 keyed_checksum_types.so keyed_checksum_types.po $(OUTPRE)keyed_checksum_types.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -422,9 +345,7 @@ keyed_checksum_types.so keyed_checksum_types.po $(OUTPRE)keyed_checksum_types.$(
 keylengths.so keylengths.po $(OUTPRE)keylengths.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -435,9 +356,7 @@ keylengths.so keylengths.po $(OUTPRE)keylengths.$(OBJEXT): \
 make_checksum.so make_checksum.po $(OUTPRE)make_checksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -448,9 +367,7 @@ make_checksum.so make_checksum.po $(OUTPRE)make_checksum.$(OBJEXT): \
 make_checksum_iov.so make_checksum_iov.po $(OUTPRE)make_checksum_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -461,9 +378,7 @@ make_checksum_iov.so make_checksum_iov.po $(OUTPRE)make_checksum_iov.$(OBJEXT): 
 make_random_key.so make_random_key.po $(OUTPRE)make_random_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -474,9 +389,7 @@ make_random_key.so make_random_key.po $(OUTPRE)make_random_key.$(OBJEXT): \
 mandatory_sumtype.so mandatory_sumtype.po $(OUTPRE)mandatory_sumtype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -486,9 +399,7 @@ mandatory_sumtype.so mandatory_sumtype.po $(OUTPRE)mandatory_sumtype.$(OBJEXT): 
   crypto_int.h mandatory_sumtype.c
 nfold.so nfold.po $(OUTPRE)nfold.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -499,9 +410,7 @@ nfold.so nfold.po $(OUTPRE)nfold.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 old_api_glue.so old_api_glue.po $(OUTPRE)old_api_glue.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -511,9 +420,7 @@ old_api_glue.so old_api_glue.po $(OUTPRE)old_api_glue.$(OBJEXT): \
   crypto_int.h old_api_glue.c
 prf.so prf.po $(OUTPRE)prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -524,9 +431,7 @@ prf.so prf.po $(OUTPRE)prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 prf_aes2.so prf_aes2.po $(OUTPRE)prf_aes2.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -537,9 +442,7 @@ prf_aes2.so prf_aes2.po $(OUTPRE)prf_aes2.$(OBJEXT): \
 prf_cmac.so prf_cmac.po $(OUTPRE)prf_cmac.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -549,9 +452,7 @@ prf_cmac.so prf_cmac.po $(OUTPRE)prf_cmac.$(OBJEXT): \
   crypto_int.h prf_cmac.c
 prf_des.so prf_des.po $(OUTPRE)prf_des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -561,9 +462,7 @@ prf_des.so prf_des.po $(OUTPRE)prf_des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/socket-utils.h crypto_int.h prf_des.c
 prf_dk.so prf_dk.po $(OUTPRE)prf_dk.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -573,9 +472,7 @@ prf_dk.so prf_dk.po $(OUTPRE)prf_dk.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/socket-utils.h crypto_int.h prf_dk.c
 prf_rc4.so prf_rc4.po $(OUTPRE)prf_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -585,9 +482,7 @@ prf_rc4.so prf_rc4.po $(OUTPRE)prf_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/socket-utils.h crypto_int.h prf_rc4.c
 prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -595,25 +490,10 @@ prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h crypto_int.h prng.c
-prng_fortuna.so prng_fortuna.po $(OUTPRE)prng_fortuna.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crypto_int.h prng_fortuna.c
 random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -624,9 +504,7 @@ random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
 s2k_pbkdf2.so s2k_pbkdf2.po $(OUTPRE)s2k_pbkdf2.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -636,9 +514,7 @@ s2k_pbkdf2.so s2k_pbkdf2.po $(OUTPRE)s2k_pbkdf2.$(OBJEXT): \
   crypto_int.h s2k_pbkdf2.c
 s2k_rc4.so s2k_rc4.po $(OUTPRE)s2k_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -649,9 +525,7 @@ s2k_rc4.so s2k_rc4.po $(OUTPRE)s2k_rc4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   crypto_int.h s2k_rc4.c
 state.so state.po $(OUTPRE)state.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h \
-  $(srcdir)/../builtin/aes/brg_types.h $(srcdir)/../builtin/crypto_mod.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -662,9 +536,7 @@ state.so state.po $(OUTPRE)state.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 string_to_cksumtype.so string_to_cksumtype.po $(OUTPRE)string_to_cksumtype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -675,9 +547,7 @@ string_to_cksumtype.so string_to_cksumtype.po $(OUTPRE)string_to_cksumtype.$(OBJ
 string_to_key.so string_to_key.po $(OUTPRE)string_to_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -685,25 +555,10 @@ string_to_key.so string_to_key.po $(OUTPRE)string_to_key.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   crypto_int.h string_to_key.c
-t_fortuna.so t_fortuna.po $(OUTPRE)t_fortuna.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  crypto_int.h prng_fortuna.c t_fortuna.c
 valid_cksumtype.so valid_cksumtype.po $(OUTPRE)valid_cksumtype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -714,9 +569,7 @@ valid_cksumtype.so valid_cksumtype.po $(OUTPRE)valid_cksumtype.$(OBJEXT): \
 verify_checksum.so verify_checksum.po $(OUTPRE)verify_checksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -727,9 +580,7 @@ verify_checksum.so verify_checksum.po $(OUTPRE)verify_checksum.$(OBJEXT): \
 verify_checksum_iov.so verify_checksum_iov.po $(OUTPRE)verify_checksum_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/brg_types.h \
-  $(srcdir)/../builtin/crypto_mod.h $(srcdir)/../builtin/sha2/sha2.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \

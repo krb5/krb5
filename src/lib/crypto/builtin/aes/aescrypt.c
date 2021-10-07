@@ -21,6 +21,9 @@ Issue Date: 20/12/2007
 #include "aesopt.h"
 #include "aestab.h"
 
+#include "crypto_int.h"
+#ifdef K5_BUILTIN_AES
+
 #if defined( USE_INTEL_AES_IF_PRESENT )
 #  include "aes_ni.h"
 #else
@@ -299,3 +302,5 @@ AES_RETURN aes_xi(decrypt)(const unsigned char *in, unsigned char *out, const ae
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* K5_BUILTIN_AES */

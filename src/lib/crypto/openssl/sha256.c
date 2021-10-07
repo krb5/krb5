@@ -31,7 +31,17 @@
  */
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_SHA2
+
 #include <openssl/evp.h>
+
+/* 1.1 standardizes constructor and destructor names, renaming
+ * EVP_MD_CTX_create and EVP_MD_CTX_destroy. */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_MD_CTX_new EVP_MD_CTX_create
+#define EVP_MD_CTX_free EVP_MD_CTX_destroy
+#endif
 
 krb5_error_code
 k5_sha256(const krb5_data *in, size_t n, uint8_t out[K5_SHA256_HASHLEN])
@@ -50,3 +60,5 @@ k5_sha256(const krb5_data *in, size_t n, uint8_t out[K5_SHA256_HASHLEN])
     EVP_MD_CTX_free(ctx);
     return ok ? 0 : KRB5_CRYPTO_INTERNAL;
 }
+
+#endif

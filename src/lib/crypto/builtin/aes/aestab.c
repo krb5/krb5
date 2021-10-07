@@ -23,6 +23,9 @@ Issue Date: 20/12/2007
 #include "aes.h"
 #include "aesopt.h"
 
+#include "crypto_int.h"
+#ifdef K5_BUILTIN_AES
+
 #if defined(STATIC_TABLES)
 
 #define sb_data(w) {\
@@ -416,3 +419,11 @@ static void aes_startup(void)
 }
 #endif
 
+#else /* K5_BUILTIN_AES */
+
+/* Include aestab.h for proper dependency generation, but without defining the
+ * table objects. */
+#undef DO_TABLES
+#include "aestab.h"
+
+#endif

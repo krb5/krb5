@@ -33,6 +33,9 @@
 
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_RC4
+
 #include <openssl/evp.h>
 
 /*
@@ -163,3 +166,5 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_init_state,
     k5_arcfour_free_state
 };
+
+#endif /* K5_OPENSSL_RC4 */

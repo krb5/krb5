@@ -403,8 +403,9 @@ RUN_VARS=@KRB5_RUN_VARS@
 RUN_TEST=$(RUN_SETUP) KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf \
     LC_ALL=C $(VALGRIND)
 
-# Crypto and PRNG back-end selections
-CRYPTO_IMPL	= @CRYPTO_IMPL@
+# libk5crypto dependencies
+CRYPTO_IMPL_CFLAGS	= @CRYPTO_IMPL_CFLAGS@
+CRYPTO_IMPL_LIBS	= @CRYPTO_IMPL_LIBS@
 
 # TLS implementation selection
 TLS_IMPL	= @TLS_IMPL@
