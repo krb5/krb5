@@ -112,6 +112,8 @@ keyUsage = nonRepudiation,digitalSignature,keyEncipherment,keyAgreement
 basicConstraints = critical,CA:FALSE
 subjectAltName = otherName:$KRB5_UPN_SAN;UTF8:user@$REALM
 extendedKeyUsage = $CLIENT_EKU_LIST
+
+[exts_none]
 EOF
 
 # Generate a private key.
@@ -122,56 +124,49 @@ openssl rsa -in privkey.pem -out privkey-enc.pem -des3 -passout pass:encrypted
 SUBJECT=ca openssl req -config openssl.cnf -new -x509 -extensions exts_ca \
     -set_serial 1 -days $DAYS -key privkey.pem -out ca.pem
 
+serial=2
+gen_cert() {
+    SUBJECT=$1 openssl req -config openssl.cnf -new -key privkey.pem -out csr
+    SUBJECT=$1 openssl x509 -extfile openssl.cnf -extensions $2 \
+           -set_serial $serial -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
+           -in csr -out $3
+    serial=$((serial + 1))
+    rm -f csr
+}
+
+gen_pkcs12() {
+    # Use -descert to make OpenSSL 1.1 generate files OpenSSL 3.0 can
+    # read (the default uses RC2, which is only available in the
+    # legacy provider in OpenSSL 3).  This option causes an algorithm
+    # downgrade with OpenSSL 3.0 (AES to DES3), but that isn't
+    # important for test certs.
+    openssl pkcs12 -export -descert -in "$1" -inkey privkey.pem -out "$2" \
+            -passout pass:"$3"
+}
+
 # Generate a KDC certificate.
-SUBJECT=kdc openssl req -config openssl.cnf -new -key privkey.pem -out kdc.csr
-SUBJECT=kdc openssl x509 -extfile openssl.cnf -extensions exts_kdc \
-    -set_serial 2 -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
-    -out kdc.pem -in kdc.csr
+gen_cert kdc exts_kdc kdc.pem
 
 # Generate a client certificate and PKCS#12 bundles.
-SUBJECT=user openssl req -config openssl.cnf -new -key privkey.pem \
-    -out user.csr
-SUBJECT=user openssl x509 -extfile openssl.cnf -extensions exts_client \
-    -set_serial 3 -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
-    -out user.pem -in user.csr
-openssl pkcs12 -export -in user.pem -inkey privkey.pem -out user.p12 \
-    -passout pass:
-openssl pkcs12 -export -in user.pem -inkey privkey.pem -out user-enc.p12 \
-    -passout pass:encrypted
+gen_cert user exts_client user.pem
+gen_pkcs12 user.pem user.p12
+gen_pkcs12 user.pem user-enc.p12 encrypted
 
-# Generate a client certificate and PKCS#12 bundles with a UPN SAN.
-SUBJECT=user openssl req -config openssl.cnf -new -key privkey.pem \
-    -out user-upn.csr
-SUBJECT=user openssl x509 -extfile openssl.cnf -extensions exts_upn_client \
-    -set_serial 4 -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
-    -out user-upn.pem -in user-upn.csr
-openssl pkcs12 -export -in user-upn.pem -inkey privkey.pem -out user-upn.p12 \
-    -passout pass:
+# Generate a client certificate and PKCS#12 bundle with a UPN SAN.
+gen_cert user exts_upn_client user-upn.pem
+gen_pkcs12 user-upn.pem user-upn.p12
 
-SUBJECT=user openssl req -config openssl.cnf -new -key privkey.pem \
-    -out user-upn2.csr
-SUBJECT=user openssl x509 -extfile openssl.cnf -extensions exts_upn2_client \
-    -set_serial 5 -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
-    -out user-upn2.pem -in user-upn2.csr
-openssl pkcs12 -export -in user-upn2.pem -inkey privkey.pem \
-     -out user-upn2.p12 -passout pass:
+# Same, but with no realm in the UPN SAN.
+gen_cert user exts_upn2_client user-upn2.pem
+gen_pkcs12 user-upn2.pem user-upn2.p12
 
-SUBJECT=user openssl req -config openssl.cnf -new -key privkey.pem \
-    -out user-upn3.csr
-SUBJECT=user openssl x509 -extfile openssl.cnf -extensions exts_upn3_client \
-    -set_serial 6 -days $DAYS -req -CA ca.pem -CAkey privkey.pem \
-    -out user-upn3.pem -in user-upn3.csr
-openssl pkcs12 -export -in user-upn3.pem -inkey privkey.pem \
-     -out user-upn3.p12 -passout pass:
+# Same, but with an uppercase realm in the UPN SAN.
+gen_cert user exts_upn3_client user-upn3.pem
+gen_pkcs12 user-upn3.pem user-upn3.p12
 
 # Generate a client certificate and PKCS#12 bundle with no PKINIT extensions.
-SUBJECT=user openssl req -config openssl.cnf -new -key privkey.pem \
-    -out generic.csr
-SUBJECT=user openssl x509 -set_serial 7 -days $DAYS -req -CA ca.pem \
-    -CAkey privkey.pem -out generic.pem -in generic.csr
-openssl pkcs12 -export -in generic.pem -inkey privkey.pem -out generic.p12 \
-    -passout pass:
+gen_cert user exts_none generic.pem
+gen_pkcs12 generic.pem generic.p12
 
 # Clean up.
-rm -f openssl.cnf kdc.csr user.csr user-upn.csr user-upn2.csr user-upn3.csr
-rm -f generic.csr
+rm -f openssl.cnf
