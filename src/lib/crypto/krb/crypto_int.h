@@ -34,15 +34,30 @@
 
 #if defined(CRYPTO_OPENSSL)
 
+#include <openssl/opensslv.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+/*
+ * OpenSSL 3.0 relegates MD4 and RC4 to the legacy provider, which must be
+ * explicitly loaded into a library context.  Performing this loading within a
+ * library carries complications, so use the built-in implementations of these
+ * primitives instead.  OpenSSL 3.0 also deprecates DES_set_odd_parity() with
+ * no replacement.
+ */
+#define K5_BUILTIN_DES_KEY_PARITY
+#define K5_BUILTIN_MD4
+#define K5_BUILTIN_RC4
+#else
+#define K5_OPENSSL_DES_KEY_PARITY
+#define K5_OPENSSL_MD4
+#define K5_OPENSSL_RC4
+#endif
+
 #define K5_OPENSSL_AES
 #define K5_OPENSSL_CAMELLIA
 #define K5_OPENSSL_DES
-#define K5_OPENSSL_DES_KEY_PARITY
 #define K5_OPENSSL_HMAC
-#define K5_OPENSSL_MD4
 #define K5_OPENSSL_MD5
 #define K5_OPENSSL_PBKDF2
-#define K5_OPENSSL_RC4
 #define K5_OPENSSL_SHA1
 #define K5_OPENSSL_SHA2
 
