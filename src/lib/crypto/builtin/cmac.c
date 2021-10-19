@@ -26,6 +26,8 @@
 
 #include "crypto_int.h"
 
+#ifdef K5_BUILTIN_CMAC
+
 #define BLOCK_SIZE 16
 
 static unsigned char const_Rb[BLOCK_SIZE] = {
@@ -198,3 +200,5 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
 
     return 0;
 }
+
+#endif /* K5_BUILTIN_CMAC */

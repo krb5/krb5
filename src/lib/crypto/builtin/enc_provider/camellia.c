@@ -113,7 +113,7 @@ cbc_dec(krb5_key key, unsigned char *data, size_t nblocks, unsigned char *iv)
     memcpy(iv, last_cipherblock, BLOCK_SIZE);
 }
 
-static krb5_error_code
+krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
                          krb5_crypto_iov *data, size_t num_data)
 {
@@ -246,7 +246,7 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
     return 0;
 }
 
-krb5_error_code
+static krb5_error_code
 krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          size_t num_data, const krb5_data *ivec,
                          krb5_data *output)

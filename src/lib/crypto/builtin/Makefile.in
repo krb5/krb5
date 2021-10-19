@@ -8,16 +8,19 @@ LOCALINCLUDES=-I$(srcdir)/../krb $(CRYPTO_IMPL_CFLAGS)
 ##DOS##OBJFILE = ..\$(OUTPRE)builtin.lst
 
 STLIBOBJS=\
+	cmac.o	\
 	hmac.o	\
 	kdf.o \
 	pbkdf2.o
 
 OBJS=\
+	$(OUTPRE)cmac.$(OBJEXT)	\
 	$(OUTPRE)hmac.$(OBJEXT)	\
 	$(OUTPRE)kdf.$(OBJEXT) \
 	$(OUTPRE)pbkdf2.$(OBJEXT)
 
 SRCS=\
+	$(srcdir)/cmac.c	\
 	$(srcdir)/hmac.c	\
 	$(srcdir)/kdf.c		\
 	$(srcdir)/pbkdf2.c	

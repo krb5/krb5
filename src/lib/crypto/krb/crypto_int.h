@@ -44,17 +44,21 @@
  * no replacement.
  *
  * OpenSSL 3.0 adds KDF implementations matching the ones we use to derive
- * encryption and authentication keys from protocol keys.
+ * encryption and authentication keys from protocol keys.  It also adds
+ * the EVP_MAC interface which can be used for CMAC.  (We could use the CMAC
+ * interface with OpenSSL 1.1 but currently do not.)
  */
 #define K5_BUILTIN_DES_KEY_PARITY
 #define K5_BUILTIN_MD4
 #define K5_BUILTIN_RC4
 #define K5_OPENSSL_KDF
+#define K5_OPENSSL_CMAC
 #else
 #define K5_OPENSSL_DES_KEY_PARITY
 #define K5_OPENSSL_MD4
 #define K5_OPENSSL_RC4
 #define K5_BUILTIN_KDF
+#define K5_BUILTIN_CMAC
 #endif
 
 #define K5_OPENSSL_AES
@@ -70,6 +74,7 @@
 
 #define K5_BUILTIN_AES
 #define K5_BUILTIN_CAMELLIA
+#define K5_BUILTIN_CMAC
 #define K5_BUILTIN_DES
 #define K5_BUILTIN_DES_KEY_PARITY
 #define K5_BUILTIN_HMAC
@@ -400,13 +405,6 @@ krb5_error_code krb5int_derive_random(const struct krb5_enc_provider *enc,
 void krb5int_nfold(unsigned int inbits, const unsigned char *in,
                    unsigned int outbits, unsigned char *out);
 
-/* Compute a CMAC checksum over data. */
-krb5_error_code krb5int_cmac_checksum(const struct krb5_enc_provider *enc,
-                                      krb5_key key,
-                                      const krb5_crypto_iov *data,
-                                      size_t num_data,
-                                      krb5_data *output);
-
 /* Translate an RFC 3961 key usage to a Microsoft RC4 usage. */
 krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
@@ -496,6 +494,12 @@ krb5_error_code krb5int_hmac(const struct krb5_hash_provider *hash,
                              krb5_key key, const krb5_crypto_iov *data,
                              size_t num_data, krb5_data *output);
 
+/* Compute a CMAC checksum over data. */
+krb5_error_code krb5int_cmac_checksum(const struct krb5_enc_provider *enc,
+                                      krb5_key key,
+                                      const krb5_crypto_iov *data,
+                                      size_t num_data, krb5_data *output);
+
 /* As above, using a keyblock as the key input. */
 krb5_error_code krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
                                       const krb5_keyblock *keyblock,
@@ -551,10 +555,9 @@ krb5_error_code krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
                                     krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
                                     krb5_crypto_iov *data, size_t num_data);
-krb5_error_code krb5int_camellia_cbc_mac(krb5_key key,
-                                         const krb5_crypto_iov *data,
-                                         size_t num_data, const krb5_data *iv,
-                                         krb5_data *output);
+krb5_error_code krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
+                                         krb5_crypto_iov *data,
+                                         size_t num_data);
 
 /*** Inline helper functions ***/
 

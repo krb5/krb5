@@ -4,18 +4,21 @@ SUBDIRS=des enc_provider hash_provider
 LOCALINCLUDES=-I$(srcdir)/../krb $(CRYPTO_IMPL_CFLAGS)
 
 STLIBOBJS=\
+	cmac.o	\
 	hmac.o	\
 	kdf.o	\
 	pbkdf2.o \
 	sha256.o
 
 OBJS=\
+	$(OUTPRE)cmac.$(OBJEXT)	\
 	$(OUTPRE)hmac.$(OBJEXT)	\
 	$(OUTPRE)kdf.$(OBJEXT)	\
 	$(OUTPRE)pbkdf2.$(OBJEXT) \
 	$(OUTPRE)sha256.$(OBJEXT)
 
 SRCS=\
+	$(srcdir)/cmac.c	\
 	$(srcdir)/hmac.c	\
 	$(srcdir)/kdf.c		\
 	$(srcdir)/pbkdf2.c	\

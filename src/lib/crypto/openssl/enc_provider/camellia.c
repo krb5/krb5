@@ -52,31 +52,6 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 #define NUM_BITS 8
 #define IV_CTS_BUF_SIZE 16 /* 16 - hardcoded in CRYPTO_cts128_en/decrypt */
 
-static void
-xorblock(unsigned char *out, const unsigned char *in)
-{
-    int z;
-    for (z = 0; z < CAMELLIA_BLOCK_SIZE / 4; z++) {
-        unsigned char *outptr = &out[z * 4];
-        unsigned char *inptr = (unsigned char *)&in[z * 4];
-        /*
-         * Use unaligned accesses.  On x86, this will probably still be faster
-         * than multiple byte accesses for unaligned data, and for aligned data
-         * should be far better.  (One test indicated about 2.4% faster
-         * encryption for 1024-byte messages.)
-         *
-         * If some other CPU has really slow unaligned-word or byte accesses,
-         * perhaps this function (or the load/store helpers?) should test for
-         * alignment first.
-         *
-         * If byte accesses are faster than unaligned words, we may need to
-         * conditionalize on CPU type, as that may be hard to determine
-         * automatically.
-         */
-        store_32_n(load_32_n(outptr) ^ load_32_n(inptr), outptr);
-    }
-}
-
 static const EVP_CIPHER *
 map_mode(unsigned int len)
 {
@@ -347,7 +322,7 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
 
-static krb5_error_code
+krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
                          krb5_crypto_iov *data, size_t num_data)
 {
@@ -387,7 +362,22 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
     return ret;
 }
 
-krb5_error_code
+#ifdef K5_BUILTIN_CMAC
+
+static void
+xorblock(uint8_t *out, const uint8_t *in)
+{
+    int z;
+
+    for (z = 0; z < CAMELLIA_BLOCK_SIZE / 4; z++) {
+        uint8_t *outptr = &out[z * 4];
+        const uint8_t *inptr = &in[z * 4];
+
+        store_32_n(load_32_n(outptr) ^ load_32_n(inptr), outptr);
+    }
+}
+
+static krb5_error_code
 krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          size_t num_data, const krb5_data *iv,
                          krb5_data *output)
@@ -419,6 +409,10 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
     return 0;
 }
 
+#else
+#define krb5int_camellia_cbc_mac NULL
+#endif
+
 static krb5_error_code
 krb5int_camellia_init_state (const krb5_keyblock *key, krb5_keyusage usage,
                              krb5_data *state)
@@ -435,7 +429,7 @@ const struct krb5_enc_provider krb5int_enc_camellia128 = {
     16, 16,
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
-    krb5int_camellia_cbc_mac,
+    krb5int_camellia_cbc_mac,   /* NULL if K5_BUILTIN_CMAC not defined */
     krb5int_camellia_init_state,
     krb5int_default_free_state
 };
@@ -445,7 +439,7 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     32, 32,
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
-    krb5int_camellia_cbc_mac,
+    krb5int_camellia_cbc_mac,   /* NULL if K5_BUILTIN_CMAC not defined */
     krb5int_camellia_init_state,
     krb5int_default_free_state
 };

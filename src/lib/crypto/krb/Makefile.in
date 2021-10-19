@@ -17,7 +17,6 @@ STLIBOBJS=\
 	checksum_length.o	\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
-	cmac.o			\
 	coll_proof_cksum.o	\
 	crypto_length.o		\
 	default_state.o 	\
@@ -74,7 +73,6 @@ OBJS=\
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
-	$(OUTPRE)cmac.$(OBJEXT)			\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
@@ -131,7 +129,6 @@ SRCS=\
 	$(srcdir)/checksum_length.c	\
 	$(srcdir)/cksumtype_to_string.c	\
 	$(srcdir)/cksumtypes.c		\
-	$(srcdir)/cmac.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/crypto_length.c	\
 	$(srcdir)/default_state.c 	\
