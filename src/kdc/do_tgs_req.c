@@ -276,6 +276,8 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         au_state->status = status;
         kau_s4u2self(kdc_context, errcode ? FALSE : TRUE, au_state);
         au_state->s4u2self_user = NULL;
+        if (errcode)
+            goto cleanup;
     }
 
     /* For user-to-user and S4U2Proxy requests, decrypt the second ticket. */
@@ -294,9 +296,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         errcode = retval + ERROR_TABLE_BASE_krb5;
         goto cleanup;
     }
-
-    if (errcode)
-        goto cleanup;
 
     if (s4u_x509_user != NULL && client == NULL) {
         /*
