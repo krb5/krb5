@@ -622,6 +622,10 @@ extern const krb5_octet krb5_pkinit_sha256_oid[];
 extern const size_t krb5_pkinit_sha256_oid_len;
 extern const krb5_octet krb5_pkinit_sha512_oid[];
 extern const size_t  krb5_pkinit_sha512_oid_len;
+extern const krb5_data oakley_1024;
+extern const krb5_data oakley_2048;
+extern const krb5_data oakley_4096;
+
 /**
  * An ordered set of OIDs, stored as krb5_data, of KDF algorithms
  * supported by this implementation. The order of this array controls
