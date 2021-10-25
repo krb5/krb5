@@ -51,16 +51,10 @@ typedef struct _krb5_algorithm_identifier {
     krb5_data parameters; /* Optional */
 } krb5_algorithm_identifier;
 
-/* SubjectPublicKeyInfo */
-typedef struct _krb5_subject_pk_info {
-    krb5_algorithm_identifier   algorithm;
-    krb5_data                   subjectPublicKey; /* BIT STRING */
-} krb5_subject_pk_info;
-
 /** AuthPack from RFC 4556*/
 typedef struct _krb5_auth_pack {
     krb5_pk_authenticator       pkAuthenticator;
-    krb5_subject_pk_info        *clientPublicValue; /* Optional */
+    krb5_data                   clientPublicValue; /* Optional */
     krb5_algorithm_identifier   **supportedCMSTypes; /* Optional */
     krb5_data                   clientDHNonce; /* Optional */
     krb5_data                   **supportedKDFs; /* OIDs of KDFs; OPTIONAL */

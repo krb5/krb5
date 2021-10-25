@@ -530,10 +530,10 @@ pkinit_server_verify_padata(krb5_context context,
         goto cleanup;
 
     /* check dh parameters */
-    if (auth_pack->clientPublicValue != NULL) {
+    if (auth_pack->clientPublicValue.length > 0) {
         retval = server_check_dh(context, plgctx->cryptoctx,
                                  reqctx->cryptoctx, plgctx->idctx,
-                                 &auth_pack->clientPublicValue->algorithm.parameters,
+                                 &auth_pack->clientPublicValue,
                                  plgctx->opts->dh_min_bits);
         if (retval) {
             pkiDebug("bad dh parameters\n");
@@ -761,9 +761,7 @@ pkinit_server_return_padata(krb5_context context,
     krb5_pa_pk_as_req *reqp = NULL;
     int i = 0;
 
-    unsigned char *subjectPublicKey = NULL;
     unsigned char *dh_pubkey = NULL, *server_key = NULL;
-    unsigned int subjectPublicKey_len = 0;
     unsigned int server_key_len = 0, dh_pubkey_len = 0;
 
     krb5_kdc_dh_key_info dhkey_info;
@@ -832,17 +830,13 @@ pkinit_server_return_padata(krb5_context context,
     rep->choice = choice_pa_pk_as_rep_encKeyPack;
 
     if (reqctx->rcv_auth_pack != NULL &&
-        reqctx->rcv_auth_pack->clientPublicValue != NULL) {
-        subjectPublicKey = (unsigned char *)
-            reqctx->rcv_auth_pack->clientPublicValue->subjectPublicKey.data;
-        subjectPublicKey_len =
-            reqctx->rcv_auth_pack->clientPublicValue->subjectPublicKey.length;
+        reqctx->rcv_auth_pack->clientPublicValue.length > 0) {
         rep->choice = choice_pa_pk_as_rep_dhInfo;
 
         pkiDebug("received DH key delivery AS REQ\n");
         retval = server_process_dh(context, plgctx->cryptoctx,
-                                   reqctx->cryptoctx, plgctx->idctx, subjectPublicKey,
-                                   subjectPublicKey_len, &dh_pubkey, &dh_pubkey_len,
+                                   reqctx->cryptoctx, plgctx->idctx,
+                                   &dh_pubkey, &dh_pubkey_len,
                                    &server_key, &server_key_len);
         if (retval) {
             pkiDebug("failed to process/create dh parameters\n");

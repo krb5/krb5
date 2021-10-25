@@ -187,19 +187,15 @@ pkinit_as_req_create(krb5_context context,
                      krb5_data ** as_req)
 {
     krb5_error_code retval = ENOMEM;
-    krb5_subject_pk_info info;
-    krb5_data *coded_auth_pack = NULL;
+    krb5_data spki = empty_data(), *coded_auth_pack = NULL;
     krb5_auth_pack auth_pack;
     krb5_pa_pk_as_req *req = NULL;
     krb5_algorithm_identifier **cmstypes = NULL;
     int protocol = reqctx->opts->dh_or_rsa;
-    unsigned char *dh_params = NULL, *dh_pubkey = NULL;
-    unsigned int dh_params_len, dh_pubkey_len;
 
     pkiDebug("pkinit_as_req_create pa_type = %d\n", reqctx->pa_type);
 
     /* Create the authpack */
-    memset(&info, 0, sizeof(info));
     memset(&auth_pack, 0, sizeof(auth_pack));
     auth_pack.pkAuthenticator.ctime = ctsec;
     auth_pack.pkAuthenticator.cusec = cusec;
@@ -208,7 +204,6 @@ pkinit_as_req_create(krb5_context context,
     if (!reqctx->opts->disable_freshness)
         auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
     auth_pack.clientDHNonce.length = 0;
-    auth_pack.clientPublicValue = &info;
     auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
 
     /* add List of CMS algorithms */
@@ -223,24 +218,20 @@ pkinit_as_req_create(krb5_context context,
     case DH_PROTOCOL:
         TRACE_PKINIT_CLIENT_REQ_DH(context);
         pkiDebug("as_req: DH key transport algorithm\n");
-        info.algorithm.algorithm = dh_oid;
 
         /* create client-side DH keys */
         retval = client_create_dh(context, plgctx->cryptoctx,
                                   reqctx->cryptoctx, reqctx->idctx,
-                                  reqctx->opts->dh_size, &dh_params,
-                                  &dh_params_len, &dh_pubkey, &dh_pubkey_len);
+                                  reqctx->opts->dh_size, &spki);
+        auth_pack.clientPublicValue = spki;
         if (retval != 0) {
             pkiDebug("failed to create dh parameters\n");
             goto cleanup;
         }
-        info.algorithm.parameters = make_data(dh_params, dh_params_len);
-        info.subjectPublicKey = make_data(dh_pubkey, dh_pubkey_len);
         break;
     case RSA_PROTOCOL:
         TRACE_PKINIT_CLIENT_REQ_RSA(context);
         pkiDebug("as_req: RSA key transport algorithm\n");
-        auth_pack.clientPublicValue = NULL;
         break;
     default:
         pkiDebug("as_req: unknown key transport protocol %d\n",
@@ -324,9 +315,8 @@ pkinit_as_req_create(krb5_context context,
 
 cleanup:
     free_krb5_algorithm_identifiers(&cmstypes);
-    free(dh_params);
-    free(dh_pubkey);
     free_krb5_pa_pk_as_req(&req);
+    krb5_free_data_contents(context, &spki);
 
     pkiDebug("pkinit_as_req_create retval=%d\n", (int) retval);
 

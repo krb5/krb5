@@ -751,13 +751,6 @@ ktest_make_sample_algorithm_identifier_no_params(krb5_algorithm_identifier *p)
 }
 
 static void
-ktest_make_sample_subject_pk_info(krb5_subject_pk_info *p)
-{
-    ktest_make_sample_algorithm_identifier(&p->algorithm);
-    ktest_make_sample_data(&p->subjectPublicKey);
-}
-
-static void
 ktest_make_sample_external_principal_identifier(
     krb5_external_principal_identifier *p)
 {
@@ -806,8 +799,8 @@ void
 ktest_make_sample_auth_pack(krb5_auth_pack *p)
 {
     ktest_make_sample_pk_authenticator(&p->pkAuthenticator);
-    p->clientPublicValue = ealloc(sizeof(krb5_subject_pk_info));
-    ktest_make_sample_subject_pk_info(p->clientPublicValue);
+    /* Need a valid DER encoding here; this is the OCTET STRING "pvalue". */
+    krb5_data_parse(&p->clientPublicValue, "\x04\x06" "pvalue");
     p->supportedCMSTypes = ealloc(3 * sizeof(krb5_algorithm_identifier *));
     p->supportedCMSTypes[0] = ealloc(sizeof(krb5_algorithm_identifier));
     ktest_make_sample_algorithm_identifier(p->supportedCMSTypes[0]);
@@ -1673,13 +1666,6 @@ ktest_empty_pk_authenticator(krb5_pk_authenticator *p)
 }
 
 static void
-ktest_empty_subject_pk_info(krb5_subject_pk_info *p)
-{
-    ktest_empty_algorithm_identifier(&p->algorithm);
-    ktest_empty_data(&p->subjectPublicKey);
-}
-
-static void
 ktest_empty_external_principal_identifier(
     krb5_external_principal_identifier *p)
 {
@@ -1728,11 +1714,7 @@ ktest_empty_auth_pack(krb5_auth_pack *p)
     krb5_data **d;
 
     ktest_empty_pk_authenticator(&p->pkAuthenticator);
-    if (p->clientPublicValue != NULL) {
-        ktest_empty_subject_pk_info(p->clientPublicValue);
-        free(p->clientPublicValue);
-        p->clientPublicValue = NULL;
-    }
+    ktest_empty_data(&p->clientPublicValue);
     if (p->supportedCMSTypes != NULL) {
         for (ai = p->supportedCMSTypes; *ai != NULL; ai++) {
             ktest_empty_algorithm_identifier(*ai);

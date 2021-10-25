@@ -1446,19 +1446,8 @@ DEFCOUNTEDSTRINGTYPE(s_bitstring, char *, unsigned int,
                      ASN1_BITSTRING);
 DEFCOUNTEDTYPE(bitstring_data, krb5_data, data, length, s_bitstring);
 
-/* RFC 3280.  No context tags. */
-DEFOFFSETTYPE(spki_0, krb5_subject_pk_info, algorithm, algorithm_identifier);
-DEFOFFSETTYPE(spki_1, krb5_subject_pk_info, subjectPublicKey, bitstring_data);
-static const struct atype_info *subject_pk_info_fields[] = {
-    &k5_atype_spki_0, &k5_atype_spki_1
-};
-DEFSEQTYPE(subject_pk_info, krb5_subject_pk_info, subject_pk_info_fields);
-DEFPTRTYPE(subject_pk_info_ptr, subject_pk_info);
-DEFOPTIONALZEROTYPE(opt_subject_pk_info_ptr, subject_pk_info_ptr);
-
 DEFFIELD(auth_pack_0, krb5_auth_pack, pkAuthenticator, 0, pk_authenticator);
-DEFFIELD(auth_pack_1, krb5_auth_pack, clientPublicValue, 1,
-         opt_subject_pk_info_ptr);
+DEFFIELD(auth_pack_1, krb5_auth_pack, clientPublicValue, 1, opt_der_data);
 DEFFIELD(auth_pack_2, krb5_auth_pack, supportedCMSTypes, 2,
          opt_ptr_seqof_algorithm_identifier);
 DEFFIELD(auth_pack_3, krb5_auth_pack, clientDHNonce, 3, opt_ostring_data);

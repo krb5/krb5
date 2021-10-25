@@ -50,9 +50,6 @@ static void pkinit_fini_certs(pkinit_identity_crypto_context ctx);
 static krb5_error_code pkinit_init_pkcs11(pkinit_identity_crypto_context ctx);
 static void pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx);
 
-static krb5_error_code pkinit_encode_dh_params
-(const BIGNUM *, const BIGNUM *, const BIGNUM *, uint8_t **, unsigned int *);
-static DH *decode_dh_params(const krb5_data *);
 static int pkinit_check_dh_params(DH *dh1, DH *dh2);
 
 static krb5_error_code pkinit_sign_data
@@ -242,6 +239,258 @@ static void compat_dh_get0_key(const DH *dh, const BIGNUM **pub,
 #define ku_reject(c, u) (!(X509_get_key_usage(c) & (u)))
 
 #endif
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+/* Encode a bignum as an ASN.1 integer in DER. */
+static int
+encode_bn_der(const BIGNUM *bn, uint8_t **der_out, int *len_out)
+{
+    ASN1_INTEGER *intval;
+    int len;
+    uint8_t *der, *outptr;
+
+    intval = BN_to_ASN1_INTEGER(bn, NULL);
+    if (intval == NULL)
+        return 0;
+    len = i2d_ASN1_INTEGER(intval, NULL);
+    if (len > 0 && (outptr = der = malloc(len)) != NULL)
+        (void)i2d_ASN1_INTEGER(intval, &outptr);
+    ASN1_INTEGER_free(intval);
+    if (der == NULL)
+        return 0;
+    *der_out = der;
+    *len_out = len;
+    return 1;
+}
+
+/* Decode an ASN.1 integer, returning a bignum. */
+static BIGNUM *
+decode_bn_der(const uint8_t *der, size_t len)
+{
+    ASN1_INTEGER *intval;
+    BIGNUM *bn;
+
+    intval = d2i_ASN1_INTEGER(NULL, &der, len);
+    if (intval == NULL)
+        return NULL;
+    bn = ASN1_INTEGER_to_BN(intval, NULL);
+    ASN1_INTEGER_free(intval);
+    return bn;
+}
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+
+static DH *
+decode_dh_params(const krb5_data *params_der)
+{
+    const uint8_t *p = (uint8_t *)params_der->data;
+
+    return d2i_DHxparams(NULL, &p, params_der->length);
+}
+
+static krb5_error_code
+encode_spki(DH *dh, krb5_data *spki_out)
+{
+    krb5_error_code ret = ENOMEM;
+    EVP_PKEY *pkey = NULL;
+    int len;
+    uint8_t *outptr;
+
+    pkey = EVP_PKEY_new();
+    if (pkey == NULL)
+        goto cleanup;
+    if (!DH_up_ref(dh))
+        goto cleanup;
+    if (!EVP_PKEY_assign(pkey, EVP_PKEY_DHX, dh)) {
+        DH_free(dh);
+        goto cleanup;
+    }
+    len = i2d_PUBKEY(pkey, NULL);
+    ret = alloc_data(spki_out, len);
+    if (ret)
+        goto cleanup;
+    outptr = (uint8_t *)spki_out->data;
+    (void)i2d_PUBKEY(pkey, &outptr);
+
+cleanup:
+    EVP_PKEY_free(pkey);
+    return ret;
+}
+
+static DH *
+decode_spki(const krb5_data *spki)
+{
+    EVP_PKEY *pkey = NULL;
+    const uint8_t *inptr = (uint8_t *)spki->data;
+    DH *dh;
+
+    pkey = d2i_PUBKEY(NULL, &inptr, spki->length);
+    if (pkey == NULL)
+        return NULL;
+    dh = EVP_PKEY_get1_DH(pkey);
+    EVP_PKEY_free(pkey);
+    return dh;
+}
+
+#else /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+
+/*
+ * OpenSSL 1.0 has no DHX support, so we need a custom decoder for RFC 3279
+ * DomainParameters, and we need to use X509_PUBKEY values to marshal
+ * SubjectPublicKeyInfo.
+ */
+
+typedef struct {
+    ASN1_BIT_STRING *seed;
+    BIGNUM *counter;
+} int_dhvparams;
+
+typedef struct {
+    BIGNUM *p;
+    BIGNUM *q;
+    BIGNUM *g;
+    BIGNUM *j;
+    int_dhvparams *vparams;
+} int_dhxparams;
+
+ASN1_SEQUENCE(int_dhvparams) = {
+    ASN1_SIMPLE(int_dhvparams, seed, ASN1_BIT_STRING),
+    ASN1_SIMPLE(int_dhvparams, counter, BIGNUM)
+} ASN1_SEQUENCE_END(int_dhvparams);
+
+ASN1_SEQUENCE(int_dhxparams) = {
+    ASN1_SIMPLE(int_dhxparams, p, BIGNUM),
+    ASN1_SIMPLE(int_dhxparams, g, BIGNUM),
+    ASN1_SIMPLE(int_dhxparams, q, BIGNUM),
+    ASN1_OPT(int_dhxparams, j, BIGNUM),
+    ASN1_OPT(int_dhxparams, vparams, int_dhvparams)
+} ASN1_SEQUENCE_END(int_dhxparams);
+
+static DH *
+decode_dh_params(const krb5_data *params_der)
+{
+    int_dhxparams *params;
+    DH *dh;
+    const uint8_t *p;
+
+    dh = DH_new();
+    if (dh == NULL)
+        return NULL;
+
+    p = (uint8_t *)params_der->data;
+    params = (int_dhxparams *)ASN1_item_d2i(NULL, &p, params_der->length,
+                                            ASN1_ITEM_rptr(int_dhxparams));
+    if (params == NULL) {
+        DH_free(dh);
+        return NULL;
+    }
+
+    /* Steal p, q, and g from dhparams for dh.  Ignore j and vparams. */
+    dh->p = params->p;
+    dh->q = params->q;
+    dh->g = params->g;
+    params->p = params->q = params->g = NULL;
+    ASN1_item_free((ASN1_VALUE *)params, ASN1_ITEM_rptr(int_dhxparams));
+    return dh;
+}
+
+static krb5_error_code
+encode_spki(DH *dh, krb5_data *spki_out)
+{
+    krb5_error_code ret = ENOMEM;
+    uint8_t *param_der = NULL, *pubkey_der = NULL, *outptr;
+    int param_der_len, pubkey_der_len, len;
+    X509_PUBKEY pubkey;
+    int_dhxparams dhxparams;
+    X509_ALGOR algor;
+    ASN1_OBJECT algorithm;
+    ASN1_TYPE parameter;
+    ASN1_STRING param_str, pubkey_str;
+
+    dhxparams.p = dh->p;
+    dhxparams.q = dh->q;
+    dhxparams.g = dh->g;
+    dhxparams.j = NULL;
+    dhxparams.vparams = NULL;
+    param_der_len = ASN1_item_i2d((ASN1_VALUE *)&dhxparams, &param_der,
+                                  ASN1_ITEM_rptr(int_dhxparams));
+    if (param_der_len < 0)
+        goto cleanup;
+    param_str.length = param_der_len;
+    param_str.type = V_ASN1_SEQUENCE;
+    param_str.data = param_der;
+    param_str.flags = 0;
+    parameter.type = V_ASN1_SEQUENCE;
+    parameter.value.sequence = &param_str;
+
+    memset(&algorithm, 0, sizeof(algorithm));
+    algorithm.data = (uint8_t *)dh_oid.data;
+    algorithm.length = dh_oid.length;
+
+    algor.algorithm = &algorithm;
+    algor.parameter = &parameter;
+
+    if (!encode_bn_der(dh->pub_key, &pubkey_der, &pubkey_der_len))
+        goto cleanup;
+    pubkey_str.length = pubkey_der_len;
+    pubkey_str.type = V_ASN1_BIT_STRING;
+    pubkey_str.data = pubkey_der;
+    pubkey_str.flags = ASN1_STRING_FLAG_BITS_LEFT;
+
+    pubkey.algor = &algor;
+    pubkey.public_key = &pubkey_str;
+    len = i2d_X509_PUBKEY(&pubkey, NULL);
+    if (len < 0)
+        goto cleanup;
+    ret = alloc_data(spki_out, len);
+    if (ret)
+        goto cleanup;
+    outptr = (uint8_t *)spki_out->data;
+    i2d_X509_PUBKEY(&pubkey, &outptr);
+
+cleanup:
+    OPENSSL_free(param_der);
+    free(pubkey_der);
+    return ret;
+}
+
+static DH *
+decode_spki(const krb5_data *spki)
+{
+    X509_PUBKEY *pubkey = NULL;
+    const uint8_t *inptr;
+    DH *dh = NULL;
+    const ASN1_STRING *params;
+    const ASN1_BIT_STRING *public_key;
+    krb5_data d;
+
+    inptr = (uint8_t *)spki->data;
+    pubkey = d2i_X509_PUBKEY(NULL, &inptr, spki->length);
+    if (pubkey == NULL)
+        goto cleanup;
+
+    if (pubkey->algor->parameter->type != V_ASN1_SEQUENCE)
+        goto cleanup;
+    params = pubkey->algor->parameter->value.sequence;
+    d = make_data(params->data, params->length);
+    dh = decode_dh_params(&d);
+    if (dh == NULL)
+        goto cleanup;
+
+    public_key = pubkey->public_key;
+    dh->pub_key = decode_bn_der(public_key->data, public_key->length);
+    if (dh->pub_key == NULL) {
+        DH_free(dh);
+        dh = NULL;
+    }
+
+cleanup:
+    X509_PUBKEY_free(pubkey);
+    return dh;
+}
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
 static struct pkcs11_errstrings {
     short code;
@@ -2346,7 +2595,7 @@ cleanup:
 /* Call DH_compute_key() and ensure that we left-pad short results instead of
  * leaving junk bytes at the end of the buffer. */
 static void
-compute_dh(unsigned char *buf, int size, BIGNUM *server_pub_key, DH *dh)
+compute_dh(unsigned char *buf, int size, const BIGNUM *server_pub_key, DH *dh)
 {
     int len, pad;
 
@@ -2364,22 +2613,13 @@ client_create_dh(krb5_context context,
                  pkinit_plg_crypto_context plg_cryptoctx,
                  pkinit_req_crypto_context cryptoctx,
                  pkinit_identity_crypto_context id_cryptoctx,
-                 int dh_size,
-                 unsigned char **dh_params_out,
-                 unsigned int *dh_params_len_out,
-                 unsigned char **dh_pubkey_out,
-                 unsigned int *dh_pubkey_len_out)
+                 int dh_size, krb5_data *spki_out)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    unsigned char *buf = NULL;
     int dh_err = 0;
-    ASN1_INTEGER *pub_key = NULL;
-    const BIGNUM *pubkey_bn, *p, *q, *g;
-    unsigned char *dh_params = NULL, *dh_pubkey = NULL;
-    unsigned int dh_params_len, dh_pubkey_len;
+    const BIGNUM *pubkey_bn;
 
-    *dh_params_out = *dh_pubkey_out = NULL;
-    *dh_params_len_out = *dh_pubkey_len_out = 0;
+    *spki_out = empty_data();
 
     if (cryptoctx->dh == NULL) {
         if (dh_size == 1024)
@@ -2418,50 +2658,13 @@ client_create_dh(krb5_context context,
         goto cleanup;
     }
 
-    /* pack DHparams */
-    /* aglo: usually we could just call i2d_DHparams to encode DH params
-     * however, PKINIT requires RFC3279 encoding and openssl does pkcs#3.
-     */
-    DH_get0_pqg(cryptoctx->dh, &p, &q, &g);
-    retval = pkinit_encode_dh_params(p, g, q, &dh_params, &dh_params_len);
-    if (retval)
-        goto cleanup;
-
-    /* pack DH public key */
-    /* Diffie-Hellman public key must be ASN1 encoded as an INTEGER; this
-     * encoding shall be used as the contents (the value) of the
-     * subjectPublicKey component (a BIT STRING) of the SubjectPublicKeyInfo
-     * data element
-     */
-    pub_key = BN_to_ASN1_INTEGER(pubkey_bn, NULL);
-    if (pub_key == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
-    buf = dh_pubkey = malloc(dh_pubkey_len);
-    if (dh_pubkey == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    i2d_ASN1_INTEGER(pub_key, &buf);
-
-    *dh_params_out = dh_params;
-    *dh_params_len_out = dh_params_len;
-    *dh_pubkey_out = dh_pubkey;
-    *dh_pubkey_len_out = dh_pubkey_len;
-    dh_params = dh_pubkey = NULL;
-
-    retval = 0;
+    retval = encode_spki(cryptoctx->dh, spki_out);
 
 cleanup:
     if (retval) {
         DH_free(cryptoctx->dh);
         cryptoctx->dh = NULL;
     }
-    free(dh_params);
-    free(dh_pubkey);
-    ASN1_INTEGER_free(pub_key);
     return retval;
 }
 
@@ -2553,7 +2756,7 @@ server_check_dh(krb5_context context,
                 pkinit_plg_crypto_context cryptoctx,
                 pkinit_req_crypto_context req_cryptoctx,
                 pkinit_identity_crypto_context id_cryptoctx,
-                krb5_data *dh_params,
+                const krb5_data *client_spki,
                 int minbits)
 {
     DH *dh = NULL;
@@ -2561,7 +2764,7 @@ server_check_dh(krb5_context context,
     int dh_prime_bits;
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
 
-    dh = decode_dh_params(dh_params);
+    dh = decode_spki(client_spki);
     if (dh == NULL) {
         pkiDebug("failed to decode dhparams\n");
         goto cleanup;
@@ -2618,50 +2821,36 @@ server_process_dh(krb5_context context,
                   pkinit_plg_crypto_context plg_cryptoctx,
                   pkinit_req_crypto_context cryptoctx,
                   pkinit_identity_crypto_context id_cryptoctx,
-                  unsigned char *data,
-                  unsigned int data_len,
                   unsigned char **dh_pubkey_out,
                   unsigned int *dh_pubkey_len_out,
                   unsigned char **server_key_out,
                   unsigned int *server_key_len_out)
 {
     krb5_error_code retval = ENOMEM;
-    DH *dh = NULL, *dh_server = NULL;
+    DH *dh_server = NULL;
     unsigned char *p = NULL;
     ASN1_INTEGER *pub_key = NULL;
-    BIGNUM *client_pubkey = NULL;
-    const BIGNUM *server_pubkey;
+    const BIGNUM *client_pubkey, *server_pubkey;
     unsigned char *dh_pubkey = NULL, *server_key = NULL;
     unsigned int dh_pubkey_len = 0, server_key_len = 0;
 
     *dh_pubkey_out = *server_key_out = NULL;
     *dh_pubkey_len_out = *server_key_len_out = 0;
 
-    /* get client's received DH parameters that we saved in server_check_dh */
-    dh = cryptoctx->dh;
-    dh_server = dup_dh_params(dh);
+    /* Generate a server DH key with the same parameters as the client key. */
+    dh_server = dup_dh_params(cryptoctx->dh);
     if (dh_server == NULL)
         goto cleanup;
-
-    /* decode client's public key */
-    p = data;
-    pub_key = d2i_ASN1_INTEGER(NULL, (const unsigned char **)&p, (int)data_len);
-    if (pub_key == NULL)
-        goto cleanup;
-    client_pubkey = ASN1_INTEGER_to_BN(pub_key, NULL);
-    if (client_pubkey == NULL)
-        goto cleanup;
-    ASN1_INTEGER_free(pub_key);
-
     if (!DH_generate_key(dh_server))
         goto cleanup;
     DH_get0_key(dh_server, &server_pubkey, NULL);
 
-    /* generate DH session key */
+    /* Generate a DH result from the server key and client public key. */
     server_key_len = DH_size(dh_server);
     server_key = malloc(server_key_len);
     if (server_key == NULL)
         goto cleanup;
+    DH_get0_key(cryptoctx->dh, &client_pubkey, NULL);
     compute_dh(server_key, server_key_len, client_pubkey, dh_server);
 
 #ifdef DEBUG_DH
@@ -2699,7 +2888,6 @@ server_process_dh(krb5_context context,
     retval = 0;
 
 cleanup:
-    BN_free(client_pubkey);
     DH_free(dh_server);
     free(dh_pubkey);
     free(server_key);
@@ -2715,193 +2903,6 @@ pkinit_openssl_init()
     OpenSSL_add_all_algorithms();
     return 0;
 }
-
-static krb5_error_code
-pkinit_encode_dh_params(const BIGNUM *p, const BIGNUM *g, const BIGNUM *q,
-                        uint8_t **buf, unsigned int *buf_len)
-{
-    krb5_error_code retval = ENOMEM;
-    int bufsize = 0, r = 0;
-    unsigned char *tmp = NULL;
-    ASN1_INTEGER *ap = NULL, *ag = NULL, *aq = NULL;
-
-    if ((ap = BN_to_ASN1_INTEGER(p, NULL)) == NULL)
-        goto cleanup;
-    if ((ag = BN_to_ASN1_INTEGER(g, NULL)) == NULL)
-        goto cleanup;
-    if ((aq = BN_to_ASN1_INTEGER(q, NULL)) == NULL)
-        goto cleanup;
-    bufsize = i2d_ASN1_INTEGER(ap, NULL);
-    bufsize += i2d_ASN1_INTEGER(ag, NULL);
-    bufsize += i2d_ASN1_INTEGER(aq, NULL);
-
-    r = ASN1_object_size(1, bufsize, V_ASN1_SEQUENCE);
-
-    tmp = *buf = malloc((size_t) r);
-    if (tmp == NULL)
-        goto cleanup;
-
-    ASN1_put_object(&tmp, 1, bufsize, V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
-
-    i2d_ASN1_INTEGER(ap, &tmp);
-    i2d_ASN1_INTEGER(ag, &tmp);
-    i2d_ASN1_INTEGER(aq, &tmp);
-
-    *buf_len = r;
-
-    retval = 0;
-
-cleanup:
-    if (ap != NULL)
-        ASN1_INTEGER_free(ap);
-    if (ag != NULL)
-        ASN1_INTEGER_free(ag);
-    if (aq != NULL)
-        ASN1_INTEGER_free(aq);
-
-    return retval;
-}
-
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-
-/*
- * We need to decode DomainParameters from RFC 3279 section 2.3.3.  We would
- * like to just call d2i_DHxparams(), but Microsoft's implementation may omit
- * the q value in violation of the RFC.  Instead we must copy the internal
- * structures and sequence declarations from dh_asn1.c, modified to make the q
- * field optional.
- */
-
-typedef struct {
-    ASN1_BIT_STRING *seed;
-    BIGNUM *counter;
-} int_dhvparams;
-
-typedef struct {
-    BIGNUM *p;
-    BIGNUM *q;
-    BIGNUM *g;
-    BIGNUM *j;
-    int_dhvparams *vparams;
-} int_dhx942_dh;
-
-ASN1_SEQUENCE(DHvparams) = {
-    ASN1_SIMPLE(int_dhvparams, seed, ASN1_BIT_STRING),
-    ASN1_SIMPLE(int_dhvparams, counter, BIGNUM)
-} static_ASN1_SEQUENCE_END_name(int_dhvparams, DHvparams)
-
-ASN1_SEQUENCE(DHxparams) = {
-    ASN1_SIMPLE(int_dhx942_dh, p, BIGNUM),
-    ASN1_SIMPLE(int_dhx942_dh, g, BIGNUM),
-    ASN1_OPT(int_dhx942_dh, q, BIGNUM),
-    ASN1_OPT(int_dhx942_dh, j, BIGNUM),
-    ASN1_OPT(int_dhx942_dh, vparams, DHvparams),
-} static_ASN1_SEQUENCE_END_name(int_dhx942_dh, DHxparams)
-
-static DH *
-decode_dh_params(const krb5_data *params_der)
-{
-    const uint8_t *p;
-    int_dhx942_dh *params;
-    DH *dh;
-
-    dh = DH_new();
-    if (dh == NULL)
-        return NULL;
-
-    p = (uint8_t *)params_der->data;
-    params = (int_dhx942_dh *)ASN1_item_d2i(NULL, &p, params_der->length,
-                                            ASN1_ITEM_rptr(DHxparams));
-    if (params == NULL) {
-        DH_free(dh);
-        return NULL;
-    }
-
-    /* Steal the p, q, and g values from dhparams for dh.  Ignore j and
-     * vparams. */
-    DH_set0_pqg(dh, params->p, params->q, params->g);
-    params->p = params->q = params->g = NULL;
-    ASN1_item_free((ASN1_VALUE *)params, ASN1_ITEM_rptr(DHxparams));
-    return dh;
-}
-
-#else /* OPENSSL_VERSION_NUMBER < 0x10100000L */
-
-/*
- * Do the same decoding (except without decoding j and vparams or checking the
- * sequence length) using the pre-OpenSSL-1.1 asn1_mac.h.  Define an internal
- * function in the form demanded by the macros, then wrap it for caller
- * convenience.
- */
-
-static DH *
-decode_dh_params_int(DH ** a, uint8_t **pp, unsigned int len)
-{
-    ASN1_INTEGER ai, *aip = NULL;
-    long length = (long) len;
-
-    M_ASN1_D2I_vars(a, DH *, DH_new);
-
-    M_ASN1_D2I_Init();
-    M_ASN1_D2I_start_sequence();
-    aip = &ai;
-    ai.data = NULL;
-    ai.length = 0;
-    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
-    if (aip == NULL)
-        return NULL;
-    else {
-        ret->p = ASN1_INTEGER_to_BN(aip, NULL);
-        if (ret->p == NULL)
-            return NULL;
-        if (ai.data != NULL) {
-            OPENSSL_free(ai.data);
-            ai.data = NULL;
-            ai.length = 0;
-        }
-    }
-    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
-    if (aip == NULL)
-        return NULL;
-    else {
-        ret->g = ASN1_INTEGER_to_BN(aip, NULL);
-        if (ret->g == NULL)
-            return NULL;
-        if (ai.data != NULL) {
-            OPENSSL_free(ai.data);
-            ai.data = NULL;
-            ai.length = 0;
-        }
-
-    }
-    M_ASN1_D2I_get_opt(aip, d2i_ASN1_INTEGER, V_ASN1_INTEGER);
-    if (aip == NULL || ai.data == NULL)
-        ret->q = NULL;
-    else {
-        ret->q = ASN1_INTEGER_to_BN(aip, NULL);
-        if (ret->q == NULL)
-            return NULL;
-        if (ai.data != NULL) {
-            OPENSSL_free(ai.data);
-            ai.data = NULL;
-            ai.length = 0;
-        }
-
-    }
-    M_ASN1_D2I_end_sequence();
-    M_ASN1_D2I_Finish(a, DH_free, 0);
-
-}
-
-static DH *
-decode_dh_params(const krb5_data *params_der)
-{
-    uint8_t *p = (uint8_t *)params_der->data;
-
-    return decode_dh_params_int(NULL, &p, params_der->length);
-}
-
-#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
 static krb5_error_code
 pkinit_create_sequence_of_principal_identifiers(

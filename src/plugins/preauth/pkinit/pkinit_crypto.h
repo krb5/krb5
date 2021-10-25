@@ -315,14 +315,8 @@ krb5_error_code client_create_dh
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	int dh_size,					/* IN
 		    specifies the DH modulous, eg 1024, 2048, or 4096 */
-	unsigned char **dh_params_out,			/* OUT
-		    contains DER encoded DH params */
-	unsigned int *dh_params_len_out,		/* OUT
-		    contains length of encoded DH params */
-	unsigned char **dh_pubkey_out,			/* OUT
-		    receives DER encoded DH pub key */
-	unsigned int *dh_pubkey_len_out);			/* OUT
-		    receives length of DH pub key */
+	krb5_data *spki_out);				/* OUT
+		    receives SubjectPublicKeyInfo encoding */
 
 /*
  * this function completes client's the DH protocol. client
@@ -353,8 +347,8 @@ krb5_error_code server_check_dh
 	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_data *dh_params,				/* IN
-		    ???? */
+	const krb5_data *client_spki,			/* IN
+		    SubjectPublicKeyInfo encoding from client */
 	int minbits);					/* IN
 		    the minimum number of key bits acceptable */
 
@@ -367,10 +361,6 @@ krb5_error_code server_process_dh
 	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	unsigned char *received_pubkey,			/* IN
-		    contains client's DER encoded DH pub key */
-	unsigned int received_pub_len,			/* IN
-		    contains length of received_pubkey */
 	unsigned char **dh_pubkey_out,			/* OUT
 		    receives KDC's DER encoded DH pub key */
 	unsigned int *dh_pubkey_len_out,		/* OUT

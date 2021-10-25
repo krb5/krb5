@@ -877,18 +877,6 @@ ktest_equal_pk_authenticator(krb5_pk_authenticator *ref,
 }
 
 static int
-ktest_equal_subject_pk_info(krb5_subject_pk_info *ref,
-                            krb5_subject_pk_info *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && struct_equal(algorithm, ktest_equal_algorithm_identifier);
-    p = p && equal_str(subjectPublicKey);
-    return p;
-}
-
-static int
 ktest_equal_external_principal_identifier(
     krb5_external_principal_identifier *ref,
     krb5_external_principal_identifier *var)
@@ -962,7 +950,7 @@ ktest_equal_auth_pack(krb5_auth_pack *ref, krb5_auth_pack *var)
     if (ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && struct_equal(pkAuthenticator, ktest_equal_pk_authenticator);
-    p = p && ptr_equal(clientPublicValue, ktest_equal_subject_pk_info);
+    p = p && equal_str(clientPublicValue);
     p = p && ptr_equal(supportedCMSTypes,
                        ktest_equal_sequence_of_algorithm_identifier);
     p = p && equal_str(clientDHNonce);
