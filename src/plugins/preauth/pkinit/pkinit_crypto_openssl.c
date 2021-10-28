@@ -50,8 +50,6 @@ static void pkinit_fini_certs(pkinit_identity_crypto_context ctx);
 static krb5_error_code pkinit_init_pkcs11(pkinit_identity_crypto_context ctx);
 static void pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx);
 
-static int pkinit_check_dh_params(DH *dh1, DH *dh2);
-
 static krb5_error_code pkinit_sign_data
 (krb5_context context, pkinit_identity_crypto_context cryptoctx,
  unsigned char *data, unsigned int data_len,
@@ -189,33 +187,32 @@ pkcs11err(int err);
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #define ASN1_STRING_get0_data ASN1_STRING_data
 
+/*
+ * 1.1 adds DHX support, which uses the RFC 3279 DomainParameters encoding we
+ * need for PKINIT.  For 1.0 we must use the original DH type when creating
+ * EVP_PKEY objects.
+ */
+#define EVP_PKEY_DHX EVP_PKEY_DH
+
 /* 1.1 makes many handle types opaque and adds accessors.  Add compatibility
  * versions of the new accessors we use for pre-1.1. */
 
 #define OBJ_get0_data(o) ((o)->data)
 #define OBJ_length(o) ((o)->length)
 
-#define DH_set0_pqg compat_dh_set0_pqg
-static int compat_dh_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
+#define DH_set0_key compat_dh_set0_key
+static int
+compat_dh_set0_key(DH *dh, BIGNUM *pub, BIGNUM *priv)
 {
-    /* The real function frees the old values and does argument checking, but
-     * our code doesn't need that. */
-    dh->p = p;
-    dh->q = q;
-    dh->g = g;
+    if (pub != NULL) {
+        BN_clear_free(dh->pub_key);
+        dh->pub_key = pub;
+    }
+    if (priv != NULL) {
+        BN_clear_free(dh->priv_key);
+        dh->priv_key = priv;
+    }
     return 1;
-}
-
-#define DH_get0_pqg compat_dh_get0_pqg
-static void compat_dh_get0_pqg(const DH *dh, const BIGNUM **p,
-                               const BIGNUM **q, const BIGNUM **g)
-{
-    if (p != NULL)
-        *p = dh->p;
-    if (q != NULL)
-        *q = dh->q;
-    if (g != NULL)
-        *g = dh->g;
 }
 
 #define DH_get0_key compat_dh_get0_key
@@ -226,6 +223,16 @@ static void compat_dh_get0_key(const DH *dh, const BIGNUM **pub,
         *pub = dh->pub_key;
     if (priv != NULL)
         *priv = dh->priv_key;
+}
+
+#define EVP_PKEY_get0_DH compat_get0_DH
+static DH *
+compat_get0_DH(const EVP_PKEY *pkey)
+{
+    if (pkey->type != EVP_PKEY_DH)
+        return NULL;
+    return pkey->pkey.dh;
+
 }
 
 /* Return true if the cert c includes a key usage which doesn't include u.
@@ -240,14 +247,31 @@ static void compat_dh_get0_key(const DH *dh, const BIGNUM **pub,
 
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+/* Convert *dh to an EVP_PKEY object, free it, and set it to NULL.  On error,
+ * return NULL and do not free or change *dh. */
+static EVP_PKEY *
+dh_to_pkey(DH **dh)
+{
+    EVP_PKEY *pkey;
+
+    pkey = EVP_PKEY_new();
+    if (pkey == NULL)
+        return NULL;
+    if (!EVP_PKEY_assign(pkey, EVP_PKEY_DHX, *dh)) {
+        EVP_PKEY_free(pkey);
+        return NULL;
+    }
+    *dh = NULL;
+    return pkey;
+}
+
 /* Encode a bignum as an ASN.1 integer in DER. */
 static int
 encode_bn_der(const BIGNUM *bn, uint8_t **der_out, int *len_out)
 {
     ASN1_INTEGER *intval;
     int len;
-    uint8_t *der, *outptr;
+    uint8_t *der = NULL, *outptr;
 
     intval = BN_to_ASN1_INTEGER(bn, NULL);
     if (intval == NULL)
@@ -277,35 +301,55 @@ decode_bn_der(const uint8_t *der, size_t len)
     ASN1_INTEGER_free(intval);
     return bn;
 }
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+static int
+params_valid(EVP_PKEY *params)
+{
+    EVP_PKEY_CTX *ctx;
+    int result;
+
+    ctx = EVP_PKEY_CTX_new(params, NULL);
+    if (ctx == NULL)
+        return 0;
+    result = EVP_PKEY_param_check(ctx);
+    EVP_PKEY_CTX_free(ctx);
+    return result == 1;
+}
+#else
+static int
+params_valid(EVP_PKEY *params)
+{
+    DH *dh;
+    int codes;
+
+    dh = EVP_PKEY_get0_DH(params);
+    return (dh == NULL) ? 0 : (DH_check(dh, &codes) && codes == 0);
+}
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 
-static DH *
+static EVP_PKEY *
 decode_dh_params(const krb5_data *params_der)
 {
     const uint8_t *p = (uint8_t *)params_der->data;
+    DH *dh;
+    EVP_PKEY *pkey;
 
-    return d2i_DHxparams(NULL, &p, params_der->length);
+    dh = d2i_DHxparams(NULL, &p, params_der->length);
+    pkey = dh_to_pkey(&dh);
+    DH_free(dh);
+    return pkey;
 }
 
 static krb5_error_code
-encode_spki(DH *dh, krb5_data *spki_out)
+encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
 {
     krb5_error_code ret = ENOMEM;
-    EVP_PKEY *pkey = NULL;
     int len;
     uint8_t *outptr;
 
-    pkey = EVP_PKEY_new();
-    if (pkey == NULL)
-        goto cleanup;
-    if (!DH_up_ref(dh))
-        goto cleanup;
-    if (!EVP_PKEY_assign(pkey, EVP_PKEY_DHX, dh)) {
-        DH_free(dh);
-        goto cleanup;
-    }
     len = i2d_PUBKEY(pkey, NULL);
     ret = alloc_data(spki_out, len);
     if (ret)
@@ -314,23 +358,15 @@ encode_spki(DH *dh, krb5_data *spki_out)
     (void)i2d_PUBKEY(pkey, &outptr);
 
 cleanup:
-    EVP_PKEY_free(pkey);
     return ret;
 }
 
-static DH *
+static EVP_PKEY *
 decode_spki(const krb5_data *spki)
 {
-    EVP_PKEY *pkey = NULL;
     const uint8_t *inptr = (uint8_t *)spki->data;
-    DH *dh;
 
-    pkey = d2i_PUBKEY(NULL, &inptr, spki->length);
-    if (pkey == NULL)
-        return NULL;
-    dh = EVP_PKEY_get1_DH(pkey);
-    EVP_PKEY_free(pkey);
-    return dh;
+    return d2i_PUBKEY(NULL, &inptr, spki->length);
 }
 
 #else /* OPENSSL_VERSION_NUMBER < 0x10100000L */
@@ -367,11 +403,12 @@ ASN1_SEQUENCE(int_dhxparams) = {
     ASN1_OPT(int_dhxparams, vparams, int_dhvparams)
 } ASN1_SEQUENCE_END(int_dhxparams);
 
-static DH *
+static EVP_PKEY *
 decode_dh_params(const krb5_data *params_der)
 {
     int_dhxparams *params;
     DH *dh;
+    EVP_PKEY *pkey;
     const uint8_t *p;
 
     dh = DH_new();
@@ -392,13 +429,16 @@ decode_dh_params(const krb5_data *params_der)
     dh->g = params->g;
     params->p = params->q = params->g = NULL;
     ASN1_item_free((ASN1_VALUE *)params, ASN1_ITEM_rptr(int_dhxparams));
-    return dh;
+    pkey = dh_to_pkey(&dh);
+    DH_free(dh);
+    return pkey;
 }
 
 static krb5_error_code
-encode_spki(DH *dh, krb5_data *spki_out)
+encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
 {
     krb5_error_code ret = ENOMEM;
+    const DH *dh;
     uint8_t *param_der = NULL, *pubkey_der = NULL, *outptr;
     int param_der_len, pubkey_der_len, len;
     X509_PUBKEY pubkey;
@@ -407,6 +447,10 @@ encode_spki(DH *dh, krb5_data *spki_out)
     ASN1_OBJECT algorithm;
     ASN1_TYPE parameter;
     ASN1_STRING param_str, pubkey_str;
+
+    dh = EVP_PKEY_get0_DH(pkey);
+    if (dh == NULL)
+        goto cleanup;
 
     dhxparams.p = dh->p;
     dhxparams.q = dh->q;
@@ -455,12 +499,13 @@ cleanup:
     return ret;
 }
 
-static DH *
+static EVP_PKEY *
 decode_spki(const krb5_data *spki)
 {
     X509_PUBKEY *pubkey = NULL;
     const uint8_t *inptr;
-    DH *dh = NULL;
+    DH *dh;
+    EVP_PKEY *pkey = NULL, *pkey_ret = NULL;
     const ASN1_STRING *params;
     const ASN1_BIT_STRING *public_key;
     krb5_data d;
@@ -474,23 +519,209 @@ decode_spki(const krb5_data *spki)
         goto cleanup;
     params = pubkey->algor->parameter->value.sequence;
     d = make_data(params->data, params->length);
-    dh = decode_dh_params(&d);
+    pkey = decode_dh_params(&d);
+    if (pkey == NULL)
+        goto cleanup;
+    dh = EVP_PKEY_get0_DH(pkey);
     if (dh == NULL)
         goto cleanup;
-
     public_key = pubkey->public_key;
     dh->pub_key = decode_bn_der(public_key->data, public_key->length);
-    if (dh->pub_key == NULL) {
-        DH_free(dh);
-        dh = NULL;
-    }
+    if (dh->pub_key == NULL)
+        goto cleanup;
+
+    pkey_ret = pkey;
+    pkey = NULL;
 
 cleanup:
     X509_PUBKEY_free(pubkey);
-    return dh;
+    EVP_PKEY_free(pkey);
+    return pkey_ret;
 }
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+
+/* Attempt to specify padded Diffie-Hellman result derivation.  Don't error out
+ * if this fails since we also detect short results and adjust them. */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+static void
+set_padded_derivation(EVP_PKEY_CTX *ctx)
+{
+    /* We would use EVP_PKEY_CTX_set_dh_pad() but it doesn't work with DHX. */
+    EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_DHX, EVP_PKEY_OP_DERIVE,
+                      EVP_PKEY_CTRL_DH_PAD, 1, NULL);
+}
+#else
+static void
+set_padded_derivation(EVP_PKEY_CTX *ctx)
+{
+    /* There's no support for padded derivation in 1.0. */
+}
+#endif
+
+static int
+dh_result(EVP_PKEY *pkey, EVP_PKEY *peer,
+          uint8_t **result_out, unsigned int *len_out)
+{
+    EVP_PKEY_CTX *derive_ctx = NULL;
+    int ok = 0;
+    uint8_t *buf = NULL;
+    size_t len, dh_size = EVP_PKEY_size(pkey);
+
+    *result_out = NULL;
+    *len_out = 0;
+
+    derive_ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (derive_ctx == NULL)
+        goto cleanup;
+    if (EVP_PKEY_derive_init(derive_ctx) <= 0)
+        goto cleanup;
+    set_padded_derivation(derive_ctx);
+    if (EVP_PKEY_derive_set_peer(derive_ctx, peer) <= 0)
+        goto cleanup;
+
+    buf = malloc(dh_size);
+    if (buf == NULL)
+        goto cleanup;
+    len = dh_size;
+    if (EVP_PKEY_derive(derive_ctx, buf, &len) <= 0)
+        goto cleanup;
+    if (len < dh_size) {        /* only possible without padded derivation */
+        memmove(buf + (dh_size - len), buf, len);
+        memset(buf, 0, dh_size - len);
+    }
+
+    ok = 1;
+    *result_out = buf;
+    *len_out = dh_size;
+    buf = NULL;
+
+cleanup:
+    EVP_PKEY_CTX_free(derive_ctx);
+    free(buf);
+    return ok;
+}
+
+static int
+dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
+{
+    const DH *dh;
+    const BIGNUM *pubkey_bn;
+    uint8_t *buf;
+    int len;
+
+    dh = EVP_PKEY_get0_DH(pkey);
+    if (dh == NULL)
+        return 0;
+    DH_get0_key(dh, &pubkey_bn, NULL);
+    if (!encode_bn_der(pubkey_bn, &buf, &len))
+        return 0;
+    *pubkey_out = buf;
+    *len_out = len;
+    return 1;
+}
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+/* OpenSSL 1.1 and later will copy the q parameter when generating keys. */
+static int
+copy_q_openssl10(EVP_PKEY *src, EVP_PKEY *dest)
+{
+    return 1;
+}
+#else
+/* OpenSSL 1.0 won't copy the q parameter, so we have to do it. */
+static int
+copy_q_openssl10(EVP_PKEY *src, EVP_PKEY *dest)
+{
+    DH *dhsrc = EVP_PKEY_get0_DH(src), *dhdest = EVP_PKEY_get0_DH(dest);
+
+    if (dhsrc == NULL || dhsrc->q == NULL || dhdest == NULL)
+        return 0;
+    if (dhdest->q != NULL)
+        return 1;
+    dhdest->q = BN_dup(dhsrc->q);
+    return dhdest->q != NULL;
+}
+#endif
+
+static EVP_PKEY *
+generate_dh_pkey(EVP_PKEY *params)
+{
+    EVP_PKEY_CTX *ctx = NULL;
+    EVP_PKEY *pkey = NULL;
+
+    ctx = EVP_PKEY_CTX_new(params, NULL);
+    if (ctx == NULL)
+        goto cleanup;
+    if (EVP_PKEY_keygen_init(ctx) <= 0)
+        goto cleanup;
+    if (EVP_PKEY_keygen(ctx, &pkey) <= 0)
+        goto cleanup;
+    if (!copy_q_openssl10(params, pkey)) {
+        EVP_PKEY_free(pkey);
+        pkey = NULL;
+    }
+
+cleanup:
+    EVP_PKEY_CTX_free(ctx);
+    return pkey;
+}
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+static DH *
+dup_dh_params(DH *src)
+{
+    return DHparams_dup(src);
+}
+#else
+/* DHparams_dup() won't copy q in OpenSSL 1.0. */
+static DH *
+dup_dh_params(DH *src)
+{
+    DH *dh;
+
+    dh = DH_new();
+    if (dh == NULL)
+        return NULL;
+    dh->p = BN_dup(src->p);
+    dh->q = BN_dup(src->q);
+    dh->g = BN_dup(src->g);
+    if (dh->p == NULL || dh->q == NULL || dh->g == NULL) {
+        DH_free(dh);
+        return NULL;
+    }
+    return dh;
+}
+#endif
+
+static EVP_PKEY *
+compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
+{
+    DH *dhparams, *dh = NULL;
+    EVP_PKEY *pkey = NULL;
+    BIGNUM *pubkey_bn = NULL;
+
+    pubkey_bn = decode_bn_der(pubkey_der, der_len);
+    if (pubkey_bn == NULL)
+        goto cleanup;
+
+    dhparams = (DH *)EVP_PKEY_get0_DH(params);
+    if (dhparams == NULL)
+        goto cleanup;
+    dh = dup_dh_params(dhparams);
+    if (dh == NULL)
+        goto cleanup;
+    if (!DH_set0_key(dh, pubkey_bn, NULL))
+        goto cleanup;
+    pubkey_bn = NULL;
+
+    pkey = dh_to_pkey(&dh);
+
+cleanup:
+    BN_free(pubkey_bn);
+    DH_free(dh);
+    return pkey;
+}
 
 static struct pkcs11_errstrings {
     short code;
@@ -754,7 +985,8 @@ pkinit_init_req_crypto(pkinit_req_crypto_context *cryptoctx)
         goto out;
     memset(ctx, 0, sizeof(*ctx));
 
-    ctx->dh = NULL;
+    ctx->client_pkey = NULL;
+    ctx->received_params = NULL;
     ctx->received_cert = NULL;
 
     *cryptoctx = ctx;
@@ -775,10 +1007,9 @@ pkinit_fini_req_crypto(pkinit_req_crypto_context req_cryptoctx)
         return;
 
     pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, req_cryptoctx);
-    if (req_cryptoctx->dh != NULL)
-        DH_free(req_cryptoctx->dh);
-    if (req_cryptoctx->received_cert != NULL)
-        X509_free(req_cryptoctx->received_cert);
+    EVP_PKEY_free(req_cryptoctx->client_pkey);
+    EVP_PKEY_free(req_cryptoctx->received_params);
+    X509_free(req_cryptoctx->received_cert);
 
     free(req_cryptoctx);
 }
@@ -1008,13 +1239,9 @@ cleanup:
 static void
 pkinit_fini_dh_params(pkinit_plg_crypto_context plgctx)
 {
-    if (plgctx->dh_1024 != NULL)
-        DH_free(plgctx->dh_1024);
-    if (plgctx->dh_2048 != NULL)
-        DH_free(plgctx->dh_2048);
-    if (plgctx->dh_4096 != NULL)
-        DH_free(plgctx->dh_4096);
-
+    EVP_PKEY_free(plgctx->dh_1024);
+    EVP_PKEY_free(plgctx->dh_2048);
+    EVP_PKEY_free(plgctx->dh_4096);
     plgctx->dh_1024 = plgctx->dh_2048 = plgctx->dh_4096 = NULL;
 }
 
@@ -2592,22 +2819,6 @@ cleanup:
     return retval;
 } /*pkinit_alg_agility_kdf() */
 
-/* Call DH_compute_key() and ensure that we left-pad short results instead of
- * leaving junk bytes at the end of the buffer. */
-static void
-compute_dh(unsigned char *buf, int size, const BIGNUM *server_pub_key, DH *dh)
-{
-    int len, pad;
-
-    len = DH_compute_key(buf, server_pub_key, dh);
-    assert(len >= 0 && len <= size);
-    if (len < size) {
-        pad = size - len;
-        memmove(buf + pad, buf, len);
-        memset(buf, 0, pad);
-    }
-}
-
 krb5_error_code
 client_create_dh(krb5_context context,
                  pkinit_plg_crypto_context plg_cryptoctx,
@@ -2616,55 +2827,35 @@ client_create_dh(krb5_context context,
                  int dh_size, krb5_data *spki_out)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    int dh_err = 0;
-    const BIGNUM *pubkey_bn;
+    EVP_PKEY *params = NULL, *pkey = NULL;
 
     *spki_out = empty_data();
 
-    if (cryptoctx->dh == NULL) {
-        if (dh_size == 1024)
-            cryptoctx->dh = decode_dh_params(&oakley_1024);
-        else if (dh_size == 2048)
-            cryptoctx->dh = decode_dh_params(&oakley_2048);
-        else if (dh_size == 4096)
-            cryptoctx->dh = decode_dh_params(&oakley_4096);
-        if (cryptoctx->dh == NULL)
-            goto cleanup;
-    }
-
-    DH_generate_key(cryptoctx->dh);
-    DH_get0_key(cryptoctx->dh, &pubkey_bn, NULL);
-
-    DH_check(cryptoctx->dh, &dh_err);
-    if (dh_err != 0) {
-        pkiDebug("Warning: dh_check failed with %d\n", dh_err);
-        if (dh_err & DH_CHECK_P_NOT_PRIME)
-            pkiDebug("p value is not prime\n");
-        if (dh_err & DH_CHECK_P_NOT_SAFE_PRIME)
-            pkiDebug("p value is not a safe prime\n");
-        if (dh_err & DH_UNABLE_TO_CHECK_GENERATOR)
-            pkiDebug("unable to check the generator value\n");
-        if (dh_err & DH_NOT_SUITABLE_GENERATOR)
-            pkiDebug("the g value is not a generator\n");
-    }
-#ifdef DEBUG_DH
-    print_dh(cryptoctx->dh, "client's DH params\n");
-    print_pubkey(cryptoctx->dh->pub_key, "client's pub_key=");
-#endif
-
-    DH_check_pub_key(cryptoctx->dh, pubkey_bn, &dh_err);
-    if (dh_err != 0) {
-        pkiDebug("dh_check_pub_key failed with %d\n", dh_err);
+    if (cryptoctx->received_params != NULL)
+        params = cryptoctx->received_params;
+    else if (dh_size == 1024)
+        params = plg_cryptoctx->dh_1024;
+    else if (dh_size == 2048)
+        params = plg_cryptoctx->dh_2048;
+    else if (dh_size == 4096)
+        params = plg_cryptoctx->dh_4096;
+    else
         goto cleanup;
-    }
 
-    retval = encode_spki(cryptoctx->dh, spki_out);
+    pkey = generate_dh_pkey(params);
+    if (pkey == NULL)
+        goto cleanup;
+
+    retval = encode_spki(pkey, spki_out);
+    if (retval)
+        goto cleanup;
+
+    EVP_PKEY_free(cryptoctx->client_pkey);
+    cryptoctx->client_pkey = pkey;
+    pkey = NULL;
 
 cleanup:
-    if (retval) {
-        DH_free(cryptoctx->dh);
-        cryptoctx->dh = NULL;
-    }
+    EVP_PKEY_free(pkey);
     return retval;
 }
 
@@ -2679,29 +2870,23 @@ client_process_dh(krb5_context context,
                   unsigned int *client_key_len_out)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    BIGNUM *server_pub_key = NULL;
-    ASN1_INTEGER *pub_key = NULL;
-    unsigned char *client_key = NULL;
+    EVP_PKEY *server_pkey = NULL;
+    uint8_t *client_key = NULL;
     unsigned int client_key_len;
-    const unsigned char *p = NULL;
 
     *client_key_out = NULL;
     *client_key_len_out = 0;
 
-    client_key_len = DH_size(cryptoctx->dh);
-    client_key = malloc(client_key_len);
-    if (client_key == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    p = subjectPublicKey_data;
-    pub_key = d2i_ASN1_INTEGER(NULL, &p, (long)subjectPublicKey_length);
-    if (pub_key == NULL)
-        goto cleanup;
-    if ((server_pub_key = ASN1_INTEGER_to_BN(pub_key, NULL)) == NULL)
+    server_pkey = compose_dh_pkey(cryptoctx->client_pkey,
+                                  subjectPublicKey_data,
+                                  subjectPublicKey_length);
+    if (server_pkey == NULL)
         goto cleanup;
 
-    compute_dh(client_key, client_key_len, server_pub_key, cryptoctx->dh);
+    if (!dh_result(cryptoctx->client_pkey, server_pkey,
+                   &client_key, &client_key_len))
+        goto cleanup;
+
 #ifdef DEBUG_DH
     print_pubkey(server_pub_key, "server's pub_key=");
     pkiDebug("client computed key (%d)= ", client_key_len);
@@ -2715,39 +2900,22 @@ client_process_dh(krb5_context context,
     retval = 0;
 
 cleanup:
-    BN_free(server_pub_key);
-    ASN1_INTEGER_free(pub_key);
+    EVP_PKEY_free(server_pkey);
     free(client_key);
     return retval;
 }
 
 /* Return 1 if dh is a permitted well-known group, otherwise return 0. */
 static int
-check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, DH *dh, int nbits)
+check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, EVP_PKEY *pkey,
+                   int nbits)
 {
-
-    switch (nbits) {
-    case 1024:
-        /* Oakley MODP group 2 */
-        if (pkinit_check_dh_params(cryptoctx->dh_1024, dh) == 0)
-            return 1;
-        break;
-
-    case 2048:
-        /* Oakley MODP group 14 */
-        if (pkinit_check_dh_params(cryptoctx->dh_2048, dh) == 0)
-            return 1;
-        break;
-
-    case 4096:
-        /* Oakley MODP group 16 */
-        if (pkinit_check_dh_params(cryptoctx->dh_4096, dh) == 0)
-            return 1;
-        break;
-
-    default:
-        break;
-    }
+    if (nbits == 1024)
+        return EVP_PKEY_cmp_parameters(cryptoctx->dh_1024, pkey) == 1;
+    else if (nbits == 2048)
+        return EVP_PKEY_cmp_parameters(cryptoctx->dh_2048, pkey) == 1;
+    else if (nbits == 4096)
+        return EVP_PKEY_cmp_parameters(cryptoctx->dh_4096, pkey) == 1;
     return 0;
 }
 
@@ -2759,60 +2927,34 @@ server_check_dh(krb5_context context,
                 const krb5_data *client_spki,
                 int minbits)
 {
-    DH *dh = NULL;
-    const BIGNUM *p;
+    EVP_PKEY *client_pkey = NULL;
     int dh_prime_bits;
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
 
-    dh = decode_spki(client_spki);
-    if (dh == NULL) {
+    client_pkey = decode_spki(client_spki);
+    if (client_pkey == NULL) {
         pkiDebug("failed to decode dhparams\n");
         goto cleanup;
     }
 
     /* KDC SHOULD check to see if the key parameters satisfy its policy */
-    DH_get0_pqg(dh, &p, NULL, NULL);
-    dh_prime_bits = BN_num_bits(p);
+    dh_prime_bits = EVP_PKEY_bits(client_pkey);
     if (minbits && dh_prime_bits < minbits) {
         pkiDebug("client sent dh params with %d bits, we require %d\n",
                  dh_prime_bits, minbits);
         goto cleanup;
     }
 
-    if (check_dh_wellknown(cryptoctx, dh, dh_prime_bits))
+    if (check_dh_wellknown(cryptoctx, client_pkey, dh_prime_bits))
         retval = 0;
 
 cleanup:
     if (retval == 0)
-        req_cryptoctx->dh = dh;
+        req_cryptoctx->client_pkey = client_pkey;
     else
-        DH_free(dh);
+        EVP_PKEY_free(client_pkey);
 
     return retval;
-}
-
-/* Duplicate a DH handle (parameters only, not public or private key). */
-static DH *
-dup_dh_params(const DH *src)
-{
-    const BIGNUM *oldp, *oldq, *oldg;
-    BIGNUM *p = NULL, *q = NULL, *g = NULL;
-    DH *dh;
-
-    DH_get0_pqg(src, &oldp, &oldq, &oldg);
-    p = BN_dup(oldp);
-    q = BN_dup(oldq);
-    g = BN_dup(oldg);
-    dh = DH_new();
-    if (p == NULL || q == NULL || g == NULL || dh == NULL) {
-        BN_free(p);
-        BN_free(q);
-        BN_free(g);
-        DH_free(dh);
-        return NULL;
-    }
-    DH_set0_pqg(dh, p, q, g);
-    return dh;
 }
 
 /* kdc's dh function */
@@ -2827,10 +2969,7 @@ server_process_dh(krb5_context context,
                   unsigned int *server_key_len_out)
 {
     krb5_error_code retval = ENOMEM;
-    DH *dh_server = NULL;
-    unsigned char *p = NULL;
-    ASN1_INTEGER *pub_key = NULL;
-    const BIGNUM *client_pubkey, *server_pubkey;
+    EVP_PKEY *server_pkey = NULL;
     unsigned char *dh_pubkey = NULL, *server_key = NULL;
     unsigned int dh_pubkey_len = 0, server_key_len = 0;
 
@@ -2838,46 +2977,16 @@ server_process_dh(krb5_context context,
     *dh_pubkey_len_out = *server_key_len_out = 0;
 
     /* Generate a server DH key with the same parameters as the client key. */
-    dh_server = dup_dh_params(cryptoctx->dh);
-    if (dh_server == NULL)
+    server_pkey = generate_dh_pkey(cryptoctx->client_pkey);
+    if (server_pkey == NULL)
         goto cleanup;
-    if (!DH_generate_key(dh_server))
-        goto cleanup;
-    DH_get0_key(dh_server, &server_pubkey, NULL);
 
-    /* Generate a DH result from the server key and client public key. */
-    server_key_len = DH_size(dh_server);
-    server_key = malloc(server_key_len);
-    if (server_key == NULL)
+    if (!dh_result(server_pkey, cryptoctx->client_pkey, &server_key,
+                   &server_key_len))
         goto cleanup;
-    DH_get0_key(cryptoctx->dh, &client_pubkey, NULL);
-    compute_dh(server_key, server_key_len, client_pubkey, dh_server);
 
-#ifdef DEBUG_DH
-    print_dh(dh_server, "client&server's DH params\n");
-    print_pubkey(client_pubkey, "client's pub_key=");
-    print_pubkey(server_pubkey, "server's pub_key=");
-    pkiDebug("server computed key=");
-    print_buffer(server_key, server_key_len);
-#endif
-
-    /* KDC reply */
-    /* pack DH public key */
-    /* Diffie-Hellman public key must be ASN1 encoded as an INTEGER; this
-     * encoding shall be used as the contents (the value) of the
-     * subjectPublicKey component (a BIT STRING) of the SubjectPublicKeyInfo
-     * data element
-     */
-    pub_key = BN_to_ASN1_INTEGER(server_pubkey, NULL);
-    if (pub_key == NULL)
+    if (!dh_pubkey_der(server_pkey, &dh_pubkey, &dh_pubkey_len))
         goto cleanup;
-    dh_pubkey_len = i2d_ASN1_INTEGER(pub_key, NULL);
-    p = dh_pubkey = malloc(dh_pubkey_len);
-    if (dh_pubkey == NULL)
-        goto cleanup;
-    i2d_ASN1_INTEGER(pub_key, &p);
-    if (pub_key != NULL)
-        ASN1_INTEGER_free(pub_key);
 
     *dh_pubkey_out = dh_pubkey;
     *dh_pubkey_len_out = dh_pubkey_len;
@@ -2888,7 +2997,7 @@ server_process_dh(krb5_context context,
     retval = 0;
 
 cleanup:
-    DH_free(dh_server);
+    EVP_PKEY_free(server_pkey);
     free(dh_pubkey);
     free(server_key);
 
@@ -3095,26 +3204,6 @@ pkinit_check_kdc_pkid(krb5_context context,
     return 0;
 }
 
-/* Check parameters against a well-known DH group. */
-static int
-pkinit_check_dh_params(DH *dh1, DH *dh2)
-{
-    const BIGNUM *p1, *p2, *g1, *g2;
-
-    DH_get0_pqg(dh1, &p1, NULL, &g1);
-    DH_get0_pqg(dh2, &p2, NULL, &g2);
-    if (BN_cmp(p1, p2) != 0) {
-        pkiDebug("p is not well-known group dhparameter\n");
-        return -1;
-    }
-    if (BN_cmp(g1, g2) != 0) {
-        pkiDebug("bad g dhparameter\n");
-        return -1;
-    }
-    pkiDebug("good %d dhparams\n", BN_num_bits(p1));
-    return 0;
-}
-
 krb5_error_code
 pkinit_process_td_dh_params(krb5_context context,
                             pkinit_plg_crypto_context cryptoctx,
@@ -3124,59 +3213,55 @@ pkinit_process_td_dh_params(krb5_context context,
                             int *new_dh_size)
 {
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
-    int i = 0, use_sent_dh = 0, ok = 0;
+    EVP_PKEY *params = NULL;
+    int i, dh_prime_bits, old_dh_size;
 
     pkiDebug("dh parameters\n");
 
-    while (algId[i] != NULL) {
-        DH *dh = NULL;
-        const BIGNUM *p;
-        int dh_prime_bits = 0;
+    EVP_PKEY_free(req_cryptoctx->received_params);
+    req_cryptoctx->received_params = NULL;
 
+    old_dh_size = *new_dh_size;
+
+    for (i = 0; algId[i] != NULL; i++) {
+        /* Free any parameters from the previous iteration. */
+        EVP_PKEY_free(params);
+        params = NULL;
+
+        /* Skip any parameters for algorithms other than DH. */
         if (algId[i]->algorithm.length != dh_oid.length ||
             memcmp(algId[i]->algorithm.data, dh_oid.data, dh_oid.length))
-            goto cleanup;
+            continue;
 
-        dh = decode_dh_params(&algId[i]->parameters);
-        if (dh == NULL)
-            goto cleanup;
-        DH_get0_pqg(dh, &p, NULL, NULL);
-        dh_prime_bits = BN_num_bits(p);
+        params = decode_dh_params(&algId[i]->parameters);
+        if (params == NULL)
+            continue;
+        dh_prime_bits = EVP_PKEY_bits(params);
+        /* Skip any parameters shorter than the previous size. */
+        if (dh_prime_bits < old_dh_size)
+            continue;
         pkiDebug("client sent %d DH bits server prefers %d DH bits\n",
                  *new_dh_size, dh_prime_bits);
-        ok = check_dh_wellknown(cryptoctx, dh, dh_prime_bits);
-        if (ok) {
+
+        /* If this is one of our well-known groups, just save the new size; we
+         * will use our own copy of the parameters. */
+        if (check_dh_wellknown(cryptoctx, params, dh_prime_bits)) {
             *new_dh_size = dh_prime_bits;
+            retval = 0;
+            goto cleanup;
         }
-        if (!ok) {
-            DH_check(dh, &retval);
-            if (retval != 0) {
-                pkiDebug("DH parameters provided by server are unacceptable\n");
-                retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
-            }
-            else {
-                use_sent_dh = 1;
-                ok = 1;
-            }
+
+        /* If the parameters aren't well-known but check out, save them. */
+        if (params_valid(params)) {
+            req_cryptoctx->received_params = params;
+            params = NULL;
+            retval = 0;
+            goto cleanup;
         }
-        if (!use_sent_dh)
-            DH_free(dh);
-        if (ok) {
-            if (req_cryptoctx->dh != NULL) {
-                DH_free(req_cryptoctx->dh);
-                req_cryptoctx->dh = NULL;
-            }
-            if (use_sent_dh)
-                req_cryptoctx->dh = dh;
-            break;
-        }
-        i++;
     }
 
-    if (ok)
-        retval = 0;
-
 cleanup:
+    EVP_PKEY_free(params);
     return retval;
 }
 
