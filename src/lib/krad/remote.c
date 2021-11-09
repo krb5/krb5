@@ -422,14 +422,19 @@ error:
 }
 
 void
+kr_remote_cancel_all(krad_remote *rr)
+{
+    while (!K5_TAILQ_EMPTY(&rr->list))
+        request_finish(K5_TAILQ_FIRST(&rr->list), ECANCELED, NULL);
+}
+
+void
 kr_remote_free(krad_remote *rr)
 {
     if (rr == NULL)
         return;
 
-    while (!K5_TAILQ_EMPTY(&rr->list))
-        request_finish(K5_TAILQ_FIRST(&rr->list), ECANCELED, NULL);
-
+    kr_remote_cancel_all(rr);
     free(rr->secret);
     if (rr->info != NULL)
         free(rr->info->ai_addr);

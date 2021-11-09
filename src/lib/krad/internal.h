@@ -109,6 +109,10 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
 void
 kr_remote_cancel(krad_remote *rr, const krad_packet *pkt);
 
+/* Cancel all requests awaiting responses. */
+void
+kr_remote_cancel_all(krad_remote *rr);
+
 /* Determine if this remote object refers to the remote resource identified
  * by the addrinfo struct and the secret. */
 krb5_boolean
