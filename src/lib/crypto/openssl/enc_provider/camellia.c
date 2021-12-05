@@ -25,6 +25,9 @@
  */
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_CAMELLIA
+
 #include <openssl/evp.h>
 #include <openssl/camellia.h>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
@@ -32,8 +35,6 @@
 #else
 #include <openssl/modes.h>
 #endif
-
-#ifdef K5_OPENSSL_CAMELLIA
 
 static krb5_error_code
 cbc_enc(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
