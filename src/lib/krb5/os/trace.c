@@ -93,7 +93,7 @@ hash_bytes(krb5_context context, const void *ptr, size_t len)
     krb5_data d = make_data((void *) ptr, len);
     char *s = NULL;
 
-    if (krb5_k_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL, 0, &d,
+    if (krb5_k_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, &d,
                              &cksum) != 0)
         return NULL;
     if (cksum.length >= 2)

@@ -118,8 +118,8 @@ pa_pkinit_gen_req(krb5_context context,
         goto cleanup;
     }
 
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL, 0,
-                                  der_req, &cksum);
+    retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
+                                  &cksum);
     if (retval)
         goto cleanup;
     TRACE_PKINIT_CLIENT_REQ_CHECKSUM(context, &cksum);
@@ -698,13 +698,6 @@ pkinit_as_rep_parse(krb5_context context,
             pkiDebug("failed to decode reply_key_pack\n");
             goto cleanup;
         }
-        /*
-         * This is hack but Windows sends back SHA1 checksum
-         * with checksum type of 14. There is currently no
-         * checksum type of 14 defined.
-         */
-        if (key_pack->asChecksum.checksum_type == 14)
-            key_pack->asChecksum.checksum_type = CKSUMTYPE_NIST_SHA;
         retval = krb5_c_make_checksum(context,
                                       key_pack->asChecksum.checksum_type,
                                       &key_pack->replyKey,

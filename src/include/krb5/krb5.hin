@@ -443,6 +443,11 @@ typedef struct _krb5_crypto_iov {
 #define ENCTYPE_CAMELLIA256_CTS_CMAC        0x001a /**< RFC 6803 */
 #define ENCTYPE_UNKNOWN                     0x01ff
 
+/*
+ * Historically we used the value 9 for unkeyed SHA-1.  RFC 3961 assigns this
+ * value to rsa-md5-des3, which fortunately is unused.  For ABI compatibility
+ * we allow either 9 or 14 for SHA-1.
+ */
 #define CKSUMTYPE_CRC32         0x0001
 #define CKSUMTYPE_RSA_MD4       0x0002
 #define CKSUMTYPE_RSA_MD4_DES   0x0003
@@ -453,6 +458,7 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_RSA_MD5_DES   0x0008
 #define CKSUMTYPE_NIST_SHA      0x0009
 #define CKSUMTYPE_HMAC_SHA1_DES3      0x000c
+#define CKSUMTYPE_SHA1          0x000d /**< RFC 3962 */
 #define CKSUMTYPE_HMAC_SHA1_96_AES128 0x000f /**< RFC 3962. Used with
                                                 ENCTYPE_AES128_CTS_HMAC_SHA1_96 */
 #define CKSUMTYPE_HMAC_SHA1_96_AES256 0x0010 /**< RFC 3962. Used with

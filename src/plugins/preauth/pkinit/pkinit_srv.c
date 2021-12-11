@@ -548,8 +548,8 @@ pkinit_server_verify_padata(krb5_context context,
         goto cleanup;
     }
     der_req = cb->request_body(context, rock);
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL, 0,
-                                  der_req, &cksum);
+    retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
+                                  &cksum);
     if (retval) {
         pkiDebug("unable to calculate AS REQ checksum\n");
         goto cleanup;

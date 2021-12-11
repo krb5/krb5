@@ -58,8 +58,7 @@ oidToSaslName(OM_uint32 *minor, const gss_OID mech,
     iov[2].data.length = sizeof(cksumBuf);
     iov[2].data.data = (char *)cksumBuf;
 
-    *minor = krb5_k_make_checksum_iov(NULL, CKSUMTYPE_NIST_SHA,
-                                      NULL, 0, iov, 3);
+    *minor = krb5_k_make_checksum_iov(NULL, CKSUMTYPE_SHA1, NULL, 0, iov, 3);
     if (*minor != 0)
         return GSS_S_FAILURE;
 

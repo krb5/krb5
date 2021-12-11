@@ -205,7 +205,7 @@ make_keyblock(krb5_kvno kvno, krb5_enctype etype, int32_t salttype,
                  (int)salttype, princstr, (int)realm->length, realm->data) < 0)
         abort();
     d = string2data(hashstr);
-    check(krb5_c_make_checksum(NULL, CKSUMTYPE_NIST_SHA, NULL, 0, &d, &cksum));
+    check(krb5_c_make_checksum(NULL, CKSUMTYPE_SHA1, NULL, 0, &d, &cksum));
 
     /* Make the appropriate number of input bytes from the hash result. */
     for (pos = 0; pos < keybytes; pos += n) {
