@@ -595,10 +595,6 @@ if test "$GCC" = yes ; then
       CFLAGS="$CFLAGS -fno-common"
       ;;
     esac
-    case "$LD $LDFLAGS" in
-    *-Wl,-search_paths_first*) ;;
-    *) LDFLAGS="${LDFLAGS} -Wl,-search_paths_first" ;;
-    esac
   fi
 else
   if test "`uname -s`" = AIX ; then
