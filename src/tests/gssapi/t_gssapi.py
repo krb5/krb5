@@ -23,10 +23,19 @@ realm.run([kadminl, 'addprinc', '-randkey', 'service1/barack'])
 realm.run([kadminl, 'addprinc', '-randkey', 'service2/calvin'])
 realm.run([kadminl, 'addprinc', '-randkey', 'service2/dwight'])
 realm.run([kadminl, 'addprinc', '-randkey', 'host/-nomatch-'])
+realm.run([kadminl, 'addprinc', '-randkey', 'http/localhost'])
 realm.run([kadminl, 'xst', 'service1/abraham'])
 realm.run([kadminl, 'xst', 'service1/barack'])
 realm.run([kadminl, 'xst', 'service2/calvin'])
+realm.run([kadminl, 'xst', 'http/localhost'])
 realm.run([kadminl, 'renprinc', 'service1/abraham', 'service1/andrew'])
+
+# Test with no default realm and no dots in the server name.
+realm.run(['./t_accname', 'h:http@localhost'], expected_msg='http/localhost')
+remove_default = {'libdefaults': {'default_realm': None}}
+no_default = realm.special_env('no_default', False, krb5_conf=remove_default)
+realm.run(['./t_accname', 'h:http@localhost'], expected_msg='http/localhost',
+          env=no_default)
 
 # Test with no acceptor name, including client/keytab principal
 # mismatch (non-fatal) and missing keytab entry (fatal).
