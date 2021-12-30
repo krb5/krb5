@@ -107,6 +107,25 @@ GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X;
 
 /*
+ *
+ * This OID can be used with gss_set_cred_option() to suppress the
+ * checking of the transited realm array. Typically the caller
+ * requires a verified PAC and delegate the cross-realm verification
+ * to the [K]DC of an active directory domain.
+ *
+ * This overwrites the value from the [libdefaults]
+ * acceptor_skip_transit_check krb5.conf option and allows
+ * applications to force the behavior.
+ *
+ * See also https://bugzilla.samba.org/show_bug.cgi?id=12907
+ *
+ * iso(1) identified-organization(3) dod(6) internet(1) private(4)
+ * enterprise(1) Samba Development Team(7165) Samba4(4) gsskrb5(7)
+ * skip_transit_check(1)
+ */
+GSS_DLLIMP extern const gss_OID GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X;
+
+/*
  * This OID can be used with gss_inquire_cred_by_oid(0 to retrieve the
  * impersonator name (if any).
  *

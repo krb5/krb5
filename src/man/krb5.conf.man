@@ -332,6 +332,18 @@ flexibility of server applications on multihomed hosts, but could
 compromise the security of virtual hosting environments.  The
 default value is false.  New in release 1.10.
 .TP
+\fBacceptor_skip_transit_check\fP
+Active directory KDCs do transit checking without setting the
+related TKT_FLG_TRANSIT_POLICY_CHECKED flag in service tickets.
+Which means transit checking is still done by the acceptor
+and may reject the authentication.  The topology of trusted domains is maintained
+by the KDCs (domain controllers), so it is not useful to require knowledge
+of that topology on each acceptor (domain member).
+This options allows admins to disable the transit check if they
+know that their active directory KDCs (domain controllers) already
+do the checking.  See also https://bugzilla.samba.org/show_bug.cgi?id=12907.
+The default value is false.  New in release 1.20.
+.TP
 \fBk5login_authoritative\fP
 If this flag is true, principals must be listed in a local user\(aqs
 k5login file to be granted login access, if a \&.k5login(5)

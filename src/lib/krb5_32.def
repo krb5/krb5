@@ -508,3 +508,4 @@ EXPORTS
 	krb5_marshal_credentials			@472
 	krb5_unmarshal_credentials			@473
 	k5_sname_compare				@474 ; PRIVATE GSSAPI
+	krb5_rd_req_decoded_opt				@475 ; PRIVATE GSSAPI

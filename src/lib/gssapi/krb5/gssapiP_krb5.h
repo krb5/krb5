@@ -181,6 +181,7 @@ typedef struct _krb5_gss_cred_id_rec {
     unsigned int iakerb_mech : 1;
     unsigned int destroy_ccache : 1;
     unsigned int suppress_ci_flags : 1;
+    unsigned int skip_transit_check : 1;
 
     /* keytab (accept) data */
     krb5_keytab keytab;

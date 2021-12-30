@@ -122,8 +122,15 @@
  * except the last in each value's encoding.
  */
 
+/* 1.2.752.43.13.29 */
 #define NO_CI_FLAGS_X_OID_LENGTH 6
 #define NO_CI_FLAGS_X_OID "\x2a\x85\x70\x2b\x0d\x1d"
+
+/* 1.3.6.1.4.1.7165.4.7.1 */
+#define SKIP_TRANSIT_CHECK_X_OID_LENGTH 10
+#define SKIP_TRANSIT_CHECK_X_OID "\x2b\x06\x01\x04\x01\xb7\x7d\x04\x07\x01"
+
+/* 1.2.840.113554.1.2.2.5.14 */
 #define GET_CRED_IMPERSONATOR_OID_LENGTH 11
 #define GET_CRED_IMPERSONATOR_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0e"
 
@@ -154,6 +161,7 @@ const gss_OID_desc krb5_gss_oid_array[] = {
     {10, "\052\206\110\206\367\022\001\002\002\006"},
     /* GSS_KRB5_NT_X509_CERT */
     {10, "\052\206\110\206\367\022\001\002\002\007"},
+    {SKIP_TRANSIT_CHECK_X_OID_LENGTH, SKIP_TRANSIT_CHECK_X_OID},
     { 0, 0 }
 };
 
@@ -173,6 +181,7 @@ const gss_OID GSS_KRB5_CRED_NO_CI_FLAGS_X       = &kg_oids[7];
 const gss_OID GSS_KRB5_GET_CRED_IMPERSONATOR    = &kg_oids[8];
 const gss_OID GSS_KRB5_NT_ENTERPRISE_NAME       = &kg_oids[9];
 const gss_OID GSS_KRB5_NT_X509_CERT             = &kg_oids[10];
+const gss_OID GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X  = &kg_oids[11];
 
 static const gss_OID_set_desc oidsets[] = {
     {1, &kg_oids[0]}, /* RFC OID */
@@ -490,6 +499,22 @@ no_ci_flags(OM_uint32 *minor_status,
     *minor_status = 0;
     return GSS_S_COMPLETE;
 }
+
+static OM_uint32
+skip_transit_check(OM_uint32 *minor_status,
+                 gss_cred_id_t *cred_handle,
+                 const gss_OID desired_oid,
+                 const gss_buffer_t value)
+{
+    krb5_gss_cred_id_t cred;
+
+    cred = (krb5_gss_cred_id_t) *cred_handle;
+    cred->skip_transit_check = 1;
+
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
+
 /*
  * gssspi_set_cred_option() methods
  */
@@ -516,6 +541,10 @@ static struct {
     {
         {NO_CI_FLAGS_X_OID_LENGTH, NO_CI_FLAGS_X_OID},
         no_ci_flags
+    },
+    {
+        {SKIP_TRANSIT_CHECK_X_OID_LENGTH, SKIP_TRANSIT_CHECK_X_OID},
+        skip_transit_check
     },
 };
 

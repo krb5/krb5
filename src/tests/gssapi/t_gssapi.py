@@ -117,6 +117,144 @@ r1.stop()
 r2.stop()
 r3.stop()
 
+#
+# Test the behavior of [libdefaults] acceptor_skip_transit_check
+# and GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X.
+#
+# First we define all possible capaths explicitly
+# in krb5conf_all_all. This will be used by default.
+#
+# Then we define krb5conf_AX_D{1,2,3}X, which
+# has just the first hops from A.X to the others,
+# this will allow the client code to get a service
+# ticket for a service in D{1,2,3}.X, but doesn't allow
+# the acceptor part to pass the transited check.
+#
+krb5conf_all = {
+  'capaths': {
+    'A.X': {
+      'D1.X': ['B.X', 'C.X'],
+      'D2.X': ['B.X', 'C.X'],
+      'D3.X': ['B.X', 'C.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+    'B.X': {
+      'A.X': ['.'],
+      'C.X': ['.'],
+      'D1.X': ['C.X'],
+      'D2.X': ['C.X'],
+      'D3.X': ['C.X'],
+    },
+    'C.X': {
+      'D1.X': ['.'],
+      'D2.X': ['.'],
+      'D3.X': ['.'],
+      'B.X': ['.'],
+      'A.X': ['B.X'],
+    },
+    'D1.X': {
+      'A.X': ['C.X', 'B.X'],
+      'B.X': ['C.X'],
+      'C.X': ['.'],
+    },
+    'D2.X': {
+      'A.X': ['C.X', 'B.X'],
+      'B.X': ['C.X'],
+      'C.X': ['.'],
+    },
+    'D3.X': {
+      'A.X': ['C.X', 'B.X'],
+      'B.X': ['C.X'],
+      'C.X': ['.'],
+    },
+  }
+}
+krb5conf_none = {
+  'capaths': None,
+}
+krb5conf_AX_D1X = {
+  'capaths': {
+    'A.X': {
+      'D1.X': ['B.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+  }
+}
+krb5conf_AX_D2X = {
+  'libdefaults': {'acceptor_skip_transit_check': 'false'},
+  'capaths': {
+    'A.X': {
+      'D2.X': ['B.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+  }
+}
+krb5conf_AX_D3X = {
+  'libdefaults': {'acceptor_skip_transit_check': 'true'},
+  'capaths': {
+    'A.X': {
+      'D3.X': ['B.X'],
+      'C.X': ['B.X'],
+      'B.X': ['.'],
+    },
+  }
+}
+rAXargs = { 'realm': 'A.X', 'krb5_conf': krb5conf_all, 'create_user': True }
+rBXargs = { 'realm': 'B.X', 'krb5_conf': krb5conf_all }
+rCXargs = { 'realm': 'C.X', 'krb5_conf': krb5conf_all }
+noreject = {'realms': {'$realm': {'reject_bad_transit': 'false'}}}
+rD1Xargs = { 'realm': 'D1.X', 'krb5_conf': krb5conf_none, 'kdc_conf': noreject, 'create_host': True }
+rD2Xargs = { 'realm': 'D2.X', 'krb5_conf': krb5conf_none, 'kdc_conf': noreject, 'create_host': True }
+rD3Xargs = { 'realm': 'D3.X', 'krb5_conf': krb5conf_none, 'kdc_conf': noreject, 'create_host': True }
+
+rAX, rBX, rCX, rD1X, rD2X, rD3X = cross_realms(6, xtgts=((0,1), (1,2), (2,3), (2,4), (2,5)),
+                              create_user=False, create_host=False,
+                              args=[rAXargs, rBXargs, rCXargs, rD1Xargs, rD2Xargs, rD3Xargs])
+# We create a special environment for the client on A.X to access D1.X
+os.rename(rD1X.keytab, rAX.keytab)
+rAXD1Xclient = rAX.special_env('client', False, krb5_conf=krb5conf_AX_D1X)
+# It will get a service ticket, but the acceptor fail to verify the
+# transited path.
+rAX.run(['./t_accname', 'p:' + rD1X.host_princ, 'h:host'],
+   env=rAXD1Xclient,
+   expected_code=1,
+   expected_msg='Illegal cross-realm ticket')
+# With GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X it bypasses the check
+rAX.run(['./t_accname', 'p:' + rD1X.host_princ, 'h:host', 'skip_transit_check'],
+   env=rAXD1Xclient)
+# We create a special environment for the client on A.X to access D2.X
+os.rename(rD2X.keytab, rAX.keytab)
+rAXD2Xclient = rAX.special_env('client', False, krb5_conf=krb5conf_AX_D2X)
+# It will get a service ticket, but the acceptor fail to verify the
+# transited path.
+rAX.run(['./t_accname', 'p:' + rD2X.host_princ, 'h:host'],
+   env=rAXD2Xclient,
+   expected_code=1,
+   expected_msg='Illegal cross-realm ticket')
+# With GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X it bypasses the check
+rAX.run(['./t_accname', 'p:' + rD2X.host_princ, 'h:host', 'skip_transit_check'],
+   env=rAXD2Xclient)
+# We create a special environment for the client on A.X to access D3.X
+os.rename(rD3X.keytab, rAX.keytab)
+rAXD3Xclient = rAX.special_env('client', False, krb5_conf=krb5conf_AX_D3X)
+# It will get a service ticket, but the acceptor fail to verify the
+# transited path.
+# With [libdefaults] acceptor_skip_transit_check = true it works
+rAX.run(['./t_accname', 'p:' + rD3X.host_princ, 'h:host'],
+   env=rAXD3Xclient)
+# With GSS_KRB5_CRED_SKIP_TRANSIT_CHECK_X it bypasses the check
+rAX.run(['./t_accname', 'p:' + rD3X.host_princ, 'h:host', 'skip_transit_check'],
+   env=rAXD3Xclient)
+rAX.stop()
+rBX.stop()
+rCX.stop()
+rD1X.stop()
+rD2X.stop()
+rD3X.stop()
+
 ### Test gss_inquire_cred behavior.
 
 realm = K5Realm()

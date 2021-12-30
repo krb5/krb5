@@ -469,11 +469,38 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
     return (ret != 0) ? ret : dret;
 }
 
-static krb5_error_code
-rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
-                   const krb5_ap_req *req, krb5_const_principal server,
-                   krb5_keytab keytab, krb5_flags *ap_req_options,
-                   krb5_ticket **ticket, int check_valid_flag)
+static krb5_boolean
+conf_skip_transit_check(krb5_context context, unsigned int opt_flags)
+{
+    krb5_error_code ret;
+    int bval;
+
+    if (opt_flags & KRB5_RD_REQ_SKIP_TRANSIT_CHECK) {
+        return TRUE;
+    }
+
+    ret = profile_get_boolean(context->profile,
+                              KRB5_CONF_LIBDEFAULTS,
+                              KRB5_CONF_ACCEPTOR_SKIP_TRANSIT_CHECK,
+                              NULL,
+                              FALSE,
+                              &bval);
+    if (ret == 0) {
+        return bval;
+    }
+
+    return FALSE;
+}
+
+krb5_error_code
+krb5_rd_req_decoded_opt(krb5_context context,
+                        krb5_auth_context *auth_context,
+                        const krb5_ap_req *req,
+                        krb5_const_principal server,
+                        krb5_keytab keytab,
+                        krb5_flags *ap_req_options,
+                        krb5_ticket **ticket,
+                        unsigned int opt_flags)
 {
     krb5_error_code       retval = 0;
     krb5_enctype         *desired_etypes = NULL;
@@ -482,6 +509,16 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     krb5_enctype         *permitted_etypes = NULL;
     int                   permitted_etypes_len = 0;
     krb5_keyblock         decrypt_key;
+    int                   check_valid_flag = 0;
+    krb5_boolean          skip_transit_check = FALSE;
+
+    if (opt_flags & ~_KRB5_RD_REQ_VALID_FLAGS) {
+        return EINVAL;
+    }
+
+    if (opt_flags & KRB5_RD_REQ_CHECK_VALID_FLAG) {
+        check_valid_flag = 1;
+    }
 
     decrypt_key.enctype = ENCTYPE_NULL;
     decrypt_key.contents = NULL;
@@ -549,6 +586,8 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     }
     /* okay, now check cross-realm policy */
 
+    skip_transit_check = conf_skip_transit_check(context, opt_flags);
+
 #if defined(_SINGLE_HOP_ONLY)
 
     /* Single hop cross-realm tickets only */
@@ -589,7 +628,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
     /* Hierarchical Cross-Realm */
 
-    {
+    if (!skip_transit_check) {
         krb5_data      * realm;
         krb5_transited * trans;
         krb5_flags       flags;
@@ -793,10 +832,10 @@ krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
                     krb5_ticket **ticket)
 {
     krb5_error_code retval;
-    retval = rd_req_decoded_opt(context, auth_context,
-                                req, server, keytab,
-                                ap_req_options, ticket,
-                                1); /* check_valid_flag */
+    retval = krb5_rd_req_decoded_opt(context, auth_context,
+                                     req, server, keytab,
+                                     ap_req_options, ticket,
+                                     KRB5_RD_REQ_CHECK_VALID_FLAG);
     return retval;
 }
 
@@ -808,10 +847,10 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
                             krb5_flags *ap_req_options, krb5_ticket **ticket)
 {
     krb5_error_code retval;
-    retval = rd_req_decoded_opt(context, auth_context,
-                                req, server, keytab,
-                                ap_req_options, ticket,
-                                0); /* don't check_valid_flag */
+    retval = krb5_rd_req_decoded_opt(context, auth_context,
+                                     req, server, keytab,
+                                     ap_req_options, ticket,
+                                     0); /* don't check_valid_flag */
     return retval;
 }
 
