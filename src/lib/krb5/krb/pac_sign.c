@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "authdata.h"
 
 /* draft-brezak-win2k-krb-authz-00 */
@@ -285,4 +286,124 @@ krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
            PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH));
 
     return 0;
+}
+
+/* Add a signature over der_enc_tkt in privsvr to pac.  der_enc_tkt should be
+ * encoded with a dummy PAC authdata element containing a single zero byte. */
+static krb5_error_code
+add_ticket_signature(krb5_context context, const krb5_pac pac,
+                     krb5_data *der_enc_tkt, const krb5_keyblock *privsvr)
+{
+    krb5_error_code ret;
+    krb5_data ticket_cksum;
+    krb5_cksumtype ticket_cksumtype;
+    krb5_crypto_iov iov[2];
+
+    /* Create zeroed buffer for checksum. */
+    ret = k5_insert_checksum(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                             privsvr, &ticket_cksumtype);
+    if (ret)
+        return ret;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                               &ticket_cksum);
+    if (ret)
+        return ret;
+
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data = *der_enc_tkt;
+    iov[1].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
+    iov[1].data = make_data(ticket_cksum.data + PAC_SIGNATURE_DATA_LENGTH,
+                            ticket_cksum.length - PAC_SIGNATURE_DATA_LENGTH);
+    ret = krb5_c_make_checksum_iov(context, ticket_cksumtype, privsvr,
+                                   KRB5_KEYUSAGE_APP_DATA_CKSUM, iov, 2);
+    if (ret)
+        return ret;
+
+    store_32_le(ticket_cksumtype, ticket_cksum.data);
+    return 0;
+}
+
+/* Set *out to an AD-IF-RELEVANT authdata element containing a PAC authdata
+ * element with contents pac_data. */
+static krb5_error_code
+encode_pac_ad(krb5_context context, krb5_data *pac_data, krb5_authdata **out)
+{
+    krb5_error_code ret;
+    krb5_authdata *container[2], **encoded_container = NULL;
+    krb5_authdata pac_ad = { KV5M_AUTHDATA, KRB5_AUTHDATA_WIN2K_PAC };
+    uint8_t z = 0;
+
+    pac_ad.contents = (pac_data != NULL) ? (uint8_t *)pac_data->data : &z;
+    pac_ad.length = (pac_data != NULL) ? pac_data->length : 1;
+    container[0] = &pac_ad;
+    container[1] = NULL;
+
+    ret = krb5_encode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                         container, &encoded_container);
+    if (ret)
+        return ret;
+
+    *out = encoded_container[0];
+    free(encoded_container);
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_sign_ticket(krb5_context context, krb5_enc_tkt_part *enc_tkt,
+                     const krb5_pac pac, krb5_const_principal server_princ,
+                     krb5_const_principal client_princ,
+                     const krb5_keyblock *server, const krb5_keyblock *privsvr,
+                     krb5_boolean with_realm)
+{
+    krb5_error_code ret;
+    krb5_data *der_enc_tkt = NULL, pac_data = empty_data();
+    krb5_authdata **list, *pac_ad;
+    size_t count;
+
+    /* Reallocate space for another authdata element in enc_tkt. */
+    list = enc_tkt->authorization_data;
+    for (count = 0; list != NULL && list[count] != NULL; count++);
+    list = realloc(enc_tkt->authorization_data, (count + 2) * sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+    list[count] = NULL;
+    enc_tkt->authorization_data = list;
+
+    /* Create a dummy PAC for ticket signing and make it the first element. */
+    ret = encode_pac_ad(context, NULL, &pac_ad);
+    if (ret)
+        goto cleanup;
+    memmove(list + 1, list, (count + 1) * sizeof(*list));
+    list[0] = pac_ad;
+
+    if (k5_pac_should_have_ticket_signature(server_princ)) {
+        ret = encode_krb5_enc_tkt_part(enc_tkt, &der_enc_tkt);
+        if (ret)
+            goto cleanup;
+
+        assert(privsvr != NULL);
+        ret = add_ticket_signature(context, pac, der_enc_tkt, privsvr);
+        if (ret)
+            goto cleanup;
+    }
+
+    ret = krb5_pac_sign_ext(context, pac, enc_tkt->times.authtime,
+                            client_princ, server, privsvr, with_realm,
+                            &pac_data);
+    if (ret)
+        goto cleanup;
+
+    /* Replace the dummy PAC with the signed real one. */
+    ret = encode_pac_ad(context, &pac_data, &pac_ad);
+    if (ret)
+        goto cleanup;
+    free(list[0]->contents);
+    free(list[0]);
+    list[0] = pac_ad;
+
+cleanup:
+    krb5_free_data(context, der_enc_tkt);
+    krb5_free_data_contents(context, &pac_data);
+    return ret;
 }

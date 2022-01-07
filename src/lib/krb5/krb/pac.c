@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "authdata.h"
 
 /* draft-brezak-win2k-krb-authz-00 */
@@ -537,8 +538,10 @@ k5_pac_verify_server_checksum(krb5_context context,
     checksum.checksum_type = load_32_le(p);
     checksum.length = checksum_data.length - PAC_SIGNATURE_DATA_LENGTH;
     checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
+    if (checksum.checksum_type == CKSUMTYPE_SHA1)
+        return KRB5KDC_ERR_SUMTYPE_NOSUPP;
     if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
-        return KRB5KRB_AP_ERR_INAPP_CKSUM;
+        return KRB5KRB_ERR_GENERIC;
 
     pac_data.length = pac->data.length;
     pac_data.data = k5memdup(pac->data.data, pac->data.length, &ret);
@@ -571,7 +574,7 @@ k5_pac_verify_server_checksum(krb5_context context,
     }
 
     if (valid == FALSE)
-        ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        ret = KRB5KRB_AP_ERR_MODIFIED;
 
     return ret;
 }
@@ -607,7 +610,7 @@ k5_pac_verify_kdc_checksum(krb5_context context,
     p = (krb5_octet *)privsvr_checksum.data;
     checksum.checksum_type = load_32_le(p);
     if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
-        return KRB5KRB_AP_ERR_INAPP_CKSUM;
+        return KRB5KRB_ERR_GENERIC;
 
     /* There may be an RODCIdentifier trailer (see [MS-PAC] 2.8), so look up
      * the length of the checksum by its type. */
@@ -629,8 +632,145 @@ k5_pac_verify_kdc_checksum(krb5_context context,
         return ret;
 
     if (valid == FALSE)
-        ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        ret = KRB5KRB_AP_ERR_MODIFIED;
 
+    return ret;
+}
+
+static krb5_error_code
+verify_ticket_checksum(krb5_context context, const krb5_pac pac,
+                       const krb5_data *ticket, const krb5_keyblock *privsvr)
+{
+    krb5_error_code ret;
+    krb5_checksum checksum;
+    krb5_data checksum_data;
+    krb5_boolean valid;
+    krb5_octet *p;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_TICKET_CHECKSUM,
+                               &checksum_data);
+    if (ret != 0)
+        return KRB5KRB_AP_ERR_MODIFIED;
+
+    if (checksum_data.length < PAC_SIGNATURE_DATA_LENGTH)
+        return KRB5_BAD_MSIZE;
+
+    p = (krb5_octet *)checksum_data.data;
+    checksum.checksum_type = load_32_le(p);
+    checksum.length = checksum_data.length - PAC_SIGNATURE_DATA_LENGTH;
+    checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
+    if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
+        return KRB5KRB_ERR_GENERIC;
+
+    ret = krb5_c_verify_checksum(context, privsvr,
+                                 KRB5_KEYUSAGE_APP_DATA_CKSUM, ticket,
+                                 &checksum, &valid);
+    if (ret != 0)
+        return ret;
+
+    return valid ? 0 : KRB5KRB_AP_ERR_MODIFIED;
+}
+
+/* Per MS-PAC 2.8.3, tickets encrypted to TGS and password change principals
+ * should not have ticket signatures. */
+krb5_boolean
+k5_pac_should_have_ticket_signature(krb5_const_principal sprinc)
+{
+    if (IS_TGS_PRINC(sprinc))
+        return FALSE;
+    if (sprinc->length == 2 && data_eq_string(sprinc->data[0], "kadmin") &&
+        data_eq_string(sprinc->data[1], "changepw"))
+        return FALSE;
+    return TRUE;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
+                       krb5_const_principal server_princ,
+                       const krb5_keyblock *server,
+                       const krb5_keyblock *privsvr, krb5_pac *pac_out)
+{
+    krb5_error_code ret;
+    krb5_pac pac = NULL;
+    krb5_data *recoded_tkt = NULL;
+    krb5_authdata **authdata, *orig, **ifrel = NULL, **recoded_ifrel = NULL;
+    uint8_t z = 0;
+    krb5_authdata zpac = { KV5M_AUTHDATA, KRB5_AUTHDATA_WIN2K_PAC, 1, &z };
+    size_t i, j;
+
+    *pac_out = NULL;
+
+    /*
+     * Find the position of the PAC in the ticket authdata.  ifrel will be the
+     * decoded AD-IF-RELEVANT container at position i containing a PAC, and j
+     * will be the offset within the container.
+     */
+    authdata = enc_tkt->authorization_data;
+    for (i = 0; authdata != NULL && authdata[i] != NULL; i++) {
+        if (authdata[i]->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
+            continue;
+
+        ret = krb5_decode_authdata_container(context,
+                                             KRB5_AUTHDATA_IF_RELEVANT,
+                                             authdata[i], &ifrel);
+        if (ret)
+            goto cleanup;
+
+        for (j = 0; ifrel[j] != NULL; j++) {
+            if (ifrel[j]->ad_type == KRB5_AUTHDATA_WIN2K_PAC)
+                break;
+        }
+        if (ifrel[j] != NULL)
+            break;
+
+        krb5_free_authdata(context, ifrel);
+        ifrel = NULL;
+    }
+
+    /* Stop and return successfully if we didn't find a PAC. */
+    if (ifrel == NULL) {
+        ret = 0;
+        goto cleanup;
+    }
+
+    ret = krb5_pac_parse(context, ifrel[j]->contents, ifrel[j]->length, &pac);
+    if (ret)
+        goto cleanup;
+
+    if (privsvr != NULL && k5_pac_should_have_ticket_signature(server_princ)) {
+        /* To check the PAC ticket signatures, re-encode the ticket with the
+         * PAC contents replaced by a single zero. */
+        orig = ifrel[j];
+        ifrel[j] = &zpac;
+        ret = krb5_encode_authdata_container(context,
+                                             KRB5_AUTHDATA_IF_RELEVANT,
+                                             ifrel, &recoded_ifrel);
+        ifrel[j] = orig;
+        if (ret)
+            goto cleanup;
+        orig = authdata[i];
+        authdata[i] = recoded_ifrel[0];
+        ret = encode_krb5_enc_tkt_part(enc_tkt, &recoded_tkt);
+        authdata[i] = orig;
+        if (ret)
+            goto cleanup;
+
+        ret = verify_ticket_checksum(context, pac, recoded_tkt, privsvr);
+        if (ret)
+            goto cleanup;
+    }
+
+    ret = krb5_pac_verify_ext(context, pac, enc_tkt->times.authtime, NULL,
+                              server, privsvr, FALSE);
+
+    *pac_out = pac;
+    pac = NULL;
+
+cleanup:
+    krb5_pac_free(context, pac);
+    krb5_free_data(context, recoded_tkt);
+    krb5_free_authdata(context, ifrel);
+    krb5_free_authdata(context, recoded_ifrel);
     return ret;
 }
 

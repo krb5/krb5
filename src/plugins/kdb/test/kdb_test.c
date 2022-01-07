@@ -700,7 +700,7 @@ verify_kdc_signature(krb5_context context, krb5_pac pac,
     int tries;
 
     ret = krb5_pac_verify(context, pac, 0, NULL, NULL, tgt_key);
-    if (ret != KRB5KRB_AP_ERR_BAD_INTEGRITY)
+    if (ret != KRB5KRB_AP_ERR_MODIFIED)
         return ret;
 
     kvno = tgt->key_data[0].key_data_kvno - 1;
@@ -709,7 +709,7 @@ verify_kdc_signature(krb5_context context, krb5_pac pac,
     for (tries = 2; tries > 0 && kvno > 0; tries--, kvno--) {
         ret = krb5_dbe_find_enctype(context, tgt, -1, -1, kvno, &kd);
         if (ret)
-            return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+            return KRB5KRB_AP_ERR_MODIFIED;
         ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
         if (ret)
             return ret;
@@ -722,7 +722,7 @@ verify_kdc_signature(krb5_context context, krb5_pac pac,
         kvno = kd->key_data_kvno - 1;
     }
 
-    return KRB5KRB_AP_ERR_BAD_INTEGRITY;
+    return KRB5KRB_AP_ERR_MODIFIED;
 }
 
 static krb5_error_code

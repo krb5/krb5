@@ -395,4 +395,7 @@ k5_sname_wildcard_host(krb5_context context, krb5_const_principal mprinc);
 krb5_int32
 k5_infer_principal_type(krb5_principal princ);
 
+krb5_boolean
+k5_pac_should_have_ticket_signature(krb5_const_principal sprinc);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

@@ -1875,7 +1875,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_AUTHDATA_CAMMAC    96
 #define KRB5_AUTHDATA_WIN2K_PAC 128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION 129     /**< RFC 4537 */
-#define KRB5_AUTHDATA_SIGNTICKET        512     /**< formerly 142 in krb5 1.8 */
+#define KRB5_AUTHDATA_SIGNTICKET        512     /**< @deprecated use PAC */
 #define KRB5_AUTHDATA_FX_ARMOR 71
 #define KRB5_AUTHDATA_AUTH_INDICATOR 97
 #define KRB5_AUTHDATA_AP_OPTIONS 143
@@ -8152,6 +8152,12 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
 #define KRB5_PAC_CLIENT_INFO       10 /**< Client name and ticket info */
 #define KRB5_PAC_DELEGATION_INFO   11 /**< Constrained delegation info */
 #define KRB5_PAC_UPN_DNS_INFO      12 /**< User principal name and DNS info */
+#define KRB5_PAC_CLIENT_CLAIMS     13 /**< Client claims information */
+#define KRB5_PAC_DEVICE_INFO       14 /**< Device information */
+#define KRB5_PAC_DEVICE_CLAIMS     15 /**< Device claims information */
+#define KRB5_PAC_TICKET_CHECKSUM   16 /**< Ticket checksum */
+#define KRB5_PAC_ATTRIBUTES_INFO   17 /**< PAC attributes */
+#define KRB5_PAC_REQUESTOR         18 /**< PAC requestor SID */
 
 struct krb5_pac_data;
 /** PAC data structure to convey authorization information */
@@ -8309,47 +8315,46 @@ krb5_pac_verify_ext(krb5_context context, const krb5_pac pac,
                     krb5_boolean with_realm);
 
 /**
- * Sign a PAC.
+ * Verify a PAC, possibly including ticket signature
  *
- * @param [in]  context         Library context
- * @param [in]  pac             PAC handle
- * @param [in]  authtime        Expected timestamp
- * @param [in]  principal       Expected principal name (or NULL)
- * @param [in]  server_key      Key for server checksum
- * @param [in]  privsvr_key     Key for KDC checksum
- * @param [out] data            Signed PAC encoding
+ * @param [in] context          Library context
+ * @param [in] enc_tkt          Ticket enc-part, possibly containing a PAC
+ * @param [in] server_princ     Canonicalized name of ticket server
+ * @param [in] server           Key to validate server checksum (or NULL)
+ * @param [in] privsvr          Key to validate KDC checksum (or NULL)
+ * @param [out] pac_out         Verified PAC (NULL if no PAC included)
  *
- * This function signs @a pac using the keys @a server_key and @a privsvr_key
- * and returns the signed encoding in @a data.  @a pac is modified to include
- * the server and KDC checksum buffers.  Use krb5_free_data_contents() to free
- * @a data when it is no longer needed.
+ * If a PAC is present in @a enc_tkt, verify its signatures.  If @a privsvr is
+ * not NULL and @a server_princ is not a krbtgt or kadmin/changepw service,
+ * require a ticket signature over @a enc_tkt in addition to the KDC signature.
+ * Place the verified PAC in @a pac_out.  If an invalid PAC signature is found,
+ * return an error matching the Windows KDC protocol code for that condition as
+ * closely as possible.
  *
- * @version New in 1.10
+ * If no PAC is present in @a enc_tkt, set @a pac_out to NULL and return
+ * successfully.
+ *
+ * @note This function does not validate the PAC_CLIENT_INFO buffer.  If a
+ * specific value is expected, the caller can make a separate call to
+ * krb5_pac_verify_ext() with a principal but no keys.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ *
+ * @version New in 1.20
  */
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
+                       krb5_const_principal server_princ,
+                       const krb5_keyblock *server,
+                       const krb5_keyblock *privsvr, krb5_pac *pac_out);
+
+/** @deprecated Use krb5_kdc_sign_ticket() instead. */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
               krb5_const_principal principal, const krb5_keyblock *server_key,
               const krb5_keyblock *privsvr_key, krb5_data *data);
 
-/**
- * Sign a PAC, possibly with a specified realm.
- *
- * @param [in]  context         Library context
- * @param [in]  pac             PAC handle
- * @param [in]  authtime        Expected timestamp
- * @param [in]  principal       Principal name (or NULL)
- * @param [in]  server_key      Key for server checksum
- * @param [in]  privsvr_key     Key for KDC checksum
- * @param [in]  with_realm      If true, include the realm of @a principal
- * @param [out] data            Signed PAC encoding
- *
- * This function is similar to krb5_pac_sign(), but adds a parameter
- * @a with_realm.  If @a with_realm is true, the PAC_CLIENT_INFO field of the
- * signed PAC will include the realm of @a principal as well as the name.  This
- * flag is necessary to generate PACs for cross-realm S4U2Self referrals.
- *
- * @version New in 1.17
- */
+/** @deprecated Use krb5_kdc_sign_ticket() instead. */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
                   krb5_const_principal principal,
@@ -8357,8 +8362,37 @@ krb5_pac_sign_ext(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
                   const krb5_keyblock *privsvr_key, krb5_boolean with_realm,
                   krb5_data *data);
 
+/**
+ * Sign a PAC, possibly including a ticket signature
+ *
+ * @param [in]  context         Library context
+ * @param [in]  enc_tkt         The ticket for the signature
+ * @param [in]  pac             PAC handle
+ * @param [in]  server_princ    Canonical ticket server name
+ * @param [in]  client_princ    PAC_CLIENT_INFO principal (or NULL)
+ * @param [in]  server          Key for server checksum
+ * @param [in]  privsvr         Key for KDC and ticket checksum
+ * @param [in]  with_realm      If true, include the realm of @a principal
+ *
+ * Sign @a pac using the keys @a server and @a privsvr.  Include a ticket
+ * signature over @a enc_tkt if @a server_princ is not a TGS or kadmin/changepw
+ * principal name.  Add the signed PAC's encoding to the authorization data of
+ * @a enc_tkt in the first slot, wrapped in an AD-IF-RELEVANT container.  If @a
+ * client_princ is non-null, add a PAC_CLIENT_INFO buffer, including the realm
+ * if @a with_realm is true.
+ *
+ * @retval 0 on success, otherwise - Kerberos error codes
+ *
+ * @version New in 1.20
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_sign_ticket(krb5_context context, krb5_enc_tkt_part *enc_tkt,
+                     const krb5_pac pac, krb5_const_principal server_princ,
+                     krb5_const_principal client_princ,
+                     const krb5_keyblock *server, const krb5_keyblock *privsvr,
+                     krb5_boolean with_realm);
 
-/*
+/**
  * Read client information from a PAC.
  *
  * @param [in]  context         Library context
