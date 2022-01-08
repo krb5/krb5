@@ -260,7 +260,7 @@ check_tgs_lineage(krb5_db_entry *server, krb5_ticket *tkt,
 
 static int
 check_tgs_s4u2self(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
-                   krb5_db_entry *server, krb5_ticket *tkt,
+                   krb5_db_entry *server, krb5_ticket *tkt, krb5_pac pac,
                    krb5_timestamp kdc_time,
                    krb5_pa_s4u_x509_user *s4u_x509_user, krb5_db_entry *client,
                    krb5_boolean is_crossrealm, krb5_boolean is_referral,
@@ -272,7 +272,7 @@ check_tgs_s4u2self(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
     if (!is_referral &&
         !is_client_db_alias(kdc_context, server, tkt->enc_part2->client)) {
         *status = "INVALID_S4U2SELF_REQUEST_SERVER_MISMATCH";
-        return KDC_ERR_C_PRINCIPAL_UNKNOWN; /* match Windows error */
+        return KRB_AP_ERR_BADMATCH;
     }
 
     /* S4U2Self requests must use options valid for AS requests. */
@@ -325,26 +325,115 @@ check_tgs_s4u2self(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
         return KDC_ERR_POLICY; /* match Windows error */
     }
 
+    /* The header ticket PAC must be present. */
+    if (pac == NULL) {
+        *status = "S4U2SELF_NO_PAC";
+        return KDC_ERR_TGT_REVOKED;
+    }
+
     if (client != NULL) {
+        /* The header ticket PAC must be for the impersonator. */
+        if (krb5_pac_verify(kdc_context, pac, tkt->enc_part2->times.authtime,
+                            tkt->enc_part2->client, NULL, NULL) != 0) {
+            *status = "S4U2SELF_LOCAL_PAC_CLIENT";
+            return KDC_ERR_BADOPTION;
+        }
+
         /* Validate the client policy.  Use an empty server principal to bypass
          * server policy checks. */
         return validate_as_request(kdc_active_realm, req, client,
                                    &empty_server, kdc_time, status, e_data);
+    } else {
+        /* The header ticket PAC must be for the subject, with realm. */
+        if (krb5_pac_verify_ext(kdc_context, pac,
+                                tkt->enc_part2->times.authtime,
+                                s4u_x509_user->user_id.user, NULL, NULL,
+                                TRUE) != 0) {
+            *status = "S4U2SELF_FOREIGN_PAC_CLIENT";
+            return KDC_ERR_BADOPTION;
+        }
     }
 
     return 0;
 }
 
+/*
+ * Validate pac as an S4U2Proxy subject PAC contained within a cross-realm TGT.
+ * If target_server is non-null, verify that it matches the PAC proxy target.
+ * Return 0 on success, non-zero on failure.
+ */
+static int
+verify_deleg_pac(krb5_context context, krb5_pac pac,
+                 krb5_enc_tkt_part *enc_tkt,
+                 krb5_const_principal target_server)
+{
+    krb5_timestamp pac_authtime;
+    krb5_data deleg_buf = empty_data();
+    krb5_principal princ = NULL;
+    struct pac_s4u_delegation_info *di = NULL;
+    char *client_str = NULL, *target_str = NULL;
+    const char *last_transited;
+    int result = -1;
+
+    /* Make sure the PAC client string can be parsed as a principal with
+     * realm. */
+    if (get_pac_princ_with_realm(context, pac, &princ, &pac_authtime) != 0)
+        goto cleanup;
+    if (pac_authtime != enc_tkt->times.authtime)
+        goto cleanup;
+
+    if (krb5_pac_get_buffer(context, pac, KRB5_PAC_DELEGATION_INFO,
+                            &deleg_buf) != 0)
+        goto cleanup;
+
+    if (ndr_dec_delegation_info(&deleg_buf, &di) != 0)
+        goto cleanup;
+
+    if (target_server != NULL) {
+        if (krb5_unparse_name_flags(context, target_server,
+                                    KRB5_PRINCIPAL_UNPARSE_DISPLAY |
+                                    KRB5_PRINCIPAL_UNPARSE_NO_REALM,
+                                    &target_str) != 0)
+            goto cleanup;
+        if (strcmp(target_str, di->proxy_target) != 0)
+            goto cleanup;
+    }
+
+    /* Check that the most recently added PAC transited service matches the
+     * requesting impersonator. */
+    if (di->transited_services_length == 0)
+        goto cleanup;
+    if (krb5_unparse_name(context, enc_tkt->client, &client_str) != 0)
+        goto cleanup;
+    last_transited = di->transited_services[di->transited_services_length - 1];
+    if (strcmp(last_transited, client_str) != 0)
+        goto cleanup;
+
+    result = 0;
+
+cleanup:
+    free(target_str);
+    free(client_str);
+    ndr_free_delegation_info(di);
+    krb5_free_principal(context, princ);
+    krb5_free_data_contents(context, &deleg_buf);
+    return result;
+}
+
 static int
 check_tgs_s4u2proxy(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
-                    krb5_db_entry *server, krb5_ticket *tkt,
-                    const krb5_ticket *stkt, krb5_db_entry *stkt_server,
-                    krb5_boolean is_crossrealm, krb5_boolean is_referral,
-                    const char **status)
+                    krb5_db_entry *server, krb5_ticket *tkt, krb5_pac pac,
+                    const krb5_ticket *stkt, krb5_pac stkt_pac,
+                    krb5_db_entry *stkt_server, krb5_boolean is_crossrealm,
+                    krb5_boolean is_referral, const char **status)
 {
-    /* A second ticket must be present in the request. */
+    /* A forwardable second ticket must be present in the request. */
     if (stkt == NULL) {
         *status = "NO_2ND_TKT";
+        return KDC_ERR_BADOPTION;
+    }
+    if (!(stkt->enc_part2->flags & TKT_FLG_FORWARDABLE)) {
+        *status = "EVIDENCE_TKT_NOT_FORWARDABLE";
         return KDC_ERR_BADOPTION;
     }
 
@@ -361,6 +450,17 @@ check_tgs_s4u2proxy(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
         return KDC_ERR_POLICY;
     }
 
+    /* The header ticket PAC must be present and for the impersonator. */
+    if (pac == NULL) {
+        *status = "S4U2PROXY_NO_HEADER_PAC";
+        return KDC_ERR_TGT_REVOKED;
+    }
+    if (krb5_pac_verify(kdc_context, pac, tkt->enc_part2->times.authtime,
+                        tkt->enc_part2->client, NULL, NULL) != 0) {
+        *status = "S4U2PROXY_HEADER_PAC";
+        return KDC_ERR_BADOPTION;
+    }
+
     /*
      * An S4U2Proxy request must be an initial request to the impersonator's
      * realm (possibly for a target resource in the same realm), or a final
@@ -368,27 +468,51 @@ check_tgs_s4u2proxy(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
      * referral-chasing requests do not use the CNAME-IN-ADDL-TKT flag.
      */
 
-    /* For an initial or same-realm request, the second ticket server and
-     * header ticket client must be the same principal. */
-    if (!is_crossrealm && !is_client_db_alias(kdc_context, stkt_server,
-                                              tkt->enc_part2->client)) {
-        *status = "EVIDENCE_TICKET_MISMATCH";
-        return KDC_ERR_SERVER_NOMATCH;
+    if (stkt_pac == NULL) {
+        *status = "S4U2PROXY_NO_STKT_PAC";
+        return KRB_AP_ERR_MODIFIED;
     }
+    if (!is_crossrealm) {
+        /* For an initial or same-realm request, the second ticket server and
+         * header ticket client must be the same principal. */
+        if (!is_client_db_alias(kdc_context, stkt_server,
+                                tkt->enc_part2->client)) {
+            *status = "EVIDENCE_TICKET_MISMATCH";
+            return KDC_ERR_SERVER_NOMATCH;
+        }
 
-    /*
-     * For a cross-realm request, the second ticket must be a referral TGT to
-     * our realm with the impersonator as client.  (Unlike the header ticket,
-     * the second ticket contains authdata for the subject client.)  The target
-     * server must also be local, so we must not be issuing a referral.
-     */
-    if (is_crossrealm &&
-        (is_referral || !is_cross_tgs_principal(stkt_server->princ) ||
-         !data_eq(stkt_server->princ->data[1], server->princ->realm) ||
-         !krb5_principal_compare(kdc_context, stkt->enc_part2->client,
-                                 tkt->enc_part2->client))) {
-        *status = "XREALM_EVIDENCE_TICKET_MISMATCH";
-        return KDC_ERR_BADOPTION;
+        /* The second ticket client and PAC client are the subject, and must
+         * match. */
+        if (krb5_pac_verify(kdc_context, stkt_pac,
+                            stkt->enc_part2->times.authtime,
+                            stkt->enc_part2->client, NULL, NULL) != 0) {
+            *status = "S4U2PROXY_LOCAL_STKT_PAC";
+            return KDC_ERR_BADOPTION;
+        }
+
+    } else {
+
+        /*
+         * For a cross-realm request, the second ticket must be a referral TGT
+         * to our realm with the impersonator as client.  The target server
+         * must also be local, so we must not be issuing a referral.
+         */
+        if (is_referral || !is_cross_tgs_principal(stkt_server->princ) ||
+            !data_eq(stkt_server->princ->data[1], server->princ->realm) ||
+            !krb5_principal_compare(kdc_context, stkt->enc_part2->client,
+                                    tkt->enc_part2->client)) {
+            *status = "XREALM_EVIDENCE_TICKET_MISMATCH";
+            return KDC_ERR_BADOPTION;
+        }
+
+        /* The second ticket PAC must be present and for the impersonated
+         * client, with delegation info. */
+        if (stkt_pac == NULL ||
+            verify_deleg_pac(kdc_context, stkt_pac, stkt->enc_part2,
+                             req->server) != 0) {
+            *status = "S4U2PROXY_CROSS_STKT_PAC";
+            return KDC_ERR_BADOPTION;
+        }
     }
 
     return 0;
@@ -419,6 +543,32 @@ check_tgs_u2u(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
     }
 
     return 0;
+}
+
+/* Validate the PAC of a non-S4U TGS request, if one is present. */
+static int
+check_normal_tgs_pac(krb5_context context, krb5_enc_tkt_part *enc_tkt,
+                     krb5_pac pac, krb5_db_entry *server,
+                     krb5_boolean is_crossrealm, const char **status)
+{
+    /* We don't require a PAC for regular TGS requests. */
+    if (pac == NULL)
+        return 0;
+
+    /* For most requests the header ticket PAC will be for the ticket
+     * client. */
+    if (krb5_pac_verify(context, pac, enc_tkt->times.authtime, enc_tkt->client,
+                        NULL, NULL) == 0)
+        return 0;
+
+    /* For intermediate RBCD requests the header ticket PAC will be for the
+     * impersonated client. */
+    if (is_crossrealm && is_cross_tgs_principal(server->princ) &&
+        verify_deleg_pac(context, pac, enc_tkt, NULL) == 0)
+        return 0;
+
+    *status = "HEADER_PAC";
+    return KDC_ERR_BADOPTION;
 }
 
 /*
@@ -468,7 +618,8 @@ check_tgs_tgt(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
 int
 validate_tgs_request(kdc_realm_t *kdc_active_realm,
                      krb5_kdc_req *request, krb5_db_entry *server,
-                     krb5_ticket *ticket, const krb5_ticket *stkt,
+                     krb5_ticket *ticket, krb5_pac pac,
+                     const krb5_ticket *stkt, krb5_pac stkt_pac,
                      krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
                      krb5_pa_s4u_x509_user *s4u_x509_user,
                      krb5_db_entry *s4u2self_client,
@@ -508,9 +659,9 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
 
     if (s4u_x509_user != NULL) {
         errcode = check_tgs_s4u2self(kdc_active_realm, request, server, ticket,
-                                     kdc_time, s4u_x509_user, s4u2self_client,
-                                     is_crossrealm, is_referral,
-                                     status, e_data);
+                                     pac, kdc_time, s4u_x509_user,
+                                     s4u2self_client, is_crossrealm,
+                                     is_referral, status, e_data);
     } else {
         errcode = check_tgs_lineage(server, ticket, is_crossrealm, status);
     }
@@ -526,8 +677,13 @@ validate_tgs_request(kdc_realm_t *kdc_active_realm,
 
     if (request->kdc_options & KDC_OPT_CNAME_IN_ADDL_TKT) {
         errcode = check_tgs_s4u2proxy(kdc_active_realm, request, server,
-                                      ticket, stkt, stkt_server, is_crossrealm,
-                                      is_referral, status);
+                                      ticket, pac, stkt, stkt_pac, stkt_server,
+                                      is_crossrealm, is_referral, status);
+        if (errcode != 0)
+            return errcode;
+    } else if (s4u_x509_user == NULL) {
+        errcode = check_normal_tgs_pac(kdc_context, ticket->enc_part2, pac,
+                                       server, is_crossrealm, status);
         if (errcode != 0)
             return errcode;
     }

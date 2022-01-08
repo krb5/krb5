@@ -538,34 +538,6 @@ ktest_equal_ad_kdcissued(krb5_ad_kdcissued *ref, krb5_ad_kdcissued *var)
 }
 
 int
-ktest_equal_ad_signedpath_data(krb5_ad_signedpath_data *ref,
-                               krb5_ad_signedpath_data *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && ptr_equal(client,ktest_equal_principal_data);
-    p = p && scalar_equal(authtime);
-    p = p && ptr_equal(delegated,ktest_equal_sequence_of_principal);
-    p = p && ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
-    p = p && ptr_equal(authorization_data,ktest_equal_authorization_data);
-    return p;
-}
-
-int
-ktest_equal_ad_signedpath(krb5_ad_signedpath *ref, krb5_ad_signedpath *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && scalar_equal(enctype);
-    p = p && struct_equal(checksum,ktest_equal_checksum);
-    p = p && ptr_equal(delegated,ktest_equal_sequence_of_principal);
-    p = p && ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
-    return p;
-}
-
-int
 ktest_equal_iakerb_header(krb5_iakerb_header *ref, krb5_iakerb_header *var)
 {
     int p = TRUE;

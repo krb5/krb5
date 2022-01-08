@@ -520,6 +520,100 @@ cleanup:
     return ret;
 }
 
+/*
+ * If a PAC is present in enc_tkt, verify it and place it in *pac_out.  sprinc
+ * is the canonical name of the server principal entry used to decrypt enc_tkt.
+ * server_key is the ticket decryption key.  tgt is the local krbtgt entry for
+ * the ticket server realm, and tgt_key is its first key.
+ */
+krb5_error_code
+get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
+                 krb5_const_principal sprinc, krb5_keyblock *server_key,
+                 krb5_db_entry *tgt, krb5_keyblock *tgt_key, krb5_pac *pac_out)
+{
+    krb5_error_code ret;
+    krb5_key_data *kd;
+    krb5_keyblock old_key;
+    krb5_kvno kvno;
+    int tries;
+
+    *pac_out = NULL;
+
+    /* For local or cross-realm TGTs we only check the server signature. */
+    if (krb5_is_tgs_principal(sprinc)) {
+        return krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
+                                      NULL, pac_out);
+    }
+
+    ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
+                                 tgt_key, pac_out);
+    if (ret != KRB5KRB_AP_ERR_MODIFIED && ret != KRB5_BAD_ENCTYPE)
+        return ret;
+
+    /* There is no kvno in PAC signatures, so try two previous versions. */
+    kvno = tgt->key_data[0].key_data_kvno - 1;
+    for (tries = 2; tries > 0 && kvno > 0; tries--, kvno--) {
+        ret = krb5_dbe_find_enctype(context, tgt, -1, -1, kvno, &kd);
+        if (ret)
+            return KRB5KRB_AP_ERR_MODIFIED;
+        ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
+        if (ret)
+            return ret;
+        ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
+                                     &old_key, pac_out);
+        krb5_free_keyblock_contents(context, &old_key);
+        if (!ret)
+            return 0;
+    }
+
+    return KRB5KRB_AP_ERR_MODIFIED;
+}
+
+/*
+ * Fetch the client info from pac and parse it into a principal name, expecting
+ * a realm in the string.  Set *authtime_out to the client info authtime if it
+ * is not null.
+ */
+krb5_error_code
+get_pac_princ_with_realm(krb5_context context, krb5_pac pac,
+                         krb5_principal *princ_out,
+                         krb5_timestamp *authtime_out)
+{
+    krb5_error_code ret;
+    int n_atsigns, flags = KRB5_PRINCIPAL_PARSE_REQUIRE_REALM;
+    char *client_str = NULL;
+    const char *p;
+
+    *princ_out = NULL;
+
+    ret = krb5_pac_get_client_info(context, pac, authtime_out, &client_str);
+    if (ret)
+        return ret;
+
+    n_atsigns = 0;
+    for (p = client_str; *p != '\0'; p++) {
+        if (*p == '@')
+            n_atsigns++;
+    }
+
+    if (n_atsigns == 2) {
+        flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+    } else if (n_atsigns != 1) {
+        ret = KRB5_PARSE_MALFORMED;
+        goto cleanup;
+    }
+
+    ret = krb5_parse_name_flags(context, client_str, flags, princ_out);
+    if (ret)
+        return ret;
+
+    (*princ_out)->type = KRB5_NT_MS_PRINCIPAL;
+
+cleanup:
+    free(client_str);
+    return 0;
+}
+
 /* This probably wants to be updated if you support last_req stuff */
 
 static krb5_last_req_entry nolrentry = { KV5M_LAST_REQ_ENTRY, KRB5_LRQ_NONE, 0 };
@@ -1387,8 +1481,7 @@ is_client_db_alias(krb5_context context, const krb5_db_entry *entry,
     krb5_db_entry *self;
     krb5_boolean is_self = FALSE;
 
-    ret = krb5_db_get_principal(context, princ,
-                                KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY, &self);
+    ret = krb5_db_get_principal(context, princ, KRB5_KDB_FLAG_CLIENT, &self);
     if (!ret) {
         is_self = krb5_principal_compare(context, entry->princ, self->princ);
         krb5_db_free_principal(context, self);
@@ -1451,7 +1544,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
         if (id->subject_cert.length != 0) {
             code = krb5_db_get_s4u_x509_principal(kdc_context,
                                                   &id->subject_cert, id->user,
-                                                  KRB5_KDB_FLAG_INCLUDE_PAC,
+                                                  KRB5_KDB_FLAG_CLIENT,
                                                   &princ);
             if (code == 0 && id->user->length == 0) {
                 krb5_free_principal(kdc_context, id->user);
@@ -1460,7 +1553,7 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
             }
         } else {
             code = krb5_db_get_principal(kdc_context, id->user,
-                                         KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
+                                         KRB5_KDB_FLAG_CLIENT, &princ);
         }
         if (code == KRB5_KDB_NOENTRY) {
             *status = "UNKNOWN_S4U2SELF_PRINCIPAL";
@@ -1481,6 +1574,29 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
     return 0;
 }
 
+/* Clear the forwardable flag in tkt if server cannot obtain forwardable
+ * S4U2Self tickets according to [MS-SFU] 3.2.5.1.2. */
+krb5_error_code
+s4u2self_forwardable(krb5_context context, krb5_db_entry *server,
+                     krb5_enc_tkt_part *tkt)
+{
+    krb5_error_code ret;
+
+    /* Allow the forwardable flag if server has ok-to-auth-as-delegate set. */
+    if (server->attributes & KRB5_KDB_OK_TO_AUTH_AS_DELEGATE)
+        return 0;
+
+    /* Deny the forwardable flag if server has any authorized delegation
+     * targets for traditional S4U2Proxy. */
+    ret = krb5_db_check_allowed_to_delegate(context, NULL, server, NULL);
+    if (!ret)
+        tkt->flags &= ~TKT_FLG_FORWARDABLE;
+
+    if (ret == KRB5KDC_ERR_BADOPTION || ret == KRB5_PLUGIN_OP_NOTSUPP)
+        return 0;
+    return ret;
+}
+
 /*
  * Determine if an S4U2Proxy request is authorized.  Set **stkt_ad_info to the
  * KDB authdata handle for the second ticket if the KDB module supplied one.
@@ -1489,97 +1605,80 @@ kdc_process_s4u2self_req(kdc_realm_t *kdc_active_realm,
  */
 krb5_error_code
 kdc_process_s4u2proxy_req(kdc_realm_t *kdc_active_realm, unsigned int flags,
-                          krb5_kdc_req *request,
-                          const krb5_enc_tkt_part *t2enc,
-                          krb5_db_entry *krbtgt, krb5_keyblock *krbtgt_key,
+                          krb5_kdc_req *request, krb5_pac header_pac,
+                          const krb5_enc_tkt_part *t2enc, krb5_pac t2_pac,
                           const krb5_db_entry *server,
                           krb5_keyblock *server_key,
                           krb5_const_principal server_princ,
                           const krb5_db_entry *proxy,
-                          krb5_const_principal proxy_princ,
-                          void *ad_info, void **stkt_ad_info,
-                          krb5_principal *stkt_authdata_client,
+                          krb5_principal *stkt_pac_client,
                           const char **status)
 {
     krb5_error_code errcode;
     krb5_boolean support_rbcd;
-    krb5_principal client_princ = t2enc->client;
+    krb5_principal client_princ = t2enc->client, t2_pac_princ = NULL;
+
+    *stkt_pac_client = NULL;
 
     /* Check if the client supports resource-based constrained delegation. */
     errcode = kdc_get_pa_pac_rbcd(kdc_context, request->padata, &support_rbcd);
     if (errcode)
         return errcode;
 
-    errcode = krb5_db_get_authdata_info(kdc_context, flags,
-                                        t2enc->authorization_data,
-                                        t2enc->client, proxy_princ, server_key,
-                                        krbtgt_key, krbtgt,
-                                        t2enc->times.authtime, stkt_ad_info,
-                                        stkt_authdata_client);
-    if (errcode != 0 && errcode != KRB5_PLUGIN_OP_NOTSUPP) {
-        *status = "NOT_ALLOWED_TO_DELEGATE";
-        return errcode;
-    }
-
-    /* For RBCD we require that both client and impersonator's authdata have
-     * been verified. */
-    if (errcode != 0 || ad_info == NULL)
-        support_rbcd = FALSE;
-
-    /* For an RBCD final request, the KDB module must be able to recover the
-     * reply ticket client name from the evidence ticket authorization data. */
-    if (isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM)) {
-        if (*stkt_authdata_client == NULL ||
-            (*stkt_authdata_client)->realm.length == 0) {
-            *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-            return KRB5KDC_ERR_BADOPTION;
+    /* For an RBCD final request, recover the reply ticket client name from
+     * the evidence ticket PAC. */
+    if (flags & KRB5_KDB_FLAG_CROSS_REALM) {
+        if (get_pac_princ_with_realm(kdc_context, t2_pac, &t2_pac_princ,
+                                     NULL) != 0) {
+            *status = "RBCD_PAC_PRINC";
+            errcode = KRB5KDC_ERR_BADOPTION;
+            goto done;
         }
-
-        client_princ = *stkt_authdata_client;
+        client_princ = t2_pac_princ;
     }
 
     /* If both are in the same realm, try allowed_to_delegate first. */
-    if (krb5_realm_compare(kdc_context, server->princ, proxy_princ)) {
+    if (krb5_realm_compare(kdc_context, server->princ, request->server)) {
 
         errcode = krb5_db_check_allowed_to_delegate(kdc_context, client_princ,
-                                                    server, proxy_princ);
-        if (errcode != 0 && errcode != KRB5KDC_ERR_POLICY &&
+                                                    server, request->server);
+        if (errcode != KRB5KDC_ERR_BADOPTION &&
             errcode != KRB5_PLUGIN_OP_NOTSUPP)
-            return errcode;
+            goto done;
 
-        if (errcode == 0) {
-
-            /*
-             * In legacy constrained-delegation, the evidence ticket must be
-             * forwardable.  This check deliberately causes an error response
-             * even if the delegation is also authorized by resource-based
-             * constrained delegation (which does not require a forwardable
-             * evidence ticket).  Windows KDCs behave the same way.
-             */
-            if (!isflagset(t2enc->flags, TKT_FLG_FORWARDABLE)) {
-                *status = "EVIDENCE_TKT_NOT_FORWARDABLE";
-                return KRB5KDC_ERR_BADOPTION;
-            }
-
-            return 0;
-        }
         /* Fall back to resource-based constrained-delegation. */
     }
 
     if (!support_rbcd) {
         *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-        return KRB5KDC_ERR_BADOPTION;
+        errcode = KRB5KDC_ERR_BADOPTION;
+        goto done;
     }
 
     /* If we are issuing a referral, the KDC in the resource realm will check
      * if delegation is allowed. */
-    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL))
-        return 0;
+    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
+        errcode = 0;
+        goto done;
+    }
 
     errcode = krb5_db_allowed_to_delegate_from(kdc_context, client_princ,
-                                               server_princ, ad_info, proxy);
-    if (errcode)
+                                               server_princ, header_pac,
+                                               proxy);
+    if (errcode == KRB5_PLUGIN_OP_NOTSUPP) {
+        *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
+        errcode = KRB5KDC_ERR_BADOPTION;
+        goto done;
+    } else if (errcode) {
         *status = "NOT_ALLOWED_TO_DELEGATE";
+        goto done;
+    }
+
+    *stkt_pac_client = t2_pac_princ;
+    t2_pac_princ = NULL;
+
+done:
+    krb5_free_principal(kdc_context, t2_pac_princ);
     return errcode;
 }
 
