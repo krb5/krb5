@@ -256,6 +256,7 @@ local.properties
 /src/kdc/kdc5_err.[ch]
 /src/kdc/krb5kdc
 /src/kdc/rtest
+/src/kdc/t_ndr
 /src/kdc/t_replay
 
 /src/lib/k5sprt32.def
