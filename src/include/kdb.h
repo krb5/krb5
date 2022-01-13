@@ -1421,8 +1421,7 @@ typedef struct _kdb_vftabl {
      * the Kerberos password or long-term key was not used.  The module may use
      * this key to encrypt a PAC_CREDENTIALS_INFO buffer containing credentials
      * (such as an NTLM hash) that the client would ordinarily derive from the
-     * Kerberos password or long-term key.  (Note: this feature is not yet
-     * implemented and the caller will always pass NULL until it is.)
+     * Kerberos password or long-term key.
      *
      * server is the database entry of the server the ticket will be issued to,
      * which may be a referral TGS.

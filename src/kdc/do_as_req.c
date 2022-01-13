@@ -201,6 +201,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     void *oldarg;
     kdc_realm_t *kdc_active_realm = state->active_realm;
     krb5_audit_state *au_state = state->au_state;
+    krb5_keyblock *replaced_reply_key = NULL;
 
     assert(state);
     oldrespond = state->respond;
@@ -262,10 +263,14 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         goto egress;
     }
 
+    if (state->rock.replaced_reply_key)
+        replaced_reply_key = &state->client_keyblock;
+
     errcode = handle_authdata(kdc_active_realm, state->c_flags, state->client,
                               state->server, NULL, state->local_tgt,
                               &state->local_tgt_key, &state->client_keyblock,
-                              &state->server_keyblock, NULL, state->req_pkt,
+                              &state->server_keyblock, NULL,
+                              replaced_reply_key, state->req_pkt,
                               state->request, NULL, NULL, NULL,
                               &state->auth_indicators, &state->enc_tkt_reply);
     if (errcode) {

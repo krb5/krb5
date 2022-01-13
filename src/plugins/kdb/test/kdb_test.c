@@ -656,6 +656,14 @@ test_issue_pac(krb5_context context, unsigned int flags, krb5_db_entry *client,
         data = string2data("fake");
         check(krb5_pac_add_buffer(context, new_pac, KRB5_PAC_LOGON_INFO,
                                   &data));
+
+        if (replaced_reply_key != NULL) {
+            /* Add a fake PAC_CREDENTIALS_INFO buffer so we can test whether
+             * this parameter was set. */
+            data = string2data("fake credinfo");
+            check(krb5_pac_add_buffer(context, new_pac,
+                                      KRB5_PAC_CREDENTIALS_INFO, &data));
+        }
         return 0;
     } else {
         /* Field copying - my favorite! */

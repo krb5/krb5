@@ -11,7 +11,7 @@ realm = K5Realm(krb5_conf=conf)
 # container.
 mark('baseline authdata')
 out = realm.run(['./adata', realm.host_princ])
-if '?128: ' not in out or '^-42: Hello' not in out:
+if '?128: [6, 7, 10, 16]' not in out or '^-42: Hello' not in out:
     fail('expected authdata not seen for basic request')
 
 # Requested authdata is copied into the ticket, with KDC-only types
@@ -181,7 +181,8 @@ realm.stop()
 realm2.stop()
 
 # Load the test KDB module to allow successful S4U2Proxy
-# auth-indicator requests.
+# auth-indicator requests and to detect whether replaced_reply_key is
+# set.
 testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'krbtgt/FOREIGN': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
@@ -197,7 +198,8 @@ kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'princs': testprincs,
                                   'delegation': {'service/1': 'service/2'}}}}
-realm = K5Realm(krb5_conf=krb5conf, kdc_conf=kdcconf, create_kdb=False)
+realm = K5Realm(krb5_conf=krb5conf, kdc_conf=kdcconf, create_kdb=False,
+                pkinit=True)
 usercache = 'FILE:' + os.path.join(realm.testdir, 'usercache')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.extract_keytab('krbtgt/FOREIGN', realm.keytab)
@@ -207,6 +209,17 @@ realm.extract_keytab('service/1', realm.keytab)
 realm.extract_keytab('service/2', realm.keytab)
 realm.extract_keytab('noauthdata', realm.keytab)
 realm.start_kdc()
+
+if not pkinit_enabled:
+    skipped('replaced_reply_key test', 'PKINIT not built')
+else:
+    # Check that replaced_reply_key is set in issue_pac() when PKINIT
+    # is used.  The test KDB module will indicate this by including a
+    # fake PAC_CREDENTIAL_INFO(2) buffer in the PAC.
+    mark('PKINIT (replaced_reply_key set)')
+    realm.pkinit(realm.user_princ)
+    realm.run(['./adata', realm.krbtgt_princ],
+              expected_msg='?128: [1, 2, 6, 7, 10]')
 
 # S4U2Self (should have no indicators since client did not authenticate)
 mark('S4U2Self (no auth indicators expected)')
@@ -229,6 +242,9 @@ realm.run(['./s4u2proxy', usercache, 'service/2'])
 out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
+# Make sure a PAC with an S4U_DELEGATION_INFO(11) buffer is included.
+if '?128: [1, 6, 7, 10, 11, 16]' not in out:
+    fail('PAC with delegation info not seen for S4U2Proxy req')
 
 # Get another S4U2Proxy ticket including request-authdata.
 realm.run(['./s4u2proxy', usercache, 'service/2', '-2', 'proxy_ad'])

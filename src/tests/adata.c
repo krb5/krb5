@@ -55,9 +55,10 @@
 
 static krb5_context ctx;
 
-static void display_authdata_list(krb5_authdata **list, krb5_keyblock *skey,
+static void display_authdata_list(krb5_authdata **list,
+                                  krb5_enc_tkt_part *enc_tkt,
                                   krb5_keyblock *tktkey, char prefix_byte,
-                                  krb5_boolean pac_expected);
+                                  krb5_boolean pac_ok);
 
 static void
 check(krb5_error_code code)
@@ -165,6 +166,43 @@ get_container_contents(krb5_authdata *ad, krb5_keyblock *skey,
     return inner_ad;
 }
 
+static int
+compare_uint32(const void *p1, const void *p2)
+{
+    uint32_t t1 = *(uint32_t *)p1, t2 = *(uint32_t *)p2;
+
+    return (t1 > t2) ? 1 : (t1 == t2) ? 0 : -1;
+}
+
+static void
+display_pac(krb5_authdata *ad, krb5_enc_tkt_part *enc_tkt,
+            krb5_keyblock *tktkey)
+{
+    krb5_pac pac;
+    size_t tlen, i;
+    uint32_t *types;
+
+    assert(ad->ad_type == KRB5_AUTHDATA_WIN2K_PAC);
+    check(krb5_pac_parse(ctx, ad->contents, ad->length, &pac));
+
+    check(krb5_pac_verify(ctx, pac, enc_tkt->times.authtime, enc_tkt->client,
+                          tktkey, NULL));
+
+    check(krb5_pac_get_types(ctx, pac, &tlen, &types));
+    qsort(types, tlen, sizeof(*types), compare_uint32);
+
+    printf("[");
+    for (i = 0; i < tlen; i++) {
+        printf("%d", (int)types[i]);
+        if (i + 1 < tlen)
+            printf(", ");
+    }
+    printf("]");
+
+    free(types);
+    krb5_pac_free(ctx, pac);
+}
+
 /* Decode and display authentication indicator authdata. */
 static void
 display_auth_indicator(krb5_authdata *ad)
@@ -206,8 +244,8 @@ display_binary_or_ascii(krb5_authdata *ad)
 /* Display the contents of an authdata element, prefixed by prefix_byte.  skey
  * must be the ticket session key. */
 static void
-display_authdata(krb5_authdata *ad, krb5_keyblock *skey, krb5_keyblock *tktkey,
-                 int prefix_byte, krb5_boolean pac_expected)
+display_authdata(krb5_authdata *ad, krb5_enc_tkt_part *enc_tkt,
+                 krb5_keyblock *tktkey, int prefix_byte, krb5_boolean pac_ok)
 {
     krb5_authdata **inner_ad;
 
@@ -216,21 +254,23 @@ display_authdata(krb5_authdata *ad, krb5_keyblock *skey, krb5_keyblock *tktkey,
         ad->ad_type == KRB5_AUTHDATA_KDC_ISSUED ||
         ad->ad_type == KRB5_AUTHDATA_CAMMAC) {
         if (ad->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
-            pac_expected = FALSE;
+            pac_ok = FALSE;
         /* Decode and display the contents. */
-        inner_ad = get_container_contents(ad, skey, tktkey);
-        display_authdata_list(inner_ad, skey, tktkey, get_prefix_byte(ad),
-                              pac_expected);
+        inner_ad = get_container_contents(ad, enc_tkt->session, tktkey);
+        display_authdata_list(inner_ad, enc_tkt, tktkey, get_prefix_byte(ad),
+                              pac_ok);
         krb5_free_authdata(ctx, inner_ad);
         return;
     }
 
-    assert(!pac_expected || ad->ad_type == KRB5_AUTHDATA_WIN2K_PAC);
+    assert(pac_ok || ad->ad_type != KRB5_AUTHDATA_WIN2K_PAC);
 
     printf("%c", prefix_byte);
     printf("%d: ", (int)ad->ad_type);
 
-    if (ad->ad_type == KRB5_AUTHDATA_AUTH_INDICATOR)
+    if (ad->ad_type == KRB5_AUTHDATA_WIN2K_PAC)
+        display_pac(ad, enc_tkt, tktkey);
+    else if (ad->ad_type == KRB5_AUTHDATA_AUTH_INDICATOR)
         display_auth_indicator(ad);
     else
         display_binary_or_ascii(ad);
@@ -238,44 +278,17 @@ display_authdata(krb5_authdata *ad, krb5_keyblock *skey, krb5_keyblock *tktkey,
 }
 
 static void
-display_authdata_list(krb5_authdata **list, krb5_keyblock *skey,
+display_authdata_list(krb5_authdata **list, krb5_enc_tkt_part *tkt_enc,
                       krb5_keyblock *tktkey, char prefix_byte,
-                      krb5_boolean pac_expected)
+                      krb5_boolean pac_ok)
 {
     if (list == NULL)
         return;
     /* Only expect a PAC in the first element, if at all. */
     for (; *list != NULL; list++) {
-        display_authdata(*list, skey, tktkey, prefix_byte, pac_expected);
-        pac_expected = FALSE;
+        display_authdata(*list, tkt_enc, tktkey, prefix_byte, pac_ok);
+        pac_ok = FALSE;
     }
-}
-
-/* If a PAC is present in enc_part2, verify its service signature with key and
- * set *has_pac to true. */
-static void
-check_pac(krb5_context context, krb5_enc_tkt_part *enc_part2,
-          const krb5_keyblock *key, krb5_boolean *has_pac)
-{
-    krb5_authdata **authdata;
-    krb5_pac pac;
-
-    *has_pac = FALSE;
-
-    check(krb5_find_authdata(context, enc_part2->authorization_data, NULL,
-                             KRB5_AUTHDATA_WIN2K_PAC, &authdata));
-    if (authdata == NULL)
-        return;
-
-    assert(authdata[1] == NULL);
-    check(krb5_pac_parse(context, authdata[0]->contents, authdata[0]->length,
-                         &pac));
-    krb5_free_authdata(context, authdata);
-
-    check(krb5_pac_verify(context, pac, enc_part2->times.authtime,
-                          enc_part2->client, key, NULL));
-    krb5_pac_free(context, pac);
-    *has_pac = TRUE;
 }
 
 int
@@ -289,7 +302,6 @@ main(int argc, char **argv)
     krb5_ticket *ticket;
     krb5_authdata **req_authdata = NULL, *ad;
     krb5_keytab_entry ktent;
-    krb5_boolean with_pac;
     size_t count;
     int c;
 
@@ -349,10 +361,8 @@ main(int argc, char **argv)
                             ticket->enc_part.enctype, &ktent));
     check(krb5_decrypt_tkt_part(ctx, &ktent.key, ticket));
 
-    check_pac(ctx, ticket->enc_part2, &ktent.key, &with_pac);
     display_authdata_list(ticket->enc_part2->authorization_data,
-                          ticket->enc_part2->session, &ktent.key, ' ',
-                          with_pac);
+                          ticket->enc_part2, &ktent.key, ' ', TRUE);
 
     while (count > 0) {
         free(req_authdata[--count]->contents);

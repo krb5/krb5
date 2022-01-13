@@ -591,7 +591,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
                               subject_server, local_tgt, &local_tgt_key,
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
-                              encrypting_key, subject_key, pkt, request,
+                              encrypting_key, subject_key, NULL, pkt, request,
                               altcprinc, subject_pac, subject_tkt,
                               &auth_indicators, &enc_tkt_reply);
     if (errcode) {

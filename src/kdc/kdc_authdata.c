@@ -463,10 +463,11 @@ handle_pac(kdc_realm_t *kdc_active_realm, unsigned int flags,
            krb5_db_entry *client, krb5_db_entry *server,
            krb5_db_entry *subject_server, krb5_db_entry *local_tgt,
            krb5_keyblock *local_tgt_key, krb5_keyblock *server_key,
-           krb5_keyblock *subject_key, krb5_enc_tkt_part *subject_tkt,
-           krb5_pac subject_pac, krb5_kdc_req *req,
-           krb5_const_principal altcprinc, krb5_timestamp authtime,
-           krb5_enc_tkt_part *enc_tkt_reply, krb5_data ***auth_indicators)
+           krb5_keyblock *subject_key, krb5_keyblock *replaced_reply_key,
+           krb5_enc_tkt_part *subject_tkt, krb5_pac subject_pac,
+           krb5_kdc_req *req, krb5_const_principal altcprinc,
+           krb5_timestamp authtime, krb5_enc_tkt_part *enc_tkt_reply,
+           krb5_data ***auth_indicators)
 {
     krb5_error_code ret;
     krb5_context context = kdc_context;
@@ -503,8 +504,9 @@ handle_pac(kdc_realm_t *kdc_active_realm, unsigned int flags,
     else
         signing_tgt = local_tgt;
 
-    ret = krb5_db_issue_pac(context, flags, client, NULL, server, signing_tgt,
-                            authtime, subject_pac, new_pac, auth_indicators);
+    ret = krb5_db_issue_pac(context, flags, client, replaced_reply_key, server,
+                            signing_tgt, authtime, subject_pac, new_pac,
+                            auth_indicators);
     if (ret) {
         if (ret == KRB5_PLUGIN_OP_NOTSUPP)
             ret = 0;
@@ -573,10 +575,10 @@ handle_authdata(kdc_realm_t *kdc_active_realm, unsigned int flags,
                 krb5_db_entry *subject_server, krb5_db_entry *local_tgt,
                 krb5_keyblock *local_tgt_key, krb5_keyblock *client_key,
                 krb5_keyblock *server_key, krb5_keyblock *subject_key,
-                krb5_data *req_pkt, krb5_kdc_req *req,
-                krb5_const_principal altcprinc, krb5_pac subject_pac,
-                krb5_enc_tkt_part *enc_tkt_req, krb5_data ***auth_indicators,
-                krb5_enc_tkt_part *enc_tkt_reply)
+                krb5_keyblock *replaced_reply_key, krb5_data *req_pkt,
+                krb5_kdc_req *req, krb5_const_principal altcprinc,
+                krb5_pac subject_pac, krb5_enc_tkt_part *enc_tkt_req,
+                krb5_data ***auth_indicators, krb5_enc_tkt_part *enc_tkt_reply)
 {
     kdcauthdata_handle *h;
     krb5_error_code ret = 0;
@@ -616,7 +618,7 @@ handle_authdata(kdc_realm_t *kdc_active_realm, unsigned int flags,
 
     return handle_pac(kdc_active_realm, flags, client, server, subject_server,
                       local_tgt, local_tgt_key, server_key, subject_key,
-                      enc_tkt_req, subject_pac, req, altcprinc,
-                      enc_tkt_reply->times.authtime, enc_tkt_reply,
+                      replaced_reply_key, enc_tkt_req, subject_pac, req,
+                      altcprinc, enc_tkt_reply->times.authtime, enc_tkt_reply,
                       auth_indicators);
 }
