@@ -447,6 +447,7 @@ struct krb5_kdcpreauth_rock_st {
     verto_ctx *vctx;
     krb5_data ***auth_indicators;
     krb5_boolean send_freshness_token;
+    krb5_boolean replaced_reply_key;
 };
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

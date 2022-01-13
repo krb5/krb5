@@ -743,10 +743,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->status = "DECRYPT_CLIENT_KEY";
         goto errout;
     }
-    if (state->client_key != NULL) {
+    if (state->client_key != NULL)
         state->rock.client_key = state->client_key;
-        state->rock.client_keyblock = &state->client_keyblock;
-    }
+    state->rock.client_keyblock = &state->client_keyblock;
 
     errcode = kdc_fast_read_cookie(kdc_context, state->rstate, state->request,
                                    state->local_tgt, &state->local_tgt_key);
