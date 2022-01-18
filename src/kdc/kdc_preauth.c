@@ -491,7 +491,7 @@ match_client(krb5_context context, krb5_kdcpreauth_rock rock,
         krb5_principal_compare(context, princ, client))
         return TRUE;
 
-    if (krb5_db_get_principal(context, princ, 0, &ent))
+    if (krb5_db_get_principal(context, princ, KRB5_KDB_FLAG_CLIENT, &ent))
         return FALSE;
     match = krb5_principal_compare(context, ent->princ, client);
     krb5_db_free_principal(context, ent);
