@@ -92,3 +92,45 @@ sn2princ_realm(krb5_context context, const char *hostname, const char *sname,
     *princ_out = princ;
     return 0;
 }
+
+void
+encode_database_size(uint64_t size, krb5_data *buf)
+{
+    assert(buf->length >= 12);
+    if (size > 0 && size <= UINT32_MAX) {
+        /* Encode in 32 bits for backward compatibility. */
+        store_32_be(size, buf->data);
+        buf->length = 4;
+    } else {
+        /* Set the first 32 bits to 0 and encode in the following 64 bits. */
+        store_32_be(0, buf->data);
+        store_64_be(size, buf->data + 4);
+        buf->length = 12;
+    }
+}
+
+krb5_error_code
+decode_database_size(const krb5_data *buf, uint64_t *size_out)
+{
+    uint64_t size;
+
+    if (buf->length == 12) {
+        /* A 12-byte buffer must have the first four bytes zeroed. */
+        if (load_32_be(buf->data) != 0)
+            return KRB5KRB_ERR_GENERIC;
+
+        /* The size is stored in the next 64 bits.  Values from 1..2^32-1 must
+         * be encoded in four bytes. */
+        size = load_64_be(buf->data + 4);
+        if (size > 0 && size <= UINT32_MAX)
+            return KRB5KRB_ERR_GENERIC;
+    } else if (buf->length == 4) {
+        size = load_32_be(buf->data);
+    } else {
+        /* Invalid buffer size. */
+        return KRB5KRB_ERR_GENERIC;
+    }
+
+    *size_out = size;
+    return 0;
+}
