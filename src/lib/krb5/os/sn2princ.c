@@ -174,7 +174,7 @@ split_trailer(const krb5_data *data, krb5_data *host, krb5_data *trailer)
      * IPv6 address will have more than one colon, so don't accept that. */
     if (p == NULL || tlen == 1 || memchr(p + 1, ':', tlen - 1) != NULL) {
         *host = *data;
-        *trailer = empty_data();
+        *trailer = make_data("", 0);
     } else {
         *host = make_data(data->data, p - data->data);
         *trailer = make_data(p, tlen);

@@ -4,7 +4,7 @@
  *
  */
 
-#include <k5-platform.h>
+#include <k5-int.h>
 #include <socket-utils.h>
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
@@ -219,6 +219,7 @@ static gss_name_t acceptor_name(gss_ctx_id_t context)
 static int gss_to_krb5_name(kadm5_server_handle_t handle,
                             gss_name_t gss_name, krb5_principal *princ)
 {
+    krb5_error_code ret;
     OM_uint32 minor_stat;
     gss_buffer_desc gss_str;
     int success;
@@ -226,7 +227,8 @@ static int gss_to_krb5_name(kadm5_server_handle_t handle,
 
     if (gss_name_to_string(gss_name, &gss_str) != 0)
         return 0;
-    if (asprintf(&s, "%.*s", (int)gss_str.length, (char *)gss_str.value) < 0) {
+    s = k5memdup0(gss_str.value, gss_str.length, &ret);
+    if (s == NULL) {
         gss_release_buffer(&minor_stat, &gss_str);
         return 0;
     }

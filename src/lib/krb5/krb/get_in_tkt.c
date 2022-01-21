@@ -1183,7 +1183,6 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     krb5_data config;
     char *encoded;
     krb5_error_code code;
-    int i;
     krb5_ccache in_ccache = k5_gic_opt_get_in_ccache(ctx->opt);
 
     k5_json_release(ctx->cc_config_in);
@@ -1198,9 +1197,9 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     if (code)
         return code;
 
-    i = asprintf(&encoded, "%.*s", (int)config.length, config.data);
+    encoded = k5memdup0(config.data, config.length, &code);
     krb5_free_data_contents(context, &config);
-    if (i < 0)
+    if (encoded == NULL)
         return ENOMEM;
 
     code = k5_json_decode(encoded, &val);
