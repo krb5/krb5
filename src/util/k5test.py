@@ -81,6 +81,7 @@ keyword arguments:
     - $buildtop: The root of the build directory
     - $srctop:   The root of the source directory
     - $plugins:  The plugin directory in the build tree
+    - $certs:    The PKINIT certificate directory in the source tree
     - $hostname: The FQDN of the host
     - $port0:    The first listener port (portbase)
     - ...
@@ -120,6 +121,8 @@ keyword arguments:
 
 * bdb_only=True: Use the DB2 KDB module even if K5TEST_LMDB is set in
   the environment.
+
+* pkinit=True: Configure a PKINIT anchor and KDC certificate.
 
 Scripts may use the following functions and variables:
 
@@ -196,6 +199,11 @@ Scripts may use the following functions and variables:
 * srctop: The top of the source directory (absolute path).
 
 * plugins: The plugin directory in the build tree (absolute path).
+
+* pkinit_enabled: True if the PKINIT plugin module is present in the
+  build directory.
+
+* pkinit_certs: The directory containing test PKINIT certificates.
 
 * hostname: The local hostname as it will initially appear in
   krb5_sname_to_principal() results.  (Shortname qualification is
@@ -301,6 +309,10 @@ Scripts may use the following realm methods and attributes:
   specified, it will be used as input to the kinit process; otherwise
   flags must cause kinit not to need a password (e.g. by specifying a
   keytab).
+
+* realm.pkinit(princ, **keywords): Acquire credentials for princ,
+  supplying a PKINIT identity of the basic user test certificate
+  (matching user@KRBTEST.COM).
 
 * realm.klist(client_princ, service_princ=None, ccache=None): Using
   klist, list the credentials cache ccache (must be a filename;
@@ -881,7 +893,7 @@ class K5Realm(object):
                  krb5_conf=None, kdc_conf=None, create_kdb=True,
                  krbtgt_keysalt=None, create_user=True, get_creds=True,
                  create_host=True, start_kdc=True, start_kadmind=False,
-                 start_kpropd=False, bdb_only=False):
+                 start_kpropd=False, bdb_only=False, pkinit=False):
         global hostname, _default_krb5_conf, _default_kdc_conf
         global _lmdb_kdc_conf, _current_db
 
@@ -898,11 +910,15 @@ class K5Realm(object):
         self.ccache = os.path.join(self.testdir, 'ccache')
         self.gss_mech_config = os.path.join(self.testdir, 'mech.conf')
         self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
-        self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
+        base_krb5_conf = _default_krb5_conf
         base_kdc_conf = _default_kdc_conf
         if (os.getenv('K5TEST_LMDB') is not None and
             not bdb_only and not _current_db):
             base_kdc_conf = _cfg_merge(base_kdc_conf, _lmdb_kdc_conf)
+        if pkinit:
+            base_krb5_conf = _cfg_merge(base_krb5_conf, _pkinit_krb5_conf)
+            base_kdc_conf = _cfg_merge(base_kdc_conf, _pkinit_kdc_conf)
+        self._krb5_conf = _cfg_merge(base_krb5_conf, krb5_conf)
         self._kdc_conf = _cfg_merge(base_kdc_conf, kdc_conf)
         self._kdc_proc = None
         self._kadmind_proc = None
@@ -979,6 +995,7 @@ class K5Realm(object):
                                     buildtop=buildtop,
                                     srctop=srctop,
                                     plugins=plugins,
+                                    certs=pkinit_certs,
                                     hostname=hostname,
                                     port0=self.portbase,
                                     port1=self.portbase + 1,
@@ -1119,6 +1136,12 @@ class K5Realm(object):
         else:
             input = None
         return self.run([kinit] + flags + [princname], input=input, **keywords)
+
+    def pkinit(self, princ, flags=[], **kw):
+        id = 'FILE:%s,%s' % (os.path.join(pkinit_certs, 'user.pem'),
+                             os.path.join(pkinit_certs, 'privkey.pem'))
+        flags = flags + ['-X', 'X509_user_identity=%s' % id]
+        self.kinit(princ, flags=flags, **kw)
 
     def klist(self, client_princ, service_princ=None, ccache=None, **keywords):
         if service_princ is None:
@@ -1302,6 +1325,12 @@ _lmdb_kdc_conf = {'dbmodules': {'db': {'db_library': 'klmdb',
                                        'nosync': 'true'}}}
 
 
+_pkinit_krb5_conf = {'realms': {'$realm': {
+    'pkinit_anchors': 'FILE:$certs/ca.pem'}}}
+_pkinit_kdc_conf = {'realms': {'$realm': {
+    'pkinit_identity': 'FILE:$certs/kdc.pem,$certs/privkey.pem'}}}
+
+
 # A pass is a tuple of: name, krbtgt_keysalt, krb5_conf, kdc_conf.
 _passes = [
     # No special settings; exercises AES256.
@@ -1370,6 +1399,8 @@ _last_cmd_output = None
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
+pkinit_enabled = os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so'))
+pkinit_certs = os.path.join(srctop, 'tests', 'pkinit-certs')
 hostname = socket.gethostname().lower()
 null_input = open(os.devnull, 'r')
 

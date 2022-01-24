@@ -51,19 +51,11 @@ if '128:' not in out or  '^-42: Hello' not in out or ' -3: test' not in out:
 
 realm.stop()
 
-if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
+if not pkinit_enabled:
     skipped('anonymous ticket authdata tests', 'PKINIT not built')
 else:
     # Set up a realm with PKINIT support and get anonymous tickets.
-    certs = os.path.join(srctop, 'tests', 'pkinit-certs')
-    ca_pem = os.path.join(certs, 'ca.pem')
-    kdc_pem = os.path.join(certs, 'kdc.pem')
-    privkey_pem = os.path.join(certs, 'privkey.pem')
-    pkinit_conf = {'realms': {'$realm': {
-                'pkinit_anchors': 'FILE:%s' % ca_pem,
-                'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem)}}}
-    conf.update(pkinit_conf)
-    realm = K5Realm(krb5_conf=conf, get_creds=False)
+    realm = K5Realm(krb5_conf=conf, get_creds=False, pkinit=True)
     realm.addprinc('WELLKNOWN/ANONYMOUS')
     realm.kinit('@%s' % realm.realm, flags=['-n'])
 
