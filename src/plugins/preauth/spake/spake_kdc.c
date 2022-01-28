@@ -537,14 +537,6 @@ spake_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     k5_free_pa_spake(context, pa_spake);
 }
 
-/* Release a per-request module data object. */
-static void
-spake_free_modreq(krb5_context context, krb5_kdcpreauth_moddata moddata,
-                  krb5_kdcpreauth_modreq modreq)
-{
-    krb5_free_keyblock(context, (krb5_keyblock *)modreq);
-}
-
 krb5_error_code
 kdcpreauth_spake_initvt(krb5_context context, int maj_ver, int min_ver,
                         krb5_plugin_vtable vtable);
@@ -565,6 +557,5 @@ kdcpreauth_spake_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->fini = spake_fini;
     vt->edata = spake_edata;
     vt->verify = spake_verify;
-    vt->free_modreq = spake_free_modreq;
     return 0;
 }
