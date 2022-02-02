@@ -51,7 +51,7 @@ static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NEXT };
 #define NEXT &cc_lcc_entry
 #endif
 
-#ifdef USE_CCAPI_V3
+#ifdef USE_CCAPI
 extern const krb5_cc_ops krb5_cc_stdcc_ops;
 static struct krb5_cc_typelist cc_stdcc_entry = { &krb5_cc_stdcc_ops, NEXT };
 #undef NEXT
@@ -562,7 +562,7 @@ k5_cccol_lock(krb5_context context)
 #ifdef USE_KEYRING_CCACHE
     k5_cc_mutex_lock(context, &krb5int_krcc_mutex);
 #endif
-#ifdef USE_CCAPI_V3
+#ifdef USE_CCAPI
     ret = krb5_stdccv3_context_lock(context);
     if (ret) {
         k5_cc_mutex_unlock(context, &krb5int_mcc_mutex);
@@ -587,7 +587,7 @@ k5_cccol_unlock(krb5_context context)
     k5_mutex_lock(&cc_typelist_lock);
 
     /* unlock each type in the opposite order */
-#ifdef USE_CCAPI_V3
+#ifdef USE_CCAPI
     krb5_stdccv3_context_unlock(context);
 #endif
 #ifdef USE_KEYRING_CCACHE
@@ -621,7 +621,7 @@ k5_cccol_force_unlock()
 #ifdef USE_KEYRING_CCACHE
     k5_cc_mutex_force_unlock(&krb5int_krcc_mutex);
 #endif
-#ifdef USE_CCAPI_V3
+#ifdef USE_CCAPI
     krb5_stdccv3_context_unlock(NULL);
 #endif
     k5_cc_mutex_force_unlock(&krb5int_mcc_mutex);

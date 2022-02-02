@@ -2,11 +2,9 @@ mydir=lib$(S)krb5$(S)ccache
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS = # ccapi
 WINSUBDIRS = ccapi
-##WIN32##DEFINES = -DUSE_CCAPI -DUSE_CCAPI_V3
+##WIN32##DEFINES = -DUSE_CCAPI
 
-LOCALINCLUDES = -I$(srcdir)$(S)ccapi -I$(srcdir) -I. $(WIN_INCLUDES)
-
-##DOS##WIN_INCLUDES = -I$(top_srcdir)\windows\lib
+LOCALINCLUDES = -I$(srcdir)$(S)ccapi -I$(srcdir) -I.
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=ccache

@@ -110,13 +110,11 @@ extern k5_cc_mutex krb5int_mcc_mutex;
 extern k5_cc_mutex krb5int_krcc_mutex;
 extern k5_cc_mutex krb5int_cc_file_mutex;
 
-#ifdef USE_CCAPI_V3
 extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
 (krb5_context context);
 
 extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
 (krb5_context context);
-#endif
 
 krb5_error_code
 k5_cc_lock(krb5_context context, krb5_ccache ccache);
