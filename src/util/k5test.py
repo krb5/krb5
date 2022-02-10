@@ -575,8 +575,7 @@ def _parse_args():
     parser.add_option('--debug', dest='debug', metavar='NUM',
                       help='Debug numbered command (or "all")')
     parser.add_option('--debugger', dest='debugger', metavar='COMMAND',
-                      help='Debugger command (default is gdb --args)',
-                      default='gdb --args')
+                      help='Debugger command (default is gdb --args)')
     parser.add_option('--stop-before', dest='stopb', metavar='NUM',
                       help='Stop before numbered command (or "all")')
     parser.add_option('--stop-after', dest='stopa', metavar='NUM',
@@ -589,11 +588,20 @@ def _parse_args():
     verbose = options.verbose
     testpass = options.testpass
     _debug = _parse_cmdnum('--debug', options.debug)
-    _debugger_command = shlex.split(options.debugger)
     _stop_before = _parse_cmdnum('--stop-before', options.stopb)
     _stop_after = _parse_cmdnum('--stop-after', options.stopa)
     _shell_before = _parse_cmdnum('--shell-before', options.shellb)
     _shell_after = _parse_cmdnum('--shell-after', options.shella)
+
+    if options.debugger is not None:
+        _debugger_command = shlex.split(options.debugger)
+    elif which('gdb') is not None:
+        _debugger_command = ['gdb', '--args']
+    elif which('lldb') is not None:
+        _debugger_command = ['lldb', '--']
+    elif options.debug is not None:
+        print('Cannot find a debugger; use --debugger=COMMAND')
+        sys.exit(1)
 
 
 # Translate a command number spec.  -1 means all, None means none.
