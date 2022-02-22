@@ -61,7 +61,7 @@ jobs:
                 fi
 
     windows:
-        runs-on: windows-2019
+        runs-on: windows-latest
         env:
             KRB_INSTALL_DIR: C:\kfw
         steps:
@@ -71,11 +71,13 @@ jobs:
               shell: cmd
               run: |
                 mkdir %KRB_INSTALL_DIR%
+            - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                arch: x86
             - name: Build 32-bit
               shell: cmd
               run: |
                 cd src
-                call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
                 set
                 set PATH=%PATH%;%wix%bin
                 nmake -f Makefile.in prep-windows
@@ -84,11 +86,13 @@ jobs:
                 cd windows\installer\wix
                 nmake
                 rename kfw.msi kfw32.msi
+            - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                arch: x64
             - name: Build 64-bit
               shell: cmd
               run: |
                 cd src
-                call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
                 set
                 set PATH=%PATH%;%wix%bin;"%WindowsSdkVerBinPath%"\x86
                 nmake clean
