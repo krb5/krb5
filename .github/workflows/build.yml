@@ -61,7 +61,7 @@ jobs:
                 fi
 
     windows:
-        runs-on: windows-latest
+        runs-on: windows-2019
         env:
             KRB_INSTALL_DIR: C:\kfw
         steps:
