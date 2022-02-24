@@ -25,6 +25,7 @@ KCMRPC_OBJ = $(KCMRPC_OBJ-@OSX@)
 
 
 STLIBOBJS= \
+	ccapi_util.o \
 	ccbase.o \
 	cccopy.o \
 	cccursor.o \
@@ -44,7 +45,8 @@ STLIBOBJS= \
 	ccfns.o \
 	$(KCMRPC_OBJ)
 
-OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
+OBJS=	$(OUTPRE)ccapi_util.$(OBJEXT) \
+	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
 	$(OUTPRE)cccursor.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
@@ -63,7 +65,8 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)ccfns.$(OBJEXT) \
 	$(MSLSA_OBJ)
 
-SRCS=	$(srcdir)/ccbase.c \
+SRCS=	$(srcdir)/ccapi_util.c \
+	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
 	$(srcdir)/cccursor.c \
 	$(srcdir)/ccdefault.c \

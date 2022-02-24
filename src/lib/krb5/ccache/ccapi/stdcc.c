@@ -33,8 +33,8 @@
 
 #include "k5-int.h"
 #include "../cc-int.h"
+#include "../ccapi_util.h"
 #include "stdcc.h"
-#include "stdcc_util.h"
 #include "string.h"
 #include <stdio.h>
 
@@ -464,7 +464,7 @@ krb5_stdccv3_store (krb5_context context, krb5_ccache id, krb5_creds *creds )
 
     if (!err) {
         /* copy the fields from the almost identical structures */
-        err = copy_krb5_creds_to_cc_cred_union (context, creds, &cred_union);
+        err = k5_krb5_to_ccapi_creds (context, creds, &cred_union);
     }
 
     if (!err) {
@@ -475,7 +475,7 @@ krb5_stdccv3_store (krb5_context context, krb5_ccache id, krb5_creds *creds )
         cache_changed();
     }
 
-    if (cred_union) { cred_union_release (cred_union); }
+    if (cred_union) { k5_release_ccapi_cred (cred_union); }
 
     return cc_err_xlate (err);
 }
@@ -537,7 +537,7 @@ krb5_stdccv3_next_cred (krb5_context context,
         err = cc_credentials_iterator_next (iterator, &credentials);
 
         if (!err && (credentials->data->version == cc_credentials_v5)) {
-            copy_cc_cred_union_to_krb5_creds(context, credentials->data, creds);
+            err = k5_ccapi_to_krb5_creds (context, credentials->data, creds);
             break;
         }
     }
@@ -787,8 +787,7 @@ krb5_stdccv3_remove (krb5_context context,
         if (!err && (credentials->data->version == cc_credentials_v5)) {
             krb5_creds creds;
 
-            err = copy_cc_cred_union_to_krb5_creds(context,
-                                                   credentials->data, &creds);
+            err = k5_ccapi_to_krb5_creds (context, credentials->data, &creds);
 
             if (!err) {
                 found = krb5int_cc_creds_match_request(context,

@@ -11,12 +11,11 @@ DEFINES= -DUSE_CCAPI
 
 STLIBOBJS 	= \
 	stdcc.o \
-	stdcc_util.o \
 	winccld.o
 
-OBJS 	= $(OUTPRE)stdcc.$(OBJEXT) $(OUTPRE)stdcc_util.$(OBJEXT) $(OUTPRE)winccld.$(OBJEXT)
+OBJS 	= $(OUTPRE)stdcc.$(OBJEXT) $(OUTPRE)winccld.$(OBJEXT)
 
-SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c $(srcdir)/winccld.c
+SRCS 	= $(srcdir)/stdcc.c $(srcdir)/winccld.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
