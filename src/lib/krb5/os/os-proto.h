@@ -49,6 +49,7 @@ typedef enum {
     UDP_FIRST = 0,
     UDP_LAST,
     NO_UDP,
+    ONLY_UDP
 } k5_transport_strategy;
 
 /* A single server hostname or address. */
