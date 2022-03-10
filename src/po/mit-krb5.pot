@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mit-krb5 1.18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-22 18:48-0400\n"
+"POT-Creation-Date: 2022-03-10 00:46-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3431,11 +3431,11 @@ msgstr ""
 msgid "AS_REQ : handle_authdata (%d)"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:631
+#: ../../src/kdc/do_tgs_req.c:636
 msgid "not checking transit path"
 msgstr ""
 
-#: ../../src/kdc/do_tgs_req.c:648
+#: ../../src/kdc/do_tgs_req.c:653
 #, c-format
 msgid "TGS_REQ : handle_authdata (%d)"
 msgstr ""
