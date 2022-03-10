@@ -51,7 +51,7 @@
  */
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 18
-#define KRB5_PATCHLEVEL 4
+#define KRB5_PATCHLEVEL 5
 /* #undef KRB5_RELTAIL */
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "krb5-1.18.4-final"
+#define KRB5_RELTAG "krb5-1.18.5-final"

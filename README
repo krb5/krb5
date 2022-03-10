@@ -70,6 +70,18 @@ DES no longer supported
 Beginning with the krb5-1.18 release, single-DES encryption types are
 no longer supported.
 
+Major changes in 1.18.5 (2022-03-11)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix a denial of service attack against the KDC [CVE-2021-37750].
+
+krb5-1.18.5 changes by ticket ID
+--------------------------------
+
+9008    Fix KDC null deref on TGS inner body null server
+
 Major changes in 1.18.4 (2021-07-22)
 ------------------------------------
 
