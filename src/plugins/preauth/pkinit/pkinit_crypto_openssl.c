@@ -1649,7 +1649,7 @@ cms_signeddata_create(krb5_context context,
         /* will not fill-out EVP_PKEY because it's on the smartcard */
 
         /* Set digest algs */
-        p7si->digest_alg->algorithm = OBJ_nid2obj(NID_sha1);
+        p7si->digest_alg->algorithm = OBJ_nid2obj(NID_sha256);
 
         if (p7si->digest_alg->parameter != NULL)
             ASN1_TYPE_free(p7si->digest_alg->parameter);
@@ -1660,17 +1660,18 @@ cms_signeddata_create(krb5_context context,
         /* Set sig algs */
         if (p7si->digest_enc_alg->parameter != NULL)
             ASN1_TYPE_free(p7si->digest_enc_alg->parameter);
-        p7si->digest_enc_alg->algorithm = OBJ_nid2obj(NID_sha1WithRSAEncryption);
+        p7si->digest_enc_alg->algorithm =
+            OBJ_nid2obj(NID_sha256WithRSAEncryption);
         if (!(p7si->digest_enc_alg->parameter = ASN1_TYPE_new()))
             goto cleanup;
         p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
 
         /* add signed attributes */
-        /* compute sha1 digest over the EncapsulatedContentInfo */
+        /* compute sha256 digest over the EncapsulatedContentInfo */
         ctx = EVP_MD_CTX_new();
         if (ctx == NULL)
             goto cleanup;
-        EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+        EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
         EVP_DigestUpdate(ctx, data, data_len);
         md_tmp = EVP_MD_CTX_get0_md(ctx);
         EVP_DigestFinal_ex(ctx, md_data, &md_len);
@@ -1698,12 +1699,14 @@ cms_signeddata_create(krb5_context context,
             goto cleanup2;
 
 #ifndef WITHOUT_PKCS11
-        /* Some tokens can only do RSAEncryption without sha1 hash */
-        /* to compute sha1WithRSAEncryption, encode the algorithm ID for the hash
-         * function and the hash value into an ASN.1 value of type DigestInfo
-         * DigestInfo::=SEQUENCE {
-         *  digestAlgorithm  AlgorithmIdentifier,
-         *  digest OCTET STRING }
+        /*
+         * Some tokens can only do RSAEncryption without a hash.  To compute
+         * sha256WithRSAEncryption, encode the algorithm ID for the hash
+         * function and the hash value into an ASN.1 value of type DigestInfo:
+         * DigestInfo ::= SEQUENCE {
+         *   digestAlgorithm  AlgorithmIdentifier,
+         *   digest  OCTET STRING
+         * }
          */
         if (id_cryptoctx->pkcs11_method == 1 &&
             id_cryptoctx->mech == CKM_RSA_PKCS) {
@@ -1719,7 +1722,7 @@ cms_signeddata_create(krb5_context context,
             alg = X509_ALGOR_new();
             if (alg == NULL)
                 goto cleanup2;
-            X509_ALGOR_set0(alg, OBJ_nid2obj(NID_sha1), V_ASN1_NULL, NULL);
+            X509_ALGOR_set0(alg, OBJ_nid2obj(NID_sha256), V_ASN1_NULL, NULL);
             alg_len = i2d_X509_ALGOR(alg, NULL);
 
             digest = ASN1_OCTET_STRING_new();
@@ -1748,7 +1751,7 @@ cms_signeddata_create(krb5_context context,
 #endif
         {
             pkiDebug("mech = %s\n",
-                     id_cryptoctx->pkcs11_method == 1 ? "CKM_SHA1_RSA_PKCS" : "FS");
+                     id_cryptoctx->pkcs11_method == 1 ? "CKM_SHA256_RSA_PKCS" : "FS");
             retval = pkinit_sign_data(context, id_cryptoctx, abuf, alen,
                                       &sig, &sig_len);
         }
@@ -4078,7 +4081,7 @@ create_signature(unsigned char **sig, unsigned int *sig_len,
     ctx = EVP_MD_CTX_new();
     if (ctx == NULL)
         return ENOMEM;
-    EVP_SignInit(ctx, EVP_sha1());
+    EVP_SignInit(ctx, EVP_sha256());
     EVP_SignUpdate(ctx, data, data_len);
     *sig_len = EVP_PKEY_size(pkey);
     if ((*sig = malloc(*sig_len)) == NULL)
@@ -4627,10 +4630,11 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
 
     /*
-     * We'd like to use CKM_SHA1_RSA_PKCS for signing if it's available, but
-     * many cards seems to be confused about whether they are capable of
-     * this or not. The safe thing seems to be to ignore the mechanism list,
-     * always use CKM_RSA_PKCS and calculate the sha1 digest ourselves.
+     * We'd like to use CKM_SHA256_RSA_PKCS for signing if it's available, but
+     * historically many cards seem to be confused about whether they are
+     * capable of mechanisms or not. The safe thing seems to be to ignore the
+     * mechanism list, always use CKM_RSA_PKCS and calculate the sha256 digest
+     * ourselves.
      */
     id_cryptoctx->mech = CKM_RSA_PKCS;
 
