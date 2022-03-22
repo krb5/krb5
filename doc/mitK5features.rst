@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: https://web.mit.edu/kerberos/krb5-1.18/
-    - Supported: https://web.mit.edu/kerberos/krb5-1.17/
+    - Latest stable: https://web.mit.edu/kerberos/krb5-1.20/
+    - Supported: https://web.mit.edu/kerberos/krb5-1.19/
     - Release cycle: approximately 12 months
 
 Supported platforms \/ OS distributions:
@@ -593,6 +593,55 @@ User experience:
 
   - Added kvno flags --out-cache, --no-store, and --cached-only
     (inspired by Heimdal's kgetcred).
+
+Release 1.20
+
+* Administrator experience:
+
+  - Added a "disable_pac" realm relation to suppress adding PAC
+    authdata to tickets, for realms which do not need to support S4U
+    requests.
+
+  - Most credential cache types will use atomic replacement when a
+    cache is reinitialized using kinit or refreshed from the client
+    keytab.
+
+  - kprop can now propagate databases with a dump size larger than
+    4GB, if both the client and server are upgraded.
+
+  - kprop can now work over NATs that change the destination IP
+    address, if the client is upgraded.
+
+* Developer experience:
+
+  - Updated the KDB interface.  The sign_authdata() method is replaced
+    with the issue_pac() method, allowing KDB modules to add logon
+    info and other buffers to the PAC issued by the KDC.
+
+  - Host-based initiator names are better supported in the GSS krb5
+    mechanism.
+
+* Protocol evolution:
+
+  - Replaced AD-SIGNEDPATH authdata with minimal PACs.
+
+  - To avoid spurious replay errors, password change requests will not
+    be attempted over UDP until the attempt over TCP fails.
+
+  - PKINIT will sign its CMS messages with SHA-256 instead of SHA-1.
+
+* Code quality:
+
+  - Updated all code using OpenSSL to be compatible with OpenSSL 3.
+
+  - Reorganized the libk5crypto build system to allow the OpenSSL
+    back-end to pull in material from the builtin back-end depending
+    on the OpenSSL version.
+
+  - Simplified the PRNG logic to always use the platform PRNG.
+
+  - Converted the remaining Tcl tests to Python.
+
 
 `Pre-authentication mechanisms`
 
