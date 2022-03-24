@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.20
+                   Kerberos Version 5, Release 1.21
 
                             Release Notes
                         The MIT Kerberos Team
@@ -64,16 +64,31 @@ and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary
 way to interact with our bug database is via email.
 
-DES no longer supported
------------------------
+PAC transition
+--------------
 
-Beginning with the krb5-1.18 release, single-DES encryption types are
-no longer supported.
+Beginning with release 1.20, the KDC will include minimal PACs in
+tickets instead of AD-SIGNEDPATH authdata.  S4U requests (protocol
+transition and constrained delegation) must now contain valid PACs in
+the incoming tickets.  If only some KDCs in a realm have been upgraded
+across version 1.20, the upgraded KDCs will reject S4U requests
+containing tickets from non-upgraded KDCs and vice versa.
 
-Major changes in 1.20
+Triple-DES transition
 ---------------------
 
-krb5-1.20 changes by ticket ID
+Beginning with the krb5-1.19 release, a warning will be issued if
+initial credentials are acquired using the des3-cbc-sha1 encryption
+type.  In future releases, this encryption type will be disabled by
+default and eventually removed.
+
+Beginning with the krb5-1.18 release, single-DES encryption types have
+been removed.
+
+Major changes in 1.21
+---------------------
+
+krb5-1.21 changes by ticket ID
 ------------------------------
 
 Acknowledgements
@@ -195,6 +210,8 @@ reports, suggestions, and valuable resources:
     Sumit Bose
     Emmanuel Bouillon
     Isaac Boukris
+    Ulf Bremer
+    Pavel Březina
     Philip Brown
     Samuel Cabrero
     Michael Calmer
@@ -226,6 +243,7 @@ reports, suggestions, and valuable resources:
     John Devitofranceschi
     Marc Dionne
     Roland Dowdeswell
+    Ken Dreyer
     Dorian Ducournau
     Viktor Dukhovni
     Jason Edgecombe
@@ -244,6 +262,7 @@ reports, suggestions, and valuable resources:
     Frank Filz
     William Fiveash
     Jacques Florent
+    Oliver Freyermuth
     Ákos Frohner
     Sebastian Galiano
     Marcus Granado
@@ -261,6 +280,7 @@ reports, suggestions, and valuable resources:
     Matthieu Hautreux
     Jochen Hein
     Paul B. Henson
+    Kihong Heo
     Jeff Hodges
     Christopher Hogan
     Love Hörnquist Åstrand
@@ -275,6 +295,7 @@ reports, suggestions, and valuable resources:
     Holger Isenberg
     Spencer Jackson
     Diogenes S. Jesus
+    Mike Jetzer
     Pavel Jindra
     Brian Johannesmeyer
     Joel Johnson
@@ -288,6 +309,7 @@ reports, suggestions, and valuable resources:
     Patrik Kis
     Martin Kittel
     Thomas Klausner
+    Tomasz Kłoczko
     Matthew Krupcale
     Mikkel Kruse
     Reinhard Kugler
@@ -316,7 +338,9 @@ reports, suggestions, and valuable resources:
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
+    Vipul Mehta
     Alexey Melnikov
+    Ivan A. Melnikov
     Franklyn Mendez
     Mantas Mikulėnas
     Markus Moeller
@@ -324,6 +348,7 @@ reports, suggestions, and valuable resources:
     Paul Moore
     Keiichi Mori
     Michael Morony
+    Sam Morris
     Zbysek Mraz
     Edward Murrell
     Joshua Neuheisel
@@ -351,6 +376,7 @@ reports, suggestions, and valuable resources:
     Tony Reix
     Martin Rex
     Pat Riehecky
+    Julien Rische
     Jason Rogers
     Matt Rogers
     Nate Rosenblum
@@ -360,6 +386,7 @@ reports, suggestions, and valuable resources:
     Joshua Schaeffer
     Alexander Scheel
     Jens Schleusener
+    Ryan Schmidt
     Andreas Schneider
     Paul Seyfert
     Tom Shaw
@@ -373,12 +400,15 @@ reports, suggestions, and valuable resources:
     Michael Ströder
     Bjørn Tore Sund
     Ondřej Surý
+    Joseph Sutton
     Joe Travaglini
     Sergei Trofimovich
     Greg Troxel
+    Fraser Tweedale
     Tim Uglow
     Rathor Vipin
     Denis Vlasenko
+    Thomas Wagner
     Jorgen Wahlsten
     Stef Walter
     Max (Weijun) Wang
@@ -400,6 +430,7 @@ reports, suggestions, and valuable resources:
     Xu Qiang
     Neng Xue
     Zhaomo Yang
+    Tianjiao Yin
     Nickolai Zeldovich
     Bean Zhang
     Hanz van Zijst
