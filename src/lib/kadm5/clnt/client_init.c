@@ -239,12 +239,16 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     /*
      * Parse the client name.  If it has an empty realm, it is almost certainly
      * a host-based principal using DNS fallback processing or the referral
-     * realm, so give it the appropriate name type for canonicalization.
+     * realm, so give it the appropriate name type for canonicalization.  Also
+     * check for iprop client principals as kpropd sets the realm on the
+     * sn2princ result.
      */
     code = krb5_parse_name(handle->context, client_name, &client);
     if (code)
         goto cleanup;
-    if (init_type == INIT_SKEY && client->realm.length == 0)
+    if ((init_type == INIT_SKEY && client->realm.length == 0) ||
+        (client->length == 2 &&
+         data_eq_string(client->data[0], KIPROP_SVC_NAME)))
         client->type = KRB5_NT_SRV_HST;
 
     /*
