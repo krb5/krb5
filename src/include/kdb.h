@@ -65,6 +65,7 @@
 #ifndef KRB5_KDB5__
 #define KRB5_KDB5__
 
+#include <time.h>
 #include <krb5.h>
 
 /* This version will be incremented when incompatible changes are made to the
