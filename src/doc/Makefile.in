@@ -10,6 +10,7 @@ sysconfdir=@sysconfdir@
 DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
+PKCS11_MODNAME=@PKCS11_MODNAME@
 
 RST_SOURCES= _static \
 	_templates \
@@ -118,6 +119,7 @@ paths.py:
 	echo 'ccache = "``$(DEFCCNAME)``"' >> $@
 	echo 'keytab = "``$(DEFKTNAME)``"' >> $@
 	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
+	echo 'pkcs11_modname = "``$(PKCS11_MODNAME)``"' >> $@
 
 # Dummy rule that man/Makefile can invoke
 version.py: $(docsrc)/version.py

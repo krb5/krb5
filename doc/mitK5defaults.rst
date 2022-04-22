@@ -59,18 +59,19 @@ subdirectories of ``/usr/local``.  When MIT krb5 is integrated into an
 operating system, the paths are generally chosen to match the
 operating system's filesystem layout.
 
-==========================  =============  ===========================  ===========================
-Description                 Symbolic name  Custom build path            Typical OS path
-==========================  =============  ===========================  ===========================
-User programs               BINDIR         ``/usr/local/bin``           ``/usr/bin``
-Libraries and plugins       LIBDIR         ``/usr/local/lib``           ``/usr/lib``
-Parent of KDC state dir     LOCALSTATEDIR  ``/usr/local/var``           ``/var``
-Parent of KDC runtime dir   RUNSTATEDIR    ``/usr/local/var/run``       ``/run``
-Administrative programs     SBINDIR        ``/usr/local/sbin``          ``/usr/sbin``
-Alternate krb5.conf dir     SYSCONFDIR     ``/usr/local/etc``           ``/etc``
-Default ccache name         DEFCCNAME      ``FILE:/tmp/krb5cc_%{uid}``  ``FILE:/tmp/krb5cc_%{uid}``
-Default keytab name         DEFKTNAME      ``FILE:/etc/krb5.keytab``    ``FILE:/etc/krb5.keytab``
-==========================  =============  ===========================  ===========================
+==========================  ==============  ===========================  ===========================
+Description                 Symbolic name   Custom build path            Typical OS path
+==========================  ==============  ===========================  ===========================
+User programs               BINDIR          ``/usr/local/bin``           ``/usr/bin``
+Libraries and plugins       LIBDIR          ``/usr/local/lib``           ``/usr/lib``
+Parent of KDC state dir     LOCALSTATEDIR   ``/usr/local/var``           ``/var``
+Parent of KDC runtime dir   RUNSTATEDIR     ``/usr/local/var/run``       ``/run``
+Administrative programs     SBINDIR         ``/usr/local/sbin``          ``/usr/sbin``
+Alternate krb5.conf dir     SYSCONFDIR      ``/usr/local/etc``           ``/etc``
+Default ccache name         DEFCCNAME       ``FILE:/tmp/krb5cc_%{uid}``  ``FILE:/tmp/krb5cc_%{uid}``
+Default keytab name         DEFKTNAME       ``FILE:/etc/krb5.keytab``    ``FILE:/etc/krb5.keytab``
+Default PKCS11 module       PKCS11_MODNAME  ``opensc-pkcs11.so``         ``opensc-pkcs11.so``
+==========================  ==============  ===========================  ===========================
 
 The default client keytab name (DEFCKTNAME) typically defaults to
 ``FILE:/usr/local/var/krb5/user/%{euid}/client.keytab`` for a custom

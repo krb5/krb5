@@ -1467,6 +1467,14 @@ AC_DEFINE_UNQUOTED(DEFKTNAME, ["$DEFKTNAME"], [Define to default keytab name])
 AC_DEFINE_UNQUOTED(DEFCKTNAME, ["$DEFCKTNAME"],
                    [Define to default client keytab name])
 
+AC_ARG_VAR(PKCS11_MODNAME, [Default PKCS11 module name])
+if test "${PKCS11_MODNAME+set}" != set; then
+	PKCS11_MODNAME=opensc-pkcs11.so
+fi
+AC_MSG_NOTICE([Default PKCS11 module name: $PKCS11_MODNAME])
+AC_DEFINE_UNQUOTED(PKCS11_MODNAME, ["$PKCS11_MODNAME"],
+                   [Default PKCS11 module name])
+
 AC_CONFIG_FILES([build-tools/krb5-config], [chmod +x build-tools/krb5-config])
 AC_CONFIG_FILES([build-tools/kadm-server.pc
 	build-tools/kadm-client.pc

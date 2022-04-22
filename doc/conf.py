@@ -242,6 +242,7 @@ if 'mansubs' in tags:
     ccache = '``@CCNAME@``'
     keytab = '``@KTNAME@``'
     ckeytab = '``@CKTNAME@``'
+    pkcs11_modname = '``@PKCS11MOD@``'
 elif 'pathsubs' in tags:
     # Read configured paths from a file produced by the build system.
     exec(open("paths.py").read())
@@ -255,6 +256,7 @@ else:
     ccache = ':ref:`DEFCCNAME <paths>`'
     keytab = ':ref:`DEFKTNAME <paths>`'
     ckeytab = ':ref:`DEFCKTNAME <paths>`'
+    pkcs11_modname = ':ref:`PKCS11_MODNAME <paths>`'
 
 rst_epilog = '\n'
 
@@ -275,6 +277,7 @@ else:
     rst_epilog += '.. |ccache| replace:: %s\n' % ccache
     rst_epilog += '.. |keytab| replace:: %s\n' % keytab
     rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
+    rst_epilog += '.. |pkcs11_modname| replace:: %s\n' % pkcs11_modname
     rst_epilog += '''
 .. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal``

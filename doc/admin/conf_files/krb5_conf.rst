@@ -1011,7 +1011,7 @@ information for PKINIT is as follows:
     All keyword/values are optional.  *modname* specifies the location
     of a library implementing PKCS #11.  If a value is encountered
     with no keyword, it is assumed to be the *modname*.  If no
-    module-name is specified, the default is ``opensc-pkcs11.so``.
+    module-name is specified, the default is |pkcs11_modname|.
     ``slotid=`` and/or ``token=`` may be specified to force the use of
     a particular smard card reader or token if there is more than one
     available.  ``certid=`` and/or ``certlabel=`` may be specified to

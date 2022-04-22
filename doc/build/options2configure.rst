@@ -137,6 +137,9 @@ Environment variables
     This option allows one to specify libraries to be passed to the
     linker (e.g., ``-l<library>``)
 
+**PKCS11_MODNAME=**\ *library*
+    Override the built-in default PKCS11 library name.
+
 **SS_LIB=**\ *libs*...
     If ``-lss`` is not the correct way to link in your installed ss
     library, for example if additional support libraries are needed,

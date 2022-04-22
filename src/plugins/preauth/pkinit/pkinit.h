@@ -42,7 +42,6 @@
 #ifndef WITHOUT_PKCS11
 #include "pkcs11.h"
 
-#define PKCS11_MODNAME "opensc-pkcs11.so"
 #define PK_SIGLEN_GUESS 1000
 #define PK_NOSLOT 999999
 #endif
