@@ -458,7 +458,7 @@ main(int argc, char **argv)
         }
     }
 
-    if (krb5_init_context(&context)) {
+    if (kadm5_init_krb5_context(&context)) {
         fprintf(stderr, _("Unable to initialize Kerberos\n\n"));
         exit(1);
     }

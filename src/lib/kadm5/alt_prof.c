@@ -510,8 +510,8 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
                                         kadm5_config_params *params_in,
                                         kadm5_config_params *params_out)
 {
-    char *filename, *envname, *lrealm, *svalue, *sp, *ep, *tp;
-    krb5_pointer aprofile = 0;
+    char *lrealm, *svalue, *sp, *ep, *tp;
+    krb5_pointer aprofile = context->profile;
     const char *hierarchy[4];
     krb5_int32 ivalue;
     kadm5_config_params params, empty_params;
@@ -543,25 +543,6 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
         params.kvno = params_in->kvno;
         params.mask |= KADM5_CONFIG_KVNO;
     }
-    /*
-     * XXX These defaults should to work on both client and
-     * server.  kadm5_get_config_params can be implemented as a
-     * wrapper function in each library that provides correct
-     * defaults for NULL values.
-     */
-    if (use_kdc_config) {
-        filename = DEFAULT_KDC_PROFILE;
-        envname = KDC_PROFILE_ENV;
-    } else {
-        filename = DEFAULT_PROFILE_PATH;
-        envname = "KRB5_CONFIG";
-    }
-    if (context->profile_secure == TRUE)
-        envname = NULL;
-
-    ret = krb5_aprof_init(filename, envname, &aprofile);
-    if (ret)
-        goto cleanup;
 
     /* Initialize realm parameters. */
     hierarchy[0] = KRB5_CONF_REALMS;
@@ -814,7 +795,6 @@ krb5_error_code kadm5_get_config_params(krb5_context context,
     *params_out = params;
 
 cleanup:
-    krb5_aprof_finish(aprofile);
     if (ret) {
         kadm5_free_config_params(context, &params);
         params_out->mask = 0;

@@ -291,6 +291,8 @@ typedef struct _kadm5_key_data {
  * functions
  */
 
+/* The use_kdc_config parameter is no longer used, as configuration is
+ * retrieved from the context profile. */
 krb5_error_code kadm5_get_config_params(krb5_context context,
                                         int use_kdc_config,
                                         kadm5_config_params *params_in,
