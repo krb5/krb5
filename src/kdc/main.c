@@ -608,7 +608,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
     krb5_boolean        def_restrict_anon;
     char                *def_udp_listen = NULL;
     char                *def_tcp_listen = NULL;
-    krb5_pointer        aprof = NULL;
+    krb5_pointer        aprof = kcontext->profile;
     const char          *hierarchy[3];
     char                *no_referral = NULL;
     char                *hostbased = NULL;
@@ -617,40 +617,38 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
 
     extern char *optarg;
 
-    if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
-        hierarchy[0] = KRB5_CONF_KDCDEFAULTS;
-        hierarchy[1] = KRB5_CONF_KDC_LISTEN;
-        hierarchy[2] = (char *) NULL;
-        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen)) {
-            hierarchy[1] = KRB5_CONF_KDC_PORTS;
-            if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen))
-                def_udp_listen = NULL;
-        }
-        hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN;
-        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen)) {
-            hierarchy[1] = KRB5_CONF_KDC_TCP_PORTS;
-            if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen))
-                def_tcp_listen = NULL;
-        }
-        hierarchy[1] = KRB5_CONF_KDC_MAX_DGRAM_REPLY_SIZE;
-        if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
-            max_dgram_reply_size = MAX_DGRAM_SIZE;
-        if (tcp_listen_backlog_out != NULL) {
-            hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN_BACKLOG;
-            if (krb5_aprof_get_int32(aprof, hierarchy, TRUE,
-                                     tcp_listen_backlog_out))
-                *tcp_listen_backlog_out = DEFAULT_TCP_LISTEN_BACKLOG;
-        }
-        hierarchy[1] = KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT;
-        if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE, &def_restrict_anon))
-            def_restrict_anon = FALSE;
-        hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
-        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_referral))
-            no_referral = 0;
-        hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
-        if (krb5_aprof_get_string_all(aprof, hierarchy, &hostbased))
-            hostbased = 0;
+    hierarchy[0] = KRB5_CONF_KDCDEFAULTS;
+    hierarchy[1] = KRB5_CONF_KDC_LISTEN;
+    hierarchy[2] = NULL;
+    if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen)) {
+        hierarchy[1] = KRB5_CONF_KDC_PORTS;
+        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen))
+            def_udp_listen = NULL;
     }
+    hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN;
+    if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen)) {
+        hierarchy[1] = KRB5_CONF_KDC_TCP_PORTS;
+        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen))
+            def_tcp_listen = NULL;
+    }
+    hierarchy[1] = KRB5_CONF_KDC_MAX_DGRAM_REPLY_SIZE;
+    if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
+        max_dgram_reply_size = MAX_DGRAM_SIZE;
+    if (tcp_listen_backlog_out != NULL) {
+        hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN_BACKLOG;
+        if (krb5_aprof_get_int32(aprof, hierarchy, TRUE,
+                                 tcp_listen_backlog_out))
+            *tcp_listen_backlog_out = DEFAULT_TCP_LISTEN_BACKLOG;
+    }
+    hierarchy[1] = KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT;
+    if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE, &def_restrict_anon))
+        def_restrict_anon = FALSE;
+    hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
+    if (krb5_aprof_get_string_all(aprof, hierarchy, &no_referral))
+        no_referral = 0;
+    hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
+    if (krb5_aprof_get_string_all(aprof, hierarchy, &hostbased))
+        hostbased = 0;
 
     if (def_udp_listen == NULL) {
         def_udp_listen = strdup(DEFAULT_KDC_UDP_PORTLIST);
@@ -836,8 +834,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
         free(hostbased);
     if (no_referral)
         free(no_referral);
-    if (aprof)
-        krb5_aprof_finish(aprof);
 
     return;
 }

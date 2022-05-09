@@ -50,52 +50,6 @@ copy_key_salt_tuple(krb5_key_salt_tuple *ksalt, krb5_int32 len)
 }
 
 /*
- * krb5_aprof_init()        - Initialize alternate profile context.
- *
- * Parameters:
- *        fname             - default file name of the profile.
- *        envname           - environment variable which can override fname
- *        acontextp         - Pointer to opaque context for alternate profile
- *
- * Returns:
- *        error codes from profile_init()
- */
-krb5_error_code
-krb5_aprof_init(char *fname, char *envname, krb5_pointer *acontextp)
-{
-    krb5_error_code ret;
-    profile_t profile;
-    const char *kdc_config;
-    char **filenames;
-    int i;
-    struct k5buf buf;
-
-    ret = krb5_get_default_config_files(&filenames);
-    if (ret)
-        return ret;
-    if (envname == NULL || (kdc_config = secure_getenv(envname)) == NULL)
-        kdc_config = fname;
-    k5_buf_init_dynamic(&buf);
-    if (kdc_config)
-        k5_buf_add(&buf, kdc_config);
-    for (i = 0; filenames[i] != NULL; i++) {
-        if (buf.len > 0)
-            k5_buf_add(&buf, ":");
-        k5_buf_add(&buf, filenames[i]);
-    }
-    krb5_free_config_files(filenames);
-    if (k5_buf_status(&buf) != 0)
-        return ENOMEM;
-    profile = (profile_t) NULL;
-    ret = profile_init_path(buf.data, &profile);
-    k5_buf_free(&buf);
-    if (ret)
-        return ret;
-    *acontextp = profile;
-    return 0;
-}
-
-/*
  * krb5_aprof_getvals()     - Get values from alternate profile.
  *
  * Parameters:
@@ -342,22 +296,6 @@ krb5_aprof_get_int32(krb5_pointer acontext, const char **hierarchy,
 
     profile_free_list(values);
     return ret;
-}
-
-/*
- * krb5_aprof_finish()      - Finish alternate profile context.
- *
- * Parameter:
- *        acontext          - opaque context for alternate profile.
- *
- * Returns:
- *        0 on success, something else on failure.
- */
-krb5_error_code
-krb5_aprof_finish(krb5_pointer acontext)
-{
-    profile_release(acontext);
-    return 0;
 }
 
 /*

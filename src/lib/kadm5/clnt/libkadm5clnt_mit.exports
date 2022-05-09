@@ -45,13 +45,11 @@ kadm5_setkey_principal
 kadm5_setkey_principal_3
 kadm5_setkey_principal_4
 kadm5_unlock
-krb5_aprof_finish
 krb5_aprof_get_boolean
 krb5_aprof_get_deltat
 krb5_aprof_get_int32
 krb5_aprof_get_string
 krb5_aprof_getvals
-krb5_aprof_init
 krb5_flagnum_to_string
 krb5_flagspec_to_mask
 krb5_flags_to_strings
