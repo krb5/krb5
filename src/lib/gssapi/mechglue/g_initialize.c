@@ -93,7 +93,7 @@ static void free_mechSet(void);
 static gss_mech_info g_mechList = NULL;
 static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
-static time_t g_confFileModTime = (time_t)0;
+static time_t g_confFileModTime = (time_t)-1;
 static time_t g_confLastCall = (time_t)0;
 
 static gss_OID_set_desc g_mechSet = { 0, NULL };
@@ -469,9 +469,9 @@ load_if_changed(const char *pathname, time_t last, time_t *highest)
 	mtime = check_link_mtime(pathname, &mtime);
 	if (mtime == (time_t)-1)
 		return;
-	if (mtime > *highest)
+	if (mtime > *highest || *highest == (time_t)-1)
 		*highest = mtime;
-	if (mtime > last)
+	if (mtime > last || last == (time_t)-1)
 		loadConfigFile(pathname);
 }
 
@@ -482,7 +482,7 @@ static void
 loadConfigFiles()
 {
 	glob_t globbuf;
-	time_t highest = 0, now;
+	time_t highest = (time_t)-1, now;
 	char **path;
 	const char *val;
 
@@ -522,7 +522,8 @@ updateMechList(void)
 
 #if defined(_WIN32)
 	time_t lastConfModTime = getRegConfigModTime(MECH_KEY);
-	if (g_confFileModTime >= lastConfModTime)
+	if (g_confFileModTime >= lastConfModTime &&
+	    g_confFileModTime != (time_t)-1)
 		return;
 	g_confFileModTime = lastConfModTime;
 	loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
