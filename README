@@ -85,8 +85,8 @@ default and eventually removed.
 Beginning with the krb5-1.18 release, single-DES encryption types have
 been removed.
 
-Major changes in 1.20
----------------------
+Major changes in 1.20 (2022-05-26)
+----------------------------------
 
 Administrator experience:
 
@@ -185,6 +185,8 @@ krb5-1.20 changes by ticket ID
 9049    Add replace_reply_key kdcpreauth callback
 9050    Implement replaced_reply_key input to issue_pac()
 9051    Clarify certauth interface documentation
+9056    Fix iprop with fallback
+9060    Read GSS configuration files with mtime 0
 
 Acknowledgements
 ----------------
