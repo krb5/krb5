@@ -644,7 +644,7 @@ test_issue_pac(krb5_context context, unsigned int flags, krb5_db_entry *client,
 {
     krb5_data data = empty_data();
     krb5_boolean found_logon_info = FALSE;
-    krb5_ui_4 *types;
+    krb5_ui_4 *types = NULL;
     size_t num_buffers = 0, i;
 
     change_auth_indicators(context, auth_indicators);
@@ -692,6 +692,8 @@ test_issue_pac(krb5_context context, unsigned int flags, krb5_db_entry *client,
 
         if (old_pac != NULL)
             assert(found_logon_info);
+
+        free(types);
     }
 
     return 0;
@@ -771,6 +773,7 @@ test_allowed_to_delegate_from(krb5_context context,
     found = match_in_table(context, "rbcd", proxy_princ, server_princ);
     krb5_free_unparsed_name(context, proxy_princ);
     krb5_free_unparsed_name(context, server_princ);
+    krb5_free_unparsed_name(context, client_princ);
     return found ? 0 : KRB5KDC_ERR_BADOPTION;
 }
 
