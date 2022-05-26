@@ -828,7 +828,10 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
      * resolution. */
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV;
+    hints.ai_flags = AI_PASSIVE;
+#ifdef AI_NUMERICSERV
+    hints.ai_flags |= AI_NUMERICSERV;
+#endif
 
     /* Add all the requested addresses. */
     for (i = 0; i < bind_addresses.n; i++) {
