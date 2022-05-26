@@ -469,6 +469,7 @@ cleanup:
     zapfree(spakeresult.data, spakeresult.length);
     krb5_free_data_contents(context, &thash);
     krb5_free_keyblock(context, k1);
+    krb5_free_keyblock(context, reply_key);
     k5_free_spake_factor(context, factor);
     (*respond)(arg, ret, NULL, NULL, NULL);
 }
