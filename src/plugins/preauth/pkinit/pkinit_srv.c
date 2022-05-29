@@ -1022,7 +1022,6 @@ pkinit_server_return_padata(krb5_context context,
     (*send_pa)->contents = (krb5_octet *) out_data->data;
 
 cleanup:
-    pkinit_fini_kdc_req_context(context, reqctx);
     free(scratch.data);
     free(out_data);
     if (encoded_dhkey_info != NULL)
@@ -1612,6 +1611,13 @@ pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     free(reqctx);
 }
 
+static void
+pkinit_free_modreq(krb5_context context, krb5_kdcpreauth_moddata moddata,
+                   krb5_kdcpreauth_modreq modreq)
+{
+    pkinit_fini_kdc_req_context(context, modreq);
+}
+
 krb5_error_code
 kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
                          krb5_plugin_vtable vtable);
@@ -1633,5 +1639,6 @@ kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->edata = pkinit_server_get_edata;
     vt->verify = pkinit_server_verify_padata;
     vt->return_padata = pkinit_server_return_padata;
+    vt->free_modreq = pkinit_free_modreq;
     return 0;
 }
