@@ -32,9 +32,14 @@
 
 #include "pkinit.h"
 
-/* statically declare OID constants for all three algorithms */
-static char sha1_oid[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x01};
+/* RFC 8636 id-pkinit-kdf-ah-sha1: iso(1) identified-organization(3) dod(6)
+ * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha1(1) */
+static char sha1_oid[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x01 };
+/* RFC 8636 id-pkinit-kdf-ah-sha256: iso(1) identified-organization(3) dod(6)
+ * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha256(2) */
 static char sha256_oid[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x02 };
+/* RFC 8636 id-pkinit-kdf-ah-sha512: iso(1) identified-organization(3) dod(6)
+ * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha512(3) */
 static char sha512_oid[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x03 };
 
 const krb5_data sha1_id = { KV5M_DATA, sizeof(sha1_oid), sha1_oid };
@@ -45,6 +50,30 @@ krb5_data const * const supported_kdf_alg_ids[] = {
     &sha256_id,
     &sha1_id,
     &sha512_id,
+    NULL
+};
+
+/* RFC 4055 sha256WithRSAEncryption: iso(1) member-body(2) us(840)
+ * rsadsi(113549) pkcs(1) 1 11 */
+static char sha256WithRSAEncr_oid[9] = {
+    0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b
+};
+/* RFC 4055 sha256WithRSAEncryption: iso(1) member-body(2) us(840)
+ * rsadsi(113549) pkcs(1) 1 13 */
+static char sha512WithRSAEncr_oid[9] = {
+    0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0d
+};
+
+const krb5_data sha256WithRSAEncr_id = {
+    KV5M_DATA, sizeof(sha256WithRSAEncr_oid), sha256WithRSAEncr_oid
+};
+const krb5_data sha512WithRSAEncr_id = {
+    KV5M_DATA, sizeof(sha512WithRSAEncr_oid), sha512WithRSAEncr_oid
+};
+
+krb5_data const * const supported_cms_algs[] = {
+    &sha512WithRSAEncr_id,
+    &sha256WithRSAEncr_id,
     NULL
 };
 

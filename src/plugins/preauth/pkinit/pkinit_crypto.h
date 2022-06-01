@@ -620,6 +620,10 @@ extern const krb5_data oakley_4096;
  */
 extern krb5_data const * const supported_kdf_alg_ids[];
 
+/* CMS signature algorithms supported by this implementation, in order of
+ * decreasing preference. */
+extern krb5_data const * const supported_cms_algs[];
+
 krb5_error_code
 crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
 		       uint8_t **der_out, size_t *der_len);

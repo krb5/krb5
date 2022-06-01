@@ -5475,37 +5475,38 @@ create_krb5_supportedCMSTypes(krb5_context context,
                               pkinit_plg_crypto_context plg_cryptoctx,
                               pkinit_req_crypto_context req_cryptoctx,
                               pkinit_identity_crypto_context id_cryptoctx,
-                              krb5_algorithm_identifier ***oids)
+                              krb5_algorithm_identifier ***algs_out)
 {
+    krb5_error_code ret;
+    krb5_algorithm_identifier **algs = NULL;
+    size_t i, count;
 
-    krb5_error_code retval = ENOMEM;
-    krb5_algorithm_identifier **loids = NULL;
-    krb5_data des3oid = {0, 8, "\x2A\x86\x48\x86\xF7\x0D\x03\x07" };
+    *algs_out = NULL;
 
-    *oids = NULL;
-    loids = malloc(2 * sizeof(krb5_algorithm_identifier *));
-    if (loids == NULL)
+    /* Count supported OIDs and allocate list (including null terminator). */
+    for (count = 0; supported_cms_algs[count] != NULL; count++);
+    algs = k5calloc(count + 1, sizeof(*algs), &ret);
+    if (algs == NULL)
         goto cleanup;
-    loids[1] = NULL;
-    loids[0] = malloc(sizeof(krb5_algorithm_identifier));
-    if (loids[0] == NULL) {
-        free(loids);
-        goto cleanup;
+
+    /* Add an algorithm identifier for each OID, with no parameters. */
+    for (i = 0; i < count; i++) {
+        algs[i] = k5alloc(sizeof(*algs[i]), &ret);
+        if (algs[i] == NULL)
+            goto cleanup;
+        ret = krb5int_copy_data_contents(context, supported_cms_algs[i],
+                                         &algs[i]->algorithm);
+        if (ret)
+            goto cleanup;
+        algs[i]->parameters = empty_data();
     }
-    retval = pkinit_copy_krb5_data(&loids[0]->algorithm, &des3oid);
-    if (retval) {
-        free(loids[0]);
-        free(loids);
-        goto cleanup;
-    }
-    loids[0]->parameters.length = 0;
-    loids[0]->parameters.data = NULL;
 
-    *oids = loids;
-    retval = 0;
+    *algs_out = algs;
+    algs = NULL;
+
 cleanup:
-
-    return retval;
+    free_krb5_algorithm_identifiers(&algs);
+    return ret;
 }
 
 krb5_error_code
