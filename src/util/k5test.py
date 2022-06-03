@@ -414,7 +414,10 @@ def fail(msg):
         print("*** Last mark: %s" % _last_mark)
     if _last_cmd:
         print("*** Last command (#%d): %s" % (_cmd_index - 1, _last_cmd))
-    if _last_cmd_output:
+    if _failed_daemon_output:
+        print('*** Output of failed daemon:')
+        sys.stdout.write(_failed_daemon_output)
+    elif _last_cmd_output:
         print("*** Output of last command:")
         sys.stdout.write(_last_cmd_output)
     if _current_pass:
@@ -426,7 +429,7 @@ def fail(msg):
 
 def success(msg):
     global _success
-    _check_daemons()
+    _stop_daemons()
     output('*** Success: %s\n' % msg)
     _success = True
 
@@ -447,7 +450,7 @@ def skipped(whatmsg, whymsg):
 def skip_rest(whatmsg, whymsg):
     global _success
     skipped(whatmsg, whymsg)
-    _check_daemons()
+    _stop_daemons()
     _success = True
     sys.exit(0)
 
@@ -503,8 +506,7 @@ def _onexit():
         sys.stdout.flush()
         sys.stdin.readline()
     for proc in _daemons:
-        if _check_daemon(proc) is None:
-            os.kill(proc.pid, signal.SIGTERM)
+        _stop_daemon(proc)
     if not _success:
         print
         if not verbose:
@@ -833,65 +835,56 @@ def _start_daemon(args, env, sentinel):
     return proc
 
 
-# Check a daemon's status prior to terminating it.  Display its return
-# code if it already exited, and display any output it has generated.
-# Return the daemon's exit status or None if it is still running.
+# Await a daemon process's exit status and display it if it isn't
+# successful.  Display any output it generated after the sentinel.
+# Return the daemon's exit status (0 if it terminated with SIGTERM).
 def _check_daemon(proc):
-    exited = False
-    code = proc.poll()
-    if code is not None:
+    global _failed_daemon_output
+    code = proc.wait()
+    # If a daemon doesn't catch SIGTERM (like gss-server), treat it as
+    # a normal exit.
+    if code == -signal.SIGTERM:
+        code = 0
+    if code != 0:
         output('*** Daemon pid %d exited with code %d\n' % (proc.pid, code))
 
-    flags = fcntl.fcntl(proc.stdout, fcntl.F_GETFL)
-    fcntl.fcntl(proc.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-    try:
-        out = proc.stdout.read()
-    except:
-        return
-
+    out, err = proc.communicate()
+    if code != 0:
+        _failed_daemon_output = out
     output('*** Daemon pid %d output:\n' % proc.pid)
     output(out)
+
     return code
 
 
-# Check all tracked daemon processes.  If any daemons already exited,
-# remove them from the list (so we don't try to terminate them again).
-# If any daemons exited with an error, fail out.
-def _check_daemons():
-    exited = []
+# Terminate all active daemon processes.  Fail out if any of them
+# exited unsuccessfully.
+def _stop_daemons():
+    global _daemons
     daemon_error = False
     for proc in _daemons:
+        os.kill(proc.pid, signal.SIGTERM)
         code = _check_daemon(proc)
-        if code is not None:
-            exited.append(proc)
-            if code != 0:
-                daemon_error = True
-
-    for proc in exited:
-        _daemons.remove(proc)
-
+        if code != 0:
+            daemon_error = True
+    _daemons = []
     if daemon_error:
         fail('One or more daemon processes exited with an error')
 
 
-def stop_daemon(proc):
-    code = _check_daemon(proc)
-    if code is not None:
-        _daemons.remove(proc)
-        if code != 0:
-            fail('Daemon process %d exited early' % proc.pid)
-    else:
-        output('*** Terminating process %d\n' % proc.pid)
-        os.kill(proc.pid, signal.SIGTERM)
-        proc.wait()
-        _daemons.remove(proc)
-
-
+# Wait for a daemon process to exit.  Fail out if it exits
+# unsuccessfully.
 def await_daemon_exit(proc):
-    code = proc.wait()
+    code = _check_daemon(proc)
     _daemons.remove(proc)
     if code != 0:
-        fail('Daemon process %d exited with status %d' % (proc.pid, code))
+        fail('Daemon exited unsuccessfully')
+
+
+# Terminate one daemon process.  Fail out if it exits unsuccessfully.
+def stop_daemon(proc):
+    os.kill(proc.pid, signal.SIGTERM)
+    return await_daemon_exit(proc)
 
 
 class K5Realm(object):
@@ -1404,6 +1397,7 @@ _cmd_index = 1
 _last_mark = None
 _last_cmd = None
 _last_cmd_output = None
+_failed_daemon_output = None
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
