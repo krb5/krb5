@@ -1041,7 +1041,6 @@ int main(int argc, char **argv)
     kau_kdc_start(kcontext, TRUE);
 
     verto_run(ctx);
-    loop_free(ctx);
     kau_kdc_stop(kcontext, TRUE);
     krb5_klog_syslog(LOG_INFO, _("shutting down"));
     unload_preauth_plugins(kcontext);
@@ -1055,6 +1054,7 @@ int main(int argc, char **argv)
 #ifndef NOCACHE
     kdc_free_lookaside(kcontext);
 #endif
+    loop_free(ctx);
     krb5_free_context(kcontext);
     return errout;
 }
