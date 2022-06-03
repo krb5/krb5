@@ -211,7 +211,7 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     krb5_pa_otp_challenge chl;
     krb5_pa_data *pa = NULL;
     krb5_error_code retval;
-    krb5_data *encoding;
+    krb5_data *encoding, nonce = empty_data();
     char *config;
 
     /* Determine if otp is enabled for the user. */
@@ -239,9 +239,10 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     ti.iteration_count = -1;
 
     /* Generate the nonce. */
-    retval = nonce_generate(context, armor_key->length, &chl.nonce);
+    retval = nonce_generate(context, armor_key->length, &nonce);
     if (retval != 0)
         goto out;
+    chl.nonce = nonce;
 
     /* Build the output pa-data. */
     retval = encode_krb5_pa_otp_challenge(&chl, &encoding);
@@ -258,6 +259,7 @@ otp_edata(krb5_context context, krb5_kdc_req *request,
     free(encoding);
 
 out:
+    krb5_free_data_contents(context, &nonce);
     (*respond)(arg, retval, pa);
 }
 
