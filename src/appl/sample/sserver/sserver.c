@@ -62,8 +62,6 @@ extern krb5_deltat krb5_clockskew;
 #define GETPEERNAME_ARG3_TYPE int
 #endif
 
-#define DEBUG
-
 static void
 usage(char *name)
 {
