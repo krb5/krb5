@@ -189,9 +189,10 @@ long KRB5_CALLCONV
 krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct errinfo *ep)
 {
     long err = 0;
-    struct stat statbuf;
     struct plugin_file_handle *htmp = NULL;
     int got_plugin = 0;
+#if defined(USE_CFBUNDLE) || defined(_WIN32)
+    struct stat statbuf;
 
     if (!err) {
         if (stat (filepath, &statbuf) < 0) {
@@ -201,6 +202,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
                          filepath, strerror(err));
         }
     }
+#endif
 
     if (!err) {
         htmp = calloc (1, sizeof (*htmp)); /* calloc initializes ptrs to NULL */
@@ -208,11 +210,12 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
     }
 
 #if USE_DLOPEN
-    if (!err && ((statbuf.st_mode & S_IFMT) == S_IFREG
+    if (!err
 #if USE_CFBUNDLE
-                 || (statbuf.st_mode & S_IFMT) == S_IFDIR
+                 && ((statbuf.st_mode & S_IFMT) == S_IFREG
+                 || (statbuf.st_mode & S_IFMT) == S_IFDIR)
 #endif /* USE_CFBUNDLE */
-        )) {
+        ) {
         void *handle = NULL;
 
 #if USE_CFBUNDLE
