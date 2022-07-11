@@ -46,6 +46,7 @@
 #include <openssl/asn1.h>
 #include <openssl/pem.h>
 #include <openssl/asn1t.h>
+#include <openssl/cms.h>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/core_names.h>
 #include <openssl/decoder.h>
