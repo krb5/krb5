@@ -1504,7 +1504,6 @@ cms_signeddata_create(krb5_context context,
                       pkinit_req_crypto_context req_cryptoctx,
                       pkinit_identity_crypto_context id_cryptoctx,
                       int cms_msg_type,
-                      int include_certchain,
                       unsigned char *data,
                       unsigned int data_len,
                       unsigned char **signed_data,
@@ -1549,49 +1548,46 @@ cms_signeddata_create(krb5_context context,
         goto cleanup;
 
     if (id_cryptoctx->my_certs != NULL) {
-        /* create a cert chain that has at least the signer's certificate */
+        X509_STORE *certstore = NULL;
+        X509_STORE_CTX *certctx;
+        STACK_OF(X509) *certstack = NULL;
+        char buf[DN_BUF_LEN];
+        unsigned int i = 0, size = 0;
+
+        /* create a cert chain */
         if ((cert_stack = sk_X509_new_null()) == NULL)
             goto cleanup;
 
         cert = sk_X509_value(id_cryptoctx->my_certs, id_cryptoctx->cert_index);
-        if (!include_certchain) {
-            pkiDebug("only including signer's certificate\n");
-            sk_X509_push(cert_stack, X509_dup(cert));
-        } else {
-            /* create a cert chain */
-            X509_STORE *certstore = NULL;
-            X509_STORE_CTX *certctx;
-            STACK_OF(X509) *certstack = NULL;
-            char buf[DN_BUF_LEN];
-            unsigned int i = 0, size = 0;
 
-            if ((certstore = X509_STORE_new()) == NULL)
-                goto cleanup;
-            pkiDebug("building certificate chain\n");
-            X509_STORE_set_verify_cb(certstore, openssl_callback);
-            certctx = X509_STORE_CTX_new();
-            if (certctx == NULL)
-                goto cleanup;
-            X509_STORE_CTX_init(certctx, certstore, cert,
-                                id_cryptoctx->intermediateCAs);
-            X509_STORE_CTX_trusted_stack(certctx, id_cryptoctx->trustedCAs);
-            if (!X509_verify_cert(certctx)) {
-                retval = oerr_cert(context, 0, certctx,
-                                   _("Failed to verify own certificate"));
-                goto cleanup;
-            }
-            certstack = X509_STORE_CTX_get1_chain(certctx);
-            size = sk_X509_num(certstack);
-            for(i = 0; i < size - 1; i++) {
-                X509 *x = sk_X509_value(certstack, i);
-                X509_NAME_oneline(X509_get_subject_name(x), buf, sizeof(buf));
-                TRACE_PKINIT_CERT_CHAIN_NAME(context, (int)i, buf);
-                sk_X509_push(cert_stack, X509_dup(x));
-            }
-            X509_STORE_CTX_free(certctx);
-            X509_STORE_free(certstore);
-            sk_X509_pop_free(certstack, X509_free);
+        certstore = X509_STORE_new();
+        if (certstore == NULL)
+            goto cleanup;
+        pkiDebug("building certificate chain\n");
+        X509_STORE_set_verify_cb(certstore, openssl_callback);
+        certctx = X509_STORE_CTX_new();
+        if (certctx == NULL)
+            goto cleanup;
+        X509_STORE_CTX_init(certctx, certstore, cert,
+                            id_cryptoctx->intermediateCAs);
+        X509_STORE_CTX_trusted_stack(certctx, id_cryptoctx->trustedCAs);
+        if (!X509_verify_cert(certctx)) {
+            retval = oerr_cert(context, 0, certctx,
+                               _("Failed to verify own certificate"));
+            goto cleanup;
         }
+        certstack = X509_STORE_CTX_get1_chain(certctx);
+        size = sk_X509_num(certstack);
+        for (i = 0; i < size - 1; i++) {
+            X509 *x = sk_X509_value(certstack, i);
+            X509_NAME_oneline(X509_get_subject_name(x), buf, sizeof(buf));
+            TRACE_PKINIT_CERT_CHAIN_NAME(context, (int)i, buf);
+            sk_X509_push(cert_stack, X509_dup(x));
+        }
+        X509_STORE_CTX_free(certctx);
+        X509_STORE_free(certstore);
+        sk_X509_pop_free(certstack, X509_free);
+
         p7s->cert = cert_stack;
 
         /* fill-in PKCS7_SIGNER_INFO */
@@ -2175,7 +2171,6 @@ cms_envelopeddata_create(krb5_context context,
                          pkinit_req_crypto_context reqctx,
                          pkinit_identity_crypto_context idctx,
                          krb5_preauthtype pa_type,
-                         int include_certchain,
                          unsigned char *key_pack,
                          unsigned int key_pack_len,
                          unsigned char **out,
@@ -2191,8 +2186,8 @@ cms_envelopeddata_create(krb5_context context,
     const EVP_CIPHER *cipher = NULL;
 
     retval = cms_signeddata_create(context, plgctx, reqctx, idctx,
-                                   CMS_ENVEL_SERVER, include_certchain,
-                                   key_pack, key_pack_len, &signed_data,
+                                   CMS_ENVEL_SERVER, key_pack, key_pack_len,
+                                   &signed_data,
                                    (unsigned int *)&signed_data_len);
     if (retval) {
         pkiDebug("failed to create pkcs7 signed data\n");

@@ -863,7 +863,7 @@ pkinit_server_return_padata(krb5_context context,
 
         retval = cms_signeddata_create(context, plgctx->cryptoctx,
                                        reqctx->cryptoctx, plgctx->idctx,
-                                       CMS_SIGN_SERVER, 1,
+                                       CMS_SIGN_SERVER,
                                        (unsigned char *)
                                        encoded_dhkey_info->data,
                                        encoded_dhkey_info->length,
@@ -917,7 +917,7 @@ pkinit_server_return_padata(krb5_context context,
         rep->choice = choice_pa_pk_as_rep_encKeyPack;
         retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
                                           reqctx->cryptoctx, plgctx->idctx,
-                                          padata->pa_type, 1,
+                                          padata->pa_type,
                                           (unsigned char *)
                                           encoded_key_pack->data,
                                           encoded_key_pack->length,

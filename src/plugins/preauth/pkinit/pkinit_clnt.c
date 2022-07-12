@@ -270,7 +270,7 @@ pkinit_as_req_create(krb5_context context,
     } else {
         retval = cms_signeddata_create(context, plgctx->cryptoctx,
                                        reqctx->cryptoctx, reqctx->idctx,
-                                       CMS_SIGN_CLIENT, 1,
+                                       CMS_SIGN_CLIENT,
                                        (unsigned char *)
                                        coded_auth_pack->data,
                                        coded_auth_pack->length,
