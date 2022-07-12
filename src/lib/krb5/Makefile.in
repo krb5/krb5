@@ -23,18 +23,6 @@ LIBMINOR=3
 LIBINITFUNC=profile_library_initializer krb5int_lib_init
 LIBFINIFUNC=profile_library_finalizer krb5int_lib_fini
 
-STOBJLISTS= \
-	OBJS.ST \
-	error_tables/OBJS.ST \
-	asn.1/OBJS.ST \
-	ccache/OBJS.ST \
-	keytab/OBJS.ST \
-	krb/OBJS.ST \
-	rcache/OBJS.ST \
-	unicode/OBJS.ST \
-	os/OBJS.ST \
-	$(BUILDTOP)/util/profile/OBJS.ST
-
 SUBDIROBJLISTS= \
 	error_tables/OBJS.ST \
 	asn.1/OBJS.ST \
@@ -45,6 +33,8 @@ SUBDIROBJLISTS= \
 	unicode/OBJS.ST \
 	os/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
+
+STOBJLISTS= OBJS.ST $(SUBDIROBJLISTS)
 
 OBJS=\
 	$(OUTPRE)krb5_libinit.$(OBJEXT)

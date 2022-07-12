@@ -24,18 +24,13 @@ SRCS=\
 	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/sha256.c
 
-STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
-	md5/OBJS.ST sha1/OBJS.ST sha2/OBJS.ST 	\
-	enc_provider/OBJS.ST 		\
-	hash_provider/OBJS.ST 		\
-	aes/OBJS.ST 			\
-	OBJS.ST
-
 SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 		md5/OBJS.ST sha1/OBJS.ST sha2/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
 		hash_provider/OBJS.ST 		\
 		aes/OBJS.ST 
+
+STOBJLISTS= $(SUBDIROBJLISTS) OBJS.ST
 
 all-unix: all-libobjs
 includes: depend
