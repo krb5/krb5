@@ -85,12 +85,4 @@ struct server_handle {
 kdc_realm_t *find_realm_data(struct server_handle *, char *, krb5_ui_4);
 kdc_realm_t *setup_server_realm(struct server_handle *, krb5_principal);
 
-/*
- * These macros used to refer to a global pointer to the active realm state
- * structure for a request.  They now refer to a local variable that must be
- * properly declared in each function that uses these macros.
- */
-#define kdc_context                     kdc_active_realm->realm_context
-#define tgs_server                      kdc_active_realm->realm_tgsprinc
-
 #endif  /* REALM_DATA_H */
