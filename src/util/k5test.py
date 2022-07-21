@@ -506,7 +506,8 @@ def _onexit():
         sys.stdout.flush()
         sys.stdin.readline()
     for proc in _daemons:
-        _stop_daemon(proc)
+        os.kill(proc.pid, signal.SIGTERM)
+        _check_daemon(proc)
     if not _success:
         print
         if not verbose:
