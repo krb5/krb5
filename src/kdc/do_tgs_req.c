@@ -70,8 +70,9 @@
 #include <ctype.h>
 
 static krb5_error_code
-prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
-                  krb5_principal,krb5_data **,const char *, krb5_pa_data **);
+prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *, krb5_ticket *,
+                  krb5_error_code, krb5_principal, krb5_data **, const char *,
+                  krb5_pa_data **);
 
 static krb5_error_code
 decrypt_2ndtkt(krb5_context, krb5_kdc_req *, krb5_flags, krb5_db_entry *,
@@ -113,7 +114,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     const krb5_ticket *stkt = NULL;
     krb5_enc_tkt_part enc_tkt_reply;
     int newtransited = 0;
-    krb5_error_code retval = 0;
+    krb5_error_code retval = 0, errcode;
     krb5_keyblock server_keyblock, *encrypting_key;
     krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key, local_tgt_key;
@@ -121,7 +122,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
     krb5_principal stkt_authdata_client = NULL;
     krb5_last_req_entry *nolrarray[2], nolrentry;
-    int errcode;
     const char        *status = 0;
     krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
     krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
@@ -290,15 +290,14 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     if (errcode)
         goto cleanup;
 
-    retval = validate_tgs_request(realm, request, server, header_ticket,
-                                  header_pac, stkt, stkt_pac, stkt_server,
-                                  kdc_time, s4u_x509_user, client,
-                                  is_crossrealm, is_referral, &status,
-                                  &e_data);
-    if (retval) {
-        if (retval == KDC_ERR_POLICY || retval == KDC_ERR_BADOPTION)
+    errcode = validate_tgs_request(realm, request, server, header_ticket,
+                                   header_pac, stkt, stkt_pac, stkt_server,
+                                   kdc_time, s4u_x509_user, client,
+                                   is_crossrealm, is_referral, &status,
+                                   &e_data);
+    if (errcode) {
+        if (errcode == KRB5KDC_ERR_POLICY || errcode == KRB5KDC_ERR_BADOPTION)
             au_state->violation = PROT_CONSTRAINT;
-        errcode = retval + ERROR_TABLE_BASE_krb5;
         goto cleanup;
     }
 
@@ -313,7 +312,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
                                             header_ticket->enc_part2->client,
                                             server, &stkt_authdata_client,
                                             &status);
-        if (errcode == KDC_ERR_POLICY || errcode == KDC_ERR_BADOPTION)
+        if (errcode == KRB5KDC_ERR_POLICY || errcode == KRB5KDC_ERR_BADOPTION)
             au_state->violation = PROT_CONSTRAINT;
         else if (errcode)
             au_state->violation = LOCAL_POLICY;
@@ -720,9 +719,6 @@ cleanup:
             status = krb5_get_error_message(context, errcode);
             got_err = 1;
         }
-        errcode -= ERROR_TABLE_BASE_krb5;
-        if (errcode < 0 || errcode > KRB_ERR_MAX)
-            errcode = KRB_ERR_GENERIC;
 
         retval = prepare_error_tgs(state, request, header_ticket, errcode,
                                    (server != NULL) ? server->princ : NULL,
@@ -774,11 +770,10 @@ cleanup:
 }
 
 static krb5_error_code
-prepare_error_tgs (struct kdc_request_state *state,
-                   krb5_kdc_req *request, krb5_ticket *ticket, int error,
-                   krb5_principal canon_server,
-                   krb5_data **response, const char *status,
-                   krb5_pa_data **e_data)
+prepare_error_tgs(struct kdc_request_state *state, krb5_kdc_req *request,
+                  krb5_ticket *ticket, krb5_error_code code,
+                  krb5_principal canon_server, krb5_data **response,
+                  const char *status, krb5_pa_data **e_data)
 {
     krb5_context context = state->realm_data->realm_context;
     krb5_error errpkt;
@@ -792,7 +787,7 @@ prepare_error_tgs (struct kdc_request_state *state,
     retval = krb5_us_timeofday(context, &errpkt.stime, &errpkt.susec);
     if (retval)
         return(retval);
-    errpkt.error = error;
+    errpkt.error = errcode_to_protocol(code);
     errpkt.server = request->server;
     if (ticket && ticket->enc_part2)
         errpkt.client = ticket->enc_part2->client;

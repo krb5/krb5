@@ -76,8 +76,8 @@
 
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *, krb5_kdc_req *, krb5_db_entry *,
-                 krb5_keyblock *, int, krb5_pa_data **, krb5_boolean,
-                 krb5_principal, krb5_data **, const char *);
+                 krb5_keyblock *, krb5_error_code, krb5_pa_data **,
+                 krb5_boolean, krb5_principal, krb5_data **, const char *);
 
 /* Determine the key-expiration value according to RFC 4120 section 5.4.2. */
 static krb5_timestamp
@@ -370,10 +370,6 @@ egress:
             state->status = emsg;
         }
         if (errcode != KRB5KDC_ERR_DISCARD) {
-            errcode -= ERROR_TABLE_BASE_krb5;
-            if (errcode < 0 || errcode > KRB_ERR_MAX)
-                errcode = KRB_ERR_GENERIC;
-
             errcode = prepare_error_as(state->rstate, state->request,
                                        state->local_tgt, &state->local_tgt_key,
                                        errcode, state->e_data,
@@ -634,10 +630,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     errcode = validate_as_request(realm, state->request, state->client,
                                   state->server, state->kdc_time,
                                   &state->status, &state->e_data);
-    if (errcode) {
-        errcode += ERROR_TABLE_BASE_krb5;
+    if (errcode)
         goto errout;
-    }
 
     au_state->stage = ISSUE_TKT;
 
@@ -774,7 +768,7 @@ errout:
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
                  krb5_db_entry *local_tgt, krb5_keyblock *local_tgt_key,
-                 int error, krb5_pa_data **e_data_in,
+                 krb5_error_code code, krb5_pa_data **e_data_in,
                  krb5_boolean typed_e_data, krb5_principal canon_client,
                  krb5_data **response, const char *status)
 {
@@ -806,9 +800,9 @@ prepare_error_as(struct kdc_request_state *rstate, krb5_kdc_req *request,
     retval = krb5_us_timeofday(context, &errpkt.stime, &errpkt.susec);
     if (retval)
         goto cleanup;
-    errpkt.error = error;
+    errpkt.error = errcode_to_protocol(code);
     errpkt.server = request->server;
-    errpkt.client = (error == KDC_ERR_WRONG_REALM) ? canon_client :
+    errpkt.client = (code == KRB5KDC_ERR_WRONG_REALM) ? canon_client :
         request->client;
     errpkt.text = string2data((char *)status);
 

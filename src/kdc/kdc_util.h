@@ -78,12 +78,12 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
               krb5_db_entry *candidate, krb5_db_entry **alias_out,
               krb5_db_entry **storage_out, krb5_keyblock *kb_out);
 
-int
+krb5_error_code
 validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
                      krb5_db_entry *, krb5_timestamp,
                      const char **, krb5_pa_data ***);
 
-int
+krb5_error_code
 validate_tgs_request(kdc_realm_t *realm, krb5_kdc_req *request,
                      krb5_db_entry *server, krb5_ticket *ticket, krb5_pac pac,
                      const krb5_ticket *stkt, krb5_pac stkt_pac,
