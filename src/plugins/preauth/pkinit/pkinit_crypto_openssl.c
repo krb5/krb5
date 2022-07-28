@@ -2061,12 +2061,15 @@ cms_signeddata_verify(krb5_context context,
             goto cleanup;
         out = BIO_new(BIO_s_mem());
         if (CMS_verify(cms, NULL, store, NULL, out, flags) == 0) {
-            unsigned long err = ERR_peek_error();
+            unsigned long err = ERR_peek_last_error();
             switch(ERR_GET_REASON(err)) {
-            case PKCS7_R_DIGEST_FAILURE:
+            case RSA_R_DIGEST_NOT_ALLOWED:
+            case CMS_R_UNKNOWN_DIGEST_ALGORITHM:
+            case CMS_R_NO_MATCHING_DIGEST:
+            case CMS_R_NO_MATCHING_SIGNATURE:
                 retval = KRB5KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED;
                 break;
-            case PKCS7_R_SIGNATURE_FAILURE:
+            case CMS_R_VERIFICATION_FAILURE:
             default:
                 retval = KRB5KDC_ERR_INVALID_SIG;
             }
