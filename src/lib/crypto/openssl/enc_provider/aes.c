@@ -27,7 +27,7 @@
 #include "crypto_int.h"
 #include <openssl/evp.h>
 #include <openssl/aes.h>
-//#include <openssl/modes.h>
+#include <openssl/modes.h>
 
 /* proto's */
 static krb5_error_code
@@ -218,35 +218,6 @@ static size_t CRYPTO_cts128_encrypt(const unsigned char *in, unsigned char *out,
     memcpy(out, out - 16, residue);
     (*cbc) (tmp.c, out - 16, 16, key, ivec, 1);
 #endif
-    return len + residue;
-}
-
-static size_t CRYPTO_cts128_encrypt_block(const unsigned char *in,
-                                   unsigned char *out, size_t len,
-                                   const void *key, unsigned char ivec[16],
-                                   block128_f block)
-{
-    size_t residue, n;
-
-    if (len <= 16)
-        return 0;
-
-    if ((residue = len % 16) == 0)
-        residue = 16;
-
-    len -= residue;
-
-    CRYPTO_cbc128_encrypt(in, out, len, key, ivec, block);
-
-    in += len;
-    out += len;
-
-    for (n = 0; n < residue; ++n)
-        ivec[n] ^= in[n];
-    (*block) (ivec, ivec, key);
-    memcpy(out, out - 16, residue);
-    memcpy(out - 16, ivec, 16);
-
     return len + residue;
 }
 
