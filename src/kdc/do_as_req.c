@@ -699,7 +699,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                            state->server, &state->enc_tkt_reply.times.endtime);
 
     kdc_get_ticket_renewtime(realm, state->request, NULL, state->client,
-                             state->server, &state->enc_tkt_reply);
+                             state->server, &state->enc_tkt_reply.flags,
+                             &state->enc_tkt_reply.times);
 
     /*
      * starttime is optional, and treated as authtime if not present.

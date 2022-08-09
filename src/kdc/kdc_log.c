@@ -149,7 +149,8 @@ log_tgs_req(krb5_context ctx, const krb5_fulladdr *from,
        important).  */
     if (errcode != KRB5KDC_ERR_SERVER_NOMATCH) {
         ktypestr = ktypes2str(request->ktype, request->nktypes);
-        rep_etypestr = rep_etypes2str(reply);
+        if (reply != NULL)
+            rep_etypestr = rep_etypes2str(reply);
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ (%s) %s: %s: authtime %u, %s%s "
                                      "%s for %s%s%s"),
                          ktypestr ? ktypestr : "", fromstring, status,

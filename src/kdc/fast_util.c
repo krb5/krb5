@@ -262,6 +262,8 @@ kdc_make_rstate(kdc_realm_t *active_realm, struct kdc_request_state **out)
 void
 kdc_free_rstate (struct kdc_request_state *s)
 {
+    if (s == NULL)
+        return;
     if (s->armor_key)
         krb5_free_keyblock(s->realm_data->realm_context, s->armor_key);
     if (s->strengthen_key)

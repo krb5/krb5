@@ -517,6 +517,60 @@ check_tgs_s4u2proxy(krb5_context context, krb5_kdc_req *req,
     return 0;
 }
 
+/* Check the KDB policy for a final RBCD request. */
+static krb5_error_code
+check_s4u2proxy_policy(krb5_context context, krb5_kdc_req *req,
+                       krb5_principal desired_client,
+                       krb5_principal impersonator_name,
+                       krb5_db_entry *impersonator, krb5_pac impersonator_pac,
+                       krb5_principal resource_name, krb5_db_entry *resource,
+                       krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                       const char **status)
+{
+    krb5_error_code ret;
+    krb5_boolean support_rbcd, policy_denial = FALSE;
+
+    /* Check if the client supports resource-based constrained delegation. */
+    ret = kdc_get_pa_pac_rbcd(context, req->padata, &support_rbcd);
+    if (ret)
+        return ret;
+
+    if (is_referral) {
+        if (!support_rbcd) {
+            /* The client must support RBCD for a referral to be useful. */
+            *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
+            return KRB5KDC_ERR_BADOPTION;
+        }
+        /* Policy will be checked in the resource realm. */
+        return 0;
+    }
+
+    /* Try resource-based authorization if the client supports RBCD. */
+    if (support_rbcd) {
+        ret = krb5_db_allowed_to_delegate_from(context, desired_client,
+                                               impersonator_name,
+                                               impersonator_pac, resource);
+        if (ret == KRB5KDC_ERR_BADOPTION)
+            policy_denial = TRUE;
+        else if (ret != KRB5_PLUGIN_OP_NOTSUPP)
+            return ret;
+    }
+
+    /* Try traditional authorization if the requestor is in this realm. */
+    if (!is_crossrealm) {
+        ret = krb5_db_check_allowed_to_delegate(context, desired_client,
+                                                impersonator, resource_name);
+        if (ret == KRB5KDC_ERR_BADOPTION)
+            policy_denial = TRUE;
+        else if (ret != KRB5_PLUGIN_OP_NOTSUPP)
+            return ret;
+    }
+
+    *status = policy_denial ? "NOT_ALLOWED_TO_DELEGATE" :
+        "UNSUPPORTED_S4U2PROXY_REQUEST";
+    return KRB5KDC_ERR_BADOPTION;
+}
+
 static krb5_error_code
 check_tgs_u2u(krb5_context context, krb5_kdc_req *req, const krb5_ticket *stkt,
               krb5_db_entry *server, const char **status)
@@ -612,18 +666,17 @@ check_tgs_tgt(krb5_kdc_req *req, krb5_ticket *tkt, const char **status)
 }
 
 krb5_error_code
-validate_tgs_request(kdc_realm_t *realm, krb5_kdc_req *request,
-                     krb5_db_entry *server, krb5_ticket *ticket, krb5_pac pac,
-                     const krb5_ticket *stkt, krb5_pac stkt_pac,
-                     krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
-                     krb5_pa_s4u_x509_user *s4u_x509_user,
-                     krb5_db_entry *s4u2self_client,
-                     krb5_boolean is_crossrealm, krb5_boolean is_referral,
-                     const char **status, krb5_pa_data ***e_data)
+check_tgs_constraints(kdc_realm_t *realm, krb5_kdc_req *request,
+                      krb5_db_entry *server, krb5_ticket *ticket, krb5_pac pac,
+                      const krb5_ticket *stkt, krb5_pac stkt_pac,
+                      krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
+                      krb5_pa_s4u_x509_user *s4u_x509_user,
+                      krb5_db_entry *s4u2self_client,
+                      krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                      const char **status, krb5_pa_data ***e_data)
 {
     krb5_context context = realm->realm_context;
     int errcode;
-    krb5_error_code ret;
 
     /* Depends only on request and ticket. */
     errcode = check_tgs_opts(request, ticket, status);
@@ -636,22 +689,12 @@ validate_tgs_request(kdc_realm_t *realm, krb5_kdc_req *request,
     if (errcode != 0)
         return errcode;
 
-    errcode = check_tgs_svc_policy(request, server, ticket, kdc_time, status);
-    if (errcode != 0)
-        return errcode;
-
     if (request->kdc_options & NON_TGT_OPTION)
         errcode = check_tgs_nontgt(context, request, ticket, status);
     else
         errcode = check_tgs_tgt(request, ticket, status);
     if (errcode != 0)
         return errcode;
-
-    /* Check the hot list */
-    if (check_hot_list(ticket)) {
-        *status = "HOT_LIST";
-        return(KRB5KRB_AP_ERR_REPEAT);
-    }
 
     if (s4u_x509_user != NULL) {
         errcode = check_tgs_s4u2self(realm, request, server, ticket, pac,
@@ -683,9 +726,42 @@ validate_tgs_request(kdc_realm_t *realm, krb5_kdc_req *request,
             return errcode;
     }
 
+    return 0;
+}
+
+krb5_error_code
+check_tgs_policy(kdc_realm_t *realm, krb5_kdc_req *request,
+                 krb5_db_entry *server, krb5_ticket *ticket,
+                 krb5_pac pac, const krb5_ticket *stkt, krb5_pac stkt_pac,
+                 krb5_principal stkt_pac_client, krb5_db_entry *stkt_server,
+                 krb5_timestamp kdc_time, krb5_boolean is_crossrealm,
+                 krb5_boolean is_referral, const char **status,
+                 krb5_pa_data ***e_data)
+{
+    krb5_context context = realm->realm_context;
+    int errcode;
+    krb5_error_code ret;
+    krb5_principal desired_client;
+
+    errcode = check_tgs_svc_policy(request, server, ticket, kdc_time, status);
+    if (errcode != 0)
+        return errcode;
+
+    if (request->kdc_options & KDC_OPT_CNAME_IN_ADDL_TKT) {
+        desired_client = (stkt_pac_client != NULL) ? stkt_pac_client :
+            stkt->enc_part2->client;
+        errcode = check_s4u2proxy_policy(context, request, desired_client,
+                                         ticket->enc_part2->client,
+                                         stkt_server, pac, request->server,
+                                         server, is_crossrealm, is_referral,
+                                         status);
+        if (errcode != 0)
+            return errcode;
+    }
+
     if (check_anon(realm, ticket->enc_part2->client, request->server) != 0) {
         *status = "ANONYMOUS NOT ALLOWED";
-        return(KRB5KDC_ERR_POLICY);
+        return KRB5KDC_ERR_POLICY;
     }
 
     /* Perform KDB module policy checks. */

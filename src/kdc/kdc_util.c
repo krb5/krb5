@@ -625,15 +625,6 @@ fetch_last_req_info(krb5_db_entry *dbentry, krb5_last_req_entry ***lrentry)
 }
 
 
-/* XXX!  This is a temporary place-holder */
-
-krb5_error_code
-check_hot_list(krb5_ticket *ticket)
-{
-    return 0;
-}
-
-
 /* Convert an API error code to a protocol error code. */
 int
 errcode_to_protocol(krb5_error_code code)
@@ -761,6 +752,10 @@ get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
                  krb5_db_entry *server, krb5_enc_tkt_part *header_enc)
 {
     krb5_flags flags;
+
+    /* Validation and renewal TGS requests preserve the header ticket flags. */
+    if ((reqflags & (KDC_OPT_VALIDATE | KDC_OPT_RENEW)) && header_enc != NULL)
+        return header_enc->flags & ~TKT_FLG_INVALID;
 
     /* Indicate support for encrypted padata (RFC 6806), and set flags based on
      * request options and the header ticket. */
@@ -1553,7 +1548,7 @@ kdc_process_s4u2self_req(krb5_context context, krb5_kdc_req *request,
  * S4U2Self tickets according to [MS-SFU] 3.2.5.1.2. */
 krb5_error_code
 s4u2self_forwardable(krb5_context context, krb5_db_entry *server,
-                     krb5_enc_tkt_part *tkt)
+                     krb5_flags *tktflags)
 {
     krb5_error_code ret;
 
@@ -1565,96 +1560,11 @@ s4u2self_forwardable(krb5_context context, krb5_db_entry *server,
      * targets for traditional S4U2Proxy. */
     ret = krb5_db_check_allowed_to_delegate(context, NULL, server, NULL);
     if (!ret)
-        tkt->flags &= ~TKT_FLG_FORWARDABLE;
+        *tktflags &= ~TKT_FLG_FORWARDABLE;
 
     if (ret == KRB5KDC_ERR_BADOPTION || ret == KRB5_PLUGIN_OP_NOTSUPP)
         return 0;
     return ret;
-}
-
-/*
- * Determine if an S4U2Proxy request is authorized.  Set **stkt_ad_info to the
- * KDB authdata handle for the second ticket if the KDB module supplied one.
- * Set *stkt_authdata_client to the subject client name if the KDB module
- * supplied one; it must do so for a cross-realm request to be authorized.
- */
-krb5_error_code
-kdc_process_s4u2proxy_req(krb5_context context, unsigned int flags,
-                          krb5_kdc_req *request, krb5_pac header_pac,
-                          const krb5_enc_tkt_part *t2enc, krb5_pac t2_pac,
-                          const krb5_db_entry *server,
-                          krb5_keyblock *server_key,
-                          krb5_const_principal server_princ,
-                          const krb5_db_entry *proxy,
-                          krb5_principal *stkt_pac_client,
-                          const char **status)
-{
-    krb5_error_code errcode;
-    krb5_boolean support_rbcd;
-    krb5_principal client_princ = t2enc->client, t2_pac_princ = NULL;
-
-    *stkt_pac_client = NULL;
-
-    /* Check if the client supports resource-based constrained delegation. */
-    errcode = kdc_get_pa_pac_rbcd(context, request->padata, &support_rbcd);
-    if (errcode)
-        return errcode;
-
-    /* For an RBCD final request, recover the reply ticket client name from
-     * the evidence ticket PAC. */
-    if (flags & KRB5_KDB_FLAG_CROSS_REALM) {
-        if (get_pac_princ_with_realm(context, t2_pac, &t2_pac_princ,
-                                     NULL) != 0) {
-            *status = "RBCD_PAC_PRINC";
-            errcode = KRB5KDC_ERR_BADOPTION;
-            goto done;
-        }
-        client_princ = t2_pac_princ;
-    }
-
-    /* If both are in the same realm, try allowed_to_delegate first. */
-    if (krb5_realm_compare(context, server->princ, request->server)) {
-
-        errcode = krb5_db_check_allowed_to_delegate(context, client_princ,
-                                                    server, request->server);
-        if (errcode != KRB5KDC_ERR_BADOPTION &&
-            errcode != KRB5_PLUGIN_OP_NOTSUPP)
-            goto done;
-
-        /* Fall back to resource-based constrained-delegation. */
-    }
-
-    if (!support_rbcd) {
-        *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-        errcode = KRB5KDC_ERR_BADOPTION;
-        goto done;
-    }
-
-    /* If we are issuing a referral, the KDC in the resource realm will check
-     * if delegation is allowed. */
-    if (isflagset(flags, KRB5_KDB_FLAG_ISSUING_REFERRAL)) {
-        errcode = 0;
-        goto done;
-    }
-
-    errcode = krb5_db_allowed_to_delegate_from(context, client_princ,
-                                               server_princ, header_pac,
-                                               proxy);
-    if (errcode == KRB5_PLUGIN_OP_NOTSUPP) {
-        *status = "UNSUPPORTED_S4U2PROXY_REQUEST";
-        errcode = KRB5KDC_ERR_BADOPTION;
-        goto done;
-    } else if (errcode) {
-        *status = "NOT_ALLOWED_TO_DELEGATE";
-        goto done;
-    }
-
-    *stkt_pac_client = t2_pac_princ;
-    t2_pac_princ = NULL;
-
-done:
-    krb5_free_principal(context, t2_pac_princ);
-    return errcode;
 }
 
 krb5_error_code
@@ -1718,19 +1628,21 @@ kdc_get_ticket_endtime(kdc_realm_t *realm, krb5_timestamp starttime,
 }
 
 /*
- * Set tkt->renew_till to the requested renewable lifetime as modified by
- * policy.  Set the TKT_FLG_RENEWABLE flag if we set a nonzero renew_till.
- * client and tgt may be NULL.
+ * Set times->renew_till to the requested renewable lifetime as modified by
+ * policy.  Set the TKT_FLG_RENEWABLE bit in *tktflags if we set a nonzero
+ * renew_till.  *times must be filled in except for renew_till.  client and tgt
+ * may be NULL.
  */
 void
 kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
                          krb5_enc_tkt_part *tgt, krb5_db_entry *client,
-                         krb5_db_entry *server, krb5_enc_tkt_part *tkt)
+                         krb5_db_entry *server, krb5_flags *tktflags,
+                         krb5_ticket_times *times)
 {
     krb5_timestamp rtime, max_rlife;
 
-    clear(tkt->flags, TKT_FLG_RENEWABLE);
-    tkt->times.renew_till = 0;
+    *tktflags &= ~TKT_FLG_RENEWABLE;
+    times->renew_till = 0;
 
     /* Don't issue renewable tickets if the client or server don't allow it,
      * or if this is a TGS request and the TGT isn't renewable. */
@@ -1745,7 +1657,7 @@ kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
     if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE))
         rtime = request->rtime ? request->rtime : kdc_infinity;
     else if (isflagset(request->kdc_options, KDC_OPT_RENEWABLE_OK) &&
-             ts_after(request->till, tkt->times.endtime))
+             ts_after(request->till, times->endtime))
         rtime = request->till;
     else
         return;
@@ -1756,16 +1668,16 @@ kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
     max_rlife = min(server->max_renewable_life, realm->realm_maxrlife);
     if (client != NULL)
         max_rlife = min(max_rlife, client->max_renewable_life);
-    rtime = ts_min(rtime, ts_incr(tkt->times.starttime, max_rlife));
+    rtime = ts_min(rtime, ts_incr(times->starttime, max_rlife));
 
     /* If the client only specified renewable-ok, don't issue a renewable
      * ticket unless the truncated renew time exceeds the ticket end time. */
     if (!isflagset(request->kdc_options, KDC_OPT_RENEWABLE) &&
-        !ts_after(rtime, tkt->times.endtime))
+        !ts_after(rtime, times->endtime))
         return;
 
-    setflag(tkt->flags, TKT_FLG_RENEWABLE);
-    tkt->times.renew_till = rtime;
+    *tktflags |= TKT_FLG_RENEWABLE;
+    times->renew_till = rtime;
 }
 
 /**

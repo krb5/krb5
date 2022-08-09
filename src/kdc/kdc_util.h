@@ -36,7 +36,6 @@
 #include "realm_data.h"
 #include "reqstate.h"
 
-krb5_error_code check_hot_list (krb5_ticket *);
 krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
 krb5_boolean is_cross_tgs_principal(krb5_const_principal);
 krb5_boolean is_local_tgs_principal(krb5_const_principal);
@@ -84,14 +83,23 @@ validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
                      const char **, krb5_pa_data ***);
 
 krb5_error_code
-validate_tgs_request(kdc_realm_t *realm, krb5_kdc_req *request,
-                     krb5_db_entry *server, krb5_ticket *ticket, krb5_pac pac,
-                     const krb5_ticket *stkt, krb5_pac stkt_pac,
-                     krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
-                     krb5_pa_s4u_x509_user *s4u_x509_user,
-                     krb5_db_entry *s4u2self_client,
-                     krb5_boolean is_crossrealm, krb5_boolean is_referral,
-                     const char **status, krb5_pa_data ***e_data);
+check_tgs_constraints(kdc_realm_t *realm, krb5_kdc_req *request,
+                      krb5_db_entry *server, krb5_ticket *ticket, krb5_pac pac,
+                      const krb5_ticket *stkt, krb5_pac stkt_pac,
+                      krb5_db_entry *stkt_server, krb5_timestamp kdc_time,
+                      krb5_pa_s4u_x509_user *s4u_x509_user,
+                      krb5_db_entry *s4u2self_client,
+                      krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                      const char **status, krb5_pa_data ***e_data);
+
+krb5_error_code
+check_tgs_policy(kdc_realm_t *realm, krb5_kdc_req *request,
+                 krb5_db_entry *server, krb5_ticket *ticket,
+                 krb5_pac pac, const krb5_ticket *stkt, krb5_pac stkt_pac,
+                 krb5_principal stkt_pac_client, krb5_db_entry *stkt_server,
+                 krb5_timestamp kdc_time, krb5_boolean is_crossrealm,
+                 krb5_boolean is_referral, const char **status,
+                 krb5_pa_data ***e_data);
 
 krb5_flags
 get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
@@ -275,7 +283,7 @@ kdc_process_s4u2self_req(krb5_context context, krb5_kdc_req *request,
 
 krb5_error_code
 s4u2self_forwardable(krb5_context context, krb5_db_entry *server,
-                     krb5_enc_tkt_part *enc_tkt);
+                     krb5_flags *tktflags);
 
 krb5_error_code
 kdc_make_s4u2self_rep (krb5_context context,
@@ -284,17 +292,6 @@ kdc_make_s4u2self_rep (krb5_context context,
                        krb5_pa_s4u_x509_user *req_s4u_user,
                        krb5_kdc_rep *reply,
                        krb5_enc_kdc_rep_part *reply_encpart);
-
-krb5_error_code
-kdc_process_s4u2proxy_req(krb5_context context, unsigned int flags,
-                          krb5_kdc_req *request, krb5_pac header_pac,
-                          const krb5_enc_tkt_part *t2enc, krb5_pac t2_pac,
-                          const krb5_db_entry *server,
-                          krb5_keyblock *server_key,
-                          krb5_const_principal server_princ,
-                          const krb5_db_entry *proxy,
-                          krb5_principal *stkt_ad_client,
-                          const char **status);
 
 krb5_error_code
 kdc_check_transited_list(krb5_context context, const krb5_data *trans,
@@ -309,7 +306,8 @@ kdc_get_ticket_endtime(kdc_realm_t *realm, krb5_timestamp now,
 void
 kdc_get_ticket_renewtime(kdc_realm_t *realm, krb5_kdc_req *request,
                          krb5_enc_tkt_part *tgt, krb5_db_entry *client,
-                         krb5_db_entry *server, krb5_enc_tkt_part *tkt);
+                         krb5_db_entry *server, krb5_flags *tktflags,
+                         krb5_ticket_times *times);
 
 void
 log_as_req(krb5_context context,
