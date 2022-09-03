@@ -661,11 +661,8 @@ kg_new_connection(
     }
 
     /* compute time_rec */
-    if (time_rec) {
-        if ((code = krb5_timeofday(context, &now)))
-            goto cleanup;
-        *time_rec = ts_delta(ctx->krb_times.endtime, now);
-    }
+    if (time_rec)
+        *time_rec = ctx_lifetime(context, ctx);
 
     /* set the other returns */
     *output_token = token;
@@ -733,7 +730,6 @@ mutual_auth(
     char *sptr;
     krb5_data ap_rep;
     krb5_ap_rep_enc_part *ap_rep_data;
-    krb5_timestamp now;
     krb5_gss_ctx_id_rec *ctx;
     krb5_error *krb_error;
     krb5_error_code code;
@@ -875,11 +871,8 @@ mutual_auth(
 
     /* set returns */
 
-    if (time_rec) {
-        if ((code = krb5_timeofday(context, &now)))
-            goto fail;
-        *time_rec = ts_delta(ctx->krb_times.endtime, now);
-    }
+    if (time_rec)
+        *time_rec = ctx_lifetime(context, ctx);
 
     if (ret_flags)
         *ret_flags = ctx->gss_flags;

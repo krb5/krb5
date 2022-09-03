@@ -33,10 +33,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
     gss_ctx_id_t context_handle;
     OM_uint32 *time_rec;
 {
-    krb5_error_code code;
     krb5_gss_ctx_id_rec *ctx;
-    krb5_timestamp now;
-    krb5_deltat lifetime;
 
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
@@ -45,22 +42,7 @@ krb5_gss_context_time(minor_status, context_handle, time_rec)
         return(GSS_S_NO_CONTEXT);
     }
 
-    if ((code = krb5_timeofday(ctx->k5_context, &now))) {
-        *minor_status = code;
-        save_error_info(*minor_status, ctx->k5_context);
-        return(GSS_S_FAILURE);
-    }
-
-    lifetime = ts_delta(ctx->krb_times.endtime, now);
-    if (!ctx->initiate)
-        lifetime += ctx->k5_context->clockskew;
-    if (lifetime <= 0) {
-        *time_rec = 0;
-        *minor_status = 0;
-        return(GSS_S_CONTEXT_EXPIRED);
-    } else {
-        *time_rec = lifetime;
-        *minor_status = 0;
-        return(GSS_S_COMPLETE);
-    }
+    *time_rec = ctx_lifetime(ctx->k5_context, ctx);
+    *minor_status = 0;
+    return(*time_rec == 0 ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE);
 }

@@ -1449,4 +1449,16 @@ gss_krb5int_get_cred_impersonator(OM_uint32 *minor_status,
                                   const gss_OID desired_object,
                                   gss_buffer_set_t *data_set);
 
+static inline OM_uint32
+ctx_lifetime(krb5_context context, krb5_gss_ctx_id_t ctx)
+{
+    krb5_error_code ret;
+    krb5_timestamp endtime = ctx->krb_times.endtime, now;
+
+    /* krb5_timeofday() always succeeds on a valid context. */
+    ret = krb5_timeofday(context, &now);
+    assert(ret == 0);
+    return ts_after(endtime, now) ? ts_delta(endtime, now) : 0;
+}
+
 #endif /* _GSSAPIP_KRB5_H_ */
