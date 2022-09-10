@@ -482,8 +482,18 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     code = krb5_get_credentials(context, options, ccache, &tgtq, &tgt);
     if (code != 0)
         goto cleanup;
-
     tgtptr = tgt;
+
+    /* Canonicalize the user's realm name using the obtained TGT. */
+    if (tgt->server->length != 2) {
+        code = KRB5KRB_AP_ERR_MODIFIED;
+        goto cleanup;
+    }
+    krb5_free_data_contents(context, &s4u_user.user_id.user->realm);
+    code = krb5int_copy_data_contents(context, &tgt->server->data[1],
+                                      &s4u_user.user_id.user->realm);
+    if (code != 0)
+        goto cleanup;
 
     /* Convert the server principal to an enterprise principal, for use with
      * foreign realms. */
