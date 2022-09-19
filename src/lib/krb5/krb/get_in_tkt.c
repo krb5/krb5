@@ -1522,7 +1522,7 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     void *expire_data;
     krb5_timestamp pw_exp, acct_exp, now;
     krb5_boolean is_last_req;
-    krb5_deltat delta;
+    uint32_t interval;
     char ts[256], banner[1024];
 
     if (as_reply == NULL || as_reply->enc_part2 == NULL)
@@ -1553,8 +1553,8 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     ret = krb5_timeofday(context, &now);
     if (ret != 0)
         return;
-    if (!is_last_req &&
-        (ts_after(now, pw_exp) || ts_delta(pw_exp, now) > 7 * 24 * 60 * 60))
+    interval = ts_interval(now, pw_exp);
+    if (!is_last_req && (!interval || interval > 7 * 24 * 60 * 60))
         return;
 
     if (!prompter)
@@ -1564,19 +1564,18 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     if (ret != 0)
         return;
 
-    delta = ts_delta(pw_exp, now);
-    if (delta < 3600) {
+    if (interval < 3600) {
         snprintf(banner, sizeof(banner),
                  _("Warning: Your password will expire in less than one hour "
                    "on %s"), ts);
-    } else if (delta < 86400 * 2) {
+    } else if (interval < 86400 * 2) {
         snprintf(banner, sizeof(banner),
                  _("Warning: Your password will expire in %d hour%s on %s"),
-                 delta / 3600, delta < 7200 ? "" : "s", ts);
+                 interval / 3600, interval < 7200 ? "" : "s", ts);
     } else {
         snprintf(banner, sizeof(banner),
                  _("Warning: Your password will expire in %d days on %s"),
-                 delta / 86400, ts);
+                 interval / 86400, ts);
     }
 
     /* PROMPTER_INVOCATION */

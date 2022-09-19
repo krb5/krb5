@@ -95,8 +95,8 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     krb5_error_code code;
     krb5_gss_ctx_id_rec *ctx;
     krb5_gss_name_t initiator, acceptor;
-    krb5_timestamp now;
-    krb5_deltat lifetime;
+    krb5_timestamp now, start;
+    OM_uint32 lifetime;
 
     if (initiator_name)
         *initiator_name = (gss_name_t) NULL;
@@ -120,11 +120,8 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
         /* Add the maximum allowable clock skew as a grace period for context
          * expiration, just as we do for the ticket during authentication. */
-        lifetime = ts_delta(ctx->krb_times.endtime, now);
-        if (!ctx->initiate)
-            lifetime += context->clockskew;
-        if (lifetime < 0)
-            lifetime = 0;
+        start = ctx->initiate ? now : ts_incr(now, -context->clockskew);
+        lifetime = ts_interval(start, ctx->krb_times.endtime);
 
         if (initiator_name) {
             code = kg_duplicate_name(context,

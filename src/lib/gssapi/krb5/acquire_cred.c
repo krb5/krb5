@@ -879,8 +879,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                                   GSS_C_NO_NAME);
             if (GSS_ERROR(ret))
                 goto error_out;
-            *time_rec = ts_after(cred->expire, now) ?
-                ts_delta(cred->expire, now) : 0;
+            *time_rec = ts_interval(now, cred->expire);
             k5_mutex_unlock(&cred->lock);
         }
     }

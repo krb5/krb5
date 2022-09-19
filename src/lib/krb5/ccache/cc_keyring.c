@@ -762,7 +762,7 @@ update_keyring_expiration(krb5_context context, krb5_ccache id)
 
     /* Setting the timeout to zero would reset the timeout, so we set it to one
      * second instead if creds are already expired. */
-    timeout = ts_after(endtime, now) ? ts_delta(endtime, now) : 1;
+    timeout = ts_after(endtime, now) ? ts_interval(now, endtime) : 1;
     (void)keyctl_set_timeout(data->cache_id, timeout);
 }
 
@@ -1343,7 +1343,7 @@ krcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
 
     if (ts_after(creds->times.endtime, now)) {
         (void)keyctl_set_timeout(cred_key,
-                                 ts_delta(creds->times.endtime, now));
+                                 ts_interval(now, creds->times.endtime));
     }
 
     update_keyring_expiration(context, id);

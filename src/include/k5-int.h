@@ -2324,6 +2324,15 @@ ts_delta(krb5_timestamp a, krb5_timestamp b)
     return (krb5_deltat)((uint32_t)a - (uint32_t)b);
 }
 
+/* Return (end - start) as an unsigned 32-bit value, or 0 if start > end. */
+static inline uint32_t
+ts_interval(krb5_timestamp start, krb5_timestamp end)
+{
+    if ((uint32_t)start > (uint32_t)end)
+        return 0;
+    return (uint32_t)end - (uint32_t)start;
+}
+
 /* Increment a timestamp by a signed 32-bit interval, without relying on
  * undefined behavior. */
 static inline krb5_timestamp

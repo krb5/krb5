@@ -664,7 +664,7 @@ kg_new_connection(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto cleanup;
-        *time_rec = ts_delta(ctx->krb_times.endtime, now);
+        *time_rec = ts_interval(now, ctx->krb_times.endtime);
     }
 
     /* set the other returns */
@@ -878,7 +878,7 @@ mutual_auth(
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
             goto fail;
-        *time_rec = ts_delta(ctx->krb_times.endtime, now);
+        *time_rec = ts_interval(now, ctx->krb_times.endtime);
     }
 
     if (ret_flags)

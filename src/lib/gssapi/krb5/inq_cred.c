@@ -131,7 +131,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     }
 
     if (cred->expire != 0) {
-        lifetime = ts_delta(cred->expire, now);
+        lifetime = ts_interval(now, cred->expire);
         if (lifetime < 0)
             lifetime = 0;
     }

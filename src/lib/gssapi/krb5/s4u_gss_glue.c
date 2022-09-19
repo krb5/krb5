@@ -279,7 +279,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
         if (code != 0)
             goto cleanup;
 
-        *time_rec = ts_delta(cred->expire, now);
+        *time_rec = ts_interval(now, cred->expire);
     }
 
     major_status = GSS_S_COMPLETE;
