@@ -199,6 +199,12 @@ krb5int_utf8_normalize(
 	/* s[i] is non-ascii */
 	/* convert everything up to next ascii to ucs-4 */
 	while (i < len) {
+	    /* KRB5_UTF8_CHARLEN only looks at the first byte; use it to guard
+	     * against small read overruns. */
+	    if (KRB5_UTF8_CHARLEN(s + i) > len - i) {
+		retval = KRB5_ERR_INVALID_UTF8;
+		goto cleanup;
+	    }
 	    clen = KRB5_UTF8_CHARLEN2(s + i, clen);
 	    if (clen == 0) {
 		retval = KRB5_ERR_INVALID_UTF8;
