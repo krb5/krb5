@@ -142,7 +142,7 @@ ndr_dec_delegation_info(krb5_data *data, struct pac_s4u_delegation_info **out)
     krb5_error_code ret;
     struct pac_s4u_delegation_info *di = NULL;
     struct k5input in;
-    uint32_t i, object_buffer_length;
+    uint32_t i, object_buffer_length, nservices;
     uint8_t version, endianness, common_header_length;
 
     *out = NULL;
@@ -193,26 +193,26 @@ ndr_dec_delegation_info(krb5_data *data, struct pac_s4u_delegation_info **out)
     ret = dec_wchar_pointer(&in, &di->proxy_target);
     if (ret)
         goto error;
-    di->transited_services_length = k5_input_get_uint32_le(&in);
+    nservices = k5_input_get_uint32_le(&in);
 
     /* Here, we have encoded 2 bytes of length, 2 bytes of (length + 2), and 4
      * bytes of pointer, for each element (deferred pointers). */
-    if (di->transited_services_length > UINT32_MAX / 8) {
+    if (nservices > data->length / 8) {
         ret = ERANGE;
         goto error;
     }
-    (void)k5_input_get_bytes(&in, 8 * di->transited_services_length);
+    (void)k5_input_get_bytes(&in, 8 * nservices);
 
     /* Since we're likely to add another entry, leave a blank at the end. */
-    di->transited_services = k5calloc(di->transited_services_length + 1,
-                                      sizeof(char *), &ret);
+    di->transited_services = k5calloc(nservices + 1, sizeof(char *), &ret);
     if (di->transited_services == NULL)
         goto error;
 
-    for (i = 0; i < di->transited_services_length; i++) {
+    for (i = 0; i < nservices; i++) {
         ret = dec_wchar_pointer(&in, &di->transited_services[i]);
         if (ret)
             goto error;
+        di->transited_services_length++;
     }
 
     ret = in.status;
