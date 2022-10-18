@@ -958,7 +958,7 @@ uccanoncompatdecomp(const krb5_ui_4 *in, int inlen,
                     for (l = i; l > 0; l--)
                         if (class >= uccombining_class((*out)[l-1]))
                             break;
-                    memcpy(*out + l + 1, *out + l, (i - l) * sizeof(**out));
+                    memmove(*out + l + 1, *out + l, (i - l) * sizeof(**out));
                     (*out)[l] = decomp[k];
                 }
                 i++;
@@ -988,7 +988,7 @@ uccanoncompatdecomp(const krb5_ui_4 *in, int inlen,
                 for (l = i; l > 0; l--)
                     if (class >= uccombining_class((*out)[l-1]))
                         break;
-                memcpy(*out + l + 1, *out + l, (i - l) * sizeof(**out));
+                memmove(*out + l + 1, *out + l, (i - l) * sizeof(**out));
                 (*out)[l] = in[j];
             }
             i++;
