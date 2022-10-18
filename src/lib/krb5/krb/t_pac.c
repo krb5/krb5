@@ -431,6 +431,16 @@ static const unsigned char s4u_pac_ent_xrealm[] = {
     0x8a, 0x81, 0x9c, 0x9c, 0x00, 0x00, 0x00, 0x00
 };
 
+static const unsigned char fuzz1[] = {
+    0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+    0x06, 0xff, 0xff, 0xff, 0x00, 0x00, 0xf5
+};
+
+static const unsigned char fuzz2[] = {
+    0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
+    0x20, 0x20
+};
+
 static const char *s4u_principal = "w2k8u@ACME.COM";
 static const char *s4u_enterprise = "w2k8u@abc@ACME.COM";
 
@@ -827,6 +837,14 @@ main(int argc, char **argv)
         krb5_free_principal(context, sp);
         krb5_free_principal(context, sep);
     }
+
+    /* Check problematic PACs found by fuzzing. */
+    ret = krb5_pac_parse(context, fuzz1, sizeof(fuzz1), &pac);
+    if (!ret)
+        err(context, ret, "krb5_pac_parse should have failed");
+    ret = krb5_pac_parse(context, fuzz2, sizeof(fuzz2), &pac);
+    if (!ret)
+        err(context, ret, "krb5_pac_parse should have failed");
 
     /*
      * Test empty free
