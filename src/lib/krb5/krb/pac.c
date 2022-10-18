@@ -27,6 +27,8 @@
 #include "k5-int.h"
 #include "authdata.h"
 
+#define MAX_BUFFERS 4096
+
 /* draft-brezak-win2k-krb-authz-00 */
 
 /*
@@ -316,6 +318,9 @@ krb5_pac_parse(krb5_context context,
     if (version != 0)
         return EINVAL;
 
+    if (cbuffers < 1 || cbuffers > MAX_BUFFERS)
+        return ERANGE;
+
     header_len = PACTYPE_LENGTH + (cbuffers * PAC_INFO_BUFFER_LENGTH);
     if (len < header_len)
         return ERANGE;
@@ -348,8 +353,8 @@ krb5_pac_parse(krb5_context context,
             krb5_pac_free(context, pac);
             return EINVAL;
         }
-        if (buffer->Offset < header_len ||
-            buffer->Offset + buffer->cbBufferSize > len) {
+        if (buffer->Offset < header_len || buffer->Offset > len ||
+            buffer->cbBufferSize > len - buffer->Offset) {
             krb5_pac_free(context, pac);
             return ERANGE;
         }
