@@ -176,7 +176,7 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_FAST_ARMOR_CCACHE(c, ccache_name)         \
     TRACE(c, "FAST armor ccache: {str}", ccache_name)
 #define TRACE_FAST_ARMOR_CCACHE_KEY(c, keyblock)                \
-    TRACE(c, "Armor ccache sesion key: {keyblock}", keyblock)
+    TRACE(c, "Armor ccache session key: {keyblock}", keyblock)
 #define TRACE_FAST_ARMOR_KEY(c, keyblock)               \
     TRACE(c, "FAST armor key: {keyblock}", keyblock)
 #define TRACE_FAST_CCACHE_CONFIG(c)                                     \
