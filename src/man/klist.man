@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KLIST" "1" " " "1.19.3" "MIT Kerberos"
+.TH "KLIST" "1" " " "1.19.4" "MIT Kerberos"
 .SH NAME
 klist \- list cached Kerberos tickets
 .

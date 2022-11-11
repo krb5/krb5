@@ -75,6 +75,23 @@ default and eventually removed.
 Beginning with the krb5-1.18 release, single-DES encryption types have
 been removed.
 
+Major changes in 1.19.4 (2022-11-15)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix integer overflows in PAC parsing [CVE-2022-42898].
+
+* Fix memory leak in OTP kdcpreauth module.
+
+krb5-1.19.4 changes by ticket ID
+--------------------------------
+
+9063    Fix memory leak in OTP kdcpreauth module
+9064    Free verto context later in KDC cleanup
+9065    Fix uncommon PKINIT memory leak
+9074    Fix integer overflows in PAC parsing
+
 Major changes in 1.19.3 (2022-03-11)
 ------------------------------------
 
