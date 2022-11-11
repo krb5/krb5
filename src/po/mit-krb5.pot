@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.20\n"
+"Project-Id-Version: mit-krb5 1.20-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-25 21:04-0400\n"
+"POT-Creation-Date: 2022-11-11 17:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3769,7 +3769,7 @@ msgstr ""
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1046
+#: ../../src/kdc/main.c:1045
 msgid "shutting down"
 msgstr ""
 
@@ -4879,85 +4879,85 @@ msgstr ""
 msgid "No addresses added to the net server"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:842
+#: ../../src/lib/apputils/net-server.c:845
 #, c-format
 msgid "Failed getting address info (for %s): %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:872
+#: ../../src/lib/apputils/net-server.c:875
 #, c-format
 msgid "Failed setting up a %s socket (for %s)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:913
+#: ../../src/lib/apputils/net-server.c:916
 msgid "setting up network..."
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:916
+#: ../../src/lib/apputils/net-server.c:919
 msgid "Error setting up network"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:919
+#: ../../src/lib/apputils/net-server.c:922
 #, c-format
 msgid "set up %d sockets"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:922
+#: ../../src/lib/apputils/net-server.c:925
 msgid "no sockets set up?"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:985
-#: ../../src/lib/apputils/net-server.c:1039
+#: ../../src/lib/apputils/net-server.c:988
+#: ../../src/lib/apputils/net-server.c:1042
 msgid "while dispatching (udp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1014
+#: ../../src/lib/apputils/net-server.c:1017
 #, c-format
 msgid "while sending reply to %s/%s from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1019
+#: ../../src/lib/apputils/net-server.c:1022
 #, c-format
 msgid "short reply write %d vs %d\n"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1064
+#: ../../src/lib/apputils/net-server.c:1067
 msgid "while receiving from network"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1107
+#: ../../src/lib/apputils/net-server.c:1110
 msgid "too many connections"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1125
+#: ../../src/lib/apputils/net-server.c:1128
 #, c-format
 msgid "dropping %s fd %d from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1195
+#: ../../src/lib/apputils/net-server.c:1198
 #, c-format
 msgid "allocating buffer for new TCP session from %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1227
+#: ../../src/lib/apputils/net-server.c:1230
 msgid "while dispatching (tcp)"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1259
+#: ../../src/lib/apputils/net-server.c:1262
 msgid "error allocating tcp dispatch private!"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1306
+#: ../../src/lib/apputils/net-server.c:1309
 #, c-format
 msgid "TCP client %s wants %lu bytes, cap is %lu"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1314
+#: ../../src/lib/apputils/net-server.c:1317
 #, c-format
 msgid "error constructing KRB_ERR_FIELD_TOOLONG error! %s"
 msgstr ""
 
-#: ../../src/lib/apputils/net-server.c:1353
+#: ../../src/lib/apputils/net-server.c:1356
 #, c-format
 msgid "getsockname failed: %s"
 msgstr ""
@@ -6670,22 +6670,22 @@ msgstr ""
 msgid "Anonymous pkinit without DH public value not supported."
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1083
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1082
 #, c-format
 msgid "No pkinit_identity supplied for realm %s"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1094
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1093
 #, c-format
 msgid "No pkinit_anchors supplied for realm %s"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1114
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1113
 #, c-format
 msgid "OCSP is not supported: (realm: %s)"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1515
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1514
 msgid "No realms configured correctly for pkinit support"
 msgstr ""
 
@@ -6698,7 +6698,7 @@ msgstr ""
 msgid "SPAKE challenge group not a permitted group: %s"
 msgstr ""
 
-#: ../../src/plugins/preauth/spake/spake_kdc.c:533
+#: ../../src/plugins/preauth/spake/spake_kdc.c:534
 msgid "Unknown SPAKE request type"
 msgstr ""
 
@@ -6715,26 +6715,26 @@ msgstr ""
 msgid "error %ld"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:200
+#: ../../src/util/support/plugins.c:201
 #, c-format
 msgid "unable to find plugin [%s]: %s"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:288
+#: ../../src/util/support/plugins.c:291
 msgid "unknown failure"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:291
+#: ../../src/util/support/plugins.c:294
 #, c-format
 msgid "unable to load plugin [%s]: %s"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:314
+#: ../../src/util/support/plugins.c:317
 #, c-format
 msgid "unable to load DLL [%s]"
 msgstr ""
 
-#: ../../src/util/support/plugins.c:330
+#: ../../src/util/support/plugins.c:333
 #, c-format
 msgid "plugin unavailable: %s"
 msgstr ""
