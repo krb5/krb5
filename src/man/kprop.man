@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KPROP" "8" " " "1.20" "MIT Kerberos"
+.TH "KPROP" "8" " " "1.20.1" "MIT Kerberos"
 .SH NAME
 kprop \- propagate a Kerberos V5 principal database to a replica server
 .

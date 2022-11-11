@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "SSERVER" "8" " " "1.20" "MIT Kerberos"
+.TH "SSERVER" "8" " " "1.20.1" "MIT Kerberos"
 .SH NAME
 sserver \- sample Kerberos version 5 server
 .

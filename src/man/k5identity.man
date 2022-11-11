@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "K5IDENTITY" "5" " " "1.20" "MIT Kerberos"
+.TH "K5IDENTITY" "5" " " "1.20.1" "MIT Kerberos"
 .SH NAME
 k5identity \- Kerberos V5 client principal selection rules
 .

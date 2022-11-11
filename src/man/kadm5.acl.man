@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "KADM5.ACL" "5" " " "1.20" "MIT Kerberos"
+.TH "KADM5.ACL" "5" " " "1.20.1" "MIT Kerberos"
 .SH NAME
 kadm5.acl \- Kerberos ACL file
 .
