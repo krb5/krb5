@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.19.3\n"
+"Project-Id-Version: mit-krb5 1.19.3-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-10 01:46-0500\n"
+"POT-Creation-Date: 2022-11-11 13:21-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3761,7 +3761,7 @@ msgstr ""
 msgid "commencing operation"
 msgstr ""
 
-#: ../../src/kdc/main.c:1070
+#: ../../src/kdc/main.c:1069
 msgid "shutting down"
 msgstr ""
 
@@ -6647,22 +6647,22 @@ msgstr ""
 msgid "Anonymous pkinit without DH public value not supported."
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1086
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1085
 #, c-format
 msgid "No pkinit_identity supplied for realm %s"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1097
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1096
 #, c-format
 msgid "No pkinit_anchors supplied for realm %s"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1117
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1116
 #, c-format
 msgid "OCSP is not supported: (realm: %s)"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1518
+#: ../../src/plugins/preauth/pkinit/pkinit_srv.c:1517
 msgid "No realms configured correctly for pkinit support"
 msgstr ""
 
