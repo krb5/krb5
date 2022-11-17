@@ -409,8 +409,8 @@ else
       [[struct sockaddr_in6 in;
         AF_INET6;
         IN6_IS_ADDR_LINKLOCAL(&in.sin6_addr);]])],
-    [krb5_cv_inet6=yes], [krb5_cv_inet6=no])])
-fi
+    [krb5_cv_inet6=yes], [krb5_cv_inet6=no])
+fi])
 AC_MSG_RESULT($krb5_cv_inet6)
 if test "$krb5_cv_inet6" = no && test "$ac_cv_func_inet_ntop" = yes; then
 AC_MSG_CHECKING(for IPv6 compile-time support with -DINET6)
