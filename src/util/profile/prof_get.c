@@ -62,7 +62,7 @@ static void end_list(struct profile_string_list *list, char ***ret_list)
         *ret_list = list->list;
         return;
     } else {
-        for (cp = list->list; *cp; cp++)
+        for (cp = list->list; cp && *cp; cp++)
             free(*cp);
         free(list->list);
     }
