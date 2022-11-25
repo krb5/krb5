@@ -48,22 +48,18 @@ krb5int_authdata_verify(krb5_context context,
  * to the application (notwithstanding signature verification).
  */
 
-typedef struct _PAC_INFO_BUFFER {
-    krb5_ui_4 ulType;
-    krb5_ui_4 cbBufferSize;
-    uint64_t Offset;
-} PAC_INFO_BUFFER;
-
-typedef struct _PACTYPE {
-    krb5_ui_4 cBuffers;
-    krb5_ui_4 Version;
-    PAC_INFO_BUFFER Buffers[1];
-} PACTYPE;
+struct k5_pac_buffer {
+    uint32_t type;
+    uint32_t size;
+    uint64_t offset;
+};
 
 struct krb5_pac_data {
-    PACTYPE *pac;       /* PAC header + info buffer array */
     krb5_data data;     /* PAC data (including uninitialised header) */
     krb5_boolean verified;
+    uint32_t nbuffers;
+    uint32_t version;
+    struct k5_pac_buffer *buffers;
 };
 
 

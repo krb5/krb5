@@ -31,16 +31,13 @@
 /* draft-brezak-win2k-krb-authz-00 */
 
 static krb5_error_code
-k5_insert_client_info(krb5_context context,
-                      krb5_pac pac,
-                      krb5_timestamp authtime,
-                      krb5_const_principal principal,
-                      krb5_boolean with_realm)
+insert_client_info(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
+                   krb5_const_principal principal, krb5_boolean with_realm)
 {
     krb5_error_code ret;
     krb5_data client_info;
     char *princ_name_utf8 = NULL;
-    unsigned char *princ_name_utf16 = NULL, *p;
+    uint8_t *princ_name_utf16 = NULL, *p;
     size_t princ_name_utf16_len = 0;
     uint64_t nt_authtime;
     int flags = 0;
@@ -60,12 +57,12 @@ k5_insert_client_info(krb5_context context,
     }
 
     ret = krb5_unparse_name_flags(context, principal, flags, &princ_name_utf8);
-    if (ret != 0)
+    if (ret)
         goto cleanup;
 
     ret = k5_utf8_to_utf16le(princ_name_utf8, &princ_name_utf16,
                              &princ_name_utf16_len);
-    if (ret != 0)
+    if (ret)
         goto cleanup;
 
     client_info.length = PAC_CLIENT_INFO_LENGTH + princ_name_utf16_len;
@@ -73,10 +70,10 @@ k5_insert_client_info(krb5_context context,
 
     ret = k5_pac_add_buffer(context, pac, KRB5_PAC_CLIENT_INFO,
                             &client_info, TRUE, &client_info);
-    if (ret != 0)
+    if (ret)
         goto cleanup;
 
-    p = (unsigned char *)client_info.data;
+    p = (uint8_t *)client_info.data;
 
     /* copy in authtime converted to a 64-bit NT time */
     k5_seconds_since_1970_to_time(authtime, &nt_authtime);
@@ -99,26 +96,23 @@ cleanup:
 }
 
 static krb5_error_code
-k5_insert_checksum(krb5_context context,
-                   krb5_pac pac,
-                   krb5_ui_4 type,
-                   const krb5_keyblock *key,
-                   krb5_cksumtype *cksumtype)
+insert_checksum(krb5_context context, krb5_pac pac, krb5_ui_4 type,
+                const krb5_keyblock *key, krb5_cksumtype *cksumtype)
 {
     krb5_error_code ret;
     size_t len;
     krb5_data cksumdata;
 
     ret = krb5int_c_mandatory_cksumtype(context, key->enctype, cksumtype);
-    if (ret != 0)
+    if (ret)
         return ret;
 
     ret = krb5_c_checksum_length(context, *cksumtype, &len);
-    if (ret != 0)
+    if (ret)
         return ret;
 
     ret = k5_pac_locate_buffer(context, pac, type, &cksumdata);
-    if (ret == 0) {
+    if (!ret) {
         /*
          * If we're resigning PAC, make sure we can fit checksum
          * into existing buffer
@@ -132,10 +126,9 @@ k5_insert_checksum(krb5_context context,
         cksumdata.length = PAC_SIGNATURE_DATA_LENGTH + len;
         cksumdata.data = NULL;
 
-        ret = k5_pac_add_buffer(context, pac,
-                                type, &cksumdata,
-                                TRUE, &cksumdata);
-        if (ret != 0)
+        ret = k5_pac_add_buffer(context, pac, type, &cksumdata, TRUE,
+                                &cksumdata);
+        if (ret)
             return ret;
     }
 
@@ -147,40 +140,41 @@ k5_insert_checksum(krb5_context context,
 
 /* in-place encoding of PAC header */
 static krb5_error_code
-k5_pac_encode_header(krb5_context context, krb5_pac pac)
+encode_header(krb5_context context, krb5_pac pac)
 {
     size_t i;
     unsigned char *p;
     size_t header_len;
 
-    header_len = PACTYPE_LENGTH +
-        (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH);
+    header_len = PACTYPE_LENGTH + (pac->nbuffers * PAC_INFO_BUFFER_LENGTH);
     assert(pac->data.length >= header_len);
 
-    p = (unsigned char *)pac->data.data;
+    p = (uint8_t *)pac->data.data;
 
-    store_32_le(pac->pac->cBuffers, p);
+    store_32_le(pac->nbuffers, p);
     p += 4;
-    store_32_le(pac->pac->Version, p);
+    store_32_le(pac->version, p);
     p += 4;
 
-    for (i = 0; i < pac->pac->cBuffers; i++) {
-        PAC_INFO_BUFFER *buffer = &pac->pac->Buffers[i];
+    for (i = 0; i < pac->nbuffers; i++) {
+        struct k5_pac_buffer *buffer = &pac->buffers[i];
 
-        store_32_le(buffer->ulType, p);
+        store_32_le(buffer->type, p);
         p += 4;
-        store_32_le(buffer->cbBufferSize, p);
+        store_32_le(buffer->size, p);
         p += 4;
-        store_64_le(buffer->Offset, p);
+        store_64_le(buffer->offset, p);
         p += 8;
 
-        assert((buffer->Offset % PAC_ALIGNMENT) == 0);
-        assert(buffer->Offset + buffer->cbBufferSize <= pac->data.length);
-        assert(buffer->Offset >= header_len);
+        assert((buffer->offset % PAC_ALIGNMENT) == 0);
+        assert(buffer->size < pac->data.length);
+        assert(buffer->offset <= pac->data.length - buffer->size);
+        assert(buffer->offset >= header_len);
 
-        if (buffer->Offset % PAC_ALIGNMENT ||
-            buffer->Offset + buffer->cbBufferSize > pac->data.length ||
-            buffer->Offset < header_len)
+        if (buffer->offset % PAC_ALIGNMENT ||
+            buffer->size > pac->data.length ||
+            buffer->offset > pac->data.length - buffer->size ||
+            buffer->offset < header_len)
             return ERANGE;
     }
 
@@ -227,30 +221,30 @@ sign_pac(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
     data->data = NULL;
 
     if (principal != NULL) {
-        ret = k5_insert_client_info(context, pac, authtime, principal,
-                                    with_realm);
+        ret = insert_client_info(context, pac, authtime, principal,
+                                 with_realm);
         if (ret)
             return ret;
     }
 
     /* Create zeroed buffers for all checksums. */
-    ret = k5_insert_checksum(context, pac, KRB5_PAC_SERVER_CHECKSUM,
-                             server_key, &server_cksumtype);
+    ret = insert_checksum(context, pac, KRB5_PAC_SERVER_CHECKSUM, server_key,
+                          &server_cksumtype);
     if (ret)
         return ret;
-    ret = k5_insert_checksum(context, pac, KRB5_PAC_PRIVSVR_CHECKSUM,
-                             privsvr_key, &privsvr_cksumtype);
+    ret = insert_checksum(context, pac, KRB5_PAC_PRIVSVR_CHECKSUM, privsvr_key,
+                          &privsvr_cksumtype);
     if (ret)
         return ret;
     if (is_service_tkt) {
-        ret = k5_insert_checksum(context, pac, KRB5_PAC_FULL_CHECKSUM,
-                                 privsvr_key, &privsvr_cksumtype);
+        ret = insert_checksum(context, pac, KRB5_PAC_FULL_CHECKSUM,
+                              privsvr_key, &privsvr_cksumtype);
         if (ret)
             return ret;
     }
 
     /* Encode the PAC header so that the checksums will include it. */
-    ret = k5_pac_encode_header(context, pac);
+    ret = encode_header(context, pac);
     if (ret)
         return ret;
 
@@ -284,7 +278,7 @@ sign_pac(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
     data->length = pac->data.length;
 
     memset(pac->data.data, 0,
-           PACTYPE_LENGTH + (pac->pac->cBuffers * PAC_INFO_BUFFER_LENGTH));
+           PACTYPE_LENGTH + (pac->nbuffers * PAC_INFO_BUFFER_LENGTH));
 
     return 0;
 }
@@ -321,8 +315,8 @@ add_ticket_signature(krb5_context context, const krb5_pac pac,
     krb5_crypto_iov iov[2];
 
     /* Create zeroed buffer for checksum. */
-    ret = k5_insert_checksum(context, pac, KRB5_PAC_TICKET_CHECKSUM,
-                             privsvr, &ticket_cksumtype);
+    ret = insert_checksum(context, pac, KRB5_PAC_TICKET_CHECKSUM, privsvr,
+                          &ticket_cksumtype);
     if (ret)
         return ret;
 
