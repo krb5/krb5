@@ -45,7 +45,6 @@ get_as_key_keytab(krb5_context context,
     krb5_keytab keytab = (krb5_keytab) gak_data;
     krb5_error_code ret;
     krb5_keytab_entry kt_ent;
-    krb5_keyblock *kt_key;
 
     /* We don't need the password from the responder to create the AS key. */
     if (as_key == NULL)
@@ -71,16 +70,13 @@ get_as_key_keytab(krb5_context context,
                                  etype, &kt_ent)))
         return(ret);
 
-    ret = krb5_copy_keyblock(context, &kt_ent.key, &kt_key);
-
-    /* again, krb5's memory management is lame... */
-
-    *as_key = *kt_key;
-    free(kt_key);
+    /* Steal the keyblock from kt_ent for the caller. */
+    *as_key = kt_ent.key;
+    memset(&kt_ent.key, 0, sizeof(kt_ent.key));
 
     (void) krb5_kt_free_entry(context, &kt_ent);
 
-    return(ret);
+    return 0;
 }
 
 /* Return the list of etypes available for client in keytab. */
