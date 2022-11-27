@@ -263,6 +263,10 @@ k5_preauth_request_context_init(krb5_context context,
      * preauth context's array of handles. */
     for (count = 0; pctx->handles[count] != NULL; count++);
     reqctx->modreqs = calloc(count, sizeof(*reqctx->modreqs));
+    if (reqctx->modreqs == NULL) {
+        free(reqctx);
+        return;
+    }
     for (i = 0; i < count; i++) {
         h = pctx->handles[i];
         if (h->vt.request_init != NULL)
