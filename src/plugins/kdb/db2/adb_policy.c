@@ -58,7 +58,7 @@ osa_adb_create_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE);
 
-    if(entry->name == NULL) {
+    if(entry->name == NULL || db->db == NULL) {
         ret = EINVAL;
         goto error;
     }
@@ -131,7 +131,7 @@ osa_adb_destroy_policy(osa_adb_policy_t db, char *name)
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE);
 
-    if(name == NULL) {
+    if(name == NULL || db->db == NULL) {
         ret = EINVAL;
         goto error;
     }
@@ -190,7 +190,7 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
     *entry_ptr = NULL;
     OPENLOCK(db, KRB5_DB_LOCKMODE_SHARED);
 
-    if(name == NULL) {
+    if(name == NULL || db->db == NULL) {
         ret = EINVAL;
         goto error;
     }
@@ -262,7 +262,7 @@ osa_adb_put_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE);
 
-    if(entry->name == NULL) {
+    if(entry->name == NULL || db->db == NULL) {
         ret = EINVAL;
         goto error;
     }
@@ -330,6 +330,10 @@ osa_adb_iter_policy(osa_adb_policy_t db, osa_adb_iter_policy_func func,
     char                    *aligned_data;
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE); /* hmmm */
+    if (db->db == NULL) {
+        ret = EINVAL;
+        goto error;
+    }
 
     if((ret = db->db->seq(db->db, &dbkey, &dbdata, R_FIRST)) == -1) {
         ret = errno;
