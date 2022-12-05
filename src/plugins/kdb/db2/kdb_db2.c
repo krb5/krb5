@@ -390,7 +390,7 @@ open_db(krb5_context context, krb5_db2_context *dbc, int flags, int mode,
 
     *db_out = db;
     free(fname);
-    return (db == NULL) ? errno : 0;
+    return (db == NULL) ? (errno == 0 ? ENOMEM : errno) : 0;
 }
 
 static krb5_error_code
