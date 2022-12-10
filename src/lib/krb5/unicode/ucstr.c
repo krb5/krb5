@@ -18,6 +18,7 @@
 #include "k5-int.h"
 #include "k5-utf8.h"
 #include "k5-unicode.h"
+#include "k5-input.h"
 #include "ucdata/ucdata.h"
 
 #include <ctype.h>
@@ -98,6 +99,32 @@ krb5int_ucstr2upper(
     for (; 0 < n; ++u, --n) {
 	*u = uctoupper(*u);
     }
+}
+
+/* Return true if data contains valid UTF-8 sequences. */
+krb5_boolean
+k5_utf8_validate(const krb5_data *data)
+{
+    struct k5input in;
+    int len, tmplen, i;
+    const uint8_t *bytes;
+
+    k5_input_init(&in, data->data, data->length);
+    while (!in.status && in.len > 0) {
+	len = KRB5_UTF8_CHARLEN(in.ptr);
+	if (len < 1 || len > 4)
+	    return FALSE;
+	bytes = k5_input_get_bytes(&in, len);
+	if (bytes == NULL)
+	    return FALSE;
+	if (KRB5_UTF8_CHARLEN2(bytes, tmplen) != len)
+	    return FALSE;
+	for (i = 1; i < len; i++) {
+	    if ((bytes[i] & 0xc0) != 0x80)
+		return FALSE;
+	}
+    }
+    return !in.status;
 }
 
 #define TOUPPER(c)  (islower(c) ? toupper(c) : (c))

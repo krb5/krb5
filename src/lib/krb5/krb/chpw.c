@@ -477,7 +477,6 @@ krb5_chpw_message(krb5_context context, const krb5_data *server_string,
                   char **message_out)
 {
     krb5_error_code ret;
-    krb5_data *string;
     char *msg;
 
     *message_out = NULL;
@@ -493,11 +492,10 @@ krb5_chpw_message(krb5_context context, const krb5_data *server_string,
     /* If server_string contains a valid UTF-8 string, return that. */
     if (server_string->length > 0 &&
         memchr(server_string->data, 0, server_string->length) == NULL &&
-        krb5int_utf8_normalize(server_string, &string,
-                               KRB5_UTF8_APPROX) == 0) {
-        *message_out = string->data; /* already null terminated */
-        free(string);
-        return 0;
+        k5_utf8_validate(server_string)) {
+        *message_out = k5memdup0(server_string->data, server_string->length,
+                                 &ret);
+        return (*message_out == NULL) ? ENOMEM : 0;
     }
 
     /* server_string appears invalid, so try to be helpful. */

@@ -127,4 +127,6 @@ int krb5int_utf8_normcmp(
     const krb5_data *,
     unsigned);
 
+krb5_boolean k5_utf8_validate(const krb5_data *data);
+
 #endif /* K5_UNICODE_H */
