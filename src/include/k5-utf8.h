@@ -73,9 +73,6 @@
 typedef uint16_t krb5_ucs2;
 typedef uint32_t krb5_ucs4;
 
-int krb5int_utf8_to_ucs2(const char *p, krb5_ucs2 *out);
-size_t krb5int_ucs2_to_utf8(krb5_ucs2 c, char *buf);
-
 int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out);
 size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf);
 
@@ -96,49 +93,6 @@ int k5_utf16le_to_utf8(const uint8_t *utf16bytes, size_t nbytes,
 int k5_utf8_to_utf16le(const char *utf8, uint8_t **utf16_out,
                        size_t *nbytes_out);
 
-/* returns the number of bytes in the UTF-8 string */
-size_t krb5int_utf8_bytes(const char *);
-/* returns the number of UTF-8 characters in the string */
-size_t krb5int_utf8_chars(const char *);
-/* returns the number of UTF-8 characters in the counted string */
-size_t krb5int_utf8c_chars(const char *, size_t);
-/* returns the length (in bytes) of the UTF-8 character */
-int krb5int_utf8_offset(const char *);
-/* returns the length (in bytes) indicated by the UTF-8 character */
-int krb5int_utf8_charlen(const char *);
-
-/* returns the length (in bytes) indicated by the UTF-8 character
- * also checks that shortest possible encoding was used
- */
-int krb5int_utf8_charlen2(const char *);
-
-/* copies a UTF-8 character and returning number of bytes copied */
-int krb5int_utf8_copy(char *, const char *);
-
-/* returns pointer of next UTF-8 character in string */
-char *krb5int_utf8_next( const char *);
-/* returns pointer of previous UTF-8 character in string */
-char *krb5int_utf8_prev( const char *);
-
-/* primitive ctype routines -- not aware of non-ascii characters */
-int krb5int_utf8_isascii( const char *);
-int krb5int_utf8_isalpha( const char *);
-int krb5int_utf8_isalnum( const char *);
-int krb5int_utf8_isdigit( const char *);
-int krb5int_utf8_isxdigit( const char *);
-int krb5int_utf8_isspace( const char *);
-
-/* span characters not in set, return bytes spanned */
-size_t krb5int_utf8_strcspn( const char* str, const char *set);
-/* span characters in set, return bytes spanned */
-size_t krb5int_utf8_strspn( const char* str, const char *set);
-/* return first occurrence of character in string */
-char *krb5int_utf8_strchr( const char* str, const char *chr);
-/* return first character of set in string */
-char *krb5int_utf8_strpbrk( const char* str, const char *set);
-/* reentrant tokenizer */
-char *krb5int_utf8_strtok( char* sp, const char* sep, char **last);
-
 /* Optimizations */
 extern const char krb5int_utf8_lentab[128];
 extern const char krb5int_utf8_mintab[32];
@@ -157,38 +111,10 @@ extern const char krb5int_utf8_mintab[32];
          (krb5int_utf8_mintab[KRB5_UTF8_BV(p) & 0x1f] & (p)[1])) ?      \
         l : 0)
 
-#define KRB5_UTF8_OFFSET(p) (KRB5_UTF8_ISASCII(p)               \
-                             ? 1 : krb5int_utf8_offset((p)) )
-
-#define KRB5_UTF8_COPY(d,s) (KRB5_UTF8_ISASCII(s)                       \
-                             ? (*(d) = *(s), 1) : krb5int_utf8_copy((d),(s)))
-
-#define KRB5_UTF8_NEXT(p) (KRB5_UTF8_ISASCII(p)                         \
-                           ? (char *)(p)+1 : krb5int_utf8_next((p)))
-
-#define KRB5_UTF8_INCR(p) ((p) = KRB5_UTF8_NEXT(p))
-
-/* For symmetry */
-#define KRB5_UTF8_PREV(p) (krb5int_utf8_prev((p)))
-#define KRB5_UTF8_DECR(p) ((p)=KRB5_UTF8_PREV((p)))
-
 /*
  * these macros assume 'x' is an ASCII x
  * and assume the "C" locale
  */
-#define KRB5_ASCII(c)           (!((c) & 0x80))
-#define KRB5_SPACE(c)           ((c) == ' ' || (c) == '\t' || (c) == '\n')
-#define KRB5_DIGIT(c)           ((c) >= '0' && (c) <= '9')
-#define KRB5_LOWER(c)           ((c) >= 'a' && (c) <= 'z')
 #define KRB5_UPPER(c)           ((c) >= 'A' && (c) <= 'Z')
-#define KRB5_ALPHA(c)           (KRB5_LOWER(c) || KRB5_UPPER(c))
-#define KRB5_ALNUM(c)           (KRB5_ALPHA(c) || KRB5_DIGIT(c))
-
-#define KRB5_LDH(c)             (KRB5_ALNUM(c) || (c) == '-')
-
-#define KRB5_HEXLOWER(c)        ((c) >= 'a' && (c) <= 'f')
-#define KRB5_HEXUPPER(c)        ((c) >= 'A' && (c) <= 'F')
-#define KRB5_HEX(c)             (KRB5_DIGIT(c) ||                       \
-                                 KRB5_HEXLOWER(c) || KRB5_HEXUPPER(c))
 
 #endif /* K5_UTF8_H */

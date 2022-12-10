@@ -87,40 +87,11 @@
 
 typedef krb5_ucs4 krb5_unicode;
 
-int krb5int_ucstrncmp(
-    const krb5_unicode *,
-    const krb5_unicode *,
-    size_t);
-
-int krb5int_ucstrncasecmp(
-    const krb5_unicode *,
-    const krb5_unicode *,
-    size_t);
-
-krb5_unicode *krb5int_ucstrnchr(
-    const krb5_unicode *,
-    size_t,
-    krb5_unicode);
-
-krb5_unicode *krb5int_ucstrncasechr(
-    const krb5_unicode *,
-    size_t,
-    krb5_unicode);
-
-void krb5int_ucstr2upper(
-    krb5_unicode *,
-    size_t);
-
 #define KRB5_UTF8_NOCASEFOLD    0x0U
 #define KRB5_UTF8_CASEFOLD      0x1U
 #define KRB5_UTF8_ARG1NFC       0x2U
 #define KRB5_UTF8_ARG2NFC       0x4U
 #define KRB5_UTF8_APPROX        0x8U
-
-krb5_error_code krb5int_utf8_normalize(
-    const krb5_data *,
-    krb5_data **,
-    unsigned);
 
 int krb5int_utf8_normcmp(
     const krb5_data *,
