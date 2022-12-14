@@ -22,9 +22,9 @@ realm.run([kvno, princ1])
 realm.run([kadminl, 'purgekeys', realm.krbtgt_princ])
 # Make sure an old TGT fails after purging old TGS key.
 realm.run([kvno, princ2], expected_code=1)
-et = "aes128-cts-hmac-sha256-128"
-msg = 'krbtgt/%s@%s\n\tEtype (skey, tkt): %s, %s' % \
-    (realm.realm, realm.realm, et, et)
+msg = 'krbtgt/%s@%s\n\tEtype (skey, tkt): ' \
+    'aes256-cts-hmac-sha1-96, aes128-cts-hmac-sha256-128' % \
+    (realm.realm, realm.realm)
 realm.run([klist, '-e'], expected_msg=msg)
 
 # Check that new key actually works.

@@ -1006,6 +1006,10 @@ dbentry_supports_enctype(krb5_context context, krb5_db_entry *server,
     free(etypes_str);
     free(etypes);
 
+    /* Assume every server without a session_enctypes attribute supports
+     * aes256-cts-hmac-sha1-96. */
+    if (enctype == ENCTYPE_AES256_CTS_HMAC_SHA1_96)
+        return TRUE;
     /* Assume the server supports any enctype it has a long-term key for. */
     return !krb5_dbe_find_enctype(context, server, enctype, -1, 0, &datap);
 }
