@@ -221,6 +221,16 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
         goto cleanup;
     ctx->allow_weak_crypto = tmp;
 
+    retval = get_boolean(ctx, KRB5_CONF_ALLOW_DES3, 0, &tmp);
+    if (retval)
+        goto cleanup;
+    ctx->allow_des3 = tmp;
+
+    retval = get_boolean(ctx, KRB5_CONF_ALLOW_RC4, 0, &tmp);
+    if (retval)
+        goto cleanup;
+    ctx->allow_rc4 = tmp;
+
     retval = get_boolean(ctx, KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME, 0, &tmp);
     if (retval)
         goto cleanup;

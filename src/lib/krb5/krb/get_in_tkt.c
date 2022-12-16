@@ -1582,22 +1582,31 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     (*prompter)(context, data, 0, banner, 0, 0);
 }
 
-/* Display a warning via the prompter if des3-cbc-sha1 was used for either the
- * reply key or the session key. */
+/* Display a warning via the prompter if a deprecated enctype was used for
+ * either the reply key or the session key. */
 static void
-warn_des3(krb5_context context, krb5_init_creds_context ctx,
-          krb5_enctype as_key_enctype)
+warn_deprecated(krb5_context context, krb5_init_creds_context ctx,
+                krb5_enctype as_key_enctype)
 {
-    const char *banner;
+    krb5_enctype etype;
+    char encbuf[128], banner[256];
 
-    if (as_key_enctype != ENCTYPE_DES3_CBC_SHA1 &&
-        ctx->cred.keyblock.enctype != ENCTYPE_DES3_CBC_SHA1)
-        return;
     if (ctx->prompter == NULL)
         return;
 
-    banner = _("Warning: encryption type des3-cbc-sha1 used for "
-               "authentication is weak and will be disabled");
+    if (krb5int_c_deprecated_enctype(as_key_enctype))
+        etype = as_key_enctype;
+    else if (krb5int_c_deprecated_enctype(ctx->cred.keyblock.enctype))
+        etype = ctx->cred.keyblock.enctype;
+    else
+        return;
+
+    if (krb5_enctype_to_name(etype, FALSE, encbuf, sizeof(encbuf)) != 0)
+        return;
+    snprintf(banner, sizeof(banner),
+             _("Warning: encryption type %s used for authentication is "
+               "deprecated and will be disabled"), encbuf);
+
     /* PROMPTER_INVOCATION */
     (*ctx->prompter)(context, ctx->prompter_data, NULL, banner, 0, NULL);
 }
@@ -1848,7 +1857,7 @@ init_creds_step_reply(krb5_context context,
     ctx->complete = TRUE;
     warn_pw_expiry(context, ctx->opt, ctx->prompter, ctx->prompter_data,
                    ctx->in_tkt_service, ctx->reply);
-    warn_des3(context, ctx, encrypting_key.enctype);
+    warn_deprecated(context, ctx, encrypting_key.enctype);
 
 cleanup:
     krb5_free_pa_data(context, kdc_padata);

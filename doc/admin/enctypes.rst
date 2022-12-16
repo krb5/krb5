@@ -48,12 +48,15 @@ Session key selection
 The KDC chooses the session key enctype by taking the intersection of
 its **permitted_enctypes** list, the list of long-term keys for the
 most recent kvno of the service, and the client's requested list of
-enctypes.
+enctypes.  Starting in krb5-1.21, all services are assumed to support
+aes256-cts-hmac-sha1-96; also, des3-cbc-sha1 and arcfour-hmac session
+keys will not be issued by default.
 
 Starting in krb5-1.11, it is possible to set a string attribute on a
 service principal to control what session key enctypes the KDC may
-issue for service tickets for that principal.  See :ref:`set_string`
-in :ref:`kadmin(1)` for details.
+issue for service tickets for that principal, overriding the service's
+long-term keys and the assumption of aes256-cts-hmac-sha1-96 support.
+See :ref:`set_string` in :ref:`kadmin(1)` for details.
 
 
 Choosing enctypes for a service
@@ -86,6 +89,20 @@ affect how enctypes are chosen.
     set this to *true* unless the use of weak enctypes is an
     acceptable risk for your environment and the weak enctypes are
     required for backward compatibility.
+
+**allow_des3**
+    was added in release 1.21 and defaults to *false*.  Unless this
+    flag is set to *true*, the KDC will not issue tickets with
+    des3-cbc-sha1 session keys.  In a future release, this flag will
+    control whether des3-cbc-sha1 is permitted in similar fashion to
+    weak enctypes.
+
+**allow_rc4**
+    was added in release 1.21 and defaults to *false*.  Unless this
+    flag is set to *true*, the KDC will not issue tickets with
+    arcfour-hmac session keys.  In a future release, this flag will
+    control whether arcfour-hmac is permitted in similar fashion to
+    weak enctypes.
 
 **permitted_enctypes**
     controls the set of enctypes that a service will permit for

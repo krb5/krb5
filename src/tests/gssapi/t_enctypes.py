@@ -18,7 +18,8 @@ d_rc4 = 'DEPRECATED:arcfour-hmac'
 # These tests make assumptions about the default enctype lists, so set
 # them explicitly rather than relying on the library defaults.
 supp='aes256-cts:normal aes128-cts:normal des3-cbc-sha1:normal rc4-hmac:normal'
-conf = {'libdefaults': {'permitted_enctypes': 'aes des3 rc4'},
+conf = {'libdefaults': {'permitted_enctypes': 'aes des3 rc4',
+                        'allow_des3': 'true', 'allow_rc4': 'true'},
         'realms': {'$realm': {'supported_enctypes': supp}}}
 realm = K5Realm(krb5_conf=conf)
 shutil.copyfile(realm.ccache, os.path.join(realm.testdir, 'save'))

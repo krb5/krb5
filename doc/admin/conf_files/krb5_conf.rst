@@ -95,6 +95,18 @@ Additionally, krb5.conf may include any of the relations described in
 
 The libdefaults section may contain any of the following relations:
 
+**allow_des3**
+    Permit the KDC to issue tickets with des3-cbc-sha1 session keys.
+    In future releases, this flag will allow des3-cbc-sha1 to be used
+    at all.  The default value for this tag is false.  (Added in
+    release 1.21.)
+
+**allow_rc4**
+    Permit the KDC to issue tickets with arcfour-hmac session keys.
+    In future releases, this flag will allow arcfour-hmac to be used
+    at all.  The default value for this tag is false.  (Added in
+    release 1.21.)
+
 **allow_weak_crypto**
     If this flag is set to false, then weak encryption types (as noted
     in :ref:`Encryption_types` in :ref:`kdc.conf(5)`) will be filtered

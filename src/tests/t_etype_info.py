@@ -1,7 +1,7 @@
 from k5test import *
 
 supported_enctypes = 'aes128-cts des3-cbc-sha1 rc4-hmac'
-conf = {'libdefaults': {'allow_weak_crypto': 'true'},
+conf = {'libdefaults': {'allow_des3': 'true', 'allow_rc4': 'true'},
         'realms': {'$realm': {'supported_enctypes': supported_enctypes}}}
 realm = K5Realm(create_host=False, get_creds=False, krb5_conf=conf)
 

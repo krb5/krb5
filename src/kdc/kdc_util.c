@@ -1032,6 +1032,16 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
         if (!krb5_is_permitted_enctype(context, ktype[i]))
             continue;
 
+        /*
+         * Prevent these deprecated enctypes from being used as session keys
+         * unless they are explicitly allowed.  In the future they will be more
+         * comprehensively disabled and eventually removed.
+         */
+        if (ktype[i] == ENCTYPE_DES3_CBC_SHA1 && !context->allow_des3)
+            continue;
+        if (ktype[i] == ENCTYPE_ARCFOUR_HMAC && !context->allow_rc4)
+            continue;
+
         if (dbentry_supports_enctype(context, server, ktype[i]))
             return ktype[i];
     }
