@@ -11,7 +11,7 @@ realm = K5Realm(krb5_conf=conf)
 # container.
 mark('baseline authdata')
 out = realm.run(['./adata', realm.host_princ])
-if '?128: [6, 7, 10, 16]' not in out or '^-42: Hello' not in out:
+if '?128: [6, 7, 10, 16, 19]' not in out or '^-42: Hello' not in out:
     fail('expected authdata not seen for basic request')
 
 # Requested authdata is copied into the ticket, with KDC-only types
@@ -243,7 +243,7 @@ out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
 # Make sure a PAC with an S4U_DELEGATION_INFO(11) buffer is included.
-if '?128: [1, 6, 7, 10, 11, 16]' not in out:
+if '?128: [1, 6, 7, 10, 11, 16, 19]' not in out:
     fail('PAC with delegation info not seen for S4U2Proxy req')
 
 # Get another S4U2Proxy ticket including request-authdata.

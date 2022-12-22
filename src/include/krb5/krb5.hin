@@ -8158,6 +8158,7 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
 #define KRB5_PAC_TICKET_CHECKSUM   16 /**< Ticket checksum */
 #define KRB5_PAC_ATTRIBUTES_INFO   17 /**< PAC attributes */
 #define KRB5_PAC_REQUESTOR         18 /**< PAC requestor SID */
+#define KRB5_PAC_FULL_CHECKSUM     19 /**< KDC full checksum */
 
 struct krb5_pac_data;
 /** PAC data structure to convey authorization information */

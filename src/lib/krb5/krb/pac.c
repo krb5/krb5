@@ -490,7 +490,8 @@ zero_signature(krb5_context context, const krb5_pac pac, krb5_ui_4 type,
     size_t i;
 
     assert(type == KRB5_PAC_SERVER_CHECKSUM ||
-           type == KRB5_PAC_PRIVSVR_CHECKSUM);
+           type == KRB5_PAC_PRIVSVR_CHECKSUM ||
+           type == KRB5_PAC_FULL_CHECKSUM);
     assert(data->length >= pac->data.length);
 
     for (i = 0; i < pac->pac->cBuffers; i++) {
@@ -557,17 +558,17 @@ verify_checksum(krb5_context context, const krb5_pac pac, uint32_t buffer_type,
 }
 
 static krb5_error_code
-verify_server_checksum(krb5_context context, const krb5_pac pac,
-                       const krb5_keyblock *server)
+verify_pac_checksums(krb5_context context, const krb5_pac pac,
+                     krb5_boolean expect_full_checksum,
+                     const krb5_keyblock *server, const krb5_keyblock *privsvr)
 {
     krb5_error_code ret;
-    krb5_data copy;             /* PAC with zeroed checksums */
+    krb5_data copy, server_checksum;
 
+    /* Make a copy of the PAC with zeroed out server and privsvr checksums. */
     ret = krb5int_copy_data_contents(context, &pac->data, &copy);
     if (ret)
         return ret;
-
-    /* Zero out both checksum buffers */
     ret = zero_signature(context, pac, KRB5_PAC_SERVER_CHECKSUM, &copy);
     if (ret)
         goto cleanup;
@@ -575,32 +576,46 @@ verify_server_checksum(krb5_context context, const krb5_pac pac,
     if (ret)
         goto cleanup;
 
-    ret = verify_checksum(context, pac, KRB5_PAC_SERVER_CHECKSUM, server,
-                          KRB5_KEYUSAGE_APP_DATA_CKSUM, &copy);
+    if (server != NULL) {
+        /* Verify the server checksum over the PAC copy. */
+        ret = verify_checksum(context, pac, KRB5_PAC_SERVER_CHECKSUM, server,
+                              KRB5_KEYUSAGE_APP_DATA_CKSUM, &copy);
+    }
+
+    if (privsvr != NULL && expect_full_checksum) {
+        /* Zero the full checksum buffer in the copy and verify the full
+         * checksum over the copy with all three checksums zeroed. */
+        ret = zero_signature(context, pac, KRB5_PAC_FULL_CHECKSUM, &copy);
+        if (ret)
+            goto cleanup;
+        ret = verify_checksum(context, pac, KRB5_PAC_FULL_CHECKSUM, privsvr,
+                              KRB5_KEYUSAGE_APP_DATA_CKSUM, &copy);
+        if (ret)
+            goto cleanup;
+    }
+
+    if (privsvr != NULL) {
+        /* Verify the privsvr checksum over the server checksum. */
+        ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_SERVER_CHECKSUM,
+                                   &server_checksum);
+        if (ret)
+            return ret;
+        if (server_checksum.length < PAC_SIGNATURE_DATA_LENGTH)
+            return KRB5_BAD_MSIZE;
+        server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
+        server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
+
+        ret = verify_checksum(context, pac, KRB5_PAC_PRIVSVR_CHECKSUM, privsvr,
+                              KRB5_KEYUSAGE_APP_DATA_CKSUM, &server_checksum);
+        if (ret)
+            goto cleanup;
+    }
+
+    pac->verified = TRUE;
 
 cleanup:
     free(copy.data);
     return ret;
-}
-
-static krb5_error_code
-verify_kdc_checksum(krb5_context context, const krb5_pac pac,
-                    const krb5_keyblock *privsvr)
-{
-    krb5_error_code ret;
-    krb5_data server_checksum;
-
-    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_SERVER_CHECKSUM,
-                               &server_checksum);
-    if (ret)
-        return ret;
-    if (server_checksum.length < PAC_SIGNATURE_DATA_LENGTH)
-        return KRB5_BAD_MSIZE;
-    server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
-    server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
-
-    return verify_checksum(context, pac, KRB5_PAC_PRIVSVR_CHECKSUM, privsvr,
-                           KRB5_KEYUSAGE_APP_DATA_CKSUM, &server_checksum);
 }
 
 /* Per MS-PAC 2.8.3, tickets encrypted to TGS and password change principals
@@ -628,6 +643,7 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
     krb5_authdata **authdata, *orig, **ifrel = NULL, **recoded_ifrel = NULL;
     uint8_t z = 0;
     krb5_authdata zpac = { KV5M_AUTHDATA, KRB5_AUTHDATA_WIN2K_PAC, 1, &z };
+    krb5_boolean is_service_tkt;
     size_t i, j;
 
     *pac_out = NULL;
@@ -669,7 +685,8 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
     if (ret)
         goto cleanup;
 
-    if (privsvr != NULL && k5_pac_should_have_ticket_signature(server_princ)) {
+    is_service_tkt = k5_pac_should_have_ticket_signature(server_princ);
+    if (privsvr != NULL && is_service_tkt) {
         /* To check the PAC ticket signatures, re-encode the ticket with the
          * PAC contents replaced by a single zero. */
         orig = ifrel[j];
@@ -693,8 +710,9 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
             goto cleanup;
     }
 
-    ret = krb5_pac_verify_ext(context, pac, enc_tkt->times.authtime, NULL,
-                              server, privsvr, FALSE);
+    ret = verify_pac_checksums(context, pac, is_service_tkt, server, privsvr);
+    if (ret)
+        goto cleanup;
 
     *pac_out = pac;
     pac = NULL;
@@ -730,14 +748,8 @@ krb5_pac_verify_ext(krb5_context context,
 {
     krb5_error_code ret;
 
-    if (server != NULL) {
-        ret = verify_server_checksum(context, pac, server);
-        if (ret != 0)
-            return ret;
-    }
-
-    if (privsvr != NULL) {
-        ret = verify_kdc_checksum(context, pac, privsvr);
+    if (server != NULL || privsvr != NULL) {
+        ret = verify_pac_checksums(context, pac, FALSE, server, privsvr);
         if (ret != 0)
             return ret;
     }
@@ -748,8 +760,6 @@ krb5_pac_verify_ext(krb5_context context,
         if (ret != 0)
             return ret;
     }
-
-    pac->verified = TRUE;
 
     return 0;
 }
