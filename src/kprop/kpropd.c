@@ -1047,6 +1047,7 @@ parse_args(int argc, char **argv)
     enum { PID_FILE = 256 };
     struct option long_options[] = {
         { "pid-file", 1, NULL, PID_FILE },
+        { NULL, 0, NULL, 0 },
     };
 
     memset(&params, 0, sizeof(params));
