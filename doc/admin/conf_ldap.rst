@@ -87,8 +87,7 @@ Configuring Kerberos with OpenLDAP back-end
        ldap_service_password_file
        ldap_servers
 
- 8. Create the realm using :ref:`kdb5_ldap_util(8)` (see
-    :ref:`ldap_create_realm`)::
+ 8. Create the realm using :ref:`kdb5_ldap_util(8)`:
 
        kdb5_ldap_util create -subtrees ou=users,dc=example,dc=com -s
 

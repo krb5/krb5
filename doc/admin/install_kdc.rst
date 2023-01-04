@@ -488,7 +488,7 @@ Add Kerberos principals to the database
 Once your KDCs are set up and running, you are ready to use
 :ref:`kadmin(1)` to load principals for your users, hosts, and other
 services into the Kerberos database.  This procedure is described
-fully in :ref:`add_mod_del_princs`.
+fully in :ref:`principals`.
 
 You may occasionally want to use one of your replica KDCs as the
 primary.  This might happen if you are upgrading the primary KDC, or

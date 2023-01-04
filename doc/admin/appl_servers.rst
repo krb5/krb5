@@ -4,9 +4,9 @@ Application servers
 If you need to install the Kerberos V5 programs on an application
 server, please refer to the Kerberos V5 Installation Guide.  Once you
 have installed the software, you need to add that host to the Kerberos
-database (see :ref:`add_mod_del_princs`), and generate a keytab for
-that host, that contains the host's key.  You also need to make sure
-the host's clock is within your maximum clock skew of the KDCs.
+database (see :ref:`principals`), and generate a keytab for that host,
+that contains the host's key.  You also need to make sure the host's
+clock is within your maximum clock skew of the KDCs.
 
 
 Keytabs
@@ -30,34 +30,23 @@ Adding principals to keytabs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To generate a keytab, or to add a principal to an existing keytab, use
-the **ktadd** command from kadmin.
-
-.. include:: admin_commands/kadmin_local.rst
-   :start-after:  _ktadd:
-   :end-before: _ktadd_end:
-
-
-Examples
-########
-
-Here is a sample session, using configuration files that enable only
-AES encryption::
+the **ktadd** command from kadmin.  Here is a sample session, using
+configuration files that enable only AES encryption::
 
     kadmin: ktadd host/daffodil.mit.edu@ATHENA.MIT.EDU
     Entry for principal host/daffodil.mit.edu with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab
     Entry for principal host/daffodil.mit.edu with kvno 2, encryption type aes128-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab
-    kadmin:
 
 
 Removing principals from keytabs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To remove a principal from an existing keytab, use the kadmin
-**ktremove** command.
+**ktremove** command::
 
-.. include:: admin_commands/kadmin_local.rst
-   :start-after:  _ktremove:
-   :end-before: _ktremove_end:
+    kadmin:  ktremove host/daffodil.mit.edu@ATHENA.MIT.EDU
+    Entry for principal host/daffodil.mit.edu with kvno 2 removed from keytab FILE:/etc/krb5.keytab.
+    Entry for principal host/daffodil.mit.edu with kvno 2 removed from keytab FILE:/etc/krb5.keytab.
 
 
 Using a keytab to acquire client credentials

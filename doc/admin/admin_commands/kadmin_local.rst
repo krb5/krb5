@@ -28,8 +28,6 @@ SYNOPSIS
 [**-x** *db_args*]
 [command args...]
 
-.. _kadmin_synopsis_end:
-
 
 DESCRIPTION
 -----------
@@ -141,8 +139,6 @@ OPTIONS
 **-x** *db_args*
     Specifies the database specific arguments.  See the next section
     for supported options.
-
-.. _kadmin_options_end:
 
 Starting with release 1.14, if any command-line arguments remain after
 the options, they will be treated as a single query to be executed.
@@ -426,8 +422,6 @@ Example::
     Principal "jennifer@ATHENA.MIT.EDU" created.
     kadmin:
 
-.. _add_principal_end:
-
 .. _modify_principal:
 
 modify_principal
@@ -451,8 +445,6 @@ Options (in addition to the **addprinc** options):
     authentication attempts without enough time between them according
     to its password policy) so that it can successfully authenticate.
 
-.. _modify_principal_end:
-
 .. _rename_principal:
 
 rename_principal
@@ -468,8 +460,6 @@ This command requires the **add** and **delete** privileges.
 
 Alias: **renprinc**
 
-.. _rename_principal_end:
-
 .. _delete_principal:
 
 delete_principal
@@ -483,8 +473,6 @@ prompts for deletion, unless the **-force** option is given.
 This command requires the **delete** privilege.
 
 Alias: **delprinc**
-
-.. _delete_principal_end:
 
 .. _change_password:
 
@@ -529,8 +517,6 @@ Example::
     Password for systest@BLEEP.COM changed.
     kadmin:
 
-.. _change_password_end:
-
 .. _purgekeys:
 
 purgekeys
@@ -545,8 +531,6 @@ only purges keys with kvnos lower than *oldest_kvno_to_keep*.  If
 is new in release 1.12.
 
 This command requires the **modify** privilege.
-
-.. _purgekeys_end:
 
 .. _get_principal:
 
@@ -588,8 +572,6 @@ Examples::
     tlyu/admin@BLEEP.COM     786100034 0    0
     kadmin:
 
-.. _get_principal_end:
-
 .. _list_principals:
 
 list_principals
@@ -618,8 +600,6 @@ Example::
     testuser@SECURE-TEST.OV.COM
     kadmin:
 
-.. _list_principals_end:
-
 .. _get_strings:
 
 get_strings
@@ -632,8 +612,6 @@ Displays string attributes on *principal*.
 This command requires the **inquire** privilege.
 
 Alias: **getstrs**
-
-.. _get_strings_end:
 
 .. _set_string:
 
@@ -680,8 +658,6 @@ Example::
     set_string host/foo.mit.edu session_enctypes aes128-cts
     set_string user@FOO.COM otp "[{""type"":""hotp"",""username"":""al""}]"
 
-.. _set_string_end:
-
 .. _del_string:
 
 del_string
@@ -694,8 +670,6 @@ Deletes a string attribute from *principal*.
 This command requires the **delete** privilege.
 
 Alias: **delstr**
-
-.. _del_string_end:
 
 .. _add_policy:
 
@@ -773,8 +747,6 @@ Example::
     kadmin: add_policy -maxlife "2 days" -minlength 5 guests
     kadmin:
 
-.. _add_policy_end:
-
 .. _modify_policy:
 
 modify_policy
@@ -788,8 +760,6 @@ for **add_policy**.
 This command requires the **modify** privilege.
 
 Alias: **modpol**
-
-.. _modify_policy_end:
 
 .. _delete_policy:
 
@@ -812,8 +782,6 @@ Example::
     Are you sure you want to delete the policy "guests"?
     (yes/no): yes
     kadmin:
-
-.. _delete_policy_end:
 
 .. _get_policy:
 
@@ -849,8 +817,6 @@ The "Reference count" is the number of principals using that policy.
 With the LDAP KDC database module, the reference count field is not
 meaningful.
 
-.. _get_policy_end:
-
 .. _list_policies:
 
 list_policies
@@ -880,8 +846,6 @@ Examples::
     test-pol
     test-pol-nopw
     kadmin:
-
-.. _list_policies_end:
 
 .. _ktadd:
 
@@ -932,8 +896,6 @@ Example::
          FILE:/tmp/foo-new-keytab
     kadmin:
 
-.. _ktadd_end:
-
 .. _ktremove:
 
 ktremove
@@ -967,8 +929,6 @@ Example::
     Entry for principal kadmin/admin with kvno 3 removed from keytab
          FILE:/etc/krb5.keytab
     kadmin:
-
-.. _ktremove_end:
 
 lock
 ~~~~
