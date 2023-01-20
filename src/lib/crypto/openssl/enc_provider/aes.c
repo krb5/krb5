@@ -127,6 +127,7 @@ cbc_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 }
 
 
+#if USE_BORINGSSL
 /** The CTS mode is not implemented in BoringSSL.
   * So, copy the implementation from OpenSSL here.
   */
@@ -302,7 +303,7 @@ size_t CRYPTO_cts128_decrypt_block(const unsigned char *in,
 
     return 16 + len + residue;
 }
-
+#endif
 
 static krb5_error_code
 cts_encr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
@@ -479,3 +480,4 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_init_state,
     krb5int_default_free_state
 };
+
