@@ -136,7 +136,7 @@ realm.run([klist, '-C'], expected_msg='refresh_time = ')
 # Test 18: no name/ccache specified, manually acquired creds with a
 # client principal not present in the client keytab.  A refresh is
 # attempted but fails, and an expired ticket error results.
-realm.kinit(realm.admin_princ, password('admin'), ['-l', '-1s'])
+realm.kinit(realm.admin_princ, password('admin'), ['-l', '-10s'])
 msgs = ('Getting initial credentials for user/admin@KRBTEST.COM',
         '/Matching credential not found')
 realm.run(['./t_ccselect', phost], expected_code=1,
