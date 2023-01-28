@@ -184,4 +184,5 @@ main()
     RUN_TEST_FAIL(fuzz2);
 
     printf("Passed NDR tests\n");
+    return 0;
 }
