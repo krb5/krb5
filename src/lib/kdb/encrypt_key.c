@@ -109,6 +109,7 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
     if ((retval = krb5_c_encrypt(context, mkey, /* XXX */ 0, 0,
                                  &plain, &cipher))) {
         free(key_data->key_data_contents[0]);
+        key_data->key_data_contents[0] = NULL;
         return retval;
     }
 
@@ -121,6 +122,7 @@ krb5_dbe_def_encrypt_key_data( krb5_context             context,
                 key_data->key_data_contents[1] = malloc(keysalt->data.length);
                 if (key_data->key_data_contents[1] == NULL) {
                     free(key_data->key_data_contents[0]);
+                    key_data->key_data_contents[0] = NULL;
                     return ENOMEM;
                 }
                 memcpy(key_data->key_data_contents[1], keysalt->data.data,
