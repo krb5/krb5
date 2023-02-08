@@ -3455,7 +3455,7 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in,
 	     unsigned int buff_length)
 {
 	gss_OID_set returned_mechSet;
-	OM_uint32 major_status;
+	OM_uint32 major_status, tmpmin;
 	int length;
 	unsigned int bytes;
 	OM_uint32 set_length;
@@ -3485,9 +3485,12 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in,
 
 		major_status = gss_add_oid_set_member(minor_status,
 						      temp, &returned_mechSet);
-		if (major_status == GSS_S_COMPLETE)
-			set_length += returned_mechSet->elements[i].length +2;
 		generic_gss_release_oid(minor_status, &temp);
+		if (major_status != GSS_S_COMPLETE) {
+			gss_release_oid_set(&tmpmin, &returned_mechSet);
+			return (NULL);
+		}
+		set_length += returned_mechSet->elements[i].length + 2;
 	}
 
 	return (returned_mechSet);
@@ -4305,7 +4308,8 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 	 * - check for a0(context specific identifier)
 	 * - get length and verify that enoughd ata exists
 	 */
-	if (g_get_tag_and_length(&buf, CONTEXT, cur_size, &bytes) < 0)
+	if (g_get_tag_and_length(&buf, CONTEXT, cur_size, &bytes) < 0 ||
+	    bytes == 0)
 		return (G_BAD_TOK_HEADER);
 
 	cur_size = bytes; /* should indicate bytes remaining */
@@ -4315,7 +4319,7 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 	 * a strucure of type NegTokenInit.
 	 */
 	if (*buf++ == SEQUENCE) {
-		if ((seqsize = gssint_get_der_length(&buf, cur_size, &bytes)) < 0)
+		if ((seqsize = gssint_get_der_length(&buf, cur_size - 1, &bytes)) <= 0)
 			return (G_BAD_TOK_HEADER);
 		/*
 		 * Make sure we have the entire buffer as described
@@ -4332,7 +4336,7 @@ g_verify_neg_token_init(unsigned char **buf_in, unsigned int cur_size)
 	 * Verify that the first blob is a sequence of mechTypes
 	 */
 	if (*buf++ == CONTEXT) {
-		if ((seqsize = gssint_get_der_length(&buf, cur_size, &bytes)) < 0)
+		if ((seqsize = gssint_get_der_length(&buf, cur_size - 1, &bytes)) < 0)
 			return (G_BAD_TOK_HEADER);
 		/*
 		 * Make sure we have the entire buffer as described
