@@ -181,7 +181,8 @@ static time_t	yyRelSeconds;
 
 %token			tAGO tID tDST tNEVER
 %token	<Number>	tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE tMERIDIAN
+%token	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tZONE
+%token	<Meridian>	tMERIDIAN
 %type	<Meridian>	o_merid
 
 %%
