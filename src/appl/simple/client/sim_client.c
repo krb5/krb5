@@ -29,14 +29,17 @@
  * This program performs no useful function.
  */
 
-#include <k5-int.h>
+#include <krb5.h>
 #include "com_err.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <netdb.h>
-#include <ctype.h>
+#include <getopt.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -66,7 +69,6 @@ main(int argc, char *argv[])
     int flags = 0;                      /* flags for sendto() */
     struct servent *serv;
     struct hostent *host;
-    char *cp;
 #ifdef BROKEN_STREAMS_SOCKETS
     char my_hostname[MAXHOSTNAMELEN];
 #endif
@@ -85,7 +87,7 @@ main(int argc, char *argv[])
     krb5_error_code retval;
     krb5_data packet, inbuf;
     krb5_ccache ccdef;
-    krb5_address addr, *portlocal_addr;
+    krb5_address addr;
 
     krb5_context          context;
     krb5_auth_context     auth_context = NULL;
@@ -202,8 +204,9 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    if ((retval = krb5_mk_req(context, &auth_context, 0, service, hostname,
-                              &inbuf, ccdef, &packet))) {
+    retval = krb5_mk_req(context, &auth_context, AP_OPTS_USE_SUBKEY, service,
+                         hostname, &inbuf, ccdef, &packet);
+    if (retval) {
         com_err(progname, retval, "while preparing AP_REQ");
         exit(1);
     }
@@ -248,20 +251,6 @@ main(int argc, char *argv[])
     if ((retval = krb5_auth_con_setaddrs(context, auth_context,
                                          &addr, NULL))) {
         com_err(progname, retval, "while setting local addr\n");
-        exit(1);
-    }
-
-    /* THIS IS UGLY */
-    if ((retval = krb5_gen_portaddr(context, &addr,
-                                    (krb5_pointer) &c_sock.sin_port,
-                                    &portlocal_addr))) {
-        com_err(progname, retval, "while generating port address");
-        exit(1);
-    }
-
-    if ((retval = krb5_gen_replay_name(context,portlocal_addr,
-                                       "_sim_clt",&cp))) {
-        com_err(progname, retval, "while generating replay cache name");
         exit(1);
     }
 
