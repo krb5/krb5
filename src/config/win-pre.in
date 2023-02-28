@@ -131,7 +131,7 @@ ENTRYPOINT=_DllMainCRTStartup
 ENTRYPOINT=_DllMainCRTStartup@12
 !endif
 CCLINKOPTION=
-DEBUGOPT=/Zi
+DEBUGOPT=/guard:cf /Zi
 
 #if the compiler is vstudio 8, generate manifest
 !if exists("$(VCINSTALLDIR)\..\..\MICROSOFT VISUAL STUDIO 8")
