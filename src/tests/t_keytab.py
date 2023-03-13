@@ -41,6 +41,19 @@ realm.kinit(realm.user_princ, flags=['-i'],
             expected_msg='keytab specified, forcing -k')
 realm.klist(realm.user_princ)
 
+# Test default principal for -k.  This operation requires
+# canonicalization against the keytab in krb5_get_init_creds_keytab()
+# as the krb5_sname_to_principal() result won't have a realm.  Try
+# with and without without fallback processing since the code paths
+# are different.
+mark('default principal for -k')
+realm.run([kinit, '-k'])
+realm.klist(realm.host_princ)
+no_canon_conf = {'libdefaults': {'dns_canonicalize_hostname': 'false'}}
+no_canon = realm.special_env('no_canon', False, krb5_conf=no_canon_conf)
+realm.run([kinit, '-k'], env=no_canon)
+realm.klist(realm.host_princ)
+
 # Test extracting keys with multiple key versions present.
 mark('multi-kvno extract')
 os.remove(realm.keytab)

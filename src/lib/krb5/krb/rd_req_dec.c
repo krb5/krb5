@@ -451,10 +451,8 @@ decrypt_ticket(krb5_context context, const krb5_ap_req *req,
     struct canonprinc iter = { server, .no_hostrealm = TRUE };
     krb5_const_principal canonprinc;
 
-    /* Don't try to canonicalize if we're going to ignore the hostname, or if
-     * server is null or has a wildcard hostname. */
-    if (context->ignore_acceptor_hostname || server == NULL ||
-        (server->length == 2 && server->data[1].length == 0))
+    /* Don't try to canonicalize if we're going to ignore hostnames. */
+    if (k5_sname_wildcard_host(context, server))
         return decrypt_try_server(context, req, server, keytab, keyblock_out);
 
     /* Try each canonicalization candidate for server.  If they all fail,

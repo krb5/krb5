@@ -255,7 +255,7 @@ typedef krb5_error_code
 /* vtable declaration */
 typedef struct krb5_audit_vtable_st {
     /* Mandatory: name of module. */
-    char                   *name;
+    const char             *name;
     krb5_audit_open_fn      open;
     krb5_audit_close_fn     close;
     krb5_audit_kdc_start_fn kdc_start;

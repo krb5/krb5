@@ -223,6 +223,8 @@ Rarely used public interfaces
    krb5_init_creds_step.rst
    krb5_init_keyblock.rst
    krb5_is_referral_realm.rst
+   krb5_kdc_sign_ticket.rst
+   krb5_kdc_verify_ticket.rst
    krb5_kt_add_entry.rst
    krb5_kt_end_seq_get.rst
    krb5_kt_get_entry.rst
@@ -232,6 +234,7 @@ Rarely used public interfaces
    krb5_kt_remove_entry.rst
    krb5_kt_start_seq_get.rst
    krb5_make_authdata_kdc_issued.rst
+   krb5_marshal_credentials.rst
    krb5_merge_authdata.rst
    krb5_mk_1cred.rst
    krb5_mk_error.rst
@@ -285,6 +288,7 @@ Rarely used public interfaces
    krb5_tkt_creds_get_times.rst
    krb5_tkt_creds_init.rst
    krb5_tkt_creds_step.rst
+   krb5_unmarshal_credentials.rst
    krb5_verify_init_creds.rst
    krb5_verify_init_creds_opt_init.rst
    krb5_verify_init_creds_opt_set_ap_req_nofail.rst

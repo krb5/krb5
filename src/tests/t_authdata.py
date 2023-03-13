@@ -6,12 +6,12 @@ greet_path = os.path.join(buildtop, 'plugins', 'authdata', 'greet_server',
 conf = {'plugins': {'kdcauthdata': {'module': 'greet:' + greet_path}}}
 realm = K5Realm(krb5_conf=conf)
 
-# With no requested authdata, we expect to see SIGNTICKET (512) in an
+# With no requested authdata, we expect to see PAC (128) in an
 # if-relevant container and the greet authdata in a kdc-issued
 # container.
 mark('baseline authdata')
 out = realm.run(['./adata', realm.host_princ])
-if '?512: ' not in out or '^-42: Hello' not in out:
+if '?128: [6, 7, 10, 16]' not in out or '^-42: Hello' not in out:
     fail('expected authdata not seen for basic request')
 
 # Requested authdata is copied into the ticket, with KDC-only types
@@ -29,54 +29,44 @@ mark('AD-MANDATORY-FOR-KDC')
 realm.run(['./adata', realm.host_princ, '!-1', 'mandatoryforkdc'],
           expected_code=1, expected_msg='KDC policy rejects request')
 
-# The no_auth_data_required server flag should suppress SIGNTICKET,
-# but not module or request authdata.
+# The no_auth_data_required server flag should suppress the PAC, but
+# not module or request authdata.
 mark('no_auth_data_required server flag')
 realm.run([kadminl, 'ank', '-randkey', '+no_auth_data_required', 'noauth'])
 realm.extract_keytab('noauth', realm.keytab)
 out = realm.run(['./adata', 'noauth', '-2', 'test'])
 if '^-42: Hello' not in out or ' -2: test' not in out:
     fail('expected authdata not seen for no_auth_data_required request')
-if '512: ' in out:
-    fail('SIGNTICKET authdata seen for no_auth_data_required request')
+if '128: ' in out:
+    fail('PAC authdata seen for no_auth_data_required request')
 
-# Cross-realm TGT requests should also suppress SIGNTICKET, but not
-# module or request authdata.
+# Cross-realm TGT requests should not suppress PAC or request
+# authdata.
 mark('cross-realm')
 realm.addprinc('krbtgt/XREALM')
 realm.extract_keytab('krbtgt/XREALM', realm.keytab)
 out = realm.run(['./adata', 'krbtgt/XREALM', '-3', 'test'])
-if '^-42: Hello' not in out or ' -3: test' not in out:
+if '128:' not in out or  '^-42: Hello' not in out or ' -3: test' not in out:
     fail('expected authdata not seen for cross-realm TGT request')
-if '512: ' in out:
-    fail('SIGNTICKET authdata seen in cross-realm TGT')
 
 realm.stop()
 
-if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
+if not pkinit_enabled:
     skipped('anonymous ticket authdata tests', 'PKINIT not built')
 else:
     # Set up a realm with PKINIT support and get anonymous tickets.
-    certs = os.path.join(srctop, 'tests', 'dejagnu', 'pkinit-certs')
-    ca_pem = os.path.join(certs, 'ca.pem')
-    kdc_pem = os.path.join(certs, 'kdc.pem')
-    privkey_pem = os.path.join(certs, 'privkey.pem')
-    pkinit_conf = {'realms': {'$realm': {
-                'pkinit_anchors': 'FILE:%s' % ca_pem,
-                'pkinit_identity': 'FILE:%s,%s' % (kdc_pem, privkey_pem)}}}
-    conf.update(pkinit_conf)
-    realm = K5Realm(krb5_conf=conf, get_creds=False)
+    realm = K5Realm(krb5_conf=conf, get_creds=False, pkinit=True)
     realm.addprinc('WELLKNOWN/ANONYMOUS')
     realm.kinit('@%s' % realm.realm, flags=['-n'])
 
-    # SIGNTICKET and module authdata should be suppressed for
-    # anonymous tickets, but not request authdata.
+    # PAC and module authdata should be suppressed for anonymous
+    # tickets, but not request authdata.
     mark('anonymous')
     out = realm.run(['./adata', realm.host_princ, '-4', 'test'])
     if ' -4: test' not in out:
         fail('expected authdata not seen for anonymous request')
-    if '512: ' in out or '-42: ' in out:
-        fail('SIGNTICKET or greet authdata seen for anonymous request')
+    if '128: ' in out or '-42: ' in out:
+        fail('PAC or greet authdata seen for anonymous request')
 
 realm.stop()
 
@@ -191,7 +181,8 @@ realm.stop()
 realm2.stop()
 
 # Load the test KDB module to allow successful S4U2Proxy
-# auth-indicator requests.
+# auth-indicator requests and to detect whether replaced_reply_key is
+# set.
 testprincs = {'krbtgt/KRBTEST.COM': {'keys': 'aes128-cts'},
               'krbtgt/FOREIGN': {'keys': 'aes128-cts'},
               'user': {'keys': 'aes128-cts', 'flags': '+preauth'},
@@ -207,7 +198,8 @@ kdcconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'princs': testprincs,
                                   'delegation': {'service/1': 'service/2'}}}}
-realm = K5Realm(krb5_conf=krb5conf, kdc_conf=kdcconf, create_kdb=False)
+realm = K5Realm(krb5_conf=krb5conf, kdc_conf=kdcconf, create_kdb=False,
+                pkinit=True)
 usercache = 'FILE:' + os.path.join(realm.testdir, 'usercache')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.extract_keytab('krbtgt/FOREIGN', realm.keytab)
@@ -217,6 +209,17 @@ realm.extract_keytab('service/1', realm.keytab)
 realm.extract_keytab('service/2', realm.keytab)
 realm.extract_keytab('noauthdata', realm.keytab)
 realm.start_kdc()
+
+if not pkinit_enabled:
+    skipped('replaced_reply_key test', 'PKINIT not built')
+else:
+    # Check that replaced_reply_key is set in issue_pac() when PKINIT
+    # is used.  The test KDB module will indicate this by including a
+    # fake PAC_CREDENTIAL_INFO(2) buffer in the PAC.
+    mark('PKINIT (replaced_reply_key set)')
+    realm.pkinit(realm.user_princ)
+    realm.run(['./adata', realm.krbtgt_princ],
+              expected_msg='?128: [1, 2, 6, 7, 10]')
 
 # S4U2Self (should have no indicators since client did not authenticate)
 mark('S4U2Self (no auth indicators expected)')
@@ -239,6 +242,9 @@ realm.run(['./s4u2proxy', usercache, 'service/2'])
 out = realm.run(['./adata', '-p', realm.user_princ, 'service/2'])
 if '+97: [indcl]' not in out or '[inds1]' in out:
     fail('correct auth-indicator not seen for S4U2Proxy req')
+# Make sure a PAC with an S4U_DELEGATION_INFO(11) buffer is included.
+if '?128: [1, 6, 7, 10, 11, 16]' not in out:
+    fail('PAC with delegation info not seen for S4U2Proxy req')
 
 # Get another S4U2Proxy ticket including request-authdata.
 realm.run(['./s4u2proxy', usercache, 'service/2', '-2', 'proxy_ad'])
@@ -264,40 +270,20 @@ realm.kinit(realm.user_princ, None,
             ['-k', '-X', 'indicators=strong dbincr1', '-S', 'rservice'],
             expected_code=1)
 
-# Test that KDB module authdata is included in an AS request, by
-# default or with an explicit PAC request.
-mark('AS-REQ KDB module authdata')
-realm.kinit(realm.user_princ, None, ['-k'])
-realm.run(['./adata', realm.krbtgt_princ],
-          expected_msg='-456: db-authdata-test')
-realm.kinit(realm.user_princ, None, ['-k', '--request-pac'])
-realm.run(['./adata', realm.krbtgt_princ],
-          expected_msg='-456: db-authdata-test')
-
-# Test that KDB module authdata is suppressed in an AS request by a
-# negative PAC request.
-mark('AS-REQ KDB module authdata client supression')
+# Test that the PAC is suppressed in an AS request by a negative PAC
+# request.
+mark('AS-REQ PAC client supression')
 realm.kinit(realm.user_princ, None, ['-k', '--no-request-pac'])
 out = realm.run(['./adata', realm.krbtgt_princ])
-if '-456: db-authdata-test' in out:
-    fail('DB authdata not suppressed by --no-request-pac')
-
-# Test that KDB authdata is included in a TGS request by default.
-mark('TGS-REQ KDB authdata')
-realm.run(['./adata', 'service/1'], expected_msg='-456: db-authdata-test')
-
-# Test that KDB authdata is suppressed in a TGS request by the
-# +no_auth_data_required flag.
-mark('TGS-REQ KDB authdata service suppression')
-out = realm.run(['./adata', 'noauthdata'])
-if '-456: db-authdata-test' in out:
-    fail('DB authdata not suppressed by +no_auth_data_required')
+if '128:' in out:
+    fail('PAC not suppressed by --no-request-pac')
 
 mark('S4U2Proxy with a foreign client')
 
 a_princs = {'krbtgt/A': {'keys': 'aes128-cts'},
             'krbtgt/B': {'keys': 'aes128-cts'},
             'impersonator': {'keys': 'aes128-cts'},
+            'impersonator2': {'keys': 'aes128-cts'},
             'resource': {'keys': 'aes128-cts'}}
 a_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
@@ -312,9 +298,9 @@ b_princs = {'krbtgt/B': {'keys': 'aes128-cts'},
 b_kconf = {'realms': {'$realm': {'database_module': 'test'}},
            'dbmodules': {'test': {'db_library': 'test',
                                   'princs': b_princs,
-                                  'rbcd': {'rb@B': 'impersonator@A'},
+                                  'rbcd': {'rb@B': 'impersonator2@A'},
                                   'alias': {'service/rb.b': 'rb',
-                                            'impersonator@A': '@A'}}}}
+                                            'impersonator2@A': '@A'}}}}
 
 ra, rb = cross_realms(2, xtgts=(),
                           args=({'realm': 'A', 'kdc_conf': a_kconf},
@@ -325,6 +311,7 @@ ra.start_kdc()
 rb.start_kdc()
 
 ra.extract_keytab('impersonator@A', ra.keytab)
+ra.extract_keytab('impersonator2@A', ra.keytab)
 rb.extract_keytab('user@B', rb.keytab)
 
 usercache = 'FILE:' + os.path.join(rb.testdir, 'usercache')
@@ -336,11 +323,11 @@ ra.run(['./s4u2proxy', usercache, 'resource@A'])
 
 mark('Cross realm S4U authdata tests')
 
-ra.kinit('impersonator@A', None, ['-k', '-t', ra.keytab])
-ra.run(['./s4u2self', rb.user_princ, 'impersonator@A', usercache, '-2',
+ra.kinit('impersonator2@A', None, ['-f', '-k', '-t', ra.keytab])
+ra.run(['./s4u2self', rb.user_princ, 'impersonator2@A', usercache, '-2',
         'cross_s4u_self_ad'])
 out = ra.run(['./adata', '-c', usercache, '-p', rb.user_princ,
-              'impersonator@A', '-2', 'cross_s4u_self_ad'])
+              'impersonator2@A', '-2', 'cross_s4u_self_ad'])
 if out.count(' -2: cross_s4u_self_ad') != 1:
     fail('expected one cross_s4u_self_ad, got: %s' % count)
 
@@ -356,10 +343,5 @@ if out.count(' -2: cross_s4u_proxy_ad') != 1:
 
 ra.stop()
 rb.stop()
-
-# Additional KDB module authdata behavior we don't currently test:
-# * KDB module authdata is suppressed in TGS requests if the TGT
-#   contains no authdata and the request is not cross-realm or S4U.
-# * KDB module authdata is suppressed for anonymous tickets.
 
 success('Authorization data tests')

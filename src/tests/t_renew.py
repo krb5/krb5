@@ -5,6 +5,10 @@ import re
 conf = {'realms': {'$realm': {'max_life': '20h', 'max_renewable_life': '20h'}}}
 realm = K5Realm(create_host=False, get_creds=False, kdc_conf=conf)
 
+# We will be scraping timestamps from klist to compute lifetimes, so
+# use a time zone with no daylight savings time.
+realm.env['TZ'] = 'UTC'
+
 def test(testname, life, rlife, exp_life, exp_rlife, env=None):
     global realm
     flags = ['-l', life]

@@ -268,38 +268,36 @@ class DoxyTypes(object):
 
     def _process_paragraph_content(self, node):
 
+        def add_text(l, s):
+            # Add a space if it wouldn't be at the start or end of a line.
+            if l and not l[-1].endswith('\n') and not s.startswith('\n'):
+                l.append(' ')
+            l.append(s)
+
         result = list()
         content = node.xpath(".//text()")
         for e in content:
-            if node is e.getparent():
-                result.append(e.strip())
+            if e.is_tail or node is e.getparent():
+                add_text(result, e.strip())
             elif e.getparent().tag == 'ref':
-                if e.is_tail:
-                    result.append(e.strip())
-                elif e.strip().find('(') > 0:
-                    result.append(':c:func:`%s`' % e.strip())
+                if e.strip().find('(') > 0:
+                    add_text(result, ':c:func:`%s`' % e.strip())
                 elif e.isupper():
-                    result.append(':c:data:`%s`' % e.strip())
+                    add_text(result, ':c:data:`%s`' % e.strip())
                 else:
-                    result.append(':c:type:`%s`' % e.strip())
+                    add_text(result, ':c:type:`%s`' % e.strip())
             elif e.getparent().tag == 'emphasis':
-                if e.is_tail:
-                    result.append(e.strip())
-                else:
-                    result.append('*%s*' % e.strip())
+                add_text(result, '*%s*' % e.strip())
             elif e.getparent().tag == 'computeroutput':
-                if e.is_tail:
-                    result.append(e.strip())
-                else:
-                    result.append('*%s*' % e.strip())
-            elif  e.getparent().tag == 'defname':
-                result.append('%s, ' % e.strip())
+                add_text(result, '*%s*' % e.strip())
+            elif e.getparent().tag == 'defname':
+                add_text(result, '%s, ' % e.strip())
             elif e.getparent().tag == 'verbatim':
-                result.append('\n::\n\n')
-                result.append(textwrap.indent(e, '    ', lambda x: True))
-                result.append('\n')
+                add_text(result, '\n::\n\n')
+                add_text(result, textwrap.indent(e, '    ', lambda x: True))
+                add_text(result, '\n')
 
-        result = ' '.join(result)
+        result = ''.join(result)
 
         return result
 

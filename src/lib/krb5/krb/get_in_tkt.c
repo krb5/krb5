@@ -506,12 +506,7 @@ build_in_tkt_name(krb5_context context,
         if (ret)
             return ret;
     }
-    /*
-     * Windows Server 2008 R2 RODC insists on TGS principal names having the
-     * right name type.
-     */
-    if (server->length == 2 && data_eq_string(server->data[0], KRB5_TGS_NAME))
-        server->type = KRB5_NT_SRV_INST;
+
     *server_out = server;
     return 0;
 }
@@ -1188,7 +1183,6 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     krb5_data config;
     char *encoded;
     krb5_error_code code;
-    int i;
     krb5_ccache in_ccache = k5_gic_opt_get_in_ccache(ctx->opt);
 
     k5_json_release(ctx->cc_config_in);
@@ -1203,9 +1197,9 @@ read_cc_config_in_data(krb5_context context, krb5_init_creds_context ctx)
     if (code)
         return code;
 
-    i = asprintf(&encoded, "%.*s", (int)config.length, config.data);
+    encoded = k5memdup0(config.data, config.length, &code);
     krb5_free_data_contents(context, &config);
-    if (i < 0)
+    if (encoded == NULL)
         return ENOMEM;
 
     code = k5_json_decode(encoded, &val);
@@ -1609,6 +1603,61 @@ warn_des3(krb5_context context, krb5_init_creds_context ctx,
     (*ctx->prompter)(context, ctx->prompter_data, NULL, banner, 0, NULL);
 }
 
+/*
+ * If ctx specifies an output ccache, create or refresh it (atomically, if
+ * possible) with the obtained credential and any appropriate ccache
+ * configuration.
+ */
+static krb5_error_code
+write_out_ccache(krb5_context context, krb5_init_creds_context ctx,
+                 krb5_boolean fast_avail)
+{
+    krb5_error_code ret;
+    krb5_ccache out_ccache = k5_gic_opt_get_out_ccache(ctx->opt);
+    krb5_ccache mcc = NULL;
+    krb5_data yes = string2data("yes");
+
+    if (out_ccache == NULL)
+        return 0;
+
+    ret = krb5_cc_new_unique(context, "MEMORY", NULL, &mcc);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_cc_initialize(context, mcc, ctx->cred.client);
+    if (ret)
+        goto cleanup;
+
+    if (fast_avail) {
+        ret = krb5_cc_set_config(context, mcc, ctx->cred.server,
+                                 KRB5_CC_CONF_FAST_AVAIL, &yes);
+        if (ret)
+            goto cleanup;
+    }
+
+    ret = save_selected_preauth_type(context, mcc, ctx);
+    if (ret)
+        goto cleanup;
+
+    ret = save_cc_config_out_data(context, mcc, ctx);
+    if (ret)
+        goto cleanup;
+
+    ret = k5_cc_store_primary_cred(context, mcc, &ctx->cred);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_cc_move(context, mcc, out_ccache);
+    if (ret)
+        goto cleanup;
+    mcc = NULL;
+
+cleanup:
+    if (mcc != NULL)
+        krb5_cc_destroy(context, mcc);
+    return ret;
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1623,7 +1672,6 @@ init_creds_step_reply(krb5_context context,
     krb5_keyblock *strengthen_key = NULL;
     krb5_keyblock encrypting_key;
     krb5_boolean fast_avail;
-    krb5_ccache out_ccache = k5_gic_opt_get_out_ccache(ctx->opt);
 
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
@@ -1791,30 +1839,9 @@ init_creds_step_reply(krb5_context context,
     code = stash_as_reply(context, ctx->reply, &ctx->cred, NULL);
     if (code != 0)
         goto cleanup;
-    if (out_ccache != NULL) {
-        krb5_data config_data;
-        code = krb5_cc_initialize(context, out_ccache, ctx->cred.client);
-        if (code != 0)
-            goto cc_cleanup;
-        code = krb5_cc_store_cred(context, out_ccache, &ctx->cred);
-        if (code != 0)
-            goto cc_cleanup;
-        if (fast_avail) {
-            config_data.data = "yes";
-            config_data.length = strlen(config_data.data);
-            code = krb5_cc_set_config(context, out_ccache, ctx->cred.server,
-                                      KRB5_CC_CONF_FAST_AVAIL, &config_data);
-            if (code != 0)
-                goto cc_cleanup;
-        }
-        code = save_selected_preauth_type(context, out_ccache, ctx);
-        if (code != 0)
-            goto cc_cleanup;
-        code = save_cc_config_out_data(context, out_ccache, ctx);
-    cc_cleanup:
-        if (code != 0)
-            k5_prependmsg(context, code, _("Failed to store credentials"));
-    }
+    code = write_out_ccache(context, ctx, fast_avail);
+    if (code)
+        k5_prependmsg(context, code, _("Failed to store credentials"));
 
     k5_preauth_request_context_fini(context, ctx);
 

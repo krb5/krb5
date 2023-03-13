@@ -538,34 +538,6 @@ ktest_equal_ad_kdcissued(krb5_ad_kdcissued *ref, krb5_ad_kdcissued *var)
 }
 
 int
-ktest_equal_ad_signedpath_data(krb5_ad_signedpath_data *ref,
-                               krb5_ad_signedpath_data *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && ptr_equal(client,ktest_equal_principal_data);
-    p = p && scalar_equal(authtime);
-    p = p && ptr_equal(delegated,ktest_equal_sequence_of_principal);
-    p = p && ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
-    p = p && ptr_equal(authorization_data,ktest_equal_authorization_data);
-    return p;
-}
-
-int
-ktest_equal_ad_signedpath(krb5_ad_signedpath *ref, krb5_ad_signedpath *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && scalar_equal(enctype);
-    p = p && struct_equal(checksum,ktest_equal_checksum);
-    p = p && ptr_equal(delegated,ktest_equal_sequence_of_principal);
-    p = p && ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
-    return p;
-}
-
-int
 ktest_equal_iakerb_header(krb5_iakerb_header *ref, krb5_iakerb_header *var)
 {
     int p = TRUE;
@@ -877,18 +849,6 @@ ktest_equal_pk_authenticator(krb5_pk_authenticator *ref,
 }
 
 static int
-ktest_equal_subject_pk_info(krb5_subject_pk_info *ref,
-                            krb5_subject_pk_info *var)
-{
-    int p = TRUE;
-    if (ref == var) return TRUE;
-    else if (ref == NULL || var == NULL) return FALSE;
-    p = p && struct_equal(algorithm, ktest_equal_algorithm_identifier);
-    p = p && equal_str(subjectPublicKey);
-    return p;
-}
-
-static int
 ktest_equal_external_principal_identifier(
     krb5_external_principal_identifier *ref,
     krb5_external_principal_identifier *var)
@@ -962,7 +922,7 @@ ktest_equal_auth_pack(krb5_auth_pack *ref, krb5_auth_pack *var)
     if (ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && struct_equal(pkAuthenticator, ktest_equal_pk_authenticator);
-    p = p && ptr_equal(clientPublicValue, ktest_equal_subject_pk_info);
+    p = p && equal_str(clientPublicValue);
     p = p && ptr_equal(supportedCMSTypes,
                        ktest_equal_sequence_of_algorithm_identifier);
     p = p && equal_str(clientDHNonce);

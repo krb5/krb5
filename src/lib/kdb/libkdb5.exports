@@ -16,13 +16,12 @@ krb5_db_destroy
 krb5_db_fetch_mkey
 krb5_db_fetch_mkey_list
 krb5_db_fini
-krb5_db_free_authdata_info
 krb5_db_free_principal
 krb5_db_get_age
-krb5_db_get_authdata_info
 krb5_db_get_key_data_kvno
 krb5_db_get_context
 krb5_db_get_principal
+krb5_db_issue_pac
 krb5_db_iterate
 krb5_db_lock
 krb5_db_mkey_list_alias
@@ -31,7 +30,6 @@ krb5_db_refresh_config
 krb5_db_rename_principal
 krb5_db_set_context
 krb5_db_setup_mkey_name
-krb5_db_sign_authdata
 krb5_db_unlock
 krb5_db_store_master_key
 krb5_db_store_master_key_list

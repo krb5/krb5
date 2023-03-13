@@ -25,6 +25,9 @@
  */
 
 #include "crypto_int.h"
+
+#ifdef K5_OPENSSL_DES_KEY_PARITY
+
 #include <openssl/des.h>
 
 void
@@ -33,10 +36,13 @@ k5_des_fixup_key_parity(unsigned char *keybits)
     DES_set_odd_parity((DES_cblock *)keybits);
 }
 
+<<<<<<< HEAD
 #if 0
 krb5_boolean
 k5_des_is_weak_key(unsigned char *keybits)
 {
     return DES_is_weak_key((DES_cblock *)keybits);
 }
+=======
+>>>>>>> krb5-1.20.1-final
 #endif

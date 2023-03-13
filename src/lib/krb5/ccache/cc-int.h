@@ -51,6 +51,10 @@ krb5int_cc_initialize(void);
 void
 krb5int_cc_finalize(void);
 
+krb5_error_code
+k5_nonatomic_replace(krb5_context context, krb5_ccache ccache,
+                     krb5_principal princ, krb5_creds **creds);
+
 /*
  * Cursor for iterating over ccache types
  */
@@ -210,8 +214,8 @@ struct _krb5_cc_ops {
                                                    krb5_ccache *);
     krb5_error_code (KRB5_CALLCONV *ptcursor_free)(krb5_context,
                                                    krb5_cc_ptcursor *);
-    krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache,
-                                          krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *replace)(krb5_context, krb5_ccache,
+                                             krb5_principal, krb5_creds **);
     krb5_error_code (KRB5_CALLCONV *wasdefault)(krb5_context, krb5_ccache,
                                                 krb5_timestamp *);
     krb5_error_code (KRB5_CALLCONV *lock)(krb5_context, krb5_ccache);

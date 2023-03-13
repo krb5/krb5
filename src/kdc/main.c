@@ -62,7 +62,6 @@ static int nofork = 0;
 static int workers = 0;
 static int time_offset = 0;
 static const char *pid_file = NULL;
-static int rkey_init_done = 0;
 static volatile int signal_received = 0;
 static volatile int sighup_received = 0;
 
@@ -334,6 +333,11 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     free(svalue);
     svalue = NULL;
 
+    hierarchy[2] = KRB5_CONF_DISABLE_PAC;
+    if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE,
+                               &rdp->realm_disable_pac))
+        rdp->realm_disable_pac = FALSE;
+
     /*
      * We've got our parameters, now go and setup our realm context.
      */
@@ -409,22 +413,6 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         goto whoops;
     }
 
-    if (!rkey_init_done) {
-        krb5_data seed;
-        /*
-         * If all that worked, then initialize the random key
-         * generators.
-         */
-
-        seed.length = rdp->realm_mkey.length;
-        seed.data = (char *)rdp->realm_mkey.contents;
-
-        if ((kret = krb5_c_random_add_entropy(rdp->realm_context,
-                                              KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
-            goto whoops;
-
-        rkey_init_done = 1;
-    }
 whoops:
     /*
      * If we choked, then clean up any dirt we may have dropped on the floor.
@@ -436,28 +424,16 @@ whoops:
     return(kret);
 }
 
-static krb5_sigtype
+static void
 on_monitor_signal(int signo)
 {
     signal_received = signo;
-
-#ifdef POSIX_SIGTYPE
-    return;
-#else
-    return(0);
-#endif
 }
 
-static krb5_sigtype
+static void
 on_monitor_sighup(int signo)
 {
     sighup_received = 1;
-
-#ifdef POSIX_SIGTYPE
-    return;
-#else
-    return(0);
-#endif
 }
 
 /*
@@ -605,7 +581,7 @@ usage(char *name)
 {
     fprintf(stderr,
             _("usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
-              "\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
+              "\t\t[-T time_offset] [-m] [-k masterenctype]\n"
               "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
               "\t\t[-n] [-w numworkers] [/]\n\n"
               "where,\n"
@@ -697,7 +673,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
      * twice if worker processes are used, so we must initialize optind.
      */
     optind = 1;
-    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:T:X3")) != -1) {
+    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:P:p:nw:4:T:X3")) != -1) {
         switch(c) {
         case 'x':
             db_args_size++;
@@ -1065,7 +1041,6 @@ int main(int argc, char **argv)
     kau_kdc_start(kcontext, TRUE);
 
     verto_run(ctx);
-    loop_free(ctx);
     kau_kdc_stop(kcontext, TRUE);
     krb5_klog_syslog(LOG_INFO, _("shutting down"));
     unload_preauth_plugins(kcontext);
@@ -1079,6 +1054,7 @@ int main(int argc, char **argv)
 #ifndef NOCACHE
     kdc_free_lookaside(kcontext);
 #endif
+    loop_free(ctx);
     krb5_free_context(kcontext);
     return errout;
 }

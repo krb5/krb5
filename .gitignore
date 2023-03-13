@@ -253,25 +253,10 @@ local.properties
 
 /src/kadmin/server/kadmind
 
-/src/kadmin/testing/admin_*
-/src/kadmin/testing/init-*
-/src/kadmin/testing/kadmin_*
-/src/kadmin/testing/krb5-test-root/
-
-/src/kadmin/testing/scripts/compare_dump.pl
-/src/kadmin/testing/scripts/env-setup.sh
-/src/kadmin/testing/scripts/env-setup.stamp
-/src/kadmin/testing/scripts/make-host-keytab.pl
-/src/kadmin/testing/scripts/qualname.pl
-/src/kadmin/testing/scripts/simple_dump.pl
-/src/kadmin/testing/scripts/verify_xrunner_report.pl
-
-/src/kadmin/testing/util/kadm5_clnt_tcl
-/src/kadmin/testing/util/kadm5_srv_tcl
-
 /src/kdc/kdc5_err.[ch]
 /src/kdc/krb5kdc
 /src/kdc/rtest
+/src/kdc/t_ndr
 /src/kdc/t_replay
 
 /src/lib/k5sprt32.def
@@ -308,16 +293,11 @@ local.properties
 /src/lib/crypto/crypto_tests/t_nfold
 /src/lib/crypto/crypto_tests/t_prf
 /src/lib/crypto/crypto_tests/t_prf.output
-/src/lib/crypto/crypto_tests/t_prng
-/src/lib/crypto/crypto_tests/t_prng.output
 /src/lib/crypto/crypto_tests/t_sha2
 /src/lib/crypto/crypto_tests/t_short
 /src/lib/crypto/crypto_tests/t_str2key
 /src/lib/crypto/crypto_tests/vk.txt
 /src/lib/crypto/crypto_tests/vt.txt
-
-/src/lib/crypto/krb/t_fortuna
-/src/lib/crypto/krb/t_fortuna.output
 
 /src/lib/gssapi/merged-gssapi-header.h
 
@@ -331,10 +311,6 @@ local.properties
 
 /src/lib/kadm5/chpass_util_strings.[ch]
 /src/lib/kadm5/kadm_err.[ch]
-
-/src/lib/kadm5/unit-test/*.log
-/src/lib/kadm5/unit-test/*.sum
-/src/lib/kadm5/unit-test/*-test
 
 /src/lib/kdb/adb_err.[ch]
 
@@ -442,6 +418,7 @@ local.properties
 /src/tests/s2p
 /src/tests/s4u2proxy
 /src/tests/s4u2self
+/src/tests/t_inetd
 /src/tests/unlockiter
 
 /src/tests/asn.1/expected_encode.out
@@ -455,19 +432,12 @@ local.properties
 
 /src/tests/create/kdb5_mkdums
 
-/src/tests/dejagnu/dbg.log
-/src/tests/dejagnu/krb.log
-/src/tests/dejagnu/krb.sum
-/src/tests/dejagnu/runenv.vals
-/src/tests/dejagnu/site.exp
-/src/tests/dejagnu/t_inetd
-/src/tests/dejagnu/tmpdir/
-
 /src/tests/gss-threads/gss-client
 /src/tests/gss-threads/gss-server
 
 /src/tests/gssapi/ccinit
 /src/tests/gssapi/ccrefresh
+/src/tests/gssapi/reload
 /src/tests/gssapi/t_accname
 /src/tests/gssapi/t_add_cred
 /src/tests/gssapi/t_bindings
@@ -496,6 +466,7 @@ local.properties
 /src/tests/gssapi/t_saslname
 /src/tests/gssapi/t_spnego
 /src/tests/gssapi/t_srcattrs
+/src/tests/gssapi/t_store_cred
 /src/tests/gssapi/t_inq_ctx
 
 /src/tests/hammer/kdc5_hammer
@@ -544,7 +515,6 @@ local.properties
 /src/util/profile/modtest.conf
 /src/util/profile/prof_err.[ch]
 /src/util/profile/profile.h
-/src/util/profile/profile_tcl
 /src/util/profile/test?.ini
 /src/util/profile/test_include_dir/
 /src/util/profile/test_load

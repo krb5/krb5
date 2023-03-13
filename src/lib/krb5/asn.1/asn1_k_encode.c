@@ -334,11 +334,6 @@ decode_lr_type(const taginfo *t, const uint8_t *asn1, size_t len, void *p)
         return ret;
     if (val > INT32_MAX || val < INT32_MIN)
         return ASN1_OVERFLOW;
-#ifdef KRB5_GENEROUS_LR_TYPE
-    /* If type is in the 128-255 range, treat it as a negative 8-bit value. */
-    if (val >= 128 && val <= 255)
-        val -= 256;
-#endif
     *(int32_t *)p = val;
     return 0;
 }
@@ -1096,33 +1091,6 @@ DEFPTRTYPE(ptr_seqof_princ_plus_realm, seqof_princ_plus_realm);
 DEFOPTIONALEMPTYTYPE(opt_ptr_seqof_princ_plus_realm,
                      ptr_seqof_princ_plus_realm);
 
-DEFFIELD(spdata_0, krb5_ad_signedpath_data, client, 0, princ_plus_realm);
-DEFFIELD(spdata_1, krb5_ad_signedpath_data, authtime, 1, kerberos_time);
-DEFFIELD(spdata_2, krb5_ad_signedpath_data, delegated, 2,
-         opt_ptr_seqof_princ_plus_realm);
-DEFFIELD(spdata_3, krb5_ad_signedpath_data, method_data, 3,
-         opt_ptr_seqof_pa_data);
-DEFFIELD(spdata_4, krb5_ad_signedpath_data, authorization_data, 4,
-         opt_auth_data_ptr);
-static const struct atype_info *ad_signedpath_data_fields[] = {
-    &k5_atype_spdata_0, &k5_atype_spdata_1, &k5_atype_spdata_2,
-    &k5_atype_spdata_3, &k5_atype_spdata_4
-};
-DEFSEQTYPE(ad_signedpath_data, krb5_ad_signedpath_data,
-           ad_signedpath_data_fields);
-
-DEFFIELD(signedpath_0, krb5_ad_signedpath, enctype, 0, int32);
-DEFFIELD(signedpath_1, krb5_ad_signedpath, checksum, 1, checksum);
-DEFFIELD(signedpath_2, krb5_ad_signedpath, delegated, 2,
-         opt_ptr_seqof_princ_plus_realm);
-DEFFIELD(signedpath_3, krb5_ad_signedpath, method_data, 3,
-         opt_ptr_seqof_pa_data);
-static const struct atype_info *ad_signedpath_fields[] = {
-    &k5_atype_signedpath_0, &k5_atype_signedpath_1, &k5_atype_signedpath_2,
-    &k5_atype_signedpath_3
-};
-DEFSEQTYPE(ad_signedpath, krb5_ad_signedpath, ad_signedpath_fields);
-
 /* First context tag is 1, not 0. */
 DEFFIELD(iakerb_header_1, krb5_iakerb_header, target_realm, 1, ostring_data);
 DEFFIELD(iakerb_header_2, krb5_iakerb_header, cookie, 2, opt_ostring_data_ptr);
@@ -1328,9 +1296,6 @@ MAKE_DECODER(decode_krb5_fast_response, fast_response);
 
 MAKE_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
 MAKE_DECODER(decode_krb5_ad_kdcissued, ad_kdc_issued);
-MAKE_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
-MAKE_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
-MAKE_DECODER(decode_krb5_ad_signedpath, ad_signedpath);
 MAKE_ENCODER(encode_krb5_iakerb_header, iakerb_header);
 MAKE_DECODER(decode_krb5_iakerb_header, iakerb_header);
 MAKE_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
@@ -1451,19 +1416,8 @@ DEFCOUNTEDSTRINGTYPE(s_bitstring, char *, unsigned int,
                      ASN1_BITSTRING);
 DEFCOUNTEDTYPE(bitstring_data, krb5_data, data, length, s_bitstring);
 
-/* RFC 3280.  No context tags. */
-DEFOFFSETTYPE(spki_0, krb5_subject_pk_info, algorithm, algorithm_identifier);
-DEFOFFSETTYPE(spki_1, krb5_subject_pk_info, subjectPublicKey, bitstring_data);
-static const struct atype_info *subject_pk_info_fields[] = {
-    &k5_atype_spki_0, &k5_atype_spki_1
-};
-DEFSEQTYPE(subject_pk_info, krb5_subject_pk_info, subject_pk_info_fields);
-DEFPTRTYPE(subject_pk_info_ptr, subject_pk_info);
-DEFOPTIONALZEROTYPE(opt_subject_pk_info_ptr, subject_pk_info_ptr);
-
 DEFFIELD(auth_pack_0, krb5_auth_pack, pkAuthenticator, 0, pk_authenticator);
-DEFFIELD(auth_pack_1, krb5_auth_pack, clientPublicValue, 1,
-         opt_subject_pk_info_ptr);
+DEFFIELD(auth_pack_1, krb5_auth_pack, clientPublicValue, 1, opt_der_data);
 DEFFIELD(auth_pack_2, krb5_auth_pack, supportedCMSTypes, 2,
          opt_ptr_seqof_algorithm_identifier);
 DEFFIELD(auth_pack_3, krb5_auth_pack, clientDHNonce, 3, opt_ostring_data);

@@ -239,7 +239,7 @@ for realm in multidb_realms(kdc_conf=conf, create_user=False,
     replica2_kprop_port = str(realm.portbase + 9)
     kadmind_proponly = realm.start_server([kadmind, '-r', realm.realm,
                                            '-nofork', '-proponly',
-                                           '-W', '-p', kdb5_util,
+                                           '-p', kdb5_util,
                                            '-K', kprop, '-k',
                                            replica2_kprop_port,
                                            '-F', replica1_out_dump_path],

@@ -592,9 +592,8 @@ krb5_get_self_cred_from_kdc(krb5_context context,
         /* Only include a cert in the initial request to the client realm. */
         s4u_user.user_id.subject_cert = empty_data();
 
-        if (krb5_principal_compare(context,
-                                   in_creds->server,
-                                   (*out_creds)->server)) {
+        if (krb5_principal_compare_any_realm(context, in_creds->server,
+                                             (*out_creds)->server)) {
             /* Verify that the unprotected client name in the reply matches the
              * checksum-protected one from the client realm's KDC padata. */
             if (!krb5_principal_compare(context, (*out_creds)->client,
@@ -713,7 +712,6 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
         } else if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE) {
             goto cleanup;
         }
-        code = 0;
     }
 
     /* Note the authdata we asked for in the output creds. */

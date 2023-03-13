@@ -216,7 +216,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
         goto cleanup;
 
-    if ((retval = krb5_cc_store_cred(context, ccache, creds[0])))
+    if ((retval = k5_cc_store_primary_cred(context, ccache, creds[0])))
         goto cleanup;
 
     /* generate a delegated credential handle */
@@ -671,7 +671,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket = NULL;
     const gss_OID_desc *mech_used = NULL;
-    OM_uint32 major_status = GSS_S_FAILURE;
+    OM_uint32 major_status;
     OM_uint32 tmp_minor_status;
     krb5_error krb_error_data;
     krb5_data scratch;
@@ -683,7 +683,6 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
-    krb5_principal accprinc = NULL;
     krb5_ap_req *request = NULL;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
@@ -849,17 +848,9 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
-    if (!cred->default_identity) {
-        if ((code = kg_acceptor_princ(context, cred->name, &accprinc))) {
-            major_status = GSS_S_FAILURE;
-            goto fail;
-        }
-    }
-
-    code = krb5_rd_req_decoded(context, &auth_context, request, accprinc,
-                               cred->keytab, &ap_req_options, NULL);
-
-    krb5_free_principal(context, accprinc);
+    code = krb5_rd_req_decoded(context, &auth_context, request,
+                               cred->acceptor_mprinc, cred->keytab,
+                               &ap_req_options, NULL);
     if (code) {
         major_status = GSS_S_FAILURE;
         goto fail;
@@ -877,8 +868,6 @@ kg_accept_krb5(minor_status, context_handle,
 
     if (major_status != GSS_S_COMPLETE)
         goto fail;
-
-    major_status = GSS_S_FAILURE;
 
     if (exts->iakerb.conv && !exts->iakerb.verified) {
         major_status = GSS_S_BAD_SIG;
@@ -993,7 +982,7 @@ kg_accept_krb5(minor_status, context_handle,
     {
         krb5_int32 seq_temp;
         krb5_auth_con_getremoteseqnumber(context, auth_context, &seq_temp);
-        ctx->seq_recv = seq_temp;
+        ctx->seq_recv = (uint32_t)seq_temp;
     }
 
     if ((code = krb5_timeofday(context, &now))) {
@@ -1076,7 +1065,7 @@ kg_accept_krb5(minor_status, context_handle,
         }
 
         krb5_auth_con_getlocalseqnumber(context, auth_context, &seq_temp);
-        ctx->seq_send = seq_temp & 0xffffffffL;
+        ctx->seq_send = (uint32_t)seq_temp;
 
         if (cfx_generate_subkey) {
             /* Get the new acceptor subkey.  With the code above, there

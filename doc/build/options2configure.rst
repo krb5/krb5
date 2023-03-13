@@ -39,12 +39,6 @@ Most commonly used options
     library or fails to pass the tests in ``src/tests/resolv``, you
     will need to use this option.
 
-**-**\ **-with-tcl=**\ *TCLPATH*
-    Some of the unit-tests in the build tree rely upon using a program
-    in Tcl.  The directory specified by *TCLPATH* specifies where the
-    Tcl header file (TCLPATH/include/tcl.h) as well as where the Tcl
-    library (TCLPATH/lib) should be found.
-
 **-**\ **-enable-dns-for-realm**
     Enable the use of DNS to look up a host's Kerberos realm,
     if the information is not provided in
@@ -332,11 +326,6 @@ Optional packages
 **-**\ **-with-lmdb**
     Compile LMDB database backend module.
 
-**-**\ **-with-tcl=**\ *path*
-    Specifies that *path* is the location of a Tcl installation.
-    Tcl is needed for some of the tests run by 'make check'; such tests
-    will be skipped if this option is not set.
-
 **-**\ **-with-vague-errors**
     Do not send helpful errors to client.  For example, if the KDC
     should return only vague error codes to clients.
@@ -348,11 +337,6 @@ Optional packages
     implemented crypto backend is ``openssl``.  (See
     :ref:`mitK5features`)
 
-**-**\ **-with-prng-alg=**\ *ALG*
-    Use specified PRNG algorithm.  For example, to use the OS native
-    prng specify ``--with-prng-alg=os``.  The default is ``fortuna``.
-    (See :ref:`mitK5features`)
-
 **-**\ **-without-libedit**
     Do not compile and link against libedit.  Some utilities will no
     longer offer command history or completion in interactive mode if
@@ -360,8 +344,6 @@ Optional packages
 
 **-**\ **-with-readline**
     Compile and link against GNU readline, as an alternative to libedit.
-    Building with readline breaks the dejagnu test suite, which is a
-    subset of the tests run by 'make check'.
 
 **-**\ **-with-system-verto**
     Use an installed version of libverto.  If the libverto header and

@@ -191,7 +191,7 @@ The libdefaults section may contain any of the following relations:
     fully-qualified hostnames.  If this option is set to ``fallback`` (new
     in release 1.18), DNS canonicalization will only be performed the
     server hostname is not found with the original name when
-    requesting credentials.  The default value is ``fallback``.
+    requesting credentials.  The default value is true.
 
 **dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs
@@ -546,15 +546,12 @@ following tags may be specified in the realm's subsection:
 [domain_realm]
 ~~~~~~~~~~~~~~
 
-The [domain_realm] section provides a translation from a domain name
-or hostname to a Kerberos realm name.  The tag name can be a host name
-or domain name, where domain names are indicated by a prefix of a
-period (``.``).  The value of the relation is the Kerberos realm name
-for that particular host or domain.  A host name relation implicitly
-provides the corresponding domain name relation, unless an explicit domain
-name relation is provided.  The Kerberos realm may be
+The [domain_realm] section provides a translation from hostnames to
+Kerberos realms.  Each tag is a domain name, providing the mapping for
+that domain and all subdomains.  If the tag begins with a period
+(``.``) then it applies only to subdomains.  The Kerberos realm may be
 identified either in the realms_ section or using DNS SRV records.
-Host names and domain names should be in lower case.  For example::
+Tag names should be in lower case.  For example::
 
     [domain_realm]
         crash.mit.edu = TEST.ATHENA.MIT.EDU
@@ -1126,10 +1123,9 @@ PKINIT krb5.conf options
 **pkinit_identities**
     Specifies the location(s) to be used to find the user's X.509
     identity information.  If this option is specified multiple times,
-    the first valid value is used; this can be used to specify an
-    environment variable (with **ENV:**\ *envvar*) followed by a
-    default value.  Note that these values are not used if the user
-    specifies **X509_user_identity** on the command line.
+    each value is attempted in order until certificates are found.
+    Note that these values are not used if the user specifies
+    **X509_user_identity** on the command line.
 
 **pkinit_kdc_hostname**
     The presence of this option indicates that the client is willing

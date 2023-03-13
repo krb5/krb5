@@ -179,6 +179,10 @@ main(int argc, char *argv[])
             syslog(LOG_ERR, "listen: %m");
             exit(3);
         }
+
+        printf("starting...\n");
+        fflush(stdout);
+
         if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1){
             syslog(LOG_ERR, "accept: %m");
             exit(3);

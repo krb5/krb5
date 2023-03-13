@@ -93,7 +93,7 @@ affect how enctypes are chosen.
     and other programs that access the Kerberos database will ignore
     keys of non-permitted enctypes.  Starting in release 1.18, this
     setting also acts as the default for **default_tkt_enctypes** and
-    **defaut_tgs_enctypes**.
+    **default_tgs_enctypes**.
 
 **default_tkt_enctypes**
     controls the default set of enctypes that the Kerberos client

@@ -81,6 +81,7 @@ keyword arguments:
     - $buildtop: The root of the build directory
     - $srctop:   The root of the source directory
     - $plugins:  The plugin directory in the build tree
+    - $certs:    The PKINIT certificate directory in the source tree
     - $hostname: The FQDN of the host
     - $port0:    The first listener port (portbase)
     - ...
@@ -121,6 +122,8 @@ keyword arguments:
 * bdb_only=True: Use the DB2 KDB module even if K5TEST_LMDB is set in
   the environment.
 
+* pkinit=True: Configure a PKINIT anchor and KDC certificate.
+
 Scripts may use the following functions and variables:
 
 * fail(message): Display message (plus leading marker and trailing
@@ -154,6 +157,10 @@ Scripts may use the following functions and variables:
 
 * password(name): Return a weakly random password based on name.  The
   password will be consistent across calls with the same name.
+
+* canonicalize_hostname(name, rdns=True): Return the DNS
+  canonicalization of name, optionally using reverse DNS.  On error,
+  return name converted to lowercase.
 
 * stop_daemon(proc): Stop a daemon process started with
   realm.start_server() or realm.start_in_inetd().  Only necessary if
@@ -192,6 +199,11 @@ Scripts may use the following functions and variables:
 * srctop: The top of the source directory (absolute path).
 
 * plugins: The plugin directory in the build tree (absolute path).
+
+* pkinit_enabled: True if the PKINIT plugin module is present in the
+  build directory.
+
+* pkinit_certs: The directory containing test PKINIT certificates.
 
 * hostname: The local hostname as it will initially appear in
   krb5_sname_to_principal() results.  (Shortname qualification is
@@ -297,6 +309,10 @@ Scripts may use the following realm methods and attributes:
   specified, it will be used as input to the kinit process; otherwise
   flags must cause kinit not to need a password (e.g. by specifying a
   keytab).
+
+* realm.pkinit(princ, **keywords): Acquire credentials for princ,
+  supplying a PKINIT identity of the basic user test certificate
+  (matching user@KRBTEST.COM).
 
 * realm.klist(client_princ, service_princ=None, ccache=None): Using
   klist, list the credentials cache ccache (must be a filename;
@@ -458,6 +474,24 @@ def password(name):
     return name + str(os.getpid())
 
 
+def canonicalize_hostname(name, rdns=True):
+    """Canonicalize name using DNS, optionally with reverse DNS."""
+    try:
+        ai = socket.getaddrinfo(name, None, 0, 0, 0, socket.AI_CANONNAME)
+    except socket.gaierror as e:
+        return name.lower()
+    (family, socktype, proto, canonname, sockaddr) = ai[0]
+
+    if not rdns:
+        return canonname.lower()
+
+    try:
+        rname = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
+    except socket.gaierror:
+        return canonname.lower()
+    return rname[0].lower()
+
+
 # Exit handler which ensures processes are cleaned up and, on failure,
 # prints messages to help developers debug the problem.
 def _onexit():
@@ -541,8 +575,7 @@ def _parse_args():
     parser.add_option('--debug', dest='debug', metavar='NUM',
                       help='Debug numbered command (or "all")')
     parser.add_option('--debugger', dest='debugger', metavar='COMMAND',
-                      help='Debugger command (default is gdb --args)',
-                      default='gdb --args')
+                      help='Debugger command (default is gdb --args)')
     parser.add_option('--stop-before', dest='stopb', metavar='NUM',
                       help='Stop before numbered command (or "all")')
     parser.add_option('--stop-after', dest='stopa', metavar='NUM',
@@ -555,11 +588,20 @@ def _parse_args():
     verbose = options.verbose
     testpass = options.testpass
     _debug = _parse_cmdnum('--debug', options.debug)
-    _debugger_command = shlex.split(options.debugger)
     _stop_before = _parse_cmdnum('--stop-before', options.stopb)
     _stop_after = _parse_cmdnum('--stop-after', options.stopa)
     _shell_before = _parse_cmdnum('--shell-before', options.shellb)
     _shell_after = _parse_cmdnum('--shell-after', options.shella)
+
+    if options.debugger is not None:
+        _debugger_command = shlex.split(options.debugger)
+    elif which('gdb') is not None:
+        _debugger_command = ['gdb', '--args']
+    elif which('lldb') is not None:
+        _debugger_command = ['lldb', '--']
+    elif options.debug is not None:
+        print('Cannot find a debugger; use --debugger=COMMAND')
+        sys.exit(1)
 
 
 # Translate a command number spec.  -1 means all, None means none.
@@ -845,6 +887,13 @@ def stop_daemon(proc):
         _daemons.remove(proc)
 
 
+def await_daemon_exit(proc):
+    code = proc.wait()
+    _daemons.remove(proc)
+    if code != 0:
+        fail('Daemon process %d exited with status %d' % (proc.pid, code))
+
+
 class K5Realm(object):
     """An object representing a functional krb5 test realm."""
 
@@ -852,7 +901,7 @@ class K5Realm(object):
                  krb5_conf=None, kdc_conf=None, create_kdb=True,
                  krbtgt_keysalt=None, create_user=True, get_creds=True,
                  create_host=True, start_kdc=True, start_kadmind=False,
-                 start_kpropd=False, bdb_only=False):
+                 start_kpropd=False, bdb_only=False, pkinit=False):
         global hostname, _default_krb5_conf, _default_kdc_conf
         global _lmdb_kdc_conf, _current_db
 
@@ -869,11 +918,15 @@ class K5Realm(object):
         self.ccache = os.path.join(self.testdir, 'ccache')
         self.gss_mech_config = os.path.join(self.testdir, 'mech.conf')
         self.kadmin_ccache = os.path.join(self.testdir, 'kadmin_ccache')
-        self._krb5_conf = _cfg_merge(_default_krb5_conf, krb5_conf)
+        base_krb5_conf = _default_krb5_conf
         base_kdc_conf = _default_kdc_conf
         if (os.getenv('K5TEST_LMDB') is not None and
             not bdb_only and not _current_db):
             base_kdc_conf = _cfg_merge(base_kdc_conf, _lmdb_kdc_conf)
+        if pkinit:
+            base_krb5_conf = _cfg_merge(base_krb5_conf, _pkinit_krb5_conf)
+            base_kdc_conf = _cfg_merge(base_kdc_conf, _pkinit_kdc_conf)
+        self._krb5_conf = _cfg_merge(base_krb5_conf, krb5_conf)
         self._kdc_conf = _cfg_merge(base_kdc_conf, kdc_conf)
         self._kdc_proc = None
         self._kadmind_proc = None
@@ -950,6 +1003,7 @@ class K5Realm(object):
                                     buildtop=buildtop,
                                     srctop=srctop,
                                     plugins=plugins,
+                                    certs=pkinit_certs,
                                     hostname=hostname,
                                     port0=self.portbase,
                                     port1=self.portbase + 1,
@@ -1012,12 +1066,12 @@ class K5Realm(object):
             port = self.server_port()
         if env is None:
             env = self.env
-        inetd_args = [t_inetd, str(port)] + args
+        inetd_args = [t_inetd, str(port), args[0]] + args
         return _start_daemon(inetd_args, env, 'Ready!')
 
     def create_kdb(self):
         global kdb5_util
-        self.run([kdb5_util, 'create', '-W', '-s', '-P', 'master'])
+        self.run([kdb5_util, 'create', '-s', '-P', 'master'])
 
     def start_kdc(self, args=[], env=None):
         global krb5kdc
@@ -1038,7 +1092,7 @@ class K5Realm(object):
             env = self.env
         assert(self._kadmind_proc is None)
         dump_path = os.path.join(self.testdir, 'dump')
-        self._kadmind_proc = _start_daemon([kadmind, '-nofork', '-W',
+        self._kadmind_proc = _start_daemon([kadmind, '-nofork',
                                             '-p', kdb5_util, '-K', kprop,
                                             '-F', dump_path], env,
                                            'starting...')
@@ -1090,6 +1144,12 @@ class K5Realm(object):
         else:
             input = None
         return self.run([kinit] + flags + [princname], input=input, **keywords)
+
+    def pkinit(self, princ, flags=[], **kw):
+        id = 'FILE:%s,%s' % (os.path.join(pkinit_certs, 'user.pem'),
+                             os.path.join(pkinit_certs, 'privkey.pem'))
+        flags = flags + ['-X', 'X509_user_identity=%s' % id]
+        self.kinit(princ, flags=flags, **kw)
 
     def klist(self, client_princ, service_princ=None, ccache=None, **keywords):
         if service_princ is None:
@@ -1240,6 +1300,7 @@ _default_krb5_conf = {
     'libdefaults': {
         'default_realm': '$realm',
         'dns_lookup_kdc': 'false',
+        'dns_canonicalize_hostname': 'fallback',
         'qualify_shortname': '',
         'plugin_base_dir': '$plugins'},
     'realms': {'$realm': {
@@ -1254,7 +1315,7 @@ _default_kdc_conf = {
             'iprop_port': '$port4',
             'key_stash_file': '$testdir/stash',
             'acl_file': '$testdir/acl',
-            'dictfile': '$testdir/dictfile',
+            'dict_file': '$testdir/dictfile',
             'kadmind_port': '$port1',
             'kpasswd_port': '$port2',
             'kdc_listen': '$port0',
@@ -1270,6 +1331,12 @@ _default_kdc_conf = {
 
 _lmdb_kdc_conf = {'dbmodules': {'db': {'db_library': 'klmdb',
                                        'nosync': 'true'}}}
+
+
+_pkinit_krb5_conf = {'realms': {'$realm': {
+    'pkinit_anchors': 'FILE:$certs/ca.pem'}}}
+_pkinit_kdc_conf = {'realms': {'$realm': {
+    'pkinit_identity': 'FILE:$certs/kdc.pem,$certs/privkey.pem'}}}
 
 
 # A pass is a tuple of: name, krbtgt_keysalt, krb5_conf, kdc_conf.
@@ -1340,6 +1407,8 @@ _last_cmd_output = None
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
+pkinit_enabled = os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so'))
+pkinit_certs = os.path.join(srctop, 'tests', 'pkinit-certs')
 hostname = socket.gethostname().lower()
 null_input = open(os.devnull, 'r')
 
@@ -1367,7 +1436,7 @@ kswitch = os.path.join(buildtop, 'clients', 'kswitch', 'kswitch')
 kvno = os.path.join(buildtop, 'clients', 'kvno', 'kvno')
 kdestroy = os.path.join(buildtop, 'clients', 'kdestroy', 'kdestroy')
 kpasswd = os.path.join(buildtop, 'clients', 'kpasswd', 'kpasswd')
-t_inetd = os.path.join(buildtop, 'tests', 'dejagnu', 't_inetd')
+t_inetd = os.path.join(buildtop, 'tests', 't_inetd')
 kproplog = os.path.join(buildtop, 'kprop', 'kproplog')
 kpropd = os.path.join(buildtop, 'kprop', 'kpropd')
 kprop = os.path.join(buildtop, 'kprop', 'kprop')

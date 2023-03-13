@@ -449,6 +449,8 @@ have_client_keys(krb5_context context, krb5_kdcpreauth_rock rock)
 static const krb5_keyblock *
 client_keyblock(krb5_context context, krb5_kdcpreauth_rock rock)
 {
+    if (rock->client_keyblock->enctype == ENCTYPE_NULL)
+        return NULL;
     return rock->client_keyblock;
 }
 
@@ -489,7 +491,7 @@ match_client(krb5_context context, krb5_kdcpreauth_rock rock,
         krb5_principal_compare(context, princ, client))
         return TRUE;
 
-    if (krb5_db_get_principal(context, princ, 0, &ent))
+    if (krb5_db_get_principal(context, princ, KRB5_KDB_FLAG_CLIENT, &ent))
         return FALSE;
     match = krb5_principal_compare(context, ent->princ, client);
     krb5_db_free_principal(context, ent);
@@ -562,8 +564,23 @@ cleanup:
     return valid ? 0 : KRB5KDC_ERR_PREAUTH_EXPIRED;
 }
 
+static krb5_error_code
+replace_reply_key(krb5_context context, krb5_kdcpreauth_rock rock,
+                  const krb5_keyblock *key, krb5_boolean is_strengthen)
+{
+    krb5_keyblock copy;
+
+    if (krb5_copy_keyblock_contents(context, key, &copy) != 0)
+        return ENOMEM;
+    krb5_free_keyblock_contents(context, rock->client_keyblock);
+    *rock->client_keyblock = copy;
+    if (!is_strengthen)
+        rock->replaced_reply_key = TRUE;
+    return 0;
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
-    5,
+    6,
     max_time_skew,
     client_keys,
     free_keys,
@@ -581,7 +598,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     match_client,
     client_name,
     send_freshness_token,
-    check_freshness_token
+    check_freshness_token,
+    replace_reply_key
 };
 
 static krb5_error_code

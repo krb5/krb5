@@ -560,6 +560,49 @@ test_memory_concurrent(krb5_context context)
     free_test_cred(context);
 }
 
+/* Check that order is preserved during iteration.  Not all cache types have
+ * this property. */
+static void
+test_order(krb5_context context, const char *name)
+{
+    krb5_error_code kret;
+    krb5_ccache id;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
+
+    kret = init_test_cred(context);
+    CHECK(kret, "init_creds");
+
+    kret = krb5_cc_resolve(context, name, &id);
+    CHECK(kret, "resolve");
+    kret = krb5_cc_initialize(context, id, test_creds.client);
+    CHECK(kret, "initialize");
+    kret = krb5_cc_store_cred(context, id, &test_creds);
+    CHECK(kret, "store 1");
+    kret = krb5_cc_store_cred(context, id, &test_creds2);
+    CHECK(kret, "store 2");
+
+    kret = krb5_cc_start_seq_get(context, id, &cursor);
+    CHECK(kret, "start_seq_get");
+    kret = krb5_cc_next_cred(context, id, &cursor, &creds);
+    CHECK(kret, "next_cred 1");
+    CHECK_BOOL(krb5_principal_compare(context, creds.server,
+                                      test_creds.server) != TRUE,
+               "first cred does not match", "principal_compare");
+    krb5_free_cred_contents(context, &creds);
+
+    kret = krb5_cc_next_cred(context, id, &cursor, &creds);
+    CHECK(kret, "next_cred 2");
+    CHECK_BOOL(krb5_principal_compare(context, creds.server,
+                                      test_creds2.server) != TRUE,
+               "second cred does not match", "principal_compare");
+    krb5_free_cred_contents(context, &creds);
+
+    krb5_cc_end_seq_get(context, id, &cursor);
+    krb5_cc_close(context, id);
+    free_test_cred(context);
+}
+
 extern const krb5_cc_ops krb5_mcc_ops;
 extern const krb5_cc_ops krb5_fcc_ops;
 
@@ -609,6 +652,8 @@ main(void)
     do_test(context, "FILE:");
 
     test_memory_concurrent(context);
+
+    test_order(context, "MEMORY:order");
 
     krb5_free_context(context);
     return 0;

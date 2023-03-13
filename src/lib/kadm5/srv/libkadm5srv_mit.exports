@@ -1,7 +1,6 @@
 _kadm5_check_handle
 _kadm5_chpass_principal_util
 hist_princ
-kadm5_set_use_password_server
 kadm5_chpass_principal
 kadm5_chpass_principal_3
 kadm5_chpass_principal_util

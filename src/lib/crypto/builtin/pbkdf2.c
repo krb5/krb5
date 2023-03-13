@@ -27,6 +27,8 @@
 #include <ctype.h>
 #include "crypto_int.h"
 
+#ifdef K5_BUILTIN_PBKDF2
+
 /*
  * RFC 2898 specifies PBKDF2 in terms of an underlying pseudo-random
  * function with two arguments (password and salt||blockindex).  Right
@@ -215,3 +217,5 @@ krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
     err = pbkdf2(hash, &keyblock, salt, count, out);
     return err;
 }
+
+#endif /* K5_BUILTIN_PBKDF2 */

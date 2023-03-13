@@ -23,6 +23,7 @@
 #         traceback.print_exception(etype, value, tb, file=f)
 # sys.excepthook = ehook
 
+import optparse
 import select
 import socket
 import struct
@@ -39,6 +40,7 @@ class KCMOpcodes(object):
     INITIALIZE = 4
     DESTROY = 5
     STORE = 6
+    RETRIEVE = 7
     GET_PRINCIPAL = 8
     GET_CRED_UUID_LIST = 9
     GET_CRED_BY_UUID = 10
@@ -49,12 +51,16 @@ class KCMOpcodes(object):
     SET_DEFAULT_CACHE = 21
     GET_KDC_OFFSET = 22
     SET_KDC_OFFSET = 23
+    GET_CRED_LIST = 13001
+    REPLACE = 13002
 
 
 class KRB5Errors(object):
+    KRB5_CC_NOTFOUND = -1765328243
     KRB5_CC_END = -1765328242
     KRB5_CC_NOSUPP = -1765328137
     KRB5_FCC_NOFILE = -1765328189
+    KRB5_FCC_INTERNAL = -1765328188
 
 
 def make_uuid():
@@ -86,6 +92,25 @@ def get_cache(name):
 def unmarshal_name(argbytes):
     offset = argbytes.find(b'\0')
     return argbytes[0:offset], argbytes[offset+1:]
+
+
+# Find the bounds of a marshalled principal, returning it and the
+# remainder of argbytes.
+def extract_princ(argbytes):
+    ncomps, rlen = struct.unpack('>LL', argbytes[4:12])
+    pos = 12 + rlen
+    for i in range(ncomps):
+        clen, = struct.unpack('>L', argbytes[pos:pos+4])
+        pos += 4 + clen
+    return argbytes[0:pos], argbytes[pos:]
+
+
+# Return true if the marshalled principals p1 and p2 name the same
+# principal.
+def princ_eq(p1, p2):
+    # Ignore the name-types at bytes 0..3.  The remaining bytes should
+    # be identical if the principals are the same.
+    return p1[4:] == p2[4:]
 
 
 def op_gen_new(argbytes):
@@ -121,6 +146,22 @@ def op_store(argbytes):
     cache.creds[uuid] = cred
     cache.cred_uuids.append(uuid)
     return 0, b''
+
+
+def op_retrieve(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    # Ignore the flags at rest[0:4] and the header at rest[4:8].
+    # Assume there are client and server creds in the tag and match
+    # only against them.
+    cprinc, rest = extract_princ(rest[8:])
+    sprinc, rest = extract_princ(rest)
+    cache = get_cache(name)
+    for cred in (cache.creds[u] for u in cache.cred_uuids):
+        cred_cprinc, rest = extract_princ(cred)
+        cred_sprinc, rest = extract_princ(rest)
+        if princ_eq(cred_cprinc, cprinc) and princ_eq(cred_sprinc, sprinc):
+            return 0, cred
+    return KRB5Errors.KRB5_CC_NOTFOUND, b''
 
 
 def op_get_principal(argbytes):
@@ -183,11 +224,45 @@ def op_set_kdc_offset(argbytes):
     return 0, b''
 
 
+def op_get_cred_list(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    cache = get_cache(name)
+    creds = [cache.creds[u] for u in cache.cred_uuids]
+    return 0, (struct.pack('>L', len(creds)) +
+               b''.join(struct.pack('>L', len(c)) + c for c in creds))
+
+
+def op_replace(argbytes):
+    name, rest = unmarshal_name(argbytes)
+    offset, = struct.unpack('>L', rest[0:4])
+    princ, rest = extract_princ(rest[4:])
+    ncreds, = struct.unpack('>L', rest[0:4])
+    rest = rest[4:]
+    creds = []
+    for i in range(ncreds):
+        len, = struct.unpack('>L', rest[0:4])
+        creds.append(rest[4:4+len])
+        rest = rest[4+len:]
+
+    cache = get_cache(name)
+    cache.princ = princ
+    cache.cred_uuids = []
+    cache.creds = {}
+    cache.time_offset = offset
+    for i in range(ncreds):
+        uuid = make_uuid()
+        cache.creds[uuid] = creds[i]
+        cache.cred_uuids.append(uuid)
+
+    return 0, b''
+
+
 ophandlers = {
     KCMOpcodes.GEN_NEW : op_gen_new,
     KCMOpcodes.INITIALIZE : op_initialize,
     KCMOpcodes.DESTROY : op_destroy,
     KCMOpcodes.STORE : op_store,
+    KCMOpcodes.RETRIEVE : op_retrieve,
     KCMOpcodes.GET_PRINCIPAL : op_get_principal,
     KCMOpcodes.GET_CRED_UUID_LIST : op_get_cred_uuid_list,
     KCMOpcodes.GET_CRED_BY_UUID : op_get_cred_by_uuid,
@@ -197,7 +272,9 @@ ophandlers = {
     KCMOpcodes.GET_DEFAULT_CACHE : op_get_default_cache,
     KCMOpcodes.SET_DEFAULT_CACHE : op_set_default_cache,
     KCMOpcodes.GET_KDC_OFFSET : op_get_kdc_offset,
-    KCMOpcodes.SET_KDC_OFFSET : op_set_kdc_offset
+    KCMOpcodes.SET_KDC_OFFSET : op_set_kdc_offset,
+    KCMOpcodes.GET_CRED_LIST : op_get_cred_list,
+    KCMOpcodes.REPLACE : op_replace
 }
 
 # Read and respond to a request from the socket s.
@@ -215,7 +292,11 @@ def service_request(s):
 
     majver, minver, op = struct.unpack('>BBH', req[:4])
     argbytes = req[4:]
-    code, payload = ophandlers[op](argbytes)
+
+    if op in ophandlers:
+        code, payload = ophandlers[op](argbytes)
+    else:
+        code, payload = KRB5Errors.KRB5_FCC_INTERNAL, b''
 
     # The KCM response is the code (4 bytes) and the response payload.
     # The Heimdal IPC response is the length of the KCM response (4
@@ -226,9 +307,18 @@ def service_request(s):
     s.sendall(hipc_response)
     return True
 
+parser = optparse.OptionParser()
+parser.add_option('-f', '--fallback', action='store_true', dest='fallback',
+                  default=False,
+                  help='Do not support RETRIEVE/GET_CRED_LIST/REPLACE')
+(options, args) = parser.parse_args()
+if options.fallback:
+    del ophandlers[KCMOpcodes.RETRIEVE]
+    del ophandlers[KCMOpcodes.GET_CRED_LIST]
+    del ophandlers[KCMOpcodes.REPLACE]
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-server.bind(sys.argv[1])
+server.bind(args[0])
 server.listen(5)
 select_input = [server,]
 sys.stderr.write('starting...\n')

@@ -330,7 +330,6 @@ void init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in);
 void init_krb5_reply_key_pack(krb5_reply_key_pack **in);
 
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
-void init_krb5_subject_pk_info(krb5_subject_pk_info **in);
 
 void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in);
 void free_krb5_reply_key_pack(krb5_reply_key_pack **in);
@@ -340,7 +339,6 @@ void free_krb5_external_principal_identifier(krb5_external_principal_identifier 
 void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);
-void free_krb5_subject_pk_info(krb5_subject_pk_info **in);
 krb5_error_code pkinit_copy_krb5_data(krb5_data *dst, const krb5_data *src);
 
 

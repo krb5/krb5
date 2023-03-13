@@ -75,12 +75,17 @@ using the mechglue's gss_create_empty_oid_set and
 gss_add_oid_set_member functions.
 
 An interposer module must use the prefix ``gssi_`` for the GSSAPI
-functions it exports, instead of the prefix ``gss_``.
+functions it exports, instead of the prefix ``gss_``.  In most cases,
+unexported ``gssi_`` functions will result in failure from their
+corresponding ``gss_`` calls.
 
 An interposer module can link against the GSSAPI library in order to
 make calls to the original mechanism.  To do so, it must specify a
 special mechanism OID which is the concatention of the interposer's
 own OID byte string and the original mechanism's OID byte string.
+
+Functions that do not accept a mechanism argument directly require no
+special handling, with the following exceptions:
 
 Since **gss_accept_sec_context** does not accept a mechanism argument,
 an interposer mechanism must, in order to invoke the original
@@ -107,19 +112,23 @@ the token.  These functions have the following signatures::
 
 To re-enter the original mechanism when importing tokens for the above
 functions, the interposer module must wrap the mechanism token in the
-mechglue's format, using the concatenated OID.  The mechglue token
-formats are:
+mechglue's format, using the concatenated OID (except in
+**gss_import_name**).  The mechglue token formats are:
 
 * For **gss_import_sec_context**, a four-byte OID length in big-endian
-  order, followed by the mechanism OID, followed by the mechanism
+  order, followed by the concatenated OID, followed by the mechanism
   token.
 
 * For **gss_import_name**, the bytes 04 01, followed by a two-byte OID
   length in big-endian order, followed by the mechanism OID, followed
-  by the bytes 06, followed by the OID length as a single byte,
-  followed by the mechanism OID, followed by the mechanism token.
+  by a four-byte token length in big-endian order, followed by the
+  mechanism token.  Unlike most uses of OIDs in the API, the mechanism
+  OID encoding must include the DER tag and length for an object
+  identifier (06 followed by the DER length of the OID byte string),
+  and this prefix must be included in the two-byte OID length.
+  input_name_type must also be set to GSS_C_NT_EXPORT_NAME.
 
 * For **gss_import_cred**, a four-byte OID length in big-endian order,
-  followed by the mechanism OID, followed by a four-byte token length
-  in big-endian order, followed by the mechanism token.  This sequence
-  may be repeated multiple times.
+  followed by the concatenated OID, followed by a four-byte token
+  length in big-endian order, followed by the mechanism token.  This
+  sequence may be repeated multiple times.

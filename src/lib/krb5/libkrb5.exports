@@ -1,6 +1,5 @@
 _krb5_conf_boolean
 decode_krb5_ad_kdcissued
-decode_krb5_ad_signedpath
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
 decode_krb5_ap_req
@@ -53,8 +52,6 @@ decode_krb5_ticket
 decode_krb5_typed_data
 decode_utf8_strings
 encode_krb5_ad_kdcissued
-encode_krb5_ad_signedpath_data
-encode_krb5_ad_signedpath
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
 encode_krb5_ap_req
@@ -125,6 +122,7 @@ k5_add_pa_data_from_data
 k5_alloc_pa_data
 k5_authind_decode
 k5_build_conf_principals
+k5_cc_store_primary_cred
 k5_ccselect_free_context
 k5_change_error_message_code
 k5_etypes_contains
@@ -158,6 +156,7 @@ k5_internalize_keyblock
 k5_internalize_principal
 k5_is_string_numeric
 k5_kt_get_principal
+k5_kt_have_match
 k5_localauth_free_context
 k5_locate_kdc
 k5_marshal_cred
@@ -173,12 +172,14 @@ k5_plugin_register_dyn
 k5_rc_close
 k5_rc_get_name
 k5_rc_resolve
+k5_rc_store
 k5_size_auth_context
 k5_size_authdata
 k5_size_authdata_context
 k5_size_context
 k5_size_keyblock
 k5_size_principal
+k5_sname_compare
 k5_unmarshal_cred
 k5_unmarshal_princ
 k5_unwrap_cammac_svc
@@ -319,7 +320,6 @@ krb5_expand_hostname
 krb5_fcc_ops
 krb5_find_authdata
 krb5_free_ad_kdcissued
-krb5_free_ad_signedpath
 krb5_free_address
 krb5_free_addresses
 krb5_free_ap_rep
@@ -461,6 +461,8 @@ krb5_is_permitted_enctype
 krb5_is_referral_realm
 krb5_is_thread_safe
 krb5_kdc_rep_decrypt_proc
+krb5_kdc_sign_ticket
+krb5_kdc_verify_ticket
 krb5_kt_add_entry
 krb5_kt_client_default
 krb5_kt_close
@@ -487,6 +489,7 @@ krb5_lock_file
 krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
+krb5_marshal_credentials
 krb5_mcc_ops
 krb5_merge_authdata
 krb5_mk_1cred
@@ -563,6 +566,7 @@ krb5_set_config_files
 krb5_set_debugging_time
 krb5_set_default_realm
 krb5_set_default_tgs_enctypes
+krb5_set_default_tgs_ktypes
 krb5_set_error_message
 krb5_set_password
 krb5_set_password_using_ccache
@@ -589,6 +593,7 @@ krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string
 krb5_unlock_file
+krb5_unmarshal_credentials
 krb5_unpack_full_ipaddr
 krb5_unparse_name
 krb5_unparse_name_ext

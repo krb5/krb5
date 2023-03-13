@@ -88,7 +88,7 @@ krb5int_aes_encrypt
 krb5int_aes_decrypt
 krb5int_enc_des3
 krb5int_arcfour_gsscrypt
-krb5int_camellia_cbc_mac
+krb5int_camellia_encrypt
 krb5int_cmac_checksum
 krb5int_enc_aes128
 krb5int_enc_aes256
@@ -96,12 +96,7 @@ krb5int_enc_camellia128
 krb5int_enc_camellia256
 krb5int_derive_key
 krb5int_derive_random
-krb5int_aes_enc_blk
-krb5int_aes_enc_key
 k5_sha256
-k5_sha256_final
-k5_sha256_init
-k5_sha256_update
 krb5int_nfold
 k5_allow_weak_pbkdf2iter
 krb5_c_prfplus

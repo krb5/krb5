@@ -19,8 +19,8 @@ Quick facts
 License - :ref:`mitK5license`
 
 Releases:
-    - Latest stable: https://web.mit.edu/kerberos/krb5-1.18/
-    - Supported: https://web.mit.edu/kerberos/krb5-1.17/
+    - Latest stable: https://web.mit.edu/kerberos/krb5-1.20/
+    - Supported: https://web.mit.edu/kerberos/krb5-1.19/
     - Release cycle: approximately 12 months
 
 Supported platforms \/ OS distributions:
@@ -533,6 +533,116 @@ Release 1.18
   - The test suite incorporates soft-pkcs11 so that PKINIT PKCS11
     support can always be tested.
 
+Release 1.19
+
+* Administrator experience:
+
+  - When a client keytab is present, the GSSAPI krb5 mech will refresh
+    credentials even if the current credentials were acquired
+    manually.
+
+  - It is now harder to accidentally delete the K/M entry from a KDB.
+
+* Developer experience:
+
+  - gss_acquire_cred_from() now supports the "password" and "verify"
+    options, allowing credentials to be acquired via password and
+    verified using a keytab key.
+
+  - When an application accepts a GSS security context, the new
+    GSS_C_CHANNEL_BOUND_FLAG will be set if the initiator and acceptor
+    both provided matching channel bindings.
+
+  - Added the GSS_KRB5_NT_X509_CERT name type, allowing S4U2Self
+    requests to identify the desired client principal by certificate.
+
+  - PKINIT certauth modules can now cause the hw-authent flag to be
+    set in issued tickets.
+
+  - The krb5_init_creds_step() API will now issue the same password
+    expiration warnings as krb5_get_init_creds_password().
+
+* Protocol evolution:
+
+  - Added client and KDC support for Microsoft's Resource-Based
+    Constrained Delegation, which allows cross-realm S4U2Proxy
+    requests.  A third-party database module is required for KDC
+    support.
+
+  - kadmin/admin is now the preferred server principal name for kadmin
+    connections, and the host-based form is no longer created by
+    default.  The client will still try the host-based form as a
+    fallback.
+
+  - Added client and server support for Microsoft's
+    KERB_AP_OPTIONS_CBT extension, which causes channel bindings to be
+    required for the initiator if the acceptor provided them.  The
+    client will send this option if the client_aware_gss_bindings
+    profile option is set.
+
+User experience:
+
+  - The default setting of dns_canonicalize_realm is now "fallback".
+    Hostnames provided from applications will be tried in principal
+    names as given (possibly with shortname qualification), falling
+    back to the canonicalized name.
+
+  - kinit will now issue a warning if the des3-cbc-sha1 encryption
+    type is used in the reply.  This encryption type will be
+    deprecated and removed in future releases.
+
+  - Added kvno flags --out-cache, --no-store, and --cached-only
+    (inspired by Heimdal's kgetcred).
+
+Release 1.20
+
+* Administrator experience:
+
+  - Added a "disable_pac" realm relation to suppress adding PAC
+    authdata to tickets, for realms which do not need to support S4U
+    requests.
+
+  - Most credential cache types will use atomic replacement when a
+    cache is reinitialized using kinit or refreshed from the client
+    keytab.
+
+  - kprop can now propagate databases with a dump size larger than
+    4GB, if both the client and server are upgraded.
+
+  - kprop can now work over NATs that change the destination IP
+    address, if the client is upgraded.
+
+* Developer experience:
+
+  - Updated the KDB interface.  The sign_authdata() method is replaced
+    with the issue_pac() method, allowing KDB modules to add logon
+    info and other buffers to the PAC issued by the KDC.
+
+  - Host-based initiator names are better supported in the GSS krb5
+    mechanism.
+
+* Protocol evolution:
+
+  - Replaced AD-SIGNEDPATH authdata with minimal PACs.
+
+  - To avoid spurious replay errors, password change requests will not
+    be attempted over UDP until the attempt over TCP fails.
+
+  - PKINIT will sign its CMS messages with SHA-256 instead of SHA-1.
+
+* Code quality:
+
+  - Updated all code using OpenSSL to be compatible with OpenSSL 3.
+
+  - Reorganized the libk5crypto build system to allow the OpenSSL
+    back-end to pull in material from the builtin back-end depending
+    on the OpenSSL version.
+
+  - Simplified the PRNG logic to always use the platform PRNG.
+
+  - Converted the remaining Tcl tests to Python.
+
+
 `Pre-authentication mechanisms`
 
 - PW-SALT                                         :rfc:`4120#section-5.2.7.3`
@@ -545,10 +655,3 @@ Release 1.18
 - S4U-X509-USER                (release 1.8)      https://msdn.microsoft.com/en-us/library/cc246091
 - OTP                          (release 1.12)     :ref:`otp_preauth`
 - SPAKE                        (release 1.17)     :ref:`spake`
-
-`PRNG`
-
-- modularity       (release 1.9)
-- Yarrow PRNG      (release < 1.10)
-- Fortuna PRNG     (release 1.9)       https://www.schneier.com/book-practical.html
-- OS PRNG          (release 1.10)      OS's native PRNG

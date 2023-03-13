@@ -55,7 +55,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
     krb5_error_code status = 0;
     krb5_ldap_realm_params *rparams = NULL;
     krb5_ldap_context *ldap_context=NULL;
-    krb5_boolean realm_obj_created = FALSE;
     int mask = 0;
 
     /* Clear the global error string */
@@ -108,9 +107,6 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
 
     if ((status = krb5_ldap_create_realm(context, rparams, mask)))
         goto cleanup;
-
-    /* We just created the Realm container. Here starts our transaction tracking */
-    realm_obj_created = TRUE;
 
     /* verify realm object */
     if ((status = krb5_ldap_read_realm_params(context,

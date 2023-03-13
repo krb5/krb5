@@ -174,7 +174,7 @@ split_trailer(const krb5_data *data, krb5_data *host, krb5_data *trailer)
      * IPv6 address will have more than one colon, so don't accept that. */
     if (p == NULL || tlen == 1 || memchr(p + 1, ':', tlen - 1) != NULL) {
         *host = *data;
-        *trailer = empty_data();
+        *trailer = make_data("", 0);
     } else {
         *host = make_data(data->data, p - data->data);
         *trailer = make_data(p, tlen);
@@ -271,14 +271,33 @@ krb5_error_code
 k5_canonprinc(krb5_context context, struct canonprinc *iter,
               krb5_const_principal *princ_out)
 {
+    krb5_error_code ret;
     int step = ++iter->step;
 
     *princ_out = NULL;
 
-    /* If we're not doing fallback, the input principal is canonical. */
-    if (context->dns_canonicalize_hostname != CANONHOST_FALLBACK ||
-        iter->princ->type != KRB5_NT_SRV_HST || iter->princ->length != 2) {
+    /* If the hostname isn't from krb5_sname_to_principal(), the input
+     * principal is canonical. */
+    if (iter->princ->type != KRB5_NT_SRV_HST || iter->princ->length != 2 ||
+        iter->princ->data[1].length == 0) {
         *princ_out = (step == 1) ? iter->princ : NULL;
+        return 0;
+    }
+
+    /* If we're not doing fallback, the hostname is canonical, but we may need
+     * to substitute the default realm. */
+    if (context->dns_canonicalize_hostname != CANONHOST_FALLBACK) {
+        if (step > 1)
+            return 0;
+        iter->copy = *iter->princ;
+        if (iter->subst_defrealm && iter->copy.realm.length == 0) {
+            ret = krb5_get_default_realm(context, &iter->realm);
+            if (ret)
+                return ret;
+            iter->copy = *iter->princ;
+            iter->copy.realm = string2data(iter->realm);
+        }
+        *princ_out = &iter->copy;
         return 0;
     }
 
@@ -286,6 +305,26 @@ k5_canonprinc(krb5_context context, struct canonprinc *iter,
     if (step > 2)
         return 0;
     return canonicalize_princ(context, iter, step == 2, princ_out);
+}
+
+krb5_boolean
+k5_sname_compare(krb5_context context, krb5_const_principal sname,
+                 krb5_const_principal princ)
+{
+    krb5_error_code ret;
+    struct canonprinc iter = { sname, .subst_defrealm = TRUE };
+    krb5_const_principal canonprinc = NULL;
+    krb5_boolean match = FALSE;
+
+    while ((ret = k5_canonprinc(context, &iter, &canonprinc)) == 0 &&
+           canonprinc != NULL) {
+        if (krb5_principal_compare(context, canonprinc, princ)) {
+            match = TRUE;
+            break;
+        }
+    }
+    free_canonprinc(&iter);
+    return match;
 }
 
 krb5_error_code KRB5_CALLCONV

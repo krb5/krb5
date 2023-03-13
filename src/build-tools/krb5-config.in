@@ -70,8 +70,7 @@ while test $# != 0; do
 	--defktname)
 	    do_defktname=1
 	    ;;
-	--deps)
-	    do_deps=1
+	--deps) # historically a no-op
 	    ;;
 	--exec-prefix)
 	    do_exec_prefix=1
@@ -251,7 +250,7 @@ if test -n "$do_libs"; then
     fi
 
     if test $library = 'krb5'; then
-	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err"
+	lib_flags="$lib_flags -lkrb5 -lk5crypto @COM_ERR_LIB@"
     fi
 
     # If we ever support a flag to generate output suitable for static

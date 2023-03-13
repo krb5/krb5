@@ -54,7 +54,7 @@ struct test {
     },
     {
         { KV5M_DATA, 0, "" },
-        CKSUMTYPE_NIST_SHA, 0, 0, { KV5M_DATA, 0, "" },
+        CKSUMTYPE_SHA1, 0, 0, { KV5M_DATA, 0, "" },
         { KV5M_DATA, 20,
           "\xDA\x39\xA3\xEE\x5E\x6B\x4B\x0D\x32\x55\xBF\xEF\x95\x60\x18\x90"
           "\xAF\xD8\x07\x09" }

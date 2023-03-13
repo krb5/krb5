@@ -349,8 +349,8 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
      * Check the certificate against each certauth module.  For the certificate
      * to be authorized at least one module must return 0 or
      * KRB5_CERTAUTH_HWAUTH, and no module can return an error code other than
-     * KRB5_PLUGIN_NO_HANDLE (pass).  Add indicators from modules that return 0
-     * or pass.
+     * KRB5_PLUGIN_NO_HANDLE (pass) or KRB5_CERTAUTH_HWAUTH_PASS (pass but
+     * set hw-authent).  Add indicators from all modules.
      */
     ret = KRB5_PLUGIN_NO_HANDLE;
     for (i = 0; certauth_modules != NULL && certauth_modules[i] != NULL; i++) {
@@ -362,6 +362,8 @@ authorize_cert(krb5_context context, certauth_handle *certauth_modules,
             accepted = TRUE;
         else if (ret == KRB5_CERTAUTH_HWAUTH)
             accepted = hwauth = TRUE;
+        else if (ret == KRB5_CERTAUTH_HWAUTH_PASS)
+            hwauth = TRUE;
         else if (ret != KRB5_PLUGIN_NO_HANDLE)
             goto cleanup;
 
@@ -528,10 +530,10 @@ pkinit_server_verify_padata(krb5_context context,
         goto cleanup;
 
     /* check dh parameters */
-    if (auth_pack->clientPublicValue != NULL) {
+    if (auth_pack->clientPublicValue.length > 0) {
         retval = server_check_dh(context, plgctx->cryptoctx,
                                  reqctx->cryptoctx, plgctx->idctx,
-                                 &auth_pack->clientPublicValue->algorithm.parameters,
+                                 &auth_pack->clientPublicValue,
                                  plgctx->opts->dh_min_bits);
         if (retval) {
             pkiDebug("bad dh parameters\n");
@@ -546,8 +548,8 @@ pkinit_server_verify_padata(krb5_context context,
         goto cleanup;
     }
     der_req = cb->request_body(context, rock);
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL, 0,
-                                  der_req, &cksum);
+    retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
+                                  &cksum);
     if (retval) {
         pkiDebug("unable to calculate AS REQ checksum\n");
         goto cleanup;
@@ -759,10 +761,9 @@ pkinit_server_return_padata(krb5_context context,
     krb5_pa_pk_as_req *reqp = NULL;
     int i = 0;
 
-    unsigned char *subjectPublicKey = NULL;
     unsigned char *dh_pubkey = NULL, *server_key = NULL;
-    unsigned int subjectPublicKey_len = 0;
     unsigned int server_key_len = 0, dh_pubkey_len = 0;
+    krb5_keyblock reply_key = { 0 };
 
     krb5_kdc_dh_key_info dhkey_info;
     krb5_data *encoded_dhkey_info = NULL;
@@ -800,12 +801,6 @@ pkinit_server_return_padata(krb5_context context,
     TRACE_PKINIT_SERVER_RETURN_PADATA(context);
     reqctx = (pkinit_kdc_req_context)modreq;
 
-    if (encrypting_key->contents) {
-        free(encrypting_key->contents);
-        encrypting_key->length = 0;
-        encrypting_key->contents = NULL;
-    }
-
     for(i = 0; i < request->nktypes; i++) {
         enctype = request->ktype[i];
         if (!krb5_c_valid_enctype(enctype))
@@ -830,17 +825,13 @@ pkinit_server_return_padata(krb5_context context,
     rep->choice = choice_pa_pk_as_rep_encKeyPack;
 
     if (reqctx->rcv_auth_pack != NULL &&
-        reqctx->rcv_auth_pack->clientPublicValue != NULL) {
-        subjectPublicKey = (unsigned char *)
-            reqctx->rcv_auth_pack->clientPublicValue->subjectPublicKey.data;
-        subjectPublicKey_len =
-            reqctx->rcv_auth_pack->clientPublicValue->subjectPublicKey.length;
+        reqctx->rcv_auth_pack->clientPublicValue.length > 0) {
         rep->choice = choice_pa_pk_as_rep_dhInfo;
 
         pkiDebug("received DH key delivery AS REQ\n");
         retval = server_process_dh(context, plgctx->cryptoctx,
-                                   reqctx->cryptoctx, plgctx->idctx, subjectPublicKey,
-                                   subjectPublicKey_len, &dh_pubkey, &dh_pubkey_len,
+                                   reqctx->cryptoctx, plgctx->idctx,
+                                   &dh_pubkey, &dh_pubkey_len,
                                    &server_key, &server_key_len);
         if (retval) {
             pkiDebug("failed to process/create dh parameters\n");
@@ -887,19 +878,19 @@ pkinit_server_return_padata(krb5_context context,
     } else {
         pkiDebug("received RSA key delivery AS REQ\n");
 
-        retval = krb5_c_make_random_key(context, enctype, encrypting_key);
-        if (retval) {
-            pkiDebug("unable to make a session key\n");
-            goto cleanup;
-        }
-
         init_krb5_reply_key_pack(&key_pack);
         if (key_pack == NULL) {
             retval = ENOMEM;
             goto cleanup;
         }
 
-        retval = krb5_c_make_checksum(context, 0, encrypting_key,
+        retval = krb5_c_make_random_key(context, enctype, &key_pack->replyKey);
+        if (retval) {
+            pkiDebug("unable to make a session key\n");
+            goto cleanup;
+        }
+
+        retval = krb5_c_make_checksum(context, 0, &key_pack->replyKey,
                                       KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
                                       req_pkt, &key_pack->asChecksum);
         if (retval) {
@@ -912,12 +903,9 @@ pkinit_server_return_padata(krb5_context context,
         pkiDebug("checksum size = %d\n", key_pack->asChecksum.length);
         print_buffer(key_pack->asChecksum.contents,
                      key_pack->asChecksum.length);
-        pkiDebug("encrypting key (%d)\n", encrypting_key->length);
-        print_buffer(encrypting_key->contents, encrypting_key->length);
+        pkiDebug("encrypting key (%d)\n", key_pack->replyKey.length);
+        print_buffer(key_pack->replyKey.contents, key_pack->replyKey.length);
 #endif
-
-        krb5_copy_keyblock_contents(context, encrypting_key,
-                                    &key_pack->replyKey);
 
         retval = k5int_encode_krb5_reply_key_pack(key_pack,
                                                   &encoded_key_pack);
@@ -948,6 +936,11 @@ pkinit_server_return_padata(krb5_context context,
         print_buffer_bin(rep->u.encKeyPack.data, rep->u.encKeyPack.length,
                          "/tmp/kdc_enc_key_pack");
 #endif
+
+        retval = cb->replace_reply_key(context, rock, &key_pack->replyKey,
+                                       FALSE);
+        if (retval)
+            goto cleanup;
     }
 
     if (rep->choice == choice_pa_pk_as_rep_dhInfo &&
@@ -993,7 +986,7 @@ pkinit_server_return_padata(krb5_context context,
                                             rep->u.dh_Info.kdfID,
                                             request->client, request->server,
                                             enctype, req_pkt, out_data,
-                                            encrypting_key);
+                                            &reply_key);
             if (retval) {
                 pkiDebug("pkinit_alg_agility_kdf failed: %s\n",
                          error_message(retval));
@@ -1003,13 +996,16 @@ pkinit_server_return_padata(krb5_context context,
             /* Otherwise, use the older octetstring2key() function */
         } else {
             retval = pkinit_octetstring2key(context, enctype, server_key,
-                                            server_key_len, encrypting_key);
+                                            server_key_len, &reply_key);
             if (retval) {
                 pkiDebug("pkinit_octetstring2key failed: %s\n",
                          error_message(retval));
                 goto cleanup;
             }
         }
+        retval = cb->replace_reply_key(context, rock, &reply_key, FALSE);
+        if (retval)
+            goto cleanup;
     }
 
     *send_pa = malloc(sizeof(krb5_pa_data));
@@ -1026,7 +1022,6 @@ pkinit_server_return_padata(krb5_context context,
     (*send_pa)->contents = (krb5_octet *) out_data->data;
 
 cleanup:
-    pkinit_fini_kdc_req_context(context, reqctx);
     free(scratch.data);
     free(out_data);
     if (encoded_dhkey_info != NULL)
@@ -1038,6 +1033,7 @@ cleanup:
     free_krb5_pa_pk_as_req(&reqp);
     free_krb5_pa_pk_as_rep(&rep);
     free_krb5_reply_key_pack(&key_pack);
+    krb5_free_keyblock_contents(context, &reply_key);
 
     if (retval)
         pkiDebug("pkinit_verify_padata failure");
@@ -1615,6 +1611,13 @@ pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     free(reqctx);
 }
 
+static void
+pkinit_free_modreq(krb5_context context, krb5_kdcpreauth_moddata moddata,
+                   krb5_kdcpreauth_modreq modreq)
+{
+    pkinit_fini_kdc_req_context(context, modreq);
+}
+
 krb5_error_code
 kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
                          krb5_plugin_vtable vtable);
@@ -1636,5 +1639,6 @@ kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->edata = pkinit_server_get_edata;
     vt->verify = pkinit_server_verify_padata;
     vt->return_padata = pkinit_server_return_padata;
+    vt->free_modreq = pkinit_free_modreq;
     return 0;
 }

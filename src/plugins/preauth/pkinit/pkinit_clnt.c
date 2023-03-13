@@ -34,7 +34,6 @@
 #include "k5-json.h"
 
 #include <unistd.h>
-#include <dlfcn.h>
 #include <sys/stat.h>
 
 /**
@@ -119,8 +118,8 @@ pa_pkinit_gen_req(krb5_context context,
         goto cleanup;
     }
 
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL, 0,
-                                  der_req, &cksum);
+    retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
+                                  &cksum);
     if (retval)
         goto cleanup;
     TRACE_PKINIT_CLIENT_REQ_CHECKSUM(context, &cksum);
@@ -188,19 +187,15 @@ pkinit_as_req_create(krb5_context context,
                      krb5_data ** as_req)
 {
     krb5_error_code retval = ENOMEM;
-    krb5_subject_pk_info info;
-    krb5_data *coded_auth_pack = NULL;
+    krb5_data spki = empty_data(), *coded_auth_pack = NULL;
     krb5_auth_pack auth_pack;
     krb5_pa_pk_as_req *req = NULL;
     krb5_algorithm_identifier **cmstypes = NULL;
     int protocol = reqctx->opts->dh_or_rsa;
-    unsigned char *dh_params = NULL, *dh_pubkey = NULL;
-    unsigned int dh_params_len, dh_pubkey_len;
 
     pkiDebug("pkinit_as_req_create pa_type = %d\n", reqctx->pa_type);
 
     /* Create the authpack */
-    memset(&info, 0, sizeof(info));
     memset(&auth_pack, 0, sizeof(auth_pack));
     auth_pack.pkAuthenticator.ctime = ctsec;
     auth_pack.pkAuthenticator.cusec = cusec;
@@ -209,7 +204,6 @@ pkinit_as_req_create(krb5_context context,
     if (!reqctx->opts->disable_freshness)
         auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
     auth_pack.clientDHNonce.length = 0;
-    auth_pack.clientPublicValue = &info;
     auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
 
     /* add List of CMS algorithms */
@@ -224,24 +218,20 @@ pkinit_as_req_create(krb5_context context,
     case DH_PROTOCOL:
         TRACE_PKINIT_CLIENT_REQ_DH(context);
         pkiDebug("as_req: DH key transport algorithm\n");
-        info.algorithm.algorithm = dh_oid;
 
         /* create client-side DH keys */
         retval = client_create_dh(context, plgctx->cryptoctx,
                                   reqctx->cryptoctx, reqctx->idctx,
-                                  reqctx->opts->dh_size, &dh_params,
-                                  &dh_params_len, &dh_pubkey, &dh_pubkey_len);
+                                  reqctx->opts->dh_size, &spki);
+        auth_pack.clientPublicValue = spki;
         if (retval != 0) {
             pkiDebug("failed to create dh parameters\n");
             goto cleanup;
         }
-        info.algorithm.parameters = make_data(dh_params, dh_params_len);
-        info.subjectPublicKey = make_data(dh_pubkey, dh_pubkey_len);
         break;
     case RSA_PROTOCOL:
         TRACE_PKINIT_CLIENT_REQ_RSA(context);
         pkiDebug("as_req: RSA key transport algorithm\n");
-        auth_pack.clientPublicValue = NULL;
         break;
     default:
         pkiDebug("as_req: unknown key transport protocol %d\n",
@@ -325,9 +315,8 @@ pkinit_as_req_create(krb5_context context,
 
 cleanup:
     free_krb5_algorithm_identifiers(&cmstypes);
-    free(dh_params);
-    free(dh_pubkey);
     free_krb5_pa_pk_as_req(&req);
+    krb5_free_data_contents(context, &spki);
 
     pkiDebug("pkinit_as_req_create retval=%d\n", (int) retval);
 
@@ -709,13 +698,6 @@ pkinit_as_rep_parse(krb5_context context,
             pkiDebug("failed to decode reply_key_pack\n");
             goto cleanup;
         }
-        /*
-         * This is hack but Windows sends back SHA1 checksum
-         * with checksum type of 14. There is currently no
-         * checksum type of 14 defined.
-         */
-        if (key_pack->asChecksum.checksum_type == 14)
-            key_pack->asChecksum.checksum_type = CKSUMTYPE_NIST_SHA;
         retval = krb5_c_make_checksum(context,
                                       key_pack->asChecksum.checksum_type,
                                       &key_pack->replyKey,
@@ -1101,8 +1083,11 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     }
 
     if (processing_request) {
-        pkinit_client_profile(context, plgctx, reqctx, cb, rock,
-                              &request->server->realm);
+        if (reqctx->idopts->anchors == NULL) {
+            krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                                   _("No pkinit_anchors supplied"));
+            return KRB5_PREAUTH_FAILED;
+        }
         /* Pull in PINs and passwords for identities which we deferred
          * loading earlier. */
         retval = pkinit_client_parse_answers(context, moddata, modreq,

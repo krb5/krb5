@@ -118,10 +118,9 @@ establish_contexts(gss_OID imech, gss_cred_id_t icred, gss_cred_id_t acred,
                    gss_ctx_id_t *actx, gss_name_t *src_name, gss_OID *amech,
                    gss_cred_id_t *deleg_cred)
 {
-    return establish_contexts_ex(imech, icred, acred, tname, flags, ictx, actx,
-                                 GSS_C_NO_CHANNEL_BINDINGS,
-                                 GSS_C_NO_CHANNEL_BINDINGS, NULL, src_name,
-                                 amech, deleg_cred);
+    establish_contexts_ex(imech, icred, acred, tname, flags, ictx, actx,
+                          GSS_C_NO_CHANNEL_BINDINGS, GSS_C_NO_CHANNEL_BINDINGS,
+                          NULL, src_name, amech, deleg_cred);
 }
 
 void

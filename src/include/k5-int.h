@@ -205,6 +205,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_DISABLE_ENCRYPTED_TIMESTAMP  "disable_encrypted_timestamp"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS         "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT              "disable_lockout"
+#define KRB5_CONF_DISABLE_PAC                  "disable_pac"
 #define KRB5_CONF_DNS_CANONICALIZE_HOSTNAME    "dns_canonicalize_hostname"
 #define KRB5_CONF_DNS_FALLBACK                 "dns_fallback"
 #define KRB5_CONF_DNS_LOOKUP_KDC               "dns_lookup_kdc"
@@ -308,6 +309,7 @@ typedef unsigned char   u_char;
 #define KRB5_CC_CONF_PA_TYPE                   "pa_type"
 #define KRB5_CC_CONF_PROXY_IMPERSONATOR        "proxy_impersonator"
 #define KRB5_CC_CONF_REFRESH_TIME              "refresh_time"
+#define KRB5_CC_CONF_START_REALM               "start_realm"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -584,12 +586,8 @@ extern char *strdup (const char *);
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
 #endif
-#else
 #include <time.h>
-#endif
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>                   /* struct stat, stat() */
@@ -819,21 +817,6 @@ typedef struct _krb5_ad_kdcissued {
     krb5_authdata **elements;
 } krb5_ad_kdcissued;
 
-typedef struct _krb5_ad_signedpath_data {
-    krb5_principal client;
-    krb5_timestamp authtime;
-    krb5_principal *delegated;
-    krb5_pa_data **method_data;
-    krb5_authdata **authorization_data;
-} krb5_ad_signedpath_data;
-
-typedef struct _krb5_ad_signedpath {
-    krb5_enctype enctype;
-    krb5_checksum checksum;
-    krb5_principal *delegated;
-    krb5_pa_data **method_data;
-} krb5_ad_signedpath;
-
 typedef struct _krb5_iakerb_header {
     krb5_data target_realm;
     krb5_data *cookie;
@@ -952,7 +935,6 @@ void KRB5_CALLCONV krb5_free_fast_req(krb5_context, krb5_fast_req *);
 void KRB5_CALLCONV krb5_free_fast_finished(krb5_context, krb5_fast_finished *);
 void KRB5_CALLCONV krb5_free_fast_response(krb5_context, krb5_fast_response *);
 void KRB5_CALLCONV krb5_free_ad_kdcissued(krb5_context, krb5_ad_kdcissued *);
-void KRB5_CALLCONV krb5_free_ad_signedpath(krb5_context, krb5_ad_signedpath *);
 void KRB5_CALLCONV krb5_free_iakerb_header(krb5_context, krb5_iakerb_header *);
 void KRB5_CALLCONV krb5_free_iakerb_finished(krb5_context,
                                              krb5_iakerb_finished *);
@@ -1517,12 +1499,6 @@ krb5_error_code
 encode_krb5_ad_kdcissued(const krb5_ad_kdcissued *, krb5_data **);
 
 krb5_error_code
-encode_krb5_ad_signedpath(const krb5_ad_signedpath *, krb5_data **);
-
-krb5_error_code
-encode_krb5_ad_signedpath_data(const krb5_ad_signedpath_data *, krb5_data **);
-
-krb5_error_code
 encode_krb5_otp_tokeninfo(const krb5_otp_tokeninfo *, krb5_data **);
 
 krb5_error_code
@@ -1697,9 +1673,6 @@ decode_krb5_fast_response(const krb5_data *, krb5_fast_response **);
 
 krb5_error_code
 decode_krb5_ad_kdcissued(const krb5_data *, krb5_ad_kdcissued **);
-
-krb5_error_code
-decode_krb5_ad_signedpath(const krb5_data *, krb5_ad_signedpath **);
 
 krb5_error_code
 decode_krb5_iakerb_header(const krb5_data *, krb5_iakerb_header **);
@@ -1909,6 +1882,9 @@ krb5_ser_unpack_bytes(krb5_octet *, size_t, krb5_octet **, size_t *);
 
 krb5_error_code KRB5_CALLCONV
 krb5int_cc_default(krb5_context, krb5_ccache *);
+
+krb5_error_code
+k5_cc_store_primary_cred(krb5_context, krb5_ccache, krb5_creds *);
 
 /* Fill in the buffer with random alphanumeric data. */
 krb5_error_code
@@ -2121,6 +2097,9 @@ krb5_error_code KRB5_CALLCONV krb5_kt_register(krb5_context,
 
 krb5_error_code k5_kt_get_principal(krb5_context context, krb5_keytab keytab,
                                     krb5_principal *princ_out);
+
+krb5_error_code k5_kt_have_match(krb5_context context, krb5_keytab keytab,
+                                 krb5_principal mprinc);
 
 krb5_error_code krb5_principal2salt_norealm(krb5_context, krb5_const_principal,
                                             krb5_data *);
@@ -2402,5 +2381,14 @@ void k5_change_error_message_code(krb5_context ctx, krb5_error_code oldcode,
 #define k5_setmsg krb5_set_error_message
 #define k5_prependmsg krb5_prepend_error_message
 #define k5_wrapmsg krb5_wrap_error_message
+
+/*
+ * Like krb5_principal_compare(), but with canonicalization of sname if
+ * fallback is enabled.  This function should be avoided if multiple matches
+ * are required, since repeated canonicalization is inefficient.
+ */
+krb5_boolean
+k5_sname_compare(krb5_context context, krb5_const_principal sname,
+                 krb5_const_principal princ);
 
 #endif /* _KRB5_INT_H */

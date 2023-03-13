@@ -105,6 +105,9 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 
 #endif /* DISABLE_TRACING */
 
+#define TRACE_CC_CACHE_MATCH(c, princ, ret)                             \
+    TRACE(c, "Matching {princ} in collection with result: {kerr}",      \
+          princ, ret)
 #define TRACE_CC_DESTROY(c, cache)                      \
     TRACE(c, "Destroying ccache {ccache}", cache)
 #define TRACE_CC_GEN_NEW(c, cache)                                      \
@@ -116,7 +119,7 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
     TRACE(c, "Initializing {ccache} with default princ {princ}",    \
           cache, princ)
 #define TRACE_CC_MOVE(c, src, dst)                                      \
-    TRACE(c, "Moving contents of ccache {src} to {dst}", src, dst)
+    TRACE(c, "Moving ccache {ccache} to {ccache}", src, dst)
 #define TRACE_CC_NEW_UNIQUE(c, type)                            \
     TRACE(c, "Resolving unique ccache of type {str}", type)
 #define TRACE_CC_REMOVE(c, cache, creds)                        \

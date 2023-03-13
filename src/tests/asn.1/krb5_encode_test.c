@@ -640,23 +640,6 @@ main(argc, argv)
         ktest_empty_ad_kdcissued(&kdci);
     }
     /****************************************************************/
-    /* encode_krb5_ad_signedpath_data */
-    {
-        krb5_ad_signedpath_data spd;
-        ktest_make_sample_ad_signedpath_data(&spd);
-        encode_run(spd, "ad_signedpath_data", "",
-                   encode_krb5_ad_signedpath_data);
-        ktest_empty_ad_signedpath_data(&spd);
-    }
-    /****************************************************************/
-    /* encode_krb5_ad_signedpath */
-    {
-        krb5_ad_signedpath sp;
-        ktest_make_sample_ad_signedpath(&sp);
-        encode_run(sp, "ad_signedpath", "", encode_krb5_ad_signedpath);
-        ktest_empty_ad_signedpath(&sp);
-    }
-    /****************************************************************/
     /* encode_krb5_iakerb_header */
     {
         krb5_iakerb_header ih;

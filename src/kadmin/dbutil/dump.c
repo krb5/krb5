@@ -668,6 +668,10 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     }
 
     /* Get memory for flattened principal name */
+    if (u2 > UINT_MAX / 2) {
+        load_err(fname, *linenop, _("cannot allocate principal (too large)"));
+        goto fail;
+    }
     name = malloc(u2 + 1);
     if (name == NULL)
         goto fail;
@@ -682,6 +686,10 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
     dbentry->n_tl_data = u3;
 
     /* Get memory for key list */
+    if (u4 > INT16_MAX) {
+        load_err(fname, *linenop, _("invalid key_data size"));
+        goto fail;
+    }
     if (u4 && (kp = calloc(u4, sizeof(krb5_key_data))) == NULL)
         goto fail;
 
@@ -769,13 +777,17 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
             load_err(fname, *linenop, _("unsupported key_data_ver version"));
             goto fail;
         }
+        if (t2 < 0 || t2 > UINT16_MAX) {
+            load_err(fname, *linenop, _("invalid kvno"));
+            goto fail;
+        }
 
         kd->key_data_ver = t1;
         kd->key_data_kvno = t2;
 
         for (j = 0; j < t1; j++) {
             nread = fscanf(filep, "%d\t%d\t", &t3, &t4);
-            if (nread != 2 || t4 < 0) {
+            if (nread != 2 || t4 < 0 || t4 > UINT16_MAX) {
                 load_err(fname, *linenop,
                          _("cannot read key type and length"));
                 goto fail;
@@ -1161,12 +1173,6 @@ current_dump_sno_in_ulog(krb5_context context, const char *ifile)
     return status == UPDATE_OK || status == UPDATE_NIL;
 }
 
-/*
- * usage is:
- *      dump_db [-b7] [-r13] [-r18] [-verbose] [-mkey_convert]
- *              [-new_mkey_file mkey_file] [-rev] [-recurse]
- *              [filename [principals...]]
- */
 void
 dump_db(int argc, char **argv)
 {
@@ -1205,6 +1211,7 @@ dump_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-r18")) {
             dump = &r1_8_version;
         } else if (!strncmp(argv[aindex], "-i", 2)) {
+            /* Intentionally undocumented - only used by kadmin. */
             if (log_ctx && log_ctx->iproprole) {
                 /* ipropx_version is the maximum version acceptable. */
                 ipropx_version = atoi(argv[aindex] + 2);
@@ -1411,9 +1418,6 @@ restore_dump(krb5_context context, char *dumpfile, FILE *f,
     return 0;
 }
 
-/*
- * Usage: load_db [-b7] [-r13] [-r18] [-verbose] [-update] [-hash] filename
- */
 void
 load_db(int argc, char **argv)
 {
@@ -1443,6 +1447,7 @@ load_db(int argc, char **argv)
         } else if (!strcmp(argv[aindex], "-r18")){
             load = &r1_8_version;
         } else if (!strcmp(argv[aindex], "-i")) {
+            /* Intentionally undocumented - only used by kadmin. */
             if (log_ctx && log_ctx->iproprole) {
                 load = &iprop_version;
                 iprop_load = TRUE;

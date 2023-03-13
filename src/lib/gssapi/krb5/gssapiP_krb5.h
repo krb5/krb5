@@ -175,6 +175,7 @@ typedef struct _krb5_gss_cred_id_rec {
     /* name/type of credential */
     gss_cred_usage_t usage;
     krb5_gss_name_t name;
+    krb5_principal acceptor_mprinc;
     krb5_principal impersonator;
     unsigned int default_identity : 1;
     unsigned int iakerb_mech : 1;
@@ -379,8 +380,7 @@ OM_uint32 kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status);
 OM_uint32 kg_caller_provided_ccache_name (OM_uint32 *minor_status,
                                           int *out_caller_provided_name);
 
-OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status,
-                              const char **out_name);
+OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status, char **out_name);
 
 OM_uint32 kg_set_ccache_name (OM_uint32 *minor_status,
                               const char *name);
@@ -548,6 +548,17 @@ iakerb_gss_acquire_cred_with_password(
     gss_cred_id_t *output_cred_handle,
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred_from(OM_uint32 *minor_status,
+                             const gss_name_t desired_name,
+                             OM_uint32 time_req,
+                             const gss_OID_set desired_mechs,
+                             gss_cred_usage_t cred_usage,
+                             gss_const_key_value_set_t cred_store,
+                             gss_cred_id_t *output_cred_handle,
+                             gss_OID_set *actual_mechs,
+                             OM_uint32 *time_rec);
 
 OM_uint32 KRB5_CALLCONV krb5_gss_release_cred
 (OM_uint32*,       /* minor_status */
@@ -1285,6 +1296,8 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_KEYTAB_URN "keytab"
 #define KRB5_CS_CCACHE_URN "ccache"
 #define KRB5_CS_RCACHE_URN "rcache"
+#define KRB5_CS_PASSWORD_URN "password"
+#define KRB5_CS_VERIFY_URN "verify"
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,

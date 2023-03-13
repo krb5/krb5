@@ -206,6 +206,93 @@ so multiple invocations may be necessary to retrieve all of the
 indicators from the ticket.  (New in release 1.15.)
 
 
+Credential store extensions
+---------------------------
+
+Beginning with release 1.11, the following GSSAPI extensions declared
+in ``<gssapi/gssapi_ext.h>`` can be used to specify how credentials
+are acquired or stored::
+
+    struct gss_key_value_element_struct {
+        const char *key;
+        const char *value;
+    };
+    typedef struct gss_key_value_element_struct gss_key_value_element_desc;
+
+    struct gss_key_value_set_struct {
+        OM_uint32 count;
+        gss_key_value_element_desc *elements;
+    };
+    typedef const struct gss_key_value_set_struct gss_key_value_set_desc;
+    typedef const gss_key_value_set_desc *gss_const_key_value_set_t;
+
+    OM_uint32 gss_acquire_cred_from(OM_uint32 *minor_status,
+                                    const gss_name_t desired_name,
+                                    OM_uint32 time_req,
+                                    const gss_OID_set desired_mechs,
+                                    gss_cred_usage_t cred_usage,
+                                    gss_const_key_value_set_t cred_store,
+                                    gss_cred_id_t *output_cred_handle,
+                                    gss_OID_set *actual_mechs,
+                                    OM_uint32 *time_rec);
+
+    OM_uint32 gss_store_cred_into(OM_uint32 *minor_status,
+                                  gss_cred_id_t input_cred_handle,
+                                  gss_cred_usage_t cred_usage,
+                                  const gss_OID desired_mech,
+                                  OM_uint32 overwrite_cred,
+                                  OM_uint32 default_cred,
+                                  gss_const_key_value_set_t cred_store,
+                                  gss_OID_set *elements_stored,
+                                  gss_cred_usage_t *cred_usage_stored);
+
+The additional *cred_store* parameter allows the caller to specify
+information about how the credentials should be obtained and stored.
+The following options are supported by the krb5 mechanism:
+
+* **ccache**: For acquiring initiator credentials, the name of the
+  :ref:`credential cache <ccache_definition>` to which the handle will
+  refer.  For storing credentials, the name of the cache or collection
+  where the credentials will be stored (see below).
+
+* **client_keytab**: For acquiring initiator credentials, the name of
+  the :ref:`keytab <keytab_definition>` which will be used, if
+  necessary, to refresh the credentials in the cache.
+
+* **keytab**: For acquiring acceptor credentials, the name of the
+  :ref:`keytab <keytab_definition>` to which the handle will refer.
+  In release 1.19 and later, this option also determines the keytab to
+  be used for verification when initiator credentials are acquired
+  using a password and verified.
+
+* **password**: For acquiring initiator credentials, this option
+  instructs the mechanism to acquire fresh credentials into a unique
+  memory credential cache.  This option may not be used with the
+  **ccache** or **client_keytab** options, and a *desired_name* must
+  be specified.  (New in release 1.19.)
+
+* **rcache**: For acquiring acceptor credentials, the name of the
+  :ref:`replay cache <rcache_definition>` to be used when processing
+  the initiator tokens.  (New in release 1.13.)
+
+* **verify**: For acquiring initiator credentials, this option
+  instructs the mechanism to verify the credentials by obtaining a
+  ticket to a service with a known key.  The service key is obtained
+  from the keytab specified with the **keytab** option or the default
+  keytab.  The value may be the name of a principal in the keytab, or
+  the empty string.  If the empty string is given, any ``host``
+  service principal in the keytab may be used.  (New in release 1.19.)
+
+In release 1.20 or later, if a collection name is specified for
+**cache** in a call to gss_store_cred_into(), an existing cache for
+the client principal within the collection will be selected, or a new
+cache will be created within the collection.  If *overwrite_cred* is
+false and the selected credential cache already exists, a
+**GSS_S_DUPLICATE_ELEMENT** error will be returned.  If *default_cred*
+is true, the primary cache of the collection will be switched to the
+selected cache.
+
+
 Importing and exporting credentials
 -----------------------------------
 

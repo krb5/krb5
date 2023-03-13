@@ -27,7 +27,7 @@ STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
 SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
-SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
+SHLIB_EXPLIBS=-lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 RELDIR=gssapi
 
 all-unix: all-liblinks @MAINT@ verify-calling-conventions-gssapi

@@ -61,6 +61,17 @@ struct uuid_list {
     size_t pos;
 };
 
+struct cred_list {
+    krb5_creds *creds;
+    size_t count;
+    size_t pos;
+};
+
+struct kcm_cursor {
+    struct uuid_list *uuids;
+    struct cred_list *creds;
+};
+
 struct kcmio {
     SOCKET fd;
 #ifdef __APPLE__
@@ -97,6 +108,54 @@ map_invalid(krb5_error_code code)
 {
     return (code == EINVAL || code == KRB5_CC_FORMAT) ?
         KRB5_KCM_MALFORMED_REPLY : code;
+}
+
+/*
+ * Map an MIT krb5 KRB5_TC flag word to the equivalent Heimdal flag word.  Note
+ * that there is no MIT krb5 equivalent for Heimdal's KRB5_TC_DONT_MATCH_REALM
+ * (which is like KRB5_TC_MATCH_SRV_NAMEONLY but also applies to the client
+ * principal) and no Heimdal equivalent for MIT krb5's KRB5_TC_SUPPORTED_KTYPES
+ * (which matches against enctypes from the krb5_context rather than the
+ * matching cred).
+ */
+static inline krb5_flags
+map_tcflags(krb5_flags mitflags)
+{
+    krb5_flags heimflags = 0;
+
+    if (mitflags & KRB5_TC_MATCH_TIMES)
+        heimflags |= KCM_TC_MATCH_TIMES;
+    if (mitflags & KRB5_TC_MATCH_IS_SKEY)
+        heimflags |= KCM_TC_MATCH_IS_SKEY;
+    if (mitflags & KRB5_TC_MATCH_FLAGS)
+        heimflags |= KCM_TC_MATCH_FLAGS;
+    if (mitflags & KRB5_TC_MATCH_TIMES_EXACT)
+        heimflags |= KCM_TC_MATCH_TIMES_EXACT;
+    if (mitflags & KRB5_TC_MATCH_FLAGS_EXACT)
+        heimflags |= KCM_TC_MATCH_FLAGS_EXACT;
+    if (mitflags & KRB5_TC_MATCH_AUTHDATA)
+        heimflags |= KCM_TC_MATCH_AUTHDATA;
+    if (mitflags & KRB5_TC_MATCH_SRV_NAMEONLY)
+        heimflags |= KCM_TC_MATCH_SRV_NAMEONLY;
+    if (mitflags & KRB5_TC_MATCH_2ND_TKT)
+        heimflags |= KCM_TC_MATCH_2ND_TKT;
+    if (mitflags & KRB5_TC_MATCH_KTYPE)
+        heimflags |= KCM_TC_MATCH_KEYTYPE;
+    return heimflags;
+}
+
+/*
+ * Return true if code could indicate an unsupported operation.  Heimdal's KCM
+ * returns KRB5_FCC_INTERNAL.  sssd's KCM daemon (as of sssd 2.4) returns
+ * KRB5_CC_NO_SUPP if it recognizes the operation but does not implement it,
+ * and KRB5_CC_IO if it doesn't recognize the operation (which is unfortunate
+ * since it could also indicate a communication failure).
+ */
+static krb5_boolean
+unsupported_op_error(krb5_error_code code)
+{
+    return code == KRB5_FCC_INTERNAL || code == KRB5_CC_IO ||
+        code == KRB5_CC_NOSUPP;
 }
 
 /* Begin a request for the given opcode.  If cache is non-null, supply the
@@ -490,6 +549,69 @@ free_uuid_list(struct uuid_list *uuids)
 }
 
 static void
+free_cred_list(struct cred_list *list)
+{
+    size_t i;
+
+    if (list == NULL)
+        return;
+
+    /* Creds are transferred to the caller as list->pos is incremented, so we
+     * can start freeing there. */
+    for (i = list->pos; i < list->count; i++)
+        krb5_free_cred_contents(NULL, &list->creds[i]);
+    free(list->creds);
+    free(list);
+}
+
+/* Fetch a cred list from req->reply. */
+static krb5_error_code
+kcmreq_get_cred_list(struct kcmreq *req, struct cred_list **creds_out)
+{
+    struct cred_list *list;
+    const unsigned char *data;
+    krb5_error_code ret = 0;
+    size_t count, len, i;
+
+    *creds_out = NULL;
+
+    /* Check a rough bound on the count to prevent very large allocations. */
+    count = k5_input_get_uint32_be(&req->reply);
+    if (count > req->reply.len / 4)
+        return KRB5_KCM_MALFORMED_REPLY;
+
+    list = malloc(sizeof(*list));
+    if (list == NULL)
+        return ENOMEM;
+
+    list->creds = NULL;
+    list->count = count;
+    list->pos = 0;
+    list->creds = k5calloc(count, sizeof(*list->creds), &ret);
+    if (list->creds == NULL) {
+        free(list);
+        return ret;
+    }
+
+    for (i = 0; i < count; i++) {
+        len = k5_input_get_uint32_be(&req->reply);
+        data = k5_input_get_bytes(&req->reply, len);
+        if (data == NULL)
+            break;
+        ret = k5_unmarshal_cred(data, len, 4, &list->creds[i]);
+        if (ret)
+            break;
+    }
+    if (i < count) {
+        free_cred_list(list);
+        return (ret == ENOMEM) ? ENOMEM : KRB5_KCM_MALFORMED_REPLY;
+    }
+
+    *creds_out = list;
+    return 0;
+}
+
+static void
 kcmreq_free(struct kcmreq *req)
 {
     k5_buf_free(&req->reqbuf);
@@ -718,9 +840,55 @@ static krb5_error_code KRB5_CALLCONV
 kcm_retrieve(krb5_context context, krb5_ccache cache, krb5_flags flags,
              krb5_creds *mcred, krb5_creds *cred_out)
 {
-    /* There is a KCM opcode for retrieving creds, but Heimdal's client doesn't
-     * use it.  It causes the KCM daemon to actually make a TGS request. */
-    return k5_cc_retrieve_cred_default(context, cache, flags, mcred, cred_out);
+    krb5_error_code ret;
+    struct kcmreq req = EMPTY_KCMREQ;
+    krb5_creds cred;
+    krb5_enctype *enctypes = NULL;
+
+    memset(&cred, 0, sizeof(cred));
+
+    /* Include KCM_GC_CACHED in flags to prevent Heimdal's sssd from making a
+     * TGS request itself. */
+    kcmreq_init(&req, KCM_OP_RETRIEVE, cache);
+    k5_buf_add_uint32_be(&req.reqbuf, map_tcflags(flags) | KCM_GC_CACHED);
+    k5_marshal_mcred(&req.reqbuf, mcred);
+    ret = cache_call(context, cache, &req);
+
+    /* Fall back to iteration if the server does not support retrieval. */
+    if (unsupported_op_error(ret)) {
+        ret = k5_cc_retrieve_cred_default(context, cache, flags, mcred,
+                                          cred_out);
+        goto cleanup;
+    }
+    if (ret)
+        goto cleanup;
+
+    ret = k5_unmarshal_cred(req.reply.ptr, req.reply.len, 4, &cred);
+    if (ret)
+        goto cleanup;
+
+    /* In rare cases we might retrieve a credential with a session key this
+     * context can't support, in which case we must retry using iteration. */
+    if (flags & KRB5_TC_SUPPORTED_KTYPES) {
+        ret = krb5_get_tgs_ktypes(context, cred.server, &enctypes);
+        if (ret)
+            goto cleanup;
+        if (!k5_etypes_contains(enctypes, cred.keyblock.enctype)) {
+            ret = k5_cc_retrieve_cred_default(context, cache, flags, mcred,
+                                              cred_out);
+            goto cleanup;
+        }
+    }
+
+    *cred_out = cred;
+    memset(&cred, 0, sizeof(cred));
+
+cleanup:
+    kcmreq_free(&req);
+    krb5_free_cred_contents(context, &cred);
+    free(enctypes);
+    /* Heimdal's KCM returns KRB5_CC_END if no cred is found. */
+    return (ret == KRB5_CC_END) ? KRB5_CC_NOTFOUND : map_invalid(ret);
 }
 
 static krb5_error_code KRB5_CALLCONV
@@ -753,33 +921,53 @@ kcm_start_seq_get(krb5_context context, krb5_ccache cache,
 {
     krb5_error_code ret;
     struct kcmreq req = EMPTY_KCMREQ;
-    struct uuid_list *uuids;
+    struct uuid_list *uuids = NULL;
+    struct cred_list *creds = NULL;
+    struct kcm_cursor *cursor;
 
     *cursor_out = NULL;
 
     get_kdc_offset(context, cache);
 
-    kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
+    kcmreq_init(&req, KCM_OP_GET_CRED_LIST, cache);
     ret = cache_call(context, cache, &req);
-    if (ret)
+    if (ret == 0) {
+        /* GET_CRED_LIST is available. */
+        ret = kcmreq_get_cred_list(&req, &creds);
+        if (ret)
+            goto cleanup;
+    } else if (unsupported_op_error(ret)) {
+        /* Fall back to GET_CRED_UUID_LIST. */
+        kcmreq_free(&req);
+        kcmreq_init(&req, KCM_OP_GET_CRED_UUID_LIST, cache);
+        ret = cache_call(context, cache, &req);
+        if (ret)
+            goto cleanup;
+        ret = kcmreq_get_uuid_list(&req, &uuids);
+        if (ret)
+            goto cleanup;
+    } else {
         goto cleanup;
-    ret = kcmreq_get_uuid_list(&req, &uuids);
-    if (ret)
+    }
+
+    cursor = k5alloc(sizeof(*cursor), &ret);
+    if (cursor == NULL)
         goto cleanup;
-    *cursor_out = (krb5_cc_cursor)uuids;
+    cursor->uuids = uuids;
+    cursor->creds = creds;
+    *cursor_out = (krb5_cc_cursor)cursor;
 
 cleanup:
     kcmreq_free(&req);
     return ret;
 }
 
-static krb5_error_code KRB5_CALLCONV
-kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
-              krb5_creds *cred_out)
+static krb5_error_code
+next_cred_by_uuid(krb5_context context, krb5_ccache cache,
+                  struct uuid_list *uuids, krb5_creds *cred_out)
 {
     krb5_error_code ret;
     struct kcmreq req;
-    struct uuid_list *uuids = (struct uuid_list *)*cursor;
 
     memset(cred_out, 0, sizeof(*cred_out));
 
@@ -798,10 +986,38 @@ kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
 }
 
 static krb5_error_code KRB5_CALLCONV
+kcm_next_cred(krb5_context context, krb5_ccache cache, krb5_cc_cursor *cursor,
+              krb5_creds *cred_out)
+{
+    struct kcm_cursor *c = (struct kcm_cursor *)*cursor;
+    struct cred_list *list;
+
+    if (c->uuids != NULL)
+        return next_cred_by_uuid(context, cache, c->uuids, cred_out);
+
+    list = c->creds;
+    if (list->pos >= list->count)
+        return KRB5_CC_END;
+
+    /* Transfer memory ownership of one cred to the caller. */
+    *cred_out = list->creds[list->pos];
+    memset(&list->creds[list->pos], 0, sizeof(*list->creds));
+    list->pos++;
+
+    return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
 kcm_end_seq_get(krb5_context context, krb5_ccache cache,
                 krb5_cc_cursor *cursor)
 {
-    free_uuid_list((struct uuid_list *)*cursor);
+    struct kcm_cursor *c = *cursor;
+
+    if (c == NULL)
+        return 0;
+    free_uuid_list(c->uuids);
+    free_cred_list(c->creds);
+    free(c);
     *cursor = NULL;
     return 0;
 }
@@ -814,7 +1030,7 @@ kcm_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
     struct kcmreq req;
 
     kcmreq_init(&req, KCM_OP_REMOVE_CRED, cache);
-    k5_buf_add_uint32_be(&req.reqbuf, flags);
+    k5_buf_add_uint32_be(&req.reqbuf, map_tcflags(flags));
     k5_marshal_mcred(&req.reqbuf, mcred);
     ret = cache_call(context, cache, &req);
     kcmreq_free(&req);
@@ -981,8 +1197,10 @@ kcm_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
         k5_buf_add_len(&req.reqbuf, id, KCM_UUID_LEN);
         ret = kcmio_call(context, data->io, &req);
         /* Continue if the cache has been deleted. */
-        if (ret == KRB5_CC_END)
+        if (ret == KRB5_CC_END || ret == KRB5_FCC_NOFILE) {
+            ret = 0;
             continue;
+        }
         if (ret)
             goto cleanup;
         ret = kcmreq_get_name(&req, &name);
@@ -1014,6 +1232,43 @@ kcm_ptcursor_free(krb5_context context, krb5_cc_ptcursor *cursor)
     free(*cursor);
     *cursor = NULL;
     return 0;
+}
+
+static krb5_error_code KRB5_CALLCONV
+kcm_replace(krb5_context context, krb5_ccache cache, krb5_principal princ,
+            krb5_creds **creds)
+{
+    krb5_error_code ret;
+    struct kcmreq req = EMPTY_KCMREQ;
+    size_t pos;
+    uint8_t *lenptr;
+    int ncreds, i;
+    krb5_os_context octx = &context->os_context;
+    int32_t offset;
+
+    kcmreq_init(&req, KCM_OP_REPLACE, cache);
+    offset = (octx->os_flags & KRB5_OS_TOFFSET_VALID) ? octx->time_offset : 0;
+    k5_buf_add_uint32_be(&req.reqbuf, offset);
+    k5_marshal_princ(&req.reqbuf, 4, princ);
+    for (ncreds = 0; creds[ncreds] != NULL; ncreds++);
+    k5_buf_add_uint32_be(&req.reqbuf, ncreds);
+    for (i = 0; creds[i] != NULL; i++) {
+        /* Store a dummy length, then fix it up after marshalling the cred. */
+        pos = req.reqbuf.len;
+        k5_buf_add_uint32_be(&req.reqbuf, 0);
+        k5_marshal_cred(&req.reqbuf, 4, creds[i]);
+        if (k5_buf_status(&req.reqbuf) == 0) {
+            lenptr = (uint8_t *)req.reqbuf.data + pos;
+            store_32_be(req.reqbuf.len - (pos + 4), lenptr);
+        }
+    }
+    ret = cache_call(context, cache, &req);
+    kcmreq_free(&req);
+
+    if (unsupported_op_error(ret))
+        return k5_nonatomic_replace(context, cache, princ, creds);
+
+    return ret;
 }
 
 static krb5_error_code KRB5_CALLCONV
@@ -1063,7 +1318,7 @@ const krb5_cc_ops krb5_kcm_ops = {
     kcm_ptcursor_new,
     kcm_ptcursor_next,
     kcm_ptcursor_free,
-    NULL, /* move */
+    kcm_replace,
     NULL, /* wasdefault */
     kcm_lock,
     kcm_unlock,

@@ -56,7 +56,7 @@ RELDIR=krb5
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
-SHLIB_EXPLIBS=-lk5crypto -lcom_err $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
+SHLIB_EXPLIBS=-lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) @GEN_LIB@ $(LIBS)
 
 all-unix: all-liblinks
 

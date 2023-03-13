@@ -35,14 +35,14 @@ In the MIT krb5 client library, canonicalization of host-based service
 principals is controlled by the **dns_canonicalize_hostname**,
 **rnds**, and **qualify_shortname** variables in :ref:`libdefaults`.
 
-If **dns_canonicalize_hostname** is set to ``true`` (the default value
-before release 1.19), the client performs forward resolution by
-looking up the IPv4 and/or IPv6 addresses of the hostname using
-``getaddrinfo()``.  This process will typically add a domain suffix to
-the hostname if needed, and follow CNAME records in the DNS.  If
-**rdns** is also set to ``true`` (the default), the client will then
-perform a reverse lookup of the first returned Internet address using
-``getnameinfo()``, finding the name associated with the PTR record.
+If **dns_canonicalize_hostname** is set to ``true`` (the default
+value), the client performs forward resolution by looking up the IPv4
+and/or IPv6 addresses of the hostname using ``getaddrinfo()``.  This
+process will typically add a domain suffix to the hostname if needed,
+and follow CNAME records in the DNS.  If **rdns** is also set to
+``true`` (the default), the client will then perform a reverse lookup
+of the first returned Internet address using ``getnameinfo()``,
+finding the name associated with the PTR record.
 
 If **dns_canonicalize_hostname** is set to ``false``, the hostname is
 not canonicalized using DNS.  If the hostname has only one component
@@ -50,11 +50,11 @@ not canonicalized using DNS.  If the hostname has only one component
 domain will be appended, if there is one.  The **qualify_shortname**
 variable can be used to override or disable this suffix.
 
-If **dns_canonicalize_hostname** is set to ``fallback`` (the default
-value in release 1.19 and later), the hostname is initially treated
-according to the rules for ``dns_canonicalize_hostname=false``.  If a
-ticket request fails because the service principal is unknown, it the
-hostname will be canonicalized according to the rules for
+If **dns_canonicalize_hostname** is set to ``fallback`` (added in
+release 1.18), the hostname is initially treated according to the
+rules for ``dns_canonicalize_hostname=false``.  If a ticket request
+fails because the service principal is unknown, the hostname will be
+canonicalized according to the rules for
 ``dns_canonicalize_hostname=true`` and the request will be retried.
 
 In all cases, the hostname is converted to lowercase, and any trailing
@@ -115,3 +115,12 @@ any key in its keytab when accepting a connection, rather than looking
 for the keytab entry that matches the host's own idea of its name
 (typically the name that ``gethostname()`` returns).  This requires
 krb5-1.10 or later.
+
+OpenLDAP (ldapsearch, etc.)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OpenLDAP's SASL implementation performs reverse DNS lookup in order to
+canonicalize service principal names, even if **rdns** is set to
+``false`` in the Kerberos configuration.  To disable this behavior,
+add ``SASL_NOCANON on`` to ``ldap.conf``, or set the
+``LDAPSASL_NOCANON`` environment variable.

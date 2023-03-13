@@ -2,7 +2,7 @@ K5_AC_INIT([aclocal.m4])
 
 # If $runstatedir isn't set by autoconf (<2.70), set it manually.
 if test x"$runstatedir" = x; then
-  runstatedir=$localstatedir/run
+  runstatedir='${localstatedir}/run'
 fi
 AC_SUBST(runstatedir)
 
@@ -98,7 +98,6 @@ fi
 # configuration options.
 
 KRB5_LIB_AUX
-AC_KRB5_TCL
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],,)
 
@@ -123,8 +122,8 @@ AC_SUBST(LIBUTIL)
 # Determine if NLS is desired and supported.
 po=
 AC_ARG_ENABLE([nls],
-AC_HELP_STRING([--disable-nls], [disable native language support]),
-              [], [enable_nls=check])
+  [AS_HELP_STRING([--disable-nls], [disable native language support])],
+  [], [enable_nls=check])
 if test "$enable_nls" != no; then
   AC_CHECK_HEADER(libintl.h, [
     AC_SEARCH_LIBS(dgettext, intl, [
@@ -229,7 +228,9 @@ CHECK_SIGNALS
 # --with-vague-errors disables useful error messages.
 
 AC_ARG_WITH([vague-errors],
-AC_HELP_STRING([--with-vague-errors],[Do not @<:@do@:>@ send helpful errors to client]), , withval=no)
+  [AS_HELP_STRING([--with-vague-errors],
+    [Do not @<:@do@:>@ send helpful errors to client])],
+  [], [withval=no])
 if test "$withval" = yes; then
 	AC_MSG_NOTICE(Supplying vague error messages to KDC clients)
 	AC_DEFINE(KRBCONF_VAGUE_ERRORS,1,[Define if the KDC should return only vague error codes to clients])
@@ -238,8 +239,9 @@ fi
 # Check which (if any) audit plugin to build
 audit_plugin=""
 AC_ARG_ENABLE([audit-plugin],
-AC_HELP_STRING([--enable-audit-plugin=IMPL],
-               [use audit plugin @<:@ do not use audit @:>@]), , enableval=no)
+  [AS_HELP_STRING([--enable-audit-plugin=IMPL],
+    [use audit plugin @<:@ do not use audit @:>@])],
+  [], enableval=no)
 if test "$enableval" != no; then
     case "$enableval" in
     simple)
@@ -261,44 +263,36 @@ AC_SUBST(audit_plugin)
 
 # WITH_CRYPTO_IMPL
 
-CRYPTO_IMPL="builtin"
+CRYPTO_IMPL=builtin
 AC_ARG_WITH([crypto-impl],
-AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @<:@builtin@:>@]),
-[CRYPTO_IMPL=$withval
-AC_MSG_NOTICE(k5crypto will use '$withval')
-], withval=builtin)
-case "$withval" in
+  [AS_HELP_STRING([--with-crypto-impl=IMPL],
+    [use specified crypto implementation @<:@builtin@:>@])],
+  [CRYPTO_IMPL=$withval
+   AC_MSG_NOTICE(k5crypto will use '$withval')])
+
+CRYPTO_BUILTIN_TESTS=no
+case $CRYPTO_IMPL in
 builtin)
+  CRYPTO_BUILTIN_TESTS=yes
   ;;
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_DEFINE([CRYPTO_OPENSSL], 1, [Define to use OpenSSL crypto library])
   ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
   ;;
 esac
-AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
-AC_SUBST(CRYPTO_IMPL)
-AC_SUBST(CRYPTO_IMPL_CFLAGS)
-AC_SUBST(CRYPTO_IMPL_LIBS)
-
-AC_ARG_WITH([prng-alg],
-AC_HELP_STRING([--with-prng-alg=ALG], [use specified PRNG algorithm. @<:@fortuna@:>@]),
-[PRNG_ALG=$withval
-AC_MSG_NOTICE(k5crypto will use '$withval')
-], PRNG_ALG=fortuna)
-AC_CONFIG_COMMANDS(PRNG_ALG, , PRNG_ALG=$PRNG_ALG)
-AC_SUBST(PRNG_ALG)
-if test "$PRNG_ALG" = fortuna; then
-	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
-fi
+AC_SUBST([CRYPTO_IMPL_CFLAGS])
+AC_SUBST([CRYPTO_IMPL_LIBS])
+AC_SUBST([CRYPTO_BUILTIN_TESTS])
 
 # WITH_TLS_IMPL
 
 AC_ARG_WITH([tls-impl],
-AC_HELP_STRING([--with-tls-impl=IMPL],
-               [use specified TLS implementation @<:@auto@:>@]),
-[TLS_IMPL=$withval],[TLS_IMPL=auto])
+  [AS_HELP_STRING([--with-tls-impl=IMPL],
+    [use specified TLS implementation @<:@auto@:>@])],
+  [TLS_IMPL=$withval], [TLS_IMPL=auto])
 case "$TLS_IMPL" in
 openssl|auto)
   AC_CHECK_LIB(ssl,SSL_CTX_new,[have_lib_ssl=true],[have_lib_ssl=false],
@@ -337,8 +331,8 @@ AC_SUBST(TLS_IMPL_CFLAGS)
 AC_SUBST(TLS_IMPL_LIBS)
 
 AC_ARG_WITH([keyutils],
-AC_HELP_STRING([--without-keyutils],[do not link with libkeyutils]),
-            [], [with_keyutils=check])
+  [AS_HELP_STRING([--without-keyutils], [do not link with libkeyutils])],
+  [], [with_keyutils=check])
 if test "$with_keyutils" != no; then
   have_keyutils=false
   AC_CHECK_HEADERS([keyutils.h],
@@ -361,8 +355,9 @@ fi
 # and can support three NIST groups using OpenSSL.
 HAVE_SPAKE_OPENSSL=no
 AC_ARG_WITH([spake-openssl],
-AC_HELP_STRING([--with-spake-openssl],
-               [use OpenSSL for SPAKE preauth @<:@auto@:>@]),,[withval=auto])
+  [AS_HELP_STRING([--with-spake-openssl],
+    [use OpenSSL for SPAKE preauth @<:@auto@:>@])],
+  [], [withval=auto])
 if test "$withval" = auto -o "$withval" = yes; then
   AC_CHECK_LIB([crypto],[EC_POINT_new],[have_crypto=true],[have_crypto=false])
   if test "$have_crypto" = true; then
@@ -377,8 +372,8 @@ AC_SUBST(HAVE_SPAKE_OPENSSL)
 AC_SUBST(SPAKE_OPENSSL_LIBS)
 
 AC_ARG_ENABLE([aesni],
-AC_HELP_STRING([--disable-aesni],[Do not build with AES-NI support]), ,
-enable_aesni=check)
+  [AS_HELP_STRING([--disable-aesni], [Do not build with AES-NI support])],
+  [], [enable_aesni=check])
 if test "$CRYPTO_IMPL" = builtin -a "x$enable_aesni" != xno; then
     case "$host" in
     i686-*)
@@ -415,9 +410,9 @@ AC_SUBST(AESNI_OBJ)
 AC_SUBST(AESNI_FLAGS)
 
 AC_ARG_ENABLE([kdc-lookaside-cache],
-AC_HELP_STRING([--disable-kdc-lookaside-cache],
-               [Disable the cache which detects client retransmits]), ,
-               enableval=yes)
+  AS_HELP_STRING([--disable-kdc-lookaside-cache],
+    [Disable the cache which detects client retransmits]),
+  [], [enableval=yes])
 if test "$enableval" = no ; then
 	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no lookaside cache])
 fi
@@ -428,8 +423,8 @@ KRB5_RUN_FLAGS
 # -fsanitize=address, and set ASAN=yes to suppress the undefined
 # symbols check when building shared libraries.
 AC_ARG_ENABLE([asan],
-AC_HELP_STRING([--enable-asan],[Build with asan memory checking]),[],
-               [enable_asan=no])
+  [AS_HELP_STRING([--enable-asan], [Build with asan memory checking])],
+  [], [enable_asan=no])
 if test "$enable_asan" != no; then
     if test "$enable_asan" = yes; then
         enable_asan=address
@@ -444,14 +439,11 @@ fi
 AC_SUBST(ASAN_FLAGS)
 AC_SUBST(ASAN)
 
-AC_TYPE_SIGNAL
-
 # from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE],
 [Define if "struct sockaddr_storage" is available.])
 
 AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
-AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
 AC_FUNC_STRERROR_R
@@ -513,42 +505,50 @@ CHECK_SETJMP
 
 AC_MSG_CHECKING([return type of setrpcent])
 AC_CACHE_VAL(k5_cv_type_setrpcent,
-[AC_TRY_COMPILE([#include <netdb.h>
-#ifdef __cplusplus
-extern "C"
-#endif
-extern void setrpcent();],
-[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE([[#include <netdb.h>
+                    extern void setrpcent();]])],
+  [k5_cv_type_setrpcent=void],
+  [k5_cv_type_setrpcent=int])])
 AC_MSG_RESULT($k5_cv_type_setrpcent)
 AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
 
 AC_MSG_CHECKING([return type of endrpcent])
 AC_CACHE_VAL(k5_cv_type_endrpcent,
-[AC_TRY_COMPILE([#include <netdb.h>
-#ifdef __cplusplus
-extern "C"
-#endif
-extern void endrpcent();],
-[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE(
+    [[#include <netdb.h>
+      extern void endrpcent();]])],
+  [k5_cv_type_endrpcent=void], [k5_cv_type_endrpcent=int])])
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 
 
 # bswap_16 is a macro in byteswap.h under GNU libc
 AC_MSG_CHECKING(for bswap_16)
-AC_CACHE_VAL(krb5_cv_bswap_16,[
-AC_TRY_LINK([#if HAVE_BYTESWAP_H
-#include <byteswap.h>
-#endif],[bswap_16(37);],krb5_cv_bswap_16=yes,krb5_cv_bswap_16=no)])
+AC_CACHE_VAL(krb5_cv_bswap_16,
+[AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#if HAVE_BYTESWAP_H
+      #include <byteswap.h>
+      #endif
+    ]],
+    [[bswap_16(37);]])],
+  [krb5_cv_bswap_16=yes], [krb5_cv_bswap_16=no])])
 AC_MSG_RESULT($krb5_cv_bswap_16)
 if test "$krb5_cv_bswap_16" = yes; then
   AC_DEFINE(HAVE_BSWAP_16,1,[Define to 1 if bswap_16 is available via byteswap.h])
 fi
 AC_MSG_CHECKING(for bswap_64)
-AC_CACHE_VAL(krb5_cv_bswap_64,[
-AC_TRY_LINK([#if HAVE_BYTESWAP_H
-#include <byteswap.h>
-#endif],[bswap_64(37);],krb5_cv_bswap_64=yes,krb5_cv_bswap_64=no)])
+AC_CACHE_VAL(krb5_cv_bswap_64,
+[AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#if HAVE_BYTESWAP_H
+      #include <byteswap.h>
+      #endif
+    ]],
+    [[bswap_64(37);]])],
+  [krb5_cv_bswap_64=yes], [krb5_cv_bswap_64=no])])
 AC_MSG_RESULT($krb5_cv_bswap_64)
 if test "$krb5_cv_bswap_64" = yes; then
   AC_DEFINE(HAVE_BSWAP_64,1,[Define to 1 if bswap_64 is available via byteswap.h])
@@ -581,18 +581,22 @@ ac_cv_func_gethostbyname_r=yes
 if test "$ac_cv_func_gethostbyname_r" = yes; then
   AC_MSG_CHECKING([if gethostbyname_r returns an int])
   AC_CACHE_VAL(krb5_cv_gethostbyname_r_returns_int,
-  [AC_TRY_COMPILE([#include <netdb.h>
-  extern int gethostbyname_r ();], [1;],
-  krb5_cv_gethostbyname_r_returns_int=yes,
-  krb5_cv_gethostbyname_r_returns_int=no)])
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <netdb.h>
+        extern int gethostbyname_r();]])],
+    [krb5_cv_gethostbyname_r_returns_int=yes],
+    [krb5_cv_gethostbyname_r_returns_int=no])])
   AC_MSG_RESULT($krb5_cv_gethostbyname_r_returns_int)
 
   AC_MSG_CHECKING([if gethostbyname_r returns a pointer])
   AC_CACHE_VAL(krb5_cv_gethostbyname_r_returns_ptr,
-  [AC_TRY_COMPILE([#include <netdb.h>
-  extern struct hostent *gethostbyname_r ();], [1;],
-  krb5_cv_gethostbyname_r_returns_ptr=yes,
-  krb5_cv_gethostbyname_r_returns_ptr=no)])
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <netdb.h>
+        extern struct hostent *gethostbyname_r();]])],
+    [krb5_cv_gethostbyname_r_returns_ptr=yes],
+    [krb5_cv_gethostbyname_r_returns_ptr=no])])
   AC_MSG_RESULT($krb5_cv_gethostbyname_r_returns_ptr)
 
   if test "$krb5_cv_gethostbyname_r_returns_int" = "$krb5_cv_gethostbyname_r_returns_ptr"; then
@@ -619,12 +623,16 @@ AC_CHECK_FUNC(getpwuid_r,ac_cv_func_getpwuid_r=yes,ac_cv_func_getpwuid_r=no)
 if test "$ac_cv_func_getpwnam_r" = yes; then
   AC_MSG_CHECKING([return type of getpwnam_r])
   AC_CACHE_VAL(krb5_cv_getpwnam_r_return_type,
-  [AC_TRY_COMPILE([#include <pwd.h>
-   extern int getpwnam_r();], [1;],
-   getpwnam_r_returns_int=yes,getpwnam_r_returns_int=no)
-   AC_TRY_COMPILE([#include <pwd.h>
-   extern struct passwd *getpwnam_r();], [1;],
-   getpwnam_r_returns_ptr=yes,getpwnam_r_returns_ptr=no)
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <pwd.h>
+        extern int getpwnam_r();]])],
+    [getpwnam_r_returns_int=yes], [getpwnam_r_returns_int=no])
+   AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <pwd.h>
+        extern struct passwd *getpwnam_r();]])],
+    [getpwnam_r_returns_ptr=yes], [getpwnam_r_returns_ptr=no])
    case "$getpwnam_r_returns_int/$getpwnam_r_returns_ptr" in
      yes/no) krb5_cv_getpwnam_r_return_type=int ;;
      no/yes) krb5_cv_getpwnam_r_return_type=ptr ;;
@@ -641,12 +649,19 @@ fi
 if test "$ac_cv_func_getpwnam_r" = yes; then
   AC_MSG_CHECKING([number of arguments to getpwnam_r])
   AC_CACHE_VAL(krb5_cv_getpwnam_r_args,
-  [AC_TRY_COMPILE([#include <pwd.h>
-   struct passwd pwx; char buf[1024];],
-   [getpwnam_r("", &pwx, buf, sizeof(buf));], args4=yes, args4=no)
-   AC_TRY_COMPILE([#include <pwd.h>
-   struct passwd pwx, *p; char buf[1024];],
-   [getpwnam_r("", &pwx, buf, sizeof(buf), &p);], args5=yes, args5=no)
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[#include <pwd.h>
+        struct passwd pwx; char buf[1024];]],
+      [[getpwnam_r("", &pwx, buf, sizeof(buf));]])],
+    [args4=yes], [args4=no])
+   AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM(
+       [[#include <pwd.h>
+         struct passwd pwx, *p;
+         char buf[1024];]],
+       [[getpwnam_r("", &pwx, buf, sizeof(buf), &p);]])],
+     [args5=yes], [args5=no])
    case $args4/$args5 in
      yes/no) krb5_cv_getpwnam_r_args=4 ;;
      no/yes) krb5_cv_getpwnam_r_args=5 ;;
@@ -683,10 +698,16 @@ fi
 if test "$ac_cv_func_gmtime_r" = yes; then
   AC_MSG_CHECKING([whether gmtime_r returns int])
   AC_CACHE_VAL(krb5_cv_gmtime_r_returns_int,
-  [AC_TRY_COMPILE([#include <time.h>
-   extern int gmtime_r ();], [1;], return_int=yes, return_int=no)
-   AC_TRY_COMPILE([#include <time.h>
-   extern struct tm *gmtime_r ();], [1;], return_ptr=yes, return_ptr=no)
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <time.h>
+        extern int gmtime_r();]])],
+    [return_int=yes], [return_int=no])
+   AC_COMPILE_IFELSE([
+     AC_LANG_SOURCE(
+       [[#include <time.h>
+         extern struct tm *gmtime_r();]])],
+     [return_ptr=yes], [return_ptr=no])
    case $return_int/$return_ptr in
      yes/no) krb5_cv_gmtime_r_returns_int=yes ;;
      no/yes) krb5_cv_gmtime_r_returns_int=no ;;
@@ -708,18 +729,22 @@ ac_cv_func_getservbyname_r=yes
 if test "$ac_cv_func_getservbyname_r" = yes; then
   AC_MSG_CHECKING([if getservbyname_r returns an int])
   AC_CACHE_VAL(krb5_cv_getservbyname_r_returns_int,
-  [AC_TRY_COMPILE([#include <netdb.h>
-  extern int getservbyname_r ();], [1;],
-  krb5_cv_getservbyname_r_returns_int=yes,
-  krb5_cv_getservbyname_r_returns_int=no)])
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <netdb.h>
+        extern int getservbyname_r();]])],
+    [krb5_cv_getservbyname_r_returns_int=yes],
+    [krb5_cv_getservbyname_r_returns_int=no])])
   AC_MSG_RESULT($krb5_cv_getservbyname_r_returns_int)
 
   AC_MSG_CHECKING([if getservbyname_r returns a pointer])
   AC_CACHE_VAL(krb5_cv_getservbyname_r_returns_ptr,
-  [AC_TRY_COMPILE([#include <netdb.h>
-  extern struct servent *getservbyname_r ();], [1;],
-  krb5_cv_getservbyname_r_returns_ptr=yes,
-  krb5_cv_getservbyname_r_returns_ptr=no)])
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <netdb.h>
+        extern struct servent *getservbyname_r();]])],
+    [krb5_cv_getservbyname_r_returns_ptr=yes],
+    [krb5_cv_getservbyname_r_returns_ptr=no])])
   AC_MSG_RESULT($krb5_cv_getservbyname_r_returns_ptr)
 
   if test "$krb5_cv_getservbyname_r_returns_int" = "$krb5_cv_getservbyname_r_returns_ptr"; then
@@ -736,7 +761,6 @@ if test "$ac_cv_func_getservbyname_r" = yes; then
 fi
 ])
 
-HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T
 
@@ -744,27 +768,27 @@ AC_CHECK_HEADER(termios.h,
 [AC_CHECK_FUNC([tcsetattr],
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
 
-KRB5_SIGTYPE
 AC_CHECK_HEADERS(poll.h stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
 
 # If compiling with IPv6 support, test if in6addr_any functions.
 # Irix 6.5.16 defines it, but lacks support in the C library.
 if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes ; then
-AC_CACHE_CHECK([for in6addr_any definition in library],
-  krb5_cv_var_in6addr_any,
-[AC_TRY_LINK([
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <stdio.h>
-],[
-  struct sockaddr_in6 in;
-  in.sin6_addr = in6addr_any;
-  printf("%x", &in);
-],krb5_cv_var_in6addr_any=yes, krb5_cv_var_in6addr_any=no)])
+  AC_CACHE_CHECK([for in6addr_any definition in library],
+  [krb5_cv_var_in6addr_any],
+  [AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[#ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #include <sys/socket.h>
+        #include <netinet/in.h>
+        #include <netdb.h>
+        #include <stdio.h>
+      ]],
+      [[struct sockaddr_in6 in;
+        in.sin6_addr = in6addr_any;
+        printf("%x", &in);]])],
+    [krb5_cv_var_in6addr_any=yes], [krb5_cv_var_in6addr_any=no])])
   if test $krb5_cv_var_in6addr_any = no; then
     AC_DEFINE(NEED_INSIXADDR_ANY,1,[Define if in6addr_any is not defined in libc])
   fi
@@ -772,7 +796,6 @@ fi
 
 # then from osconf.h, we have
 
-AC_HEADER_TIME
 AC_CHECK_TYPE(time_t, long)
 AC_CHECK_SIZEOF(time_t)
 SIZEOF_TIME_T=$ac_cv_sizeof_time_t
@@ -799,11 +822,13 @@ AC_SUBST(KRB5_RCTMPDIR)
 
 AC_MSG_CHECKING(for socklen_t)
 AC_CACHE_VAL(krb5_cv_has_type_socklen_t,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <sys/socket.h>
-],[sizeof (socklen_t);],
-krb5_cv_has_type_socklen_t=yes,krb5_cv_has_type_socklen_t=no)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/types.h>
+      #include <sys/socket.h>
+    ]],
+    [[sizeof(socklen_t);]])],
+  [krb5_cv_has_type_socklen_t=yes], [krb5_cv_has_type_socklen_t=no])])
 AC_MSG_RESULT($krb5_cv_has_type_socklen_t)
 if test $krb5_cv_has_type_socklen_t = yes; then
     AC_DEFINE(HAVE_SOCKLEN_T,1,[Define if there is a socklen_t type. If not, probably use size_t])
@@ -811,11 +836,13 @@ fi
 
 AC_MSG_CHECKING(for struct lifconf)
 AC_CACHE_VAL(krb5_cv_has_struct_lifconf,
-[AC_TRY_COMPILE(
-[#include <sys/socket.h>
-#include <net/if.h>
-],[sizeof (struct lifconf);],
-krb5_cv_has_struct_lifconf=yes,krb5_cv_has_struct_lifconf=no)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/socket.h>
+      #include <net/if.h>
+    ]],
+    [[sizeof (struct lifconf);]])],
+  [krb5_cv_has_struct_lifconf=yes], [krb5_cv_has_struct_lifconf=no])])
 AC_MSG_RESULT($krb5_cv_has_struct_lifconf)
 if test $krb5_cv_has_struct_lifconf = yes; then
     AC_DEFINE(HAVE_STRUCT_LIFCONF,1,[Define if there is a struct lifconf.])
@@ -823,12 +850,15 @@ fi
 # HP-UX 11 uses stuct if_laddrconf
 AC_MSG_CHECKING(for struct if_laddrconf)
 AC_CACHE_VAL(krb5_cv_has_struct_if_laddrconf,
-[AC_TRY_COMPILE(
-[#include <sys/socket.h>
-#include <net/if.h>
-#include <net/if6.h>
-],[sizeof (struct if_laddrconf);],
-krb5_cv_has_struct_if_laddrconf=yes,krb5_cv_has_struct_if_laddrconf=no)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/socket.h>
+      #include <net/if.h>
+      #include <net/if6.h>
+    ]],
+    [[sizeof(struct if_laddrconf);]])],
+  [krb5_cv_has_struct_if_laddrconf=yes],
+  [krb5_cv_has_struct_if_laddrconf=no])])
 AC_MSG_RESULT($krb5_cv_has_struct_if_laddrconf)
 if test $krb5_cv_has_struct_if_laddrconf = yes; then
     AC_DEFINE(HAVE_STRUCT_IF_LADDRCONF,1,[Define if there is a struct if_laddrconf.])
@@ -837,10 +867,12 @@ fi
 
 AC_MSG_CHECKING([for h_errno in netdb.h])
 AC_CACHE_VAL(krb5_cv_header_netdb_h_h_errno,
-[AC_TRY_COMPILE(
-	[#include <netdb.h>],
-	[int x = h_errno;], krb5_cv_header_netdb_h_h_errno=yes,
-	krb5_cv_header_netdb_h_h_errno=no)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <netdb.h>]],
+    [[int x = h_errno;]])],
+    [krb5_cv_header_netdb_h_h_errno=yes],
+    [krb5_cv_header_netdb_h_h_errno=no])])
 AC_MSG_RESULT($krb5_cv_header_netdb_h_h_errno)
 if test $krb5_cv_header_netdb_h_h_errno = yes; then
     AC_DEFINE([HAVE_NETDB_H_H_ERRNO], 1,
@@ -881,13 +913,6 @@ AC_CHECK_TYPES([struct rt_msghdr], , , [
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_TYPES([__int128_t, __uint128_t])
 
-# stuff for util/profile
-
-# AC_KRB5_TCL already done
-DO_TCL=
-test "$TCL_LIBS" != "" && DO_TCL=ok
-AC_SUBST(DO_TCL)
-
 # types libdb2 wants
 
 AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t, int8_t, int16_t, int32_t])
@@ -913,23 +938,25 @@ AC_SUBST(FCTSH)
 # to ANSI/ISO C 1999 specification).  Specifically, positional
 # specifications; not checking for other features like %zx at present.
 AC_MSG_CHECKING(for POSIX printf positional specification support)
-AC_CACHE_VAL(ac_cv_printf_positional,[
-AC_TRY_RUN([
-#include <stdio.h>
-#include <string.h>
-const char expected[] = "200 100";
-int main () {
-    char buf[30];
-    sprintf(buf, "%2\$x %1\$d", 100, 512);
-    if (strcmp(expected, buf)) {
-	fprintf(stderr,"bad result: <%s> wanted: <%s>\n", buf, expected);
-	return 1;
-    }
-    return 0;
-}],
-  ac_cv_printf_positional=yes,
-  ac_cv_printf_positional=no,
-  AC_MSG_ERROR([Cannot test for printf positional argument support when cross compiling]))])
+AC_CACHE_VAL(ac_cv_printf_positional,
+[AC_RUN_IFELSE(
+  [AC_LANG_SOURCE(
+    [[#include <stdio.h>
+      #include <string.h>
+      const char expected[] = "200 100";
+      int main()
+      {
+          char buf[30];
+          sprintf(buf, "%2\$x %1\$d", 100, 512);
+          if (strcmp(expected, buf)) {
+              fprintf(stderr, "bad result: <%s> wanted: <%s>\n",
+                      buf, expected);
+              return 1;
+          }
+          return 0;
+      }]])],
+  [ac_cv_printf_positional=yes], [ac_cv_printf_positional=no],
+  [AC_MSG_ERROR(Cannot test for printf positional argument support when cross compiling)])])
 # Nothing for autoconf.h for now.
 AC_MSG_RESULT($ac_cv_printf_positional)
 
@@ -946,33 +973,9 @@ ath_compat=
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 ath_compat=compat,)
-# The following are tests for the presence of programs required for
-# kadmin testing.
-AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
-AC_CHECK_PROG(have_PERL,perl,perl)
-if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
-	DO_TEST=ok
-fi
-AC_SUBST(DO_TEST)
 
-# The following are substituted into kadmin/testing/scripts/env-setup.sh
-RBUILD=`pwd`
-AC_SUBST(RBUILD)
-case "$srcdir" in
-/*)	S_TOP=$srcdir ;;
-*)	S_TOP=`pwd`/$srcdir ;;
-esac
-AC_SUBST(S_TOP)
-AC_PATH_PROG(EXPECT,expect)
-# For kadmin/testing/util/Makefile.in
-if test "$TCL_LIBS" != "" ;  then
-	DO_ALL=tcl
-fi
-AC_SUBST(DO_ALL)
 KRB5_AC_PRIOCNTL_HACK
-K5_GEN_FILE(kadmin/testing/scripts/env-setup.sh:kadmin/testing/scripts/env-setup.shin)
-# for lib/kadm5
-AC_CHECK_PROG(RUNTEST,runtest,runtest)
+
 AC_CHECK_PROG(PERL,perl,perl)
 
 # lib/gssapi
@@ -999,19 +1002,33 @@ AC_SUBST(include_xom)
 # STRUCT_RPCENT_IN_RPC_NETDB_H anyway.
 
 AC_MSG_CHECKING([where struct rpcent is declared])
-AC_TRY_COMPILE([#include <netdb.h>],
-[struct rpcent e;
-char c = e.r_name[0];
-int i = e.r_number;],
-[AC_TRY_COMPILE([#include <rpc/netdb.h>],
-[struct rpcent e;
-char c = e.r_name[0];
-int i = e.r_number;],
-[AC_MSG_RESULT([rpc/netdb.h])
-rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'],
-[AC_MSG_RESULT([netdb.h])])],
-[AC_MSG_RESULT([nowhere])
-rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <netdb.h>
+    ]],
+    [[struct rpcent e;
+      char c = e.r_name[0];
+      int i = e.r_number;]])],
+    [netdb_rpcent=yes], [netdb_rpcent=no])
+if test "$netdb_rpcent" = yes; then
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+      [[#include <rpc/netdb.h>
+      ]],
+      [[struct rpcent e;
+        char c = e.r_name[0];
+        int i = e.r_number;]])],
+    [rpc_netdb_rpcent=yes], [rpc_netdb_rpcent=no])
+  if test "$rpc_netdb_rpcent" = yes; then
+    AC_MSG_RESULT([rpc/netdb.h])
+    rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'
+  else
+    AC_MSG_RESULT([netdb.h])
+  fi
+else
+  AC_MSG_RESULT([nowhere])
+  rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'
+fi
 AC_SUBST(rpcent_define)
 
 AC_CHECK_HEADERS(sys/select.h sys/time.h unistd.h)
@@ -1035,15 +1052,21 @@ fi
 AC_SUBST(GSSRPC__UNISTD_H)
 
 AC_CACHE_CHECK([for MAXHOSTNAMELEN in sys/param.h],
-  [krb5_cv_header_sys_param_h_maxhostnamelen],
-  [AC_TRY_COMPILE([#include <sys/param.h>],
-    [int i = MAXHOSTNAMELEN;],
+[krb5_cv_header_sys_param_h_maxhostnamelen],
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/param.h>
+    ]],
+    [[int i = MAXHOSTNAMELEN;]])],
     [krb5_cv_header_sys_param_h_maxhostnamelen=yes],
     [krb5_cv_header_sys_param_h_maxhostnamelen=no])])
 AC_CACHE_CHECK([for MAXHOSTNAMELEN in netdb.h],
-  [krb5_cv_header_netdb_h_maxhostnamelen],
-  [AC_TRY_COMPILE([#include <netdb.h>],
-    [int i = MAXHOSTNAMELEN;],
+[krb5_cv_header_netdb_h_maxhostnamelen],
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <netdb.h>
+    ]],
+    [[int i = MAXHOSTNAMELEN;]])],
     [krb5_cv_header_netdb_h_maxhostnamelen=yes],
     [krb5_cv_header_netdb_h_maxhostnamelen=no])])
 
@@ -1062,14 +1085,17 @@ AC_SUBST(GSSRPC__SYS_PARAM_H)
 AC_SUBST(GSSRPC__NETDB_H)
 
 AC_CACHE_CHECK([for BSD type aliases], [krb5_cv_type_bsdaliases],
-  [AC_TRY_COMPILE(
-    [#include <sys/types.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif],
-    [u_char c;
-u_int i;
-u_long l;], [krb5_cv_type_bsdaliases=yes], [krb5_cv_type_bsdaliases=no])])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <sys/types.h>
+      #if HAVE_UNISTD_H
+      #include <unistd.h>
+      #endif
+    ]],
+    [[u_char c;
+      u_int i;
+      u_long l;]])],
+  [krb5_cv_type_bsdaliases=yes], [krb5_cv_type_bsdaliases=no])])
 if test $krb5_cv_type_bsdaliases = yes; then
   GSSRPC__BSD_TYPEALIASES='/* #undef GSSRPC__BSD_TYPEALIASES */'
 else
@@ -1079,23 +1105,21 @@ AC_SUBST(GSSRPC__BSD_TYPEALIASES)
 
 AC_MSG_CHECKING([return type of setrpcent])
 AC_CACHE_VAL(k5_cv_type_setrpcent,
-[AC_TRY_COMPILE([#include <netdb.h>
-#ifdef __cplusplus
-extern "C"
-#endif
-extern void setrpcent();],
-[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE(
+    [[#include <netdb.h>
+      extern void setrpcent();]])],
+  [k5_cv_type_setrpcent=void], [k5_cv_type_setrpcent=int])])
 AC_MSG_RESULT($k5_cv_type_setrpcent)
 AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
 
 AC_MSG_CHECKING([return type of endrpcent])
 AC_CACHE_VAL(k5_cv_type_endrpcent,
-[AC_TRY_COMPILE([#include <netdb.h>
-#ifdef __cplusplus
-extern "C"
-#endif
-extern void endrpcent();],
-[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])
+[AC_COMPILE_IFELSE(
+  [AC_LANG_SOURCE(
+    [[#include <netdb.h>
+      extern void endrpcent();]])],
+  [k5_cv_type_endrpcent=void], [k5_cv_type_endrpcent=int])])
 AC_MSG_RESULT($k5_cv_type_endrpcent)
 AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 K5_GEN_FILE(include/gssrpc/types.h:include/gssrpc/types.hin)
@@ -1114,6 +1138,7 @@ int i = 1;
 ])], k5_cv_openssl_version_okay=yes, k5_cv_openssl_version_okay=no)])
   old_LIBS="$LIBS"
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  AC_CHECK_FUNCS(EVP_PKEY_get_bn_param)
   LIBS="$old_LIBS"
 fi
 if test "$k5_cv_openssl_version_okay" = yes && (test "$enable_pkinit" = yes || test "$enable_pkinit" = try); then
@@ -1132,14 +1157,6 @@ AC_SUBST(PKINIT)
 
 # for lib/apputils
 AC_REPLACE_FUNCS(daemon)
-
-# for tests/
-if test x"$RUNTEST" != x; then
-	HAVE_RUNTEST=yes
-else
-	HAVE_RUNTEST=no
-fi
-AC_SUBST(HAVE_RUNTEST)
 
 # For Python tests.  Python version 3.2.4 is required as prior
 # versions do not accept string input to subprocess.Popen.communicate
@@ -1200,14 +1217,9 @@ AC_SUBST(DB_EXTRA_LIBS)
 
 
 
-# Check for thread safety issues.
-# (Is there a better place for this?)
-# tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
-# Removed getpwnam_r and getpwuid_r because include/configure.in has some
-# more careful checks, and may decide to pretend that they're not found if
-# the function signatures can't be figured out.
-tsfuncs="gethostbyname_r getservbyname_r gmtime_r localtime_r"
-AC_CHECK_FUNCS($tsfuncs)
+# Warn about possible thread safety issues.  These functions have all
+# been checked for previously.
+tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
 if test "$enable_thread_support" = yes; then
   tsmissing=""
   for ts in $tsfuncs; do
@@ -1264,7 +1276,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
     if test "$BER_OKAY" = "1"; then
       LDAP_LIBS='-lldap -llber'
     else
-      AC_ERROR("BER library missing - cannot build LDAP database module")
+      AC_MSG_ERROR("BER library missing - cannot build LDAP database module")
     fi
   fi
   AC_DEFINE([ENABLE_LDAP], 1, [Define if LDAP KDB support within the Kerberos library (mainly ASN.1 code) should be enabled.])
@@ -1301,9 +1313,9 @@ CFLAGS=$old_CFLAGS
 lmdb_plugin_dir=""
 HAVE_LMDB=no
 AC_ARG_WITH([lmdb],
-AC_HELP_STRING([--with-lmdb],
-	    [compile LMDB database backend module @<:@auto@:>@]),,
-	    [withval=auto])
+  [AS_HELP_STRING([--with-lmdb],
+    [compile LMDB database backend module @<:@auto@:>@])],
+  [], [withval=auto])
 if test "$withval" = auto -o "$withval" = yes; then
   AC_CHECK_LIB([lmdb],[mdb_env_create],[have_lmdb=true],[have_lmdb=false])
   if test "$have_lmdb" = true; then
@@ -1327,13 +1339,12 @@ fi
 
 # Compile with libedit support in ss by default if available.  Compile
 # with readline only if asked, to avoid a default GPL dependency.
-# Building with readline also breaks the dejagnu test suite.
 AC_ARG_WITH([libedit],
-	    AC_HELP_STRING([--without-libedit], [do not compile with libedit]),
-	    [], [with_libedit=default])
+  [AS_HELP_STRING([--without-libedit], [do not compile with libedit])],
+  [], [with_libedit=default])
 AC_ARG_WITH([readline],
-	    AC_HELP_STRING([--with-readline], [compile with GNU Readline]),
-	    [], [with_readline=no])
+  [AS_HELP_STRING([--with-readline], [compile with GNU Readline])],
+  [], [with_readline=no])
 if test "x$with_readline" = xyes; then
   with_libedit=no
 fi
@@ -1365,7 +1376,7 @@ AC_SUBST([RL_CFLAGS])
 AC_SUBST([RL_LIBS])
 
 AC_ARG_WITH([system-verto],
-  [AC_HELP_STRING([--with-system-verto], [always use system verto library])],
+  [AS_HELP_STRING([--with-system-verto], [always use system verto library])],
   [], [with_system_verto=default])
 VERTO_VERSION=k5
 if test "x$with_system_verto" != xno; then
@@ -1410,9 +1421,9 @@ AC_ARG_VAR(DEFCCNAME, [Default ccache name])
 AC_ARG_VAR(DEFKTNAME, [Default keytab name])
 AC_ARG_VAR(DEFCKTNAME, [Default client keytab name])
 AC_ARG_WITH([krb5-config],
-	AC_HELP_STRING([--with-krb5-config=PATH],
-		[path to existing krb5-config program for defaults]), ,
-        [with_krb5_config=krb5-config])
+  [AS_HELP_STRING([--with-krb5-config=PATH],
+    [path to existing krb5-config program for defaults])],
+  [], [with_krb5_config=krb5-config])
 if test "x$with_krb5_config" != xno; then
 	if test "x$with_krb5_config" = xyes; then
 		with_krb5_config=krb5-config
@@ -1473,14 +1484,14 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib lib/kdb
 
-	lib/crypto lib/crypto/krb lib/crypto/$CRYPTO_IMPL
-	lib/crypto/$CRYPTO_IMPL/enc_provider
-	lib/crypto/$CRYPTO_IMPL/hash_provider
-	lib/crypto/$CRYPTO_IMPL/des
-	lib/crypto/$CRYPTO_IMPL/md4 lib/crypto/$CRYPTO_IMPL/md5
-        lib/crypto/$CRYPTO_IMPL/sha1 lib/crypto/$CRYPTO_IMPL/sha2
-	lib/crypto/$CRYPTO_IMPL/aes lib/crypto/$CRYPTO_IMPL/camellia
-	lib/crypto/crypto_tests
+	lib/crypto lib/crypto/krb lib/crypto/crypto_tests
+	lib/crypto/builtin lib/crypto/builtin/des
+	lib/crypto/builtin/aes lib/crypto/builtin/camellia
+	lib/crypto/builtin/md4 lib/crypto/builtin/md5
+	lib/crypto/builtin/sha1 lib/crypto/builtin/sha2
+	lib/crypto/builtin/enc_provider lib/crypto/builtin/hash_provider
+	lib/crypto/openssl lib/crypto/openssl/des
+	lib/crypto/openssl/enc_provider lib/crypto/openssl/hash_provider
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
@@ -1491,7 +1502,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/rpc lib/rpc/unit-test
 
-	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv lib/kadm5/unit-test
+	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv
 	lib/krad
 	lib/apputils
 
@@ -1527,7 +1538,6 @@ V5_AC_OUTPUT_MAKEFILE(.
 	clients/kdestroy clients/kpasswd clients/ksu clients/kswitch
 
 	kadmin kadmin/cli kadmin/dbutil kadmin/ktutil kadmin/server
-	kadmin/testing kadmin/testing/scripts kadmin/testing/util
 
 	appl
 	appl/sample appl/sample/sclient appl/sample/sserver
@@ -1535,5 +1545,5 @@ V5_AC_OUTPUT_MAKEFILE(.
 	appl/gss-sample appl/user_user
 
 	tests tests/asn.1 tests/create tests/hammer tests/verify tests/gssapi
-	tests/dejagnu tests/threads tests/shlib tests/gss-threads tests/misc
+	tests/threads tests/shlib tests/gss-threads tests/misc
 )

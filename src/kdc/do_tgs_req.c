@@ -78,8 +78,9 @@ prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
                   krb5_principal,krb5_data **,const char *, krb5_pa_data **);
 
 static krb5_error_code
-decrypt_2ndtkt(kdc_realm_t *, krb5_kdc_req *, krb5_flags, krb5_db_entry **,
-               krb5_keyblock **, const char **);
+decrypt_2ndtkt(kdc_realm_t *, krb5_kdc_req *, krb5_flags, krb5_db_entry *,
+               krb5_keyblock *, const krb5_ticket **, krb5_pac *,
+               krb5_db_entry **, krb5_keyblock **, const char **);
 
 static krb5_error_code
 gen_session_key(kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
@@ -112,7 +113,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_kdc_rep reply;
     krb5_enc_kdc_rep_part reply_encpart;
     krb5_ticket ticket_reply, *header_ticket = 0;
-    int st_idx = 0;
+    const krb5_ticket *stkt = NULL;
     krb5_enc_tkt_part enc_tkt_reply;
     int newtransited = 0;
     krb5_error_code retval = 0;
@@ -121,7 +122,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_keyblock session_key, local_tgt_key;
     krb5_keyblock *reply_key = NULL;
     krb5_principal cprinc = NULL, sprinc = NULL, altcprinc = NULL;
-    krb5_const_principal authdata_client;
     krb5_principal stkt_authdata_client = NULL;
     krb5_last_req_entry *nolrarray[2], nolrentry;
     int errcode;
@@ -133,7 +133,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
     krb5_authdata **kdc_issued_auth_data = NULL; /* auth data issued by KDC */
     unsigned int c_flags = 0, s_flags = 0;       /* client/server KDB flags */
-    krb5_boolean is_referral;
+    krb5_boolean is_referral, is_crossrealm;
     const char *emsg = NULL;
     krb5_kvno ticket_kvno = 0;
     struct kdc_request_state *state = NULL;
@@ -142,7 +142,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     krb5_pa_data **e_data = NULL;
     krb5_audit_state *au_state = NULL;
     krb5_data **auth_indicators = NULL;
-    void *ad_info = NULL, *stkt_ad_info = NULL;
+    krb5_pac header_pac = NULL, stkt_pac = NULL, subject_pac;
 
     memset(&reply, 0, sizeof(reply));
     memset(&reply_encpart, 0, sizeof(reply_encpart));
@@ -162,17 +162,14 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     }
 
     errcode = kdc_make_rstate(kdc_active_realm, &state);
-    if (errcode !=0) {
-        krb5_free_kdc_req(kdc_context, request);
-        return errcode;
-    }
+    if (errcode != 0)
+        goto cleanup;
 
     /* Initialize audit state. */
     errcode = kau_init_kdc_req(kdc_context, request, from, &au_state);
-    if (errcode) {
-        krb5_free_kdc_req(kdc_context, request);
-        return errcode;
-    }
+    if (errcode)
+        goto cleanup;
+
     /* Seed the audit trail with the request ID and basic information. */
     kau_tgs_req(kdc_context, TRUE, au_state);
 
@@ -207,11 +204,24 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         status = "FIND_FAST";
         goto cleanup;
     }
+    if (sprinc == NULL) {
+        status = "NULL_SERVER";
+        errcode = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+        goto cleanup;
+    }
 
     errcode = get_local_tgt(kdc_context, &sprinc->realm, header_server,
                             &local_tgt, &local_tgt_storage, &local_tgt_key);
     if (errcode) {
         status = "GET_LOCAL_TGT";
+        goto cleanup;
+    }
+
+    errcode = get_verified_pac(kdc_context, header_ticket->enc_part2,
+                               header_server->princ, header_key, local_tgt,
+                               &local_tgt_key, &header_pac);
+    if (errcode) {
+        status = "HEADER_PAC";
         goto cleanup;
     }
 
@@ -237,10 +247,8 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     /* XXX make sure server here has the proper realm...taken from AP_REQ
        header? */
 
-    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
-        setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
-        setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
-    }
+    if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE))
+        setflag(s_flags, KRB5_KDB_FLAG_REFERRAL_OK);
 
     errcode = search_sprinc(kdc_active_realm, request, s_flags, &server,
                             &status);
@@ -258,106 +266,64 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     if ((errcode = krb5_timeofday(kdc_context, &kdc_time)))
         goto cleanup;
 
-    if ((retval = validate_tgs_request(kdc_active_realm,
-                                       request, server, header_ticket,
-                                       kdc_time, &status, &e_data))) {
+    is_crossrealm = !data_eq(header_server->princ->realm, sprinc->realm);
+    if (is_crossrealm)
+        setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
+    if (is_referral)
+        setflag(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL);
+
+    /* Check for protocol transition */
+    errcode = kdc_process_s4u2self_req(kdc_active_realm, request, server,
+                                       subkey, header_enc_tkt->session,
+                                       &s4u_x509_user, &client, &status);
+    if (s4u_x509_user != NULL || errcode != 0) {
+        if (s4u_x509_user != NULL)
+            au_state->s4u2self_user = s4u_x509_user->user_id.user;
+        au_state->status = status;
+        kau_s4u2self(kdc_context, errcode ? FALSE : TRUE, au_state);
+        au_state->s4u2self_user = NULL;
+        if (errcode)
+            goto cleanup;
+    }
+    if (s4u_x509_user != NULL)
+        setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
+
+    /* For user-to-user and S4U2Proxy requests, decrypt the second ticket. */
+    errcode = decrypt_2ndtkt(kdc_active_realm, request, c_flags, local_tgt,
+                             &local_tgt_key, &stkt, &stkt_pac, &stkt_server,
+                             &stkt_server_key, &status);
+    if (errcode)
+        goto cleanup;
+
+    retval = validate_tgs_request(kdc_active_realm, request, server,
+                                  header_ticket, header_pac, stkt, stkt_pac,
+                                  stkt_server, kdc_time, s4u_x509_user,
+                                  client, is_crossrealm, is_referral,
+                                  &status, &e_data);
+    if (retval) {
         if (retval == KDC_ERR_POLICY || retval == KDC_ERR_BADOPTION)
             au_state->violation = PROT_CONSTRAINT;
         errcode = retval + ERROR_TABLE_BASE_krb5;
         goto cleanup;
     }
 
-    if (!data_eq(header_server->princ->realm, sprinc->realm))
-        setflag(c_flags, KRB5_KDB_FLAG_CROSS_REALM);
-    if (is_referral)
-        setflag(c_flags, KRB5_KDB_FLAG_ISSUING_REFERRAL);
-
-    /* Check for protocol transition */
-    errcode = kdc_process_s4u2self_req(kdc_active_realm,
-                                       request,
-                                       header_enc_tkt->client,
-                                       c_flags,
-                                       server,
-                                       subkey,
-                                       header_enc_tkt->session,
-                                       kdc_time,
-                                       &s4u_x509_user,
-                                       &client,
-                                       &status);
-    if (s4u_x509_user != NULL || errcode != 0) {
-        if (s4u_x509_user != NULL)
-            au_state->s4u2self_user = s4u_x509_user->user_id.user;
-        if (errcode == KDC_ERR_POLICY || errcode == KDC_ERR_BADOPTION)
-            au_state->violation = PROT_CONSTRAINT;
-        au_state->status = status;
-        kau_s4u2self(kdc_context, errcode ? FALSE : TRUE, au_state);
-        au_state->s4u2self_user = NULL;
-    }
-
-    /* Aside from cross-realm S4U2Self requests, do not accept header tickets
-     * for local users issued by foreign realms. */
-    if (s4u_x509_user == NULL && data_eq(cprinc->realm, sprinc->realm) &&
-        isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM)) {
-        krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
-        retval = KRB5KDC_ERR_POLICY;
-        goto cleanup;
-    }
-
-    if (errcode)
-        goto cleanup;
-
-    if (s4u_x509_user != NULL && client == NULL) {
-        /*
-         * For an S4U2Self referral request (the requesting service is
-         * following a referral back to its own realm), the authdata in the
-         * header ticket should be for the requested client.
-         */
-        setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
-        authdata_client = s4u_x509_user->user_id.user;
-    } else {
-        /* Otherwise (including for initial S4U2Self requests), the authdata
-         * should be for the header ticket client. */
-        authdata_client = header_enc_tkt->client;
-    }
-    errcode = krb5_db_get_authdata_info(kdc_context, c_flags,
-                                        header_enc_tkt->authorization_data,
-                                        authdata_client, request->server,
-                                        header_key, &local_tgt_key, local_tgt,
-                                        header_enc_tkt->times.authtime,
-                                        &ad_info, NULL);
-    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP)
-        goto cleanup;
-
-    /* Flag all S4U2Self requests now that we have checked the authdata. */
-    if (s4u_x509_user != NULL)
-        setflag(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION);
-
-    /* Deal with user-to-user and constrained delegation */
-    errcode = decrypt_2ndtkt(kdc_active_realm, request, c_flags,
-                             &stkt_server, &stkt_server_key, &status);
-    if (errcode)
-        goto cleanup;
-
     if (isflagset(request->kdc_options, KDC_OPT_CNAME_IN_ADDL_TKT)) {
         /* Do constrained delegation protocol and authorization checks. */
         setflag(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
-        errcode = kdc_process_s4u2proxy_req(kdc_active_realm, c_flags, request,
-                                            request->second_ticket[st_idx]->enc_part2,
-                                            local_tgt, &local_tgt_key,
+        errcode = kdc_process_s4u2proxy_req(kdc_active_realm, c_flags,
+                                            request, header_pac,
+                                            stkt->enc_part2, stkt_pac,
                                             stkt_server, stkt_server_key,
                                             header_ticket->enc_part2->client,
-                                            server, request->server, ad_info,
-                                            &stkt_ad_info,
-                                            &stkt_authdata_client,
+                                            server, &stkt_authdata_client,
                                             &status);
         if (errcode == KDC_ERR_POLICY || errcode == KDC_ERR_BADOPTION)
             au_state->violation = PROT_CONSTRAINT;
         else if (errcode)
             au_state->violation = LOCAL_POLICY;
         au_state->status = status;
-        retval = kau_make_tkt_id(kdc_context, request->second_ticket[st_idx],
-                                  &au_state->evid_tkt_id);
+        retval = kau_make_tkt_id(kdc_context, stkt, &au_state->evid_tkt_id);
         if (retval) {
             errcode = retval;
             goto cleanup;
@@ -367,12 +333,6 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
             goto cleanup;
 
         assert(krb5_is_tgs_principal(header_ticket->server));
-
-        /* Use the parsed authdata from the second ticket during authdata
-         * handling. */
-        krb5_db_free_authdata_info(kdc_context, ad_info);
-        ad_info = stkt_ad_info;
-        stkt_ad_info = NULL;
     }
 
     au_state->stage = ISSUE_TKT;
@@ -390,11 +350,13 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
      */
 
     if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
-        subject_tkt = request->second_ticket[st_idx]->enc_part2;
+        subject_tkt = stkt->enc_part2;
+        subject_pac = stkt_pac;
         subject_server = stkt_server;
         subject_key = stkt_server_key;
     } else {
         subject_tkt = header_enc_tkt;
+        subject_pac = header_pac;
         subject_server = header_server;
         subject_key = header_key;
     }
@@ -426,12 +388,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
                                            server, header_enc_tkt);
     enc_tkt_reply.times.starttime = 0;
 
-    /* OK_TO_AUTH_AS_DELEGATE must be set on the service requesting S4U2Self
-     * for forwardable tickets to be issued. */
-    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
-        !is_referral &&
-        !isflagset(server->attributes, KRB5_KDB_OK_TO_AUTH_AS_DELEGATE))
-        clear(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
+    if (s4u_x509_user != NULL && !is_referral) {
+        /* Check if we need to suppress the forwardable ticket flag. */
+        errcode = s4u2self_forwardable(kdc_context, server, &enc_tkt_reply);
+        if (errcode)
+            goto cleanup;
+    }
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -522,14 +484,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     } else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
         /* kdc_process_s4u2proxy_req() only allows cross-realm requests if
          * stkt_authdata_client is set. */
-        altcprinc = isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ?
-            stkt_authdata_client : subject_tkt->client;
+        altcprinc = is_crossrealm ? stkt_authdata_client : subject_tkt->client;
     } else {
         altcprinc = NULL;
     }
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
-        krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
-        encrypting_key = t2enc->session;
+        encrypting_key = stkt->enc_part2->session;
     } else {
         errcode = get_first_current_key(kdc_context, server, &server_keyblock);
         if (errcode) {
@@ -539,11 +499,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         encrypting_key = &server_keyblock;
     }
 
-    if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
+    if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
         /*
-         * Don't allow authorization data to be disabled if constrained
-         * delegation is requested. We don't want to deny the server
-         * the ability to validate that delegation was used.
+         * For consistency with Active Directory, don't allow authorization
+         * data to be disabled if S4U2Self is requested.  The server likely
+         * needs a PAC to inspect or for an S4U2Proxy operation, even if it
+         * doesn't need authorization data in tickets received from clients.
          */
         clear(server->attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED);
     }
@@ -551,8 +512,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         /* If we are not doing protocol transition, try to look up the subject
          * principal so that KDB modules can add additional authdata. */
         if (!isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION)) {
-            /* Generate authorization data so we can include it in ticket */
-            setflag(c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
+            setflag(c_flags, KRB5_KDB_FLAG_CLIENT);
             /* Map principals from foreign (possibly non-AD) realms */
             setflag(c_flags, KRB5_KDB_FLAG_MAP_PRINCIPALS);
 
@@ -579,7 +539,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
      * implicitly part of the transited list and should not be explicitly
      * listed).
      */
-    if (!isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM) ||
+    if (!is_crossrealm ||
         krb5_realm_compare(kdc_context, header_ticket->server,
                            enc_tkt_reply.client)) {
         /* tgt issued by local realm or issued by realm of client */
@@ -627,12 +587,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
         goto cleanup;
     }
 
-    errcode = handle_authdata(kdc_context, c_flags, client, server,
+    errcode = handle_authdata(kdc_active_realm, c_flags, client, server,
                               subject_server, local_tgt, &local_tgt_key,
                               subkey != NULL ? subkey :
                               header_ticket->enc_part2->session,
-                              encrypting_key, subject_key, pkt, request,
-                              altcprinc, ad_info, subject_tkt,
+                              encrypting_key, subject_key, NULL, pkt, request,
+                              altcprinc, subject_pac, subject_tkt,
                               &auth_indicators, &enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
@@ -643,32 +603,12 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
-    /*
-     * If we are doing user-to-user authentication, then make sure
-     * that the client for the second ticket matches the request
-     * server, and then encrypt the ticket using the session key of
-     * the second ticket.
-     */
+    /* If we are doing user-to-user authentication, encrypt the ticket using
+     * the session key of the second ticket. */
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY)) {
-        /*
-         * Make sure the client for the second ticket matches
-         * requested server.
-         */
-        krb5_enc_tkt_part *t2enc = request->second_ticket[st_idx]->enc_part2;
-        krb5_principal client2 = t2enc->client;
-        if (!is_client_db_alias(kdc_context, server, client2)) {
-            altcprinc = client2;
-            errcode = KRB5KDC_ERR_SERVER_NOMATCH;
-            status = "2ND_TKT_MISMATCH";
-            au_state->status = status;
-            kau_u2u(kdc_context, FALSE, au_state);
-            goto cleanup;
-        }
-
         ticket_kvno = 0;
-        ticket_reply.enc_part.enctype = t2enc->session->enctype;
+        ticket_reply.enc_part.enctype = stkt->enc_part2->session->enctype;
         kau_u2u(kdc_context, TRUE, au_state);
-        st_idx++;
     } else {
         ticket_kvno = current_kvno(server);
     }
@@ -732,8 +672,7 @@ process_tgs_req(krb5_kdc_req *request, krb5_data *pkt,
     errcode = return_enc_padata(kdc_context, pkt, request,
                                 reply_key, server, &reply_encpart,
                                 is_referral &&
-                                isflagset(s_flags,
-                                          KRB5_KDB_FLAG_CANONICALIZE));
+                                isflagset(s_flags, KRB5_KDB_FLAG_REFERRAL_OK));
     if (errcode) {
         status = "KDC_RETURN_ENC_PADATA";
         goto cleanup;
@@ -772,11 +711,13 @@ cleanup:
     if (errcode)
         emsg = krb5_get_error_message (kdc_context, errcode);
 
-    au_state->status = status;
-    if (!errcode)
-        au_state->reply = &reply;
-    kau_tgs_req(kdc_context, errcode ? FALSE : TRUE, au_state);
-    kau_free_kdc_req(au_state);
+    if (au_state != NULL) {
+        au_state->status = status;
+        if (!errcode)
+            au_state->reply = &reply;
+        kau_tgs_req(kdc_context, errcode ? FALSE : TRUE, au_state);
+        kau_free_kdc_req(au_state);
+    }
 
     log_tgs_req(kdc_context, from, request, &reply, cprinc,
                 sprinc, altcprinc, authtime,
@@ -786,7 +727,7 @@ cleanup:
         emsg = NULL;
     }
 
-    if (errcode) {
+    if (errcode && state != NULL) {
         int got_err = 0;
         if (status == 0) {
             status = krb5_get_error_message (kdc_context, errcode);
@@ -838,8 +779,8 @@ cleanup:
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
     krb5_free_pa_data(kdc_context, e_data);
     k5_free_data_ptr_list(auth_indicators);
-    krb5_db_free_authdata_info(kdc_context, ad_info);
-    krb5_db_free_authdata_info(kdc_context, stkt_ad_info);
+    krb5_pac_free(kdc_context, header_pac);
+    krb5_pac_free(kdc_context, stkt_pac);
     krb5_free_principal(kdc_context, stkt_authdata_client);
 
     return retval;
@@ -917,38 +858,60 @@ prepare_error_tgs (struct kdc_request_state *state,
 /* KDC options that require a second ticket */
 #define STKT_OPTIONS (KDC_OPT_CNAME_IN_ADDL_TKT | KDC_OPT_ENC_TKT_IN_SKEY)
 /*
- * Get the key for the second ticket, if any, and decrypt it.
+ * If req is a second-ticket request and a second ticket is present, decrypt
+ * it.  Set *stkt_out to an alias to the ticket with populated enc_part2.  Set
+ * *server_out to the server DB entry and *key_out to the ticket decryption
+ * key.
  */
 static krb5_error_code
 decrypt_2ndtkt(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
-               krb5_flags flags, krb5_db_entry **server_out,
+               krb5_flags flags, krb5_db_entry *local_tgt,
+               krb5_keyblock *local_tgt_key, const krb5_ticket **stkt_out,
+               krb5_pac *pac_out, krb5_db_entry **server_out,
                krb5_keyblock **key_out, const char **status)
 {
     krb5_error_code retval;
     krb5_db_entry *server = NULL;
+    krb5_keyblock *key = NULL;
     krb5_kvno kvno;
     krb5_ticket *stkt;
 
-    if (!(req->kdc_options & STKT_OPTIONS))
+    *stkt_out = NULL;
+    *pac_out = NULL;
+    *server_out = NULL;
+    *key_out = NULL;
+
+    if (!(req->kdc_options & STKT_OPTIONS) || req->second_ticket == NULL ||
+        req->second_ticket[0] == NULL)
         return 0;
 
     stkt = req->second_ticket[0];
-    retval = kdc_get_server_key(kdc_context, stkt, flags, TRUE, &server,
-                                key_out, &kvno);
+    retval = kdc_get_server_key(kdc_context, stkt, flags, TRUE,
+                                &server, &key, &kvno);
     if (retval != 0) {
         *status = "2ND_TKT_SERVER";
         goto cleanup;
     }
-    retval = krb5_decrypt_tkt_part(kdc_context, *key_out,
-                                   req->second_ticket[0]);
+    retval = krb5_decrypt_tkt_part(kdc_context, key, stkt);
     if (retval != 0) {
         *status = "2ND_TKT_DECRYPT";
         goto cleanup;
     }
+    retval = get_verified_pac(kdc_context, stkt->enc_part2, server->princ,
+                              key, local_tgt, local_tgt_key, pac_out);
+    if (retval != 0) {
+        *status = "2ND_TKT_PAC";
+        goto cleanup;
+    }
+    *stkt_out = stkt;
     *server_out = server;
+    *key_out = key;
     server = NULL;
+    key = NULL;
+
 cleanup:
     krb5_db_free_principal(kdc_context, server);
+    krb5_free_keyblock(kdc_context, key);
     return retval;
 }
 
@@ -1203,7 +1166,7 @@ search_sprinc(kdc_realm_t *kdc_active_realm, krb5_kdc_req *req,
      * the server is supposed to match an already-issued ticket. */
     allow_referral = !(req->kdc_options & NO_REFERRAL_OPTION);
     if (!allow_referral)
-        flags &= ~KRB5_KDB_FLAG_CANONICALIZE;
+        flags &= ~KRB5_KDB_FLAG_REFERRAL_OK;
 
     ret = db_get_svc_princ(kdc_context, princ, flags, server, status);
     if (ret == 0 || ret != KRB5_KDB_NOENTRY || !allow_referral)

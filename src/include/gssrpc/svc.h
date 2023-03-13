@@ -289,16 +289,9 @@ extern int svc_fds;
 #endif /* def FD_SETSIZE */
 extern int svc_maxfd;
 
-/*
- * a small program implemented by the svc_rpc implementation itself;
- * also see clnt.h for protocol numbers.
- */
-extern void rpctest_service();
-
 extern void	svc_getreq(int);
 #ifdef FD_SETSIZE
 extern void	svc_getreqset(fd_set *);/* takes fdset instead of int */
-extern void	svc_getreqset2(fd_set *, int);
 #else
 extern void	svc_getreqset(int *);
 #endif

@@ -5,6 +5,8 @@
 #endif
 #include <string.h>
 
+#ifdef K5_BUILTIN_SHA1
+
 /* The SHS f()-functions.  The f1 and f3 functions can be optimized to
    save one boolean operation each - thanks to Rich Schroeppel,
    rcs@cs.arizona.edu for discovering this */
@@ -380,3 +382,5 @@ void shsFinal(SHS_INFO *shsInfo)
     *lp++ = shsInfo->countLo;
     SHSTransform(shsInfo->digest, shsInfo->data);
 }
+
+#endif /* K5_BUILTIN_SHA1 */

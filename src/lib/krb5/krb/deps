@@ -136,7 +136,7 @@ bld_pr_ext.so bld_pr_ext.po $(OUTPRE)bld_pr_ext.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  bld_pr_ext.c
+  bld_pr_ext.c int-proto.h
 bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -147,7 +147,7 @@ bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  bld_princ.c
+  bld_princ.c int-proto.h
 brand.so brand.po $(OUTPRE)brand.$(OBJEXT): $(top_srcdir)/patchlevel.h \
   brand.c
 chk_trans.so chk_trans.po $(OUTPRE)chk_trans.$(OBJEXT): \
@@ -710,7 +710,7 @@ pac.so pac.po $(OUTPRE)pac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-utf8.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  authdata.h pac.c
+  authdata.h int-proto.h pac.c
 pac_sign.so pac_sign.po $(OUTPRE)pac_sign.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -721,7 +721,8 @@ pac_sign.so pac_sign.po $(OUTPRE)pac_sign.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/k5-utf8.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h authdata.h pac_sign.c
+  $(top_srcdir)/include/socket-utils.h authdata.h int-proto.h \
+  pac_sign.c
 padata.so padata.po $(OUTPRE)padata.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
@@ -741,7 +742,7 @@ parse.so parse.po $(OUTPRE)parse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h parse.c
+  $(top_srcdir)/include/socket-utils.h int-proto.h parse.c
 parse_host_string.so parse_host_string.po $(OUTPRE)parse_host_string.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -984,18 +985,6 @@ response_items.so response_items.po $(OUTPRE)response_items.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   int-proto.h response_items.c
-s4u_authdata.so s4u_authdata.po $(OUTPRE)s4u_authdata.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../rcache/memrcache.h $(top_srcdir)/include/k5-buf.h \
-  $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
-  $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
-  $(top_srcdir)/include/k5-utf8.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  auth_con.h authdata.h int-proto.h s4u_authdata.c
 s4u_creds.so s4u_creds.po $(OUTPRE)s4u_creds.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -1150,7 +1139,7 @@ sname_match.so sname_match.po $(OUTPRE)sname_match.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  sname_match.c
+  int-proto.h sname_match.c
 srv_dec_tkt.so srv_dec_tkt.po $(OUTPRE)srv_dec_tkt.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

@@ -1,6 +1,5 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../$(CRYPTO_IMPL)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR = krb
@@ -18,10 +17,8 @@ STLIBOBJS=\
 	checksum_length.o	\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
-	cmac.o			\
 	coll_proof_cksum.o	\
 	crypto_length.o		\
-	crypto_libinit.o	\
 	default_state.o 	\
 	decrypt.o		\
 	decrypt_iov.o		\
@@ -54,7 +51,6 @@ STLIBOBJS=\
 	prf_dk.o		\
 	prf_rc4.o		\
 	prng.o			\
-	prng_$(PRNG_ALG).o	\
 	random_to_key.o		\
 	s2k_pbkdf2.o		\
 	s2k_rc4.o		\
@@ -77,10 +73,8 @@ OBJS=\
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
-	$(OUTPRE)cmac.$(OBJEXT)			\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
-	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
 	$(OUTPRE)decrypt.$(OBJEXT)		\
 	$(OUTPRE)decrypt_iov.$(OBJEXT)		\
@@ -113,7 +107,6 @@ OBJS=\
 	$(OUTPRE)prf_dk.$(OBJEXT)		\
 	$(OUTPRE)prf_rc4.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
-	$(OUTPRE)prng_$(PRNG_ALG).$(OBJEXT)	\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)s2k_pbkdf2.$(OBJEXT)		\
 	$(OUTPRE)s2k_rc4.$(OBJEXT)		\
@@ -136,10 +129,8 @@ SRCS=\
 	$(srcdir)/checksum_length.c	\
 	$(srcdir)/cksumtype_to_string.c	\
 	$(srcdir)/cksumtypes.c		\
-	$(srcdir)/cmac.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/crypto_length.c	\
-	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c 	\
 	$(srcdir)/decrypt.c		\
 	$(srcdir)/decrypt_iov.c		\
@@ -172,7 +163,6 @@ SRCS=\
 	$(srcdir)/prf_dk.c		\
 	$(srcdir)/prf_rc4.c		\
 	$(srcdir)/prng.c 		\
-	$(srcdir)/prng_$(PRNG_ALG).c	\
 	$(srcdir)/cf2.c 		\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/s2k_pbkdf2.c		\
@@ -180,7 +170,6 @@ SRCS=\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_key.c	\
-	$(srcdir)/t_fortuna.c		\
 	$(srcdir)/valid_cksumtype.c	\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
@@ -192,17 +181,7 @@ includes: depend
 
 depend: $(SRCS)
 
-check-unix: t_fortuna
-	if [ $(PRNG_ALG) = fortuna ]; then \
-		$(RUN_TEST) ./t_fortuna > t_fortuna.output && \
-		cmp t_fortuna.output $(srcdir)/t_fortuna.expected; \
-	fi
-
-t_fortuna: t_fortuna.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_fortuna.o $(K5CRYPTO_LIB) $(SUPPORT_LIB) $(LIBS)
-
 clean-unix:: clean-libobjs
-	$(RM) t_fortuna.o t_fortuna t_fortuna.output
 
 @lib_frag@
 @libobj_frag@

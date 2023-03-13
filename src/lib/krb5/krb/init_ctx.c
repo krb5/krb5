@@ -157,12 +157,6 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
 {
     krb5_context ctx = 0;
     krb5_error_code retval;
-    struct {
-        krb5_timestamp now;
-        krb5_int32 now_usec;
-        long pid;
-    } seed_data;
-    krb5_data seed;
     int tmp;
     char *plugin_dir = NULL;
 
@@ -238,21 +232,10 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
     ctx->enforce_ok_as_delegate = tmp;
 
     retval = get_tristate(ctx, KRB5_CONF_DNS_CANONICALIZE_HOSTNAME, "fallback",
-                          CANONHOST_FALLBACK, CANONHOST_FALLBACK, &tmp);
+                          CANONHOST_FALLBACK, 1, &tmp);
     if (retval)
         goto cleanup;
     ctx->dns_canonicalize_hostname = tmp;
-
-    /* initialize the prng (not well, but passable) */
-    if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
-        goto cleanup;
-    if ((retval = krb5_crypto_us_timeofday(&seed_data.now, &seed_data.now_usec)))
-        goto cleanup;
-    seed_data.pid = getpid ();
-    seed.length = sizeof(seed_data);
-    seed.data = (char *) &seed_data;
-    if ((retval = krb5_c_random_add_entropy(ctx, KRB5_C_RANDSOURCE_TIMING, &seed)))
-        goto cleanup;
 
     ctx->default_realm = 0;
     get_integer(ctx, KRB5_CONF_CLOCKSKEW, DEFAULT_CLOCKSKEW, &tmp);
@@ -374,6 +357,17 @@ krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes)
     free(context->tgs_etypes);
     context->tgs_etypes = list;
     return 0;
+}
+
+/* Old name for above function.  This is not a public API, but Samba (as of
+ * 2021-02-12) uses this name if it finds it in the library. */
+krb5_error_code
+krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes);
+
+krb5_error_code
+krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
+{
+    return krb5_set_default_tgs_enctypes(context, etypes);
 }
 
 /*

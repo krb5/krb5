@@ -188,20 +188,22 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
                 for (i=0; values[i] != NULL; ++i) {
                     if (krb5_ldap_parse_principal_name(values[i], &princ_name) != 0)
                         continue;
-                    if (krb5_parse_name(context, princ_name, &principal) != 0)
+                    st = krb5_parse_name(context, princ_name, &principal);
+                    free(princ_name);
+                    if (st)
                         continue;
+
                     if (is_principal_in_realm(ldap_context, principal)) {
-                        if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent, principal,
-                                                         &entry)) != 0)
+                        st = populate_krb5_db_entry(context, ldap_context, ld,
+                                                    ent, principal, &entry);
+                        krb5_free_principal(context, principal);
+                        if (st)
                             goto cleanup;
                         (*func)(func_arg, &entry);
                         krb5_dbe_free_contents(context, &entry);
-                        (void) krb5_free_principal(context, principal);
-                        free(princ_name);
                         break;
                     }
                     (void) krb5_free_principal(context, principal);
-                    free(princ_name);
                 }
                 ldap_value_free(values);
             }

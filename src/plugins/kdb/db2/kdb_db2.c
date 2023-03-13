@@ -1258,7 +1258,7 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
         goto cleanup;
     status = osa_adb_destroy_db(polname, plockname, OSA_ADB_POLICY_DB_MAGIC);
     if (status)
-        return status;
+        goto cleanup;
 
     status = krb5_db2_fini(context);
 
