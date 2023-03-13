@@ -366,7 +366,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                    creds->client, creds->server);
         }
     }
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 /* Allows trace_format formatters to be represented in terms of other

@@ -1135,7 +1135,7 @@ ktypes2str(krb5_enctype *ktype, int nktypes)
         k5_buf_add_fmt(&buf, "%s%s(%ld)", i ? ", " : "", name, (long)ktype[i]);
     }
     k5_buf_add(&buf, "}");
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 char *
@@ -1164,7 +1164,7 @@ rep_etypes2str(krb5_kdc_rep *rep)
     }
 
     k5_buf_add(&buf, "}");
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 static krb5_error_code

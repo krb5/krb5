@@ -157,7 +157,7 @@ guid_to_string(const uint8_t guid[GUID_LENGTH])
 
     k5_buf_init_dynamic(&buf);
     add_guid(&buf, guid);
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 /* Check that the described vector lies within the message, and return a
@@ -188,7 +188,7 @@ trace_received_message(spnego_gss_ctx_id_t ctx,
             if (i + 1 < msg->u.n.nschemes)
                 k5_buf_add(&buf, " ");
         }
-        info = buf.data;
+        info = k5_buf_cstring(&buf);
     } else if (msg->type == INITIATOR_META_DATA ||
                msg->type == ACCEPTOR_META_DATA ||
                msg->type == CHALLENGE || msg->type == AP_REQUEST) {
@@ -613,7 +613,8 @@ negoex_add_nego_message(spnego_gss_ctx_id_t ctx, enum message_type type,
 
     if (buf.len > 0) {
         k5_buf_truncate(&buf, buf.len - 1);
-        TRACE_NEGOEX_OUTGOING(ctx->kctx, seqnum, typestr(type), buf.data);
+        TRACE_NEGOEX_OUTGOING(ctx->kctx, seqnum, typestr(type),
+                              k5_buf_cstring(&buf));
         k5_buf_free(&buf);
     }
 }

@@ -87,7 +87,7 @@ ldap_filter_correct (char *in)
             break;
         k5_buf_add_fmt(&buf, "\\%2x", (unsigned char)*in++);
     }
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 static int

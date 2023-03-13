@@ -614,8 +614,6 @@ krb5_ldap_parse_principal_name(char *i_princ_name, char **o_princ_name)
     at_rlm_name = strrchr(i_princ_name, '@');
     if (!at_rlm_name) {
         *o_princ_name = strdup(i_princ_name);
-        if (!*o_princ_name)
-            return ENOMEM;
     } else {
         k5_buf_init_dynamic(&buf);
         for (p = i_princ_name; p < at_rlm_name; p++) {
@@ -624,9 +622,7 @@ krb5_ldap_parse_principal_name(char *i_princ_name, char **o_princ_name)
             k5_buf_add_len(&buf, p, 1);
         }
         k5_buf_add(&buf, at_rlm_name);
-        if (k5_buf_status(&buf) != 0)
-            return ENOMEM;
-        *o_princ_name = buf.data;
+        *o_princ_name = k5_buf_cstring(&buf);
     }
-    return 0;
+    return (*o_princ_name == NULL) ? ENOMEM : 0;
 }

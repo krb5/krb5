@@ -191,8 +191,8 @@ k5_utf16le_to_utf8(const uint8_t *utf16bytes, size_t nbytes, char **utf8_out)
     if (in.status)
         goto invalid;
 
-    *utf8_out = buf.data;
-    return 0;
+    *utf8_out = k5_buf_cstring(&buf);
+    return (*utf8_out == NULL) ? ENOMEM : 0;
 
 invalid:
     k5_buf_free(&buf);

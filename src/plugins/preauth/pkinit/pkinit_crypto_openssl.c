@@ -4406,7 +4406,6 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
 {
     struct k5buf buf;
     int n = 0;
-    char *ret;
 
     k5_buf_init_dynamic(&buf);
     k5_buf_add(&buf, "PKCS11:");
@@ -4431,12 +4430,7 @@ reassemble_pkcs11_name(pkinit_identity_opts *idopts)
         k5_buf_add_fmt(&buf, "%sslotid=%ld", n++ ? ":" : "",
                        (long)idopts->slotid);
     }
-    if (k5_buf_status(&buf) == 0)
-        ret = strdup(buf.data);
-    else
-        ret = NULL;
-    k5_buf_free(&buf);
-    return ret;
+    return k5_buf_cstring(&buf);
 }
 
 static krb5_error_code

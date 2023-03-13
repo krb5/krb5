@@ -72,7 +72,7 @@ make_lookup_name(const krb5_data *realm, const char *service,
     if (buf.len > 0 && ((char *)buf.data)[buf.len - 1] != '.')
         k5_buf_add(&buf, ".");
 
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 /* Insert new into the list *head, ordering by priority.  Weight is not

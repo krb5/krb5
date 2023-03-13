@@ -393,6 +393,7 @@ decode_ad_policy_info(const krb5_data *data, char **msg_out)
     uint64_t password_days;
     const char *p;
     struct k5buf buf;
+    char *msg;
 
     *msg_out = NULL;
     if (data->length != AD_POLICY_INFO_LENGTH)
@@ -462,13 +463,13 @@ decode_ad_policy_info(const krb5_data *data, char **msg_out)
                        (int)password_days);
     }
 
-    if (k5_buf_status(&buf) != 0)
+    msg = k5_buf_cstring(&buf);
+    if (msg == NULL)
         return ENOMEM;
-
-    if (buf.len > 0)
-        *msg_out = buf.data;
+    if (*msg != '\0')
+        *msg_out = msg;
     else
-        k5_buf_free(&buf);
+        free(msg);
     return 0;
 }
 

@@ -8,6 +8,7 @@ k5_buf_add
 k5_buf_add_len
 k5_buf_add_fmt
 k5_buf_add_vfmt
+k5_buf_cstring
 k5_buf_get_space
 k5_buf_truncate
 k5_buf_status

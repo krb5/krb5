@@ -504,7 +504,7 @@ prompt_for_tokeninfo(krb5_context context, krb5_prompter_fct prompter,
                      void *prompter_data, krb5_otp_tokeninfo **tis,
                      krb5_otp_tokeninfo **out_ti)
 {
-    char response[1024];
+    char response[1024], *prompt;
     krb5_otp_tokeninfo *ti = NULL;
     krb5_error_code retval = 0;
     struct k5buf buf;
@@ -517,11 +517,12 @@ prompt_for_tokeninfo(krb5_context context, krb5_prompter_fct prompter,
         k5_buf_add_len(&buf, tis[i]->vendor.data, tis[i]->vendor.length);
         k5_buf_add(&buf, "\n");
     }
-    if (k5_buf_status(&buf) != 0)
+    prompt = k5_buf_cstring(&buf);
+    if (prompt == NULL)
         return ENOMEM;
 
     do {
-        retval = doprompt(context, prompter, prompter_data, buf.data,
+        retval = doprompt(context, prompter, prompter_data, prompt,
                           _("Enter #"), response, sizeof(response));
         if (retval != 0)
             goto cleanup;

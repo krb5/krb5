@@ -392,7 +392,7 @@ txt_lookup_name(const char *prefix, const char *name)
             k5_buf_add(&buf, ".");
     }
 
-    return buf.data;
+    return k5_buf_cstring(&buf);
 }
 
 /*
