@@ -135,6 +135,7 @@
 /* String attribute names recognized by krb5 */
 #define KRB5_KDB_SK_SESSION_ENCTYPES            "session_enctypes"
 #define KRB5_KDB_SK_REQUIRE_AUTH                "require_auth"
+#define KRB5_KDB_SK_OPTIONAL_PAC_TKT_CHKSUM     "optional_pac_tkt_chksum"
 
 #if !defined(_WIN32)
 

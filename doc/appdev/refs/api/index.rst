@@ -225,6 +225,7 @@ Rarely used public interfaces
    krb5_is_referral_realm.rst
    krb5_kdc_sign_ticket.rst
    krb5_kdc_verify_ticket.rst
+   krb5_kdc_verify_ticket_ext.rst
    krb5_kt_add_entry.rst
    krb5_kt_end_seq_get.rst
    krb5_kt_get_entry.rst

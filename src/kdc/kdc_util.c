@@ -533,6 +533,8 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
     krb5_key_data *kd;
     krb5_keyblock old_key;
     krb5_kvno kvno;
+    krb5_boolean optional_tkt_chksum;
+    char *str = NULL;
     int tries;
 
     *pac_out = NULL;
@@ -543,8 +545,18 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
                                       NULL, pac_out);
     }
 
-    ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
-                                 tgt_key, pac_out);
+    /* Check if the absence of ticket signature is tolerated for this realm */
+    ret = krb5_dbe_get_string(context, tgt,
+                              KRB5_KDB_SK_OPTIONAL_PAC_TKT_CHKSUM, &str);
+    /* TODO: should be using _krb5_conf_boolean(), but os-proto.h is not
+     * available here.
+     */
+    optional_tkt_chksum = !ret && str && strncasecmp(str, "true", 4) == 0;
+
+    krb5_dbe_free_string(context, str);
+
+    ret = krb5_kdc_verify_ticket_ext(context, enc_tkt, sprinc, server_key,
+                                     tgt_key, optional_tkt_chksum, pac_out);
     if (ret != KRB5KRB_AP_ERR_MODIFIED && ret != KRB5_BAD_ENCTYPE)
         return ret;
 
@@ -557,8 +569,9 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
         ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
         if (ret)
             return ret;
-        ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
-                                     &old_key, pac_out);
+        ret = krb5_kdc_verify_ticket_ext(context, enc_tkt, sprinc, server_key,
+                                         &old_key, optional_tkt_chksum,
+                                         pac_out);
         krb5_free_keyblock_contents(context, &old_key);
         if (!ret)
             return 0;

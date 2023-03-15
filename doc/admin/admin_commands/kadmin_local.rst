@@ -649,6 +649,13 @@ KDC:
     is in the same format as those used by the **pkinit_cert_match**
     option in :ref:`krb5.conf(5)`.  (New in release 1.16.)
 
+**optional_pac_tkt_chksum**
+    Boolean value defining the behavior of the KDC in case an expected
+    ticket checksum signed with one of this principal keys is not
+    present in the PAC. This is typically the case for TGT or
+    cross-realm TGT principals when processing S4U2Proxy requests.
+    (New in release ...)
+
 This command requires the **modify** privilege.
 
 Alias: **setstr**

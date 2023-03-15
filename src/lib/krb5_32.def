@@ -510,3 +510,4 @@ EXPORTS
 	k5_sname_compare				@474 ; PRIVATE GSSAPI
 	krb5_kdc_sign_ticket                            @475 ;
 	krb5_kdc_verify_ticket                          @476 ;
+	krb5_kdc_verify_ticket_ext                      @477 ;

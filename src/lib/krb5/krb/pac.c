@@ -595,6 +595,19 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
                        const krb5_keyblock *server,
                        const krb5_keyblock *privsvr, krb5_pac *pac_out)
 {
+    return krb5_kdc_verify_ticket_ext(context, enc_tkt, server_princ, server,
+                                      privsvr, FALSE, pac_out);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_kdc_verify_ticket_ext(krb5_context context,
+                           const krb5_enc_tkt_part *enc_tkt,
+                           krb5_const_principal server_princ,
+                           const krb5_keyblock *server,
+                           const krb5_keyblock *privsvr,
+                           krb5_boolean optional_tkt_chksum,
+                           krb5_pac *pac_out)
+{
     krb5_error_code ret;
     krb5_pac pac = NULL;
     krb5_data *recoded_tkt = NULL;
@@ -602,7 +615,7 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
     krb5_authdata *orig, **ifrel = NULL, **recoded_ifrel = NULL;
     uint8_t z = 0;
     krb5_authdata zpac = { KV5M_AUTHDATA, KRB5_AUTHDATA_WIN2K_PAC, 1, &z };
-    krb5_boolean is_service_tkt;
+    krb5_boolean is_service_tkt, has_tkt_chksum = FALSE;
     size_t i, j;
 
     *pac_out = NULL;
@@ -667,11 +680,21 @@ krb5_kdc_verify_ticket(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
 
         ret = verify_checksum(context, pac, KRB5_PAC_TICKET_CHECKSUM, privsvr,
                               KRB5_KEYUSAGE_APP_DATA_CKSUM, recoded_tkt);
-        if (ret)
-            goto cleanup;
+        if (ret) {
+            if (!optional_tkt_chksum)
+                goto cleanup;
+            else if (ret != ENOENT)
+                goto cleanup;
+            /* Otherwise ticket signature is absent but optional. Proceed... */
+        } else {
+            has_tkt_chksum = TRUE;
+        }
     }
+    /* Else, we make the assumption the ticket signature is absent in case this
+     * is not a service ticket.
+     */
 
-    ret = verify_pac_checksums(context, pac, is_service_tkt, server, privsvr);
+    ret = verify_pac_checksums(context, pac, has_tkt_chksum, server, privsvr);
     if (ret)
         goto cleanup;
 
