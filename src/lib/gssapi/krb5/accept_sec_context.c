@@ -684,6 +684,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
     krb5_ap_req *request = NULL;
+    struct k5buf buf;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -1009,7 +1010,6 @@ kg_accept_krb5(minor_status, context_handle,
     /* generate an AP_REP if necessary */
 
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
-        unsigned char * ptr3;
         krb5_int32 seq_temp;
         int cfx_generate_subkey;
 
@@ -1114,18 +1114,16 @@ kg_accept_krb5(minor_status, context_handle,
         ctx->established = 1;
 
         token.length = g_token_size(mech_used, ap_rep.length);
-
-        if ((token.value = (unsigned char *) gssalloc_malloc(token.length))
-            == NULL) {
+        token.value = gssalloc_malloc(token.length);
+        if (token.value == NULL) {
             major_status = GSS_S_FAILURE;
             code = ENOMEM;
             goto fail;
         }
-        ptr3 = token.value;
-        g_make_token_header(mech_used, ap_rep.length,
-                            &ptr3, KG_TOK_CTX_AP_REP);
-
-        TWRITE_STR(ptr3, ap_rep.data, ap_rep.length);
+        k5_buf_init_fixed(&buf, token.value, token.length);
+        g_make_token_header(&buf, mech_used, ap_rep.length, KG_TOK_CTX_AP_REP);
+        k5_buf_add_len(&buf, ap_rep.data, ap_rep.length);
+        assert(buf.len == token.length);
 
         ctx->established = 1;
 
@@ -1220,7 +1218,6 @@ fail:
          (request->ap_options & AP_OPTS_MUTUAL_REQUIRED) ||
          major_status == GSS_S_CONTINUE_NEEDED)) {
         unsigned int tmsglen;
-        int toktype;
 
         /*
          * The client is expecting a response, so we can send an
@@ -1242,17 +1239,16 @@ fail:
             goto done;
 
         tmsglen = scratch.length;
-        toktype = KG_TOK_CTX_ERROR;
 
         token.length = g_token_size(mech_used, tmsglen);
         token.value = gssalloc_malloc(token.length);
         if (!token.value)
             goto done;
+        k5_buf_init_fixed(&buf, token.value, token.length);
+        g_make_token_header(&buf, mech_used, tmsglen, KG_TOK_CTX_ERROR);
+        k5_buf_add_len(&buf, scratch.data, scratch.length);
+        assert(buf.len == token.length);
 
-        ptr = token.value;
-        g_make_token_header(mech_used, tmsglen, &ptr, toktype);
-
-        TWRITE_STR(ptr, scratch.data, scratch.length);
         krb5_free_data_contents(context, &scratch);
 
         *output_token = token;

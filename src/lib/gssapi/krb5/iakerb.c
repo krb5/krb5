@@ -23,13 +23,12 @@
  * or implied warranty.
  */
 #include "k5-int.h"
+#include "k5-der.h"
 #include "gssapiP_krb5.h"
 
 /*
  * IAKERB implementation
  */
-
-extern int gssint_get_der_length(unsigned char **, OM_uint32, unsigned int*);
 
 enum iakerb_state {
     IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
@@ -172,11 +171,11 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
     krb5_iakerb_header *iah = NULL;
-    unsigned int bodysize, lenlen;
-    int length;
-    unsigned char *ptr;
+    unsigned int bodysize;
+    uint8_t *body;
     int flags = 0;
     krb5_data data;
+    struct k5input in, seq;
 
     if (token == GSS_C_NO_BUFFER || token->length == 0) {
         code = KRB5_BAD_MSIZE;
@@ -186,32 +185,20 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
     if (initialContextToken)
         flags |= G_VFY_TOKEN_HDR_WRAPPER_REQUIRED;
 
-    ptr = token->value;
-
-    code = g_verify_token_header(gss_mech_iakerb,
-                                 &bodysize, &ptr,
-                                 IAKERB_TOK_PROXY,
-                                 token->length, flags);
+    body = token->value;
+    code = g_verify_token_header(gss_mech_iakerb, &bodysize, &body,
+                                 IAKERB_TOK_PROXY, token->length, flags);
     if (code != 0)
         goto cleanup;
 
-    data.data = (char *)ptr;
-
-    if (bodysize-- == 0 || *ptr++ != 0x30 /* SEQUENCE */) {
+    /* Find the end of the DER sequence tag and decode it (with the tag) as the
+     * IAKERB jeader. */
+    k5_input_init(&in, body, bodysize);
+    if (!k5_der_get_value(&in, 0x30, &seq)) {
         code = ASN1_BAD_ID;
         goto cleanup;
     }
-
-    length = gssint_get_der_length(&ptr, bodysize, &lenlen);
-    if (length < 0 || bodysize - lenlen < (unsigned int)length) {
-        code = KRB5_BAD_MSIZE;
-        goto cleanup;
-    }
-    data.length = 1 /* SEQUENCE */ + lenlen + length;
-
-    ptr += length;
-    bodysize -= (lenlen + length);
-
+    data = make_data(body, seq.ptr + seq.len - body);
     code = decode_krb5_iakerb_header(&data, &iah);
     if (code != 0)
         goto cleanup;
@@ -226,9 +213,8 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
         iah->cookie = NULL;
     }
 
-    request->data = (char *)ptr;
-    request->length = bodysize;
-
+    /* The remainder of the token body is the request. */
+    *request = make_data((uint8_t *)in.ptr, in.len);
     assert(request->data + request->length ==
            (char *)token->value + token->length);
 
@@ -254,7 +240,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     krb5_data *data = NULL;
     char *p;
     unsigned int tokenSize;
-    unsigned char *q;
+    struct k5buf buf;
 
     token->value = NULL;
     token->length = 0;
@@ -288,24 +274,22 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     else
         tokenSize = 2 + data->length;
 
-    token->value = q = gssalloc_malloc(tokenSize);
-    if (q == NULL) {
+    token->value = gssalloc_malloc(tokenSize);
+    if (token->value == NULL) {
         code = ENOMEM;
         goto cleanup;
     }
     token->length = tokenSize;
+    k5_buf_init_fixed(&buf, token->value, token->length);
 
     if (initialContextToken) {
-        g_make_token_header(gss_mech_iakerb, data->length, &q,
+        g_make_token_header(&buf, gss_mech_iakerb, data->length,
                             IAKERB_TOK_PROXY);
     } else {
-        store_16_be(IAKERB_TOK_PROXY, q);
-        q += 2;
+        k5_buf_add_uint16_be(&buf, IAKERB_TOK_PROXY);
     }
-    memcpy(q, data->data, data->length);
-    q += data->length;
-
-    assert(q == (unsigned char *)token->value + token->length);
+    k5_buf_add_len(&buf, data->data, data->length);
+    assert(buf.len == token->length);
 
 cleanup:
     krb5_free_data(ctx->k5c, data);

@@ -153,8 +153,8 @@ int g_make_string_buffer (const char *str, gss_buffer_t buffer);
 
 unsigned int g_token_size (const gss_OID_desc * mech, unsigned int body_size);
 
-void g_make_token_header (const gss_OID_desc * mech, unsigned int body_size,
-                          unsigned char **buf, int tok_type);
+void g_make_token_header (struct k5buf *buf, const gss_OID_desc *mech,
+                          size_t body_size, int tok_type);
 
 /* flags for g_verify_token_header() */
 #define G_VFY_TOKEN_HDR_WRAPPER_REQUIRED        0x01

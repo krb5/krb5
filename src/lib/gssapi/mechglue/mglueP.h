@@ -819,23 +819,6 @@ OM_uint32 gss_add_mech_name_type
  * Sun extensions to GSS-API v2
  */
 
-int
-gssint_get_der_length(
-	unsigned char **,	/* buf */
-	unsigned int,		/* buf_len */
-	unsigned int *		/* bytes */
-);
-
-unsigned int
-gssint_der_length_size(unsigned int /* len */);
-
-int
-gssint_put_der_length(
-	unsigned int,		/* length */
-	unsigned char **,	/* buf */
-	unsigned int		/* max_len */
-);
-
 OM_uint32
 gssint_wrap_aead (gss_mechanism,	/* mech */
 		  OM_uint32 *,		/* minor_status */

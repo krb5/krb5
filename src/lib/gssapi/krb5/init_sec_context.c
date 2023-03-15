@@ -393,9 +393,9 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     struct gss_checksum_data cksum_struct;
     krb5_checksum md5;
     krb5_data ap_req;
-    unsigned char *ptr;
     unsigned char *t;
     unsigned int tlen;
+    struct k5buf buf;
 
     k5_mutex_assert_locked(&cred->lock);
     ap_req.data = 0;
@@ -447,19 +447,15 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     } else {
         /* allocate space for the token */
         tlen = g_token_size((gss_OID) mech_type, ap_req.length);
-
-        if ((t = (unsigned char *) gssalloc_malloc(tlen)) == NULL) {
+        t = gssalloc_malloc(tlen);
+        if (t == NULL) {
             code = ENOMEM;
             goto cleanup;
         }
-
-        /* fill in the buffer */
-        ptr = t;
-
-        g_make_token_header(mech_type, ap_req.length,
-                            &ptr, KG_TOK_CTX_AP_REQ);
-
-        TWRITE_STR(ptr, ap_req.data, ap_req.length);
+        k5_buf_init_fixed(&buf, t, tlen);
+        g_make_token_header(&buf, mech_type, ap_req.length, KG_TOK_CTX_AP_REQ);
+        k5_buf_add_len(&buf, ap_req.data, ap_req.length);
+        assert(buf.len == tlen);
 
         /* pass it back */
 
