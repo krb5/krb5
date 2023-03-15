@@ -246,14 +246,14 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 {
     krb5_error_code code;
     krb5_int32 con_flags;
-    unsigned char *ptr;
     struct gss_checksum_data *data = cksum_data;
     krb5_data credmsg;
     unsigned int junk;
     krb5_data *finished = NULL;
     krb5_key send_subkey;
+    struct k5buf buf;
 
-    data->checksum_data.data = 0;
+    data->checksum_data = empty_data();
     credmsg.data = 0;
     /* build the checksum field */
 
@@ -291,18 +291,12 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                request */
             data->ctx->gss_flags &= ~(GSS_C_DELEG_FLAG |
                                       GSS_C_DELEG_POLICY_FLAG);
-
-            data->checksum_data.length = 24;
         } else {
             if (credmsg.length+28 > KRB5_INT16_MAX) {
                 code = KRB5KRB_ERR_FIELD_TOOLONG;
                 goto cleanup;
             }
-
-            data->checksum_data.length = 28+credmsg.length;
         }
-    } else {
-        data->checksum_data.length = 24;
     }
 #ifdef CFX_EXERCISE
     if (data->ctx->auth_context->keyblock != NULL
@@ -335,40 +329,35 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         }
 
         krb5_k_free_key(context, key);
-        data->checksum_data.length += 8 + finished->length;
     }
-
-    data->checksum_data.length += junk;
 
     /* now allocate a buffer to hold the checksum data and
        (maybe) KRB_CRED msg */
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add_uint32_le(&buf, data->md5.length);
+    k5_buf_add_len(&buf, data->md5.contents, data->md5.length);
+    k5_buf_add_uint32_le(&buf, data->ctx->gss_flags);
+    if (credmsg.data != NULL) {
+        k5_buf_add_uint16_le(&buf, KRB5_GSS_FOR_CREDS_OPTION);
+        k5_buf_add_uint16_le(&buf, credmsg.length);
+        k5_buf_add_len(&buf, credmsg.data, credmsg.length);
+    }
+    if (data->exts->iakerb.conv != NULL) {
+        k5_buf_add_uint32_be(&buf, KRB5_GSS_EXTS_IAKERB_FINISHED);
+        k5_buf_add_uint32_be(&buf, finished->length);
+        k5_buf_add_len(&buf, finished->data, finished->length);
+    }
+    while (junk--)
+        k5_buf_add_byte(&buf, 'i');
 
-    if ((data->checksum_data.data =
-         (char *) xmalloc(data->checksum_data.length)) == NULL) {
-        code = ENOMEM;
+    code = k5_buf_status(&buf);
+    if (code)
         goto cleanup;
-    }
 
-    ptr = (unsigned char *)data->checksum_data.data;
-
-    TWRITE_INT(ptr, data->md5.length, 0);
-    TWRITE_STR(ptr, data->md5.contents, data->md5.length);
-    TWRITE_INT(ptr, data->ctx->gss_flags, 0);
-
-    if (credmsg.data) {
-        TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
-        TWRITE_INT16(ptr, credmsg.length, 0);
-        TWRITE_STR(ptr, credmsg.data, credmsg.length);
-    }
-    if (data->exts->iakerb.conv) {
-        TWRITE_INT(ptr, KRB5_GSS_EXTS_IAKERB_FINISHED, 1);
-        TWRITE_INT(ptr, finished->length, 1);
-        TWRITE_STR(ptr, finished->data, finished->length);
-    }
-    if (junk)
-        memset(ptr, 'i', junk);
+    data->checksum_data = make_data(buf.data, buf.len);
     *out = &data->checksum_data;
     code = 0;
+
 cleanup:
     krb5_free_data_contents(context, &credmsg);
     krb5_free_data(context, finished);
@@ -726,7 +715,6 @@ mutual_auth(
 {
     OM_uint32 major_status;
     unsigned char *ptr;
-    char *sptr;
     krb5_data ap_rep;
     krb5_ap_rep_enc_part *ap_rep_data;
     krb5_timestamp now;
@@ -775,7 +763,6 @@ mutual_auth(
     if (ctx->gss_flags & GSS_C_DCE_STYLE) {
         /* Raw AP-REP */
         ap_rep.length = input_token->length;
-        ap_rep.data = (char *)input_token->value;
     } else if (g_verify_token_header(ctx->mech_used,
                                      &(ap_rep.length),
                                      &ptr, KG_TOK_CTX_AP_REP,
@@ -787,9 +774,7 @@ mutual_auth(
 
             /* Handle a KRB_ERROR message from the server */
 
-            sptr = (char *) ptr;           /* PC compiler bug */
-            TREAD_STR(sptr, ap_rep.data, ap_rep.length);
-
+            ap_rep.data = (char *)ptr;
             code = krb5_rd_error(context, &ap_rep, &krb_error);
             if (code)
                 goto fail;
@@ -804,9 +789,7 @@ mutual_auth(
             return(GSS_S_DEFECTIVE_TOKEN);
         }
     }
-
-    sptr = (char *) ptr;                      /* PC compiler bug */
-    TREAD_STR(sptr, ap_rep.data, ap_rep.length);
+    ap_rep.data = (char *)ptr;
 
     /* decode the ap_rep */
     if ((code = krb5_rd_rep(context, ctx->auth_context, &ap_rep,

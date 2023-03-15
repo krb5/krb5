@@ -33,9 +33,7 @@ kg_checksum_channel_bindings(context, cb, cksum)
     gss_channel_bindings_t cb;
     krb5_checksum *cksum;
 {
-    size_t len;
-    char *buf = 0;
-    char *ptr;
+    struct k5buf buf;
     size_t sumlen;
     krb5_data plaind;
     krb5_error_code code;
@@ -59,36 +57,28 @@ kg_checksum_channel_bindings(context, cb, cksum)
         return(0);
     }
 
-    /* create the buffer to checksum into */
-
-    len = (sizeof(krb5_int32)*5+
-           cb->initiator_address.length+
-           cb->acceptor_address.length+
-           cb->application_data.length);
-
-    if ((buf = (char *) xmalloc(len)) == NULL)
-        return(ENOMEM);
-
-    /* helper macros.  This code currently depends on a long being 32
-       bits, and htonl dtrt. */
-
-    ptr = buf;
-
-    TWRITE_INT(ptr, cb->initiator_addrtype, 0);
-    TWRITE_BUF(ptr, cb->initiator_address, 0);
-    TWRITE_INT(ptr, cb->acceptor_addrtype, 0);
-    TWRITE_BUF(ptr, cb->acceptor_address, 0);
-    TWRITE_BUF(ptr, cb->application_data, 0);
+    k5_buf_init_dynamic(&buf);
+    k5_buf_add_uint32_le(&buf, cb->initiator_addrtype);
+    k5_buf_add_uint32_le(&buf, cb->initiator_address.length);
+    k5_buf_add_len(&buf, cb->initiator_address.value,
+                   cb->initiator_address.length);
+    k5_buf_add_uint32_le(&buf, cb->acceptor_addrtype);
+    k5_buf_add_uint32_le(&buf, cb->acceptor_address.length);
+    k5_buf_add_len(&buf, cb->acceptor_address.value,
+                   cb->acceptor_address.length);
+    k5_buf_add_uint32_le(&buf, cb->application_data.length);
+    k5_buf_add_len(&buf, cb->application_data.value,
+                   cb->application_data.length);
+    code = k5_buf_status(&buf);
+    if (code)
+        return code;
 
     /* checksum the data */
 
-    plaind.length = len;
-    plaind.data = buf;
-
+    plaind = make_data(buf.data, buf.len);
     code = krb5_c_make_checksum(context, CKSUMTYPE_RSA_MD5, 0, 0,
                                 &plaind, cksum);
-    if (buf)
-        xfree(buf);
+    k5_buf_free(&buf);
     return code;
 }
 

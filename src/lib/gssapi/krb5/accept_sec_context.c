@@ -657,7 +657,6 @@ kg_accept_krb5(minor_status, context_handle,
 {
     krb5_context context;
     unsigned char *ptr;
-    char *sptr;
     krb5_gss_cred_id_t cred = 0;
     krb5_data ap_rep, ap_req;
     krb5_error_code code;
@@ -788,16 +787,13 @@ kg_accept_krb5(minor_status, context_handle,
     } else if (code == G_BAD_TOK_HEADER) {
         /* DCE style not encapsulated */
         ap_req.length = input_token->length;
-        ap_req.data = input_token->value;
         mech_used = gss_mech_krb5;
         no_encap = 1;
     } else {
         major_status = GSS_S_DEFECTIVE_TOKEN;
         goto fail;
     }
-
-    sptr = (char *) ptr;
-    TREAD_STR(sptr, ap_req.data, ap_req.length);
+    ap_req.data = (char *)ptr;
 
     /* construct the sender_addr */
 
