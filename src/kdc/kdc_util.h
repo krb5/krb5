@@ -253,8 +253,12 @@ void kdc_free_lookaside(krb5_context);
 void reset_for_hangup(void *);
 
 krb5_error_code
+pac_privsvr_key(krb5_context context, krb5_db_entry *server,
+                const krb5_keyblock *tgt_key, krb5_keyblock **key_out);
+
+krb5_error_code
 get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
-                 krb5_const_principal sprinc, krb5_keyblock *server_key,
+                 krb5_db_entry *server, krb5_keyblock *server_key,
                  krb5_db_entry *tgt, krb5_keyblock *tgt_key,
                  krb5_pac *pac_out);
 

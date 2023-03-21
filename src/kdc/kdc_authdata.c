@@ -474,6 +474,7 @@ handle_pac(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
     krb5_const_principal pac_client = NULL;
     krb5_boolean with_realm, is_as_req = (req->msg_type == KRB5_AS_REQ);
     krb5_db_entry *signing_tgt;
+    krb5_keyblock *privsvr_key = NULL;
 
     /* Don't add a PAC or auth indicators if the server disables authdata. */
     if (server->attributes & KRB5_KDB_NO_AUTH_DATA_REQUIRED)
@@ -555,8 +556,11 @@ handle_pac(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
         with_realm = FALSE;
     }
 
+    ret = pac_privsvr_key(context, server, local_tgt_key, &privsvr_key);
+    if (ret)
+        goto cleanup;
     ret = krb5_kdc_sign_ticket(context, enc_tkt_reply, new_pac, server->princ,
-                               pac_client, server_key, local_tgt_key,
+                               pac_client, server_key, privsvr_key,
                                with_realm);
     if (ret)
         goto cleanup;
@@ -565,6 +569,7 @@ handle_pac(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
 
 cleanup:
     krb5_pac_free(context, new_pac);
+    krb5_free_keyblock(context, privsvr_key);
     return ret;
 }
 

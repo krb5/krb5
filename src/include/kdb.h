@@ -133,6 +133,7 @@
 #define KRB5_DB_ITER_RECURSE    0x00000004
 
 /* String attribute names recognized by krb5 */
+#define KRB5_KDB_SK_PAC_PRIVSVR_ENCTYPE         "pac_privsvr_enctype"
 #define KRB5_KDB_SK_SESSION_ENCTYPES            "session_enctypes"
 #define KRB5_KDB_SK_REQUIRE_AUTH                "require_auth"
 

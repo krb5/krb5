@@ -518,6 +518,62 @@ cleanup:
     return ret;
 }
 
+/* If server has a pac_privsvr_enctype attribute and it differs from tgt_key's
+ * enctype, derive a key of the specified enctype.  Otherwise copy tgt_key. */
+krb5_error_code
+pac_privsvr_key(krb5_context context, krb5_db_entry *server,
+                const krb5_keyblock *tgt_key, krb5_keyblock **key_out)
+{
+    krb5_error_code ret;
+    char *attrval = NULL;
+    krb5_enctype privsvr_enctype;
+    krb5_data prf_input = string2data("pac_privsvr");
+
+    ret = krb5_dbe_get_string(context, server, KRB5_KDB_SK_PAC_PRIVSVR_ENCTYPE,
+                              &attrval);
+    if (ret)
+        return ret;
+    if (attrval == NULL)
+        return krb5_copy_keyblock(context, tgt_key, key_out);
+
+    ret = krb5_string_to_enctype(attrval, &privsvr_enctype);
+    if (ret) {
+        k5_setmsg(context, ret, _("Invalid pac_privsvr_enctype value %s"),
+                  attrval);
+        goto cleanup;
+    }
+
+    if (tgt_key->enctype == privsvr_enctype) {
+        ret = krb5_copy_keyblock(context, tgt_key, key_out);
+    } else {
+        ret = krb5_c_derive_prfplus(context, tgt_key, &prf_input,
+                                    privsvr_enctype, key_out);
+    }
+
+cleanup:
+    krb5_dbe_free_string(context, attrval);
+    return ret;
+}
+
+/* Try verifying a ticket's PAC using a privsvr key either equal to or derived
+ * from tgt_key, respecting the server's pac_privsvr_enctype value if set. */
+static krb5_error_code
+try_verify_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
+               krb5_db_entry *server, krb5_keyblock *server_key,
+               const krb5_keyblock *tgt_key, krb5_pac *pac_out)
+{
+    krb5_error_code ret;
+    krb5_keyblock *privsvr_key;
+
+    ret = pac_privsvr_key(context, server, tgt_key, &privsvr_key);
+    if (ret)
+        return ret;
+    ret = krb5_kdc_verify_ticket(context, enc_tkt, server->princ, server_key,
+                                 privsvr_key, pac_out);
+    krb5_free_keyblock(context, privsvr_key);
+    return ret;
+}
+
 /*
  * If a PAC is present in enc_tkt, verify it and place it in *pac_out.  sprinc
  * is the canonical name of the server principal entry used to decrypt enc_tkt.
@@ -526,7 +582,7 @@ cleanup:
  */
 krb5_error_code
 get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
-                 krb5_const_principal sprinc, krb5_keyblock *server_key,
+                 krb5_db_entry *server, krb5_keyblock *server_key,
                  krb5_db_entry *tgt, krb5_keyblock *tgt_key, krb5_pac *pac_out)
 {
     krb5_error_code ret;
@@ -538,13 +594,13 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
     *pac_out = NULL;
 
     /* For local or cross-realm TGTs we only check the server signature. */
-    if (krb5_is_tgs_principal(sprinc)) {
-        return krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
-                                      NULL, pac_out);
+    if (krb5_is_tgs_principal(server->princ)) {
+        return krb5_kdc_verify_ticket(context, enc_tkt, server->princ,
+                                      server_key, NULL, pac_out);
     }
 
-    ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
-                                 tgt_key, pac_out);
+    ret = try_verify_pac(context, enc_tkt, server, server_key, tgt_key,
+                         pac_out);
     if (ret != KRB5KRB_AP_ERR_MODIFIED && ret != KRB5_BAD_ENCTYPE)
         return ret;
 
@@ -557,8 +613,8 @@ get_verified_pac(krb5_context context, const krb5_enc_tkt_part *enc_tkt,
         ret = krb5_dbe_decrypt_key_data(context, NULL, kd, &old_key, NULL);
         if (ret)
             return ret;
-        ret = krb5_kdc_verify_ticket(context, enc_tkt, sprinc, server_key,
-                                     &old_key, pac_out);
+        ret = try_verify_pac(context, enc_tkt, server, server_key, &old_key,
+                             pac_out);
         krb5_free_keyblock_contents(context, &old_key);
         if (!ret)
             return 0;

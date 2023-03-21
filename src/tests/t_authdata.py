@@ -1,9 +1,10 @@
 from k5test import *
 
-# Load the sample KDC authdata module.
+# Load the sample KDC authdata module.  Allow renewable tickets.
 greet_path = os.path.join(buildtop, 'plugins', 'authdata', 'greet_server',
                           'greet_server.so')
-conf = {'plugins': {'kdcauthdata': {'module': 'greet:' + greet_path}}}
+conf = {'realms': {'$realm': {'max_life': '20h', 'max_renewable_life': '20h'}},
+        'plugins': {'kdcauthdata': {'module': 'greet:' + greet_path}}}
 realm = K5Realm(krb5_conf=conf)
 
 # With no requested authdata, we expect to see PAC (128) in an
@@ -48,6 +49,20 @@ realm.extract_keytab('krbtgt/XREALM', realm.keytab)
 out = realm.run(['./adata', 'krbtgt/XREALM', '-3', 'test'])
 if '128:' not in out or  '^-42: Hello' not in out or ' -3: test' not in out:
     fail('expected authdata not seen for cross-realm TGT request')
+
+mark('pac_privsvr_enctype')
+# Change the privsvr enctype and make sure we can still verify the PAC
+# on a service ticket in a TGS request.
+realm.run([kadminl, 'setstr', realm.host_princ,
+           'pac_privsvr_enctype', 'aes128-sha1'])
+realm.kinit(realm.user_princ, password('user'),
+            ['-S', realm.host_princ, '-r', '1h'])
+realm.kinit(realm.user_princ, None, ['-S', realm.host_princ, '-R'])
+# Remove the attribute and make sure the previously-issued service
+# ticket PAC no longer verifies.
+realm.run([kadminl, 'delstr', realm.host_princ, 'pac_privsvr_enctype'])
+realm.kinit(realm.user_princ, None, ['-S', realm.host_princ, '-R'],
+            expected_code=1, expected_msg='Message stream modified')
 
 realm.stop()
 

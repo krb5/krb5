@@ -649,6 +649,15 @@ KDC:
     is in the same format as those used by the **pkinit_cert_match**
     option in :ref:`krb5.conf(5)`.  (New in release 1.16.)
 
+**pac_privsvr_enctype**
+    Forces the encryption type of the PAC KDC checksum buffers to the
+    specified encryption type for tickets issued to this server, by
+    deriving a key from the local krbtgt key if it is of a different
+    encryption type.  It may be necessary to set this value to
+    "aes256-sha1" on the cross-realm krbtgt entry for an Active
+    Directory realm when using aes-sha2 keys on the local krbtgt
+    entry.
+
 This command requires the **modify** privilege.
 
 Alias: **setstr**

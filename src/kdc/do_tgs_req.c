@@ -288,8 +288,8 @@ decrypt_2ndtkt(krb5_context context, krb5_kdc_req *req, krb5_flags flags,
         *status = "2ND_TKT_DECRYPT";
         goto cleanup;
     }
-    retval = get_verified_pac(context, stkt->enc_part2, server->princ, key,
-                              local_tgt, local_tgt_key, pac_out);
+    retval = get_verified_pac(context, stkt->enc_part2, server, key, local_tgt,
+                              local_tgt_key, pac_out);
     if (retval != 0) {
         *status = "2ND_TKT_PAC";
         goto cleanup;
@@ -655,7 +655,7 @@ gather_tgs_req_info(kdc_realm_t *realm, krb5_kdc_req **reqptr, krb5_data *pkt,
     }
 
     /* Decode and verify the header ticket PAC. */
-    ret = get_verified_pac(context, header_enc, t->header_server->princ,
+    ret = get_verified_pac(context, header_enc, t->header_server,
                            t->header_key, t->local_tgt, &t->local_tgt_key,
                            &t->header_pac);
     if (ret) {
