@@ -3437,8 +3437,9 @@ get_negTokenInit(OM_uint32 *minor_status,
 	if (!k5_der_get_value(&seq, SEQUENCE, &seq))
 		return GSS_S_DEFECTIVE_TOKEN;
 
-	/* Get the contents of the mechTypes field. */
-	if (!k5_der_get_value(&seq, CONTEXT, &field))
+	/* Get the contents of the mechTypes field.  Reject an empty field here
+	 * since we musn't allocate a zero-length buffer in the next step. */
+	if (!k5_der_get_value(&seq, CONTEXT, &field) || field.len == 0)
 		return GSS_S_DEFECTIVE_TOKEN;
 
 	/* Store a copy of the contents for MIC computation. */
