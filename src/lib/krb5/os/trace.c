@@ -165,6 +165,7 @@ padata_type_string(krb5_preauthtype type)
     case KRB5_PADATA_AS_FRESHNESS: return "PA_AS_FRESHNESS";
     case KRB5_PADATA_SPAKE: return "PA-SPAKE";
     case KRB5_PADATA_REDHAT_IDP_OAUTH2: return "PA-REDHAT-IDP-OAUTH2";
+    case KRB5_PADATA_REDHAT_PASSKEY: return "PA-REDHAT-PASSKEY";
     default: return NULL;
     }
 }

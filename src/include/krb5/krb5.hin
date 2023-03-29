@@ -1848,6 +1848,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_AS_FRESHNESS        150 /**< RFC 8070 */
 #define KRB5_PADATA_SPAKE               151
 #define KRB5_PADATA_REDHAT_IDP_OAUTH2   152 /**< Red Hat IdP mechanism */
+#define KRB5_PADATA_REDHAT_PASSKEY      153 /**< Red Hat Passkey mechanism */
 #define KRB5_PADATA_PAC_OPTIONS         167 /**< MS-KILE and MS-SFU */
 
 #define KRB5_SAM_USE_SAD_AS_KEY         0x80000000
