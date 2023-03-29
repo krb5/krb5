@@ -1400,7 +1400,8 @@ certauth_dbmatch_initvt(krb5_context context, int maj_ver, int min_ver,
 }
 
 static krb5_error_code
-load_certauth_plugins(krb5_context context, certauth_handle **handle_out)
+load_certauth_plugins(krb5_context context, const char *const *realmnames,
+                      certauth_handle **handle_out)
 {
     krb5_error_code ret;
     krb5_plugin_initvt_fn *modules = NULL, *mod;
@@ -1440,20 +1441,21 @@ load_certauth_plugins(krb5_context context, certauth_handle **handle_out)
         if (h == NULL)
             goto cleanup;
 
-        ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&h->vt);
+        ret = (*mod)(context, 1, 2, (krb5_plugin_vtable)&h->vt);
         if (ret) {
             TRACE_CERTAUTH_VTINIT_FAIL(context, ret);
             free(h);
             continue;
         }
         h->moddata = NULL;
-        if (h->vt.init != NULL) {
+        if (h->vt.init_ex != NULL)
+            ret = h->vt.init_ex(context, realmnames, &h->moddata);
+        else if (h->vt.init != NULL)
             ret = h->vt.init(context, &h->moddata);
-            if (ret) {
-                TRACE_CERTAUTH_INIT_FAIL(context, h->vt.name, ret);
-                free(h);
-                continue;
-            }
+        if (ret) {
+            TRACE_CERTAUTH_INIT_FAIL(context, h->vt.name, ret);
+            free(h);
+            continue;
         }
         list[count++] = h;
         list[count] = NULL;
@@ -1516,7 +1518,7 @@ pkinit_server_plugin_init(krb5_context context,
         goto errout;
     }
 
-    retval = load_certauth_plugins(context, &certauth_modules);
+    retval = load_certauth_plugins(context, realmnames, &certauth_modules);
     if (retval)
         goto errout;
 
