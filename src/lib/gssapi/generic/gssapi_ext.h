@@ -237,6 +237,13 @@ OM_uint32 KRB5_CALLCONV gss_unwrap_aead
  */
 GSS_DLLIMP extern gss_OID GSS_C_INQ_SSPI_SESSION_KEY;
 
+/*
+ * Returns a buffer set with the first member containing the ticket session key
+ * for ODBC compatibility.  The optional second member contains an OID
+ * identifying the session key type.
+ */
+GSS_DLLIMP extern gss_OID GSS_C_INQ_ODBC_SESSION_KEY;
+
 GSS_DLLIMP extern gss_OID GSS_C_INQ_NEGOEX_KEY;
 GSS_DLLIMP extern gss_OID GSS_C_INQ_NEGOEX_VERIFY_KEY;
 

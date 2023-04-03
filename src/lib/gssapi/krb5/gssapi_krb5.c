@@ -337,7 +337,11 @@ static struct {
     },
     {
         {GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_SSPI_SESSION_KEY_OID},
-        gss_krb5int_inq_session_key
+        gss_krb5int_inq_sspi_session_key
+    },
+    {
+        {GSS_KRB5_INQ_ODBC_SESSION_KEY_OID_LENGTH, GSS_KRB5_INQ_ODBC_SESSION_KEY_OID},
+        gss_krb5int_inq_odbc_session_key
     },
     {
         {GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID},

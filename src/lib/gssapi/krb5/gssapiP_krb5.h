@@ -1079,9 +1079,13 @@ gss_krb5int_ccache_name(OM_uint32 *minor_status, const gss_OID, const gss_OID,
 
 #define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
 #define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
+#define GSS_KRB5_INQ_ODBC_SESSION_KEY_OID_LENGTH 11
+#define GSS_KRB5_INQ_ODBC_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x13"
 
 OM_uint32
-gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+gss_krb5int_inq_sspi_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+OM_uint32
+gss_krb5int_inq_odbc_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
 
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 11
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x04"

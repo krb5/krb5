@@ -170,6 +170,14 @@ static const gss_OID_desc const_oids[] = {
      * infosys(1) gssapi(2) krb5(2) krb5-gssapi-ext(5) sasl-ssf(15)
      */
     {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0f"},
+
+    /*
+     * GSS_C_INQ_ODBC_SESSION_KEY 1.2.840.113554.1.2.2.5.19
+     * iso(1) member-body(2) United States(840) mit(113554)
+     * infosys(1) ssapi(2) krb5(2) krb5-gssapi-ext(5)
+     * inq-odbc-session-key(19)
+     */
+    {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05\13"},
 };
 
 /* Here are the constants which point to the static structure above.
@@ -234,6 +242,8 @@ GSS_DLLIMP gss_const_OID GSS_C_MA_CTX_TRANS         = oids+37;
 GSS_DLLIMP gss_const_OID GSS_C_MA_NEGOEX_AND_SPNEGO = oids+38;
 
 GSS_DLLIMP gss_OID GSS_C_SEC_CONTEXT_SASL_SSF = oids+39;
+
+GSS_DLLIMP gss_OID GSS_C_INQ_ODBC_SESSION_KEY = oids+40;
 
 static gss_OID_set_desc gss_ma_known_attrs_desc = { 28, oids+11 };
 
