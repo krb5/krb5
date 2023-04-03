@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -1664,8 +1664,8 @@ mylex(int *intp, struct param *tmv)
 	/* XXX assumes ASCII */
 	num = c - '0';
 	while (isdigit ((int) *P)) {
-	  if (num > MAX_TIME / 10)
-	    return tok_OVERFLOW;
+	    if (num > MAX_TIME / 10)
+	      return tok_OVERFLOW;
 	    num *= 10;
 	    if (num > MAX_TIME - (*P - '0'))
 	      return tok_OVERFLOW;
