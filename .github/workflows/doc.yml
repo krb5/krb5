@@ -6,21 +6,21 @@ on:
 
 jobs:
     doc-older-sphinx:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-22.04
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
             - name: Linux setup
               run: |
                 sudo apt-get update -qq
-                sudo apt-get install -y doxygen python3-lxml python3-pip python-sphinx
+                sudo apt-get install -y doxygen python3-lxml python3-pip python3-sphinx
                 pip3 install Cheetah3
             - name: Build documentation
               run: |
                 cd src/doc
                 make -f Makefile.in SPHINX_ARGS=-W htmlsrc
     doc-newest-sphinx:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
