@@ -220,9 +220,11 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
     }
     if (data) {
         data->refcount++;
-        data->last_stat = 0;    /* Make sure to stat when updating. */
         k5_mutex_unlock(&g_shared_trees_mutex);
-        retval = profile_update_file_data(data, NULL);
+        k5_mutex_lock(&data->lock);
+        data->last_stat = 0;    /* Make sure to stat when updating. */
+        retval = profile_update_file_data_locked(data, NULL);
+        k5_mutex_unlock(&data->lock);
         free(expanded_filename);
         if (retval) {
             profile_dereference_data(data);
