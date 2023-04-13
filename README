@@ -64,32 +64,114 @@ and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary
 way to interact with our bug database is via email.
 
-PAC transition
---------------
+PAC transitions
+---------------
 
 Beginning with release 1.20, the KDC will include minimal PACs in
 tickets instead of AD-SIGNEDPATH authdata.  S4U requests (protocol
 transition and constrained delegation) must now contain valid PACs in
-the incoming tickets.  If only some KDCs in a realm have been upgraded
-across version 1.20, the upgraded KDCs will reject S4U requests
-containing tickets from non-upgraded KDCs and vice versa.
+the incoming tickets.  Beginning with release 1.21, service ticket
+PACs will contain a new KDC checksum buffer, to mitigate a hash
+collision attack against the old KDC checksum.  If only some KDCs in a
+realm have been upgraded across versions 1.20 or 1.21, the upgraded
+KDCs will reject S4U requests containing tickets from non-upgraded
+KDCs and vice versa.
 
-Triple-DES transition
----------------------
+Triple-DES and RC4 transitions
+------------------------------
+
+Beginning with the krb5-1.21 release, the KDC will not issue tickets
+with triple-DES or RC4 session keys unless explicitly configured using
+the new allow_des3 and allow_rc4 variables in [libdefaults].  To
+facilitate the negotiation of session keys, the KDC will assume that
+all services can handle aes256-sha1 session keys unless the service
+principal has a session_enctypes string attribute.
 
 Beginning with the krb5-1.19 release, a warning will be issued if
 initial credentials are acquired using the des3-cbc-sha1 encryption
-type.  In future releases, this encryption type will be disabled by
-default and eventually removed.
+type.  Beginning with the krb5-1.21 release, a warning will also be
+issued for the arcfour-hmac encryption type.  In future releases,
+these encryption types will be disabled by default and eventually
+removed.
 
-Beginning with the krb5-1.18 release, single-DES encryption types have
-been removed.
+Beginning with the krb5-1.18 release, all support for single-DES
+encryption types has been removed.
 
 Major changes in 1.21
 ---------------------
 
+User experience:
+
+* Added a credential cache type providing compatibility with the macOS
+  11 native credential cache.
+
+Developer experience:
+
+* libkadm5 will use the provided krb5_context object to read
+  configuration values, instead of creating its own.
+
+* Added an interface to retrieve the ticket session key from a GSS
+  context.
+
+Protocol evolution:
+
+* The KDC will no longer issue tickets with RC4 or triple-DES session
+  keys unless explicitly configured with the new allow_rc4 or
+  allow_des3 variables respectively.
+
+* The KDC will assume that all services can handle aes256-sha1 session
+  keys unless the service principal has a session_enctypes string
+  attribute.
+
+* Support for PAC full KDC checksums has been added to mitigate an
+  S4U2Proxy privilege escalation attack.
+
+* The PKINIT client will advertise a more modern set of supported CMS
+  algorithms.
+
+Code quality:
+
+* Removed unused code in libkrb5, libkrb5support, and the PKINIT
+  module.
+
+* Modernized the KDC code for processing TGS requests, the code for
+  encrypting and decrypting key data, the PAC handling code, and the
+  GSS library packet parsing and composition code.
+
+* Improved the test framework's detection of memory errors in daemon
+  processes when used with asan.
+
 krb5-1.21 changes by ticket ID
 ------------------------------
+
+9052    Support macOS 11 native credential cache
+9053    Make kprop work for dump files larger than 4GB
+9054    Replace macros with typedefs in gssrpc types.h
+9055    Use SHA-256 instead of SHA-1 for PKINIT CMS digest
+9057    Omit LDFLAGS from krb5-config --libs output
+9058    Add configure variable for default PKCS#11 module
+9059    Use context profile for libkadm5 configuration
+9066    Set reasonable supportedCMSTypes in PKINIT
+9069    Update error checking for OpenSSL CMS_verify
+9071    Add and use ts_interval() helper
+9072    Avoid small read overrun in UTF8 normalization
+9076    Use memmove() in Unicode functions
+9077    Fix aclocal.m4 syntax error for autoconf 2.72
+9078    Fix profile crash on memory exhaustion
+9079    Fix preauth crash on memory exhaustion
+9080    Fix gic_keytab crash on memory exhaustion
+9082    Fix policy DB fallback error handling
+9083    Fix kpropd crash with unrecognized option
+9084    Add PAC full checksums
+9085    Fix read overruns in SPNEGO parsing
+9086    Fix possible double-free during KDB creation
+9087    Fix meridian type in getdate.y
+9088    Use control flow guard flag in Windows builds
+9089    Add pac_privsvr_enctype string attribute
+9090    Convey realm names to certauth modules
+9091    Add GSS_C_INQ_ODBC_SESSION_KEY
+9092    Fix maintainer-mode build for binutils 2.37
+9093    Add PA-REDHAT-PASSKEY padata type
 
 Acknowledgements
 ----------------
@@ -253,6 +335,7 @@ reports, suggestions, and valuable resources:
     Peter Eriksson
     Juha Erkkilä
     Gilles Espinasse
+    Sergey Fedorov
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -300,6 +383,7 @@ reports, suggestions, and valuable resources:
     Brian Johannesmeyer
     Joel Johnson
     Lutz Justen
+    Ganesh Kamath
     Alexander Karaivanov
     Anders Kaseorg
     Bar Katz
@@ -433,10 +517,9 @@ reports, suggestions, and valuable resources:
     Tianjiao Yin
     Nickolai Zeldovich
     Bean Zhang
+    ChenChen Zhou
     Hanz van Zijst
     Gertjan Zwartjes
 
 The above is not an exhaustive list; many others have contributed in
 various ways to the MIT Kerberos development effort over the years.
-Other acknowledgments (for bug reports and patches) are in the
-doc/CHANGES file.
