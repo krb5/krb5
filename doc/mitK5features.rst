@@ -642,6 +642,48 @@ Release 1.20
 
   - Converted the remaining Tcl tests to Python.
 
+Release 1.21
+
+* User experience:
+
+  - Added a credential cache type providing compatibility with the
+    macOS 11 native credential cache.
+
+* Developer experience:
+
+  - libkadm5 will use the provided krb5_context object to read
+    configuration values, instead of creating its own.
+
+  - Added an interface to retrieve the ticket session key from a GSS
+    context.
+
+* Protocol evolution:
+
+  - The KDC will no longer issue tickets with RC4 or triple-DES
+    session keys unless explicitly configured with the new allow_rc4
+    or allow_des3 variables respectively.
+
+  - The KDC will assume that all services can handle aes256-sha1
+    session keys unless the service principal has a session_enctypes
+    string attribute.
+
+  - Support for PAC full KDC checksums has been added to mitigate an
+    S4U2Proxy privilege escalation attack.
+
+  - The PKINIT client will advertise a more modern set of supported
+    CMS algorithms.
+
+* Code quality:
+
+  - Removed unused code in libkrb5, libkrb5support, and the PKINIT
+    module.
+
+  - Modernized the KDC code for processing TGS requests, the code for
+    encrypting and decrypting key data, the PAC handling code, and the
+    GSS library packet parsing and composition code.
+
+  - Improved the test framework's detection of memory errors in daemon
+    processes when used with asan.
 
 `Pre-authentication mechanisms`
 
