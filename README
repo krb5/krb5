@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.21
+                   Kerberos Version 5, Release 1.22
 
                             Release Notes
                         The MIT Kerberos Team
@@ -64,31 +64,43 @@ and using the "Guest Login" button.  Please note that the web
 interface to our bug database is read-only for guests, and the primary
 way to interact with our bug database is via email.
 
-PAC transition
---------------
+PAC transitions
+---------------
 
 Beginning with release 1.20, the KDC will include minimal PACs in
 tickets instead of AD-SIGNEDPATH authdata.  S4U requests (protocol
 transition and constrained delegation) must now contain valid PACs in
-the incoming tickets.  If only some KDCs in a realm have been upgraded
-across version 1.20, the upgraded KDCs will reject S4U requests
-containing tickets from non-upgraded KDCs and vice versa.
+the incoming tickets.  Beginning with release 1.21, service ticket
+PACs will contain a new KDC checksum buffer, to mitigate a hash
+collision attack against the old KDC checksum.  If only some KDCs in a
+realm have been upgraded across versions 1.20 or 1.21, the upgraded
+KDCs will reject S4U requests containing tickets from non-upgraded
+KDCs and vice versa.
 
-Triple-DES transition
----------------------
+Triple-DES and RC4 transitions
+------------------------------
+
+Beginning with the krb5-1.21 release, the KDC will not issue tickets
+with triple-DES or RC4 session keys unless explicitly configured using
+the new allow_des3 and allow_rc4 variables in [libdefaults].  To
+facilitate the negotiation of session keys, the KDC will assume that
+all services can handle aes256-sha1 session keys unless the service
+principal has a session_enctypes string attribute.
 
 Beginning with the krb5-1.19 release, a warning will be issued if
 initial credentials are acquired using the des3-cbc-sha1 encryption
-type.  In future releases, this encryption type will be disabled by
-default and eventually removed.
+type.  Beginning with the krb5-1.21 release, a warning will also be
+issued for the arcfour-hmac encryption type.  In future releases,
+these encryption types will be disabled by default and eventually
+removed.
 
-Beginning with the krb5-1.18 release, single-DES encryption types have
-been removed.
+Beginning with the krb5-1.18 release, all support for single-DES
+encryption types has been removed.
 
-Major changes in 1.21
+Major changes in 1.22
 ---------------------
 
-krb5-1.21 changes by ticket ID
+krb5-1.22 changes by ticket ID
 ------------------------------
 
 Acknowledgements
@@ -253,6 +265,7 @@ reports, suggestions, and valuable resources:
     Peter Eriksson
     Juha Erkkilä
     Gilles Espinasse
+    Sergey Fedorov
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -300,6 +313,7 @@ reports, suggestions, and valuable resources:
     Brian Johannesmeyer
     Joel Johnson
     Lutz Justen
+    Ganesh Kamath
     Alexander Karaivanov
     Anders Kaseorg
     Bar Katz
@@ -433,10 +447,9 @@ reports, suggestions, and valuable resources:
     Tianjiao Yin
     Nickolai Zeldovich
     Bean Zhang
+    ChenChen Zhou
     Hanz van Zijst
     Gertjan Zwartjes
 
 The above is not an exhaustive list; many others have contributed in
 various ways to the MIT Kerberos development effort over the years.
-Other acknowledgments (for bug reports and patches) are in the
-doc/CHANGES file.
