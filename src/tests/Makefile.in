@@ -191,6 +191,7 @@ check-pytests: responder s2p s4u2proxy unlockiter s4u2self
 	$(RUNPYTEST) $(srcdir)/t_u2u.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_kdcoptions.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_replay.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_sendto_kdc.py $(PYTESTFLAGS)
 
 clean:
 	$(RM) adata conccache etinfo forward gcred hist hooks hrealm

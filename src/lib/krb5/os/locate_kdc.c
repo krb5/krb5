@@ -38,6 +38,16 @@
 #endif
 #define DEFAULT_URI_LOOKUP TRUE
 
+struct kdclist_entry {
+    krb5_data realm;
+    struct server_entry server;
+};
+
+struct kdclist {
+    size_t count;
+    struct kdclist_entry *list;
+};
+
 static int
 maybe_use_dns (krb5_context context, const char *name, int defalt)
 {
@@ -212,6 +222,8 @@ server_list_contains(struct serverlist *list, struct server_entry *server)
     struct server_entry *ent;
 
     for (ent = list->servers; ent < list->servers + list->nservers; ent++) {
+        if (server->port != ent->port)
+            continue;
         if (server->hostname != NULL && ent->hostname != NULL &&
             strcmp(server->hostname, ent->hostname) == 0)
             return TRUE;
@@ -833,20 +845,138 @@ k5_locate_kdc(krb5_context context, const krb5_data *realm,
     return k5_locate_server(context, realm, serverlist, stype, no_udp);
 }
 
-krb5_boolean
-k5_kdc_is_primary(krb5_context context, const krb5_data *realm,
-                  struct server_entry *server)
+krb5_error_code
+k5_kdclist_create(struct kdclist **kdcs_out)
 {
-    struct serverlist list;
+    struct kdclist *kdcs;
+
+    *kdcs_out = NULL;
+    kdcs = malloc(sizeof(*kdcs));
+    if (kdcs == NULL)
+        return ENOMEM;
+    kdcs->count = 0;
+    kdcs->list = NULL;
+    *kdcs_out = kdcs;
+    return 0;
+}
+
+krb5_error_code
+k5_kdclist_add(struct kdclist *kdcs, const krb5_data *realm,
+               struct server_entry *server)
+{
+    krb5_error_code ret;
+    struct kdclist_entry *newptr, *ent;
+
+    newptr = realloc(kdcs->list, (kdcs->count + 1) * sizeof(*kdcs->list));
+    if (newptr == NULL)
+        return ENOMEM;
+    kdcs->list = newptr;
+    ent = &kdcs->list[kdcs->count];
+    ret = krb5int_copy_data_contents(NULL, realm, &ent->realm);
+    if (ret)
+        return ret;
+    /* Steal memory ownership from *server. */
+    ent->server = *server;
+    memset(server, 0, sizeof(*server));
+    kdcs->count++;
+    return 0;
+}
+
+/*
+ * If primaries is empty, mark ent as primary (the realm has no primary KDCs
+ * and therefore no KDCs are replicas).  Otherwise mark ent according to
+ * whether it is present in primaries.  Return true if ent is determined to be
+ * a replica.
+ */
+static krb5_boolean
+mark_entry(struct kdclist_entry *ent, struct serverlist *primaries)
+{
+    if (primaries->nservers == 0) {
+        ent->server.primary = 1;
+        return FALSE;
+    }
+    ent->server.primary = server_list_contains(primaries, &ent->server);
+    return !ent->server.primary;
+}
+
+/* Mark kdcs->list[start] and all entries with the same realm and transport
+ * according to primaries.  Stop and return true if a replica is found. */
+static krb5_boolean
+mark_matching_servers(struct kdclist *kdcs, size_t start,
+                      struct serverlist *primaries)
+{
+    size_t i;
+    struct kdclist_entry *ent = &kdcs->list[start];
+
+    if (mark_entry(ent, primaries))
+        return TRUE;
+    for (i = start + 1; i < kdcs->count; i++) {
+        if (kdcs->list[i].server.primary == 1)
+            continue;
+        if (kdcs->list[i].server.transport != ent->server.transport)
+            continue;
+        if (!data_eq(kdcs->list[i].realm, ent->realm))
+            continue;
+        if (mark_entry(&kdcs->list[i], primaries))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/* Return true if any entry in kdcs is a replica.  May modify the primary
+ * fields of entries in kdcs. */
+krb5_boolean
+k5_kdclist_any_replicas(krb5_context context, struct kdclist *kdcs)
+{
+    size_t i;
+    struct kdclist_entry *ent;
+    struct serverlist primaries;
     krb5_boolean found;
 
-    if (server->primary != -1)
-        return server->primary;
+    /* Check if we already know that any of the KDCs is a replica. */
+    for (i = 0; i < kdcs->count; i++) {
+        if (kdcs->list[i].server.primary == 0)
+            return TRUE;
+    }
 
-    if (locate_server(context, realm, &list, locate_service_primary_kdc,
-                      server->transport) != 0)
-        return FALSE;
-    found = server_list_contains(&list, server);
-    k5_free_serverlist(&list);
-    return found;
+    for (i = 0; i < kdcs->count; i++) {
+        ent = &kdcs->list[i];
+
+        /* Skip this entry if we already know that it's not a replica. */
+        if (ent->server.primary == 1)
+            continue;
+
+        /* Look up the primary KDCs for this entry's realm and transport.  Give
+         * up and return false on error. */
+        if (locate_server(context, &ent->realm, &primaries,
+                          locate_service_primary_kdc,
+                          ent->server.transport) != 0)
+            return FALSE;
+
+        /* Using the list of primaries, determine whether this entry and any
+         * entries with the same realm and transport are replicas. */
+        found = mark_matching_servers(kdcs, i, &primaries);
+
+        k5_free_serverlist(&primaries);
+        if (found)
+            return TRUE;
+    }
+
+    return FALSE;
+}
+
+void
+k5_kdclist_free(struct kdclist *kdcs)
+{
+    size_t i;
+
+    if (kdcs == NULL)
+        return;
+    for (i = 0; i < kdcs->count; i++) {
+        free(kdcs->list[i].realm.data);
+        free(kdcs->list[i].server.hostname);
+        free(kdcs->list[i].server.uri_path);
+    }
+    free(kdcs->list);
+    free(kdcs);
 }

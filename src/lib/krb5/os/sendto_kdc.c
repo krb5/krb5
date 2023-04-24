@@ -435,13 +435,13 @@ krb5_set_kdc_recv_hook(krb5_context context, krb5_post_recv_fn recv_hook,
  */
 
 krb5_error_code
-krb5_sendto_kdc(krb5_context context, const krb5_data *message,
-                const krb5_data *realm, krb5_data *reply_out, int *use_primary,
-                int no_udp)
+k5_sendto_kdc(krb5_context context, const krb5_data *message,
+              const krb5_data *realm, krb5_boolean use_primary,
+              krb5_boolean no_udp, krb5_data *reply_out, struct kdclist *kdcs)
 {
     krb5_error_code retval, oldret, err;
     struct serverlist servers;
-    int server_used;
+    int server_used = -1;
     k5_transport_strategy strategy;
     krb5_data reply = empty_data(), *hook_message = NULL, *hook_reply = NULL;
 
@@ -460,7 +460,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
      * should probably be returned as well.
      */
 
-    TRACE_SENDTO_KDC(context, message->length, realm, *use_primary, no_udp);
+    TRACE_SENDTO_KDC(context, message->length, realm, use_primary, no_udp);
 
     if (!no_udp && context->udp_pref_limit < 0) {
         int tmp;
@@ -486,7 +486,7 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     else
         strategy = UDP_LAST;
 
-    retval = k5_locate_kdc(context, realm, &servers, *use_primary, no_udp);
+    retval = k5_locate_kdc(context, realm, &servers, use_primary, no_udp);
     if (retval)
         return retval;
 
@@ -527,13 +527,9 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
                                         retval, realm, message, &reply,
                                         &hook_reply);
         if (oldret && !retval) {
-            /*
-             * The hook must set a reply if it overrides an error from
-             * k5_sendto().  Treat this reply as coming from the primary
-             * KDC.
-             */
+            /* The hook must set a reply if it overrides an error from
+             * k5_sendto(). */
             assert(hook_reply != NULL);
-            *use_primary = 1;
         }
     }
     if (retval)
@@ -542,24 +538,30 @@ krb5_sendto_kdc(krb5_context context, const krb5_data *message,
     if (hook_reply != NULL) {
         *reply_out = *hook_reply;
         free(hook_reply);
-    } else {
-        *reply_out = reply;
-        reply = empty_data();
+        goto cleanup;
     }
 
-    /* Set use_primary to 1 if we ended up talking to a primary when we didn't
-     * explicitly request to. */
-    if (*use_primary == 0) {
-        *use_primary = k5_kdc_is_primary(context, realm,
-                                         &servers.servers[server_used]);
-        TRACE_SENDTO_KDC_PRIMARY(context, *use_primary);
-    }
+    *reply_out = reply;
+    reply = empty_data();
+
+    /* Record which KDC we used if the caller asks. */
+    if (kdcs != NULL && server_used != -1)
+        retval = k5_kdclist_add(kdcs, realm, &servers.servers[server_used]);
 
 cleanup:
     krb5_free_data(context, hook_message);
     krb5_free_data_contents(context, &reply);
     k5_free_serverlist(&servers);
     return retval;
+}
+
+krb5_error_code
+krb5_sendto_kdc(krb5_context context, const krb5_data *message,
+                const krb5_data *realm, krb5_data *reply_out, int *use_primary,
+                int no_udp)
+{
+    return k5_sendto_kdc(context, message, realm, *use_primary, no_udp,
+                         reply_out, NULL);
 }
 
 /*
