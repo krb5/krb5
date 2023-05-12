@@ -33,9 +33,6 @@
 
 #define FAKECERT
 
-const krb5_data dh_oid = { 0, 7, "\x2A\x86\x48\xce\x3e\x02\x01" };
-
-
 krb5_error_code
 pkinit_init_req_opts(pkinit_req_opts **reqopts)
 {

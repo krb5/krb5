@@ -607,6 +607,11 @@ extern const krb5_data sha512_id;
 extern const krb5_data oakley_1024;
 extern const krb5_data oakley_2048;
 extern const krb5_data oakley_4096;
+extern const krb5_data ec_p256;
+extern const krb5_data ec_p384;
+extern const krb5_data ec_p521;
+extern const krb5_data dh_oid;
+extern const krb5_data ec_oid;
 
 /**
  * An ordered set of OIDs, stored as krb5_data, of KDF algorithms
@@ -628,5 +633,7 @@ crypto_req_cert_matching_data(krb5_context context,
 			      pkinit_plg_crypto_context plgctx,
 			      pkinit_req_crypto_context reqctx,
 			      pkinit_cert_matching_data **md_out);
+
+int parse_dh_min_bits(krb5_context context, const char *str);
 
 #endif	/* _PKINIT_CRYPTO_H */

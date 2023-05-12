@@ -59,6 +59,10 @@
 
 #define PKINIT_DEFAULT_DH_MIN_BITS  2048
 #define PKINIT_DH_MIN_CONFIG_BITS   1024
+/* Rough finite-field bit strength equivalents for the elliptic curve groups */
+#define PKINIT_DH_P256_BITS         3072
+#define PKINIT_DH_P384_BITS         7680
+#define PKINIT_DH_P521_BITS         15360
 
 #define KRB5_CONF_KDCDEFAULTS                   "kdcdefaults"
 #define KRB5_CONF_LIBDEFAULTS                   "libdefaults"
@@ -100,8 +104,6 @@ static inline void pkiDebug (const char *fmt, ...) { }
     (k5d)->length = (pad)->length; (k5d)->data = (char *)(pad)->contents;
 #define OCTETDATA_TO_KRB5DATA(octd, k5d) \
     (k5d)->length = (octd)->length; (k5d)->data = (char *)(octd)->data;
-
-extern const krb5_data dh_oid;
 
 /*
  * notes about crypto contexts:

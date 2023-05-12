@@ -92,6 +92,17 @@
 
 #define TRACE_PKINIT_DH_GROUP_UNAVAILABLE(c, name)                      \
     TRACE(c, "PKINIT key exchange group {str} unsupported", name)
+#define TRACE_PKINIT_DH_INVALID_MIN_BITS(c, str)                        \
+    TRACE(c, "Invalid pkinit_dh_min_bits value {str}, using default", str)
+#define TRACE_PKINIT_DH_NEGOTIATED_GROUP(c, desc)                       \
+    TRACE(c, "PKINIT accepting KDC key exchange group preference {str}", desc)
+#define TRACE_PKINIT_DH_PROPOSING_GROUP(c, desc)                \
+    TRACE(c, "PKINIT using {str} key exchange group", desc)
+#define TRACE_PKINIT_DH_RECEIVED_GROUP(c, desc)                         \
+    TRACE(c, "PKINIT received {str} key from client for key exchange", desc)
+#define TRACE_PKINIT_DH_REJECTING_GROUP(c, desc, mindesc)               \
+    TRACE(c, "PKINIT client key has group {str}, need at least {str}",  \
+          desc, mindesc)
 
 #define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
     TRACE(c, "PKINIT OpenSSL error: {str}", msg)

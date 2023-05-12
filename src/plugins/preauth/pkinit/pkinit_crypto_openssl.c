@@ -205,6 +205,15 @@ compat_get0_DH(const EVP_PKEY *pkey)
 
 }
 
+#define EVP_PKEY_get0_EC_KEY compat_get0_EC
+static EC_KEY *
+compat_get0_EC(const EVP_PKEY *pkey)
+{
+    if (pkey->type != EVP_PKEY_EC)
+        return NULL;
+    return pkey->pkey.ec;
+}
+
 /* Return true if the cert c includes a key usage which doesn't include u.
  * Define using direct member access for pre-1.1. */
 #define ku_reject(c, u)                                                 \
@@ -285,36 +294,10 @@ decode_bn_der(const uint8_t *der, size_t len)
 }
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-static int
-params_valid(EVP_PKEY *params)
-{
-    EVP_PKEY_CTX *ctx;
-    int result;
-
-    ctx = EVP_PKEY_CTX_new(params, NULL);
-    if (ctx == NULL)
-        return 0;
-    result = EVP_PKEY_param_check(ctx);
-    EVP_PKEY_CTX_free(ctx);
-    return result == 1;
-}
-#else
-static int
-params_valid(EVP_PKEY *params)
-{
-    DH *dh;
-    int codes;
-
-    dh = EVP_PKEY_get0_DH(params);
-    return (dh == NULL) ? 0 : (DH_check(dh, &codes) && codes == 0);
-}
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 static EVP_PKEY *
-decode_dh_params(const krb5_data *params_der)
+decode_params(const krb5_data *params_der, const char *type)
 {
     EVP_PKEY *pkey = NULL;
     const uint8_t *inptr = (uint8_t *)params_der->data;
@@ -322,7 +305,7 @@ decode_dh_params(const krb5_data *params_der)
     OSSL_DECODER_CTX *dctx;
     int ok;
 
-    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", "type-specific", "DHX",
+    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", "type-specific", type,
                                          EVP_PKEY_KEY_PARAMETERS, NULL, NULL);
     if (dctx == NULL)
         return NULL;
@@ -331,7 +314,15 @@ decode_dh_params(const krb5_data *params_der)
     OSSL_DECODER_CTX_free(dctx);
     return ok ? pkey : NULL;
 }
+
+static EVP_PKEY *
+decode_dh_params(const krb5_data *params_der)
+{
+    return decode_params(params_der, "DHX");
+}
+
 #else
+
 static EVP_PKEY *
 decode_dh_params(const krb5_data *params_der)
 {
@@ -344,6 +335,7 @@ decode_dh_params(const krb5_data *params_der)
     DH_free(dh);
     return pkey;
 }
+
 #endif
 
 static krb5_error_code
@@ -544,6 +536,39 @@ cleanup:
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+static EVP_PKEY *
+decode_ec_params(const krb5_data *params_der)
+{
+    return decode_params(params_der, "EC");
+}
+
+#else /* OPENSSL_VERSION_NUMBER < 0x30000000L */
+
+static EVP_PKEY *
+decode_ec_params(const krb5_data *params_der)
+{
+    const uint8_t *p = (uint8_t *)params_der->data;
+    EC_KEY *eckey;
+    EVP_PKEY *pkey;
+
+    eckey = d2i_ECParameters(NULL, &p, params_der->length);
+    if (eckey == NULL)
+        return NULL;
+    pkey = EVP_PKEY_new();
+    if (pkey != NULL) {
+        if (!EVP_PKEY_set1_EC_KEY(pkey, eckey)) {
+            EVP_PKEY_free(pkey);
+            pkey = NULL;
+        }
+    }
+    EC_KEY_free(eckey);
+    return pkey;
+}
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
+
 /* Attempt to specify padded Diffie-Hellman result derivation.  Don't error out
  * if this fails since we also detect short results and adjust them. */
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
@@ -575,7 +600,8 @@ dh_result(EVP_PKEY *pkey, EVP_PKEY *peer,
     EVP_PKEY_CTX *derive_ctx = NULL;
     int ok = 0;
     uint8_t *buf = NULL;
-    size_t len, dh_size = EVP_PKEY_get_size(pkey);
+    size_t len, result_size;
+    krb5_boolean ecc = (EVP_PKEY_id(pkey) == EVP_PKEY_EC);
 
     *result_out = NULL;
     *len_out = 0;
@@ -585,24 +611,39 @@ dh_result(EVP_PKEY *pkey, EVP_PKEY *peer,
         goto cleanup;
     if (EVP_PKEY_derive_init(derive_ctx) <= 0)
         goto cleanup;
-    set_padded_derivation(derive_ctx);
+    if (!ecc)
+        set_padded_derivation(derive_ctx);
     if (EVP_PKEY_derive_set_peer(derive_ctx, peer) <= 0)
         goto cleanup;
 
-    buf = malloc(dh_size);
+    if (ecc) {
+        if (EVP_PKEY_derive(derive_ctx, NULL, &result_size) <= 0)
+            goto cleanup;
+    } else {
+        /*
+         * For finite-field Diffie-Hellman we must ensure that the result
+         * matches the key size (normally through padded derivation, but that
+         * isn't supported by OpenSSL 1.0 so we must check).
+         */
+        result_size = EVP_PKEY_get_size(pkey);
+    }
+    buf = malloc(result_size);
     if (buf == NULL)
         goto cleanup;
-    len = dh_size;
+    len = result_size;
     if (EVP_PKEY_derive(derive_ctx, buf, &len) <= 0)
         goto cleanup;
-    if (len < dh_size) {        /* only possible without padded derivation */
-        memmove(buf + (dh_size - len), buf, len);
-        memset(buf, 0, dh_size - len);
+
+    /* If we couldn't specify padded derivation for finite-field DH we may need
+     * to fix up the result by right-shifting it within the buffer. */
+    if (len < result_size) {
+        memmove(buf + (result_size - len), buf, len);
+        memset(buf, 0, result_size - len);
     }
 
     ok = 1;
     *result_out = buf;
-    *len_out = dh_size;
+    *len_out = result_size;
     buf = NULL;
 
 cleanup:
@@ -616,13 +657,21 @@ static int
 dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
 {
     BIGNUM *pubkey_bn = NULL;
-    int len, ok;
-    uint8_t *buf;
+    int len, ok = 0;
+    uint8_t *buf, *outptr;
 
-    if (!EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, &pubkey_bn))
-        return 0;
-    ok = encode_bn_der(pubkey_bn, &buf, &len);
-    BN_free(pubkey_bn);
+    if (EVP_PKEY_id(pkey) == EVP_PKEY_EC) {
+        len = i2d_PublicKey(pkey, NULL);
+        if (len > 0 && (outptr = buf = malloc(len)) != NULL) {
+            (void)i2d_PublicKey(pkey, &outptr);
+            ok = 1;
+        }
+    } else {
+        if (!EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, &pubkey_bn))
+            return 0;
+        ok = encode_bn_der(pubkey_bn, &buf, &len);
+        BN_free(pubkey_bn);
+    }
     if (ok) {
         *pubkey_out = buf;
         *len_out = len;
@@ -634,19 +683,33 @@ static int
 dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
 {
     const DH *dh;
+    EC_KEY *eckey;              /* can be const when OpenSSL 1.0 dropped */
     const BIGNUM *pubkey_bn;
-    uint8_t *buf;
+    uint8_t *buf, *outptr;
     int len;
 
     dh = EVP_PKEY_get0_DH(pkey);
-    if (dh == NULL)
-        return 0;
-    DH_get0_key(dh, &pubkey_bn, NULL);
-    if (!encode_bn_der(pubkey_bn, &buf, &len))
-        return 0;
-    *pubkey_out = buf;
-    *len_out = len;
-    return 1;
+    if (dh != NULL) {
+        DH_get0_key(dh, &pubkey_bn, NULL);
+        if (!encode_bn_der(pubkey_bn, &buf, &len))
+            return 0;
+        *pubkey_out = buf;
+        *len_out = len;
+        return 1;
+    }
+
+    eckey = EVP_PKEY_get0_EC_KEY(pkey);
+    if (eckey != NULL) {
+        len = i2o_ECPublicKey(eckey, NULL);
+        if (len > 0 && (outptr = buf = malloc(len)) != NULL) {
+            (void)i2o_ECPublicKey(eckey, &outptr);
+            *pubkey_out = buf;
+            *len_out = len;
+            return 1;
+        }
+    }
+
+    return 0;
 }
 #endif
 
@@ -710,17 +773,23 @@ compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
     if (pkey == NULL)
         goto cleanup;
 
-    pubkey_bn = decode_bn_der(pubkey_der, der_len);
-    if (pubkey_bn == NULL)
-        goto cleanup;
-    binlen = EVP_PKEY_get_size(pkey);
-    pubkey_bin = malloc(binlen);
-    if (pubkey_bin == NULL)
-        goto cleanup;
-    if (BN_bn2binpad(pubkey_bn, pubkey_bin, binlen) != binlen)
-        goto cleanup;
-    if (EVP_PKEY_set1_encoded_public_key(pkey, pubkey_bin, binlen) != 1)
-        goto cleanup;
+    if (EVP_PKEY_id(params) == EVP_PKEY_EC) {
+        if (d2i_PublicKey(EVP_PKEY_id(params), &pkey, &pubkey_der,
+                          der_len) == NULL)
+            goto cleanup;
+    } else {
+        pubkey_bn = decode_bn_der(pubkey_der, der_len);
+        if (pubkey_bn == NULL)
+            goto cleanup;
+        binlen = EVP_PKEY_get_size(pkey);
+        pubkey_bin = malloc(binlen);
+        if (pubkey_bin == NULL)
+            goto cleanup;
+        if (BN_bn2binpad(pubkey_bn, pubkey_bin, binlen) != binlen)
+            goto cleanup;
+        if (EVP_PKEY_set1_encoded_public_key(pkey, pubkey_bin, binlen) != 1)
+            goto cleanup;
+    }
 
     pkey_ret = pkey;
     pkey = NULL;
@@ -765,29 +834,60 @@ static EVP_PKEY *
 compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
 {
     DH *dhparams, *dh = NULL;
-    EVP_PKEY *pkey = NULL;
+    EVP_PKEY *pkey = NULL, *pkey_ret = NULL;
     BIGNUM *pubkey_bn = NULL;
+    EC_KEY *params_eckey, *eckey = NULL;
+    const EC_GROUP *group;
 
-    pubkey_bn = decode_bn_der(pubkey_der, der_len);
-    if (pubkey_bn == NULL)
-        goto cleanup;
+    if (EVP_PKEY_id(params) == EVP_PKEY_EC) {
+        /* We would like to use EVP_PKEY_copy_parameters() and d2i_PublicKey(),
+         * but the latter is broken in OpenSSL 1.1.0-1.1.1a for EC keys. */
+        params_eckey = EVP_PKEY_get0_EC_KEY(params);
+        if (params_eckey == NULL)
+            goto cleanup;
+        group = EC_KEY_get0_group(params_eckey);
+        eckey = EC_KEY_new();
+        if (eckey == NULL)
+            goto cleanup;
+        if (!EC_KEY_set_group(eckey, group))
+            goto cleanup;
+        if (o2i_ECPublicKey(&eckey, &pubkey_der, der_len) == NULL)
+            goto cleanup;
+        pkey = EVP_PKEY_new();
+        if (pkey == NULL)
+            return NULL;
+        if (!EVP_PKEY_assign(pkey, EVP_PKEY_EC, eckey)) {
+            EVP_PKEY_free(pkey);
+            return NULL;
+        }
+        eckey = NULL;
+    } else {
+        pubkey_bn = decode_bn_der(pubkey_der, der_len);
+        if (pubkey_bn == NULL)
+            goto cleanup;
 
-    dhparams = EVP_PKEY_get0_DH(params);
-    if (dhparams == NULL)
-        goto cleanup;
-    dh = dup_dh_params(dhparams);
-    if (dh == NULL)
-        goto cleanup;
-    if (!DH_set0_key(dh, pubkey_bn, NULL))
-        goto cleanup;
-    pubkey_bn = NULL;
+        dhparams = EVP_PKEY_get0_DH(params);
+        if (dhparams == NULL)
+            goto cleanup;
+        dh = dup_dh_params(dhparams);
+        if (dh == NULL)
+            goto cleanup;
+        if (!DH_set0_key(dh, pubkey_bn, NULL))
+            goto cleanup;
+        pubkey_bn = NULL;
 
-    pkey = dh_to_pkey(&dh);
+        pkey = dh_to_pkey(&dh);
+    }
+
+    pkey_ret = pkey;
+    pkey = NULL;
 
 cleanup:
     BN_free(pubkey_bn);
     DH_free(dh);
-    return pkey;
+    EC_KEY_free(eckey);
+    EVP_PKEY_free(pkey);
+    return pkey_ret;
 }
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
@@ -1056,7 +1156,6 @@ pkinit_init_req_crypto(pkinit_req_crypto_context *cryptoctx)
     memset(ctx, 0, sizeof(*ctx));
 
     ctx->client_pkey = NULL;
-    ctx->received_params = NULL;
     ctx->received_cert = NULL;
 
     *cryptoctx = ctx;
@@ -1078,7 +1177,6 @@ pkinit_fini_req_crypto(pkinit_req_crypto_context req_cryptoctx)
 
     pkiDebug("%s: freeing ctx at %p\n", __FUNCTION__, req_cryptoctx);
     EVP_PKEY_free(req_cryptoctx->client_pkey);
-    EVP_PKEY_free(req_cryptoctx->received_params);
     X509_free(req_cryptoctx->received_cert);
 
     free(req_cryptoctx);
@@ -1282,9 +1380,9 @@ pkinit_fini_pkinit_oids(pkinit_plg_crypto_context ctx)
 
 static int
 try_import_group(krb5_context context, const krb5_data *params,
-                 const char *name, EVP_PKEY **pkey_out)
+                 const char *name, krb5_boolean ec, EVP_PKEY **pkey_out)
 {
-    *pkey_out = decode_dh_params(params);
+    *pkey_out = ec ? decode_ec_params(params) : decode_dh_params(params);
     if (*pkey_out == NULL)
         TRACE_PKINIT_DH_GROUP_UNAVAILABLE(context, name);
     return (*pkey_out != NULL) ? 1 : 0;
@@ -1295,12 +1393,15 @@ pkinit_init_dh_params(krb5_context context, pkinit_plg_crypto_context plgctx)
 {
     int n = 0;
 
-    n += try_import_group(context, &oakley_1024, "MODP 2 (1024-bit)",
+    n += try_import_group(context, &oakley_1024, "MODP 2 (1024-bit)", FALSE,
                           &plgctx->dh_1024);
-    n += try_import_group(context, &oakley_2048, "MODP 14 (2048-bit)",
+    n += try_import_group(context, &oakley_2048, "MODP 14 (2048-bit)", FALSE,
                           &plgctx->dh_2048);
-    n += try_import_group(context, &oakley_4096, "MODP 16 (4096-bit)",
+    n += try_import_group(context, &oakley_4096, "MODP 16 (4096-bit)", FALSE,
                           &plgctx->dh_4096);
+    n += try_import_group(context, &ec_p256, "P-256", TRUE, &plgctx->ec_p256);
+    n += try_import_group(context, &ec_p384, "P-384", TRUE, &plgctx->ec_p384);
+    n += try_import_group(context, &ec_p521, "P-521", TRUE, &plgctx->ec_p521);
 
     if (n == 0) {
         pkinit_fini_dh_params(plgctx);
@@ -1318,7 +1419,11 @@ pkinit_fini_dh_params(pkinit_plg_crypto_context plgctx)
     EVP_PKEY_free(plgctx->dh_1024);
     EVP_PKEY_free(plgctx->dh_2048);
     EVP_PKEY_free(plgctx->dh_4096);
+    EVP_PKEY_free(plgctx->ec_p256);
+    EVP_PKEY_free(plgctx->ec_p384);
+    EVP_PKEY_free(plgctx->ec_p521);
     plgctx->dh_1024 = plgctx->dh_2048 = plgctx->dh_4096 = NULL;
+    plgctx->ec_p256 = plgctx->ec_p384 = plgctx->ec_p521 = NULL;
 }
 
 static krb5_error_code
@@ -2895,6 +3000,62 @@ cleanup:
     return ret;
 }
 
+/* Return the equivalent finite-field bit strength of pkey if it matches a
+ * well-known group, or -1 if it doesn't. */
+static int
+check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, EVP_PKEY *pkey)
+{
+    int nbits = EVP_PKEY_get_bits(pkey);
+
+    if (nbits == 1024 && EVP_PKEY_parameters_eq(cryptoctx->dh_1024, pkey) == 1)
+        return nbits;
+    if (nbits == 2048 && EVP_PKEY_parameters_eq(cryptoctx->dh_2048, pkey) == 1)
+        return nbits;
+    if (nbits == 4096 && EVP_PKEY_parameters_eq(cryptoctx->dh_4096, pkey) == 1)
+        return nbits;
+    if (nbits == 256 && EVP_PKEY_parameters_eq(cryptoctx->ec_p256, pkey) == 1)
+        return PKINIT_DH_P256_BITS;
+    if (nbits == 384 && EVP_PKEY_parameters_eq(cryptoctx->ec_p384, pkey) == 1)
+        return PKINIT_DH_P384_BITS;
+    if (nbits == 521 && EVP_PKEY_parameters_eq(cryptoctx->ec_p521, pkey) == 1)
+        return PKINIT_DH_P521_BITS;
+    return -1;
+}
+
+/* Return a short description of the Diffie-Hellman group with the given
+ * finite-field group size equivalent. */
+static const char *
+group_desc(int dh_bits)
+{
+    switch (dh_bits) {
+    case PKINIT_DH_P256_BITS: return "P-256";
+    case PKINIT_DH_P384_BITS: return "P-384";
+    case PKINIT_DH_P521_BITS: return "P-521";
+    case 1024: return "1024-bit DH";
+    case 2048: return "2048-bit DH";
+    case 4096: return "4096-bit DH";
+    }
+    return "(unknown)";
+}
+
+static EVP_PKEY *
+choose_dh_group(pkinit_plg_crypto_context plg_cryptoctx, int dh_size)
+{
+    if (dh_size == 1024)
+        return plg_cryptoctx->dh_1024;
+    if (dh_size == 2048)
+        return plg_cryptoctx->dh_2048;
+    if (dh_size == 4096)
+        return plg_cryptoctx->dh_4096;
+    if (dh_size == PKINIT_DH_P256_BITS)
+        return plg_cryptoctx->ec_p256;
+    if (dh_size == PKINIT_DH_P384_BITS)
+        return plg_cryptoctx->ec_p384;
+    if (dh_size == PKINIT_DH_P521_BITS)
+        return plg_cryptoctx->ec_p521;
+    return NULL;
+}
+
 krb5_error_code
 client_create_dh(krb5_context context,
                  pkinit_plg_crypto_context plg_cryptoctx,
@@ -2907,16 +3068,10 @@ client_create_dh(krb5_context context,
 
     *spki_out = empty_data();
 
-    if (cryptoctx->received_params != NULL)
-        params = cryptoctx->received_params;
-    else if (plg_cryptoctx->dh_1024 != NULL && dh_size == 1024)
-        params = plg_cryptoctx->dh_1024;
-    else if (plg_cryptoctx->dh_2048 != NULL && dh_size == 2048)
-        params = plg_cryptoctx->dh_2048;
-    else if (plg_cryptoctx->dh_4096 != NULL && dh_size == 4096)
-        params = plg_cryptoctx->dh_4096;
-    else
+    params = choose_dh_group(plg_cryptoctx, dh_size);
+    if (params == NULL)
         goto cleanup;
+    TRACE_PKINIT_DH_PROPOSING_GROUP(context, group_desc(dh_size));
 
     pkey = generate_dh_pkey(params);
     if (pkey == NULL)
@@ -2956,8 +3111,11 @@ client_process_dh(krb5_context context,
     server_pkey = compose_dh_pkey(cryptoctx->client_pkey,
                                   subjectPublicKey_data,
                                   subjectPublicKey_length);
-    if (server_pkey == NULL)
+    if (server_pkey == NULL) {
+        retval = KRB5_PREAUTH_FAILED;
+        k5_setmsg(context, retval, _("Cannot compose PKINIT KDC public key"));
         goto cleanup;
+    }
 
     if (!dh_result(cryptoctx->client_pkey, server_pkey,
                    &client_key, &client_key_len))
@@ -2981,20 +3139,6 @@ cleanup:
     return retval;
 }
 
-/* Return 1 if dh is a permitted well-known group, otherwise return 0. */
-static int
-check_dh_wellknown(pkinit_plg_crypto_context cryptoctx, EVP_PKEY *pkey,
-                   int nbits)
-{
-    if (nbits == 1024)
-        return EVP_PKEY_parameters_eq(cryptoctx->dh_1024, pkey) == 1;
-    else if (nbits == 2048)
-        return EVP_PKEY_parameters_eq(cryptoctx->dh_2048, pkey) == 1;
-    else if (nbits == 4096)
-        return EVP_PKEY_parameters_eq(cryptoctx->dh_4096, pkey) == 1;
-    return 0;
-}
-
 krb5_error_code
 server_check_dh(krb5_context context,
                 pkinit_plg_crypto_context cryptoctx,
@@ -3004,7 +3148,7 @@ server_check_dh(krb5_context context,
                 int minbits)
 {
     EVP_PKEY *client_pkey = NULL;
-    int dh_prime_bits;
+    int dh_bits;
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
 
     client_pkey = decode_spki(client_spki);
@@ -3013,16 +3157,15 @@ server_check_dh(krb5_context context,
         goto cleanup;
     }
 
-    /* KDC SHOULD check to see if the key parameters satisfy its policy */
-    dh_prime_bits = EVP_PKEY_get_bits(client_pkey);
-    if (minbits && dh_prime_bits < minbits) {
-        pkiDebug("client sent dh params with %d bits, we require %d\n",
-                 dh_prime_bits, minbits);
+    dh_bits = check_dh_wellknown(cryptoctx, client_pkey);
+    if (dh_bits == -1 || dh_bits < minbits) {
+        TRACE_PKINIT_DH_REJECTING_GROUP(context, group_desc(dh_bits),
+                                        group_desc(minbits));
         goto cleanup;
     }
+    TRACE_PKINIT_DH_RECEIVED_GROUP(context, group_desc(dh_bits));
 
-    if (check_dh_wellknown(cryptoctx, client_pkey, dh_prime_bits))
-        retval = 0;
+    retval = 0;
 
 cleanup:
     if (retval == 0)
@@ -3207,9 +3350,20 @@ pkinit_create_td_dh_parameters(krb5_context context,
     krb5_algorithm_identifier alg_1024 = { dh_oid, oakley_1024 };
     krb5_algorithm_identifier alg_2048 = { dh_oid, oakley_2048 };
     krb5_algorithm_identifier alg_4096 = { dh_oid, oakley_4096 };
-    krb5_algorithm_identifier *alglist[4];
+    krb5_algorithm_identifier alg_p256 = { ec_oid, ec_p256 };
+    krb5_algorithm_identifier alg_p384 = { ec_oid, ec_p384 };
+    krb5_algorithm_identifier alg_p521 = { ec_oid, ec_p521 };
+    krb5_algorithm_identifier *alglist[7];
 
     i = 0;
+    if (plg_cryptoctx->ec_p256 != NULL &&
+        opts->dh_min_bits <= PKINIT_DH_P256_BITS)
+        alglist[i++] = &alg_p256;
+    if (plg_cryptoctx->ec_p384 != NULL &&
+        opts->dh_min_bits <= PKINIT_DH_P384_BITS)
+        alglist[i++] = &alg_p384;
+    if (plg_cryptoctx->ec_p521 != NULL)
+        alglist[i++] = &alg_p521;
     if (plg_cryptoctx->dh_2048 != NULL && opts->dh_min_bits <= 2048)
         alglist[i++] = &alg_2048;
     if (plg_cryptoctx->dh_4096 != NULL && opts->dh_min_bits <= 4096)
@@ -3294,12 +3448,9 @@ pkinit_process_td_dh_params(krb5_context context,
 {
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
     EVP_PKEY *params = NULL;
-    int i, dh_prime_bits, old_dh_size;
+    int i, dh_bits, old_dh_size;
 
     pkiDebug("dh parameters\n");
-
-    EVP_PKEY_free(req_cryptoctx->received_params);
-    req_cryptoctx->received_params = NULL;
 
     old_dh_size = *new_dh_size;
 
@@ -3308,36 +3459,22 @@ pkinit_process_td_dh_params(krb5_context context,
         EVP_PKEY_free(params);
         params = NULL;
 
-        /* Skip any parameters for algorithms other than DH. */
-        if (algId[i]->algorithm.length != dh_oid.length ||
-            memcmp(algId[i]->algorithm.data, dh_oid.data, dh_oid.length))
-            continue;
-
-        params = decode_dh_params(&algId[i]->parameters);
+        if (data_eq(algId[i]->algorithm, dh_oid))
+            params = decode_dh_params(&algId[i]->parameters);
+        else if (data_eq(algId[i]->algorithm, ec_oid))
+            params = decode_ec_params(&algId[i]->parameters);
         if (params == NULL)
             continue;
-        dh_prime_bits = EVP_PKEY_get_bits(params);
-        /* Skip any parameters shorter than the previous size. */
-        if (dh_prime_bits < old_dh_size)
+
+        dh_bits = check_dh_wellknown(cryptoctx, params);
+        /* Skip any parameters shorter than the previous size or unknown. */
+        if (dh_bits == -1 || dh_bits < old_dh_size)
             continue;
-        pkiDebug("client sent %d DH bits server prefers %d DH bits\n",
-                 *new_dh_size, dh_prime_bits);
+        TRACE_PKINIT_DH_NEGOTIATED_GROUP(context, group_desc(dh_bits));
 
-        /* If this is one of our well-known groups, just save the new size; we
-         * will use our own copy of the parameters. */
-        if (check_dh_wellknown(cryptoctx, params, dh_prime_bits)) {
-            *new_dh_size = dh_prime_bits;
-            retval = 0;
-            goto cleanup;
-        }
-
-        /* If the parameters aren't well-known but check out, save them. */
-        if (params_valid(params)) {
-            req_cryptoctx->received_params = params;
-            params = NULL;
-            retval = 0;
-            goto cleanup;
-        }
+        *new_dh_size = dh_bits;
+        retval = 0;
+        goto cleanup;
     }
 
 cleanup:
@@ -5821,4 +5958,41 @@ crypto_req_cert_matching_data(krb5_context context,
 
     return get_matching_data(context, plgctx, reqctx, reqctx->received_cert,
                              md_out);
+}
+
+/*
+ * Historically, the strength of PKINIT key exchange has been determined by the
+ * pkinit_dh_min_bits variable, which gives a finite field size.  With the
+ * addition of ECDH support, we allow the string values P-256, P-384, and P-521
+ * for this config variable, represented with the rough equivalent bit
+ * strengths for finite fields.
+ */
+int
+parse_dh_min_bits(krb5_context context, const char *str)
+{
+    char *endptr;
+    long n;
+
+    if (str == NULL)
+        return PKINIT_DEFAULT_DH_MIN_BITS;
+
+    n = strtol(str, &endptr, 0);
+    if (endptr == str) {
+        if (strcasecmp(str, "P-256") == 0)
+            return PKINIT_DH_P256_BITS;
+        else if (strcasecmp(str, "P-384") == 0)
+            return PKINIT_DH_P384_BITS;
+        else if (strcasecmp(str, "P-521") == 0)
+            return PKINIT_DH_P521_BITS;
+    } else {
+        if (n == 1024)
+            return 1024;
+        else if (n > 1024 && n <= 2048)
+            return 2048;
+        else if (n > 2048 && n <= 4096)
+            return 4096;
+    }
+
+    TRACE_PKINIT_DH_INVALID_MIN_BITS(context, str);
+    return PKINIT_DEFAULT_DH_MIN_BITS;
 }

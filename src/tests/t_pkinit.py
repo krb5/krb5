@@ -172,6 +172,15 @@ realm.pkinit(realm.user_princ, expected_trace=msgs)
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Test each Diffie-Hellman group except 1024-bit (which doesn't work
+# in OpenSSL 3.0) and the default 2048-bit group.
+for g in ('4096', 'P-256', 'P-384', 'P-521'):
+    mark('Diffie-Hellman group ' + g)
+    group_conf = {'realms': {'$realm': {'pkinit_dh_min_bits': g}}}
+    group_env = realm.special_env(g, True, krb5_conf=group_conf)
+    realm.pkinit(realm.user_princ, expected_trace=('PKINIT using ' + g,),
+                 env=group_env)
+
 # Try using multiple configured pkinit_identities, to make sure we
 # fall back to the second one when the first one cannot be read.
 id_conf = {'realms': {'$realm': {'pkinit_identities': [file_identity + 'X',
@@ -197,11 +206,14 @@ realm.start_kdc(env=minbits_env)
 msgs = ('Sending unauthenticated request',
         '/Additional pre-authentication required',
         'Preauthenticating using KDC method data',
+        'PKINIT using 2048-bit DH key exchange group',
         'Preauth module pkinit (16) (real) returned: 0/Success',
         ' preauth for next request: PA-FX-COOKIE (133), PA-PK-AS-REQ (16)',
         '/Key parameters not accepted',
         'Preauth tryagain input types (16): 109, PA-FX-COOKIE (133)',
+        'PKINIT accepting KDC key exchange group preference P-384',
         'trying again with KDC-provided parameters',
+        'PKINIT using P-384 key exchange group',
         'Preauth module pkinit (16) tryagain returned: 0/Success',
         ' preauth for next request: PA-PK-AS-REQ (16), PA-FX-COOKIE (133)')
 realm.pkinit(realm.user_princ, expected_trace=msgs)

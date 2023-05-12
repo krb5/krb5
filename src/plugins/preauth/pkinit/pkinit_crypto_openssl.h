@@ -99,6 +99,9 @@ struct _pkinit_plg_crypto_context {
     EVP_PKEY *dh_1024;
     EVP_PKEY *dh_2048;
     EVP_PKEY *dh_4096;
+    EVP_PKEY *ec_p256;
+    EVP_PKEY *ec_p384;
+    EVP_PKEY *ec_p521;
     ASN1_OBJECT *id_pkinit_authData;
     ASN1_OBJECT *id_pkinit_DHKeyData;
     ASN1_OBJECT *id_pkinit_rkeyData;
@@ -113,7 +116,6 @@ struct _pkinit_plg_crypto_context {
 struct _pkinit_req_crypto_context {
     X509 *received_cert;
     EVP_PKEY *client_pkey;
-    EVP_PKEY *received_params;
 };
 
 #endif	/* _PKINIT_CRYPTO_OPENSSL_H */

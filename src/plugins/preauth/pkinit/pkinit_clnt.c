@@ -774,7 +774,7 @@ pkinit_client_profile(krb5_context context,
                       const krb5_data *realm)
 {
     const char *configured_identity;
-    char *eku_string = NULL;
+    char *eku_string = NULL, *minbits = NULL;
 
     pkiDebug("pkinit_client_profile %p %p %p %p\n",
              context, plgctx, reqctx, realm);
@@ -783,17 +783,10 @@ pkinit_client_profile(krb5_context context,
                               KRB5_CONF_PKINIT_REQUIRE_CRL_CHECKING,
                               reqctx->opts->require_crl_checking,
                               &reqctx->opts->require_crl_checking);
-    pkinit_libdefault_integer(context, realm,
-                              KRB5_CONF_PKINIT_DH_MIN_BITS,
-                              reqctx->opts->dh_size,
-                              &reqctx->opts->dh_size);
-    if (reqctx->opts->dh_size != 1024 && reqctx->opts->dh_size != 2048
-        && reqctx->opts->dh_size != 4096) {
-        pkiDebug("%s: invalid value (%d) for pkinit_dh_min_bits, "
-                 "using default value (%d) instead\n", __FUNCTION__,
-                 reqctx->opts->dh_size, PKINIT_DEFAULT_DH_MIN_BITS);
-        reqctx->opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
-    }
+    pkinit_libdefault_string(context, realm, KRB5_CONF_PKINIT_DH_MIN_BITS,
+                             &minbits);
+    reqctx->opts->dh_size = parse_dh_min_bits(context, minbits);
+    free(minbits);
     pkinit_libdefault_string(context, realm,
                              KRB5_CONF_PKINIT_EKU_CHECKING,
                              &eku_string);

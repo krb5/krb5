@@ -320,6 +320,33 @@ static const uint8_t o4096[] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
+/* Named curve prime256v1 (1.2.840.10045.3.1.7) as parameters for RFC 3279
+ * section 2.3.5 id-ecPublicKey */
+static const uint8_t p256[] = {
+    0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07
+};
+
+/* Named curve secp384r1 (1.3.132.0.34, from RFC 5480 section 2.1.1.1) as
+ * parameters for RFC 3279 section 2.3.5 id-ecPublicKey */
+static const uint8_t p384[] = {
+    0x06, 0x05, 0x2B, 0x81, 0x04, 0x00, 0x22
+};
+
+/* Named curve secp521r1 (1.3.132.0.35, from RFC 5480 section 2.1.1.1) as
+ * parameters for RFC 3279 section 2.3.5 id-ecPublicKey */
+static const uint8_t p521[] = {
+    0x06, 0x05, 0x2B, 0x81, 0x04, 0x00, 0x23
+};
+
 const krb5_data oakley_1024 = { KV5M_DATA, sizeof(o1024), (char *)o1024 };
 const krb5_data oakley_2048 = { KV5M_DATA, sizeof(o2048), (char *)o2048 };
 const krb5_data oakley_4096 = { KV5M_DATA, sizeof(o4096), (char *)o4096 };
+const krb5_data ec_p256 = { KV5M_DATA, sizeof(p256), (char *)p256 };
+const krb5_data ec_p384 = { KV5M_DATA, sizeof(p384), (char *)p384 };
+const krb5_data ec_p521 = { KV5M_DATA, sizeof(p521), (char *)p521 };
+
+/* RFC 3279 section 2.3.3 dhpublicnumber (1.2.840.10046.2.1) */
+const krb5_data dh_oid = { 0, 7, "\x2A\x86\x48\xce\x3e\x02\x01" };
+
+/* RFC 3279 section 2.3.5 id-ecPublicKey (1.2.840.10045.2.1) */
+const krb5_data ec_oid = { 0, 7, "\x2A\x86\x48\xCE\x3D\x02\x01" };

@@ -1070,7 +1070,7 @@ static krb5_error_code
 pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     krb5_error_code retval;
-    char *eku_string = NULL, *ocsp_check = NULL;
+    char *eku_string = NULL, *ocsp_check = NULL, *minbits = NULL;
 
     pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
     retval = pkinit_kdcdefault_string(context, plgctx->realmname,
@@ -1115,17 +1115,10 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
         goto errout;
     }
 
-    pkinit_kdcdefault_integer(context, plgctx->realmname,
-                              KRB5_CONF_PKINIT_DH_MIN_BITS,
-                              PKINIT_DEFAULT_DH_MIN_BITS,
-                              &plgctx->opts->dh_min_bits);
-    if (plgctx->opts->dh_min_bits < PKINIT_DH_MIN_CONFIG_BITS) {
-        pkiDebug("%s: invalid value (%d < %d) for pkinit_dh_min_bits, "
-                 "using default value (%d) instead\n", __FUNCTION__,
-                 plgctx->opts->dh_min_bits, PKINIT_DH_MIN_CONFIG_BITS,
-                 PKINIT_DEFAULT_DH_MIN_BITS);
-        plgctx->opts->dh_min_bits = PKINIT_DEFAULT_DH_MIN_BITS;
-    }
+    pkinit_kdcdefault_string(context, plgctx->realmname,
+                             KRB5_CONF_PKINIT_DH_MIN_BITS, &minbits);
+    plgctx->opts->dh_min_bits = parse_dh_min_bits(context, minbits);
+    free(minbits);
 
     pkinit_kdcdefault_boolean(context, plgctx->realmname,
                               KRB5_CONF_PKINIT_ALLOW_UPN,

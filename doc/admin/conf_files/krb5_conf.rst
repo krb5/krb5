@@ -1128,9 +1128,10 @@ PKINIT krb5.conf options
         option is not recommended.
 
 **pkinit_dh_min_bits**
-    Specifies the size of the Diffie-Hellman key the client will
-    attempt to use.  The acceptable values are 1024, 2048, and 4096.
-    The default is 2048.
+    Specifies the group of the Diffie-Hellman key the client will
+    attempt to use.  The acceptable values are 1024, 2048, P-256,
+    4096, P-384, and P-521.  The default is 2048.  (P-256, P-384, and
+    P-521 are new in release 1.22.)
 
 **pkinit_identities**
     Specifies the location(s) to be used to find the user's X.509
