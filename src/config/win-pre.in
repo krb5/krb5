@@ -31,11 +31,11 @@ CPU=i386
 CPU=i386
 !endif # CPU == X86
 
-!if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" ) && ( "$(CPU)" != "ALPHA64" ) && ( "$(CPU)" != "IA64" ) && ( "$(CPU)" != "AMD64" )
+!if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" ) && ( "$(CPU)" != "ALPHA64" ) && ( "$(CPU)" != "IA64" ) && ( "$(CPU)" != "AMD64" ) && ( "$(CPU)" != "ARM64" )
 !error Must specify CPU environment variable ( CPU=i386, CPU=ALPHA, CPU=ALPHA64,CPU=IA64, CPU=AMD64)
 !endif
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" ) || ("$(CPU)" == "ARM64" )
 BITS=64
 !else
 BITS=32
