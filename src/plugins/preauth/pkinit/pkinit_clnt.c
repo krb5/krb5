@@ -1378,7 +1378,7 @@ pkinit_client_plugin_init(krb5_context context,
     if (retval)
         goto errout;
 
-    retval = pkinit_init_plg_crypto(&ctx->cryptoctx);
+    retval = pkinit_init_plg_crypto(context, &ctx->cryptoctx);
     if (retval)
         goto errout;
 

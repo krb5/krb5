@@ -1222,7 +1222,7 @@ pkinit_server_plugin_init_realm(krb5_context context, const char *realmname,
         goto errout;
     plgctx->realmname_len = strlen(plgctx->realmname);
 
-    retval = pkinit_init_plg_crypto(&plgctx->cryptoctx);
+    retval = pkinit_init_plg_crypto(context, &plgctx->cryptoctx);
     if (retval)
         goto errout;
 

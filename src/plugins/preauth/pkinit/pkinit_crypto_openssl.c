@@ -47,7 +47,8 @@
 static krb5_error_code pkinit_init_pkinit_oids(pkinit_plg_crypto_context );
 static void pkinit_fini_pkinit_oids(pkinit_plg_crypto_context );
 
-static krb5_error_code pkinit_init_dh_params(pkinit_plg_crypto_context );
+static krb5_error_code pkinit_init_dh_params(krb5_context,
+                                             pkinit_plg_crypto_context);
 static void pkinit_fini_dh_params(pkinit_plg_crypto_context );
 
 static krb5_error_code pkinit_init_certs(pkinit_identity_crypto_context ctx);
@@ -951,7 +952,8 @@ oerr_cert(krb5_context context, krb5_error_code code, X509_STORE_CTX *certctx,
 }
 
 krb5_error_code
-pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
+pkinit_init_plg_crypto(krb5_context context,
+                       pkinit_plg_crypto_context *cryptoctx)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_plg_crypto_context ctx = NULL;
@@ -969,7 +971,7 @@ pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx)
     if (retval)
         goto out;
 
-    retval = pkinit_init_dh_params(ctx);
+    retval = pkinit_init_dh_params(context, ctx);
     if (retval)
         goto out;
 
@@ -1278,30 +1280,36 @@ pkinit_fini_pkinit_oids(pkinit_plg_crypto_context ctx)
     ASN1_OBJECT_free(ctx->id_kp_serverAuth);
 }
 
-static krb5_error_code
-pkinit_init_dh_params(pkinit_plg_crypto_context plgctx)
+static int
+try_import_group(krb5_context context, const krb5_data *params,
+                 const char *name, EVP_PKEY **pkey_out)
 {
-    krb5_error_code retval = ENOMEM;
+    *pkey_out = decode_dh_params(params);
+    if (*pkey_out == NULL)
+        TRACE_PKINIT_DH_GROUP_UNAVAILABLE(context, name);
+    return (*pkey_out != NULL) ? 1 : 0;
+}
 
-    plgctx->dh_1024 = decode_dh_params(&oakley_1024);
-    if (plgctx->dh_1024 == NULL)
-        goto cleanup;
+static krb5_error_code
+pkinit_init_dh_params(krb5_context context, pkinit_plg_crypto_context plgctx)
+{
+    int n = 0;
 
-    plgctx->dh_2048 = decode_dh_params(&oakley_2048);
-    if (plgctx->dh_2048 == NULL)
-        goto cleanup;
+    n += try_import_group(context, &oakley_1024, "MODP 2 (1024-bit)",
+                          &plgctx->dh_1024);
+    n += try_import_group(context, &oakley_2048, "MODP 14 (2048-bit)",
+                          &plgctx->dh_2048);
+    n += try_import_group(context, &oakley_4096, "MODP 16 (4096-bit)",
+                          &plgctx->dh_4096);
 
-    plgctx->dh_4096 = decode_dh_params(&oakley_4096);
-    if (plgctx->dh_4096 == NULL)
-        goto cleanup;
-
-    retval = 0;
-
-cleanup:
-    if (retval)
+    if (n == 0) {
         pkinit_fini_dh_params(plgctx);
+        k5_setmsg(context, ENOMEM,
+                  _("PKINIT cannot initialize any key exchange groups"));
+        return ENOMEM;
+    }
 
-    return retval;
+    return 0;
 }
 
 static void
@@ -2901,11 +2909,11 @@ client_create_dh(krb5_context context,
 
     if (cryptoctx->received_params != NULL)
         params = cryptoctx->received_params;
-    else if (dh_size == 1024)
+    else if (plg_cryptoctx->dh_1024 != NULL && dh_size == 1024)
         params = plg_cryptoctx->dh_1024;
-    else if (dh_size == 2048)
+    else if (plg_cryptoctx->dh_2048 != NULL && dh_size == 2048)
         params = plg_cryptoctx->dh_2048;
-    else if (dh_size == 4096)
+    else if (plg_cryptoctx->dh_4096 != NULL && dh_size == 4096)
         params = plg_cryptoctx->dh_4096;
     else
         goto cleanup;
@@ -3201,18 +3209,22 @@ pkinit_create_td_dh_parameters(krb5_context context,
     krb5_algorithm_identifier alg_4096 = { dh_oid, oakley_4096 };
     krb5_algorithm_identifier *alglist[4];
 
-    if (opts->dh_min_bits > 4096) {
-        ret = KRB5KRB_ERR_GENERIC;
-        goto cleanup;
-    }
-
     i = 0;
-    if (opts->dh_min_bits <= 2048)
+    if (plg_cryptoctx->dh_2048 != NULL && opts->dh_min_bits <= 2048)
         alglist[i++] = &alg_2048;
-    alglist[i++] = &alg_4096;
-    if (opts->dh_min_bits <= 1024)
+    if (plg_cryptoctx->dh_4096 != NULL && opts->dh_min_bits <= 4096)
+        alglist[i++] = &alg_4096;
+    if (plg_cryptoctx->dh_1024 != NULL && opts->dh_min_bits <= 1024)
         alglist[i++] = &alg_1024;
     alglist[i] = NULL;
+
+    if (i == 0) {
+        ret = KRB5KRB_ERR_GENERIC;
+        k5_setmsg(context, ret,
+                  _("OpenSSL has no supported key exchange groups for "
+                    "pkinit_dh_min_bits=%d"), opts->dh_min_bits);
+        goto cleanup;
+    }
 
     ret = k5int_encode_krb5_td_dh_parameters(alglist, &der_alglist);
     if (ret)

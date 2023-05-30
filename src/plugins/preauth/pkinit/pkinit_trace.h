@@ -90,6 +90,9 @@
 #define TRACE_PKINIT_CLIENT_TRYAGAIN(c)                                 \
     TRACE(c, "PKINIT client trying again with KDC-provided parameters")
 
+#define TRACE_PKINIT_DH_GROUP_UNAVAILABLE(c, name)                      \
+    TRACE(c, "PKINIT key exchange group {str} unsupported", name)
+
 #define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
     TRACE(c, "PKINIT OpenSSL error: {str}", msg)
 

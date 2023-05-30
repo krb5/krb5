@@ -103,7 +103,8 @@ typedef struct _pkinit_cert_matching_data {
 /*
  * Functions to initialize and cleanup crypto contexts
  */
-krb5_error_code pkinit_init_plg_crypto(pkinit_plg_crypto_context *);
+krb5_error_code pkinit_init_plg_crypto(krb5_context,
+				       pkinit_plg_crypto_context *);
 void pkinit_fini_plg_crypto(pkinit_plg_crypto_context);
 
 krb5_error_code pkinit_init_req_crypto(pkinit_req_crypto_context *);
