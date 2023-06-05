@@ -97,8 +97,8 @@ removed.
 Beginning with the krb5-1.18 release, all support for single-DES
 encryption types has been removed.
 
-Major changes in 1.21
----------------------
+Major changes in 1.21 (2023-06-05)
+----------------------------------
 
 User experience:
 
