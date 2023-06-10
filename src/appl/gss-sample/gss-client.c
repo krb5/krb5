@@ -75,7 +75,7 @@ static gss_OID_desc gss_spnego_mechanism_oid_desc =
 {6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] "
             "[-spnego] [-d]\n");
@@ -359,9 +359,7 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
 }
 
 static void
-read_file(file_name, in_buf)
-    char   *file_name;
-    gss_buffer_t in_buf;
+read_file(char *file_name, gss_buffer_t in_buf)
 {
     int     fd, count;
     struct stat stat_buf;
@@ -431,21 +429,10 @@ read_file(file_name, in_buf)
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
 static int
-call_server(host, port, oid, service_name, gss_flags, auth_flag,
-            wrap_flag, encrypt_flag, mic_flag, v1_format, msg, use_file,
-            mcount, username, password)
-    char   *host;
-    u_short port;
-    gss_OID oid;
-    char   *service_name;
-    OM_uint32 gss_flags;
-    int     auth_flag, wrap_flag, encrypt_flag, mic_flag;
-    int     v1_format;
-    char   *msg;
-    int     use_file;
-    int     mcount;
-    char    *username;
-    char    *password;
+call_server(char *host, u_short port, gss_OID oid, char *service_name,
+            OM_uint32 gss_flags, int auth_flag, int wrap_flag,
+            int encrypt_flag, int mic_flag, int v1_format, char *msg,
+            int use_file, int mcount, char *username, char *password)
 {
     gss_ctx_id_t context = GSS_C_NO_CONTEXT;
     gss_buffer_desc in_buf, out_buf;
@@ -774,9 +761,7 @@ worker_bee(void *unused)
 }
 
 int
-main(argc, argv)
-    int     argc;
-    char  **argv;
+main(int argc, char **argv)
 {
     int     i;
 

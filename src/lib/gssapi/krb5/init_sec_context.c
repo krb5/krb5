@@ -117,14 +117,10 @@ int krb5_gss_dbg_client_expcreds = 0;
  * Common code which fetches the correct krb5 credentials from the
  * ccache.
  */
-static krb5_error_code get_credentials(context, cred, server, now,
-                                       endtime, out_creds)
-    krb5_context context;
-    krb5_gss_cred_id_t cred;
-    krb5_gss_name_t server;
-    krb5_timestamp now;
-    krb5_timestamp endtime;
-    krb5_creds **out_creds;
+static krb5_error_code
+get_credentials(krb5_context context, krb5_gss_cred_id_t cred,
+                krb5_gss_name_t server, krb5_timestamp now,
+                krb5_timestamp endtime, krb5_creds **out_creds)
 {
     krb5_error_code     code;
     krb5_creds          in_creds, evidence_creds, mcreds, *result_creds = NULL;
@@ -365,17 +361,11 @@ cleanup:
 }
 
 static krb5_error_code
-make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
-               chan_bindings, mech_type, token, exts)
-    krb5_context context;
-    krb5_gss_ctx_id_rec *ctx;
-    krb5_gss_cred_id_t cred;
-    krb5_creds *k_cred;
-    krb5_authdata_context ad_context;
-    gss_channel_bindings_t chan_bindings;
-    gss_OID mech_type;
-    gss_buffer_t token;
-    krb5_gss_ctx_ext_t exts;
+make_ap_req_v1(krb5_context context, krb5_gss_ctx_id_rec *ctx,
+               krb5_gss_cred_id_t cred, krb5_creds *k_cred,
+               krb5_authdata_context ad_context,
+               gss_channel_bindings_t chan_bindings, gss_OID mech_type,
+               gss_buffer_t token, krb5_gss_ctx_ext_t exts)
 {
     krb5_flags mk_req_flags = 0;
     krb5_error_code code;
@@ -1048,24 +1038,15 @@ krb5int_gss_use_kdc_context(OM_uint32 *minor_status,
 #endif
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
-                          context_handle, target_name, mech_type,
-                          req_flags, time_req, input_chan_bindings,
-                          input_token, actual_mech_type, output_token,
-                          ret_flags, time_rec)
-    OM_uint32 *minor_status;
-    gss_cred_id_t claimant_cred_handle;
-    gss_ctx_id_t *context_handle;
-    gss_name_t target_name;
-    gss_OID mech_type;
-    OM_uint32 req_flags;
-    OM_uint32 time_req;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_buffer_t input_token;
-    gss_OID *actual_mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
+krb5_gss_init_sec_context(OM_uint32 *minor_status,
+                          gss_cred_id_t claimant_cred_handle,
+                          gss_ctx_id_t *context_handle,
+                          gss_name_t target_name, gss_OID mech_type,
+                          OM_uint32 req_flags, OM_uint32 time_req,
+                          gss_channel_bindings_t input_chan_bindings,
+                          gss_buffer_t input_token, gss_OID *actual_mech_type,
+                          gss_buffer_t output_token, OM_uint32 *ret_flags,
+                          OM_uint32 *time_rec)
 {
     krb5_gss_ctx_ext_rec exts;
 

@@ -165,7 +165,7 @@ static kadm5_ret_t kadm5_get_kiprop_host_srv_name(krb5_context context,
                                                   char **host_service_name);
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr,
             _("\nUsage: %s [-r realm] [-s keytab] [-d] [-D] [-S]\n"

@@ -312,13 +312,13 @@ make_strings(char **stringattrs, krb5_db_entry *ent)
 }
 
 static krb5_error_code
-test_init()
+test_init(void)
 {
     return 0;
 }
 
 static krb5_error_code
-test_cleanup()
+test_cleanup(void)
 {
     return 0;
 }

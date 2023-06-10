@@ -42,7 +42,7 @@ char *whoami;
 #ifdef __GNUC__
 __attribute__((noreturn))
 #endif
-static void usage()
+static void usage(void)
 {
      fprintf(stderr, "usage: %s {-t|-u} [-a] [-s num] [-m num] host service [count]\n",
 	     whoami);
@@ -50,9 +50,7 @@ static void usage()
 }
 
 int
-main(argc, argv)
-   int argc;
-   char **argv;
+main(int argc, char **argv)
 {
      char        *host, *port, *target, *echo_arg, **echo_resp, buf[BIG_BUF];
      CLIENT      *clnt;
@@ -172,7 +170,7 @@ main(argc, argv)
 	      strcmp(echo_arg, (*echo_resp) + 6) != 0)
 	       fprintf(stderr, "RPC_TEST_ECHO call %d response wrong: "
 		       "arg = %s, resp = %s\n", i, echo_arg, *echo_resp);
-	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
      }
 
      /*
@@ -194,7 +192,7 @@ main(argc, argv)
 	       clnt_perror(clnt, whoami);
      } else {
 	  fprintf(stderr, "bad seq didn't cause failure\n");
-	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
      }
 
      AUTH_PRIVATE(clnt->cl_auth)->seq_num -= 3;
@@ -207,7 +205,7 @@ main(argc, argv)
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Sequence number improperly reset");
      else
-	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
 
      /*
       * Now simulate a lost server response, and see if
@@ -219,7 +217,7 @@ main(argc, argv)
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Auto-resynchronization failed");
      else
-	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
 
      /*
       * Now make sure auto-resyncrhonization actually worked
@@ -229,7 +227,7 @@ main(argc, argv)
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Auto-resynchronization did not work");
      else
-	  gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	  gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
 
      if (! auth_once) {
 	  tmp_auth = clnt->cl_auth;
@@ -259,7 +257,7 @@ main(argc, argv)
 		   strcmp(echo_arg, (*echo_resp) + 6) != 0)
 		    fprintf(stderr,
 			    "RPC_TEST_LENGTHS call %d response wrong\n", i);
-	       gssrpc_xdr_free(xdr_wrapstring, echo_resp);
+	       gssrpc_xdr_free((xdrproc_t)xdr_wrapstring, echo_resp);
 	  }
 
 	  /* cycle from 1 to 255 */

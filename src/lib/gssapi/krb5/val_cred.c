@@ -57,9 +57,7 @@ krb5_gss_validate_cred_1(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
 }
 
 OM_uint32
-krb5_gss_validate_cred(minor_status, cred_handle)
-    OM_uint32 *minor_status;
-    gss_cred_id_t cred_handle;
+krb5_gss_validate_cred(OM_uint32 *minor_status, gss_cred_id_t cred_handle)
 {
     krb5_context context;
     krb5_error_code code;

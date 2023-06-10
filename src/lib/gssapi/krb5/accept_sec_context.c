@@ -160,11 +160,8 @@ create_constrained_deleg_creds(OM_uint32 *minor_status,
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
-rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
-    krb5_context context;
-    krb5_auth_context auth_context;
-    krb5_data *inbuf;
-    krb5_gss_cred_id_t *out_cred;
+rd_and_store_for_creds(krb5_context context, krb5_auth_context auth_context,
+                       krb5_data *inbuf, krb5_gss_cred_id_t *out_cred)
 {
     krb5_creds ** creds = NULL;
     krb5_error_code retval;
@@ -286,20 +283,12 @@ cleanup:
  * Performs third leg of DCE authentication
  */
 static OM_uint32
-kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
-              input_token, input_chan_bindings, src_name, mech_type,
-              output_token, ret_flags, time_rec, delegated_cred_handle)
-    OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
-    gss_cred_id_t verifier_cred_handle;
-    gss_buffer_t input_token;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_name_t *src_name;
-    gss_OID *mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
-    gss_cred_id_t *delegated_cred_handle;
+kg_accept_dce(OM_uint32 *minor_status, gss_ctx_id_t *context_handle,
+              gss_cred_id_t verifier_cred_handle, gss_buffer_t input_token,
+              gss_channel_bindings_t input_chan_bindings, gss_name_t *src_name,
+              gss_OID *mech_type, gss_buffer_t output_token,
+              OM_uint32 *ret_flags, OM_uint32 *time_rec,
+              gss_cred_id_t *delegated_cred_handle)
 {
     krb5_error_code code;
     krb5_gss_ctx_id_rec *ctx = 0;
@@ -637,23 +626,13 @@ fail:
 }
 
 static OM_uint32
-kg_accept_krb5(minor_status, context_handle,
-               verifier_cred_handle, input_token,
-               input_chan_bindings, src_name, mech_type,
-               output_token, ret_flags, time_rec,
-               delegated_cred_handle, exts)
-    OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
-    gss_cred_id_t verifier_cred_handle;
-    gss_buffer_t input_token;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_name_t *src_name;
-    gss_OID *mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
-    gss_cred_id_t *delegated_cred_handle;
-    krb5_gss_ctx_ext_t exts;
+kg_accept_krb5(OM_uint32 *minor_status, gss_ctx_id_t *context_handle,
+               gss_cred_id_t verifier_cred_handle, gss_buffer_t input_token,
+               gss_channel_bindings_t input_chan_bindings,
+               gss_name_t *src_name, gss_OID *mech_type,
+               gss_buffer_t output_token, OM_uint32 *ret_flags,
+               OM_uint32 *time_rec, gss_cred_id_t *delegated_cred_handle,
+               krb5_gss_ctx_ext_t exts)
 {
     krb5_context context;
     unsigned char *ptr;
@@ -1310,22 +1289,15 @@ krb5_gss_accept_sec_context_ext(
 }
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_accept_sec_context(minor_status, context_handle,
-                            verifier_cred_handle, input_token,
-                            input_chan_bindings, src_name, mech_type,
-                            output_token, ret_flags, time_rec,
-                            delegated_cred_handle)
-    OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
-    gss_cred_id_t verifier_cred_handle;
-    gss_buffer_t input_token;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_name_t *src_name;
-    gss_OID *mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
-    gss_cred_id_t *delegated_cred_handle;
+krb5_gss_accept_sec_context(OM_uint32 *minor_status,
+                            gss_ctx_id_t *context_handle,
+                            gss_cred_id_t verifier_cred_handle,
+                            gss_buffer_t input_token,
+                            gss_channel_bindings_t input_chan_bindings,
+                            gss_name_t *src_name, gss_OID *mech_type,
+                            gss_buffer_t output_token, OM_uint32 *ret_flags,
+                            OM_uint32 *time_rec,
+                            gss_cred_id_t *delegated_cred_handle)
 {
     krb5_gss_ctx_ext_rec exts;
 

@@ -30,6 +30,7 @@
 #define NET_SERVER_H
 
 #include <verto.h>
+#include <gssrpc/rpc.h>
 
 /* The delimiter characters supported by the addresses string. */
 #define ADDRESSES_DELIM ",; "
@@ -64,13 +65,14 @@ krb5_error_code loop_add_udp_address(int default_port, const char *addresses);
 krb5_error_code loop_add_tcp_address(int default_port, const char *addresses);
 krb5_error_code loop_add_rpc_service(int default_port, const char *addresses,
                                      u_long prognum, u_long versnum,
-                                     void (*dispatchfn)());
+                                     void (*dispatchfn)(struct svc_req *,
+                                                        SVCXPRT *));
 
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname,
                                    int tcp_listen_backlog);
 krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,
-                                   void (*reset)());
+                                   void (*reset)(void *));
 void loop_free(verto_ctx *ctx);
 
 /* to be supplied by the server application */

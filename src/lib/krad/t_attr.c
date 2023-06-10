@@ -40,7 +40,7 @@ const static unsigned char auth[] = {
 };
 
 int
-main()
+main(void)
 {
     unsigned char outbuf[MAX_ATTRSETSIZE];
     const char *decoded = "accept";

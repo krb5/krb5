@@ -120,7 +120,8 @@ int trval2 (FILE *, unsigned char *, int, int, int *);
 
 /****************************************************************************/
 
-static int convert_nibble(int ch)
+static int
+convert_nibble(int ch)
 {
     if (isdigit(ch))
         return (ch - '0');
@@ -131,9 +132,8 @@ static int convert_nibble(int ch)
     return -1;
 }
 
-int trval(fin, fout)
-    FILE        *fin;
-    FILE        *fout;
+int
+trval(FILE *fin, FILE *fout)
 {
     unsigned char *p;
     unsigned int maxlen;
@@ -169,12 +169,8 @@ int trval(fin, fout)
     return(r);
 }
 
-int trval2(fp, enc, len, lev, rlen)
-    FILE *fp;
-    unsigned char *enc;
-    int len;
-    int lev;
-    int *rlen;
+int
+trval2(FILE *fp, unsigned char *enc, int len, int lev, int *rlen)
 {
     int l, eid, elen, xlen, r, rlen2 = 0;
     int rlen_ext = 0;
@@ -248,10 +244,8 @@ context_restart:
     return(r);
 }
 
-int decode_len(fp, enc, len)
-    FILE *fp;
-    unsigned char *enc;
-    int len;
+int
+decode_len(FILE *fp, unsigned char *enc, int len)
 {
     int rlen;
     int i;
@@ -270,12 +264,8 @@ int decode_len(fp, enc, len)
 /*
  * This is the printing function for bit strings
  */
-int do_prim_bitstring(fp, tag, enc, len, lev)
-    FILE *fp;
-    int tag;
-    unsigned char *enc;
-    int len;
-    int lev;
+int
+do_prim_bitstring(FILE *fp, int tag, unsigned char *enc, int len, int lev)
 {
     int i;
     long        num = 0;
@@ -297,12 +287,8 @@ int do_prim_bitstring(fp, tag, enc, len, lev)
 /*
  * This is the printing function for integers
  */
-int do_prim_int(fp, tag, enc, len, lev)
-    FILE *fp;
-    int tag;
-    unsigned char *enc;
-    int len;
-    int lev;
+int
+do_prim_int(FILE *fp, int tag, unsigned char *enc, int len, int lev)
 {
     int i;
     long        num = 0;
@@ -327,12 +313,8 @@ int do_prim_int(fp, tag, enc, len, lev)
  * This is the printing function which we use if it's a string or
  * other other type which is best printed as a string
  */
-int do_prim_string(fp, tag, enc, len, lev)
-    FILE *fp;
-    int tag;
-    unsigned char *enc;
-    int len;
-    int lev;
+int
+do_prim_string(FILE *fp, int tag, unsigned char *enc, int len, int lev)
 {
     int i;
 
@@ -349,12 +331,8 @@ int do_prim_string(fp, tag, enc, len, lev)
     return 1;
 }
 
-int do_prim(fp, tag, enc, len, lev)
-    FILE *fp;
-    int tag;
-    unsigned char *enc;
-    int len;
-    int lev;
+int
+do_prim(FILE *fp, int tag, unsigned char *enc, int len, int lev)
 {
     int n;
     int i;
@@ -396,12 +374,8 @@ int do_prim(fp, tag, enc, len, lev)
     return(OK);
 }
 
-int do_cons(fp, enc, len, lev, rlen)
-    FILE *fp;
-    unsigned char *enc;
-    int len;
-    int lev;
-    int *rlen;
+int
+do_cons(FILE *fp, unsigned char *enc, int len, int lev, int *rlen)
 {
     int n;
     int r = 0;
@@ -430,9 +404,8 @@ struct typestring_table {
     int new_appl;
 };
 
-static char *lookup_typestring(table, key1, key2)
-    struct typestring_table *table;
-    int key1, key2;
+static char *
+lookup_typestring(struct typestring_table *table, int key1, int key2)
 {
     struct typestring_table *ent;
 
@@ -700,10 +673,8 @@ struct typestring_table krb5_fields[] = {
 };
 #endif
 
-void print_tag_type(fp, eid, lev)
-    FILE *fp;
-    int     eid;
-    int     lev;
+void
+print_tag_type(FILE *fp, int eid, int lev)
 {
     int tag = eid & ID_TAG;
     int do_space = 1;

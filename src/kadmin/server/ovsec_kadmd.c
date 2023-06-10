@@ -77,7 +77,7 @@ static krb5_context context;
 static char *progname;
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr, _("Usage: kadmind [-x db_args]* [-r realm] [-m] [-nofork] "
                       "[-port port-number]\n"
@@ -173,7 +173,7 @@ setup_loop(kadm5_config_params *params, int proponly, verto_ctx **ctx_out)
 
 /* Point GSSAPI at the KDB keytab so we don't need an actual file keytab. */
 static krb5_error_code
-setup_kdb_keytab()
+setup_kdb_keytab(void)
 {
     krb5_error_code ret;
 

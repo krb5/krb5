@@ -64,7 +64,9 @@ static krb5_error_code resolve_target_cache(krb5_context ksu_context,
 /* insure the proper specification of target user as well as catching
    ill specified arguments to commands */
 
-void usage (){
+void
+usage(void)
+{
     fprintf(stderr,
             _("Usage: %s [target user] [-n principal] [-c source cachename] "
               "[-k] [-r time] [-p|-P] [-f|-F] [-l lifetime] [-zZ] [-q] "
@@ -80,9 +82,7 @@ void usage (){
 static uid_t source_uid, target_uid;
 
 int
-main (argc, argv)
-    int argc;
-    char ** argv;
+main(int argc, char ** argv)
 {
     int hp =0;
     int some_rest_copy = 0;
@@ -114,7 +114,6 @@ main (argc, argv)
     char ** params;
     int keep_target_cache = 0;
     int child_pid, child_pgrp, ret_pid;
-    extern char * getpass(), *crypt();
     int pargc;
     char ** pargv;
     krb5_boolean stored = FALSE, cc_reused = FALSE, given_princ = FALSE;
@@ -965,11 +964,10 @@ cleanup:
 
 #ifdef HAVE_GETUSERSHELL
 
-int standard_shell(sh)
-    char *sh;
+int
+standard_shell(char *sh)
 {
     char *cp;
-    char *getusershell();
 
     while ((cp = getusershell()) != NULL)
         if (!strcmp(cp, sh))
@@ -979,7 +977,8 @@ int standard_shell(sh)
 
 #endif /* HAVE_GETUSERSHELL */
 
-static char * ontty()
+static char *
+ontty(void)
 {
     char *p;
     static char buf[MAXPATHLEN + 5];
@@ -996,10 +995,8 @@ static char * ontty()
     return (buf);
 }
 
-
-static int set_env_var(name, value)
-    char *name;
-    char *value;
+static int
+set_env_var(char *name, char *value)
 {
     char * env_var_buf;
 
@@ -1008,9 +1005,8 @@ static int set_env_var(name, value)
 
 }
 
-static void sweep_up(context, cc)
-    krb5_context context;
-    krb5_ccache cc;
+static void
+sweep_up(krb5_context context, krb5_ccache cc)
 {
     krb5_error_code retval;
 
@@ -1038,11 +1034,7 @@ get_params is to be called for the -a option or -e option to
 *****************************************************************/
 
 krb5_error_code
-get_params(optindex, pargc, pargv, params)
-    int *optindex;
-    int pargc;
-    char **pargv;
-    char ***params;
+get_params(int *optindex, int pargc, char **pargv, char ***params)
 {
 
     int i,j;
@@ -1075,10 +1067,8 @@ void print_status(const char *fmt, ...)
 }
 
 krb5_error_code
-ksu_tgtname(context, server, client, tgtprinc)
-    krb5_context context;
-    const krb5_data *server, *client;
-    krb5_principal *tgtprinc;
+ksu_tgtname(krb5_context context, const krb5_data *server,
+            const krb5_data *client, krb5_principal *tgtprinc)
 {
     return krb5_build_principal_ext(context, tgtprinc, client->length, client->data,
                                     KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,

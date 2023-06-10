@@ -1,6 +1,7 @@
 /* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 #include <gssrpc/rpc.h>
 #include <kadm5/kadm_rpc.h>
+#include <kadm5/admin_xdr.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include <string.h>  /* for memset prototype */

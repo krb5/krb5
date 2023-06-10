@@ -98,7 +98,7 @@ error(const char *fmt, ...)
 }
 
 static void
-usage()
+usage(void)
 {
     error(_("Usage: %s [-r realm] [-p principal] [-q query] "
             "[clnt|local args]\n"
@@ -1130,7 +1130,7 @@ kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
 }
 
 static void
-kadmin_addprinc_usage()
+kadmin_addprinc_usage(void)
 {
     error(_("usage: add_principal [options] principal\n"));
     error(_("\toptions are:\n"));
@@ -1154,7 +1154,7 @@ kadmin_addprinc_usage()
 }
 
 static void
-kadmin_modprinc_usage()
+kadmin_modprinc_usage(void)
 {
     error(_("usage: modify_principal [options] principal\n"));
     error(_("\toptions are:\n"));

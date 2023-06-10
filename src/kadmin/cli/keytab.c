@@ -50,14 +50,14 @@ static int quiet;
 static int norandkey;
 
 static void
-add_usage()
+add_usage(void)
 {
     fprintf(stderr, _("Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] "
                       "[-norandkey] [principal | -glob princ-exp] [...]\n"));
 }
 
 static void
-rem_usage()
+rem_usage(void)
 {
     fprintf(stderr, _("Usage: ktremove [-k[eytab] keytab] [-q] principal "
                       "[kvno|\"all\"|\"old\"]\n"));

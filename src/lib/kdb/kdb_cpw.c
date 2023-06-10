@@ -57,10 +57,7 @@
 enum save { DISCARD_ALL, KEEP_LAST_KVNO, KEEP_ALL };
 
 int
-krb5_db_get_key_data_kvno(context, count, data)
-    krb5_context          context;
-    int                   count;
-    krb5_key_data       * data;
+krb5_db_get_key_data_kvno(krb5_context context, int count, krb5_key_data *data)
 {
     int i, kvno;
     /* Find last key version number */
@@ -73,10 +70,7 @@ krb5_db_get_key_data_kvno(context, count, data)
 }
 
 static void
-cleanup_key_data(context, count, data)
-    krb5_context          context;
-    int                   count;
-    krb5_key_data       * data;
+cleanup_key_data(krb5_context context, int count, krb5_key_data *data)
 {
     int i;
 
@@ -149,13 +143,9 @@ preserve_old_keys(krb5_context context, krb5_keyblock *mkey,
 }
 
 static krb5_error_code
-add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
-    krb5_context          context;
-    krb5_keyblock       * master_key;
-    krb5_key_salt_tuple * ks_tuple;
-    int                   ks_tuple_count;
-    krb5_db_entry       * db_entry;
-    int                   kvno;
+add_key_rnd(krb5_context context, krb5_keyblock *master_key,
+            krb5_key_salt_tuple *ks_tuple, int ks_tuple_count,
+            krb5_db_entry *db_entry, int kvno)
 {
     krb5_keyblock         key;
     int                   i, j;
@@ -246,15 +236,9 @@ make_random_salt(krb5_context context, krb5_keysalt *salt_out)
  * If passwd is NULL the assumes that the caller wants a random password.
  */
 static krb5_error_code
-add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
-            db_entry, kvno)
-    krb5_context          context;
-    krb5_keyblock       * master_key;
-    krb5_key_salt_tuple * ks_tuple;
-    int                   ks_tuple_count;
-    const char          * passwd;
-    krb5_db_entry       * db_entry;
-    int                   kvno;
+add_key_pwd(krb5_context context, krb5_keyblock *master_key,
+            krb5_key_salt_tuple *ks_tuple, int ks_tuple_count,
+            const char *passwd, krb5_db_entry *db_entry, int kvno)
 {
     krb5_error_code       retval;
     krb5_keysalt          key_salt;

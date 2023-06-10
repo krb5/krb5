@@ -3597,7 +3597,7 @@ load_pkcs11_module(krb5_context context, const char *modname,
     CK_RV (*getflist)(CK_FUNCTION_LIST_PTR_PTR);
     struct errinfo einfo = EMPTY_ERRINFO;
     const char *errmsg = NULL;
-    void (*sym)();
+    void (*sym)(void);
     long err;
     CK_RV rv;
 
@@ -3616,7 +3616,7 @@ load_pkcs11_module(krb5_context context, const char *modname,
         goto error;
     }
 
-    getflist = (CK_RV (*)())sym;
+    getflist = (CK_RV (*)(CK_FUNCTION_LIST_PTR_PTR))sym;
     rv = (*getflist)(p11p);
     if (rv != CKR_OK) {
         TRACE_PKINIT_PKCS11_GETFLIST_FAILED(context, pkcs11err(rv));

@@ -54,9 +54,8 @@ static void ktest_free_reply_key_pack(krb5_context context,
 static void ktest_free_kkdcp_message(krb5_context context,
                                      krb5_kkdcp_message *val);
 
-int main(argc, argv)
-    int argc;
-    char **argv;
+int
+main(int argc, char **argv)
 {
     krb5_data code;
     krb5_error_code retval;

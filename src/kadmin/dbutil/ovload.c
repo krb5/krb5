@@ -11,9 +11,8 @@
 
 #define LINESIZE        32768 /* XXX */
 
-static int parse_pw_hist_ent(current, hist)
-    char *current;
-    osa_pw_hist_ent *hist;
+static int
+parse_pw_hist_ent(char *current, osa_pw_hist_ent *hist)
 {
     int tmp, i, j, ret;
     char *cp;
@@ -90,12 +89,9 @@ done:
  *      [modifies]
  *
  */
-int process_ov_principal(kcontext, fname, filep, verbose, linenop)
-    krb5_context        kcontext;
-    const char          *fname;
-    FILE                *filep;
-    krb5_boolean        verbose;
-    int                 *linenop;
+int
+process_ov_principal(krb5_context kcontext, const char *fname, FILE *filep,
+                     krb5_boolean verbose, int *linenop)
 {
     XDR                     xdrs;
     osa_princ_ent_t         rec;

@@ -468,13 +468,13 @@ error:
 }
 
 static krb5_error_code
-klmdb_lib_init()
+klmdb_lib_init(void)
 {
     return 0;
 }
 
 static krb5_error_code
-klmdb_lib_cleanup()
+klmdb_lib_cleanup(void)
 {
     return 0;
 }

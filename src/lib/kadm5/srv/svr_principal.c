@@ -30,9 +30,9 @@ static int decrypt_key_data(krb5_context context,
 /*
  * XXX Functions that ought to be in libkrb5.a, but aren't.
  */
-kadm5_ret_t krb5_copy_key_data_contents(context, from, to)
-    krb5_context context;
-    krb5_key_data *from, *to;
+kadm5_ret_t
+krb5_copy_key_data_contents(krb5_context context, krb5_key_data *from,
+                            krb5_key_data *to)
 {
     int i, idx;
 
@@ -75,10 +75,8 @@ static krb5_tl_data *dup_tl_data(krb5_tl_data *tl)
 }
 
 /* This is in lib/kdb/kdb_cpw.c, but is static */
-static void cleanup_key_data(context, count, data)
-    krb5_context   context;
-    int                    count;
-    krb5_key_data        * data;
+static void
+cleanup_key_data(krb5_context context, int count, krb5_key_data *data)
 {
     int i;
 

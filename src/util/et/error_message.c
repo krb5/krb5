@@ -82,7 +82,7 @@ void com_err_terminate(void)
 #endif
 
 static char *
-get_thread_buffer ()
+get_thread_buffer(void)
 {
     char *cp;
     cp = k5_getspecific(K5_KEY_COM_ERR);

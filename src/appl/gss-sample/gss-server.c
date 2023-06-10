@@ -73,7 +73,7 @@ static OM_uint32
 showLocalIdentity(OM_uint32 *minor, gss_name_t name);
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr, "Usage: gss-server [-port port] [-verbose] [-once]");
 #ifdef _WIN32

@@ -58,17 +58,10 @@
    conf_state is only valid if SEAL. */
 
 static OM_uint32
-kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
-             conf_state, qop_state, toktype)
-    krb5_context context;
-    OM_uint32 *minor_status;
-    krb5_gss_ctx_id_rec *ctx;
-    unsigned char *ptr;
-    int bodysize;
-    gss_buffer_t message_buffer;
-    int *conf_state;
-    gss_qop_t *qop_state;
-    int toktype;
+kg_unseal_v1(krb5_context context, OM_uint32 *minor_status,
+             krb5_gss_ctx_id_rec *ctx, unsigned char *ptr, int bodysize,
+             gss_buffer_t message_buffer, int *conf_state,
+             gss_qop_t *qop_state, int toktype)
 {
     krb5_error_code code;
     int conflen = 0;
@@ -360,15 +353,9 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
    conf_state is only valid if SEAL. */
 
 OM_uint32
-kg_unseal(minor_status, context_handle, input_token_buffer,
-          message_buffer, conf_state, qop_state, toktype)
-    OM_uint32 *minor_status;
-    gss_ctx_id_t context_handle;
-    gss_buffer_t input_token_buffer;
-    gss_buffer_t message_buffer;
-    int *conf_state;
-    gss_qop_t *qop_state;
-    int toktype;
+kg_unseal(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
+          gss_buffer_t input_token_buffer, gss_buffer_t message_buffer,
+          int *conf_state, gss_qop_t *qop_state, int toktype)
 {
     krb5_gss_ctx_id_rec *ctx;
     unsigned char *ptr;
@@ -439,15 +426,10 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 }
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_unwrap(minor_status, context_handle,
-                input_message_buffer, output_message_buffer,
-                conf_state, qop_state)
-    OM_uint32           *minor_status;
-    gss_ctx_id_t        context_handle;
-    gss_buffer_t        input_message_buffer;
-    gss_buffer_t        output_message_buffer;
-    int                 *conf_state;
-    gss_qop_t           *qop_state;
+krb5_gss_unwrap(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
+                gss_buffer_t input_message_buffer,
+                gss_buffer_t output_message_buffer, int *conf_state,
+                gss_qop_t *qop_state)
 {
     OM_uint32           rstat;
 
@@ -458,14 +440,9 @@ krb5_gss_unwrap(minor_status, context_handle,
 }
 
 OM_uint32 KRB5_CALLCONV
-krb5_gss_verify_mic(minor_status, context_handle,
-                    message_buffer, token_buffer,
-                    qop_state)
-    OM_uint32           *minor_status;
-    gss_ctx_id_t        context_handle;
-    gss_buffer_t        message_buffer;
-    gss_buffer_t        token_buffer;
-    gss_qop_t           *qop_state;
+krb5_gss_verify_mic(OM_uint32 *minor_status, gss_ctx_id_t context_handle,
+                    gss_buffer_t message_buffer, gss_buffer_t token_buffer,
+                    gss_qop_t *qop_state)
 {
     OM_uint32           rstat;
 

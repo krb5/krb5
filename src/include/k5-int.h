@@ -2239,7 +2239,7 @@ make_data(void *data, unsigned int len)
 }
 
 static inline krb5_data
-empty_data()
+empty_data(void)
 {
     return make_data(NULL, 0);
 }

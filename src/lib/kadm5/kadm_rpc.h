@@ -360,49 +360,4 @@ extern enum clnt_stat get_principal_keys_2(getpkeys_arg *, getpkeys_ret *,
 					   CLIENT *);
 extern  bool_t get_principal_keys_2_svc(getpkeys_arg *, getpkeys_ret *,
 					struct svc_req *);
-
-extern bool_t xdr_cprinc_arg ();
-extern bool_t xdr_cprinc3_arg ();
-extern bool_t xdr_generic_ret ();
-extern bool_t xdr_dprinc_arg ();
-extern bool_t xdr_mprinc_arg ();
-extern bool_t xdr_rprinc_arg ();
-extern bool_t xdr_gprincs_arg ();
-extern bool_t xdr_gprincs_ret ();
-extern bool_t xdr_chpass_arg ();
-extern bool_t xdr_chpass3_arg ();
-extern bool_t xdr_setkey_arg ();
-extern bool_t xdr_setkey3_arg ();
-extern bool_t xdr_setkey4_arg ();
-extern bool_t xdr_chrand_arg ();
-extern bool_t xdr_chrand3_arg ();
-extern bool_t xdr_chrand_ret ();
-extern bool_t xdr_gprinc_arg ();
-extern bool_t xdr_gprinc_ret ();
-extern bool_t xdr_kadm5_ret_t ();
-extern bool_t xdr_kadm5_principal_ent_rec ();
-extern bool_t xdr_kadm5_policy_ent_rec ();
-extern bool_t	xdr_krb5_keyblock ();
-extern bool_t	xdr_krb5_principal ();
-extern bool_t	xdr_krb5_enctype ();
-extern bool_t	xdr_krb5_octet ();
-extern bool_t	xdr_krb5_int32 ();
-extern bool_t	xdr_u_int32 ();
-extern bool_t xdr_cpol_arg ();
-extern bool_t xdr_dpol_arg ();
-extern bool_t xdr_mpol_arg ();
-extern bool_t xdr_gpol_arg ();
-extern bool_t xdr_gpol_ret ();
-extern bool_t xdr_gpols_arg ();
-extern bool_t xdr_gpols_ret ();
-extern bool_t xdr_getprivs_ret ();
-extern bool_t xdr_purgekeys_arg ();
-extern bool_t xdr_gstrings_arg ();
-extern bool_t xdr_gstrings_ret ();
-extern bool_t xdr_sstring_arg ();
-extern bool_t xdr_krb5_string_attr ();
-extern bool_t xdr_kadm5_key_data ();
-extern bool_t xdr_getpkeys_arg ();
-extern bool_t xdr_getpkeys_ret ();
-
 #endif /* __KADM_RPC_H__ */

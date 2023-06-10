@@ -193,7 +193,7 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 	/* Deserialize arguments. */
 	memset(&recv_tok, 0, sizeof(recv_tok));
 
-	if (!svc_getargs(rqst->rq_xprt, xdr_rpc_gss_init_args,
+	if (!svc_getargs(rqst->rq_xprt, (xdrproc_t)xdr_rpc_gss_init_args,
 			 (caddr_t)&recv_tok))
 		return (FALSE);
 
@@ -209,7 +209,8 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 					      NULL,
 					      NULL);
 
-	svc_freeargs(rqst->rq_xprt, xdr_rpc_gss_init_args, (caddr_t)&recv_tok);
+	svc_freeargs(rqst->rq_xprt, (xdrproc_t)xdr_rpc_gss_init_args,
+		     (caddr_t)&recv_tok);
 
 	log_status("accept_sec_context", gr->gr_major, gr->gr_minor);
 	if (gr->gr_major != GSS_S_COMPLETE &&
@@ -495,7 +496,8 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 		}
 		*no_dispatch = TRUE;
 
-		call_stat = svc_sendreply(rqst->rq_xprt, xdr_rpc_gss_init_res,
+		call_stat = svc_sendreply(rqst->rq_xprt,
+					  (xdrproc_t)xdr_rpc_gss_init_res,
 					  (caddr_t)&gr);
 
 		gss_release_buffer(&min_stat, &gr.gr_token);
@@ -544,7 +546,7 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	}
 	retstat = AUTH_OK;
 freegc:
-	xdr_free(xdr_rpc_gss_cred, gc);
+	xdr_free((xdrproc_t)xdr_rpc_gss_cred, gc);
 	log_debug("returning %d from svcauth_gss()", retstat);
 	return (retstat);
 }

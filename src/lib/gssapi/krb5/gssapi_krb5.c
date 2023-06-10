@@ -197,9 +197,7 @@ g_set kg_vdb = G_SET_INIT;
  * so handling the expiration/invalidation condition here isn't needed.
  */
 OM_uint32
-kg_get_defcred(minor_status, cred)
-    OM_uint32 *minor_status;
-    gss_cred_id_t *cred;
+kg_get_defcred(OM_uint32 *minor_status, gss_cred_id_t *cred)
 {
     OM_uint32 major;
 

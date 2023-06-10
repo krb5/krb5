@@ -860,7 +860,7 @@ func_not_supported(void)
 }
 
 static char *
-get_rcfilename()
+get_rcfilename(void)
 {
     struct passwd *pw;
     const char *home = NULL;

@@ -111,7 +111,7 @@ struct test {
 
 /* Fake up enough of a CFX GSS context for gss_unwrap, using an AES key. */
 static gss_ctx_id_t
-make_fake_cfx_context()
+make_fake_cfx_context(void)
 {
     gss_union_ctx_id_t uctx;
     krb5_gss_ctx_id_t kgctx;
@@ -414,7 +414,7 @@ try_accept(void *value, size_t len)
 
 /* Accept contexts using superficially valid but truncated encapsulations. */
 static void
-test_short_encapsulation()
+test_short_encapsulation(void)
 {
     /* Include just the initial application tag, to see if we overrun reading
      * the sequence length. */

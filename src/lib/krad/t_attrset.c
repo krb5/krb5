@@ -40,7 +40,7 @@ const static unsigned char encpass[] = {
 };
 
 int
-main()
+main(void)
 {
     unsigned char buffer[KRAD_PACKET_SIZE_MAX], encoded[MAX_ATTRSETSIZE];
     const char *username = "testUser", *password = "accept";

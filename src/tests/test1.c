@@ -31,7 +31,7 @@ unsigned char key_two[8] = { 0xea, 0x89, 0x57, 0x76, 0x5b, 0xcd, 0x0d, 0x34 };
 
 extern void dump_data();
 
-tkt_test_1()
+tkt_test_1(void)
 {
     krb5_data *data;
     krb5_ticket tk_in, *tk_out;
@@ -185,7 +185,7 @@ tkt_test_1()
 
 
 
-main()
+main(void)
 {
     krb5_init_ets();
     tkt_test_1();

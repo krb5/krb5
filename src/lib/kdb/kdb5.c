@@ -75,13 +75,13 @@ free_mkey_list(krb5_context context, krb5_keylist_node *mkey_list)
 }
 
 int
-kdb_init_lock_list()
+kdb_init_lock_list(void)
 {
     return k5_mutex_finish_init(&db_lock);
 }
 
 static int
-kdb_lock_list()
+kdb_lock_list(void)
 {
     int err;
     err = CALL_INIT_FUNCTION (kdb_init_lock_list);
@@ -92,14 +92,14 @@ kdb_lock_list()
 }
 
 void
-kdb_fini_lock_list()
+kdb_fini_lock_list(void)
 {
     if (INITIALIZER_RAN(kdb_init_lock_list))
         k5_mutex_destroy(&db_lock);
 }
 
 static void
-kdb_unlock_list()
+kdb_unlock_list(void)
 {
     k5_mutex_unlock(&db_lock);
 }

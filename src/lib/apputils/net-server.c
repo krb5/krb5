@@ -203,7 +203,7 @@ struct connection {
 struct rpc_svc_data {
     u_long prognum;
     u_long versnum;
-    void (*dispatch)();
+    void (*dispatch)(struct svc_req *, SVCXPRT *);
 };
 
 struct bind_address {
@@ -255,7 +255,7 @@ free_sighup_context(verto_ctx *ctx, verto_ev *ev)
 }
 
 krb5_error_code
-loop_setup_signals(verto_ctx *ctx, void *handle, void (*reset)())
+loop_setup_signals(verto_ctx *ctx, void *handle, void (*reset)(void *))
 {
     struct sighup_context *sc;
     verto_ev *ev;
@@ -434,7 +434,8 @@ loop_add_tcp_address(int default_port, const char *addresses)
 
 krb5_error_code
 loop_add_rpc_service(int default_port, const char *addresses, u_long prognum,
-                     u_long versnum, void (*dispatchfn)())
+                     u_long versnum,
+                     void (*dispatchfn)(struct svc_req *, SVCXPRT *))
 {
     struct rpc_svc_data svc;
 

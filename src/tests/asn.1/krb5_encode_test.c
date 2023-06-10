@@ -37,7 +37,7 @@ krb5_context test_context;
 int error_count = 0;
 int do_trval = 0;
 int first_trval = 1;
-int trval2();
+int trval2(FILE *, unsigned char *, int, int, int *);
 
 static void
 encoder_print_results(krb5_data *code, char *typestring, char *description)
@@ -51,7 +51,7 @@ encoder_print_results(krb5_data *code, char *typestring, char *description)
         else
             printf("\n");
         printf("encode_krb5_%s%s:\n", typestring, description);
-        r = trval2(stdout, code->data, code->length, 0, &rlen);
+        r = trval2(stdout, (uint8_t *)code->data, code->length, 0, &rlen);
         printf("\n");
         if (rlen < 0 || (unsigned int) rlen != code->length) {
             printf("Error: length mismatch: was %d, parsed %d\n",
@@ -72,9 +72,8 @@ encoder_print_results(krb5_data *code, char *typestring, char *description)
     ktest_destroy_data(&code);
 }
 
-static void PRS(argc, argv)
-    int argc;
-    char        **argv;
+static void
+PRS(int argc, char **argv)
 {
     extern char *optarg;
     int optchar;
@@ -107,9 +106,7 @@ static void PRS(argc, argv)
 }
 
 int
-main(argc, argv)
-    int argc;
-    char        **argv;
+main(int argc, char **argv)
 {
     krb5_data *code;
     krb5_error_code retval;

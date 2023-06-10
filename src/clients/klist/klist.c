@@ -80,7 +80,7 @@ static void fillit(FILE *, unsigned int, int);
 #define KEYTAB 2
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] "
                       "[-a [-n]]] [-k [-i] [-t] [-K]] [-C] [name]\n"),

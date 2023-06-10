@@ -53,8 +53,7 @@ xdr_osa_pw_hist_ent(XDR *xdrs, osa_pw_hist_ent *objp)
 {
     if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
 		   (u_int *) &objp->n_key_data, ~0,
-		   sizeof(krb5_key_data),
-		   xdr_krb5_key_data))
+		   sizeof(krb5_key_data), (xdrproc_t)xdr_krb5_key_data))
 	return (FALSE);
     return (TRUE);
 }
@@ -88,8 +87,7 @@ xdr_osa_princ_ent_rec(XDR *xdrs, osa_princ_ent_t objp)
 	return (FALSE);
     if (!xdr_array(xdrs, (caddr_t *) &objp->old_keys,
 		   (unsigned int *) &objp->old_key_len, ~0,
-		   sizeof(osa_pw_hist_ent),
-		   xdr_osa_pw_hist_ent))
+		   sizeof(osa_pw_hist_ent), (xdrproc_t)xdr_osa_pw_hist_ent))
 	return (FALSE);
     return (TRUE);
 }

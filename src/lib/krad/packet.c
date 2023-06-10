@@ -200,7 +200,7 @@ auth_generate_response(krb5_context ctx, const char *secret,
 
 /* Create a new packet. */
 static krad_packet *
-packet_new()
+packet_new(void)
 {
     krad_packet *pkt;
 

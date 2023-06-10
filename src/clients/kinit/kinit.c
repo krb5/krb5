@@ -45,7 +45,7 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 static char *
-get_name_from_os()
+get_name_from_os(void)
 {
     struct passwd *pw;
 
@@ -137,7 +137,7 @@ const char *shopts = "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:";
 #define USAGE_BREAK "\n\t"
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr,
             _("Usage: %s [-V] [-l lifetime] [-s start_time] "

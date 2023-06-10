@@ -240,13 +240,13 @@ krb5int_get_plugin_data(struct plugin_file_handle *h, const char *csymname,
 
 long KRB5_CALLCONV
 krb5int_get_plugin_func(struct plugin_file_handle *h, const char *csymname,
-                        void (**sym_out)(), struct errinfo *ep)
+                        void (**sym_out)(void), struct errinfo *ep)
 {
     void *dptr = NULL;
     long ret = get_sym(h, csymname, &dptr, ep);
 
     if (!ret)
-        *sym_out = (void (*)())dptr;
+        *sym_out = (void (*)(void))dptr;
     return ret;
 }
 
@@ -552,7 +552,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
                              struct errinfo *ep)
 {
     long err = 0;
-    void (**p)() = NULL;
+    void (**p)(void) = NULL;
     size_t count = 0;
 
     /* XXX Do we need to add a leading "_" to the symbol name on any
@@ -569,10 +569,10 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
         int i = 0;
 
         for (i = 0; !err && (dirhandle->files[i] != NULL); i++) {
-            void (*sym)() = NULL;
+            void (*sym)(void) = NULL;
 
             if (krb5int_get_plugin_func (dirhandle->files[i], symname, &sym, ep) == 0) {
-                void (**newp)() = NULL;
+                void (**newp)(void) = NULL;
 
                 count++;
                 newp = realloc (p, ((count + 1) * sizeof (*p))); /* +1 for NULL */

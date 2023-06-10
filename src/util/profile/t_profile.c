@@ -72,7 +72,7 @@ write_file(const char *name, int nlines, ...)
 /* Regression test for #2685 (profile iterator breaks when modifications
  * made) */
 static void
-test_iterate()
+test_iterate(void)
 {
     profile_t p;
     void *iter;
@@ -129,7 +129,7 @@ test_iterate()
  * global shared profiles list.
  */
 static void
-test_shared()
+test_shared(void)
 {
     profile_t a, b;
     struct utimbuf times;
@@ -164,7 +164,7 @@ test_shared()
 /* Regression test for #2950 (profile_clear_relation not reflected within
  * handle where deletion is performed) */
 static void
-test_clear()
+test_clear(void)
 {
     profile_t p;
     const char *names[] = { "test section 1", "quux", NULL };
@@ -183,7 +183,7 @@ test_clear()
 }
 
 static void
-test_include()
+test_include(void)
 {
     profile_t p;
     const char *names[] = { "test section 1", "bar", NULL };
@@ -237,7 +237,7 @@ test_include()
 
 /* Test syntactic independence of included profile files. */
 static void
-test_independence()
+test_independence(void)
 {
     profile_t p;
     const char *names1[] = { "sec1", "var", "a", NULL };
@@ -264,7 +264,7 @@ test_independence()
 
 /* Regression test for #7971 (deleted sections should not be iterable) */
 static void
-test_delete_section()
+test_delete_section(void)
 {
     profile_t p;
     const char *sect[] = { "test section 1", NULL };
@@ -290,7 +290,7 @@ test_delete_section()
 /* Regression test for #7971 (profile_clear_relation() error with deleted node
  * at end of value set) */
 static void
-test_delete_clear_relation()
+test_delete_clear_relation(void)
 {
     profile_t p;
     const char *names[] = { "test section 1", "testkey", NULL };
@@ -305,7 +305,7 @@ test_delete_clear_relation()
 
 /* Test that order of relations is preserved if some relations are deleted. */
 static void
-test_delete_ordering()
+test_delete_ordering(void)
 {
     profile_t p;
     const char *names[] = { "test section 1", "testkey", NULL };
@@ -329,7 +329,7 @@ test_delete_ordering()
 /* Regression test for #8431 (profile_flush_to_file erroneously changes flag
  * state on source object) */
 static void
-test_flush_to_file()
+test_flush_to_file(void)
 {
     profile_t p;
 
@@ -349,7 +349,7 @@ test_flush_to_file()
 /* Regression test for #7863 (multiply-specified subsections should
  * be merged) */
 static void
-test_merge_subsections()
+test_merge_subsections(void)
 {
     profile_t p;
     const char *n1[] = { "test section 2", "child_section2", "child", NULL };
@@ -374,7 +374,7 @@ test_merge_subsections()
 }
 
 int
-main()
+main(void)
 {
     test_iterate();
     test_shared();

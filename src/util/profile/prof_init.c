@@ -103,7 +103,7 @@ init_load_module(const char *modspec, profile_t *ret_profile)
     struct errinfo einfo = { 0 };
     prf_lib_handle_t lib_handle = NULL;
     struct plugin_file_handle *plhandle = NULL;
-    void *cbdata = NULL, (*fptr)();
+    void *cbdata = NULL, (*fptr)(void);
     int have_lock = 0, have_cbdata = 0;
     struct profile_vtable vtable = { 1 };  /* Set minor_ver to 1, rest null. */
     errcode_t err;
