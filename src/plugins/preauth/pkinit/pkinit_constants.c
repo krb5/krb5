@@ -64,14 +64,52 @@ static char sha512WithRSAEncr_oid[9] = {
     0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0d
 };
 
+/* RFC 3279 ecdsa-with-SHA1: iso(1) member-body(2) us(840) ansi-X9-62(10045)
+ * signatures(4) 1 */
+static char ecdsaWithSha1_oid[] = {
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x01
+};
+
+/* RFC 5758 ecdsa-with-SHA256: iso(1) member-body(2) us(840) ansi-X9-62(10045)
+ * signatures(4) ecdsa-with-SHA2(3) 2 */
+static char ecdsaWithSha256_oid[] = {
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x02
+};
+
+/* RFC 5758 ecdsa-with-SHA384: iso(1) member-body(2) us(840) ansi-X9-62(10045)
+ * signatures(4) ecdsa-with-SHA2(3) 3 */
+static char ecdsaWithSha384_oid[] = {
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x03
+};
+
+/* RFC 5758 ecdsa-with-SHA512: iso(1) member-body(2) us(840) ansi-X9-62(10045)
+ * signatures(4) ecdsa-with-SHA2(3) 4 */
+static char ecdsaWithSha512_oid[] = {
+    0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x04
+};
+
 const krb5_data sha256WithRSAEncr_id = {
     KV5M_DATA, sizeof(sha256WithRSAEncr_oid), sha256WithRSAEncr_oid
 };
 const krb5_data sha512WithRSAEncr_id = {
     KV5M_DATA, sizeof(sha512WithRSAEncr_oid), sha512WithRSAEncr_oid
 };
+const krb5_data ecdsaWithSha1_id = {
+    KV5M_DATA, sizeof(ecdsaWithSha1_oid), ecdsaWithSha1_oid
+};
+const krb5_data ecdsaWithSha256_id = {
+    KV5M_DATA, sizeof(ecdsaWithSha256_oid), ecdsaWithSha256_oid
+};
+const krb5_data ecdsaWithSha384_id = {
+    KV5M_DATA, sizeof(ecdsaWithSha384_oid), ecdsaWithSha384_oid
+};
+const krb5_data ecdsaWithSha512_id = {
+    KV5M_DATA, sizeof(ecdsaWithSha512_oid), ecdsaWithSha512_oid
+};
 
 krb5_data const * const supported_cms_algs[] = {
+    &ecdsaWithSha512_id,
+    &ecdsaWithSha256_id,
     &sha512WithRSAEncr_id,
     &sha256WithRSAEncr_id,
     NULL
