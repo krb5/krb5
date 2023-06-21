@@ -390,6 +390,7 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 			     int v)
 {
 	unsigned int n;
+	bool_t r;
 
 	if (!xdr_krb5_principal(xdrs, &objp->principal)) {
 		return (FALSE);
@@ -443,6 +444,9 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 	if (!xdr_krb5_int16(xdrs, &objp->n_key_data)) {
 		return (FALSE);
 	}
+	if (xdrs->x_op == XDR_DECODE && objp->n_key_data < 0) {
+		return (FALSE);
+	}
 	if (!xdr_krb5_int16(xdrs, &objp->n_tl_data)) {
 		return (FALSE);
 	}
@@ -451,9 +455,10 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 		return FALSE;
 	}
 	n = objp->n_key_data;
-	if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
-		       &n, ~0, sizeof(krb5_key_data),
-		       xdr_krb5_key_data_nocontents)) {
+	r = xdr_array(xdrs, (caddr_t *) &objp->key_data, &n, objp->n_key_data,
+		      sizeof(krb5_key_data), xdr_krb5_key_data_nocontents);
+	objp->n_key_data = n;
+	if (!r) {
 		return (FALSE);
 	}
 
