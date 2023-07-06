@@ -85,6 +85,29 @@ default and eventually removed.
 Beginning with the krb5-1.18 release, single-DES encryption types have
 been removed.
 
+Major changes in 1.20.2 (2023-07-06)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix potential uninitialized pointer free in kadm5 XDR parsing
+  [CVE-2023-36054].
+
+* Fix read overruns in SPNEGO parsing.
+
+* Compatibility fix for autoconf 2.72.
+
+krb5-1.20.2 changes by ticket ID
+--------------------------------
+
+9069    Update error checking for OpenSSL CMS_verify
+9077    Fix aclocal.m4 syntax error for autoconf 2.72
+9083    Fix kpropd crash with unrecognized option
+9085    Fix read overruns in SPNEGO parsing
+9086    Fix possible double-free during KDB creation
+9087    Fix meridian type in getdate.y
+9099    Ensure array count consistency in kadm5 RPC
+
 Major changes in 1.20.1 (2022-11-15)
 ------------------------------------
 
@@ -470,6 +493,7 @@ reports, suggestions, and valuable resources:
     Paul Moore
     Keiichi Mori
     Michael Morony
+    Robert Morris
     Sam Morris
     Zbysek Mraz
     Edward Murrell
