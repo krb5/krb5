@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: mit-krb5 1.20.1\n"
+"Project-Id-Version: mit-krb5 1.20.1-postrelease\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-11 18:04-0500\n"
+"POT-Creation-Date: 2023-07-06 17:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr ""
 #: ../../src/clients/klist/klist.c:241 ../../src/clients/ksu/main.c:135
 #: ../../src/clients/ksu/main.c:141 ../../src/clients/kswitch/kswitch.c:94
 #: ../../src/kadmin/ktutil/ktutil.c:52 ../../src/kdc/main.c:929
-#: ../../src/kprop/kprop.c:103 ../../src/kprop/kpropd.c:1058
+#: ../../src/kprop/kprop.c:103 ../../src/kprop/kpropd.c:1059
 msgid "while initializing krb5"
 msgstr ""
 
@@ -668,7 +668,7 @@ msgid "while retrieving a ticket"
 msgstr ""
 
 #: ../../src/clients/klist/klist.c:674 ../../src/clients/ksu/ccache.c:440
-#: ../../src/kprop/kpropd.c:1205 ../../src/kprop/kpropd.c:1270
+#: ../../src/kprop/kpropd.c:1206 ../../src/kprop/kpropd.c:1271
 msgid "while unparsing client name"
 msgstr ""
 
@@ -3815,7 +3815,7 @@ msgstr ""
 msgid "while connecting to server"
 msgstr ""
 
-#: ../../src/kprop/kprop.c:269 ../../src/kprop/kpropd.c:1195
+#: ../../src/kprop/kprop.c:269 ../../src/kprop/kpropd.c:1196
 msgid "while getting local socket address"
 msgstr ""
 
@@ -3832,7 +3832,7 @@ msgid "while authenticating to server"
 msgstr ""
 
 #: ../../src/kprop/kprop.c:308 ../../src/kprop/kprop.c:506
-#: ../../src/kprop/kpropd.c:1515
+#: ../../src/kprop/kpropd.c:1516
 #, c-format
 msgid "Generic remote error: %s\n"
 msgstr ""
@@ -4282,133 +4282,133 @@ msgstr ""
 msgid "ERROR returned by primary KDC, bailing.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1108
+#: ../../src/kprop/kpropd.c:1109
 msgid "copying db args"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1133
+#: ../../src/kprop/kpropd.c:1134
 msgid "Unable to get default realm"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1140
+#: ../../src/kprop/kpropd.c:1141
 msgid "Unable to set default realm"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1150
+#: ../../src/kprop/kpropd.c:1151
 msgid "while trying to construct my service name"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1157
+#: ../../src/kprop/kpropd.c:1158
 msgid "while allocating filename for temp file"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1165
+#: ../../src/kprop/kpropd.c:1166
 msgid "while initializing"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1173
+#: ../../src/kprop/kpropd.c:1174
 msgid "Unable to map log!\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1215
+#: ../../src/kprop/kpropd.c:1216
 #, c-format
 msgid "Error in krb5_auth_con_ini: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1223
+#: ../../src/kprop/kpropd.c:1224
 #, c-format
 msgid "Error in krb5_auth_con_setflags: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1236
+#: ../../src/kprop/kpropd.c:1237
 #, c-format
 msgid "Error in krb5_auth_con_setaddrs: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1244
+#: ../../src/kprop/kpropd.c:1245
 #, c-format
 msgid "Error in krb5_kt_resolve: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1253
+#: ../../src/kprop/kpropd.c:1254
 #, c-format
 msgid "Error in krb5_recvauth: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1260
+#: ../../src/kprop/kpropd.c:1261
 #, c-format
 msgid "Error in krb5_copy_prinicpal: %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1277
+#: ../../src/kprop/kpropd.c:1278
 msgid "while unparsing ticket etype"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1281
+#: ../../src/kprop/kpropd.c:1282
 #, c-format
 msgid "authenticated client: %s (etype == %s)\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1361
+#: ../../src/kprop/kpropd.c:1362
 msgid "while reading size of database from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1371
+#: ../../src/kprop/kpropd.c:1372
 msgid "while decoding database size from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1379
+#: ../../src/kprop/kpropd.c:1380
 msgid "malformed database size message from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1391
+#: ../../src/kprop/kpropd.c:1392
 msgid "while initializing i_vector"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1396
+#: ../../src/kprop/kpropd.c:1397
 #, c-format
 msgid "Full propagation transfer started.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1450
+#: ../../src/kprop/kpropd.c:1451
 #, c-format
 msgid "Full propagation transfer finished.\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1510
+#: ../../src/kprop/kpropd.c:1511
 msgid "while decoding error packet from client"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1519
+#: ../../src/kprop/kpropd.c:1520
 msgid "signaled from server"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1521
+#: ../../src/kprop/kpropd.c:1522
 #, c-format
 msgid "Error text from client: %s\n"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1570
+#: ../../src/kprop/kpropd.c:1571
 #, c-format
 msgid "while trying to fork %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1574
+#: ../../src/kprop/kpropd.c:1575
 #, c-format
 msgid "while trying to exec %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1581
+#: ../../src/kprop/kpropd.c:1582
 #, c-format
 msgid "while waiting for %s"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1587
+#: ../../src/kprop/kpropd.c:1588
 #, c-format
 msgid "%s load terminated"
 msgstr ""
 
-#: ../../src/kprop/kpropd.c:1593
+#: ../../src/kprop/kpropd.c:1594
 #, c-format
 msgid "%s returned a bad exit status (%d)"
 msgstr ""
@@ -6546,7 +6546,7 @@ msgid "%s (depth %d): %s"
 msgstr ""
 
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1230
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4180
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4175
 msgid "Pass phrase for"
 msgstr ""
 
@@ -6554,7 +6554,7 @@ msgstr ""
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1526
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1784
 #: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:1794
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2271
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2266
 msgid "Failed to DER encode PKCS7"
 msgstr ""
 
@@ -6582,54 +6582,54 @@ msgstr ""
 msgid "Failed to verify received certificate"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2114
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2109
 msgid "Failed to verify CMS message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2259
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2254
 msgid "Failed to encrypt PKCS7 object"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2317
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2312
 msgid "Failed to decode PKCS7"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2333
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2328
 msgid "Failed to decrypt PKCS7 message"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2756
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2751
 msgid "Failed to fetch SSKDF"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2763
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2758
 msgid "Failed to instantiate SSKDF"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2776
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2771
 msgid "Failed to derive key using SSKDF"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2838
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:2833
 msgid "Failed to compute digest"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4300
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4295
 #, c-format
 msgid "Cannot read certificate file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4308
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:4303
 #, c-format
 msgid "Cannot read key file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5165
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5160
 #, c-format
 msgid "Cannot open file '%s'"
 msgstr ""
 
-#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5172
+#: ../../src/plugins/preauth/pkinit/pkinit_crypto_openssl.c:5167
 #, c-format
 msgid "Cannot read file '%s'"
 msgstr ""
