@@ -97,6 +97,19 @@ removed.
 Beginning with the krb5-1.18 release, all support for single-DES
 encryption types has been removed.
 
+Major changes in 1.21.1 (2023-07-10)
+------------------------------------
+
+This is a bug fix release.
+
+* Fix potential uninitialized pointer free in kadm5 XDR parsing
+  [CVE-2023-36054].
+
+krb5-1.21.1 changes by ticket ID
+--------------------------------
+
+9099    Ensure array count consistency in kadm5 RPC
+
 Major changes in 1.21 (2023-06-05)
 ----------------------------------
 
@@ -432,6 +445,7 @@ reports, suggestions, and valuable resources:
     Paul Moore
     Keiichi Mori
     Michael Morony
+    Robert Morris
     Sam Morris
     Zbysek Mraz
     Edward Murrell
