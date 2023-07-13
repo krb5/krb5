@@ -469,20 +469,21 @@ do_ccache()
 static int
 show_ccache(krb5_ccache cache)
 {
-    krb5_cc_cursor cur;
+    krb5_cc_cursor cur = NULL;
     krb5_creds creds;
-    krb5_principal princ;
+    krb5_principal princ = NULL;
     krb5_error_code ret;
+    int status = 1;
 
     ret = krb5_cc_get_principal(context, cache, &princ);
     if (ret) {
         com_err(progname, ret, "");
-        return 1;
+        goto cleanup;
     }
     ret = krb5_unparse_name(context, princ, &defname);
     if (ret) {
         com_err(progname, ret, _("while unparsing principal name"));
-        return 1;
+        goto cleanup;
     }
 
     printf(_("Ticket cache: %s:%s\nDefault principal: %s\n\n"),
@@ -498,27 +499,33 @@ show_ccache(krb5_ccache cache)
     ret = krb5_cc_start_seq_get(context, cache, &cur);
     if (ret) {
         com_err(progname, ret, _("while starting to retrieve tickets"));
-        return 1;
+        goto cleanup;
     }
     while ((ret = krb5_cc_next_cred(context, cache, &cur, &creds)) == 0) {
         if (show_config || !krb5_is_config_principal(context, creds.server))
             show_credential(&creds);
         krb5_free_cred_contents(context, &creds);
     }
-    krb5_free_principal(context, princ);
-    krb5_free_unparsed_name(context, defname);
-    defname = NULL;
     if (ret == KRB5_CC_END) {
         ret = krb5_cc_end_seq_get(context, cache, &cur);
+        cur = NULL;
         if (ret) {
             com_err(progname, ret, _("while finishing ticket retrieval"));
-            return 1;
+            goto cleanup;
         }
-        return 0;
     } else {
         com_err(progname, ret, _("while retrieving a ticket"));
-        return 1;
+        goto cleanup;
     }
+
+    status = 0;
+
+cleanup:
+    if (cur != NULL)
+        (void)krb5_cc_end_seq_get(context, cache, &cur);
+    krb5_free_principal(context, princ);
+    krb5_free_unparsed_name(context, defname);
+    return status;
 }
 
 /* Return 0 if cache is accessible, present, and unexpired; return 1 if not. */
@@ -526,15 +533,18 @@ static int
 check_ccache(krb5_ccache cache)
 {
     krb5_error_code ret;
-    krb5_cc_cursor cur;
+    krb5_cc_cursor cur = NULL;
     krb5_creds creds;
-    krb5_principal princ;
-    krb5_boolean found_tgt, found_current_tgt, found_current_cred;
+    krb5_principal princ = NULL;
+    krb5_boolean found_tgt = FALSE, found_current_tgt = FALSE;
+    krb5_boolean found_current_cred = FALSE;
 
-    if (krb5_cc_get_principal(context, cache, &princ) != 0)
-        return 1;
-    if (krb5_cc_start_seq_get(context, cache, &cur) != 0)
-        return 1;
+    ret = krb5_cc_get_principal(context, cache, &princ);
+    if (ret)
+        goto cleanup;
+    ret = krb5_cc_start_seq_get(context, cache, &cur);
+    if (ret)
+        goto cleanup;
     found_tgt = found_current_tgt = found_current_cred = FALSE;
     while ((ret = krb5_cc_next_cred(context, cache, &cur, &creds)) == 0) {
         if (is_local_tgt(creds.server, &princ->realm)) {
@@ -547,12 +557,17 @@ check_ccache(krb5_ccache cache)
         }
         krb5_free_cred_contents(context, &creds);
     }
-    krb5_free_principal(context, princ);
     if (ret != KRB5_CC_END)
-        return 1;
-    if (krb5_cc_end_seq_get(context, cache, &cur) != 0)
-        return 1;
+        goto cleanup;
+    ret = krb5_cc_end_seq_get(context, cache, &cur);
+    cur = NULL;
 
+cleanup:
+    if (cur != NULL)
+        (void)krb5_cc_end_seq_get(context, cache, &cur);
+    krb5_free_principal(context, princ);
+    if (ret)
+        return 1;
     /* If the cache contains at least one local TGT, require that it be
      * current.  Otherwise accept any current cred. */
     if (found_tgt)

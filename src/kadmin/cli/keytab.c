@@ -363,7 +363,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
 {
     krb5_principal princ = NULL;
     krb5_keytab_entry entry;
-    krb5_kt_cursor cursor;
+    krb5_kt_cursor cursor = NULL;
     enum { UNDEF, SPEC, HIGH, ALL, OLD } mode;
     int code, did_something;
     krb5_kvno kvno;
@@ -443,6 +443,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
                         _("while temporarily ending keytab scan"));
                 goto cleanup;
             }
+            cursor = NULL;
             code = krb5_kt_remove_entry(context, keytab, &entry);
             if (code != 0) {
                 com_err(whoami, code, _("while deleting entry from keytab"));
@@ -471,6 +472,7 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
         com_err(whoami, code, _("while ending keytab scan"));
         goto cleanup;
     }
+    cursor = NULL;
 
     /*
      * If !did_someting then mode must be OLD or we would have
@@ -483,6 +485,8 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
     }
 
 cleanup:
+    if (cursor != NULL)
+        (void)krb5_kt_end_seq_get(context, keytab, &cursor);
     krb5_free_principal(context, princ);
 }
 

@@ -138,12 +138,11 @@ server_acquire_creds(char *service_name, gss_OID mech,
     }
     maj_stat = gss_acquire_cred(&min_stat, server_name, 0, mechs, GSS_C_ACCEPT,
                                 server_creds, NULL, NULL);
+    (void) gss_release_name(&min_stat, &server_name);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("acquiring credentials", maj_stat, min_stat);
         return -1;
     }
-
-    (void) gss_release_name(&min_stat, &server_name);
 
     return 0;
 }

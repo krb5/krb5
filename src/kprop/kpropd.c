@@ -1291,19 +1291,20 @@ static krb5_boolean
 authorized_principal(krb5_context context, krb5_principal p,
                      krb5_enctype auth_etype)
 {
-    char *name, *ptr, buf[1024];
+    krb5_boolean ok = FALSE;
+    char *name = NULL, *ptr, buf[1024];
     krb5_error_code retval;
-    FILE *acl_file;
+    FILE *acl_file = NULL;
     int end;
     krb5_enctype acl_etype;
 
     retval = krb5_unparse_name(context, p, &name);
     if (retval)
-        return FALSE;
+        goto cleanup;
 
     acl_file = fopen(acl_file_name, "r");
     if (acl_file == NULL)
-        return FALSE;
+        goto cleanup;
 
     while (!feof(acl_file)) {
         if (!fgets(buf, sizeof(buf), acl_file))
@@ -1333,14 +1334,16 @@ authorized_principal(krb5_context context, krb5_principal p,
                  (acl_etype != auth_etype)))
                 continue;
 
-            free(name);
-            fclose(acl_file);
-            return TRUE;
+            ok = TRUE;
+            goto cleanup;
         }
     }
+
+cleanup:
     free(name);
-    fclose(acl_file);
-    return FALSE;
+    if (acl_file != NULL)
+        fclose(acl_file);
+    return ok;
 }
 
 static void

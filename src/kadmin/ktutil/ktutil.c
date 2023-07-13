@@ -254,6 +254,7 @@ ktutil_list(int argc, char *argv[])
                                                buf, sizeof(buf)))) {
                 com_err(argv[0], retval,
                         _("While converting enctype to string"));
+                free(pname);
                 return;
             }
             printf(" (%s) ", buf);
