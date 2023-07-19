@@ -1157,10 +1157,9 @@ AC_SUBST(PKINIT)
 # for lib/apputils
 AC_REPLACE_FUNCS(daemon)
 
-# For Python tests.  Python version 3.2.4 is required as prior
-# versions do not accept string input to subprocess.Popen.communicate
-# when universal_newlines is set.
-PYTHON_MINVERSION=3.2.4
+# For Python tests.  Python version 3.4 is required for
+# ssl.create_default_context().
+PYTHON_MINVERSION=3.4
 AC_SUBST(PYTHON_MINVERSION)
 AC_CHECK_PROG(PYTHON,python3,python3)
 if test x"$PYTHON" = x; then
@@ -1168,7 +1167,7 @@ if test x"$PYTHON" = x; then
 fi
 HAVE_PYTHON=no
 if test x"$PYTHON" != x; then
-	wantver="(sys.hexversion >= 0x30204F0)"
+	wantver="(sys.hexversion >= 0x30400F0)"
 	if "$PYTHON" -c "import sys; sys.exit(not $wantver and 1 or 0)"; then
 		HAVE_PYTHON=yes
 	fi
