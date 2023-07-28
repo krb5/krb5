@@ -780,7 +780,7 @@ main(int argc, char ** argv)
                 com_err(prog_name, errno, _("while calling waitpid"));
             }
             sweep_up(ksu_context, cc_target);
-            exit (statusp);
+            exit (WIFEXITED(statusp) ? WEXITSTATUS(statusp) : 1);
         case -1:
             com_err(prog_name, errno, _("while trying to fork."));
             sweep_up(ksu_context, cc_target);

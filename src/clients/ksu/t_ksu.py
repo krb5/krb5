@@ -244,7 +244,7 @@ mark('principal heuristic (no authorization)')
 realm.run([ksu, '.', '-e', klist],
           expected_msg='Default principal: alice@KRBTEST.COM')
 be_root()
-realm.run([ksu, 'ksutest', '-e', klist],
+realm.run([ksu, 'ksutest', '-e', klist], expected_code=1,
           expected_msg='No credentials cache found')
 be_caller()
 realm.kinit('ksutest', 'pwksutest')
@@ -253,7 +253,8 @@ realm.run([ksu, 'ksutest', '-e', klist],
           expected_msg='Default principal: ksutest@KRBTEST.COM')
 be_caller()
 realm.run([kdestroy])
-realm.run([ksu, '.', '-e', klist], expected_msg='No credentials cache found')
+realm.run([ksu, '.', '-e', klist], expected_code=1,
+          expected_msg='No credentials cache found')
 
 mark('authentication without authorization')
 realm.run([ksu, '.', '-n', 'ksutest', '-e', klist], input='pwksutest\n',
@@ -266,6 +267,7 @@ realm.kinit(caller_username, 'pwcaller')
 realm.run([ksu, '.', '-z', '-e', klist],
           expected_msg='Default principal: ' + caller_username)
 
-realm.run([ksu, '.', '-Z', '-e', klist])
+realm.run([ksu, '.', '-Z', '-e', klist], expected_code=1,
+          expected_msg='No credentials cache found')
 
 success('ksu tests')
