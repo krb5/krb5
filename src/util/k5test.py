@@ -672,11 +672,10 @@ def _cfg_merge(cfg1, cfg2):
     return result
 
 
-# Python gives us shlex.split() to turn a shell command into a list of
-# arguments, but oddly enough, not the easier reverse operation.  For
-# now, do a bad job of faking it.
+# We would like to use shlex.join() from Python 3.8.  For now use
+# shlex.quote() from Python 3.3.
 def _shell_equiv(args):
-    return " ".join(args)
+    return ' '.join(shlex.quote(x) for x in args)
 
 
 # Add a valgrind prefix to the front of args if specified in the
