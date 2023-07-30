@@ -28,7 +28,10 @@ SRCS= \
 	$(srcdir)/kdc_audit.c \
 	$(srcdir)/kdc_transit.c \
 	$(srcdir)/tgs_policy.c \
-	$(srcdir)/kdc_log.c \
+	$(srcdir)/kdc_log.c
+
+EXTRADEPSRCS= \
+	$(srcdir)/t_ndr.c \
 	$(srcdir)/t_replay.c
 
 OBJS= \
