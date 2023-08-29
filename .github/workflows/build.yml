@@ -41,12 +41,17 @@ jobs:
                 MAKEVARS: ${{ matrix.makevars }}
                 CONFIGURE_OPTS:  ${{ matrix.configureopts }}
               run: |
+                # For the ksu tests, allow homedir access from other users.
+                umask 022
+                chmod a+rx $HOME
+                chmod -R a+rX src
                 cd src
                 autoreconf
                 ./configure --enable-maintainer-mode --with-ldap $CONFIGURE_OPTS --prefix=$HOME/inst
                 make $MAKEVARS
                 make check
                 make install
+                (cd clients/ksu && make check-ksu)
             - name: Display skipped tests
               run: cat src/skiptests
             - name: Check for files unexpectedly not removed by make distclean
