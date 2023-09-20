@@ -668,6 +668,13 @@ has_pac(krb5_context context, krb5_authdata **authdata)
     return has_kdc_issued_authdata(context, authdata, KRB5_AUTHDATA_WIN2K_PAC);
 }
 
+/* Return true if the AD-SIGNEDPATH is present in authorization data. */
+static krb5_boolean
+has_ad_signedpath(krb5_context context, krb5_authdata **authdata)
+{
+    return has_kdc_issued_authdata(context, authdata, KRB5_AUTHDATA_SIGNTICKET);
+}
+
 /* Verify AD-SIGNTICKET authdata if we need to, and insert an AD-SIGNEDPATH
  * element if we should. */
 static krb5_error_code
@@ -680,24 +687,37 @@ handle_signticket(krb5_context context, unsigned int flags,
 {
     krb5_error_code ret = 0;
     krb5_principal *deleg_path = NULL;
-    krb5_boolean signed_path = FALSE;
+    krb5_boolean signedpath_present, signedpath_valid = FALSE;
     krb5_boolean s4u2proxy;
 
     s4u2proxy = isflagset(flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION);
 
-    /* For cross-realm the Windows PAC must have been verified, and it
-     * fulfills the same role as the signed path. */
-    if (req->msg_type == KRB5_TGS_REQ &&
-        (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM) ||
-         !has_pac(context, enc_tkt_req->authorization_data))) {
-        ret = verify_signedpath(context, local_tgt, local_tgt_key, enc_tkt_req,
-                                &deleg_path, &signed_path);
-        if (ret)
-            goto cleanup;
+    if (req->msg_type == KRB5_TGS_REQ) {
+        signedpath_present = has_ad_signedpath(context,
+                                               enc_tkt_req->authorization_data);
 
-        if (s4u2proxy && signed_path == FALSE) {
+        /* In case of constained delegation, at least one of AD-SIGNEDPATH or
+         * PAC must be present */
+        if (s4u2proxy && !signedpath_present &&
+            !has_pac(context, enc_tkt_req->authorization_data)) {
             ret = KRB5KDC_ERR_BADOPTION;
             goto cleanup;
+        }
+
+        /* If AD-SIGNEDPATH is present, verify it */
+        if (signedpath_present) {
+            ret = verify_signedpath(context, local_tgt, local_tgt_key,
+                                    enc_tkt_req, &deleg_path,
+                                    &signedpath_valid);
+            if (ret)
+                goto cleanup;
+
+            /* In case of contrained delegation, if AD-SIGNEDPATH is present, it
+             * has to be valid */
+            if (s4u2proxy && !signedpath_valid) {
+                ret = KRB5KDC_ERR_BADOPTION;
+                goto cleanup;
+            }
         }
     }
 
