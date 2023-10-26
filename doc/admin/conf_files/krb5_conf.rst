@@ -363,7 +363,7 @@ The libdefaults section may contain any of the following relations:
     for initial ticket requests.  The default value is 0.
 
 **request_timeout**
-    (:ref:`duration` string.)  Sets the maximum total time for KDC or
+    (:ref:`duration` string.)  Sets the maximum total time for KDC and
     password change requests.  This timeout does not affect the
     intervals between requests, so setting a low timeout may result in
     fewer requests being attempted and/or some servers not being

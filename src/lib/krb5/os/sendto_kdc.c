@@ -134,7 +134,6 @@ struct conn_state {
     krb5_data callback_buffer;
     size_t server_index;
     struct conn_state *next;
-    time_ms endtime;
     krb5_boolean defer;
     struct {
         const char *uri_path;
@@ -344,15 +343,19 @@ cm_select_or_poll(const struct select_state *in, time_ms endtime,
                   struct select_state *out, int *sret)
 {
 #ifndef USE_POLL
-    struct timeval tv;
+    struct timeval tv, *tvp;
 #endif
     krb5_error_code retval;
     time_ms curtime, interval;
 
-    retval = get_curtime_ms(&curtime);
-    if (retval != 0)
-        return retval;
-    interval = (curtime < endtime) ? endtime - curtime : 0;
+    if (endtime != 0) {
+        retval = get_curtime_ms(&curtime);
+        if (retval != 0)
+            return retval;
+        interval = (curtime < endtime) ? endtime - curtime : 0;
+    } else {
+        interval = -1;
+    }
 
     /* We don't need a separate copy of the selstate for poll, but use one for
      * consistency with how we use select. */
@@ -361,9 +364,14 @@ cm_select_or_poll(const struct select_state *in, time_ms endtime,
 #ifdef USE_POLL
     *sret = poll(out->fds, out->nfds, interval);
 #else
-    tv.tv_sec = interval / 1000;
-    tv.tv_usec = interval % 1000 * 1000;
-    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, &tv);
+    if (interval != -1) {
+        tv.tv_sec = interval / 1000;
+        tv.tv_usec = interval % 1000 * 1000;
+        tvp = &tv;
+    } else {
+        tvp = NULL;
+    }
+    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, tvp);
 #endif
 
     return (*sret < 0) ? SOCKET_ERRNO : 0;
@@ -1101,11 +1109,6 @@ service_tcp_connect(krb5_context context, const krb5_data *realm,
     }
 
     conn->state = WRITING;
-
-    /* Record this connection's timeout for service_fds. */
-    if (get_curtime_ms(&conn->endtime) == 0)
-        conn->endtime += 10000;
-
     return conn->service_write(context, realm, conn, selstate);
 }
 
@@ -1380,19 +1383,18 @@ kill_conn:
     return FALSE;
 }
 
-/* Return the maximum of endtime and the endtime fields of all currently active
- * TCP connections. */
-static time_ms
-get_endtime(time_ms endtime, struct conn_state *conns)
+/* Return true if conns contains any states with connected TCP sockets. */
+static krb5_boolean
+any_tcp_connections(struct conn_state *conns)
 {
     struct conn_state *state;
 
     for (state = conns; state != NULL; state = state->next) {
-        if ((state->state == READING || state->state == WRITING) &&
-            state->endtime > endtime)
-            endtime = state->endtime;
+        if (state->addr.transport != UDP &&
+            (state->state == READING || state->state == WRITING))
+            return TRUE;
     }
-    return endtime;
+    return FALSE;
 }
 
 static krb5_boolean
@@ -1415,9 +1417,9 @@ service_fds(krb5_context context, struct select_state *selstate,
 
     e = 0;
     while (selstate->nfds > 0) {
-        endtime = get_endtime(interval_end, conns);
+        endtime = any_tcp_connections(conns) ? 0 : interval_end;
         /* Don't wait longer than the whole request should last. */
-        if (timeout && endtime > timeout)
+        if (timeout && (!endtime || endtime > timeout))
             endtime = timeout;
         e = cm_select_or_poll(selstate, endtime, seltemp, &selret);
         if (e == EINTR)
