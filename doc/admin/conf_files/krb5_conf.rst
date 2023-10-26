@@ -362,6 +362,15 @@ The libdefaults section may contain any of the following relations:
     (:ref:`duration` string.)  Sets the default renewable lifetime
     for initial ticket requests.  The default value is 0.
 
+**request_timeout**
+    (:ref:`duration` string.)  Sets the maximum total time for KDC or
+    password change requests.  This timeout does not affect the
+    intervals between requests, so setting a low timeout may result in
+    fewer requests being attempted and/or some servers not being
+    contacted.  A value of 0 indicates no specific maximum, in which
+    case requests will time out if no server responds after several
+    tries.  The default value is 0.  (New in release 1.22.)
+
 **spake_preauth_groups**
     A whitespace or comma-separated list of words which specifies the
     groups allowed for SPAKE preauthentication.  The possible values

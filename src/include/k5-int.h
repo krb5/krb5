@@ -297,6 +297,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_SPAKE_PREAUTH_INDICATOR      "spake_preauth_indicator"
 #define KRB5_CONF_SPAKE_PREAUTH_KDC_CHALLENGE  "spake_preauth_kdc_challenge"
 #define KRB5_CONF_SPAKE_PREAUTH_GROUPS         "spake_preauth_groups"
+#define KRB5_CONF_REQUEST_TIMEOUT              "request_timeout"
 #define KRB5_CONF_TICKET_LIFETIME              "ticket_lifetime"
 #define KRB5_CONF_UDP_PREFERENCE_LIMIT         "udp_preference_limit"
 #define KRB5_CONF_UNLOCKITER                   "unlockiter"
@@ -1201,6 +1202,7 @@ struct _krb5_context {
     kdb5_dal_handle *dal_handle;
     /* allowable clock skew */
     krb5_deltat     clockskew;
+    krb5_deltat     req_timeout;
     krb5_flags      kdc_default_options;
     krb5_flags      library_options;
     krb5_boolean    profile_secure;
