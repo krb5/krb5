@@ -1442,7 +1442,10 @@ service_fds(krb5_context context, struct select_state *selstate,
                 if (msg_handler != NULL) {
                     krb5_data reply = make_data(state->in.buf, state->in.pos);
 
-                    stop = (msg_handler(context, &reply, msg_handler_data) != 0);
+                    if (!msg_handler(context, &reply, msg_handler_data)) {
+                        kill_conn(context, state, selstate);
+                        stop = 0;
+                    }
                 }
 
                 if (stop) {
