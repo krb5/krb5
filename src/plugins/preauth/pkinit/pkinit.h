@@ -148,7 +148,6 @@ typedef struct _pkinit_plg_opts {
     int require_eku;	    /* require EKU checking (default is true) */
     int accept_secondary_eku;/* accept secondary EKU (default is false) */
     int allow_upn;	    /* allow UPN-SAN instead of pkinit-SAN */
-    int dh_or_rsa;	    /* selects DH or RSA based pkinit */
     int require_crl_checking; /* require CRL for a CA (default is false) */
     int require_freshness;  /* require freshness token (default is false) */
     int disable_freshness;  /* disable freshness token on client for testing */
@@ -162,7 +161,6 @@ typedef struct _pkinit_req_opts {
     int require_eku;
     int accept_secondary_eku;
     int allow_upn;
-    int dh_or_rsa;
     int require_crl_checking;
     int dh_size;	    /* initial request DH modulus size (default=1024) */
     int require_hostname_match;

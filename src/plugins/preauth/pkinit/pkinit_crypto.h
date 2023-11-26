@@ -182,45 +182,6 @@ krb5_error_code cms_signeddata_verify
 		    receives whether message is signed */
 
 /*
- * this function creates a CMS message where eContentType is EnvelopedData
- */
-krb5_error_code cms_envelopeddata_create
-	(krb5_context context,				/* IN */
-	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
-	pkinit_req_crypto_context req_cryptoctx,	/* IN */
-	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_preauthtype pa_type,			/* IN */
-	unsigned char *key_pack,			/* IN
-		    contains DER encoded ReplyKeyPack */
-	unsigned int key_pack_len,			/* IN
-		    contains length of key_pack */
-	unsigned char **envel_data,			/* OUT
-		    receives DER encoded encKeyPack */
-	unsigned int *envel_data_len);			/* OUT
-		    receives length of envel_data */
-
-/*
- * this function creates a CMS message where eContentType is EnvelopedData
- */
-krb5_error_code cms_envelopeddata_verify
-	(krb5_context context,				/* IN */
-	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
-	pkinit_req_crypto_context req_cryptoctx,	/* IN */
-	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_preauthtype pa_type,			/* IN */
-	int require_crl_checking,			/* IN
-		    specifies whether CRL checking should be
-		    strictly enforced */
-	unsigned char *envel_data,			/* IN
-		    contains DER encoded encKeyPack */
-	unsigned int envel_data_len,			/* IN
-		    contains length of envel_data */
-	unsigned char **signed_data,			/* OUT
-		    receives ReplyKeyPack */
-	unsigned int *signed_data_len);			/* OUT
-		    receives length of signed_data */
-
-/*
  * This function retrieves the signer's identity, in a form that could
  * be passed back in to a future invocation of this module as a candidate
  * client identity location.

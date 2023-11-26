@@ -188,13 +188,6 @@ id_conf = {'realms': {'$realm': {'pkinit_identities': [file_identity + 'X',
 id_env = realm.special_env('idconf', False, krb5_conf=id_conf)
 realm.kinit(realm.user_princ, expected_trace=msgs, env=id_env)
 
-# Try again using RSA instead of DH.
-mark('FILE identity, no password, RSA')
-realm.pkinit(realm.user_princ, flags=['-X', 'flag_RSA_PROTOCOL=yes'],
-             expected_trace=('PKINIT client making RSA request',
-                             'PKINIT client verified RSA reply'))
-realm.klist(realm.user_princ)
-
 # Test a DH parameter renegotiation by temporarily setting a 4096-bit
 # minimum on the KDC.  (Preauth type 16 is PKINIT PA_PK_AS_REQ;
 # 109 is PKINIT TD_DH_PARAMETERS; 133 is FAST PA-FX-COOKIE.)

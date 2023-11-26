@@ -58,19 +58,10 @@
     TRACE(c, "PKINIT client verified DH reply")
 #define TRACE_PKINIT_CLIENT_REP_DH_FAIL(c)              \
     TRACE(c, "PKINIT client could not verify DH reply")
-#define TRACE_PKINIT_CLIENT_REP_RSA(c)                  \
-    TRACE(c, "PKINIT client verified RSA reply")
-#define TRACE_PKINIT_CLIENT_REP_RSA_KEY(c, keyblock, cksum)             \
-    TRACE(c, "PKINIT client retrieved reply key {keyblock} from RSA "   \
-          "reply (checksum {cksum})", keyblock, cksum)
-#define TRACE_PKINIT_CLIENT_REP_RSA_FAIL(c)                     \
-    TRACE(c, "PKINIT client could not verify RSA reply")
 #define TRACE_PKINIT_CLIENT_REQ_CHECKSUM(c, cksum)                      \
     TRACE(c, "PKINIT client computed kdc-req-body checksum {cksum}", cksum)
 #define TRACE_PKINIT_CLIENT_REQ_DH(c)                           \
     TRACE(c, "PKINIT client making DH request")
-#define TRACE_PKINIT_CLIENT_REQ_RSA(c)                  \
-    TRACE(c, "PKINIT client making RSA request")
 #define TRACE_PKINIT_CLIENT_SAN_CONFIG_DNSNAME(c, host)                 \
     TRACE(c, "PKINIT client config accepts KDC dNSName SAN {str}", host)
 #define TRACE_PKINIT_CLIENT_SAN_MATCH_DNSNAME(c, host)                  \
