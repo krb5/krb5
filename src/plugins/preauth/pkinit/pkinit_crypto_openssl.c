@@ -2599,12 +2599,9 @@ cleanup:
     return retval;
 }
 
-krb5_error_code
-pkinit_octetstring2key(krb5_context context,
-                       krb5_enctype etype,
-                       unsigned char *key,
-                       unsigned int dh_key_len,
-                       krb5_keyblock *key_block)
+static krb5_error_code
+octetstring2key(krb5_context context, krb5_enctype etype,
+                const krb5_data *secret, krb5_keyblock *key_block)
 {
     krb5_error_code retval;
     unsigned char *buf = NULL;
@@ -2614,7 +2611,7 @@ pkinit_octetstring2key(krb5_context context,
     krb5_data random_data;
     EVP_MD_CTX *sha1_ctx = NULL;
 
-    buf = k5alloc(dh_key_len, &retval);
+    buf = k5alloc(secret->length, &retval);
     if (buf == NULL)
         goto cleanup;
 
@@ -2629,20 +2626,20 @@ pkinit_octetstring2key(krb5_context context,
     do {
         if (!EVP_DigestInit(sha1_ctx, EVP_sha1()) ||
             !EVP_DigestUpdate(sha1_ctx, &counter, 1) ||
-            !EVP_DigestUpdate(sha1_ctx, key, dh_key_len) ||
+            !EVP_DigestUpdate(sha1_ctx, secret->data, secret->length) ||
             !EVP_DigestFinal(sha1_ctx, md, NULL)) {
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
-        if (dh_key_len - offset < sizeof(md))
-            memcpy(buf + offset, md, dh_key_len - offset);
+        if (secret->length - offset < sizeof(md))
+            memcpy(buf + offset, md, secret->length - offset);
         else
             memcpy(buf + offset, md, sizeof(md));
 
         offset += sizeof(md);
         counter++;
-    } while (offset < dh_key_len);
+    } while (offset < secret->length);
 
     key_block->magic = 0;
     key_block->enctype = etype;
@@ -2660,6 +2657,10 @@ pkinit_octetstring2key(krb5_context context,
     random_data.data = (char *)buf;
 
     retval = krb5_c_random_to_key(context, etype, &random_data, key_block);
+    if (retval)
+        goto cleanup;
+
+    TRACE_PKINIT_KDF_OS2K(context, key_block);
 
 cleanup:
     EVP_MD_CTX_free(sha1_ctx);
@@ -2691,8 +2692,8 @@ algid_to_md(const krb5_data *alg_id)
 
 #define sskdf openssl_sskdf
 static krb5_error_code
-openssl_sskdf(krb5_context context, const EVP_MD *md, krb5_data *key,
-              krb5_data *info, size_t len, krb5_data *out)
+openssl_sskdf(krb5_context context, const EVP_MD *md, const krb5_data *secret,
+              const krb5_data *info, size_t len, krb5_data *out)
 {
     krb5_error_code ret;
     EVP_KDF *kdf = NULL;
@@ -2719,7 +2720,7 @@ openssl_sskdf(krb5_context context, const EVP_MD *md, krb5_data *key,
     *p++ = OSSL_PARAM_construct_utf8_string(OSSL_KDF_PARAM_DIGEST,
                                             (char *)EVP_MD_get0_name(md), 0);
     *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_KEY,
-                                             key->data, key->length);
+                                             secret->data, secret->length);
     *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_INFO,
                                              info->data, info->length);
     *p = OSSL_PARAM_construct_end();
@@ -2741,8 +2742,8 @@ cleanup:
 
 #define sskdf builtin_sskdf
 static krb5_error_code
-builtin_sskdf(krb5_context context, const EVP_MD *md, krb5_data *key,
-              krb5_data *info, size_t len, krb5_data *out)
+builtin_sskdf(krb5_context context, const EVP_MD *md, const krb5_data *secret,
+              const krb5_data *info, size_t len, krb5_data *out)
 {
     krb5_error_code ret;
     uint32_t counter = 1, reps;
@@ -2783,7 +2784,7 @@ builtin_sskdf(krb5_context context, const EVP_MD *md, krb5_data *key,
         /* -   Compute Hashi = H(counter || Z || OtherInfo). */
         if (!EVP_DigestInit(ctx, md) ||
             !EVP_DigestUpdate(ctx, be_counter, 4) ||
-            !EVP_DigestUpdate(ctx, key->data, key->length) ||
+            !EVP_DigestUpdate(ctx, secret->data, secret->length) ||
             !EVP_DigestUpdate(ctx, info->data, info->length) ||
             !EVP_DigestFinal(ctx, outptr, &s)) {
             ret = oerr(context, KRB5_CRYPTO_INTERNAL,
@@ -2805,13 +2806,14 @@ cleanup:
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x30000000L */
 
-/* id-pkinit-kdf family, as specified by RFC 8636. */
+/* id-pkinit-kdf family, as specified by RFC 8636.  If alg_oid is null,
+ * octet2string(), as specified by RFC 4556. */
 krb5_error_code
-pkinit_alg_agility_kdf(krb5_context context, krb5_data *secret,
-                       krb5_data *alg_oid, krb5_const_principal party_u_info,
-                       krb5_const_principal party_v_info,
-                       krb5_enctype enctype, krb5_data *as_req,
-                       krb5_data *pk_as_rep, krb5_keyblock *key_block)
+pkinit_kdf(krb5_context context, krb5_data *secret, const krb5_data *alg_oid,
+           krb5_const_principal party_u_info,
+           krb5_const_principal party_v_info, krb5_enctype enctype,
+           const krb5_data *as_req, const krb5_data *pk_as_rep,
+           krb5_keyblock *key_block)
 {
     krb5_error_code ret;
     size_t rand_len = 0, key_len = 0;
@@ -2822,6 +2824,9 @@ pkinit_alg_agility_kdf(krb5_context context, krb5_data *secret,
     krb5_data random_data = empty_data();
     krb5_algorithm_identifier alg_id;
     char *hash_name = NULL;
+
+    if (alg_oid == NULL)
+        return octetstring2key(context, enctype, secret, key_block);
 
     ret = krb5_c_keylengths(context, enctype, &rand_len, &key_len);
     if (ret)
@@ -2840,7 +2845,7 @@ pkinit_alg_agility_kdf(krb5_context context, krb5_data *secret,
     if (party_u_info &&
         krb5_principal_compare_any_realm(context, party_u_info,
                                          krb5_anonymous_principal())) {
-        party_u_info = (krb5_principal)krb5_anonymous_principal();
+        party_u_info = krb5_anonymous_principal();
     }
 
     md = algid_to_md(alg_oid);
@@ -2875,6 +2880,10 @@ pkinit_alg_agility_kdf(krb5_context context, krb5_data *secret,
         goto cleanup;
 
     ret = krb5_c_random_to_key(context, enctype, &random_data, key_block);
+    if (ret)
+        goto cleanup;
+
+    TRACE_PKINIT_KDF_ALG(context, alg_oid, key_block);
 
 cleanup:
     if (ret)

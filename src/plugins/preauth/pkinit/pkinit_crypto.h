@@ -245,22 +245,6 @@ krb5_error_code crypto_check_cert_eku
 		    receives non-zero if an acceptable EKU was found */
 
 /*
- * this functions takes in generated DH secret key and converts
- * it in to a kerberos session key. it takes into the account the
- * enc type and then follows the procedure specified in the RFC p 22.
- */
-krb5_error_code pkinit_octetstring2key
-	(krb5_context context,				/* IN */
-	krb5_enctype etype,				/* IN
-		    specifies the enc type */
-	unsigned char *key,				/* IN
-		    contains the DH secret key */
-	unsigned int key_len,				/* IN
-		    contains length of key */
-	krb5_keyblock * krb5key);			/* OUT
-		    receives kerberos session key */
-
-/*
  * this function implements clients first part of the DH protocol.
  * client selects its DH parameters and pub key
  */
@@ -552,15 +536,11 @@ krb5_error_code pkinit_identity_set_prompter
 	void *prompter_data);				/* IN */
 
 krb5_error_code
-pkinit_alg_agility_kdf(krb5_context context,
-                       krb5_data *secret,
-                       krb5_data *alg_oid,
-                       krb5_const_principal party_u_info,
-                       krb5_const_principal party_v_info,
-                       krb5_enctype enctype,
-                       krb5_data *as_req,
-                       krb5_data *pk_as_rep,
-                       krb5_keyblock *key_block);
+pkinit_kdf(krb5_context context, krb5_data *secret, const krb5_data *alg_oid,
+	   krb5_const_principal party_u_info,
+	   krb5_const_principal party_v_info, krb5_enctype enctype,
+	   const krb5_data *as_req, const krb5_data *pk_as_rep,
+	   krb5_keyblock *key_block);
 
 extern const krb5_data sha1_id;
 extern const krb5_data sha256_id;

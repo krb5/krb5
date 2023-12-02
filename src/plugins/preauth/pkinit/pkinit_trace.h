@@ -43,12 +43,6 @@
     TRACE(c, "PKINIT client skipping EKU check due to configuration")
 #define TRACE_PKINIT_CLIENT_FRESHNESS_TOKEN(c)                  \
     TRACE(c, "PKINIT client received freshness token from KDC")
-#define TRACE_PKINIT_CLIENT_KDF_ALG(c, kdf, keyblock)                   \
-    TRACE(c, "PKINIT client used KDF {hexdata} to compute reply key "   \
-          "{keyblock}", kdf, keyblock)
-#define TRACE_PKINIT_CLIENT_KDF_OS2K(c, keyblock)                       \
-    TRACE(c, "PKINIT client used octetstring2key to compute reply key " \
-          "{keyblock}", keyblock)
 #define TRACE_PKINIT_CLIENT_NO_IDENTITY(c)                              \
     TRACE(c, "PKINIT client has no configured identity; giving up")
 #define TRACE_PKINIT_CLIENT_REP_CHECKSUM_FAIL(c, expected, received)    \
@@ -94,6 +88,13 @@
 #define TRACE_PKINIT_DH_REJECTING_GROUP(c, desc, mindesc)               \
     TRACE(c, "PKINIT client key has group {str}, need at least {str}",  \
           desc, mindesc)
+
+#define TRACE_PKINIT_KDF_ALG(c, kdf, keyblock)                          \
+    TRACE(c, "PKINIT used KDF {hexdata} to compute reply key {keyblock}", \
+          kdf, keyblock)
+#define TRACE_PKINIT_KDF_OS2K(c, keyblock)                              \
+    TRACE(c, "PKINIT used octetstring2key to compute reply key {keyblock}", \
+          keyblock)
 
 #define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
     TRACE(c, "PKINIT OpenSSL error: {str}", msg)

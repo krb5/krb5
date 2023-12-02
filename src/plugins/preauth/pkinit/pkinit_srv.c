@@ -896,30 +896,13 @@ pkinit_server_return_padata(krb5_context context,
                          "/tmp/kdc_as_rep");
 #endif
 
-    /* If mutually supported KDFs were found, use the algorithm agility KDF. */
-    if (rep->u.dh_Info.kdfID) {
-        secret.data = (char *)server_key;
-        secret.length = server_key_len;
-
-        retval = pkinit_alg_agility_kdf(context, &secret, rep->u.dh_Info.kdfID,
-                                        request->client, request->server,
-                                        enctype, req_pkt, out_data,
-                                        &reply_key);
-        if (retval) {
-            pkiDebug("pkinit_alg_agility_kdf failed: %s\n",
-                     error_message(retval));
-            goto cleanup;
-        }
-
-        /* Otherwise, use the older octetstring2key() function */
-    } else {
-        retval = pkinit_octetstring2key(context, enctype, server_key,
-                                            server_key_len, &reply_key);
-        if (retval) {
-            pkiDebug("pkinit_octetstring2key failed: %s\n",
-                     error_message(retval));
-            goto cleanup;
-        }
+    secret = make_data(server_key, server_key_len);
+    retval = pkinit_kdf(context, &secret, rep->u.dh_Info.kdfID,
+                        request->client, request->server, enctype, req_pkt,
+                        out_data, &reply_key);
+    if (retval) {
+        pkiDebug("pkinit_kdf failed: %s\n", error_message(retval));
+        goto cleanup;
     }
 
     retval = cb->replace_reply_key(context, rock, &reply_key, FALSE);

@@ -24,12 +24,8 @@
  * or implied warranty.
  */
 
-/*
- * pkinit_kdf_test.c -- Test to verify the correctness of the function
- * pkinit_alg_agility_kdf() in pkinit_crypto_openssl, which implements
- * the Key Derivation Function from the PKInit Algorithm Agility
- * document, currently draft-ietf-krb-wg-pkinit-alg-agility-04.txt.
- */
+/* Verify the correctness of pkinit_kdf() in pkinit_crypto_openssl, which
+ * implements the key derivation function from RFC 8636. */
 
 #include "k5-platform.h"
 #include "pkinit.h"
@@ -72,7 +68,6 @@ krb5_octet key3_hex[] =
 int
 main(int argc, char **argv)
 {
-    /* arguments for calls to pkinit_alg_agility_kdf() */
     krb5_context context = 0;
     krb5_data secret;
     krb5_algorithm_identifier alg_id;
@@ -131,12 +126,9 @@ main(int argc, char **argv)
 
     enctype = enctype_aes;
 
-    /* call pkinit_alg_agility_kdf() with test vector values*/
-    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret,
-                                              &alg_id.algorithm,
-                                              u_principal, v_principal,
-                                              enctype, &as_req, &pk_as_rep,
-                                              &key_block))) {
+    retval = pkinit_kdf(context, &secret, &alg_id.algorithm, u_principal,
+                        v_principal, enctype, &as_req, &pk_as_rep, &key_block);
+    if (retval) {
         printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
@@ -162,12 +154,9 @@ main(int argc, char **argv)
 
     enctype = enctype_aes;
 
-    /* call pkinit_alg_agility_kdf() with test vector values*/
-    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret,
-                                              &alg_id.algorithm,
-                                              u_principal, v_principal,
-                                              enctype, &as_req, &pk_as_rep,
-                                              &key_block))) {
+    retval = pkinit_kdf(context, &secret, &alg_id.algorithm, u_principal,
+                        v_principal, enctype, &as_req, &pk_as_rep, &key_block);
+    if (retval) {
         printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
@@ -193,12 +182,9 @@ main(int argc, char **argv)
 
     enctype = enctype_des3;
 
-    /* call pkinit_alg_agility_kdf() with test vector values*/
-    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret,
-                                              &alg_id.algorithm,
-                                              u_principal, v_principal,
-                                              enctype, &as_req, &pk_as_rep,
-                                              &key_block))) {
+    retval = pkinit_kdf(context, &secret, &alg_id.algorithm, u_principal,
+                        v_principal, enctype, &as_req, &pk_as_rep, &key_block);
+    if (retval) {
         printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d\n",
                retval);
         goto cleanup;
