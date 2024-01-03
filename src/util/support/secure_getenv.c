@@ -65,6 +65,8 @@
 
 static int elevated_privilege = 0;
 
+#if !defined(_WIN32)
+
 MAKE_INIT_FUNCTION(k5_secure_getenv_init);
 
 int
@@ -109,3 +111,5 @@ k5_secure_getenv(const char *name)
         return NULL;
     return elevated_privilege ? NULL : getenv(name);
 }
+
+#endif // !defined(_WIN32)

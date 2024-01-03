@@ -1013,6 +1013,7 @@ extern int krb5int_gettimeofday(struct timeval *tp, void *ignore);
  * may have been written into swap space....
  */
 #ifdef _WIN32
+#include <windows.h>
 # define zap(ptr, len) SecureZeroMemory(ptr, len)
 #elif defined(__STDC_LIB_EXT1__)
 /*

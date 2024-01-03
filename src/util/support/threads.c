@@ -49,6 +49,7 @@ int krb5int_pthread_loaded (void)
 }
 
 #elif defined(_WIN32)
+#include <windows.h>
 
 static DWORD tls_idx;
 static CRITICAL_SECTION key_lock;

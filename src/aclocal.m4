@@ -892,7 +892,7 @@ if test "x$enable_rpath" != xyes ; then
 	PROG_RPATH_FLAGS=
 fi
 
-if test "$SHLIBEXT" = ".so-nobuild"; then
+if test "x$enable_shared" = xyes && test "$SHLIBEXT" = ".so-nobuild"; then
    AC_MSG_ERROR([Shared libraries are not yet supported on this platform.])
 fi
 

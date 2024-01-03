@@ -3,6 +3,7 @@
 
 #include "autoconf.h"
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

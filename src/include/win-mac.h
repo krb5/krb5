@@ -183,8 +183,8 @@ typedef _W64 int         ssize_t;
  * routines directly. Rather, they only export the _<function> version.
  * The following defines works around this problem.
  */
-#include <sys\types.h>
-#include <sys\stat.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <io.h>
 #include <process.h>
