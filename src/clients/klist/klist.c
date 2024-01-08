@@ -53,7 +53,6 @@ int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
 int show_config = 0;
-char *defname;
 char *progname;
 krb5_timestamp now;
 unsigned int timestamp_width;
@@ -62,7 +61,7 @@ krb5_context context;
 
 static krb5_boolean is_local_tgt(krb5_principal princ, krb5_data *realm);
 static char *etype_string(krb5_enctype );
-static void show_credential(krb5_creds *);
+static void show_credential(krb5_creds *, const char *);
 
 static void list_all_ccaches(void);
 static int list_ccache(krb5_ccache);
@@ -473,6 +472,7 @@ show_ccache(krb5_ccache cache)
     krb5_creds creds;
     krb5_principal princ = NULL;
     krb5_error_code ret;
+    char *defname = NULL;
     int status = 1;
 
     ret = krb5_cc_get_principal(context, cache, &princ);
@@ -503,7 +503,7 @@ show_ccache(krb5_ccache cache)
     }
     while ((ret = krb5_cc_next_cred(context, cache, &cur, &creds)) == 0) {
         if (show_config || !krb5_is_config_principal(context, creds.server))
-            show_credential(&creds);
+            show_credential(&creds, defname);
         krb5_free_cred_contents(context, &creds);
     }
     if (ret == KRB5_CC_END) {
@@ -676,7 +676,7 @@ print_config_data(int col, krb5_data *data)
 }
 
 static void
-show_credential(krb5_creds *cred)
+show_credential(krb5_creds *cred, const char *defname)
 {
     krb5_error_code ret;
     krb5_ticket *tkt = NULL;
