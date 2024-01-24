@@ -261,7 +261,7 @@ else:
 rst_epilog = '\n'
 
 if 'notice' in tags:
-    exclude_patterns = [ 'admin', 'appdev', 'basic', 'build',
+    exclude_patterns = [ 'admin', 'appdev', 'basic', 'build', 'formats',
                          'plugindev', 'user' ]
     exclude_patterns += [ 'about.rst', 'build_this.rst', 'copyright.rst',
                           'index.rst', 'mitK5*.rst', 'resources.rst' ]
