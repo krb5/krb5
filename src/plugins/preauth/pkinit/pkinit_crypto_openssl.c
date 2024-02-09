@@ -1662,7 +1662,22 @@ cleanup:
     return retval;
 }
 
+/* Return the name ID of the signature algorithm for cert, assuming that the
+ * digest used is SHA-256 and the cert uses either an RSA or EC public key. */
+static int
+cert_sig_alg(X509 *cert)
+{
+    /* Use X509_get0_pubkey() when OpenSSL 1.0 support is removed. */
+    EVP_PKEY *pkey = X509_get_pubkey(cert);
+    int id;
 
+    if (pkey != NULL && EVP_PKEY_get_base_id(pkey) == EVP_PKEY_EC)
+        id = NID_ecdsa_with_SHA256;
+    else
+        id = NID_sha256WithRSAEncryption;
+    EVP_PKEY_free(pkey);
+    return id;
+}
 
 krb5_error_code
 cms_signeddata_create(krb5_context context,
@@ -1695,6 +1710,7 @@ cms_signeddata_create(krb5_context context,
     unsigned int alg_len = 0, digest_len = 0;
     unsigned char *y = NULL;
     ASN1_OBJECT *oid = NULL, *oid_copy;
+    int sig_alg_id;
 
     /* Start creating PKCS7 data. */
     if ((p7 = PKCS7_new()) == NULL)
@@ -1782,8 +1798,8 @@ cms_signeddata_create(krb5_context context,
         /* Set sig algs */
         if (p7si->digest_enc_alg->parameter != NULL)
             ASN1_TYPE_free(p7si->digest_enc_alg->parameter);
-        p7si->digest_enc_alg->algorithm =
-            OBJ_nid2obj(NID_sha256WithRSAEncryption);
+        sig_alg_id = cert_sig_alg(id_cryptoctx->my_cert);
+        p7si->digest_enc_alg->algorithm = OBJ_nid2obj(sig_alg_id);
         if (!(p7si->digest_enc_alg->parameter = ASN1_TYPE_new()))
             goto cleanup;
         p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
