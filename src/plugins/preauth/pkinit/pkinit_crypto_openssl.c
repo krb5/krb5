@@ -73,10 +73,9 @@ typedef struct _pkinit_cred_info *pkinit_cred_info;
 
 struct _pkinit_identity_crypto_context {
     pkinit_cred_info creds[MAX_CREDS_ALLOWED+1];
-    STACK_OF(X509) *my_certs;   /* available user certs */
+    X509 *my_cert;              /* selected user or KDC cert */
     char *identity;             /* identity name for user cert */
-    int cert_index;             /* cert to use out of available certs*/
-    EVP_PKEY *my_key;           /* available user keys if in filesystem */
+    EVP_PKEY *my_key;           /* selected cert key if in filesystem */
     STACK_OF(X509) *trustedCAs; /* available trusted ca certs */
     STACK_OF(X509) *intermediateCAs;   /* available intermediate ca certs */
     STACK_OF(X509_CRL) *revoked;    /* available crls */
@@ -1489,8 +1488,7 @@ pkinit_init_certs(pkinit_identity_crypto_context ctx)
 
     for (i = 0; i < MAX_CREDS_ALLOWED; i++)
         ctx->creds[i] = NULL;
-    ctx->my_certs = NULL;
-    ctx->cert_index = 0;
+    ctx->my_cert = NULL;
     ctx->my_key = NULL;
     ctx->trustedCAs = NULL;
     ctx->intermediateCAs = NULL;
@@ -1506,8 +1504,8 @@ pkinit_fini_certs(pkinit_identity_crypto_context ctx)
     if (ctx == NULL)
         return;
 
-    if (ctx->my_certs != NULL)
-        sk_X509_pop_free(ctx->my_certs, X509_free);
+    if (ctx->my_cert != NULL)
+        X509_free(ctx->my_cert);
 
     if (ctx->my_key != NULL)
         EVP_PKEY_free(ctx->my_key);
@@ -1696,7 +1694,6 @@ cms_signeddata_create(krb5_context context,
     ASN1_OCTET_STRING *digest = NULL;
     unsigned int alg_len = 0, digest_len = 0;
     unsigned char *y = NULL;
-    X509 *cert = NULL;
     ASN1_OBJECT *oid = NULL, *oid_copy;
 
     /* Start creating PKCS7 data. */
@@ -1715,7 +1712,7 @@ cms_signeddata_create(krb5_context context,
     if (oid == NULL)
         goto cleanup;
 
-    if (id_cryptoctx->my_certs != NULL) {
+    if (id_cryptoctx->my_cert != NULL) {
         X509_STORE *certstore = NULL;
         X509_STORE_CTX *certctx;
         STACK_OF(X509) *certstack = NULL;
@@ -1726,8 +1723,6 @@ cms_signeddata_create(krb5_context context,
         if ((cert_stack = sk_X509_new_null()) == NULL)
             goto cleanup;
 
-        cert = sk_X509_value(id_cryptoctx->my_certs, id_cryptoctx->cert_index);
-
         certstore = X509_STORE_new();
         if (certstore == NULL)
             goto cleanup;
@@ -1736,7 +1731,7 @@ cms_signeddata_create(krb5_context context,
         certctx = X509_STORE_CTX_new();
         if (certctx == NULL)
             goto cleanup;
-        X509_STORE_CTX_init(certctx, certstore, cert,
+        X509_STORE_CTX_init(certctx, certstore, id_cryptoctx->my_cert,
                             id_cryptoctx->intermediateCAs);
         X509_STORE_CTX_trusted_stack(certctx, id_cryptoctx->trustedCAs);
         if (!X509_verify_cert(certctx)) {
@@ -1764,13 +1759,13 @@ cms_signeddata_create(krb5_context context,
         if (!ASN1_INTEGER_set(p7si->version, 1))
             goto cleanup;
         if (!X509_NAME_set(&p7si->issuer_and_serial->issuer,
-                           X509_get_issuer_name(cert)))
+                           X509_get_issuer_name(id_cryptoctx->my_cert)))
             goto cleanup;
         /* because ASN1_INTEGER_set is used to set a 'long' we will do
          * things the ugly way. */
         ASN1_INTEGER_free(p7si->issuer_and_serial->serial);
         if (!(p7si->issuer_and_serial->serial =
-              ASN1_INTEGER_dup(X509_get_serialNumber(cert))))
+              ASN1_INTEGER_dup(X509_get_serialNumber(id_cryptoctx->my_cert))))
             goto cleanup;
 
         /* will not fill-out EVP_PKEY because it's on the smartcard */
@@ -3311,7 +3306,7 @@ pkinit_check_kdc_pkid(krb5_context context,
     PKCS7_ISSUER_AND_SERIAL *is = NULL;
     const unsigned char *p = pdid_buf;
     int status = 1;
-    X509 *kdc_cert = sk_X509_value(id_cryptoctx->my_certs, id_cryptoctx->cert_index);
+    X509 *kdc_cert = id_cryptoctx->my_cert;
 
     *valid_kdcPkId = 0;
     pkiDebug("found kdcPkId in AS REQ\n");
@@ -4783,7 +4778,8 @@ cleanup:
 }
 
 /*
- * Set the certificate in idctx->creds[cred_index] as the selected certificate.
+ * Set the certificate in idctx->creds[cred_index] as the selected certificate,
+ * stealing pointers from it.
  */
 krb5_error_code
 crypto_cert_select(krb5_context context, pkinit_identity_crypto_context idctx,
@@ -4795,20 +4791,17 @@ crypto_cert_select(krb5_context context, pkinit_identity_crypto_context idctx,
         return ENOENT;
 
     ci = idctx->creds[cred_index];
-    /* copy the selected cert into our id_cryptoctx */
-    if (idctx->my_certs != NULL)
-        sk_X509_pop_free(idctx->my_certs, X509_free);
-    idctx->my_certs = sk_X509_new_null();
-    sk_X509_push(idctx->my_certs, ci->cert);
-    free(idctx->identity);
+
+    idctx->my_cert = ci->cert;
+    ci->cert = NULL;
+
     /* hang on to the selected credential name */
+    free(idctx->identity);
     if (ci->name != NULL)
         idctx->identity = strdup(ci->name);
     else
         idctx->identity = NULL;
 
-    ci->cert = NULL;       /* Don't free it twice */
-    idctx->cert_index = 0;
     if (idctx->pkcs11_method != 1) {
         idctx->my_key = ci->key;
         ci->key = NULL;    /* Don't free it twice */
@@ -4837,41 +4830,14 @@ crypto_cert_select_default(krb5_context context,
 
     retval = crypto_cert_get_count(id_cryptoctx, &cert_count);
     if (retval)
-        goto errout;
+        return retval;
 
     if (cert_count != 1) {
         TRACE_PKINIT_NO_DEFAULT_CERT(context, cert_count);
-        retval = EINVAL;
-        goto errout;
+        return EINVAL;
     }
-    /* copy the selected cert into our id_cryptoctx */
-    if (id_cryptoctx->my_certs != NULL) {
-        sk_X509_pop_free(id_cryptoctx->my_certs, X509_free);
-    }
-    id_cryptoctx->my_certs = sk_X509_new_null();
-    sk_X509_push(id_cryptoctx->my_certs, id_cryptoctx->creds[0]->cert);
-    id_cryptoctx->creds[0]->cert = NULL;        /* Don't free it twice */
-    id_cryptoctx->cert_index = 0;
-    /* hang on to the selected credential name */
-    if (id_cryptoctx->creds[0]->name != NULL)
-        id_cryptoctx->identity = strdup(id_cryptoctx->creds[0]->name);
-    else
-        id_cryptoctx->identity = NULL;
 
-    if (id_cryptoctx->pkcs11_method != 1) {
-        id_cryptoctx->my_key = id_cryptoctx->creds[0]->key;
-        id_cryptoctx->creds[0]->key = NULL;     /* Don't free it twice */
-    }
-#ifndef WITHOUT_PKCS11
-    else {
-        id_cryptoctx->cert_id = id_cryptoctx->creds[0]->cert_id;
-        id_cryptoctx->creds[0]->cert_id = NULL; /* Don't free it twice */
-        id_cryptoctx->cert_id_len = id_cryptoctx->creds[0]->cert_id_len;
-    }
-#endif
-    retval = 0;
-errout:
-    return retval;
+    return crypto_cert_select(context, id_cryptoctx, 0);
 }
 
 
