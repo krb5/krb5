@@ -358,7 +358,7 @@ do_keytab(const char *name)
 }
 
 static void
-list_all_ccaches()
+list_all_ccaches(void)
 {
     krb5_error_code ret;
     krb5_ccache cache;
@@ -450,7 +450,7 @@ show_all_ccaches(void)
 }
 
 static void
-do_ccache()
+do_ccache(void)
 {
     krb5_error_code ret;
     krb5_ccache cache;

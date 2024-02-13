@@ -390,7 +390,7 @@ nroot(BTREE *t)
 }
 
 static int
-tmp()
+tmp(void)
 {
 #ifdef SIG_BLOCK
 	sigset_t set, oset;
@@ -437,7 +437,7 @@ tmp()
 }
 
 static int
-byteorder()
+byteorder(void)
 {
 	u_int32_t x;
 	u_char *p;

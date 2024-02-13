@@ -854,7 +854,7 @@ write_pid_file(const char *path)
 }
 
 static void
-finish_realms()
+finish_realms(void)
 {
     int i;
 

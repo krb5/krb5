@@ -607,7 +607,7 @@ kadmin_startup(int argc, char *argv[], char **request_out, char ***args_out)
 }
 
 int
-quit()
+quit(void)
 {
     kadm5_ret_t retval;
 

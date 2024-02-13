@@ -367,7 +367,7 @@ main(int argc, char *argv[])
  * program is run).
  */
 static int
-open_db_and_mkey()
+open_db_and_mkey(void)
 {
     krb5_error_code retval;
     krb5_data scratch, pwd, seed;
@@ -489,7 +489,7 @@ open_db_and_mkey()
 #endif
 
 int
-quit()
+quit(void)
 {
     krb5_error_code retval;
     static krb5_boolean finished = 0;

@@ -55,7 +55,7 @@ get_name_from_os(void)
 #else /* HAVE_PWD_H */
 #ifdef _WIN32
 static char *
-get_name_from_os()
+get_name_from_os(void)
 {
     static char name[1024];
     DWORD name_size = sizeof(name);
@@ -69,7 +69,7 @@ get_name_from_os()
 }
 #else /* _WIN32 */
 static char *
-get_name_from_os()
+get_name_from_os(void)
 {
     return NULL;
 }

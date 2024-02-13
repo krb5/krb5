@@ -376,7 +376,7 @@ get_wildcard_addr(struct addrinfo **res)
 }
 
 static void
-do_standalone()
+do_standalone(void)
 {
     struct sockaddr_in frominet;
     struct addrinfo *res;
@@ -630,7 +630,7 @@ full_resync(CLIENT *clnt)
  * Returns non-zero on failure due to errors.
  */
 krb5_error_code
-do_iprop()
+do_iprop(void)
 {
     kadm5_ret_t retval;
     krb5_principal iprop_svc_principal = NULL;

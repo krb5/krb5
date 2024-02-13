@@ -3119,7 +3119,7 @@ cleanup:
 }
 
 int
-pkinit_openssl_init()
+pkinit_openssl_init(void)
 {
     /* Initialize OpenSSL. */
     ERR_load_crypto_strings();
