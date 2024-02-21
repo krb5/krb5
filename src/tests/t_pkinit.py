@@ -7,8 +7,10 @@ if not pkinit_enabled:
 
 # Construct a krb5.conf fragment configuring pkinit.
 user_pem = os.path.join(pkinit_certs, 'user.pem')
+ecuser_pem = os.path.join(pkinit_certs, 'ecuser.pem')
 privkey_pem = os.path.join(pkinit_certs, 'privkey.pem')
 privkey_enc_pem = os.path.join(pkinit_certs, 'privkey-enc.pem')
+privkey_ec_pem = os.path.join(pkinit_certs, 'eckey.pem')
 user_p12 = os.path.join(pkinit_certs, 'user.p12')
 user_enc_p12 = os.path.join(pkinit_certs, 'user-enc.p12')
 user_upn_p12 = os.path.join(pkinit_certs, 'user-upn.p12')
@@ -42,6 +44,7 @@ alias_kdc_conf = {'realms': {'$realm': {
 
 file_identity = 'FILE:%s,%s' % (user_pem, privkey_pem)
 file_enc_identity = 'FILE:%s,%s' % (user_pem, privkey_enc_pem)
+ec_identity = 'FILE:%s,%s' % (ecuser_pem, privkey_ec_pem)
 dir_identity = 'DIR:%s' % path
 dir_enc_identity = 'DIR:%s' % path_enc
 dir_file_identity = 'FILE:%s,%s' % (os.path.join(path, 'user.crt'),
@@ -176,6 +179,11 @@ for g in ('4096', 'P-256', 'P-384', 'P-521'):
     group_env = realm.special_env(g, True, krb5_conf=group_conf)
     realm.pkinit(realm.user_princ, expected_trace=('PKINIT using ' + g,),
                  env=group_env)
+
+# Test with an EC client cert.
+mark('EC client cert')
+realm.kinit(realm.user_princ,
+            flags=['-X', 'X509_user_identity=%s' % ec_identity])
 
 # Try using multiple configured pkinit_identities, to make sure we
 # fall back to the second one when the first one cannot be read.
@@ -443,6 +451,18 @@ realm.run(['./responder', '-x', 'pkinit={"%s": 1}' % p11_token_identity,
 realm.run(['./responder', '-X', p11_attr,
            '-p', '%s=%s' % (p11_token_identity, 'userpin'),
            realm.user_princ])
+realm.klist(realm.user_princ)
+realm.run([kvno, realm.host_princ])
+
+mark('PKCS11 identity, EC client cert')
+shutil.rmtree(softhsm2_tokens)
+os.mkdir(softhsm2_tokens)
+realm.run(tool_cmd + ['--init-token', '--label', 'user',
+                      '--so-pin', 'sopin', '--init-pin', '--pin', 'userpin'])
+realm.run(tool_cmd + ['-w', ecuser_pem, '-y', 'cert'])
+realm.run(tool_cmd + ['-w', privkey_ec_pem, '-y', 'privkey',
+                      '-l', '--pin', 'userpin'])
+realm.kinit(realm.user_princ, flags=['-X', p11_attr], password='userpin')
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
