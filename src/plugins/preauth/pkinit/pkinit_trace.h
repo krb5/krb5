@@ -99,21 +99,12 @@
 #define TRACE_PKINIT_OPENSSL_ERROR(c, msg)              \
     TRACE(c, "PKINIT OpenSSL error: {str}", msg)
 
-#define TRACE_PKINIT_PKCS11_GETFLIST_FAILED(c, errstr)                  \
-    TRACE(c, "PKINIT PKCS11 C_GetFunctionList failed: {str}", errstr)
-#define TRACE_PKINIT_PKCS11_GETSYM_FAILED(c, errstr)                    \
-    TRACE(c, "PKINIT unable to find PKCS11 plugin symbol "              \
-          "C_GetFunctionList: {str}", errstr)
-#define TRACE_PKINIT_PKCS11_LOGIN_FAILED(c, errstr)             \
-    TRACE(c, "PKINIT PKCS11 C_Login failed: {str}", errstr)
 #define TRACE_PKINIT_PKCS11_NO_MATCH_TOKEN(c)                   \
     TRACE(c, "PKINIT PKCS#11 module has no matching tokens")
 #define TRACE_PKINIT_PKCS11_NO_TOKEN(c)                                 \
     TRACE(c, "PKINIT PKCS#11 module shows no slots with tokens")
 #define TRACE_PKINIT_PKCS11_OPEN(c, name)                       \
     TRACE(c, "PKINIT opening PKCS#11 module \"{str}\"", name)
-#define TRACE_PKINIT_PKCS11_OPEN_FAILED(c, errstr)                      \
-    TRACE(c, "PKINIT PKCS#11 module open failed: {str}", errstr)
 #define TRACE_PKINIT_PKCS11_SLOT(c, slot, len, label)            \
     TRACE(c, "PKINIT PKCS#11 slotid {int} token {lenstr}",       \
           slot, len, label)
