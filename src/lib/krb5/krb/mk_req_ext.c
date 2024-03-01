@@ -79,6 +79,7 @@ generate_authenticator(krb5_context,
                        krb5_ui_4, krb5_authdata **,
                        krb5_authdata_context ad_context,
                        krb5_enctype *desired_etypes,
+                       krb5_boolean channel_bound,
                        krb5_enctype tkt_enctype);
 
 krb5_error_code KRB5_CALLCONV
@@ -95,6 +96,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     krb5_ap_req request;
     krb5_data *scratch = 0;
     krb5_data *toutbuf;
+    krb5_boolean channel_bound = FALSE;
 
     request.ap_options = ap_req_options & AP_OPTS_WIRE_MASK;
     request.authenticator.ciphertext.data = NULL;
@@ -106,6 +108,9 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     if ((ap_req_options & AP_OPTS_ETYPE_NEGOTIATION) &&
         !(ap_req_options & AP_OPTS_MUTUAL_REQUIRED))
         return(EINVAL);
+
+    if (ap_req_options & AP_OPTS_CHANNEL_BOUND)
+        channel_bound = TRUE;
 
     /* we need a native ticket */
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
@@ -202,6 +207,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
                                          in_creds->authdata,
                                          (*auth_context)->ad_context,
                                          desired_etypes,
+                                         channel_bound,
                                          in_creds->keyblock.enctype)))
         goto cleanup_cksum;
 
@@ -259,6 +265,7 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
                        krb5_authdata **authorization,
                        krb5_authdata_context ad_context,
                        krb5_enctype *desired_etypes,
+                       krb5_boolean channel_bound,
                        krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
@@ -302,6 +309,9 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
                                  FALSE, &client_aware_cb);
     if (retval)
         return retval;
+
+    if (channel_bound)
+        client_aware_cb = TRUE;
 
     /* Add etype negotiation or channel-binding awareness authdata to the
      * front, if appropriate. */

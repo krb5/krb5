@@ -1658,6 +1658,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define AP_OPTS_USE_SESSION_KEY    0x40000000 /**< Use session key */
 #define AP_OPTS_MUTUAL_REQUIRED    0x20000000 /**< Perform a mutual
                                                  authentication exchange */
+#define AP_OPTS_CHANNEL_BOUND      0x00000004 /* force KERB_AP_OPTIONS_CBT */
 #define AP_OPTS_ETYPE_NEGOTIATION  0x00000002
 #define AP_OPTS_USE_SUBKEY         0x00000001 /**< Generate a subsession key
                                                  from the current session key
@@ -1689,7 +1690,6 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /* #define      AP_OPTS_RESERVED        0x00000020 */
 /* #define      AP_OPTS_RESERVED        0x00000010 */
 /* #define      AP_OPTS_RESERVED        0x00000008 */
-/* #define      AP_OPTS_RESERVED        0x00000004 */
 
 
 #define AP_OPTS_WIRE_MASK               0xfffffff0
