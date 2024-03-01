@@ -372,6 +372,24 @@ TYPEDEF_FUNC(
     Leash_reset_defaults,
     (void)
     );
+TYPEDEF_FUNC(
+    DWORD,
+    CALLCONV_C,
+    Leash_reset_show_password_prompt,
+    (void)
+    );
+TYPEDEF_FUNC(
+    DWORD,
+    CALLCONV_C,
+    Leash_set_show_password_prompt,
+    (DWORD)
+    );
+TYPEDEF_FUNC(
+    DWORD,
+    CALLCONV_C,
+    Leash_get_show_password_prompt,
+    (void)
+    );		
 /* They are not yet all here... */
 
 #endif /* __LOADFUNCS_LEASH_H__ */

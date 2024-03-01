@@ -69,7 +69,8 @@ extern DECL_FUNC_PTR(Leash_timesync);
 extern DECL_FUNC_PTR(Leash_get_default_uppercaserealm);
 extern DECL_FUNC_PTR(Leash_set_default_uppercaserealm);
 extern DECL_FUNC_PTR(Leash_renew);
-
+extern DECL_FUNC_PTR(Leash_get_show_password_prompt);
+extern DECL_FUNC_PTR(Leash_set_show_password_prompt);
 // psapi functions
 extern DECL_FUNC_PTR(GetModuleFileNameExA);
 extern DECL_FUNC_PTR(EnumProcessModules);
