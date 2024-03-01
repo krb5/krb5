@@ -365,7 +365,7 @@ make_ap_req_v1(krb5_context context, krb5_gss_ctx_id_rec *ctx,
                krb5_gss_cred_id_t cred, krb5_creds *k_cred,
                krb5_authdata_context ad_context,
                gss_channel_bindings_t chan_bindings, gss_OID mech_type,
-               gss_buffer_t token, krb5_gss_ctx_ext_t exts)
+               int cbt_flag, gss_buffer_t token, krb5_gss_ctx_ext_t exts)
 {
     krb5_flags mk_req_flags = 0;
     krb5_error_code code;
@@ -400,6 +400,8 @@ make_ap_req_v1(krb5_context context, krb5_gss_ctx_id_rec *ctx,
 
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
+    if (cbt_flag)
+        mk_req_flags |= AP_OPTS_CBT_FLAG;
 
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
@@ -481,6 +483,7 @@ kg_new_connection(
     krb5_timestamp now;
     gss_buffer_desc token;
     krb5_keyblock *keyblock;
+    int cbt_flag = (req_flags & GSS_C_CHANNEL_BOUND_FLAG) != 0;
 
     k5_mutex_assert_locked(&cred->lock);
     major_status = GSS_S_FAILURE;
@@ -538,6 +541,8 @@ kg_new_connection(
         req_flags |= GSS_C_DELEG_POLICY_FLAG;
     }
 
+    /* Don't include GSS_C_CHANNEL_BOUND_FLAG here; we don't want to put it on
+     * the wire, and we only need to know about it for the first token. */
     ctx->gss_flags = req_flags & (GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
                                   GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                   GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
@@ -595,8 +600,8 @@ kg_new_connection(
         krb5_int32 seq_temp;
         if ((code = make_ap_req_v1(context, ctx,
                                    cred, k_cred, ctx->here->ad_context,
-                                   input_chan_bindings,
-                                   mech_type, &token, exts))) {
+                                   input_chan_bindings, mech_type, cbt_flag,
+                                   &token, exts))) {
             if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
                 (code == KG_EMPTY_CCACHE))
                 major_status = GSS_S_NO_CRED;
