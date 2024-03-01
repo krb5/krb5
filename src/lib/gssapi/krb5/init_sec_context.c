@@ -403,6 +403,8 @@ make_ap_req_v1(krb5_context context, krb5_gss_ctx_id_rec *ctx,
 
     mk_req_flags = AP_OPTS_USE_SUBKEY;
 
+    mk_req_flags |= AP_OPTS_TARGET_PRINCIPAL;
+
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
 

@@ -1653,11 +1653,14 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /*
  * ap_options are 32 bits; each host is responsible to put the 4 bytes
  * representing these bits into net order before transmission
+ *
+ * See also AP_OPTS_WIRE_MASK below
  */
 #define AP_OPTS_RESERVED           0x80000000
 #define AP_OPTS_USE_SESSION_KEY    0x40000000 /**< Use session key */
 #define AP_OPTS_MUTUAL_REQUIRED    0x20000000 /**< Perform a mutual
                                                  authentication exchange */
+#define AP_OPTS_TARGET_PRINCIPAL   0x00000008 /* add KRB5_AUTHDATA_TARGET_PRINCIPAL */
 #define AP_OPTS_CHANNEL_BOUND      0x00000004 /* force KERB_AP_OPTIONS_CBT */
 #define AP_OPTS_ETYPE_NEGOTIATION  0x00000002
 #define AP_OPTS_USE_SUBKEY         0x00000001 /**< Generate a subsession key
@@ -1689,7 +1692,6 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /* #define      AP_OPTS_RESERVED        0x00000040 */
 /* #define      AP_OPTS_RESERVED        0x00000020 */
 /* #define      AP_OPTS_RESERVED        0x00000010 */
-/* #define      AP_OPTS_RESERVED        0x00000008 */
 
 
 #define AP_OPTS_WIRE_MASK               0xfffffff0
@@ -1861,7 +1863,10 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_AUTHDATA_SIGNTICKET        512     /**< @deprecated use PAC */
 #define KRB5_AUTHDATA_FX_ARMOR 71
 #define KRB5_AUTHDATA_AUTH_INDICATOR 97
+#define KRB5_AUTHDATA_KERB_LOCAL 141
+#define KRB5_AUTHDATA_TOKEN_RESTRICTIONS 142
 #define KRB5_AUTHDATA_AP_OPTIONS 143
+#define KRB5_AUTHDATA_TARGET_PRINCIPAL 144
 
 /* password change constants */
 #define KRB5_KPASSWD_SUCCESS            0  /**< Success */
