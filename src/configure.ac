@@ -1143,7 +1143,6 @@ int i = 1;
 fi
 if test "$k5_cv_openssl_version_okay" = yes && (test "$enable_pkinit" = yes || test "$enable_pkinit" = try); then
   K5_GEN_MAKEFILE(plugins/preauth/pkinit)
-  K5_GEN_MAKEFILE(tests/softpkcs11)
   PKINIT=yes
 elif test "$k5_cv_openssl_version_okay" = no && test "$enable_pkinit" = yes; then
   AC_MSG_ERROR([Version of OpenSSL is too old; cannot enable PKINIT.])
