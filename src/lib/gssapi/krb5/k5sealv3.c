@@ -65,7 +65,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
                                 int conf_req_flag, int toktype)
 {
     size_t bufsize = 16;
-    unsigned char *outbuf = 0;
+    unsigned char *outbuf = NULL;
     krb5_error_code err;
     int key_usage;
     unsigned char acceptor_flag;
@@ -75,9 +75,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #endif
     size_t ec;
     unsigned short tok_id;
-    krb5_checksum sum;
+    krb5_checksum sum = { 0 };
     krb5_key key;
     krb5_cksumtype cksumtype;
+    krb5_data plain = empty_data();
+
+    token->value = NULL;
+    token->length = 0;
 
     acceptor_flag = ctx->initiate ? 0 : FLAG_SENDER_IS_ACCEPTOR;
     key_usage = (toktype == KG_TOK_WRAP_MSG
@@ -107,14 +111,15 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #endif
 
     if (toktype == KG_TOK_WRAP_MSG && conf_req_flag) {
-        krb5_data plain;
         krb5_enc_data cipher;
         size_t ec_max;
         size_t encrypt_size;
 
         /* 300: Adds some slop.  */
-        if (SIZE_MAX - 300 < message->length)
-            return ENOMEM;
+        if (SIZE_MAX - 300 < message->length) {
+            err = ENOMEM;
+            goto cleanup;
+        }
         ec_max = SIZE_MAX - message->length - 300;
         if (ec_max > 0xffff)
             ec_max = 0xffff;
@@ -126,20 +131,20 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #endif
         err = alloc_data(&plain, message->length + 16 + ec);
         if (err)
-            return err;
+            goto cleanup;
 
         /* Get size of ciphertext.  */
         encrypt_size = krb5_encrypt_size(plain.length, key->keyblock.enctype);
         if (encrypt_size > SIZE_MAX / 2) {
             err = ENOMEM;
-            goto error;
+            goto cleanup;
         }
         bufsize = 16 + encrypt_size;
         /* Allocate space for header plus encrypted data.  */
         outbuf = gssalloc_malloc(bufsize);
         if (outbuf == NULL) {
-            free(plain.data);
-            return ENOMEM;
+            err = ENOMEM;
+            goto cleanup;
         }
 
         /* TOK_ID */
@@ -164,11 +169,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         cipher.ciphertext.length = bufsize - 16;
         cipher.enctype = key->keyblock.enctype;
         err = krb5_k_encrypt(context, key, key_usage, 0, &plain, &cipher);
-        zap(plain.data, plain.length);
-        free(plain.data);
-        plain.data = 0;
         if (err)
-            goto error;
+            goto cleanup;
 
         /* Now that we know we're returning a valid token....  */
         ctx->seq_send++;
@@ -181,7 +183,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         /* If the rotate fails, don't worry about it.  */
 #endif
     } else if (toktype == KG_TOK_WRAP_MSG && !conf_req_flag) {
-        krb5_data plain;
         size_t cksumsize;
 
         /* Here, message is the application-supplied data; message2 is
@@ -193,21 +194,19 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     wrap_with_checksum:
         err = alloc_data(&plain, message->length + 16);
         if (err)
-            return err;
+            goto cleanup;
 
         err = krb5_c_checksum_length(context, cksumtype, &cksumsize);
         if (err)
-            goto error;
+            goto cleanup;
 
         assert(cksumsize <= 0xffff);
 
         bufsize = 16 + message2->length + cksumsize;
         outbuf = gssalloc_malloc(bufsize);
         if (outbuf == NULL) {
-            free(plain.data);
-            plain.data = 0;
             err = ENOMEM;
-            goto error;
+            goto cleanup;
         }
 
         /* TOK_ID */
@@ -239,23 +238,15 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         if (message2->length)
             memcpy(outbuf + 16, message2->value, message2->length);
 
-        sum.contents = outbuf + 16 + message2->length;
-        sum.length = cksumsize;
-
         err = krb5_k_make_checksum(context, cksumtype, key,
                                    key_usage, &plain, &sum);
-        zap(plain.data, plain.length);
-        free(plain.data);
-        plain.data = 0;
         if (err) {
             zap(outbuf,bufsize);
-            goto error;
+            goto cleanup;
         }
         if (sum.length != cksumsize)
             abort();
         memcpy(outbuf + 16 + message2->length, sum.contents, cksumsize);
-        krb5_free_checksum_contents(context, &sum);
-        sum.contents = 0;
         /* Now that we know we're actually generating the token...  */
         ctx->seq_send++;
 
@@ -285,12 +276,13 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 
     token->value = outbuf;
     token->length = bufsize;
-    return 0;
+    outbuf = NULL;
+    err = 0;
 
-error:
+cleanup:
+    krb5_free_checksum_contents(context, &sum);
+    zapfree(plain.data, plain.length);
     gssalloc_free(outbuf);
-    token->value = NULL;
-    token->length = 0;
     return err;
 }
 
