@@ -521,8 +521,7 @@ profile_release(profile_t profile)
 /*
  * Here begins the profile serialization functions.
  */
-errcode_t profile_ser_size(const char *unused, profile_t profile,
-                           size_t *sizep)
+errcode_t profile_ser_size(profile_t profile, size_t *sizep)
 {
     size_t      required;
     prf_file_t  pfp;
@@ -543,7 +542,7 @@ static void pack_int32(int32_t oval, unsigned char **bufpp, size_t *remainp)
     *remainp -= sizeof(int32_t);
 }
 
-errcode_t profile_ser_externalize(const char *unused, profile_t profile,
+errcode_t profile_ser_externalize(profile_t profile,
                                   unsigned char **bufpp, size_t *remainp)
 {
     errcode_t           retval;
@@ -559,7 +558,7 @@ errcode_t profile_ser_externalize(const char *unused, profile_t profile,
     retval = EINVAL;
     if (profile) {
         retval = ENOMEM;
-        (void) profile_ser_size(unused, profile, &required);
+        (void) profile_ser_size(profile, &required);
         if (required <= remain) {
             fcount = 0;
             for (pfp = profile->first_file; pfp; pfp = pfp->next)
@@ -597,7 +596,7 @@ static int unpack_int32(int32_t *intp, unsigned char **bufpp,
         return 1;
 }
 
-errcode_t profile_ser_internalize(const char *unused, profile_t *profilep,
+errcode_t profile_ser_internalize(profile_t *profilep,
                                   unsigned char **bufpp, size_t *remainp)
 {
     errcode_t               retval;

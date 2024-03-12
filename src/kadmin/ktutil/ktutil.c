@@ -63,7 +63,7 @@ main(int argc, char *argv[])
 }
 
 void
-ktutil_clear_list(int argc, char *argv[])
+ktutil_clear_list(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
 
@@ -78,7 +78,7 @@ ktutil_clear_list(int argc, char *argv[])
 }
 
 void
-ktutil_read_v5(int argc, char *argv[])
+ktutil_read_v5(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
 
@@ -92,14 +92,14 @@ ktutil_read_v5(int argc, char *argv[])
 }
 
 void
-ktutil_read_v4(int argc, char *argv[])
+ktutil_read_v4(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     fprintf(stderr, _("%s: reading srvtabs is no longer supported\n"),
             argv[0]);
 }
 
 void
-ktutil_write_v5(int argc, char *argv[])
+ktutil_write_v5(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
 
@@ -113,14 +113,14 @@ ktutil_write_v5(int argc, char *argv[])
 }
 
 void
-ktutil_write_v4(int argc, char *argv[])
+ktutil_write_v4(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     fprintf(stderr, _("%s: writing srvtabs is no longer supported\n"),
             argv[0]);
 }
 
 void
-ktutil_add_entry(int argc, char *argv[])
+ktutil_add_entry(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
     char *princ = NULL;
@@ -177,7 +177,7 @@ ktutil_add_entry(int argc, char *argv[])
 }
 
 void
-ktutil_delete_entry(int argc, char *argv[])
+ktutil_delete_entry(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
 
@@ -191,7 +191,7 @@ ktutil_delete_entry(int argc, char *argv[])
 }
 
 void
-ktutil_list(int argc, char *argv[])
+ktutil_list(int argc, char *argv[], int sci_idx, void *info_ptr)
 {
     krb5_error_code retval;
     krb5_kt_list lp;

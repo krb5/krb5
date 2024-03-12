@@ -111,7 +111,7 @@ process_keytab(krb5_context my_context, char **keytab_str,
 }
 
 void
-kadmin_keytab_add(int argc, char **argv)
+kadmin_keytab_add(int argc, char **argv, int sci_idx, void *info_ptr)
 {
     krb5_keytab keytab = 0;
     char *keytab_str = NULL, **princs;
@@ -203,7 +203,7 @@ kadmin_keytab_add(int argc, char **argv)
 }
 
 void
-kadmin_keytab_remove(int argc, char **argv)
+kadmin_keytab_remove(int argc, char **argv, int sci_idx, void *info_ptr)
 {
     krb5_keytab keytab = 0;
     char *keytab_str = NULL;

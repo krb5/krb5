@@ -249,13 +249,13 @@ void profile_unlock_global (void);
 
 /* prof_init.c -- included from profile.h */
 errcode_t profile_ser_size
-        (const char *, profile_t, size_t *);
+	(profile_t, size_t *);
 
 errcode_t profile_ser_externalize
-        (const char *, profile_t, unsigned char **, size_t *);
+	(profile_t, unsigned char **, size_t *);
 
 errcode_t profile_ser_internalize
-        (const char *, profile_t *, unsigned char **, size_t *);
+	(profile_t *, unsigned char **, size_t *);
 
 /* prof_get.c */
 
