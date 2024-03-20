@@ -1281,6 +1281,8 @@ kadm5_chpass_principal_3(void *server_handle,
             goto done;
         ret = create_history_entry(handle->context, &hist_keyblocks[0],
                                    kdb->n_key_data, kdb->key_data, &hist);
+        if (ret == KRB5_BAD_ENCTYPE)
+            ret = KADM5_BAD_HIST_KEY;
         if (ret)
             goto done;
     }
