@@ -268,6 +268,15 @@ compat_get0_EC(const EVP_PKEY *pkey)
     return pkey->pkey.ec;
 }
 
+#define ECDSA_SIG_set0 compat_ECDSA_SIG_set0
+static int
+compat_ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s)
+{
+    sig->r = r;
+    sig->s = s;
+    return 1;
+}
+
 /* Return true if the cert c includes a key usage which doesn't include u.
  * Define using direct member access for pre-1.1. */
 #define ku_reject(c, u)                                                 \
@@ -285,6 +294,7 @@ compat_get0_EC(const EVP_PKEY *pkey)
 #define EVP_PKEY_parameters_eq EVP_PKEY_cmp_parameters
 #define EVP_PKEY_get_size EVP_PKEY_size
 #define EVP_PKEY_get_bits EVP_PKEY_bits
+#define EVP_PKEY_get_base_id EVP_PKEY_base_id
 
 /*
  * Convert *dh to an EVP_PKEY object, taking ownership of *dh and setting it to
@@ -496,6 +506,17 @@ encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
     ASN1_TYPE parameter;
     ASN1_STRING param_str, pubkey_str;
 
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
+        /* Only DH keys require special encoding. */
+        len = i2d_PUBKEY(pkey, NULL);
+        ret = alloc_data(spki_out, len);
+        if (ret)
+            goto cleanup;
+        outptr = (uint8_t *)spki_out->data;
+        (void)i2d_PUBKEY(pkey, &outptr);
+        return 0;
+    }
+
     dh = EVP_PKEY_get0_DH(pkey);
     if (dh == NULL)
         goto cleanup;
@@ -562,6 +583,13 @@ decode_spki(const krb5_data *spki)
     pubkey = d2i_X509_PUBKEY(NULL, &inptr, spki->length);
     if (pubkey == NULL)
         goto cleanup;
+
+    if (OBJ_cmp(pubkey->algor->algorithm, OBJ_nid2obj(NID_dhKeyAgreement))) {
+        /* This is not a DH key, so we don't need special decoding. */
+        X509_PUBKEY_free(pubkey);
+        inptr = (uint8_t *)spki->data;
+        return d2i_PUBKEY(NULL, &inptr, spki->length);
+    }
 
     if (pubkey->algor->parameter->type != V_ASN1_SEQUENCE)
         goto cleanup;
@@ -802,7 +830,8 @@ generate_dh_pkey(EVP_PKEY *params)
         goto cleanup;
     if (EVP_PKEY_keygen(ctx, &pkey) <= 0)
         goto cleanup;
-    if (!copy_q_openssl10(params, pkey)) {
+    if (EVP_PKEY_get_base_id(pkey) == EVP_PKEY_DH &&
+        !copy_q_openssl10(params, pkey)) {
         EVP_PKEY_free(pkey);
         pkey = NULL;
     }
