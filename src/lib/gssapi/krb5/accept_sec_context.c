@@ -530,6 +530,7 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
         }
 
         token_cb = k5_input_get_bytes(&in, cb_len);
+        token_cb_present = (k5_bcmp(token_cb, null_cb, cb_len) != 0);
         if (acceptor_cb != GSS_C_NO_CHANNEL_BINDINGS) {
             code = kg_checksum_channel_bindings(context, acceptor_cb,
                                                 &cb_cksum);
@@ -538,12 +539,17 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
                 goto fail;
             }
             assert(cb_cksum.length == cb_len);
-            token_cb_present = (k5_bcmp(token_cb, null_cb, cb_len) != 0);
             cb_match = (k5_bcmp(token_cb, cb_cksum.contents, cb_len) == 0);
             if (token_cb_present && !cb_match) {
                 status = GSS_S_BAD_BINDINGS;
                 goto fail;
             }
+        } else if (!token_cb_present) {
+            /*
+             * If the caller passed GSS_C_NO_CHANNEL_BINDINGS
+             * and the client gave 16 zeros we have a match.
+             */
+            cb_match = TRUE;
         }
 
         /* Read the token flags and accept some of them as context flags. */
@@ -612,7 +618,7 @@ process_checksum(OM_uint32 *minor_status, krb5_context context,
         status = GSS_S_FAILURE;
         goto fail;
     }
-    if (client_cbt && acceptor_cb != GSS_C_NO_CHANNEL_BINDINGS && !cb_match) {
+    if (client_cbt && !cb_match) {
         status = GSS_S_BAD_BINDINGS;
         goto fail;
     }

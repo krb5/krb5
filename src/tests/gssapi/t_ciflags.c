@@ -43,6 +43,12 @@ flagtest(gss_OID mech, gss_cred_id_t icred, gss_name_t tname,
     gss_ctx_id_t ictx, actx;
     OM_uint32 major, minor, flags;
 
+    /*
+     * is there if initiator and acceptor
+     * use GSS_C_NO_CHANNEL_BINDINGS
+     */
+    expflags |= GSS_C_CHANNEL_BOUND_FLAG;
+
     establish_contexts(mech, icred, GSS_C_NO_CREDENTIAL, tname, inflags, &ictx,
                        &actx, NULL, NULL, NULL);
 
