@@ -159,6 +159,10 @@ profile_make_prf_data(const char *filename)
     d->root = NULL;
     d->next = NULL;
     d->fslen = flen;
+    if (k5_mutex_init(&d->lock) != 0) {
+        free(d);
+        return NULL;
+    }
     return d;
 }
 
@@ -239,13 +243,6 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
     free(expanded_filename);
     prf->data = data;
 
-    retval = k5_mutex_init(&data->lock);
-    if (retval) {
-        free(data);
-        free(prf);
-        return retval;
-    }
-
     retval = profile_update_file(prf, ret_modspec);
     if (retval) {
         profile_close_file(prf);
@@ -260,6 +257,37 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 
     *ret_prof = prf;
     return 0;
+}
+
+prf_file_t profile_open_memory(void)
+{
+    struct profile_node *root = NULL;
+    prf_file_t file = NULL;
+    prf_data_t data;
+
+    file = calloc(1, sizeof(*file));
+    if (file == NULL)
+        goto errout;
+    file->magic = PROF_MAGIC_FILE;
+
+    if (profile_create_node("(root)", NULL, &root) != 0)
+        goto errout;
+
+    data = profile_make_prf_data("");
+    if (data == NULL)
+        goto errout;
+
+    data->root = root;
+    data->flags = PROFILE_FILE_NO_RELOAD | PROFILE_FILE_DIRTY;
+    file->data = data;
+    file->next = NULL;
+    return file;
+
+errout:
+    free(file);
+    if (root != NULL)
+        profile_free_node(root);
+    return NULL;
 }
 
 errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
@@ -467,6 +495,10 @@ errcode_t profile_flush_file_data(prf_data_t data)
 
     if (!data || data->magic != PROF_MAGIC_FILE_DATA)
         return PROF_MAGIC_FILE_DATA;
+
+    /* Do nothing if this data object has no backing file. */
+    if (*data->filespec == '\0')
+        return 0;
 
     k5_mutex_lock(&data->lock);
 

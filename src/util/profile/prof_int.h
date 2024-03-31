@@ -214,6 +214,8 @@ errcode_t profile_open_file
 	(const_profile_filespec_t file, prf_file_t *ret_prof,
 	 char **ret_modspec);
 
+prf_file_t profile_open_memory(void);
+
 #define profile_update_file(P, M) profile_update_file_data((P)->data, M)
 errcode_t profile_update_file_data
 	(prf_data_t profile, char **ret_modspec);
