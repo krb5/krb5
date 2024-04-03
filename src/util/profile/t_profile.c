@@ -378,7 +378,7 @@ test_merge_subsections(void)
 static void
 test_empty(void)
 {
-    profile_t p;
+    profile_t p, p2;
     const char *n1[] = { "section", NULL };
     const char *n2[] = { "section", "var", NULL };
     char **values;
@@ -390,6 +390,13 @@ test_empty(void)
     check(profile_get_values(p, n2, &values));
     assert(strcmp(values[0], "value") == 0 && values[1] == NULL);
     profile_free_list(values);
+
+    check(profile_copy(p, &p2));
+    check(profile_get_values(p2, n2, &values));
+    assert(strcmp(values[0], "value") == 0 && values[1] == NULL);
+    profile_free_list(values);
+    profile_release(p2);
+
     profile_flush_to_file(p, "test3.ini");
     profile_release(p);
 

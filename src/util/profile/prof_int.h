@@ -139,6 +139,9 @@ errcode_t profile_create_node
 	(const char *name, const char *value,
 		   struct profile_node **ret_node);
 
+struct profile_node *profile_copy_node
+	(struct profile_node *oldnode);
+
 errcode_t profile_verify_node
 	(struct profile_node *node);
 
@@ -208,8 +211,6 @@ errcode_t profile_rename_node
 
 /* prof_file.c */
 
-errcode_t KRB5_CALLCONV profile_copy (profile_t, profile_t *);
-
 errcode_t profile_open_file
 	(const_profile_filespec_t file, prf_file_t *ret_prof,
 	 char **ret_modspec);
@@ -233,6 +234,9 @@ errcode_t profile_flush_file_data_to_file
 
 errcode_t profile_flush_file_data_to_buffer
 	(prf_data_t data, char **bufp);
+
+prf_file_t profile_copy_file
+	(prf_file_t oldfile);
 
 void profile_free_file
 	(prf_file_t profile);

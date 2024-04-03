@@ -112,6 +112,51 @@ errcode_t profile_create_node(const char *name, const char *value,
     return 0;
 }
 
+/* Return a copy of oldnode.  Recursively copy oldnode's children, but leave
+ * the parent, next, and prev pointers as null. */
+struct profile_node *profile_copy_node(struct profile_node *oldnode)
+{
+    struct profile_node *node = NULL, *p, *q, **nextp, *last;
+
+    if (oldnode->magic != PROF_MAGIC_NODE)
+        return NULL;
+
+    node = calloc(1, sizeof(*node));
+    node->magic = PROF_MAGIC_NODE;
+    node->name = strdup(oldnode->name);
+    if (node->name == NULL)
+        goto errout;
+    if (oldnode->value != NULL) {
+        node->value = strdup(oldnode->value);
+        if (oldnode->value == NULL)
+            goto errout;
+    }
+    node->group_level = oldnode->group_level;
+    node->final = oldnode->final;
+    node->deleted = oldnode->deleted;
+
+    nextp = &node->first_child;
+    last = NULL;
+    for (p = oldnode->first_child; p != NULL; p = p->next) {
+        q = profile_copy_node(p);
+        if (q == NULL)
+            goto errout;
+
+        /* Link in the new child and prepare for the next. */
+        q->parent = node;
+        q->prev = last;
+        last = q;
+        *nextp = q;
+        nextp = &q->next;
+    }
+
+    return node;
+
+errout:
+    profile_free_node(node);
+    return NULL;
+}
+
 /*
  * This function verifies that all of the representation invariants of
  * the profile are true.  If not, we have a programming bug somewhere,

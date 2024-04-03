@@ -293,26 +293,32 @@ copy_vtable_profile(profile_t profile, profile_t *ret_new_profile)
 errcode_t KRB5_CALLCONV
 profile_copy(profile_t old_profile, profile_t *new_profile)
 {
-    size_t size, i;
-    const_profile_filespec_t *files;
-    prf_file_t file;
-    errcode_t err;
+    profile_t profile;
+    prf_file_t p, q, *nextp;
+
+    *new_profile = NULL;
 
     if (old_profile->vt)
         return copy_vtable_profile(old_profile, new_profile);
 
-    /* The fields we care about are read-only after creation, so
-       no locking is needed.  */
-    COUNT_LINKED_LIST (size, prf_file_t, old_profile->first_file, next);
-    files = malloc ((size+1) * sizeof(*files));
-    if (files == NULL)
+    profile = calloc(1, sizeof(*profile));
+    if (profile == NULL)
         return ENOMEM;
-    for (i = 0, file = old_profile->first_file; i < size; i++, file = file->next)
-        files[i] = file->data->filespec;
-    files[size] = NULL;
-    err = profile_init (files, new_profile);
-    free (files);
-    return err;
+    profile->magic = PROF_MAGIC_PROFILE;
+
+    nextp = &profile->first_file;
+    for (p = old_profile->first_file; p != NULL; p = p->next) {
+        q = profile_copy_file(p);
+        if (q == NULL) {
+            profile_abandon(profile);
+            return ENOMEM;
+        }
+        *nextp = q;
+        nextp = &q->next;
+    }
+
+    *new_profile = profile;
+    return 0;
 }
 
 errcode_t KRB5_CALLCONV

@@ -554,6 +554,44 @@ void profile_unlock_global()
     k5_mutex_unlock(&g_shared_trees_mutex);
 }
 
+prf_file_t profile_copy_file(prf_file_t oldfile)
+{
+    prf_file_t file;
+
+    file = calloc(1, sizeof(*file));
+    if (file == NULL)
+        return NULL;
+    file->magic = PROF_MAGIC_FILE;
+
+    /* Shared data objects can just have their reference counts incremented. */
+    if (oldfile->data->flags & PROFILE_FILE_SHARED) {
+        profile_lock_global();
+        oldfile->data->refcount++;
+        profile_unlock_global();
+        file->data = oldfile->data;
+        return file;
+    }
+
+    /* Otherwise we need to copy the data object. */
+    file->data = profile_make_prf_data(oldfile->data->filespec);
+    if (file->data == NULL) {
+        free(file);
+        return NULL;
+    }
+    k5_mutex_lock(&oldfile->data->lock);
+    file->data->flags = oldfile->data->flags;
+    file->data->last_stat = oldfile->data->last_stat;
+    file->data->frac_ts = oldfile->data->frac_ts;
+    file->data->root = profile_copy_node(oldfile->data->root);
+    k5_mutex_unlock(&oldfile->data->lock);
+    if (file->data->root == NULL) {
+        profile_free_file(file);
+        return NULL;
+    }
+
+    return file;
+}
+
 void profile_free_file(prf_file_t prf)
 {
     profile_dereference_data(prf->data);
