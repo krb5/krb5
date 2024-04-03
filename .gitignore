@@ -358,6 +358,7 @@ local.properties
 /src/lib/krb5/krb/t_sname_match
 /src/lib/krb5/krb/t_valid_times
 
+/src/lib/krb5/os/t_ctxprf
 /src/lib/krb5/os/t_expand_path
 /src/lib/krb5/os/t_locate_kdc
 /src/lib/krb5/os/t_std_conf
