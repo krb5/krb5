@@ -328,6 +328,9 @@ can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
     if (cred->password != NULL)
         return TRUE;
 
+    if (cred->client_interact.type != GSS_KRB5_CLIENT_INTERACT_NOTHING)
+        return TRUE;
+
     if (cred->client_keytab == NULL)
         return FALSE;
 
@@ -625,6 +628,27 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
         code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
                                             cred->password, NULL, NULL, 0,
                                             NULL, opt);
+    } else if (cred->client_interact.type != GSS_KRB5_CLIENT_INTERACT_NOTHING) {
+        switch (cred->client_interact.type) {
+        case GSS_KRB5_CLIENT_INTERACT_NOTHING:
+            /* not reachable */
+        break;
+        case GSS_KRB5_CLIENT_INTERACT_PROMPTER:
+            code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
+                                                NULL,
+                                                cred->client_interact.cb.prompter,
+                                                cred->client_interact.data, 0,
+                                                NULL, opt);
+        break;
+        case GSS_KRB5_CLIENT_INTERACT_RESPONDER:
+            code = krb5_get_init_creds_opt_set_responder(
+                       context, opt, cred->client_interact.cb.responder,
+                       cred->client_interact.data);
+            code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
+                                                NULL, NULL, NULL, 0,
+                                                NULL, opt);
+        break;
+        }
     } else if (cred->client_keytab != NULL) {
         code = krb5_get_init_creds_keytab(context, &creds, cred->name->princ,
                                           cred->client_keytab, 0, NULL, opt);
@@ -717,6 +741,13 @@ acquire_init_cred(krb5_context context, OM_uint32 *minor_status,
         code = krb5int_cc_default(context, &cred->ccache);
         if (code)
             goto error;
+    } else if (cred->client_interact.type != GSS_KRB5_CLIENT_INTERACT_NOTHING) {
+        /* We will fetch the credential into a private memory ccache. */
+        assert(req_ccache == NULL);
+        code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
+        if (code)
+            goto error;
+        cred->destroy_ccache = 1;
     }
 
     if (client_keytab != NULL) {
@@ -781,6 +812,7 @@ error:
 static OM_uint32
 acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                      gss_name_t desired_name, gss_buffer_t password,
+                     krb5_gss_client_interact *client_interact,
                      OM_uint32 time_req, gss_cred_usage_t cred_usage,
                      krb5_ccache ccache, krb5_keytab client_keytab,
                      krb5_keytab keytab, const char *rcname,
@@ -814,6 +846,13 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
     cred->destroy_ccache = 0;
     cred->suppress_ci_flags = 0;
     cred->ccache = NULL;
+    if (client_interact != NULL) {
+        cred->client_interact = *client_interact;
+    } else {
+        cred->client_interact.type = GSS_KRB5_CLIENT_INTERACT_NOTHING;
+        cred->client_interact.cb.prompter = NULL;
+        cred->client_interact.data = NULL;
+    }
 
     code = k5_mutex_init(&cred->lock);
     if (code)
@@ -922,9 +961,9 @@ error_out:
 
 static OM_uint32
 acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
-             gss_buffer_t password, OM_uint32 time_req,
-             gss_cred_usage_t cred_usage, krb5_ccache ccache,
-             krb5_keytab keytab, krb5_boolean iakerb,
+             gss_buffer_t password, krb5_gss_client_interact *client_interact,
+             OM_uint32 time_req, gss_cred_usage_t cred_usage,
+             krb5_ccache ccache, krb5_keytab keytab, krb5_boolean iakerb,
              gss_cred_id_t *output_cred_handle, OM_uint32 *time_rec)
 {
     krb5_context context = NULL;
@@ -946,9 +985,9 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
     }
 
     ret = acquire_cred_context(context, minor_status, desired_name, password,
-                               time_req, cred_usage, ccache, NULL, keytab,
-                               NULL, NULL, iakerb, output_cred_handle,
-                               time_rec);
+                               client_interact, time_req, cred_usage, ccache,
+                               NULL, keytab, NULL, NULL, iakerb,
+                               output_cred_handle, time_rec);
 
 out:
     krb5_free_context(context);
@@ -1099,7 +1138,7 @@ krb5_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
                       gss_cred_id_t *output_cred_handle,
                       gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
-    return acquire_cred(minor_status, desired_name, NULL, time_req, cred_usage,
+    return acquire_cred(minor_status, desired_name, NULL, NULL, time_req, cred_usage,
                         NULL, NULL, FALSE, output_cred_handle, time_rec);
 }
 
@@ -1110,7 +1149,7 @@ iakerb_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
                         gss_cred_id_t *output_cred_handle,
                         gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
-    return acquire_cred(minor_status, desired_name, NULL, time_req, cred_usage,
+    return acquire_cred(minor_status, desired_name, NULL, NULL, time_req, cred_usage,
                         NULL, NULL, TRUE, output_cred_handle, time_rec);
 }
 
@@ -1125,7 +1164,7 @@ krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                     gss_OID_set *actual_mechs,
                                     OM_uint32 *time_rec)
 {
-    return acquire_cred(minor_status, desired_name, password, time_req,
+    return acquire_cred(minor_status, desired_name, password, NULL, time_req,
                         cred_usage, NULL, NULL, FALSE, output_cred_handle,
                         time_rec);
 }
@@ -1141,7 +1180,7 @@ iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                       gss_OID_set *actual_mechs,
                                       OM_uint32 *time_rec)
 {
-    return acquire_cred(minor_status, desired_name, password, time_req,
+    return acquire_cred(minor_status, desired_name, password, NULL, time_req,
                         cred_usage, NULL, NULL, TRUE, output_cred_handle,
                         time_rec);
 }
@@ -1186,7 +1225,7 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
         desired_name = (gss_name_t)&name;
     }
 
-    code = acquire_cred(minor_status, desired_name, NULL, GSS_C_INDEFINITE,
+    code = acquire_cred(minor_status, desired_name, NULL, NULL, GSS_C_INDEFINITE,
                         usage, req->id, req->keytab, FALSE, cred_handle,
                         &time_rec);
     if (req->keytab_principal != NULL)
@@ -1213,6 +1252,10 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     const struct verify_params *verify = NULL;
     gss_buffer_desc pwbuf;
     gss_buffer_t password = NULL;
+    krb5_gss_client_interact client_interact = {
+        .type = GSS_KRB5_CLIENT_INTERACT_NOTHING,
+        .cb.prompter = NULL, .data = NULL };
+    krb5_gss_client_interact *interact = NULL;
     OM_uint32 ret;
 
     code = gss_krb5int_initialize_library();
@@ -1294,13 +1337,56 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
         password = &pwbuf;
     }
 
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_RESPONDER_URN,
+                                   (const char**) &client_interact.cb.responder);
+    if (GSS_ERROR(ret))
+        goto out;
+
+    if (client_interact.cb.responder != NULL) {
+        if (password != NULL || client_keytab != NULL) {
+            /* Only valid if acquiring cred without explicitly passed password
+             * or keytab. */
+            *minor_status = G_BAD_USAGE;
+            ret = GSS_S_FAILURE;
+            goto out;
+        }
+        ret = kg_value_from_cred_store(cred_store, KRB5_CS_PROMPTER_DATA_URN,
+                                       (const char**) &client_interact.data);
+        if (GSS_ERROR(ret))
+            goto out;
+        client_interact.type = GSS_KRB5_CLIENT_INTERACT_RESPONDER;
+        interact = &client_interact;
+    } else {
+
+        ret = kg_value_from_cred_store(cred_store, KRB5_CS_PROMPTER_URN,
+                                    (const char**) &client_interact.cb.prompter);
+        if (GSS_ERROR(ret))
+            goto out;
+
+        if (client_interact.cb.prompter != NULL) {
+            if (password != NULL || client_keytab != NULL) {
+                /* Only valid if acquiring cred without explicitly passed password
+                * or keytab. */
+                *minor_status = G_BAD_USAGE;
+                ret = GSS_S_FAILURE;
+                goto out;
+            }
+            ret = kg_value_from_cred_store(cred_store, KRB5_CS_PROMPTER_DATA_URN,
+                                        (const char**) &client_interact.data);
+            if (GSS_ERROR(ret))
+                goto out;
+            client_interact.type = GSS_KRB5_CLIENT_INTERACT_PROMPTER;
+            interact = &client_interact;
+        }
+    }
+
     ret = kg_value_from_cred_store(cred_store, KRB5_CS_VERIFY_URN, &value);
     if (GSS_ERROR(ret))
         goto out;
     if (value != NULL) {
-        if (iakerb || password == NULL) {
-            /* Only valid if acquiring cred with password, and not supported
-             * with IAKERB. */
+        if (iakerb || (password == NULL && interact == NULL)) {
+	    /* Only valid if acquiring cred with password or prompt, and not
+             * supported with IAKERB. */
             *minor_status = G_BAD_USAGE;
             ret = GSS_S_FAILURE;
             goto out;
@@ -1317,7 +1403,9 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
         vparams.keytab = keytab;
         verify = &vparams;
     }
-    ret = acquire_cred_context(context, minor_status, desired_name, password,
+
+    ret = acquire_cred_context(context, minor_status, desired_name,
+                               password, interact,
                                time_req, cred_usage, ccache, client_keytab,
                                keytab, rcname, verify, iakerb,
                                output_cred_handle, time_rec);
