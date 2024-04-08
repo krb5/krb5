@@ -211,6 +211,7 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
     krb5_gss_client_interact client_interact;
+    const char* fast_ccache;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {
@@ -1323,6 +1324,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_PROMPTER_DATA_URN "prompter_data"
 #define KRB5_CS_RESPONDER_URN "responder"
 #define KRB5_CS_RESPONDER_DATA_URN "responder_data"
+#define KRB5_CS_ARMOR_CCACHE_URN "armor_ccache"
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,

@@ -624,6 +624,14 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
     code = krb5_get_init_creds_opt_set_out_ccache(context, opt, cred->ccache);
     if (code)
         goto cleanup;
+
+    if (cred->fast_ccache != NULL) {
+        code = krb5_get_init_creds_opt_set_fast_ccache_name(context, opt,
+                                                            cred->fast_ccache);
+        if (code)
+            goto cleanup;
+    }
+
     if (cred->password != NULL) {
         code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
                                             cred->password, NULL, NULL, 0,
@@ -814,7 +822,8 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                      gss_name_t desired_name, gss_buffer_t password,
                      krb5_gss_client_interact *client_interact,
                      OM_uint32 time_req, gss_cred_usage_t cred_usage,
-                     krb5_ccache ccache, krb5_keytab client_keytab,
+                     krb5_ccache ccache, const char *fast_ccache,
+                     krb5_keytab client_keytab,
                      krb5_keytab keytab, const char *rcname,
                      const struct verify_params *verify,
                      krb5_boolean iakerb, gss_cred_id_t *output_cred_handle,
@@ -853,6 +862,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
         cred->client_interact.cb.prompter = NULL;
         cred->client_interact.data = NULL;
     }
+    cred->fast_ccache = fast_ccache;
 
     code = k5_mutex_init(&cred->lock);
     if (code)
@@ -963,7 +973,8 @@ static OM_uint32
 acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
              gss_buffer_t password, krb5_gss_client_interact *client_interact,
              OM_uint32 time_req, gss_cred_usage_t cred_usage,
-             krb5_ccache ccache, krb5_keytab keytab, krb5_boolean iakerb,
+             krb5_ccache ccache, const char *fast_ccache,
+             krb5_keytab keytab, krb5_boolean iakerb,
              gss_cred_id_t *output_cred_handle, OM_uint32 *time_rec)
 {
     krb5_context context = NULL;
@@ -986,7 +997,7 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
 
     ret = acquire_cred_context(context, minor_status, desired_name, password,
                                client_interact, time_req, cred_usage, ccache,
-                               NULL, keytab, NULL, NULL, iakerb,
+                               fast_ccache, NULL, keytab, NULL, NULL, iakerb,
                                output_cred_handle, time_rec);
 
 out:
@@ -1139,7 +1150,7 @@ krb5_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
                       gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, NULL, NULL, time_req, cred_usage,
-                        NULL, NULL, FALSE, output_cred_handle, time_rec);
+                        NULL, NULL, NULL, FALSE, output_cred_handle, time_rec);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -1150,7 +1161,7 @@ iakerb_gss_acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
                         gss_OID_set *actual_mechs, OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, NULL, NULL, time_req, cred_usage,
-                        NULL, NULL, TRUE, output_cred_handle, time_rec);
+                        NULL, NULL, NULL, TRUE, output_cred_handle, time_rec);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -1165,7 +1176,7 @@ krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                     OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, password, NULL, time_req,
-                        cred_usage, NULL, NULL, FALSE, output_cred_handle,
+                        cred_usage, NULL, NULL, NULL, FALSE, output_cred_handle,
                         time_rec);
 }
 
@@ -1181,7 +1192,7 @@ iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                       OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, password, NULL, time_req,
-                        cred_usage, NULL, NULL, TRUE, output_cred_handle,
+                        cred_usage, NULL, NULL, NULL, TRUE, output_cred_handle,
                         time_rec);
 }
 
@@ -1226,7 +1237,7 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
     }
 
     code = acquire_cred(minor_status, desired_name, NULL, NULL, GSS_C_INDEFINITE,
-                        usage, req->id, req->keytab, FALSE, cred_handle,
+                        usage, req->id, NULL, req->keytab, FALSE, cred_handle,
                         &time_rec);
     if (req->keytab_principal != NULL)
         k5_mutex_destroy(&name.lock);
@@ -1247,7 +1258,7 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     krb5_keytab keytab = NULL;
     krb5_ccache ccache = NULL;
     krb5_principal verify_princ = NULL;
-    const char *rcname, *value;
+    const char *rcname, *value, *armor_ccache;
     struct verify_params vparams = { NULL };
     const struct verify_params *verify = NULL;
     gss_buffer_desc pwbuf;
@@ -1284,6 +1295,10 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
             goto out;
         }
     }
+
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_ARMOR_CCACHE_URN, &armor_ccache);
+    if (GSS_ERROR(ret))
+        goto out;
 
     ret = kg_value_from_cred_store(cred_store, KRB5_CS_CLI_KEYTAB_URN, &value);
     if (GSS_ERROR(ret))
@@ -1406,8 +1421,8 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
 
     ret = acquire_cred_context(context, minor_status, desired_name,
                                password, interact,
-                               time_req, cred_usage, ccache, client_keytab,
-                               keytab, rcname, verify, iakerb,
+                               time_req, cred_usage, ccache, armor_ccache,
+                               client_keytab, keytab, rcname, verify, iakerb,
                                output_cred_handle, time_rec);
 
 out:
