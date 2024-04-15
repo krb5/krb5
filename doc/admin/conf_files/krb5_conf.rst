@@ -35,12 +35,6 @@ or::
         baz = quux
     }
 
-Placing a '\*' after the closing bracket of a section name indicates
-that the section is *final*, meaning that if the same section appears
-within a later file specified in **KRB5_CONFIG**, it will be ignored.
-A subsection can be marked as final by placing a '\*' after either the
-tag name or the closing brace.
-
 The krb5.conf file can include other files using either of the
 following directives at the beginning of a line::
 
@@ -57,6 +51,16 @@ independent of their parents, so each included file must begin with a
 section header.  Starting in release 1.17, files are read in
 alphanumeric order; in previous releases, they may be read in any
 order.
+
+Placing a '\*' after the closing bracket of a section name indicates
+that the section is *final*, meaning that if the same section appears
+again later, it will be ignored.  A subsection can be marked as final
+by placing a '\*' after either the tag name or the closing brace.  A
+relation can be marked as final by placing a '\*' after the tag name.
+Prior to release 1.22, only sections and subsections can be marked as
+final, and the flag only causes values to be ignored if they appear in
+later files specified in **KRB5_CONFIG**, not if they appear later
+within the same file or an included file.
 
 The krb5.conf file can specify that configuration should be obtained
 from a loadable module, rather than the file itself, using the

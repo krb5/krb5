@@ -20,8 +20,9 @@
 #define STATE_GET_OBRACE        3
 
 struct parse_state {
-    int     state;
-    int     group_level;
+    int state;
+    int group_level;
+    int discard;                /* group_level of a final-flagged section */
     struct profile_node *root_section;
     struct profile_node *current_section;
 };
@@ -78,7 +79,6 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
     errcode_t retval;
     struct profile_node     *node;
     int do_subsection = 0;
-    void *iter = 0;
 
     if (*line == 0)
         return 0;
@@ -90,24 +90,22 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
     if (ch == 0)
         return 0;
     if (ch == '[') {
-        if (state->group_level > 0)
+        if (state->group_level > 1)
             return PROF_SECTION_NOTOP;
         cp++;
         p = strchr(cp, ']');
         if (p == NULL)
             return PROF_SECTION_SYNTAX;
         *p = '\0';
-        retval = profile_find_node_subsection(state->root_section,
-                                              cp, &iter, 0,
-                                              &state->current_section);
-        if (retval == PROF_NO_SECTION) {
-            retval = profile_add_node(state->root_section,
-                                      cp, 0,
-                                      &state->current_section);
-            if (retval)
-                return retval;
-        } else if (retval)
+        retval = profile_add_node(state->root_section, cp, NULL, 0,
+                                  &state->current_section);
+        if (retval)
             return retval;
+        state->group_level = 1;
+        /* If we previously saw this section name with the final flag,
+         * discard values until the next top-level section. */
+        state->discard = profile_is_node_final(state->current_section) ?
+            1 : 0;
 
         /*
          * Finish off the rest of the line.
@@ -135,6 +133,9 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
         if (retval)
             return retval;
         state->group_level--;
+        /* Check if we are done discarding values from a subsection. */
+        if (state->group_level < state->discard)
+            state->discard = 0;
         return 0;
     }
     /*
@@ -180,21 +181,29 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
         p = strchr(tag, '*');
         if (p)
             *p = '\0';
-        retval = profile_add_node(state->current_section,
-                                  tag, 0, &state->current_section);
-        if (retval)
-            return retval;
-        if (p)
-            profile_make_node_final(state->current_section);
         state->group_level++;
+        if (!state->discard) {
+            retval = profile_add_node(state->current_section, tag, NULL, 0,
+                                      &state->current_section);
+            if (retval)
+                return retval;
+            /* If we previously saw this subsection with the final flag,
+             * discard values until the subsection is done. */
+            if (profile_is_node_final(state->current_section))
+                state->discard = state->group_level;
+            if (p)
+                profile_make_node_final(state->current_section);
+        }
         return 0;
     }
     p = strchr(tag, '*');
     if (p)
         *p = '\0';
-    profile_add_node(state->current_section, tag, value, &node);
-    if (p)
-        profile_make_node_final(node);
+    if (!state->discard) {
+        profile_add_node(state->current_section, tag, value, 1, &node);
+        if (p && node)
+            profile_make_node_final(node);
+    }
     return 0;
 }
 
@@ -209,7 +218,7 @@ static errcode_t parse_include_file(const char *filename,
     /* Create a new state so that fragments are syntactically independent but
      * share a root section. */
     state.state = STATE_INIT_COMMENT;
-    state.group_level = 0;
+    state.group_level = state.discard = 0;
     state.root_section = root_section;
     state.current_section = NULL;
 
@@ -407,7 +416,7 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root,
 
     /* Initialize parsing state with a new root node. */
     state.state = STATE_INIT_COMMENT;
-    state.group_level = 0;
+    state.group_level = state.discard = 0;
     state.current_section = NULL;
     retval = profile_create_node("(root)", 0, &state.root_section);
     if (retval)
@@ -513,7 +522,7 @@ static void output_quoted_string(char *str, void (*cb)(const char *,void *),
 static void dump_profile(struct profile_node *root, int level,
                          void (*cb)(const char *, void *), void *data)
 {
-    int i;
+    int i, final;
     struct profile_node *p;
     void *iter;
     long retval;
@@ -522,22 +531,19 @@ static void dump_profile(struct profile_node *root, int level,
     iter = 0;
     do {
         retval = profile_find_node_relation(root, 0, &iter,
-                                            &name, &value);
+                                            &name, &value, &final);
         if (retval)
             break;
         for (i=0; i < level; i++)
             cb("\t", data);
-        if (need_double_quotes(value)) {
-            cb(name, data);
-            cb(" = ", data);
+        cb(name, data);
+        cb(final ? "*" : "", data);
+        cb(" = ", data);
+        if (need_double_quotes(value))
             output_quoted_string(value, cb, data);
-            cb(EOL, data);
-        } else {
-            cb(name, data);
-            cb(" = ", data);
+        else
             cb(value, data);
-            cb(EOL, data);
-        }
+        cb(EOL, data);
     } while (iter != 0);
 
     iter = 0;

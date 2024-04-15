@@ -144,7 +144,7 @@ errcode_t profile_verify_node
 
 errcode_t profile_add_node
 	(struct profile_node *section,
-		    const char *name, const char *value,
+		    const char *name, const char *value, int check_final,
 		    struct profile_node **ret_node);
 
 errcode_t profile_make_node_final
@@ -168,7 +168,7 @@ errcode_t profile_find_node
 errcode_t profile_find_node_relation
 	(struct profile_node *section,
 		    const char *name, void **state,
-		    char **ret_name, char **value);
+		    char **ret_name, char **value, int *ret_final);
 
 errcode_t profile_find_node_subsection
 	(struct profile_node *section,

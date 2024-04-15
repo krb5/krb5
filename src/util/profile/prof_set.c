@@ -270,7 +270,7 @@ profile_add_relation(profile_t profile, const char **names,
         retval = profile_find_node(section, *cpp, 0, 1,
                                    &state, &section);
         if (retval == PROF_NO_SECTION)
-            retval = profile_add_node(section, *cpp, 0, &section);
+            retval = profile_add_node(section, *cpp, NULL, 0, &section);
         if (retval) {
             k5_mutex_unlock(&profile->first_file->data->lock);
             return retval;
@@ -289,7 +289,7 @@ profile_add_relation(profile_t profile, const char **names,
         }
     }
 
-    retval = profile_add_node(section, *cpp, new_value, 0);
+    retval = profile_add_node(section, *cpp, new_value, 0, NULL);
     if (retval) {
         k5_mutex_unlock(&profile->first_file->data->lock);
         return retval;

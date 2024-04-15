@@ -145,10 +145,12 @@ errcode_t profile_verify_node(struct profile_node *node)
 }
 
 /*
- * Add a node to a particular section
+ * Add a node to a particular section.  If check_final is true, don't add the
+ * node if we find a final node for the same name.
  */
 errcode_t profile_add_node(struct profile_node *section, const char *name,
-                           const char *value, struct profile_node **ret_node)
+                           const char *value, int check_final,
+                           struct profile_node **ret_node)
 {
     errcode_t retval;
     struct profile_node *p, *last, *new;
@@ -173,6 +175,12 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
                    p->value == NULL && p->deleted != 1) {
             /* Found duplicate subsection, so don't make a new one. */
             *ret_node = p;
+            return 0;
+        } else if (check_final && cmp == 0 && p->final) {
+            /* This key already exists with the final flag and we were asked
+             * to check it, so don't add this node. */
+            if (ret_node)
+                *ret_node = NULL;
             return 0;
         }
     }
@@ -326,7 +334,8 @@ errcode_t profile_find_node(struct profile_node *section, const char *name,
  */
 errcode_t profile_find_node_relation(struct profile_node *section,
                                      const char *name, void **state,
-                                     char **ret_name, char **value)
+                                     char **ret_name, char **value,
+                                     int *ret_final)
 {
     struct profile_node *p;
     errcode_t       retval;
@@ -340,6 +349,8 @@ errcode_t profile_find_node_relation(struct profile_node *section,
             *value = p->value;
         if (ret_name)
             *ret_name = p->name;
+        if (ret_final)
+            *ret_final = p->final;
     }
     return 0;
 }
@@ -569,6 +580,8 @@ get_new_file:
         }
         if (p->deleted)
             continue;
+        if (p->final)
+            iter->flags |= PROFILE_ITER_FINAL_SEEN;
         break;
     }
     iter->num++;
