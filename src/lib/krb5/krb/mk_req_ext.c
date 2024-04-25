@@ -33,6 +33,7 @@
 #include "k5-int.h"
 #include "int-proto.h"
 #include "auth_con.h"
+#include "k5-utf8.h"
 
 /*
   Formats a KRB_AP_REQ message into outbuf, with more complete options than
@@ -70,15 +71,19 @@
 static krb5_error_code
 make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
                  krb5_enctype tkt_enctype, krb5_boolean client_aware_cb,
+                 krb5_principal target,
                  krb5_authdata ***authdata_out);
 
 static krb5_error_code
 generate_authenticator(krb5_context,
-                       krb5_authenticator *, krb5_principal,
+                       krb5_authenticator *,
+                       krb5_principal,
+                       krb5_principal,
                        krb5_checksum *, krb5_key,
                        krb5_ui_4, krb5_authdata **,
                        krb5_authdata_context ad_context,
                        krb5_enctype *desired_etypes,
+                       krb5_boolean channel_bound,
                        krb5_enctype tkt_enctype);
 
 krb5_error_code KRB5_CALLCONV
@@ -95,6 +100,8 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     krb5_ap_req request;
     krb5_data *scratch = 0;
     krb5_data *toutbuf;
+    krb5_boolean channel_bound = FALSE;
+    krb5_principal target_principal = NULL;
 
     request.ap_options = ap_req_options & AP_OPTS_WIRE_MASK;
     request.authenticator.ciphertext.data = NULL;
@@ -106,6 +113,9 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     if ((ap_req_options & AP_OPTS_ETYPE_NEGOTIATION) &&
         !(ap_req_options & AP_OPTS_MUTUAL_REQUIRED))
         return(EINVAL);
+
+    if (ap_req_options & AP_OPTS_CHANNEL_BOUND)
+        channel_bound = TRUE;
 
     /* we need a native ticket */
     if ((retval = decode_krb5_ticket(&(in_creds)->ticket, &request.ticket)))
@@ -192,16 +202,22 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
             desired_etypes = (*auth_context)->permitted_etypes;
     }
 
+    if (ap_req_options & AP_OPTS_TARGET_PRINCIPAL)
+        target_principal = in_creds->server;
+
     TRACE_MK_REQ(context, in_creds, (*auth_context)->local_seq_number,
                  (*auth_context)->send_subkey, &in_creds->keyblock);
     if ((retval = generate_authenticator(context,
                                          (*auth_context)->authentp,
-                                         in_creds->client, checksump,
+                                         in_creds->client,
+                                         target_principal,
+                                         checksump,
                                          (*auth_context)->send_subkey,
                                          (*auth_context)->local_seq_number,
                                          in_creds->authdata,
                                          (*auth_context)->ad_context,
                                          desired_etypes,
+                                         channel_bound,
                                          in_creds->keyblock.enctype)))
         goto cleanup_cksum;
 
@@ -254,11 +270,14 @@ cleanup:
 
 static krb5_error_code
 generate_authenticator(krb5_context context, krb5_authenticator *authent,
-                       krb5_principal client, krb5_checksum *cksum,
+                       krb5_principal client,
+                       krb5_principal target_principal,
+                       krb5_checksum *cksum,
                        krb5_key key, krb5_ui_4 seq_number,
                        krb5_authdata **authorization,
                        krb5_authdata_context ad_context,
                        krb5_enctype *desired_etypes,
+                       krb5_boolean channel_bound,
                        krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
@@ -303,10 +322,13 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
     if (retval)
         return retval;
 
+    if (channel_bound)
+        client_aware_cb = TRUE;
+
     /* Add etype negotiation or channel-binding awareness authdata to the
      * front, if appropriate. */
     retval = make_ap_authdata(context, desired_etypes, tkt_enctype,
-                              client_aware_cb, &ap_authdata);
+                              client_aware_cb, target_principal, &ap_authdata);
     if (retval)
         return retval;
     if (ap_authdata != NULL) {
@@ -354,14 +376,18 @@ make_etype_list(krb5_context context, krb5_enctype *desired_enctypes,
 static krb5_error_code
 make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
                  krb5_enctype tkt_enctype, krb5_boolean client_aware_cb,
+                 krb5_principal target_principal,
                  krb5_authdata ***authdata_out)
 {
     krb5_error_code ret;
-    krb5_authdata etypes_ad, flags_ad, *list[3];
+    krb5_authdata etypes_ad, flags_ad, target_ad, *list[4];
     krb5_data *der_etypes = NULL;
     size_t count = 0;
     uint8_t flagbuf[4];
     const uint32_t KERB_AP_OPTIONS_CBT = 0x4000;
+    char *princname = NULL;
+    unsigned char *princbuf = NULL;
+    size_t princlen = 0;
 
     *authdata_out = NULL;
 
@@ -387,6 +413,28 @@ make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
         list[count++] = &flags_ad;
     }
 
+    if (target_principal != NULL) {
+        ret = krb5_unparse_name_flags(context,
+                                      target_principal,
+                                      KRB5_PRINCIPAL_UNPARSE_DISPLAY,
+                                      &princname);
+        if (ret != 0) {
+            goto cleanup;
+        }
+
+        ret = k5_utf8_to_utf16le(princname, &princbuf, &princlen);
+        if (ret != 0) {
+            goto cleanup;
+        }
+
+        target_ad.magic = KV5M_AUTHDATA;
+        target_ad.ad_type = KRB5_AUTHDATA_TARGET_PRINCIPAL;
+        target_ad.length = princlen;
+        target_ad.contents = princbuf;
+
+        list[count++] = &target_ad;
+    }
+
     if (count > 0) {
         list[count] = NULL;
         ret = krb5_encode_authdata_container(context,
@@ -395,6 +443,8 @@ make_ap_authdata(krb5_context context, krb5_enctype *desired_enctypes,
     }
 
 cleanup:
+    free(princbuf);
+    free(princname);
     krb5_free_data(context, der_etypes);
     return ret;
 }

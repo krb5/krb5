@@ -22,7 +22,7 @@ realm.run(['./t_bindings', '-s', server, 'a', 'x'],
 client_aware_conf = {'libdefaults': {'client_aware_channel_bindings': 'true'}}
 e = realm.special_env('cb_aware', False, krb5_conf=client_aware_conf)
 
-mark('krb5 client_aware_channel_bindings')
+mark('krb5 client_aware_channel_bindings (config)')
 realm.run(['./t_bindings', server, '-', '-'], env=e, expected_msg='no')
 realm.run(['./t_bindings', server, 'a', '-'], env=e, expected_msg='no')
 realm.run(['./t_bindings', server, 'a', 'a'], env=e, expected_msg='yes')
@@ -31,13 +31,31 @@ realm.run(['./t_bindings', server, '-', 'a'], env=e,
 realm.run(['./t_bindings', server, 'a', 'x'], env=e,
           expected_code=1, expected_msg='Incorrect channel bindings')
 
-mark('SPNEGO client_aware_channel_bindings')
+mark('SPNEGO client_aware_channel_bindings (config)')
 realm.run(['./t_bindings', '-s', server, '-', '-'], env=e, expected_msg='no')
 realm.run(['./t_bindings', '-s', server, 'a', '-'], env=e, expected_msg='no')
 realm.run(['./t_bindings', '-s', server, 'a', 'a'], env=e, expected_msg='yes')
 realm.run(['./t_bindings', '-s', server, '-', 'a'], env=e,
           expected_code=1, expected_msg='Incorrect channel bindings')
 realm.run(['./t_bindings', '-s', server, 'a', 'x'], env=e,
+          expected_code=1, expected_msg='Incorrect channel bindings')
+
+mark('krb5 client_aware_channel_bindings (flag)')
+realm.run(['./t_bindings', '-b', server, '-', '-'], expected_msg='no')
+realm.run(['./t_bindings', '-b', server, 'a', '-'], expected_msg='no')
+realm.run(['./t_bindings', '-b', server, 'a', 'a'], expected_msg='yes')
+realm.run(['./t_bindings', '-b', server, '-', 'a'],
+          expected_code=1, expected_msg='Incorrect channel bindings')
+realm.run(['./t_bindings', '-b', server, 'a', 'x'],
+          expected_code=1, expected_msg='Incorrect channel bindings')
+
+mark('SPNEGO client_aware_channel_bindings (flag)')
+realm.run(['./t_bindings', '-s', '-b', server, '-', '-'], expected_msg='no')
+realm.run(['./t_bindings', '-s', '-b', server, 'a', '-'], expected_msg='no')
+realm.run(['./t_bindings', '-s', '-b', server, 'a', 'a'], expected_msg='yes')
+realm.run(['./t_bindings', '-s', '-b', server, '-', 'a'],
+          expected_code=1, expected_msg='Incorrect channel bindings')
+realm.run(['./t_bindings', '-s', '-b', server, 'a', 'x'],
           expected_code=1, expected_msg='Incorrect channel bindings')
 
 success('channel bindings tests')

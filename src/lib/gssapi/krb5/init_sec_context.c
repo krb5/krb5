@@ -236,6 +236,11 @@ struct gss_checksum_data {
 #ifdef CFX_EXERCISE
 #include "../../krb5/krb/auth_con.h"
 #endif
+
+/* The flags we don't put into authenticator checksum. */
+#define _GSS_C_NON_8003_WIRE_FLAGS \
+	GSS_C_CHANNEL_BOUND_FLAG
+
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                    void *cksum_data, krb5_data **out)
@@ -332,7 +337,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     k5_buf_init_dynamic(&buf);
     k5_buf_add_uint32_le(&buf, data->md5.length);
     k5_buf_add_len(&buf, data->md5.contents, data->md5.length);
-    k5_buf_add_uint32_le(&buf, data->ctx->gss_flags);
+    k5_buf_add_uint32_le(&buf, data->ctx->gss_flags & ~_GSS_C_NON_8003_WIRE_FLAGS);
     if (credmsg.data != NULL) {
         k5_buf_add_uint16_le(&buf, KRB5_GSS_FOR_CREDS_OPTION);
         k5_buf_add_uint16_le(&buf, credmsg.length);
@@ -398,8 +403,13 @@ make_ap_req_v1(krb5_context context, krb5_gss_ctx_id_rec *ctx,
 
     mk_req_flags = AP_OPTS_USE_SUBKEY;
 
+    mk_req_flags |= AP_OPTS_TARGET_PRINCIPAL;
+
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG)
         mk_req_flags |= AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_ETYPE_NEGOTIATION;
+
+    if (ctx->gss_flags & GSS_C_CHANNEL_BOUND_FLAG)
+        mk_req_flags |= AP_OPTS_CHANNEL_BOUND;
 
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
@@ -542,7 +552,8 @@ kg_new_connection(
                                   GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
                                   GSS_C_SEQUENCE_FLAG | GSS_C_DELEG_FLAG |
                                   GSS_C_DCE_STYLE | GSS_C_IDENTIFY_FLAG |
-                                  GSS_C_EXTENDED_ERROR_FLAG);
+                                  GSS_C_EXTENDED_ERROR_FLAG|
+                                  GSS_C_CHANNEL_BOUND_FLAG);
     ctx->gss_flags |= GSS_C_TRANS_FLAG;
     if (!cred->suppress_ci_flags)
         ctx->gss_flags |= (GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG);
