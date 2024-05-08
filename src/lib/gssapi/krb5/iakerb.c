@@ -523,7 +523,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     output_token->length = 0;
     output_token->value = NULL;
 
-    if (input_token != GSS_C_NO_BUFFER) {
+    if (input_token != GSS_C_NO_BUFFER && input_token->length > 0) {
         code = iakerb_parse_token(ctx, 0, input_token, NULL, &cookie, &in);
         if (code != 0)
             goto cleanup;
