@@ -1092,7 +1092,7 @@ DEFOPTIONALEMPTYTYPE(opt_ptr_seqof_princ_plus_realm,
                      ptr_seqof_princ_plus_realm);
 
 /* First context tag is 1, not 0. */
-DEFFIELD(iakerb_header_1, krb5_iakerb_header, target_realm, 1, ostring_data);
+DEFFIELD(iakerb_header_1, krb5_iakerb_header, target_realm, 1, opt_utf8_data);
 DEFFIELD(iakerb_header_2, krb5_iakerb_header, cookie, 2, opt_ostring_data_ptr);
 static const struct atype_info *iakerb_header_fields[] = {
     &k5_atype_iakerb_header_1, &k5_atype_iakerb_header_2
