@@ -439,6 +439,25 @@ fi
 AC_SUBST(ASAN_FLAGS)
 AC_SUBST(ASAN)
 
+# Build using OSS-Fuzz build processes for compiling fuzzing targets.
+# LIB_FUZZING_ENGINE is used for supporting various types of fuzzers.
+fuzz_dir=""
+FUZZ_LDFLAGS=
+AC_ARG_ENABLE([ossfuzz],
+  [AS_HELP_STRING([--enable-ossfuzz], [Build with fuzzing targets])],
+  [], [enable_ossfuzz=no])
+if test "$enable_ossfuzz" != no; then
+    # Check if LIB_FUZZING_ENGINE environment is not empty.
+    if test -z "$LIB_FUZZING_ENGINE"; then
+        AC_MSG_ERROR([LIB_FUZZING_ENGINE environment variable is not set])
+    fi
+    fuzz_dir="fuzzing"
+    FUZZ_LDFLAGS="$LIB_FUZZING_ENGINE"
+    K5_GEN_MAKEFILE(tests/fuzzing)
+fi
+AC_SUBST(fuzz_dir)
+AC_SUBST(FUZZ_LDFLAGS)
+
 # from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE],
 [Define if "struct sockaddr_storage" is available.])

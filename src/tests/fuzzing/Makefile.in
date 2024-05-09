@@ -1,0 +1,88 @@
+mydir=tests$(S)fuzzing
+BUILDTOP=$(REL)..$(S)..
+
+LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/ccache -I$(srcdir)/../../kdc \
+	-I$(srcdir)/../../util/profile
+NDROBJ = $(BUILDTOP)/kdc/ndr.o
+
+OBJS = \
+	fuzz_chpw.o \
+	fuzz_gss.o \
+	fuzz_json.o \
+	fuzz_krad.o \
+	fuzz_krb5_ticket.o \
+	fuzz_marshal_cred.o \
+	fuzz_marshal_princ.o \
+	fuzz_ndr.o \
+	fuzz_pac.o \
+	fuzz_profile.o \
+	fuzz_util.o
+
+SRCS = \
+	$(srcdir)/fuzz_chpw.c \
+	$(srcdir)/fuzz_gss.c \
+	$(srcdir)/fuzz_json.c \
+	$(srcdir)/fuzz_krad.c \
+	$(srcdir)/fuzz_krb5_ticket.c \
+	$(srcdir)/fuzz_marshal_cred.c \
+	$(srcdir)/fuzz_marshal_princ.c \
+	$(srcdir)/fuzz_ndr.c \
+	$(srcdir)/fuzz_pac.c \
+	$(srcdir)/fuzz_profile.c \
+	$(srcdir)/fuzz_util.c
+
+FUZZ_TARGETS= \
+	fuzz_chpw \
+	fuzz_gss \
+	fuzz_json \
+	fuzz_krad \
+	fuzz_krb5_ticket \
+	fuzz_marshal_cred \
+	fuzz_marshal_princ \
+	fuzz_ndr \
+	fuzz_pac \
+	fuzz_profile \
+	fuzz_util
+
+all: $(FUZZ_TARGETS)
+
+# OSS-Fuzz requires fuzz targets to be linked with the C++ linker,
+# even if they are written in C.
+
+fuzz_chpw: fuzz_chpw.o $(SUPPORT_DEPLIB)
+	$(CXX_LINK) -o $@ fuzz_chpw.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_gss: fuzz_gss.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_gss.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_json: fuzz_json.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_json.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_krad: fuzz_krad.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_krad.o -lkrad $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_krb5_ticket: fuzz_krb5_ticket.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_krb5_ticket.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_marshal_cred: fuzz_marshal_cred.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_marshal_cred.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_marshal_princ: fuzz_marshal_princ.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_marshal_princ.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_ndr: fuzz_ndr.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_ndr.o $(NDROBJ) $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_pac: fuzz_pac.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_pac.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_profile: fuzz_profile.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_profile.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_util: fuzz_util.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_util.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+install:
+
+clean:
+	$(RM) $(FUZZ_TARGETS)
