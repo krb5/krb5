@@ -95,7 +95,7 @@ kdb2_fetch(datum key)
 }
 
 datum
-kdb2_firstkey()
+kdb2_firstkey(void)
 {
 	datum item;
 

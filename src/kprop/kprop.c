@@ -80,7 +80,7 @@ static void send_error(krb5_context context, krb5_creds *my_creds, int fd,
                        char *err_text, krb5_error_code err_code);
 static void update_last_prop_file(char *hostname, char *file_name);
 
-static void usage()
+static void usage(void)
 {
     fprintf(stderr, _("\nUsage: %s [-r realm] [-f file] [-d] [-P port] "
                       "[-s keytab] replica_host\n\n"), progname);

@@ -74,7 +74,7 @@ int exit_status = 0;
 krb5_context util_context;
 kadm5_config_params global_params;
 
-void usage()
+void usage(void)
 {
     fprintf(stderr,
             _("Usage: kdb5_util [-r realm] [-d dbname] "

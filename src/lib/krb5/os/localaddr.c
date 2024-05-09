@@ -363,7 +363,7 @@ struct linux_ipv6_addr_list {
     struct linux_ipv6_addr_list *next;
 };
 static struct linux_ipv6_addr_list *
-get_linux_ipv6_addrs ()
+get_linux_ipv6_addrs (void)
 {
     struct linux_ipv6_addr_list *lst = 0;
     FILE *f;
@@ -1082,7 +1082,7 @@ static int print_addr (/*@unused@*/ void *dataptr, struct sockaddr *sa)
     return 0;
 }
 
-int main ()
+int main (void)
 {
     int r;
 
@@ -1417,7 +1417,7 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
  * by Robert Quinn
  */
 #if defined(_WIN32)
-static struct hostent *local_addr_fallback_kludge()
+static struct hostent *local_addr_fallback_kludge(void)
 {
     static struct hostent   host;
     static SOCKADDR_IN      addr;
