@@ -470,12 +470,10 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
     }
 
     ret = krb5int_dns_nextans(ds, &base, &rdlen);
-    if (ret < 0 || base == NULL)
+    if (ret < 0 || rdlen < 2 || *base == 0 || *base > rdlen - 1)
         goto errout;
 
     p = base;
-    if (!INCR_OK(base, rdlen, p, 1))
-        goto errout;
     len = *p++;
     *realm = malloc((size_t)len + 1);
     if (*realm == NULL) {
