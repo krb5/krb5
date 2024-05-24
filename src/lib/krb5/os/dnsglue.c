@@ -477,6 +477,10 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
     if (!INCR_OK(base, rdlen, p, 1))
         goto errout;
     len = *p++;
+    if (len == 0) {
+        TRACE_TXT_LOOKUP_NOTFOUND(context, txtname);
+        goto errout;
+    }
     *realm = malloc((size_t)len + 1);
     if (*realm == NULL) {
         retval = ENOMEM;
