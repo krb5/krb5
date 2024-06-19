@@ -170,8 +170,7 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
     krb5_iakerb_header *iah = NULL;
-    unsigned int bodysize;
-    uint8_t *body;
+    const uint8_t *token_body;
     krb5_data data;
     struct k5input in, seq;
 
@@ -180,21 +179,21 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
         goto cleanup;
     }
 
-    body = token->value;
-    code = g_verify_token_header(gss_mech_iakerb, &bodysize, &body,
-                                 IAKERB_TOK_PROXY, token->length,
-                                 G_VFY_TOKEN_HDR_WRAPPER_REQUIRED);
-    if (code != 0)
+    k5_input_init(&in, token->value, token->length);
+    if (!g_verify_token_header(&in, gss_mech_iakerb) ||
+        k5_input_get_uint16_be(&in) != IAKERB_TOK_PROXY) {
+        code = G_BAD_TOK_HEADER;
         goto cleanup;
+    }
 
     /* Find the end of the DER sequence tag and decode it (with the tag) as the
-     * IAKERB jeader. */
-    k5_input_init(&in, body, bodysize);
+     * IAKERB header. */
+    token_body = in.ptr;
     if (!k5_der_get_value(&in, 0x30, &seq)) {
         code = ASN1_BAD_ID;
         goto cleanup;
     }
-    data = make_data(body, seq.ptr + seq.len - body);
+    data = make_data((uint8_t *)token_body, seq.ptr + seq.len - token_body);
     code = decode_krb5_iakerb_header(&data, &iah);
     if (code != 0)
         goto cleanup;
@@ -767,16 +766,11 @@ iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
 static krb5_boolean
 iakerb_is_iakerb_token(const gss_buffer_t token)
 {
-    krb5_error_code code;
-    unsigned int bodysize = token->length;
-    unsigned char *ptr = token->value;
+    struct k5input in;
 
-    code = g_verify_token_header(gss_mech_iakerb,
-                                 &bodysize, &ptr,
-                                 IAKERB_TOK_PROXY,
-                                 token->length, 0);
-
-    return (code == 0);
+    k5_input_init(&in, token->value, token->length);
+    return g_verify_token_header(&in, gss_mech_iakerb) &&
+        k5_input_get_uint16_be(&in) == IAKERB_TOK_PROXY;
 }
 
 static void

@@ -47,6 +47,7 @@
 
 #include "k5-platform.h"
 #include "k5-buf.h"
+#include "k5-input.h"
 
 /** helper macros **/
 
@@ -69,6 +70,7 @@
 #define g_make_string_buffer    gssint_g_make_string_buffer
 #define g_token_size            gssint_g_token_size
 #define g_make_token_header     gssint_g_make_token_header
+#define g_get_token_header      gssint_g_get_token_header
 #define g_verify_token_header   gssint_g_verify_token_header
 #define g_display_major_status  gssint_g_display_major_status
 #define g_display_com_err_status gssint_g_display_com_err_status
@@ -89,14 +91,10 @@ unsigned int g_token_size (const gss_OID_desc * mech, unsigned int body_size);
 void g_make_token_header (struct k5buf *buf, const gss_OID_desc *mech,
                           size_t body_size, int tok_type);
 
-/* flags for g_verify_token_header() */
-#define G_VFY_TOKEN_HDR_WRAPPER_REQUIRED        0x01
+int g_get_token_header (struct k5input *in, gss_OID oid_out,
+                        size_t *token_len_out);
 
-gss_int32 g_verify_token_header (const gss_OID_desc * mech,
-                                 unsigned int *body_size,
-                                 unsigned char **buf, int tok_type,
-                                 unsigned int toksize_in,
-                                 int flags);
+int g_verify_token_header(struct k5input *in, gss_const_OID expected_mech);
 
 OM_uint32 g_display_major_status (OM_uint32 *minor_status,
                                   OM_uint32 status_value,

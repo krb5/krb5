@@ -79,8 +79,6 @@ typedef struct gss_cred_id_struct {
 /* it to initialize the GSSAPI library		  */
 int gssint_mechglue_initialize_library(void);
 
-OM_uint32 gssint_get_mech_type_oid(gss_OID OID, gss_buffer_t token);
-
 /*
  * This table is used to access mechanism-specific versions of the GSSAPI
  * functions.  It contains all of the functions defined in gssapi.h except for
