@@ -709,8 +709,9 @@ mutual_auth(
     krb5_context context)
 {
     OM_uint32 major_status;
-    unsigned char *ptr;
-    krb5_data ap_rep;
+    struct k5input in;
+    uint16_t toktype;
+    krb5_data body;
     krb5_ap_rep_enc_part *ap_rep_data;
     krb5_timestamp now;
     krb5_gss_ctx_id_rec *ctx;
@@ -753,24 +754,19 @@ mutual_auth(
         goto fail;
     }
 
-    ptr = (unsigned char *) input_token->value;
-
     if (ctx->gss_flags & GSS_C_DCE_STYLE) {
         /* Raw AP-REP */
-        ap_rep.length = input_token->length;
-    } else if (g_verify_token_header(ctx->mech_used,
-                                     &(ap_rep.length),
-                                     &ptr, KG_TOK_CTX_AP_REP,
-                                     input_token->length, 1)) {
-        if (g_verify_token_header((gss_OID) ctx->mech_used,
-                                  &(ap_rep.length),
-                                  &ptr, KG_TOK_CTX_ERROR,
-                                  input_token->length, 1) == 0) {
-
-            /* Handle a KRB_ERROR message from the server */
-
-            ap_rep.data = (char *)ptr;
-            code = krb5_rd_error(context, &ap_rep, &krb_error);
+        body = make_data(input_token->value, input_token->length);
+    } else {
+        k5_input_init(&in, input_token->value, input_token->length);
+        if (!g_verify_token_header(&in, ctx->mech_used)) {
+            *minor_status = 0;
+            return(GSS_S_DEFECTIVE_TOKEN);
+        }
+        toktype = k5_input_get_uint16_be(&in);
+        body = make_data((uint8_t *)in.ptr, in.len);
+        if (toktype == KG_TOK_CTX_ERROR) {
+            code = krb5_rd_error(context, &body, &krb_error);
             if (code)
                 goto fail;
             if (krb_error->error)
@@ -779,24 +775,22 @@ mutual_auth(
                 code = 0;
             krb5_free_error(context, krb_error);
             goto fail;
-        } else {
+        } else if (toktype != KG_TOK_CTX_AP_REP) {
             *minor_status = 0;
             return(GSS_S_DEFECTIVE_TOKEN);
         }
     }
-    ap_rep.data = (char *)ptr;
 
     /* decode the ap_rep */
-    if ((code = krb5_rd_rep(context, ctx->auth_context, &ap_rep,
-                            &ap_rep_data))) {
+    code = krb5_rd_rep(context, ctx->auth_context, &body, &ap_rep_data);
+    if (code) {
         /*
          * XXX A hack for backwards compatibility.
          * To be removed in 1999 -- proven
          */
         krb5_auth_con_setuseruserkey(context, ctx->auth_context,
                                      &ctx->subkey->keyblock);
-        if ((krb5_rd_rep(context, ctx->auth_context, &ap_rep,
-                         &ap_rep_data)))
+        if (krb5_rd_rep(context, ctx->auth_context, &body, &ap_rep_data) != 0)
             goto fail;
     }
 
