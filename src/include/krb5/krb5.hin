@@ -3043,10 +3043,10 @@ krb5_free_tgt_creds(krb5_context context, krb5_creds **tgts);
  * session key type is specified in @a in_creds->keyblock.enctype, if it is
  * nonzero.
  *
- * The expiration date is specified in @a in_creds->times.endtime.
- * The KDC may return tickets with an earlier expiration date.
- * If @a in_creds->times.endtime is set to 0, the latest possible
- * expiration date will be requested.
+ * If @a in_creds->times.endtime is specified, it is used as the requested
+ * expiration date if a TGS request is made.  If @a in_creds->times.endtime is
+ * set to 0, the latest possible expiration date will be requested.  The KDC or
+ * cache may return a ticket with an earlier expiration date.
  *
  * Any returned ticket and intermediate ticket-granting tickets are stored
  * in @a ccache.
