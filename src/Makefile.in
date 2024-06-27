@@ -32,7 +32,7 @@ SUBDIRS=util include lib \
 	plugins/tls/k5tls \
 	kdc kadmin kprop clients appl tests \
 	config-files build-tools man doc @po@
-WINSUBDIRS=include util lib ccapi windows clients appl plugins\preauth\spake
+WINSUBDIRS=include util lib ccapi windows clients appl plugins\preauth\spake build-tools
 BUILDTOP=$(REL).
 
 SRCS =  
@@ -154,7 +154,8 @@ WINMAKEFILES=Makefile \
 	windows\Makefile windows\lib\Makefile windows\ms2mit\Makefile \
 	windows\kfwlogon\Makefile windows\leashdll\Makefile \
 	windows\leash\Makefile windows\leash\htmlhelp\Makefile \
-	plugins\preauth\spake\Makefile
+	plugins\preauth\spake\Makefile \
+	build-tools\Makefile
 
 ##DOS##Makefile-windows: $(MKFDEP) $(WINMAKEFILES)
 
@@ -279,6 +280,8 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\leash\htmlhelp\Makefile: windows\leash\htmlhelp\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##plugins\preauth\spake\Makefile: plugins\preauth\spake\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##build-tools\Makefile: build-tools\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
