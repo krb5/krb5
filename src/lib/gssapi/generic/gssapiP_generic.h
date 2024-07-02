@@ -66,11 +66,6 @@
 /** helper functions **/
 
 /* hide names from applications, especially glib applications */
-#define g_set_init              gssint_g_set_init
-#define g_set_destroy           gssint_g_set_destroy
-#define g_set_entry_add         gssint_g_set_entry_add
-#define g_set_entry_delete      gssint_g_set_entry_delete
-#define g_set_entry_get         gssint_g_set_entry_get
 #define g_make_string_buffer    gssint_g_make_string_buffer
 #define g_token_size            gssint_g_token_size
 #define g_make_token_header     gssint_g_make_token_header
@@ -84,38 +79,8 @@
 #define g_seqstate_externalize  gssint_g_seqstate_externalize
 #define g_seqstate_internalize  gssint_g_seqstate_internalize
 #define g_canonicalize_host     gssint_g_canonicalize_host
-#define g_local_host_name       gssint_g_local_host_name
-#define g_strdup                gssint_g_strdup
-
-typedef struct _g_set_elt *g_set_elt;
-typedef struct {
-    k5_mutex_t mutex;
-    void *data;
-} g_set;
-#define G_SET_INIT { K5_MUTEX_PARTIAL_INITIALIZER, 0 }
 
 typedef struct g_seqnum_state_st *g_seqnum_state;
-
-int g_set_init (g_set_elt *s);
-int g_set_destroy (g_set_elt *s);
-int g_set_entry_add (g_set_elt *s, void *key, void *value);
-int g_set_entry_delete (g_set_elt *s, void *key);
-int g_set_entry_get (g_set_elt *s, void *key, void **value);
-
-int g_save_name (g_set *vdb, gss_name_t name);
-int g_save_cred_id (g_set *vdb, gss_cred_id_t cred);
-int g_save_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
-int g_save_lucidctx_id (g_set *vdb, void *lctx);
-
-int g_validate_name (g_set *vdb, gss_name_t name);
-int g_validate_cred_id (g_set *vdb, gss_cred_id_t cred);
-int g_validate_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
-int g_validate_lucidctx_id (g_set *vdb, void *lctx);
-
-int g_delete_name (g_set *vdb, gss_name_t name);
-int g_delete_cred_id (g_set *vdb, gss_cred_id_t cred);
-int g_delete_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
-int g_delete_lucidctx_id (g_set *vdb, void *lctx);
 
 int g_make_string_buffer (const char *str, gss_buffer_t buffer);
 
@@ -151,8 +116,6 @@ long g_seqstate_externalize(g_seqnum_state state, unsigned char **buf,
                             size_t *lenremain);
 long g_seqstate_internalize(g_seqnum_state *state_out, unsigned char **buf,
                             size_t *lenremain);
-
-char *g_strdup (char *str);
 
 /** declarations of internal name mechanism functions **/
 
