@@ -39,27 +39,6 @@ extern gss_mechanism *gssint_mechs_array;
  * This file contains the support routines for the glue layer.
  */
 
-/* Retrieve the mechanism OID from an RFC 2743 InitialContextToken.  Place
- * the result into *oid_out, aliasing memory from token. */
-OM_uint32 gssint_get_mech_type_oid(gss_OID oid_out, gss_buffer_t token)
-{
-    struct k5input in;
-
-    if (oid_out == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    if (token == NULL || token->value == NULL)
-	return (GSS_S_DEFECTIVE_TOKEN);
-
-    k5_input_init(&in, token->value, token->length);
-    if (!k5_der_get_value(&in, 0x60, &in))
-	return (GSS_S_DEFECTIVE_TOKEN);
-    if (!k5_der_get_value(&in, 0x06, &in))
-	return (GSS_S_DEFECTIVE_TOKEN);
-    oid_out->length = in.len;
-    oid_out->elements = (uint8_t *)in.ptr;
-    return (GSS_S_COMPLETE);
-}
-
 /*
  * The following mechanisms do not always identify themselves
  * per the GSS-API specification, when interoperating with MS
@@ -78,6 +57,9 @@ static gss_OID_desc gss_krb5_mechanism_oid_desc =
 OM_uint32
 gssint_get_mech_type(gss_OID OID, gss_buffer_t token)
 {
+    struct k5input in;
+    size_t tlen;
+
     /* Check for interoperability exceptions */
     if (token->length >= sizeof(NTLMSSP_SIGNATURE) &&
 	memcmp(token->value, NTLMSSP_SIGNATURE,
@@ -90,7 +72,9 @@ gssint_get_mech_type(gss_OID OID, gss_buffer_t token)
     } else if (token->length == 0) {
 	*OID = gss_spnego_mechanism_oid_desc;
     } else {
-	return gssint_get_mech_type_oid(OID, token);
+	k5_input_init(&in, token->value, token->length);
+	return (g_get_token_header(&in, OID, &tlen) ? GSS_S_COMPLETE :
+		GSS_S_DEFECTIVE_TOKEN);
     }
 
     return (GSS_S_COMPLETE);
