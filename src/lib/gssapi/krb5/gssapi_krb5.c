@@ -188,8 +188,6 @@ const gss_OID_set gss_mech_set_krb5_old         = &kg_oidsets[1];
 const gss_OID_set gss_mech_set_krb5_both        = &kg_oidsets[2];
 const gss_OID_set kg_all_mechs                  = &kg_oidsets[3];
 
-g_set kg_vdb = G_SET_INIT;
-
 /** default credential support */
 
 /*
@@ -1073,9 +1071,6 @@ int gss_krb5int_lib_init(void)
     err = k5_mutex_finish_init(&kg_kdc_flag_mutex);
     if (err)
         return err;
-    err = k5_mutex_finish_init(&kg_vdb.mutex);
-    if (err)
-        return err;
 #endif
 #ifdef _GSS_STATIC_LINK
     err = gss_krb5mechglue_init();
@@ -1107,7 +1102,6 @@ void gss_krb5int_lib_fini(void)
     k5_key_delete(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
     k5_key_delete(K5_KEY_GSS_KRB5_CCACHE_NAME);
     k5_key_delete(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
-    k5_mutex_destroy(&kg_vdb.mutex);
 #ifndef _WIN32
     k5_mutex_destroy(&kg_kdc_flag_mutex);
 #endif
