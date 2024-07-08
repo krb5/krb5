@@ -2936,6 +2936,33 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
 
 /**
+ * Return a list of default configuration filenames
+ *
+ * @param [out] filenames       Configuration filename list
+ *
+ * Fill in @a filenames with a null-terminated list of configuration files
+ * which will be read by krb5_init_context() in the current process
+ * environment.
+ *
+ * Use krb5_free_config_files() to free @a filenames when it is no longer
+ * needed.
+ *
+ * @version New in 1.22
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_default_config_files(char ***filenames);
+
+/**
+ * Free a list allocated by krb5_get_default_config_files()
+ *
+ * @param [in]  filenames       Configuration filename list
+ *
+ * @version New in 1.22
+ */
+void KRB5_CALLCONV
+krb5_free_config_files(char **filenames);
+
+/**
  * Set default TGS encryption types in a krb5_context structure.
  *
  * @param [in] context          Library context

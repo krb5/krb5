@@ -2143,10 +2143,6 @@ void KRB5_CALLCONV krb5_free_tkt_authent(krb5_context, krb5_tkt_authent *);
 void KRB5_CALLCONV krb5_free_enc_data(krb5_context, krb5_enc_data *);
 krb5_error_code krb5_set_config_files(krb5_context, const char **);
 
-krb5_error_code KRB5_CALLCONV krb5_get_default_config_files(char ***filenames);
-
-void KRB5_CALLCONV krb5_free_config_files(char **filenames);
-
 krb5_error_code krb5_rd_req_decoded(krb5_context, krb5_auth_context *,
                                     const krb5_ap_req *, krb5_const_principal,
                                     krb5_keytab, krb5_flags *, krb5_ticket **);
