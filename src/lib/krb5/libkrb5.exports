@@ -119,6 +119,8 @@ initialize_prof_error_table
 k5_add_empty_pa_data
 k5_add_pa_data_element
 k5_add_pa_data_from_data
+k5_addr_directional_accept
+k5_addr_directional_init
 k5_alloc_pa_data
 k5_authind_decode
 k5_build_conf_principals

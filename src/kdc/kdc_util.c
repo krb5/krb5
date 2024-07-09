@@ -194,7 +194,7 @@ kdc_process_tgs_req(kdc_realm_t *realm, krb5_kdc_req *request,
 
     /* If from_addr isn't IPv4 or IPv6, fake up an address that won't be
      * matched if the ticket has an address list. */
-    retval = k5_sockaddr_to_address(from, &from_addr);
+    retval = k5_sockaddr_to_address(from, FALSE, &from_addr);
     if (retval)
         from_addr = nomatch_addr;
     retval = krb5_auth_con_setaddrs(context, auth_context, NULL, &from_addr);

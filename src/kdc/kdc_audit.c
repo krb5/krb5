@@ -188,7 +188,7 @@ kau_init_kdc_req(krb5_context context,
     if (state == NULL)
         return ret;
 
-    ret = k5_sockaddr_to_address(from, &addr);
+    ret = k5_sockaddr_to_address(from, TRUE, &addr);
     if (ret)
         addr = unknown_addr;
     ret = krb5_copy_addr(context, &addr, &state->cl_addr);

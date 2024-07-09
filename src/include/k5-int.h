@@ -2409,13 +2409,19 @@ krb5_error_code
 k5_hmac_md5(const krb5_data *key, const krb5_crypto_iov *data, size_t num_data,
             krb5_data *output);
 
+/* Address objects for initiator and acceptor directional addresses. */
+extern const krb5_address k5_addr_directional_init;
+extern const krb5_address k5_addr_directional_accept;
+
 /*
  * Translate sa to a krb5_address, putting the result in *out with contents
- * aliased from *sa.  Return KRB5_PROG_ATYPE_NOSUPP if sa is not an IPv4 or
- * IPv6 address.
+ * aliased from *sa.  If local_use is true, translate UNIX domain socket names
+ * to ADDRTYPE_UNIXSOCK; otherwise do not handle them.  Return
+ * KRB5_PROG_ATYPE_NOSUPP if sa cannot be converted.
  */
 krb5_error_code
-k5_sockaddr_to_address(const struct sockaddr *sa, krb5_address *out);
+k5_sockaddr_to_address(const struct sockaddr *sa, krb5_boolean local_use,
+                       krb5_address *out);
 
 /* Place a printable representation of sa (without port) into buf. */
 void

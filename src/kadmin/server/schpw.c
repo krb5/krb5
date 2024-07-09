@@ -40,7 +40,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
     const char *errmsg = NULL;
     size_t clen;
     char *cdots;
-    char addrbuf[100];
+    char addrbuf[128];
 
     *rep = empty_data();
 
@@ -286,8 +286,8 @@ chpwfail:
     cipher = empty_data();
 
     if (ap_rep.length) {
-        if (k5_sockaddr_to_address(local_addr, &laddr) != 0)
-            abort();
+        if (k5_sockaddr_to_address(local_addr, FALSE, &laddr) != 0)
+            laddr = k5_addr_directional_accept;
         ret = krb5_auth_con_setaddrs(context, auth_context, &laddr, NULL);
         if (ret) {
             numresult = KRB5_KPASSWD_HARDERROR;

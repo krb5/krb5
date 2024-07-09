@@ -1199,8 +1199,8 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
         exit(1);
     }
 
-    if (k5_sockaddr_to_address(ss2sa(my_sin), &addr) != 0)
-        abort();
+    if (k5_sockaddr_to_address(ss2sa(my_sin), FALSE, &addr) != 0)
+        addr = k5_addr_directional_accept;
     retval = krb5_copy_addr(context, &addr, &receiver_addr);
     if (retval) {
         com_err(progname, retval, _("while converting local address"));

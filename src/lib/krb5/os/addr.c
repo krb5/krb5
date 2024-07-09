@@ -33,8 +33,16 @@
 #include "k5-int.h"
 #include "socket-utils.h"
 
+const krb5_address k5_addr_directional_init = {
+    KV5M_ADDRESS, ADDRTYPE_DIRECTIONAL, 4, (uint8_t *)"\x00\x00\x00\x00"
+};
+const krb5_address k5_addr_directional_accept = {
+    KV5M_ADDRESS, ADDRTYPE_DIRECTIONAL, 4, (uint8_t *)"\x00\x00\x00\x01"
+};
+
 krb5_error_code
-k5_sockaddr_to_address(const struct sockaddr *sa, krb5_address *out)
+k5_sockaddr_to_address(const struct sockaddr *sa, krb5_boolean local_use,
+                       krb5_address *out)
 {
     if (sa->sa_family == AF_INET) {
         const struct sockaddr_in *sin = sa2sin(sa);
@@ -52,6 +60,13 @@ k5_sockaddr_to_address(const struct sockaddr *sa, krb5_address *out)
             out->length = sizeof(sin6->sin6_addr);
             out->contents = (uint8_t *)&sin6->sin6_addr;
         }
+#ifndef _WIN32
+    } else if (sa->sa_family == AF_UNIX && local_use) {
+        const struct sockaddr_un *sun = sa2sun(sa);
+        out->addrtype = ADDRTYPE_UNIXSOCK;
+        out->length = strlen(sun->sun_path);
+        out->contents = (uint8_t *)sun->sun_path;
+#endif
     } else {
         return KRB5_PROG_ATYPE_NOSUPP;
     }
@@ -66,6 +81,10 @@ k5_print_addr(const struct sockaddr *sa, char *buf, size_t len)
         if (getnameinfo(sa, sa_socklen(sa), buf, len, NULL, 0,
                         NI_NUMERICHOST | NI_NUMERICSERV) != 0)
             strlcpy(buf, "<unknown>", len);
+#ifndef _WIN32
+    } else if (sa->sa_family == AF_UNIX) {
+        strlcpy(buf, sa2sun(sa)->sun_path, len);
+#endif
     } else {
         strlcpy(buf, "<unknown>", len);
     }

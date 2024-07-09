@@ -143,6 +143,12 @@ kpasswd_sendto_msg_callback(SOCKET fd, void *data, krb5_data *message)
         local_kaddr.addrtype = ADDRTYPE_INET6;
         local_kaddr.length = sizeof(ss2sin6(&local_addr)->sin6_addr);
         local_kaddr.contents = (krb5_octet *) &ss2sin6(&local_addr)->sin6_addr;
+#ifndef _WIN32
+    } else if (local_addr.ss_family == AF_UNIX) {
+        /* There is no standard way to represent UNIX domain sockets.  Assume
+         * that the receiver will accept a directional address. */
+        local_kaddr = k5_addr_directional_init;
+#endif
     } else {
         code = krb5_os_localaddr(ctx->context, &addrs);
         if (code)
