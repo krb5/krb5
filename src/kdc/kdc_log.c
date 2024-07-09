@@ -63,7 +63,7 @@ log_as_req(krb5_context context,
            krb5_timestamp authtime,
            const char *status, krb5_error_code errcode, const char *emsg)
 {
-    char fromstring[70];
+    char fromstring[128];
     char *ktypestr = NULL;
     const char *cname2 = cname ? cname : "<unknown client>";
     const char *sname2 = sname ? sname : "<unknown server>";
@@ -88,8 +88,8 @@ log_as_req(krb5_context context,
                          ktypestr ? ktypestr : "", fromstring, status, cname2,
                          sname2, emsg ? ", " : "", emsg ? emsg : "");
     }
-    (void)k5_sockaddr_to_address(local_addr, &laddr);
-    (void)k5_sockaddr_to_address(remote_addr, &raddr);
+    (void)k5_sockaddr_to_address(local_addr, TRUE, &laddr);
+    (void)k5_sockaddr_to_address(remote_addr, TRUE, &raddr);
     krb5_db_audit_as_req(context, request, &laddr, &raddr, client, server,
                          authtime, errcode);
 
@@ -123,7 +123,7 @@ log_tgs_req(krb5_context ctx, const struct sockaddr *from,
             const char *status, krb5_error_code errcode, const char *emsg)
 {
     char *ktypestr = NULL, *rep_etypestr = NULL;
-    char fromstring[70];
+    char fromstring[128];
     char *cname = NULL, *sname = NULL, *altcname = NULL;
     char *logcname = NULL, *logsname = NULL, *logaltcname = NULL;
 
