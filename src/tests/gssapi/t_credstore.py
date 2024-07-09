@@ -77,6 +77,9 @@ msgs = ('Getting initial credentials for %s' % realm.user_princ,
         'Destroying ccache MEMORY:')
 realm.run(['./t_credstore', '-i', 'u:' + realm.user_princ, 'password',
            password('user')], expected_trace=msgs)
+# use prompter interface to pass the password
+realm.run(['./t_credstore', '-p', '-i', 'u:' + realm.user_princ],
+           input=password('user')+'\n', expected_trace=msgs)
 
 mark('verify')
 msgs = ('Getting initial credentials for %s' % realm.user_princ,
