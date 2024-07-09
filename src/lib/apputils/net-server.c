@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #ifdef HAVE_SYS_SOCKIO_H
 /* for SIOCGIFCONF, etc. */
 #include <sys/sockio.h>
@@ -118,17 +119,23 @@ paddr(struct sockaddr *sa)
 /* KDC data.  */
 
 enum conn_type {
-    CONN_UDP, CONN_TCP_LISTENER, CONN_TCP, CONN_RPC_LISTENER, CONN_RPC
+    CONN_UDP,
+    CONN_TCP_LISTENER,
+    CONN_TCP,
+    CONN_RPC_LISTENER,
+    CONN_RPC,
+    CONN_UNIXSOCK
 };
 
 enum bind_type {
-    UDP, TCP, RPC
+    UDP, TCP, RPC, UNX
 };
 
 static const char *const bind_type_names[] = {
     [UDP] = "UDP",
     [TCP] = "TCP",
     [RPC] = "RPC",
+    [UNX] = "UNIXSOCK",
 };
 
 /* Per-connection info.  */
@@ -140,7 +147,9 @@ struct connection {
     /* Connection fields (TCP or RPC) */
     struct sockaddr_storage addr_s;
     socklen_t addrlen;
-    char addrbuf[56];
+#define NI_MAXUNIXSOCK 108
+    char addrbuf[NI_MAXUNIXSOCK];
+#undef NI_MAXUNIXSOCK
     krb5_address remote_addr_buf;
     krb5_fulladdr remote_addr;
 
@@ -285,8 +294,9 @@ loop_setup_signals(verto_ctx *ctx, void *handle, void (*reset)(void *))
  *
  * Arguments:
  * - address
- *      A string for the address (or hostname).  Pass NULL to use the wildcard
- *      address.  The address is parsed with k5_parse_host_string().
+ *      A string for the address (or hostname/unix domain socket).
+ *      Pass NULL to use the wildcard address for IPs.
+ *      The address is parsed with k5_parse_host_string().
  * - port
  *      What port the socket should be set to.
  * - type
@@ -305,6 +315,12 @@ loop_add_address(const char *address, int port, enum bind_type type,
     char *addr_copy = NULL;
 
     assert(!(type == RPC && rpc_data == NULL));
+
+    /* Make sure we have a valid unix domain socket */
+    if (type == UNX && (address == NULL || address[0] != '/')) {
+        krb5_klog_syslog(LOG_ERR, _("Invalid unix domain socket: %s"), address);
+        return EINVAL;
+    }
 
     /* Make sure a valid port number was passed. */
     if (port < 0 || port > 65535) {
@@ -406,6 +422,19 @@ loop_add_addresses(const char *addresses, int default_port,
         if (ret)
             goto cleanup;
 
+        /* This allows to specify also a unix socket in the *_listen option. */
+        if (type == UNX) {
+            if (host == NULL)
+                continue;
+            else if (host[0] != '/') {
+                ret = EINVAL;
+                goto cleanup;
+            }
+        } else {
+            if (host != NULL && host[0] == '/')
+                continue;
+        }
+
         ret = loop_add_address(host, port, type, rpc_data);
         if (ret)
             goto cleanup;
@@ -443,6 +472,15 @@ loop_add_rpc_service(int default_port, const char *addresses, u_long prognum,
     svc.versnum = versnum;
     svc.dispatch = dispatchfn;
     return loop_add_addresses(addresses, default_port, RPC, &svc);
+}
+
+krb5_error_code
+loop_add_unix_socket(const char *socket_paths)
+{
+    if (socket_paths == NULL)
+        return 0;
+
+    return loop_add_addresses(socket_paths, 0, UNX, NULL);
 }
 
 #define USE_AF AF_INET
@@ -582,6 +620,7 @@ static void process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev);
 static void process_tcp_connection_write(verto_ctx *ctx, verto_ev *ev);
 static void accept_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 static void process_rpc_connection(verto_ctx *ctx, verto_ev *ev);
+static void accept_unixsock_connection(verto_ctx *ctx, verto_ev *ev);
 
 /*
  * Create a socket and bind it to addr.  Ensure the socket will work with
@@ -641,6 +680,48 @@ create_server_socket(struct sockaddr *addr, int type, const char *prog,
     return 0;
 }
 
+
+static krb5_error_code
+create_unix_socket(char *path, int type, const char *prog,
+                     int *fd_out)
+{
+    struct sockaddr_un un = {
+        .sun_family = AF_UNIX,
+    };
+    size_t len = strlen(path);
+    int sock, e;
+    int ret;
+
+    *fd_out = -1;
+
+    if (len > (sizeof(un.sun_path) - 1))
+        return EINVAL;
+
+    memcpy(un.sun_path, path, len + 1);
+
+    unlink(un.sun_path);
+    sock = socket(un.sun_family, type, 0);
+    if (sock == -1) {
+        e = errno;
+        com_err(prog, e, _("Cannot create UNIX socket on %s"),
+                path);
+        return e;
+    }
+    set_cloexec_fd(sock);
+
+    ret = bind(sock, &un, sizeof(struct sockaddr_un));
+    if (ret == -1) {
+        e = errno;
+        com_err(prog, e, _("Cannot bind unix socket on %s"), path);
+        close(sock);
+        return e;
+    }
+
+    *fd_out = sock;
+
+    return 0;
+}
+
 static const int one = 1;
 
 static int
@@ -667,7 +748,8 @@ static const int bind_socktypes[] =
 {
     [UDP] = SOCK_DGRAM,
     [TCP] = SOCK_STREAM,
-    [RPC] = SOCK_STREAM
+    [RPC] = SOCK_STREAM,
+    [UNX] = SOCK_STREAM
 };
 
 /* An enum map containing conn_type (for struct connection) for each
@@ -676,7 +758,8 @@ static const enum conn_type bind_conn_types[] =
 {
     [UDP] = CONN_UDP,
     [TCP] = CONN_TCP_LISTENER,
-    [RPC] = CONN_RPC_LISTENER
+    [RPC] = CONN_RPC_LISTENER,
+    [UNX] = CONN_UNIXSOCK
 };
 
 /*
@@ -703,29 +786,40 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     int sock = -1;
 
     krb5_klog_syslog(LOG_DEBUG, _("Setting up %s socket for address %s"),
-                     bind_type_names[ba->type], paddr(sock_address));
+                     bind_type_names[ba->type],
+                     ba->type == UNX ? ba->address : paddr(sock_address));
 
     /* Create the socket. */
-    ret = create_server_socket(sock_address, bind_socktypes[ba->type], prog,
+    if (ba->type == UNX) {
+      ret = create_unix_socket(ba->address, bind_socktypes[ba->type], prog,
                                &sock);
+    } else {
+      ret = create_server_socket(sock_address, bind_socktypes[ba->type], prog,
+                                 &sock);
+    }
     if (ret)
         goto cleanup;
 
     /* Listen for backlogged connections on TCP sockets.  (For RPC sockets this
      * will be done by svc_register().) */
-    if (ba->type == TCP && listen(sock, tcp_listen_backlog) != 0) {
+    if ((ba->type == TCP || ba->type == UNX) &&
+        listen(sock, tcp_listen_backlog) != 0) {
         ret = errno;
         com_err(prog, errno, _("Cannot listen on %s server socket on %s"),
-                bind_type_names[ba->type], paddr(sock_address));
+                bind_type_names[ba->type],
+                ba->type == UNX ? ba->address : paddr(sock_address));
         goto cleanup;
     }
 
-    /* Set non-blocking I/O for UDP and TCP listener sockets. */
+    /*
+     * Set non-blocking I/O for UDP and TCP listener sockets and unix sockets.
+     */
     if (ba->type != RPC && setnbio(sock) != 0) {
         ret = errno;
         com_err(prog, errno,
                 _("cannot set listening %s socket on %s non-blocking"),
-                bind_type_names[ba->type], paddr(sock_address));
+                bind_type_names[ba->type],
+                ba->type == UNX ? ba->address : paddr(sock_address));
         goto cleanup;
     }
 
@@ -810,7 +904,8 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     static verto_callback *const verto_callbacks[] = {
         [UDP] = &process_packet,
         [TCP] = &accept_tcp_connection,
-        [RPC] = &accept_rpc_connection
+        [RPC] = &accept_rpc_connection,
+        [UNX] = &accept_unixsock_connection
     };
     krb5_error_code ret = 0;
     size_t i;
@@ -838,6 +933,21 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     for (i = 0; i < bind_addresses.n; i++) {
         addr = bind_addresses.data[i];
         hints.ai_socktype = bind_socktypes[addr.type];
+
+        /* Setup unix socket */
+        if (addr.type == UNX) {
+            ret = setup_socket(&addr, NULL, handle, prog, ctx,
+                               0, verto_callbacks[addr.type],
+                               bind_conn_types[addr.type]);
+            if (ret) {
+                krb5_klog_syslog(LOG_ERR,
+                                 _("Failed setting up a %s socket (for %s)"),
+                                 bind_type_names[addr.type],
+                                 addr.address);
+                goto cleanup;
+            }
+            continue;
+        }
 
         /* Call getaddrinfo, using a dummy port value. */
         err = getaddrinfo(addr.address, "0", &hints, &ai_list);
@@ -1518,6 +1628,57 @@ process_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 
     if (!FD_ISSET(verto_get_fd(ev), &svc_fdset))
         verto_del(ev);
+}
+
+static void
+accept_unixsock_connection(verto_ctx *ctx, verto_ev *ev)
+{
+    struct connection *newconn = NULL, *conn = NULL;
+    struct sockaddr_storage addr_s;
+    struct sockaddr *addr = (struct sockaddr *)&addr_s;
+    socklen_t addrlen = sizeof(addr_s);
+    verto_ev_flag flags;
+    verto_ev *newev;
+    int s;
+
+    conn = verto_get_private(ev);
+    s = accept(verto_get_fd(ev), addr, &addrlen);
+    if (s < 0)
+        return;
+    set_cloexec_fd(s);
+    setnbio(s), setnolinger(s);
+
+    flags = VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST;
+    if (add_fd(s, CONN_UNIXSOCK, flags, conn->handle, conn->prog, ctx,
+               process_tcp_connection_read, &newev) != 0) {
+        close(s);
+        return;
+    }
+
+    newconn = verto_get_private(newev);
+
+    snprintf(newconn->addrbuf, sizeof(newconn->addrbuf), "%s",
+             ((struct sockaddr_un *)addr)->sun_path);
+
+    newconn->addr_s = addr_s;
+    newconn->addrlen = addrlen;
+    newconn->bufsiz = 1024 * 1024;
+    newconn->start_time = time(0);
+    newconn->offset = 0;
+
+    newconn->buffer = malloc(newconn->bufsiz);
+    if (newconn->buffer == 0) {
+        com_err(conn->prog, errno,
+                _("allocating buffer for new unix connection from %s"),
+                newconn->addrbuf);
+        verto_del(newev);
+        return;
+    }
+
+    newconn->remote_addr.address = &newconn->remote_addr_buf;
+
+    SG_SET(&newconn->sgbuf[0], newconn->lenbuf, 4);
+    SG_SET(&newconn->sgbuf[1], 0, 0);
 }
 
 #endif /* INET */
