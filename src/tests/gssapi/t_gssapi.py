@@ -13,6 +13,8 @@ realm = K5Realm()
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
 
+realm.run(['./t_iakerb'])
+
 ### Test acceptor name behavior.
 
 # Create some host-based principals and put most of them into the

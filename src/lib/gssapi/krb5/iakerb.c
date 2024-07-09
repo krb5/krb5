@@ -283,6 +283,53 @@ cleanup:
     return code;
 }
 
+/* Generate a response to a realm discovery request. */
+static krb5_error_code
+iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
+                      gss_buffer_t output_token)
+{
+    krb5_error_code ret;
+    OM_uint32 dummy;
+    krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)verifier_cred;
+    krb5_data realm = empty_data(), reply = empty_data();
+    krb5_error error = { 0 };
+    char *defrealm = NULL;
+
+    /* Get the acceptor realm from the verifier cred if we can; otherwise try
+     * to use the default realm. */
+    if (cred != NULL && cred->name != NULL &&
+        cred->name->princ->realm.length > 0) {
+        realm = cred->name->princ->realm;
+    } else {
+        ret = krb5_get_default_realm(ctx->k5c, &defrealm);
+        if (ret) {
+            /* Generate an error reply if there is no default realm. */
+            error.error = KRB_ERR_GENERIC;
+            ret = krb5_mk_error(ctx->k5c, &error, &reply);
+            if (ret)
+                goto cleanup;
+        } else {
+            realm = string2data(defrealm);
+        }
+    }
+
+    ret = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
+    if (ret)
+        goto cleanup;
+    ret = iakerb_save_token(ctx, output_token);
+    if (ret)
+        goto cleanup;
+
+    ctx->count++;
+
+cleanup:
+    if (ret)
+        gss_release_buffer(&dummy, output_token);
+    krb5_free_default_realm(ctx->k5c, defrealm);
+    krb5_free_data_contents(ctx->k5c, &reply);
+    return ret;
+}
+
 /*
  * Parse the IAKERB token in input_token and send the contained KDC
  * request to the KDC for the realm.
@@ -290,7 +337,7 @@ cleanup:
  * Wrap the KDC reply in output_token.
  */
 static krb5_error_code
-iakerb_acceptor_step(iakerb_ctx_id_t ctx,
+iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
                      const gss_buffer_t input_token,
                      gss_buffer_t output_token)
 {
@@ -313,14 +360,18 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
-    if (realm.length == 0 || request.length == 0) {
-        code = KRB5_BAD_MSIZE;
-        goto cleanup;
-    }
-
     code = iakerb_save_token(ctx, input_token);
     if (code != 0)
         goto cleanup;
+
+    if (realm.length == 0 && request.length == 0) {
+        /* This is a realm discovery request. */
+        code = iakerb_acceptor_realm(ctx, verifier_cred, output_token);
+        goto cleanup;
+    } else if (realm.length == 0 || request.length == 0) {
+        code = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     for (tcp_only = 0; tcp_only <= 1; tcp_only++) {
         use_primary = 0;
@@ -770,7 +821,8 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             major_status = GSS_S_DEFECTIVE_TOKEN;
             goto cleanup;
         }
-        code = iakerb_acceptor_step(ctx, input_token, output_token);
+        code = iakerb_acceptor_step(ctx, verifier_cred_handle, input_token,
+                                    output_token);
         if (code == (OM_uint32)KRB5_BAD_MSIZE)
             major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)
