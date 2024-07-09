@@ -151,6 +151,8 @@ finish_realm(kdc_realm_t *rdp)
         free(rdp->realm_listen);
     if (rdp->realm_tcp_listen)
         free(rdp->realm_tcp_listen);
+    if (rdp->realm_unix_listen)
+        free(rdp->realm_unix_listen);
     if (rdp->realm_keytab)
         krb5_kt_close(rdp->realm_context, rdp->realm_keytab);
     if (rdp->realm_hostbased)
@@ -279,6 +281,11 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     if (!rdp->realm_tcp_listen) {
         kret = ENOMEM;
         goto whoops;
+    }
+    hierarchy[2] = KRB5_CONF_KDC_UNIX_LISTEN;
+    if (krb5_aprof_get_string(aprof, hierarchy, TRUE,
+                              &rdp->realm_unix_listen)) {
+        rdp->realm_unix_listen = NULL;
     }
     /* Handle stash file */
     hierarchy[2] = KRB5_CONF_KEY_STASH_FILE;
