@@ -248,6 +248,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_KDC_TCP_LISTEN               "kdc_tcp_listen"
 #define KRB5_CONF_KDC_TCP_LISTEN_BACKLOG       "kdc_tcp_listen_backlog"
 #define KRB5_CONF_KDC_TIMESYNC                 "kdc_timesync"
+#define KRB5_CONF_KDC_UNIXSOCK_LISTEN          "kdc_unixsock_listen"
 #define KRB5_CONF_KEY_STASH_FILE               "key_stash_file"
 #define KRB5_CONF_KPASSWD_LISTEN               "kpasswd_listen"
 #define KRB5_CONF_KPASSWD_PORT                 "kpasswd_port"

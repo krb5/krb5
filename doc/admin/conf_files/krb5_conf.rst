@@ -530,20 +530,21 @@ following tags may be specified in the realm's subsection:
     been set to ``FILE:/tmp/my_proxy.pem``.
 
 **kdc**
-    The name or address of a host running a KDC for that realm.  An
-    optional port number, separated from the hostname by a colon, may
-    be included.  If the name or address contains colons (for example,
-    if it is an IPv6 address), enclose it in square brackets to
+    The name or address of a host running a KDC for the realm, or a
+    UNIX domain socket path of a locally running KDC.  An optional
+    port number, separated from the hostname by a colon, may be
+    included.  If the name or address contains colons (for example, if
+    it is an IPv6 address), enclose it in square brackets to
     distinguish the colon from a port separator.  For your computer to
     be able to communicate with the KDC for each realm, this tag must
     be given a value in each realm subsection in the configuration
     file, or there must be DNS SRV records specifying the KDCs.
 
 **kpasswd_server**
-    Points to the server where all the password changes are performed.
-    If there is no such entry, DNS will be queried (unless forbidden
-    by **dns_lookup_kdc**).  Finally, port 464 on the **admin_server**
-    host will be tried.
+    The location of the password change server for the realm, using
+    the same syntax as **kdc**.  If there is no such entry, DNS will
+    be queried (unless forbidden by **dns_lookup_kdc**).  Finally,
+    port 464 on the **admin_server** host will be tried.
 
 **master_kdc**
     The name for **primary_kdc** prior to release 1.19.  Its value is
