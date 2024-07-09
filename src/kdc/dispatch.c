@@ -116,7 +116,7 @@ dispatch(void *cb, const struct sockaddr *local_addr,
     if (kdc_check_lookaside(kdc_err_context, pkt, &response)) {
         /* a hit! */
         const char *name = 0;
-        char buf[46];
+        char buf[128];
 
         k5_print_addr(remote_addr, buf, sizeof(buf));
         if (name == 0)

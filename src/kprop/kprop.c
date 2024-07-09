@@ -269,8 +269,8 @@ open_connection(krb5_context context, char *host, int *fd_out)
         com_err(progname, errno, _("while getting local socket address"));
         exit(1);
     }
-    if (k5_sockaddr_to_address(ss2sa(&my_sin), &addr) != 0)
-        abort();
+    if (k5_sockaddr_to_address(ss2sa(&my_sin), FALSE, &addr) != 0)
+        addr = k5_addr_directional_init;
     retval = krb5_copy_addr(context, &addr, &sender_addr);
     if (retval) {
         com_err(progname, retval, _("while converting local address"));
