@@ -32,7 +32,6 @@
 #include "kdc_audit.h"
 #include "extern.h"
 #include "policy.h"
-#include "kdc5_err.h"
 #include "kdb_kt.h"
 #include "net-server.h"
 #ifdef HAVE_NETINET_IN_H
@@ -932,8 +931,6 @@ int main(int argc, char **argv)
        file, and not to stderr.  We use the kdc_err wrapper around
        com_err to ensure that the error state exists in the context
        known to the krb5_klog callback. */
-
-    initialize_kdc5_error_table();
 
     /*
      * Scan through the argument list

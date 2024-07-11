@@ -1,7 +1,6 @@
 #
 # Generated makefile dependencies follow.
 #
-$(OUTPRE)kdc5_err.$(OBJEXT): $(COM_ERR_DEPS) kdc5_err.c
 $(OUTPRE)authind.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
@@ -218,9 +217,8 @@ $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5/audit_plugin.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/kdcpreauth_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h extern.h kdc5_err.h \
-  kdc_audit.h kdc_util.h main.c policy.h realm_data.h \
-  reqstate.h
+  $(top_srcdir)/include/socket-utils.h extern.h kdc_audit.h \
+  kdc_util.h main.c policy.h realm_data.h reqstate.h
 $(OUTPRE)ndr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
