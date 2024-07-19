@@ -26,6 +26,7 @@ jobs:
                     - name: linux-gcc
                       os: ubuntu-latest
                       compiler: gcc
+                      makevars: CPPFLAGS=-D_FORTIFY_SOURCE=3
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
