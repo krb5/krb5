@@ -987,6 +987,11 @@ int main(int argc, char **argv)
             if (retval)
                 goto net_init_error;
         }
+        if (*realm->realm_unix_listen != '\0') {
+            retval = loop_add_unix_socket(realm->realm_unix_listen);
+            if (retval)
+                goto net_init_error;
+        }
     }
 
     if (workers == 0) {
