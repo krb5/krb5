@@ -525,6 +525,8 @@ kdb5_use_mkey(int argc, char *argv[])
         goto cleanup_return;
     }
 
+    master_entry->mask |= KADM5_TL_DATA;
+
     if ((retval = krb5_db_put_principal(util_context, master_entry))) {
         com_err(progname, retval,
                 _("while adding master key entry to the database"));
