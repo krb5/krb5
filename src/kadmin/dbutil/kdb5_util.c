@@ -600,6 +600,10 @@ add_random_key(int argc, char **argv)
         exit_status++;
         return;
     }
+
+    dbent->mask |= KADM5_KEY_DATA | KADM5_KVNO | KADM5_ATTRIBUTES |
+                   KADM5_LAST_PWD_CHANGE;
+
     ret = krb5_db_put_principal(util_context, dbent);
     krb5_db_free_principal(util_context, dbent);
     if (ret) {
