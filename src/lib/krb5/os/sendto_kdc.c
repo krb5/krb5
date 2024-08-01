@@ -1470,7 +1470,7 @@ service_fds(krb5_context context, struct select_state *selstate,
 }
 
 /*
- * Current worst-case timeout behavior:
+ * Current timeout behavior when no request_timeout is set:
  *
  * First pass, 1s per udp or tcp server, plus 2s at end.
  * Second pass, 1s per udp server, plus 4s.
@@ -1489,9 +1489,9 @@ service_fds(krb5_context context, struct select_state *selstate,
  *
  * Note that if you try to reach two ports on one server, it counts as two.
  *
- * There is one exception to the above rules.  Whenever a TCP connection is
- * established, we wait up to ten seconds for it to finish or fail before
- * moving on.  This reduces network traffic significantly in a TCP environment.
+ * If a TCP connection is established, we wait on it indefinitely (or until
+ * request_timeout has elapsed) and do not attempt to contact additional
+ * servers.
  */
 
 krb5_error_code
