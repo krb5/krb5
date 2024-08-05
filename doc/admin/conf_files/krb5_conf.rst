@@ -221,6 +221,12 @@ The libdefaults section may contain any of the following relations:
     data), and anything the fake KDC sends will not be trusted without
     verification using some secret that it won't know.
 
+**dns_lookup_realm**
+    Indicate whether DNS TXT records should be used to map hostnames
+    to realm names for hostnames not listed in the [domain_realm]
+    section, and to determine the default realm if **default_realm**
+    is not set.  The default value is false.
+
 **dns_uri_lookup**
     Indicate whether DNS URI records should be used to locate the KDCs
     and other servers for a realm, if they are not listed in the
