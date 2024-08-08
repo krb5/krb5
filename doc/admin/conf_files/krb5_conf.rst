@@ -551,6 +551,10 @@ following tags may be specified in the realm's subsection:
     the updated database has not been propagated to the replica
     servers yet.  New in release 1.19.
 
+**sitename**
+    Specifies the name of the host's site for the purpose of DNS-based
+    KDC discovery for this realm.  New in release 1.22.
+
 **v4_instance_convert**
     This subsection allows the administrator to configure exceptions
     to the **default_domain** mapping rule.  It contains V4 instances

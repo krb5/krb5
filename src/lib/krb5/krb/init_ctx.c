@@ -66,7 +66,7 @@ static krb5_enctype default_enctype_list[] = {
 };
 
 #if (defined(_WIN32))
-extern krb5_error_code krb5_vercheck();
+extern krb5_error_code krb5_vercheck(void);
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 

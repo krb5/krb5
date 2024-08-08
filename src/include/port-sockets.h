@@ -111,7 +111,7 @@ static __inline void TranslatedWSASetLastError(int posix_error)
  * Translate Winsock errors to their POSIX counterparts.  This is necessary for
  * MSVC 2010+, where both Winsock and POSIX errors are defined.
  */
-static __inline int TranslatedWSAGetLastError()
+static __inline int TranslatedWSAGetLastError(void)
 {
     int err = WSAGetLastError();
     switch (err) {

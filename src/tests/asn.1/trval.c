@@ -72,6 +72,7 @@
 #define PRIM_REAL 0x09          /* Real */
 #define PRIM_ENUM 0x0a          /* Enumerated type */
 #define PRIM_ENCR 0x0b          /* Encrypted */
+#define PRIM_UTF8 0x0c          /* UTF8String */
 #define CONS_SEQ  0x10          /* SEQUENCE/SEQUENCE OF */
 #define CONS_SET  0x11          /* SET/SET OF */
 #define DEFN_NUMS 0x12          /* Numeric String */
@@ -321,7 +322,7 @@ do_prim_string(FILE *fp, int tag, unsigned char *enc, int len, int lev)
     /*
      * Only try this printing function with "reasonable" types
      */
-    if ((tag < DEFN_NUMS) && (tag != PRIM_OCTS))
+    if ((tag < DEFN_NUMS) && (tag != PRIM_OCTS) && (tag != PRIM_UTF8))
         return 0;
 
     for (i=0; i < len; i++)
@@ -433,6 +434,7 @@ struct typestring_table univ_types[] = {
     { PRIM_REAL, -1, "Real"},
     { PRIM_ENUM, -1, "Enumerated type"},
     { PRIM_ENCR, -1, "Encrypted"},
+    { PRIM_UTF8, -1, "UTF8String"},
     { CONS_SEQ, -1, "Sequence/Sequence Of"},
     { CONS_SET, -1, "Set/Set Of"},
     { DEFN_NUMS, -1, "Numeric String"},

@@ -124,18 +124,22 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
         return 0;
     }
     if (ch == '}') {
-        if (state->group_level == 0)
+        if (state->group_level < 2)
             return PROF_EXTRA_CBRACE;
         if (*(cp+1) == '*')
             profile_make_node_final(state->current_section);
-        retval = profile_get_node_parent(state->current_section,
-                                         &state->current_section);
-        if (retval)
-            return retval;
         state->group_level--;
         /* Check if we are done discarding values from a subsection. */
         if (state->group_level < state->discard)
             state->discard = 0;
+        /* Ascend to the current node's parent, unless the subsection we ended
+         * was discarded (in which case we never descended). */
+        if (!state->discard) {
+            retval = profile_get_node_parent(state->current_section,
+                                             &state->current_section);
+            if (retval)
+                return retval;
+        }
         return 0;
     }
     /*

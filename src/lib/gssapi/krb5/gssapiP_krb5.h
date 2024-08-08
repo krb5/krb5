@@ -247,8 +247,6 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_authdata **authdata;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
-extern g_set kg_vdb;
-
 #ifndef LEAN_CLIENT
 extern k5_mutex_t gssint_krb5_keytab_lock;
 #endif /* LEAN_CLIENT */
@@ -1291,7 +1289,7 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
     return code;
 }
 
-#define KRB5_GSS_EXTS_IAKERB_FINISHED 1
+#define GSS_EXTS_FINISHED 2
 
 
 /* Credential store extensions */

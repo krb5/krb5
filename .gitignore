@@ -433,6 +433,18 @@ local.properties
 
 /src/tests/create/kdb5_mkdums
 
+/src/tests/fuzzing/fuzz_chpw
+/src/tests/fuzzing/fuzz_gss
+/src/tests/fuzzing/fuzz_json
+/src/tests/fuzzing/fuzz_krad
+/src/tests/fuzzing/fuzz_krb5_ticket
+/src/tests/fuzzing/fuzz_marshal_cred
+/src/tests/fuzzing/fuzz_marshal_princ
+/src/tests/fuzzing/fuzz_ndr
+/src/tests/fuzzing/fuzz_pac
+/src/tests/fuzzing/fuzz_profile
+/src/tests/fuzzing/fuzz_util
+
 /src/tests/gss-threads/gss-client
 /src/tests/gss-threads/gss-server
 
@@ -451,6 +463,7 @@ local.properties
 /src/tests/gssapi/t_export_cred
 /src/tests/gssapi/t_export_name
 /src/tests/gssapi/t_gssexts
+/src/tests/gssapi/t_iakerb
 /src/tests/gssapi/t_imp_cred
 /src/tests/gssapi/t_imp_name
 /src/tests/gssapi/t_invalid

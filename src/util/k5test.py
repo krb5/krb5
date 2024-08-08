@@ -1339,14 +1339,14 @@ _passes = [
 
     # Exercise the DES3 enctype.
     ('des3', None,
-     {'libdefaults': {'permitted_enctypes': 'des3 aes256-sha1'}},
+     {'libdefaults': {'permitted_enctypes': 'des3', 'allow_des3': 'true'}},
      {'realms': {'$realm': {
                     'supported_enctypes': 'des3-cbc-sha1:normal',
                     'master_key_type': 'des3-cbc-sha1'}}}),
 
     # Exercise the arcfour enctype.
     ('arcfour', None,
-     {'libdefaults': {'permitted_enctypes': 'rc4 aes256-sha1'}},
+     {'libdefaults': {'permitted_enctypes': 'rc4', 'allow_rc4': 'true'}},
      {'realms': {'$realm': {
                     'supported_enctypes': 'arcfour-hmac:normal',
                     'master_key_type': 'arcfour-hmac'}}}),

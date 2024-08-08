@@ -545,11 +545,11 @@ void profile_dereference_data_locked(prf_data_t data)
         profile_free_file_data(data);
 }
 
-void profile_lock_global()
+void profile_lock_global(void)
 {
     k5_mutex_lock(&g_shared_trees_mutex);
 }
-void profile_unlock_global()
+void profile_unlock_global(void)
 {
     k5_mutex_unlock(&g_shared_trees_mutex);
 }

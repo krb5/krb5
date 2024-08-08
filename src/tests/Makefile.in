@@ -1,6 +1,7 @@
 mydir=tests
 BUILDTOP=$(REL)..
-SUBDIRS = asn.1 create hammer verify gssapi shlib gss-threads misc threads
+SUBDIRS = asn.1 create hammer verify gssapi shlib gss-threads misc threads \
+	@fuzz_dir@
 
 RUN_DB_TEST = $(RUN_SETUP) KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf \
 	GSS_MECH_CONFIG=mech.conf LC_ALL=C $(VALGRIND)

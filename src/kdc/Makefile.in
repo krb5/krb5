@@ -8,7 +8,6 @@ all: krb5kdc rtest
 
 LOCALINCLUDES = -I.
 SRCS= \
-	kdc5_err.c \
 	$(srcdir)/authind.c \
 	$(srcdir)/cammac.c \
 	$(srcdir)/dispatch.c \
@@ -35,7 +34,6 @@ EXTRADEPSRCS= \
 	$(srcdir)/t_replay.c
 
 OBJS= \
-	kdc5_err.o \
 	authind.o \
 	cammac.o \
 	dispatch.o \
@@ -59,14 +57,6 @@ OBJS= \
 
 RT_OBJS= rtest.o \
 	kdc_transit.o
-
-depend: kdc5_err.c kdc5_err.h
-
-kdc5_err.c: kdc5_err.et
-
-kdc5_err.h: kdc5_err.et
-
-kdc5_err.o: kdc5_err.h
 
 krb5kdc: $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB) $(VERTO_DEPLIB)
 	$(CC_LINK) -o krb5kdc $(OBJS) $(APPUTILS_LIB) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS) $(VERTO_LIBS)
@@ -100,5 +90,4 @@ install:
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 
 clean:
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest t_replay.o t_replay
-	$(RM) t_ndr.o t_ndr
+	$(RM) krb5kdc rtest.o rtest t_replay.o t_replay t_ndr.o t_ndr

@@ -176,13 +176,15 @@ struct srv_dns_entry {
 krb5_error_code
 krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
                              const char *service, const char *protocol,
+                             const char *sitename,
                              struct srv_dns_entry **answers);
 
 void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 
 krb5_error_code
 k5_make_uri_query(krb5_context context, const krb5_data *realm,
-                  const char *service, struct srv_dns_entry **answers);
+                  const char *service, const char *sitename,
+                  struct srv_dns_entry **answers);
 
 krb5_error_code k5_try_realm_txt_rr(krb5_context context, const char *prefix,
                                     const char *name, char **realm);

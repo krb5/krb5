@@ -293,6 +293,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_REJECT_BAD_TRANSIT           "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME               "renew_lifetime"
 #define KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT    "restrict_anonymous_to_tgt"
+#define KRB5_CONF_SITENAME                     "sitename"
 #define KRB5_CONF_SUPPORTED_ENCTYPES           "supported_enctypes"
 #define KRB5_CONF_SPAKE_PREAUTH_INDICATOR      "spake_preauth_indicator"
 #define KRB5_CONF_SPAKE_PREAUTH_KDC_CHALLENGE  "spake_preauth_kdc_challenge"
@@ -2141,10 +2142,6 @@ void KRB5_CALLCONV krb5_free_pa_data(krb5_context, krb5_pa_data **);
 void KRB5_CALLCONV krb5_free_tkt_authent(krb5_context, krb5_tkt_authent *);
 void KRB5_CALLCONV krb5_free_enc_data(krb5_context, krb5_enc_data *);
 krb5_error_code krb5_set_config_files(krb5_context, const char **);
-
-krb5_error_code KRB5_CALLCONV krb5_get_default_config_files(char ***filenames);
-
-void KRB5_CALLCONV krb5_free_config_files(char **filenames);
 
 krb5_error_code krb5_rd_req_decoded(krb5_context, krb5_auth_context *,
                                     const krb5_ap_req *, krb5_const_principal,

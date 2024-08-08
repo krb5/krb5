@@ -156,7 +156,8 @@ _kerberos-master._udp
 
     If you have only one KDC, or for whatever reason there is no
     accessible KDC that would get database changes faster than the
-    others, you do not need to define this entry.  _kerberos-adm._tcp
+    others, you do not need to define this entry.
+_kerberos-adm._tcp
     This should list port 749 on your primary KDC.  Support for it is
     not complete at this time, but it will eventually be used by the
     :ref:`kadmin(1)` program and related utilities.  For now, you will
@@ -194,6 +195,13 @@ using the **kdc**, **master_kdc**, **admin_server**, and
 :ref:`krb5.conf(5)`.  Even if some clients will be configured with
 explicit server locations, providing SRV records will still benefit
 unconfigured clients, and be useful for other sites.
+
+Clients can be configured with the **sitename** realm variable (new in
+release 1.22).  If a site name is set, the client first attempts SRV
+record lookups with ".*sitename*._sites" inserted after the service
+and protocol name and before the Kerberos realm.  Site-specific
+records may indicate servers more proximal to the client, allowing for
+faster access.
 
 
 .. _kdc_discovery:
@@ -242,6 +250,9 @@ URI lookups are enabled by default, and can be disabled by setting
 :ref:`krb5.conf(5)` to False.  When enabled, URI lookups take
 precedence over SRV lookups, falling back to SRV lookups if no URI
 records are found.
+
+The **sitename** variable in the :ref:`realms` section of
+:ref:`krb5.conf(5)` applies to URI lookups as well as SRV lookups.
 
 
 .. _db_prop:
