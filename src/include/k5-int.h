@@ -2403,4 +2403,9 @@ krb5_boolean
 k5_sname_compare(krb5_context context, krb5_const_principal sname,
                  krb5_const_principal princ);
 
+/* Generate an HMAC-MD5 keyed checksum as defined by RFC 2104. */
+krb5_error_code
+k5_hmac_md5(const krb5_data *key, const krb5_crypto_iov *data, size_t num_data,
+            krb5_data *output);
+
 #endif /* _KRB5_INT_H */

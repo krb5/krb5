@@ -172,6 +172,9 @@ main(int argc, const char **argv)
     krb5_data username, password;
     krb5_boolean auth = FALSE;
     krb5_context ctx;
+    const krad_packet *dupreq;
+    const krb5_data *encpkt;
+    krad_packet *decreq;
 
     username = string2data("testUser");
 
@@ -184,9 +187,17 @@ main(int argc, const char **argv)
 
     password = string2data("accept");
     noerror(make_packet(ctx, &username, &password, &packets[ACCEPT_PACKET]));
+    encpkt = krad_packet_encode(packets[ACCEPT_PACKET]);
+    noerror(krad_packet_decode_request(ctx, "foo", encpkt, NULL, NULL,
+                                       &dupreq, &decreq));
+    krad_packet_free(decreq);
 
     password = string2data("reject");
     noerror(make_packet(ctx, &username, &password, &packets[REJECT_PACKET]));
+    encpkt = krad_packet_encode(packets[REJECT_PACKET]);
+    noerror(krad_packet_decode_request(ctx, "foo", encpkt, NULL, NULL,
+                                       &dupreq, &decreq));
+    krad_packet_free(decreq);
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
