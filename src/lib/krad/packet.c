@@ -565,6 +565,8 @@ krad_packet_decode_request(krb5_context ctx, const char *secret,
         retval = verify_msgauth(secret, *reqpkt, pkt_auth(*reqpkt));
         if (retval)
             return retval;
+    } else if (requires_msgauth(secret, pkt_code_get(*reqpkt))) {
+        return ENODATA;
     }
 
     if (cb != NULL) {
@@ -619,6 +621,8 @@ krad_packet_decode_response(krb5_context ctx, const char *secret,
                 retval = verify_msgauth(secret, rsp, pkt_auth(req));
                 if (retval != 0)
                     continue;
+            } else if (requires_msgauth(secret, pkt_code_get(rsp))) {
+                continue;
             }
 
             break;
