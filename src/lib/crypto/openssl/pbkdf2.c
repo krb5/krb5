@@ -25,7 +25,7 @@
  */
 
 #include "crypto_int.h"
-
+#include "gost_helper.h"
 #ifdef K5_OPENSSL_HMAC
 
 #include <openssl/x509.h>
@@ -47,6 +47,10 @@ krb5int_pbkdf2_hmac(const struct krb5_hash_provider *hash,
         md = EVP_sha256();
     else if (hash == &krb5int_hash_sha384)
         md = EVP_sha384();
+    else if (hash == &krb5int_hash_stribog256)
+        md = EVP_gostR3411_2012_256();
+    else if (hash == &krb5int_hash_stribog512)
+        md = EVP_gostR3411_2012_512();
     if (md == NULL)
         return KRB5_CRYPTO_INTERNAL;
 

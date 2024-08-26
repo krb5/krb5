@@ -35,6 +35,7 @@
 #include "k5-hex.h"
 #include "pkinit.h"
 #include <dirent.h>
+#include <openssl/engine.h>
 
 #include <openssl/bn.h>
 #include <openssl/dh.h>
@@ -1404,6 +1405,24 @@ get_key_cb(char *buf, int size, int rwflag, void *userdata)
     return (int)rdat.length;
 }
 
+static ENGINE *eng = NULL;
+
+static void
+krb5int_init_gost()
+{
+    if (eng) return;
+    OPENSSL_add_all_algorithms_conf();
+    ERR_load_crypto_strings();
+
+    if (!(eng = ENGINE_by_id("gost"))) {
+        printf("Engine gost doesnt exist");
+        return;
+    }
+
+    ENGINE_init(eng);
+    ENGINE_set_default(eng, ENGINE_METHOD_ALL);
+}
+
 static krb5_error_code
 get_key(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
         char *filename, const char *fsname, EVP_PKEY **retkey,
@@ -1414,6 +1433,8 @@ get_key(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
     struct get_key_cb_data cb_data;
     int code;
     krb5_error_code retval;
+
+    krb5int_init_gost();
 
     if (filename == NULL || retkey == NULL)
         return EINVAL;
@@ -1711,6 +1732,66 @@ cert_sig_alg(X509 *cert)
     return id;
 }
 
+static int
+pkey_to_digest_nid(const EVP_PKEY* const pkey)
+{
+    switch (EVP_PKEY_id(pkey)) {
+    case NID_id_GostR3410_2012_256:
+        return NID_id_GostR3411_2012_256;
+    case NID_id_GostR3410_2012_512:
+        return NID_id_GostR3411_2012_512;
+    case NID_id_GostR3410_2001:
+        return NID_id_GostR3411_94;
+    default:
+        return NID_sha1;
+    }
+}
+
+static int
+get_digest_nid(const pkinit_identity_crypto_context idcryptctx)
+{
+    switch (NID_id_GostR3410_2012_256) {
+    case NID_id_GostR3410_2012_256:
+        return NID_id_GostR3411_2012_256;
+    case NID_id_GostR3410_2012_512:
+        return NID_id_GostR3411_2012_512;
+    case NID_id_GostR3410_2001:
+        return NID_id_GostR3411_94;
+    default:
+        return NID_sha1;
+    }
+}
+
+static int
+get_alg_nid(const pkinit_identity_crypto_context idcryptctx)
+{
+    switch (NID_id_GostR3410_2012_256) {
+    case NID_id_GostR3410_2012_256:
+        return NID_id_tc26_signwithdigest_gost3410_2012_256;
+    case NID_id_GostR3410_2012_512:
+        return NID_id_tc26_signwithdigest_gost3410_2012_512;
+    case NID_id_GostR3410_2001:
+        return NID_id_tc26_signwithdigest;
+    default:
+        return NID_sha1WithRSAEncryption;
+    }
+}
+
+static CK_MECHANISM_TYPE
+get_mech_type(const pkinit_identity_crypto_context idcryptctx)
+{
+    switch (NID_id_GostR3410_2012_256) {
+    case NID_id_GostR3410_2012_256:
+        return CKM_GOSTR3410_WITH_GOSTR3411_12_256;
+    case NID_id_GostR3410_2012_512:
+        return CKM_GOSTR3410_WITH_GOSTR3411_12_512;
+    case NID_id_GostR3410_2001:
+        return CKM_GOSTR3410_WITH_GOSTR3411;
+    default:
+        return CKM_RSA_PKCS;
+    }
+}
+
 krb5_error_code
 cms_signeddata_create(krb5_context context,
                       pkinit_plg_crypto_context plg_cryptoctx,
@@ -1814,7 +1895,7 @@ cms_signeddata_create(krb5_context context,
         /* will not fill-out EVP_PKEY because it's on the smartcard */
 
         /* Set digest algs */
-        p7si->digest_alg->algorithm = OBJ_nid2obj(NID_sha256);
+        p7si->digest_alg->algorithm = OBJ_nid2obj(get_digest_nid(id_cryptoctx));
 
         if (p7si->digest_alg->parameter != NULL)
             ASN1_TYPE_free(p7si->digest_alg->parameter);
@@ -1826,7 +1907,7 @@ cms_signeddata_create(krb5_context context,
         if (p7si->digest_enc_alg->parameter != NULL)
             ASN1_TYPE_free(p7si->digest_enc_alg->parameter);
         sig_alg_id = cert_sig_alg(id_cryptoctx->my_cert);
-        p7si->digest_enc_alg->algorithm = OBJ_nid2obj(sig_alg_id);
+        p7si->digest_enc_alg->algorithm = OBJ_nid2obj(get_alg_nid(id_cryptoctx));
         if (!(p7si->digest_enc_alg->parameter = ASN1_TYPE_new()))
             goto cleanup;
         p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
@@ -1836,7 +1917,7 @@ cms_signeddata_create(krb5_context context,
         ctx = EVP_MD_CTX_new();
         if (ctx == NULL)
             goto cleanup;
-        EVP_DigestInit_ex(ctx, EVP_sha256(), NULL);
+        EVP_DigestInit_ex(ctx, EVP_get_digestbynid(get_digest_nid(id_cryptoctx)), NULL);
         EVP_DigestUpdate(ctx, data, data_len);
         EVP_DigestFinal_ex(ctx, md_data, &md_len);
         EVP_MD_CTX_free(ctx);
@@ -1857,7 +1938,7 @@ cms_signeddata_create(krb5_context context,
         /* create the signature over signed attributes. get DER encoded value */
         /* This is the place where smartcard signature needs to be calculated */
         sk = p7si->auth_attr;
-        alen = ASN1_item_i2d((ASN1_VALUE *)sk, &abuf,
+        alen = (unsigned int )ASN1_item_i2d((ASN1_VALUE *) sk, &abuf,
                              ASN1_ITEM_rptr(PKCS7_ATTR_SIGN));
         if (abuf == NULL)
             goto cleanup2;
@@ -2203,6 +2284,8 @@ cms_signeddata_verify(krb5_context context,
             goto cleanup;
         out = BIO_new(BIO_s_mem());
         if (CMS_verify(cms, NULL, store, NULL, out, flags) == 0) {
+            //?
+            //?
             if (ERR_peek_last_error() == CMS_R_VERIFICATION_FAILURE)
                 retval = KRB5KDC_ERR_INVALID_SIG;
             else
@@ -3098,6 +3181,7 @@ pkinit_openssl_init(void)
     /* Initialize OpenSSL. */
     ERR_load_crypto_strings();
     OpenSSL_add_all_algorithms();
+    krb5int_init_gost();
     return 0;
 }
 
@@ -3672,13 +3756,13 @@ pkinit_find_private_key(krb5_context context,
 #ifdef PKINIT_USE_KEY_USAGE
     CK_BBOOL true_false;
 #endif
-
+//?
     cls = CKO_PRIVATE_KEY;
     attrs[nattrs].type = CKA_CLASS;
     attrs[nattrs].pValue = &cls;
     attrs[nattrs].ulValueLen = sizeof cls;
     nattrs++;
-
+//?
 #ifdef PKINIT_USE_KEY_USAGE
     /*
      * Some cards get confused if you try to specify a key usage,
@@ -3854,10 +3938,11 @@ pkinit_sign_data_pkcs11(krb5_context context,
 {
     krb5_error_code ret;
     CK_OBJECT_HANDLE obj;
-    CK_ULONG len;
+    CK_ULONG len = 0;
     CK_MECHANISM mech;
     CK_SESSION_HANDLE session;
     CK_FUNCTION_LIST_PTR p11;
+    //?
     CK_ATTRIBUTE attr;
     CK_KEY_TYPE keytype;
     CK_RV rv;

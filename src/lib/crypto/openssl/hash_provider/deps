@@ -11,4 +11,4 @@ hash_evp.so hash_evp.po $(OUTPRE)hash_evp.$(OBJEXT): \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h hash_evp.c
+  $(top_srcdir)/include/socket-utils.h $(srcdir)/../gost_helper.h hash_evp.c

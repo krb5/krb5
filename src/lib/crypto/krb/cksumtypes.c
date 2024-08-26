@@ -106,6 +106,31 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_aes256, &krb5int_hash_sha384,
       krb5int_etm_checksum, NULL,
       48, 24, 0 },
+
+    { CKSUMTYPE_STRIBOG_256_AES256,
+      "stribog-256-aes256", { 0 }, "STRIBOG256 AES256 key",
+      &krb5int_enc_aes256, &krb5int_hash_stribog256,
+      krb5int_etm_checksum, NULL,
+      64, 32, 0 },
+
+    { CKSUMTYPE_STRIBOG_512_AES256,
+      "stribog-512-aes256", { 0 }, "STRIBOG512 AES256 key",
+      &krb5int_enc_aes256, &krb5int_hash_stribog512,
+      krb5int_etm_checksum, NULL,
+      64, 64, 0 },
+
+    { CKSUMTYPE_STRIBOG_256_GOST89,
+      "stribog-256-gost89", { 0 }, "STRIBOG256 GOST89 key",
+      &krb5int_enc_gost89, &krb5int_hash_stribog256,
+      krb5int_dk_checksum, NULL,
+      64, 32, 0 },
+
+    { CKSUMTYPE_STRIBOG_512_GOST89,
+      "stribog-512-gost89", { 0 }, "STRIBOG512 GOST89 key",
+      &krb5int_enc_gost89, &krb5int_hash_stribog512,
+      krb5int_dk_checksum, NULL,
+      64, 64, 0 },
+
 };
 
 const size_t krb5int_cksumtypes_length =

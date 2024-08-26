@@ -52,6 +52,7 @@
 
 
 #include "crypto_int.h"
+#include "gost_helper.h"
 
 #ifdef K5_OPENSSL_HMAC
 
@@ -115,6 +116,10 @@ map_digest(const struct krb5_hash_provider *hash)
         return EVP_md5();
     else if (hash == &krb5int_hash_md4)
         return EVP_md4();
+    else if (hash == &krb5int_hash_stribog256)
+        return EVP_gostR3411_2012_256();
+    else if (hash == &krb5int_hash_stribog512)
+        return EVP_gostR3411_2012_512();
     else
         return NULL;
 }

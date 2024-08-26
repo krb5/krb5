@@ -68,6 +68,8 @@ krb5int_hash_md4
 krb5int_hash_md5
 krb5int_hash_sha256
 krb5int_hash_sha384
+krb5int_hash_stribog256
+krb5int_hash_stribog512
 krb5int_enc_arcfour
 krb5int_hmac
 krb5_k_create_key
@@ -94,6 +96,7 @@ krb5int_enc_aes128
 krb5int_enc_aes256
 krb5int_enc_camellia128
 krb5int_enc_camellia256
+krb5int_enc_gost89
 krb5int_derive_key
 krb5int_derive_random
 k5_sha256

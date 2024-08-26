@@ -3,22 +3,25 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../../krb $(CRYPTO_IMPL_CFLAGS)
 
 STLIBOBJS= \
-	des3.o 	\
-	rc4.o 	\
-	aes.o   \
-	camellia.o
+        des3.o      \
+        rc4.o       \
+        aes.o       \
+        camellia.o  \
+        gost.o
 
 OBJS= \
 	$(OUTPRE)des3.$(OBJEXT) 	\
-	$(OUTPRE)aes.$(OBJEXT) 	\
+        $(OUTPRE)aes.$(OBJEXT)          \
 	$(OUTPRE)camellia.$(OBJEXT) 	\
-	$(OUTPRE)rc4.$(OBJEXT)
+        $(OUTPRE)rc4.$(OBJEXT)          \
+        $(OUTPRE)gost$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/des3.c 	\
 	$(srcdir)/aes.c 	\
 	$(srcdir)/camellia.c 	\
-	$(srcdir)/rc4.c
+        $(srcdir)/rc4.c		\
+        $(srcdir)/gost.c
 
 all-unix: all-libobjs
 
