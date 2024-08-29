@@ -139,6 +139,9 @@ fi
 if test "$use_linker_fini_option" = yes; then
   AC_DEFINE(USE_LINKER_FINI_OPTION,1,[Define if link-time options for library finalization will be used])
 fi
+if test "$lib_unload_prevented" = yes; then
+  AC_DEFINE(LIB_UNLOAD_PREVENTED,1,[Define if library unloading is prevented])
+fi
 ])
 
 dnl find dlopen

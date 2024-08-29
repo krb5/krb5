@@ -153,6 +153,9 @@
    doing the pthread test at run time on systems where that works, so
    we use the k5_once_t stuff instead.)
 
+   UNIX, with library unloading prevented or when building static
+   libraries: we don't need to run finalizers.
+
    UNIX, with compiler support: MAKE_FINI_FUNCTION declares the
    function as a destructor, and the run time linker support or
    whatever will cause it to be invoked when the library is unloaded,
@@ -398,7 +401,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 # endif
 
-#elif !defined(SHARED)
+#elif !defined(SHARED) || defined(LIB_UNLOAD_PREVENTED)
 
 /*
  * In this case, we just don't care about finalization.  The code will still

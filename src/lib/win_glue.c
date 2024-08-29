@@ -401,7 +401,7 @@ control(int mode)
 
 #ifdef _WIN32
 
-BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
+BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpvReserved)
 {
     switch (fdwReason)
     {
@@ -420,6 +420,10 @@ BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpReserved)
 	    break;
 
         case DLL_PROCESS_DETACH:
+	    /* If lpvReserved is non-null, the process is exiting and we do not
+	     * need to clean up library memory. */
+	    if (lpvReserved != NULL)
+		break;
 	    if (control(DLL_SHUTDOWN))
 		return FALSE;
 	    break;
