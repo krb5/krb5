@@ -297,7 +297,7 @@ svcauth_gss_validate(struct svc_req *rqst, struct svc_rpc_gss_data *gd, struct r
 	struct opaque_auth	*oa;
 	gss_buffer_desc		 rpcbuf, checksum;
 	OM_uint32		 maj_stat, min_stat, qop_state;
-	u_char			 rpchdr[128];
+	u_char			 rpchdr[32 + MAX_AUTH_BYTES];
 	int32_t			*buf;
 
 	log_debug("in svcauth_gss_validate()");
@@ -315,6 +315,8 @@ svcauth_gss_validate(struct svc_req *rqst, struct svc_rpc_gss_data *gd, struct r
 		return (FALSE);
 
 	buf = (int32_t *)(void *)rpchdr;
+
+	/* Write the 32 first bytes of the header. */
 	IXDR_PUT_LONG(buf, msg->rm_xid);
 	IXDR_PUT_ENUM(buf, msg->rm_direction);
 	IXDR_PUT_LONG(buf, msg->rm_call.cb_rpcvers);
@@ -323,6 +325,7 @@ svcauth_gss_validate(struct svc_req *rqst, struct svc_rpc_gss_data *gd, struct r
 	IXDR_PUT_LONG(buf, msg->rm_call.cb_proc);
 	IXDR_PUT_ENUM(buf, oa->oa_flavor);
 	IXDR_PUT_LONG(buf, oa->oa_length);
+
 	if (oa->oa_length) {
 		memcpy((caddr_t)buf, oa->oa_base, oa->oa_length);
 		buf += RNDUP(oa->oa_length) / sizeof(int32_t);

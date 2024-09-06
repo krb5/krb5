@@ -695,6 +695,11 @@ process_k5beta7_princ(krb5_context context, const char *fname, FILE *filep,
 
     dbentry->len = u1;
     dbentry->n_key_data = u4;
+
+    if (u5 > UINT16_MAX) {
+        load_err(fname, *linenop, _("invalid principal extra data size"));
+        goto fail;
+    }
     dbentry->e_length = u5;
 
     if (kp != NULL) {

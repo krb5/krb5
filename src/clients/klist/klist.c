@@ -681,7 +681,7 @@ show_credential(krb5_creds *cred, const char *defname)
     krb5_error_code ret;
     krb5_ticket *tkt = NULL;
     char *name = NULL, *sname = NULL, *tktsname, *flags;
-    int extra_field = 0, ccol = 0, i;
+    int extra_field = 0, ccol = 0, i, r;
     krb5_boolean is_config = krb5_is_config_principal(context, cred->server);
 
     ret = krb5_unparse_name(context, cred->client, &name);
@@ -711,11 +711,11 @@ show_credential(krb5_creds *cred, const char *defname)
         fputs("config: ", stdout);
         ccol = 8;
         for (i = 1; i < cred->server->length; i++) {
-            ccol += printf("%s%.*s%s",
-                           i > 1 ? "(" : "",
-                           (int)cred->server->data[i].length,
-                           cred->server->data[i].data,
-                           i > 1 ? ")" : "");
+            r = printf("%s%.*s%s", i > 1 ? "(" : "",
+                       (int)cred->server->data[i].length,
+                       cred->server->data[i].data, i > 1 ? ")" : "");
+            if (r >= 0)
+                ccol += r;
         }
         fputs(" = ", stdout);
         ccol += 3;
