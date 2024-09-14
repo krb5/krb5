@@ -107,7 +107,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
                         unsigned int flags, krb5_db_entry **entry_ptr)
 {
     char                        *user=NULL, *filter=NULL, *filtuser=NULL;
-    unsigned int                tree=0, ntrees=1, princlen=0;
+    size_t                      tree=0, ntrees=1, princlen=0;
     krb5_error_code             tempst=0, st=0;
     char                        **values=NULL, **subtree=NULL, *cname=NULL;
     LDAP                        *ld=NULL;
@@ -168,7 +168,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
 
             /* get the associated directory user information */
             if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
-                int i;
+                size_t i;
 
                 /* a wild-card in a principal name can return a list of kerberos principals.
                  * Make sure that the correct principal is returned.
@@ -284,11 +284,10 @@ static krb5_error_code
 process_db_args(krb5_context context, char **db_args, xargs_t *xargs,
                 OPERATION optype)
 {
-    int                   i=0;
+    size_t                i=0, arg_val_len=0;
     krb5_error_code       st=0;
     char                  *arg=NULL, *arg_val=NULL;
     char                  **dptr=NULL;
-    unsigned int          arg_val_len=0;
 
     if (db_args) {
         for (i=0; db_args[i]; ++i) {
@@ -429,7 +428,7 @@ asn1_decode_sequence_of_keys(krb5_data *in, ldap_seqof_key_data *out)
 void
 free_berdata(struct berval **array)
 {
-    int i;
+    size_t i;
 
     if (array != NULL) {
         for (i = 0; array[i] != NULL; i++) {
@@ -622,12 +621,12 @@ static krb5_error_code
 update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
                          LDAPMod ***mods)
 {
-    int i = 0;
     krb5_error_code ret;
     char *auth_ind = NULL;
     char *strval[10] = { 0 };
     char *ai, *ai_save = NULL;
-    int mask, sv_num = sizeof(strval) / sizeof(*strval);
+    size_t i = 0, sv_num = sizeof(strval) / sizeof(*strval);
+    int mask;
 
     ret = krb5_dbe_get_string(context, entry, KRB5_KDB_SK_REQUIRE_AUTH,
                               &auth_ind);
@@ -658,10 +657,9 @@ update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
 
 static krb5_error_code
 check_dn_in_container(krb5_context context, const char *dn,
-                      char *const *subtrees, unsigned int ntrees)
+                      char *const *subtrees, size_t ntrees)
 {
-    unsigned int i;
-    size_t dnlen = strlen(dn), stlen;
+    size_t dnlen = strlen(dn), stlen, i;
 
     for (i = 0; i < ntrees; i++) {
         if (subtrees[i] == NULL || *subtrees[i] == '\0')
@@ -719,7 +717,7 @@ static krb5_error_code
 validate_xargs(krb5_context context,
                krb5_ldap_server_handle *ldap_server_handle,
                const xargs_t *xargs, const char *standalone_dn,
-               char *const *subtrees, unsigned int ntrees)
+               char *const *subtrees, size_t ntrees)
 {
     krb5_error_code st;
 
@@ -761,8 +759,8 @@ krb5_error_code
 krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                         char **db_args)
 {
-    int                         l=0, kerberos_principal_object_type=0;
-    unsigned int                ntrees=0, tre=0;
+    int                         kerberos_principal_object_type=0;
+    size_t                      l=0, ntrees=0, tre=0;
     krb5_error_code             st=0, tempst=0;
     LDAP                        *ld=NULL;
     LDAPMessage                 *result=NULL, *ent=NULL;
@@ -832,7 +830,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         goto cleanup;
 
     if (entry->mask & KADM5_LOAD) {
-        unsigned int     tree = 0;
+        size_t           tree = 0;
         int              numlentries = 0;
 
         /*  A load operation is special, will do a mix-in (add krbprinc
@@ -1000,7 +998,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
          */
         {
             char **linkdns=NULL;
-            int  j=0;
+            size_t j=0;
 
             if ((st=krb5_get_linkdn(context, entry, &linkdns)) != 0) {
                 snprintf(errbuf, sizeof(errbuf),
@@ -1256,7 +1254,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 
     /* Set tl_data */
     if (entry->tl_data != NULL) {
-        int count = 0;
+        size_t count = 0;
         struct berval **ber_tl_data = NULL;
         krb5_tl_data *ptr;
         krb5_timestamp unlock_time;
@@ -1280,7 +1278,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
             count++;
         }
         if (count != 0) {
-            int j;
+            size_t j;
             ber_tl_data = (struct berval **) calloc (count + 1,
                                                      sizeof (struct berval*));
             if (ber_tl_data == NULL) {
@@ -1411,7 +1409,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
          */
         {
             char *attrvalues[] = {"krbprincipalaux", "krbTicketPolicyAux", NULL};
-            int p, q, r=0, amask=0;
+            size_t q, r=0;
+            int p, amask=0;
 
             if ((st=checkattributevalue(ld, (xargs.dn) ? xargs.dn : principal_dn,
                                         "objectclass", attrvalues, &amask)) != 0)
@@ -1576,7 +1575,8 @@ decode_keys(struct berval **bvalues, ldap_seqof_key_data **keysets_out,
             krb5_int16 *n_keysets_out, krb5_int16 *total_keys_out)
 {
     krb5_error_code err = 0;
-    krb5_int16 n_keys, i, ki, total_keys;
+    size_t n_keys, i;
+    krb5_int16 ki, total_keys;
     ldap_seqof_key_data *keysets = NULL;
 
     *keysets_out = NULL;
@@ -1589,6 +1589,8 @@ decode_keys(struct berval **bvalues, ldap_seqof_key_data **keysets_out,
         if (bvalues[i]->bv_len > 0)
             n_keys++;
     }
+    if (n_keys > INT16_MAX / 2)
+        return EOVERFLOW;
 
     keysets = k5calloc(n_keys, sizeof(ldap_seqof_key_data), &err);
     if (keysets == NULL)

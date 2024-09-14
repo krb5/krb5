@@ -849,7 +849,8 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 static void
 free_db_args(char **db_args)
 {
-    int i;
+    size_t i;
+
     if (db_args) {
         for (i = 0; db_args[i]; i++)
             free(db_args[i]);
@@ -862,7 +863,7 @@ extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
                              krb5_int16 *count, char ***db_argsp)
 {
     char **db_args = NULL;
-    int db_args_size = 0;
+    size_t db_args_size = 0;
     krb5_tl_data *prev, *curr, *next;
     krb5_error_code status;
 

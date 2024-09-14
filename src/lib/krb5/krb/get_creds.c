@@ -73,7 +73,7 @@ construct_matching_creds(krb5_context context, krb5_flags options,
         | KRB5_TC_SUPPORTED_KTYPES;
     if (mcreds->keyblock.enctype) {
         krb5_enctype *ktypes;
-        int i;
+        size_t i;
 
         *fields |= KRB5_TC_MATCH_KTYPE;
         ret = krb5_get_tgs_ktypes(context, mcreds->server, &ktypes);

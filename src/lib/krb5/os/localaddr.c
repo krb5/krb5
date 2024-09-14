@@ -1095,7 +1095,8 @@ int main (void)
 #else /* not TESTing */
 
 struct localaddr_data {
-    int count, mem_err, cur_idx, cur_size;
+    size_t count, cur_idx, cur_size;
+    int mem_err;
     krb5_address **addr_temp;
 };
 
@@ -1123,7 +1124,7 @@ allocate (void *P_data)
 /*@*/
 {
     struct localaddr_data *data = P_data;
-    int i;
+    size_t i;
     void *n;
 
     n = realloc (data->addr_temp,
@@ -1248,7 +1249,7 @@ krb5_os_localaddr_profile (krb5_context context, struct localaddr_data *datap)
 
     for (iter = values; *iter; iter++) {
         char *cp = *iter, *next, *current;
-        int i, count;
+        size_t i, count;
 
 #ifdef DEBUG
         fprintf (stderr, "  found line: '%s'\n", cp);
@@ -1329,7 +1330,7 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
 
     r = foreach_localaddr (&data, count_addrs, allocate, add_addr);
     if (r != 0) {
-        int i;
+        size_t i;
         if (data.addr_temp) {
             for (i = 0; i < data.count; i++)
                 free (data.addr_temp[i]);
@@ -1360,7 +1361,7 @@ get_localaddrs (krb5_context context, krb5_address ***addr, int use_profile)
 
 #ifdef DEBUG
     {
-        int j;
+        size_t j;
         fprintf (stderr, "addresses:\n");
         for (j = 0; addr[0][j]; j++) {
             struct sockaddr_storage ss;
@@ -1465,7 +1466,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr (krb5_context context, krb5_address ***addr) {
     char host[64];                              /* Name of local machine */
     struct hostent *hostrec;
-    int err, count, i;
+    size_t count, i;
+    int err;
     krb5_address ** paddr;
 
     *addr = 0;

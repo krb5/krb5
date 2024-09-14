@@ -958,7 +958,7 @@ mspac_get_attribute_types(krb5_context context, krb5_authdata_context actx,
                           krb5_data **attrs_out)
 {
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
-    unsigned int i, j;
+    size_t i, j;
     krb5_data *attrs;
     krb5_error_code ret;
 

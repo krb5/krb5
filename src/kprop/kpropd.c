@@ -140,7 +140,7 @@ static krb5_address *receiver_addr;
 static const char *port = KPROP_SERVICE;
 
 static char **db_args = NULL;
-static int db_args_size = 0;
+static size_t db_args_size = 0;
 
 static void parse_args(int argc, char **argv);
 static void do_standalone(void);

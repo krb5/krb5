@@ -326,7 +326,7 @@ profile_init_path(const_profile_filespec_list_t filepath,
                   profile_t *ret_profile)
 {
     unsigned int n_entries;
-    int i;
+    size_t i;
     unsigned int ent_len;
     const char *s, *t;
     profile_filespec_t *filenames;
@@ -349,7 +349,8 @@ profile_init_path(const_profile_filespec_list_t filepath,
         filenames[i] = (char*) malloc(ent_len + 1);
         if (filenames[i] == 0) {
             /* if malloc fails, free the ones that worked */
-            while(--i >= 0) free(filenames[i]);
+            while (i > 0)
+                free(filenames[--i]);
             free(filenames);
             return ENOMEM;
         }
@@ -367,7 +368,8 @@ profile_init_path(const_profile_filespec_list_t filepath,
                                 ret_profile);
 
     /* count back down and free the entries */
-    while(--i >= 0) free(filenames[i]);
+    while (i > 0)
+        free(filenames[--i]);
     free(filenames);
 
     return retval;

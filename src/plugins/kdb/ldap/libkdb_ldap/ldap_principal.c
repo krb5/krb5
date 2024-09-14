@@ -137,7 +137,7 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
     krb5_db_entry            entry;
     krb5_principal           principal;
     char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL;
-    unsigned int             tree=0, ntree=1, i=0;
+    size_t                   tree=0, ntree=1, i=0;
     krb5_error_code          st=0, tempst=0;
     LDAP                     *ld=NULL;
     LDAPMessage              *result=NULL, *ent=NULL;
@@ -237,7 +237,8 @@ krb5_ldap_delete_principal(krb5_context context,
     char                      *user=NULL, *DN=NULL, *strval[10] = {NULL};
     LDAPMod                   **mods=NULL;
     LDAP                      *ld=NULL;
-    int                       j=0, ptype=0, pcount=0, attrsetmask=0;
+    size_t                    j=0;
+    int                       ptype=0, pcount=0, attrsetmask=0;
     krb5_error_code           st=0;
     krb5_boolean              singleentry=FALSE;
     kdb5_dal_handle           *dal_handle=NULL;

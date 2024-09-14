@@ -298,7 +298,7 @@ kadmin_startup(int argc, char *argv[], char **request_out, char ***args_out)
     krb5_principal princ;
     kadm5_config_params params;
     char **db_args = NULL;
-    int db_args_size = 0;
+    size_t db_args_size = 0;
     char *db_name = NULL;
     char *svcname, *realm;
 
@@ -795,7 +795,7 @@ kadmin_cpw(int argc, char *argv[], int sci_idx, void *info_ptr)
     krb5_key_salt_tuple *ks_tuple = NULL;
     krb5_principal princ = NULL;
     char **db_args = NULL;
-    int db_args_size = 0;
+    size_t db_args_size = 0;
 
     if (argc < 1) {
         cpw_usage(NULL);
