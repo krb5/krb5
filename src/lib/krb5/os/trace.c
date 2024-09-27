@@ -180,7 +180,9 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
     struct remote_address *ra;
     const krb5_data *d;
     krb5_data data;
-    char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV], tmpbuf[200], *str;
+#define NI_MAXUNIXSOCK 108
+    char addrbuf[NI_MAXHOST], portbuf[NI_MAXUNIXSOCK], tmpbuf[200], *str;
+#undef NI_MAXUNIXSOCK
     const char *p;
     krb5_const_principal princ;
     const krb5_keyblock *keyblock;
@@ -252,6 +254,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                 k5_buf_add(&buf, "stream");
             else if (ra->transport == HTTPS)
                 k5_buf_add(&buf, "https");
+            else if (ra->transport == UNIXSOCK)
+                k5_buf_add(&buf, "domain socket");
             else
                 k5_buf_add_fmt(&buf, "transport%d", ra->transport);
 
