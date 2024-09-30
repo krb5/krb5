@@ -37,6 +37,8 @@
 #include <k5-int.h>
 #include <kdc_util.h>
 
+#include <ndr.c>
+
 #define kMinInputLength 2
 #define kMaxInputLength 1024
 
@@ -45,15 +47,21 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    krb5_data data_in;
-    struct pac_s4u_delegation_info *di = NULL;
+    krb5_error_code ret;
+    krb5_data data_in, data_out = empty_data();
+    struct pac_s4u_delegation_info *di;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
     data_in = make_data((void *)data, size);
-    ndr_dec_delegation_info(&data_in, &di);
+
+    ret = ndr_dec_delegation_info(&data_in, &di);
+    if (!ret)
+        (void)ndr_enc_delegation_info(di, &data_out);
+
     ndr_free_delegation_info(di);
+    krb5_free_data_contents(NULL, &data_out);
 
     return 0;
 }

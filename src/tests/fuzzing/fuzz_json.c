@@ -48,8 +48,8 @@ int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     krb5_error_code ret;
-    char *data_in;
-    k5_json_value decoded;
+    k5_json_value decoded = NULL;
+    char *data_in = NULL, *data_out;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
@@ -58,8 +58,15 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (data_in == NULL)
         return 0;
 
-    k5_json_decode(data_in, &decoded);
+    ret = k5_json_decode(data_in, &decoded);
+    if (ret)
+        goto cleanup;
 
+    ret = k5_json_encode(decoded, &data_out);
+    if (!ret)
+        free(data_out);
+
+cleanup:
     free(data_in);
     k5_json_release(decoded);
 

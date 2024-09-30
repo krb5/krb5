@@ -46,21 +46,39 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    krb5_data data_in;
-    krb5_ticket *ticket;
-    krb5_context context;
+    krb5_error_code ret;
+    krb5_context context = NULL;
+    krb5_keytab defkt = NULL;
+    krb5_data data_in, *data_out;
+    krb5_ticket *ticket = NULL;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
     data_in = make_data((void *)data, size);
 
-    if (krb5_init_context(&context) != 0)
+    ret = krb5_init_context(&context);
+    if (ret)
         return 0;
 
-    krb5_decode_ticket(&data_in, &ticket);
+    ret = krb5_kt_default(context, &defkt);
+    if (ret)
+        goto cleanup;
 
+    ret = krb5_decode_ticket(&data_in, &ticket);
+    if (ret)
+        goto cleanup;
+
+    ret = encode_krb5_ticket(ticket, &data_out);
+    if (!ret)
+        krb5_free_data(context, data_out);
+
+    krb5_server_decrypt_ticket_keytab(context, defkt, ticket);
+
+cleanup:
     krb5_free_ticket(context, ticket);
+    if (defkt != NULL)
+        krb5_kt_close(context, defkt);
     krb5_free_context(context);
 
     return 0;

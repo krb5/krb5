@@ -36,26 +36,57 @@
 #include "autoconf.h"
 #include <k5-int.h>
 
+#define U(x) (uint8_t *)x
 #define kMinInputLength 2
 #define kMaxInputLength 1024
+
+static const krb5_keyblock kdc_keyblock = {
+    0, ENCTYPE_ARCFOUR_HMAC,
+    16, U("\xB2\x86\x75\x71\x48\xAF\x7F\xD2\x52\xC5\x36\x03\xA1\x50\xB7\xE7")
+};
+
+static const krb5_keyblock member_keyblock = {
+    0, ENCTYPE_ARCFOUR_HMAC,
+    16, U("\xD2\x17\xFA\xEA\xE5\xE6\xB5\xF9\x5C\xCC\x94\x07\x7A\xB8\xA5\xFC")
+};
+
+static time_t authtime = 1120440609;
+static const char *user = "w2003final$@WIN2K3.THINKER.LOCAL";
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    krb5_error_code ret;
+    krb5_context context = NULL;
     krb5_pac pac;
-    krb5_context context;
+    krb5_principal princ = NULL;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    if (krb5_init_context(&context) != 0)
+    ret = krb5_init_context(&context);
+    if (ret)
         return 0;
 
-    krb5_pac_parse(context, data, size, &pac);
+    ret = krb5_parse_name(context, user, &princ);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_pac_parse(context, data, size, &pac);
+    if (ret)
+        goto cleanup;
+
+    krb5_pac_verify(context, pac, authtime, princ, NULL, NULL);
+    krb5_pac_verify_ext(context, pac, authtime, princ, NULL, NULL, TRUE);
+    krb5_pac_verify(context, pac, authtime, princ, &member_keyblock,
+                    &kdc_keyblock);
 
     krb5_pac_free(context, pac);
+
+cleanup:
+    krb5_free_principal(context, princ);
     krb5_free_context(context);
 
     return 0;

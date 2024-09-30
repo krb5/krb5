@@ -46,8 +46,9 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    errcode_t ret;
     FILE *fp_w, *fp_r;
-    char file_name[256];
+    char file_name[256], *output;
     struct profile_node *root;
 
     if (size < kMinInputLength || size > kMaxInputLength)
@@ -55,7 +56,7 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     snprintf(file_name, sizeof(file_name), "/tmp/libfuzzer.%d", getpid());
 
-    /* Write data into the file.*/
+    /* Write data into the file. */
     fp_w = fopen(file_name, "w");
     if (!fp_w)
         return 1;
@@ -69,7 +70,12 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     initialize_prof_error_table();
 
-    if (profile_parse_file(fp_r, &root, NULL) == 0) {
+    ret = profile_parse_file(fp_r, &root, NULL);
+    if (!ret) {
+        ret = profile_write_tree_to_buffer(root, &output);
+        if (!ret)
+            free(output);
+
         profile_verify_node(root);
         profile_free_node(root);
     }

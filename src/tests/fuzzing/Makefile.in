@@ -2,8 +2,7 @@ mydir=tests$(S)fuzzing
 BUILDTOP=$(REL)..$(S)..
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/ccache -I$(srcdir)/../../kdc \
-	-I$(srcdir)/../../util/profile
-NDROBJ = $(BUILDTOP)/kdc/ndr.o
+	-I$(srcdir)/../../util/profile -I$(srcdir)/../../util/support
 
 OBJS = \
 	fuzz_chpw.o \
@@ -49,7 +48,7 @@ all: $(FUZZ_TARGETS)
 # OSS-Fuzz requires fuzz targets to be linked with the C++ linker,
 # even if they are written in C.
 
-fuzz_chpw: fuzz_chpw.o $(SUPPORT_DEPLIB)
+fuzz_chpw: fuzz_chpw.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_chpw.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_gss: fuzz_gss.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
@@ -71,7 +70,7 @@ fuzz_marshal_princ: fuzz_marshal_princ.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_marshal_princ.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_ndr: fuzz_ndr.o $(KRB5_BASE_DEPLIBS)
-	$(CXX_LINK) -o $@ fuzz_ndr.o $(NDROBJ) $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+	$(CXX_LINK) -o $@ fuzz_ndr.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_pac: fuzz_pac.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_pac.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)

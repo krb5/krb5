@@ -39,6 +39,9 @@
 #include <k5-base64.h>
 #include <k5-hex.h>
 #include <string.h>
+#include <k5-utf8.h>
+
+#include <hashtab.c>
 
 #define kMinInputLength 2
 #define kMaxInputLength 256
@@ -52,6 +55,21 @@ fuzz_base64(const char *data_in, size_t size)
 
     free(k5_base64_encode(data_in, size));
     free(k5_base64_decode(data_in, &len));
+}
+
+static void
+fuzz_hashtab(const char *data_in, size_t size)
+{
+    int st;
+    struct k5_hashtab *ht;
+
+    k5_hashtab_create(NULL, 4, &ht);
+    if (ht == NULL)
+        return;
+
+    k5_hashtab_add(ht, data_in, size, &st);
+
+    k5_hashtab_free(ht);
 }
 
 static void
@@ -96,6 +114,25 @@ fuzz_parse_host(const char *data_in, size_t size)
         free(host_out);
 }
 
+static void
+fuzz_utf8(const char *data_in, size_t size)
+{
+    krb5_ucs4 u = 0;
+    char *utf8;
+    uint8_t *utf16;
+    size_t utf16len;
+
+    krb5int_utf8_to_ucs4(data_in, &u);
+
+    k5_utf8_to_utf16le(data_in, &utf16, &utf16len);
+    if (utf16 != NULL)
+        free(utf16);
+
+    k5_utf16le_to_utf8((const uint8_t *)data_in, size, &utf8);
+    if (utf8 != NULL)
+        free(utf8);
+}
+
 extern int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -110,9 +147,11 @@ LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
 
     fuzz_base64(data_in, size);
+    fuzz_hashtab(data_in, size);
     fuzz_hex(data_in, size);
     fuzz_name(data_in, size);
     fuzz_parse_host(data_in, size);
+    fuzz_utf8(data_in, size);
 
     free(data_in);
 
