@@ -47,20 +47,23 @@ int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     int version;
-    krb5_creds cred = { 0 };
-    krb5_context context;
+    struct k5buf buf;
+    krb5_creds cred;
+    krb5_error_code ret;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    if (krb5_init_context(&context) != 0)
-        return 0;
-
     for (version = FIRST_VERSION; version <= 4; version++) {
-        k5_unmarshal_cred(data, size, version, &cred);
-        krb5_free_cred_contents(context, &cred);
+        ret = k5_unmarshal_cred(data, size, version, &cred);
+        if (!ret) {
+            k5_buf_init_dynamic(&buf);
+            k5_marshal_cred(&buf, version, &cred);
+            k5_buf_free(&buf);
+        }
+
+        krb5_free_cred_contents(NULL, &cred);
     }
 
-    krb5_free_context(context);
     return 0;
 }
