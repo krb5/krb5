@@ -106,14 +106,14 @@ krb5_crypto_us_timeofday(krb5_timestamp *seconds, krb5_int32 *microseconds)
        need to properly handle the case where the administrator intentionally
        adjusted time backwards. */
     if (now.sec == ts_incr(last_time.sec, -1) ||
-        (now.sec == last_time.sec && !ts_after(last_time.usec, now.usec))) {
+        (now.sec == last_time.sec && now.usec <= last_time.usec)) {
         /* Correct 'now' to be exactly one microsecond later than 'last_time'.
            Note that _because_ we perform this hack, 'now' may be _earlier_
            than 'last_time', even though the system time is monotonically
            increasing. */
 
         now.sec = last_time.sec;
-        now.usec = ts_incr(last_time.usec, 1);
+        now.usec = last_time.usec + 1;
         if (now.usec >= 1000000) {
             now.sec = ts_incr(now.sec, 1);
             now.usec = 0;
