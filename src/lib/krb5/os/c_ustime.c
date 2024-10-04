@@ -73,6 +73,21 @@ get_time_now(struct time_now *n)
 
 #endif
 
+krb5_error_code
+k5_us_timeofday(krb5_timestamp *seconds, krb5_int32 *microseconds)
+{
+    struct time_now now;
+    krb5_error_code err;
+
+    err = get_time_now(&now);
+    if (err)
+        return err;
+
+    *seconds = now.sec;
+    *microseconds = now.usec;
+    return 0;
+}
+
 static struct time_now last_time;
 
 krb5_error_code

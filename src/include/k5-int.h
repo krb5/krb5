@@ -698,6 +698,7 @@ krb5_error_code krb5int_c_copy_keyblock_contents(krb5_context context,
                                                  const krb5_keyblock *from,
                                                  krb5_keyblock *to);
 
+krb5_error_code k5_us_timeofday(krb5_timestamp *, krb5_int32 *);
 krb5_error_code krb5_crypto_us_timeofday(krb5_timestamp *, krb5_int32 *);
 
 /*

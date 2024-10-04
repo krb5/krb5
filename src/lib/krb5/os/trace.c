@@ -411,7 +411,7 @@ krb5int_trace(krb5_context context, const char *fmt, ...)
     str = trace_format(context, fmt, ap);
     if (str == NULL)
         goto cleanup;
-    if (krb5_crypto_us_timeofday(&sec, &usec) != 0)
+    if (k5_us_timeofday(&sec, &usec) != 0)
         goto cleanup;
     if (asprintf(&msg, "[%d] %u.%06d: %s\n", (int)getpid(),
                  (unsigned int)sec, (int)usec, str) < 0)
