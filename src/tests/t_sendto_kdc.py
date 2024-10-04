@@ -25,4 +25,39 @@ realm.kinit(realm.user_princ, 'new', env=fallback, expected_trace=msgs)
 
 stop_daemon(replica_kdc)
 
+mark('Unix domain socket')
+
+# KDC (listen on unix domain socket)
+conf_unix = {
+    'dbmodules': {
+        'db': {
+            'database_name': '$testdir/db.unix'
+        }
+    },
+    'realms': {
+        '$realm': {
+            'kdc_listen': '',
+            'kdc_tcp_listen': '',
+            'kdc_unixsock_listen': '$testdir/krb5.sock'
+        }
+    }
+}
+unix = realm.special_env('unix', True, kdc_conf=conf_unix)
+realm.run([kdb5_util, 'load', dumpfile], env=unix)
+unix_kdc = realm.start_server([krb5kdc, '-n'], 'starting...', env=unix)
+
+conf_unix_cli = {'realms': {'$realm': {'kdc': '$testdir/krb5.sock'}}}
+unix_cli = realm.special_env('unix_cli', False, krb5_conf=conf_unix_cli)
+
+# Do a kinit and check if we send the packet via a domain socket
+msgs = ('Sending TCP request to domain socket',)
+realm.kinit(
+    realm.user_princ,
+    password('user'),
+    env=unix_cli,
+    expected_trace=msgs
+)
+
+stop_daemon(unix_kdc)
+
 success('sendto_kdc')
