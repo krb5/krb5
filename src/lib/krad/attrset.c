@@ -250,10 +250,6 @@ kr_attrset_decode(krb5_context ctx, const krb5_data *in, const char *secret,
         tmp = make_data(&in->data[i + 1], (uint8_t)in->data[i] - 2);
         i += tmp.length + 1;
 
-        retval = (in->length < i) ? EBADMSG : 0;
-        if (retval != 0)
-            goto cleanup;
-
         retval = kr_attr_decode(ctx, secret, auth, type, &tmp, buffer, &len);
         if (retval != 0)
             goto cleanup;
