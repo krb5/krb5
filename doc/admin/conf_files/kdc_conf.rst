@@ -344,6 +344,13 @@ The following tags may be specified in a [realms] subsection:
     it will fail to start.  The default is to bind to the wildcard
     address on the standard port.  New in release 1.15.
 
+**kdc_unixsock_listen**
+    (Whitespace- or comma-separated list.)  Specifies the unix domain
+    socket path to listen on for the :ref:`krb5kdc(8)` daemon. If no
+    path is specified, the listener will be disabled. If the KDC
+    daemon fails to bind the unix domain socket path, it will fail to
+    start.  New in release 1.22.
+
 **kdc_tcp_ports**
     (Whitespace- or comma-separated list, deprecated.)  Prior to
     release 1.15, this relation lists the ports for the
