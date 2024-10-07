@@ -292,11 +292,13 @@ The following tags may be specified in a [realms] subsection:
     Each entry may be an interface address, a port number, or an
     address and port number separated by a colon.  If the address
     contains colons, enclose it in square brackets.  If no address is
-    specified, the wildcard address is used.  If kadmind fails to bind
-    to any of the specified addresses, it will fail to start.  The
-    default is to bind to the wildcard address at the port specified
-    in **kadmind_port**, or the standard kadmin port (749).  New in
-    release 1.15.
+    specified, the wildcard address is used.  To disable listening,
+    set this relation to the empty string with
+    ``kadmind_listen = ""``.
+    If kadmind fails to bind to any of the specified addresses, it
+    will fail to start.  The default is to bind to the wildcard
+    address at the port specified in **kadmind_port**, or the standard
+    kadmin port (749).  New in release 1.15.
 
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
@@ -316,10 +318,11 @@ The following tags may be specified in a [realms] subsection:
     address and port number separated by a colon.  If the address
     contains colons, enclose it in square brackets.  If no address is
     specified, the wildcard address is used.  If no port is specified,
-    the standard port (88) is used.  If the KDC daemon fails to bind
-    to any of the specified addresses, it will fail to start.  The
-    default is to bind to the wildcard address on the standard port.
-    New in release 1.15.
+    the standard port (88) is used.  To disable listening on UDP, set
+    this relation to the empty string with ``kdc_listen = ""``.
+    If the KDC daemon fails to bind to any of the specified addresses,
+    it will fail to start.  The default is to bind to the wildcard
+    address on the standard port.  New in release 1.15.
 
 **kdc_ports**
     (Whitespace- or comma-separated list, deprecated.)  Prior to
@@ -354,10 +357,12 @@ The following tags may be specified in a [realms] subsection:
     an interface address, a port number, or an address and port number
     separated by a colon.  If the address contains colons, enclose it
     in square brackets.  If no address is specified, the wildcard
-    address is used.  If kadmind fails to bind to any of the specified
-    addresses, it will fail to start.  The default is to bind to the
-    wildcard address at the port specified in **kpasswd_port**, or the
-    standard kpasswd port (464).  New in release 1.15.
+    address is used.  To disable listening, set this relation to the
+    empty string with ``kpasswd_listen = ""``.
+    If kadmind fails to bind to any of the specified addresses, it
+    will fail to start.  The default is to bind to the wildcard
+    address at the port specified in **kpasswd_port**, or the standard
+    kpasswd port (464).  New in release 1.15.
 
 **kpasswd_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
