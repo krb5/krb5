@@ -349,7 +349,8 @@ main(int argc, char *argv[])
     const char *pid_file = NULL;
     char **db_args = NULL, **tmpargs;
     const char *acl_file;
-    int ret, i, db_args_size = 0, proponly = 0;
+    size_t db_args_size = 0;
+    int ret, i, proponly = 0;
 
     setlocale(LC_ALL, "");
     setvbuf(stderr, NULL, _IONBF, 0);

@@ -260,7 +260,8 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     char **hostlist = NULL, *realmstr = NULL, *host = NULL;
     const char *hostspec;
     krb5_error_code code;
-    int i, default_port;
+    size_t i;
+    int default_port;
 
     Tprintf("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
             realm->data, name, udpport);
@@ -428,7 +429,8 @@ module_locate_server(krb5_context ctx, const krb5_data *realm,
     struct krb5plugin_service_locate_ftable *vtbl = NULL;
     void **ptrs;
     char *realmz;               /* NUL-terminated realm */
-    int socktype, i;
+    size_t i;
+    int socktype;
     struct module_callback_data cbdata = { 0, };
     const char *msg;
 

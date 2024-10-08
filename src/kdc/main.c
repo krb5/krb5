@@ -611,7 +611,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
     const char          *hierarchy[3];
     char                *no_referral = NULL;
     char                *hostbased = NULL;
-    int                  db_args_size = 0;
+    size_t               db_args_size = 0;
     char                **db_args = NULL;
 
     extern char *optarg;
