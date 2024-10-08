@@ -1,7 +1,7 @@
 name: CIFuzz
 
 on:
-    pull_request: {paths: [src/**, .github/workflows/build.yml]}
+    pull_request: {paths: [src/**, .github/workflows/cifuzz.yml]}
 
 permissions: {}
 jobs:
@@ -31,7 +31,7 @@ jobs:
             path: ./out/artifacts
         - name: Upload Sarif
           if: always() && steps.build.outcome == 'success'
-          uses: github/codeql-action/upload-sarif@v2
+          uses: github/codeql-action/upload-sarif@v3
           with:
             # Path to SARIF file relative to the root of the repository
             sarif_file: cifuzz-sarif/results.sarif
