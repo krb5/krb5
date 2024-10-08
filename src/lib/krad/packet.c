@@ -36,22 +36,34 @@
 typedef unsigned char uchar;
 
 /* RFC 2865 */
+#define MSGAUTH_SIZE (2 + MD5_DIGEST_SIZE)
 #define OFFSET_CODE 0
 #define OFFSET_ID 1
 #define OFFSET_LENGTH 2
 #define OFFSET_AUTH 4
 #define OFFSET_ATTR 20
+#define OFFSET_RESP_MSGAUTH (OFFSET_ATTR + MSGAUTH_SIZE)
 #define AUTH_FIELD_SIZE (OFFSET_ATTR - OFFSET_AUTH)
 
-#define offset(d, o) (&(d)->data[o])
-#define pkt_code_get(p) (*(krad_code *)offset(&(p)->pkt, OFFSET_CODE))
-#define pkt_code_set(p, v) (*(krad_code *)offset(&(p)->pkt, OFFSET_CODE)) = v
-#define pkt_id_get(p) (*(uchar *)offset(&(p)->pkt, OFFSET_ID))
-#define pkt_id_set(p, v) (*(uchar *)offset(&(p)->pkt, OFFSET_ID)) = v
-#define pkt_len_get(p)  load_16_be(offset(&(p)->pkt, OFFSET_LENGTH))
-#define pkt_len_set(p, v)  store_16_be(v, offset(&(p)->pkt, OFFSET_LENGTH))
-#define pkt_auth(p) ((uchar *)offset(&(p)->pkt, OFFSET_AUTH))
-#define pkt_attr(p) ((unsigned char *)offset(&(p)->pkt, OFFSET_ATTR))
+#define offset(d, o) ((d)->data + o)
+
+#define buf_code_get(b)     (*(krad_code *)offset(b, OFFSET_CODE))
+#define buf_code_set(b, v)  (*(krad_code *)offset(b, OFFSET_CODE)) = v
+#define buf_id_get(b)       (*(uint8_t *)offset(b, OFFSET_ID))
+#define buf_id_set(b, v)    (*(uint8_t *)offset(b, OFFSET_ID)) = v
+#define buf_len_get(b)      load_16_be(offset(b, OFFSET_LENGTH))
+#define buf_len_set(b, v)   store_16_be(v, offset(b, OFFSET_LENGTH))
+#define buf_auth(b)         ((uint8_t *)offset(b, OFFSET_AUTH))
+#define buf_attr(b)         ((uint8_t *)offset(b, OFFSET_ATTR))
+
+#define pkt_code_get(p)     buf_code_get(&(p)->pkt)
+#define pkt_code_set(p, v)  buf_code_set(&(p)->pkt, v)
+#define pkt_id_get(p)       buf_id_get(&(p)->pkt)
+#define pkt_id_set(p, v)    buf_id_set(&(p)->pkt, v)
+#define pkt_len_get(p)      buf_len_get(&(p)->pkt)
+#define pkt_len_set(p, v)   buf_len_set(&(p)->pkt, v)
+#define pkt_auth(p)         buf_auth(&(p)->pkt)
+#define pkt_attr(p)         buf_attr(&(p)->pkt)
 
 struct krad_packet_st {
     char buffer[KRAD_PACKET_SIZE_MAX];
@@ -168,34 +180,24 @@ auth_generate_random(krb5_context ctx, uchar *rauth)
 /* Generate a response authenticator field. */
 static krb5_error_code
 auth_generate_response(krb5_context ctx, const char *secret,
-                       const krad_packet *response, const uchar *auth,
-                       uchar *rauth)
+                       const krb5_data *respbuf, const uint8_t *auth,
+                       uint8_t *rauth)
 {
-    krb5_error_code retval;
-    krb5_checksum hash;
-    krb5_data data;
-
-    /* Allocate the temporary buffer. */
-    retval = alloc_data(&data, response->pkt.length + strlen(secret));
-    if (retval != 0)
-        return retval;
+    krb5_crypto_iov input[4];
 
     /* Encoded RADIUS packet with the request's
      * authenticator and the secret at the end. */
-    memcpy(data.data, response->pkt.data, response->pkt.length);
-    memcpy(data.data + OFFSET_AUTH, auth, AUTH_FIELD_SIZE);
-    memcpy(data.data + response->pkt.length, secret, strlen(secret));
+    input[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[0].data = make_data(respbuf->data, respbuf->length);
+    input[1].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[1].data = make_data((uint8_t *)auth, AUTH_FIELD_SIZE);
+    input[2].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[2].data = make_data((char *)secret, strlen(secret));
+    input[3].flags = KRB5_CRYPTO_TYPE_CHECKSUM;
+    input[3].data = make_data(rauth, AUTH_FIELD_SIZE);
 
     /* Hash it. */
-    retval = krb5_c_make_checksum(ctx, CKSUMTYPE_RSA_MD5, NULL, 0, &data,
-                                  &hash);
-    free(data.data);
-    if (retval != 0)
-        return retval;
-
-    memcpy(rauth, hash.contents, AUTH_FIELD_SIZE);
-    krb5_free_checksum_contents(ctx, &hash);
-    return 0;
+    return krb5_k_make_checksum_iov(ctx, CKSUMTYPE_RSA_MD5, NULL, 0, input, 4);
 }
 
 /* Create a new packet. */
@@ -220,6 +222,105 @@ packet_set_attrset(krb5_context ctx, const char *secret, krad_packet *pkt)
 
     tmp = make_data(pkt_attr(pkt), pkt->pkt.length - OFFSET_ATTR);
     return kr_attrset_decode(ctx, &tmp, secret, pkt_auth(pkt), &pkt->attrset);
+}
+
+/* Determines if a request or response requires a Message-Authenticator
+ * attribute. */
+static inline krb5_boolean
+requires_msgauth(const char *secret, krad_code code)
+{
+    /* If no secret is provided, assume that the transport is a UNIX socket.
+     * Message-Authenticator is required only on UDP and TCP connections. */
+    if (*secret == '\0')
+        return FALSE;
+
+    /*
+     * Per draft-ietf-radext-deprecating-radius-03 sections 5.2.4 and 7.2,
+     * Message-Authenticator is required in Access-Request packets and its
+     * potential responses when UDP or TCP transport is used.
+     */
+    return code == krad_code_name2num("Access-Request") ||
+        code == krad_code_name2num("Access-Reject") ||
+        code == krad_code_name2num("Access-Accept") ||
+        code == krad_code_name2num("Access-Challenge");
+}
+
+/* Return the beginning of the Message-Authenticator attribute in pkt, or NULL
+ * if no such attribute is present. */
+static const uint8_t *
+lookup_msgauth_addr(const krb5_data *buf)
+{
+    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
+    size_t i;
+    uint8_t *p;
+
+    i = OFFSET_ATTR;
+    while (i + 2 < buf->length) {
+        p = (uint8_t *)buf->data + i;
+        if (msgauth_type == (krad_attr)*p)
+            return p;
+        i += p[1];
+    }
+
+    return NULL;
+}
+
+/* Check if the packet has a Message-Authenticator attribute. */
+static inline krb5_boolean
+has_msgauth(const krb5_data *buf)
+{
+    return lookup_msgauth_addr(buf) ? TRUE : FALSE;
+}
+
+/*
+ * Calculate the message authenticator MAC for buf as specified in RFC 2869
+ * section 5.14, placing the result in mac_out.  Use the provided authenticator
+ * auth, which may be from buf or from a corresponding request.
+ */
+static krb5_error_code
+calculate_mac(const char *secret, const krb5_data *buf,
+              const uint8_t auth[AUTH_FIELD_SIZE],
+              uint8_t mac_out[MD5_DIGEST_SIZE])
+{
+    uint8_t zeroed_msgauth[MSGAUTH_SIZE];
+    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
+    const uint8_t *msgauth_attr, *msgauth_end, *buf_end;
+    krb5_crypto_iov input[5];
+    krb5_data ksecr, mac;
+
+    msgauth_attr = lookup_msgauth_addr(buf);
+    if (msgauth_attr == NULL)
+        return EINVAL;
+    msgauth_end = msgauth_attr + MSGAUTH_SIZE;
+    buf_end = (const uint8_t *)buf->data + buf->length;
+
+    /* Keep code, id, and length as they are. */
+    input[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[0].data = make_data(buf->data, OFFSET_AUTH);
+
+    /* Use authenticator from the argument, or from the packet. */
+    input[1].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[1].data = make_data((uint8_t *)auth, AUTH_FIELD_SIZE);
+
+    /* Read any attributes before Message-Authenticator. */
+    input[2].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[2].data = make_data(buf_attr(buf), msgauth_attr - buf_attr(buf));
+
+    /* Read Message-Authenticator with the data bytes all set to zero, per RFC
+     * 2869 section 5.14. */
+    zeroed_msgauth[0] = msgauth_type;
+    zeroed_msgauth[1] = MSGAUTH_SIZE;
+    memset(zeroed_msgauth + 2, 0, MD5_DIGEST_SIZE);
+    input[3].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[3].data = make_data(zeroed_msgauth, MSGAUTH_SIZE);
+
+    /* Read any attributes after Message-Authenticator. */
+    input[4].flags = KRB5_CRYPTO_TYPE_DATA;
+    input[4].data = make_data((uint8_t *)msgauth_end, buf_end - msgauth_end);
+
+    mac = make_data(mac_out, MD5_DIGEST_SIZE);
+    ksecr = string2data((char *)secret);
+    return k5_hmac_md5(&ksecr, input, 5, &mac);
 }
 
 ssize_t
@@ -252,49 +353,63 @@ krad_packet_new_request(krb5_context ctx, const char *secret, krad_code code,
                         void *data, krad_packet **request)
 {
     krb5_error_code retval;
-    krad_packet *pkt;
+    krad_packet *pkt = NULL;
     uchar id;
     size_t attrset_len;
+    krb5_boolean msgauth_required;
 
     pkt = packet_new();
     if (pkt == NULL) {
         if (cb != NULL)
             (*cb)(data, TRUE);
-        return ENOMEM;
+        retval = ENOMEM;
+        goto cleanup;
     }
 
     /* Generate the ID. */
     retval = id_generate(ctx, cb, data, &id);
     if (retval != 0)
-        goto error;
+        goto cleanup;
     pkt_id_set(pkt, id);
 
     /* Generate the authenticator. */
     retval = auth_generate_random(ctx, pkt_auth(pkt));
     if (retval != 0)
-        goto error;
+        goto cleanup;
+
+    /* Determine if Message-Authenticator is required. */
+    msgauth_required = (*secret != '\0' &&
+                        code == krad_code_name2num("Access-Request"));
 
     /* Encode the attributes. */
-    retval = kr_attrset_encode(set, secret, pkt_auth(pkt), pkt_attr(pkt),
-                               &attrset_len);
+    retval = kr_attrset_encode(set, secret, pkt_auth(pkt), msgauth_required,
+                               pkt_attr(pkt), &attrset_len);
     if (retval != 0)
-        goto error;
+        goto cleanup;
 
     /* Set the code, ID and length. */
     pkt->pkt.length = attrset_len + OFFSET_ATTR;
     pkt_code_set(pkt, code);
     pkt_len_set(pkt, pkt->pkt.length);
 
+    if (msgauth_required) {
+        /* Calculate and set actual Message-Authenticator. */
+        retval = calculate_mac(secret, &pkt->pkt, pkt_auth(pkt),
+                               pkt_attr(pkt) + 2);
+        if (retval != 0)
+            goto cleanup;
+    }
+
     /* Copy the attrset for future use. */
     retval = packet_set_attrset(ctx, secret, pkt);
     if (retval != 0)
-        goto error;
+        goto cleanup;
 
     *request = pkt;
-    return 0;
+    pkt = NULL;
 
-error:
-    free(pkt);
+cleanup:
+    krad_packet_free(pkt);
     return retval;
 }
 
@@ -305,18 +420,22 @@ krad_packet_new_response(krb5_context ctx, const char *secret, krad_code code,
                          krad_packet **response)
 {
     krb5_error_code retval;
-    krad_packet *pkt;
+    krad_packet *pkt = NULL;
     size_t attrset_len;
+    krb5_boolean msgauth_required;
 
     pkt = packet_new();
     if (pkt == NULL)
         return ENOMEM;
 
+    /* Determine if Message-Authenticator is required. */
+    msgauth_required = requires_msgauth(secret, code);
+
     /* Encode the attributes. */
-    retval = kr_attrset_encode(set, secret, pkt_auth(request), pkt_attr(pkt),
-                               &attrset_len);
+    retval = kr_attrset_encode(set, secret, pkt_auth(request),
+                               msgauth_required, pkt_attr(pkt), &attrset_len);
     if (retval != 0)
-        goto error;
+        goto cleanup;
 
     /* Set the code, ID and length. */
     pkt->pkt.length = attrset_len + OFFSET_ATTR;
@@ -325,56 +444,125 @@ krad_packet_new_response(krb5_context ctx, const char *secret, krad_code code,
     pkt_len_set(pkt, pkt->pkt.length);
 
     /* Generate the authenticator. */
-    retval = auth_generate_response(ctx, secret, pkt, pkt_auth(request),
+    retval = auth_generate_response(ctx, secret, &pkt->pkt, pkt_auth(request),
                                     pkt_auth(pkt));
     if (retval != 0)
-        goto error;
+        goto cleanup;
 
     /* Copy the attrset for future use. */
     retval = packet_set_attrset(ctx, secret, pkt);
     if (retval != 0)
-        goto error;
+        goto cleanup;
+
+    if (msgauth_required) {
+        /*
+         * Calculate and replace the Message-Authenticator MAC.  Per RFC 2869
+         * section 5.14, use the authenticator from the request, not from the
+         * response.
+         */
+        retval = calculate_mac(secret, &pkt->pkt, pkt_auth(request),
+                               pkt_attr(pkt) + 2);
+        if (retval != 0)
+            goto cleanup;
+    }
 
     *response = pkt;
-    return 0;
+    pkt = NULL;
 
-error:
-    free(pkt);
+cleanup:
+    krad_packet_free(pkt);
     return retval;
 }
 
-/* Decode a packet. */
+/* Verify the Message-Authenticator value in pkt, using the provided
+ * authenticator (which may be from pkt or from a corresponding request). */
+static krb5_error_code
+verify_msgauth(const char *secret, const krb5_data *buf,
+               const uint8_t auth[AUTH_FIELD_SIZE])
+{
+    uint8_t mac[MD5_DIGEST_SIZE];
+    const uint8_t *msgauth;
+    krb5_error_code retval;
+
+    msgauth = lookup_msgauth_addr(buf);
+    if (msgauth == NULL)
+        return ENODATA;
+
+    retval = calculate_mac(secret, buf, auth, mac);
+    if (retval)
+        return retval;
+
+    if (k5_bcmp(mac, msgauth + 2, MD5_DIGEST_SIZE) != 0)
+        return EBADMSG;
+
+    return 0;
+}
+
+
+static krb5_error_code
+validate_packet(const krb5_data *buf, uint16_t *validated_len)
+{
+    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
+    uint16_t pktlen, i;
+    uint8_t attrlen;
+
+    if (buf->length > KRAD_PACKET_SIZE_MAX)
+        return EMSGSIZE;
+
+    if (buf->length < OFFSET_ATTR)
+        return EBADMSG;
+
+    /* Use packet length from header. Ignore remaining bytes if they exist. */
+    pktlen = buf_len_get(buf);
+
+    if (pktlen < OFFSET_ATTR)
+        return EBADMSG;
+
+    if (pktlen > buf->length)
+        return EBADMSG;
+
+    i = OFFSET_ATTR;
+    while (i + 2 <= pktlen) {
+        attrlen = buf->data[i+1];
+
+        if (i + attrlen > pktlen)
+            return EBADMSG;
+
+        if (buf->data[i] == msgauth_type && attrlen != MSGAUTH_SIZE)
+            return EBADMSG;
+
+        i += attrlen;
+    }
+
+    if (i != pktlen)
+        return EBADMSG;
+
+    if (validated_len)
+        *validated_len = pktlen;
+
+    return 0;
+}
+
+/* Decode a packet. It must be validated first. */
 static krb5_error_code
 decode_packet(krb5_context ctx, const char *secret, const krb5_data *buffer,
               krad_packet **pkt)
 {
     krb5_error_code retval;
     krad_packet *tmp;
-    krb5_ui_2 len;
 
+    /* Allocate memory. */
     tmp = packet_new();
     if (tmp == NULL) {
         retval = ENOMEM;
         goto error;
     }
 
-    /* Ensure a proper message length. */
-    retval = (buffer->length < OFFSET_ATTR) ? EMSGSIZE : 0;
-    if (retval != 0)
-        goto error;
-    len = load_16_be(offset(buffer, OFFSET_LENGTH));
-    retval = (len < OFFSET_ATTR) ? EBADMSG : 0;
-    if (retval != 0)
-        goto error;
-    retval = (len > buffer->length || len > tmp->pkt.length) ? EBADMSG : 0;
-    if (retval != 0)
-        goto error;
-
     /* Copy over the buffer. */
-    tmp->pkt.length = len;
-    memcpy(tmp->pkt.data, buffer->data, len);
+    tmp->pkt.length = buffer->length;
+    memcpy(tmp->pkt.data, buffer->data, buffer->length);
 
-    /* Parse the packet to ensure it is well-formed. */
+    /* Parse attributes sequence and allocate attribute list. */
     retval = packet_set_attrset(ctx, secret, tmp);
     if (retval != 0)
         goto error;
@@ -394,21 +582,42 @@ krad_packet_decode_request(krb5_context ctx, const char *secret,
                            krad_packet **reqpkt)
 {
     const krad_packet *tmp = NULL;
+    uint16_t len;
+    krb5_data validbuf;
     krb5_error_code retval;
 
-    retval = decode_packet(ctx, secret, buffer, reqpkt);
-    if (cb != NULL && retval == 0) {
-        for (tmp = (*cb)(data, FALSE); tmp != NULL; tmp = (*cb)(data, FALSE)) {
+    /* Ensuure a well-formed packet. */
+    retval = validate_packet(buffer, &len);
+    if (retval)
+        return retval;
+
+    validbuf = make_data(buffer->data, len);
+
+    /* Verify Message-Authenticator if present. */
+    if (has_msgauth(&validbuf)) {
+        retval = verify_msgauth(secret, &validbuf, buf_auth(&validbuf));
+        if (retval)
+            return retval;
+    } else if (requires_msgauth(secret, buf_code_get(&validbuf))) {
+        return ENODATA;
+    }
+
+    retval = decode_packet(ctx, secret, &validbuf, reqpkt);
+    if (retval)
+        return retval;
+
+    if (cb != NULL) {
+        while ((tmp = (*cb)(data, FALSE)) != NULL) {
             if (pkt_id_get(*reqpkt) == pkt_id_get(tmp))
                 break;
         }
+
+        if (tmp != NULL)
+            (*cb)(data, TRUE);
     }
 
-    if (cb != NULL && (retval != 0 || tmp != NULL))
-        (*cb)(data, TRUE);
-
     *duppkt = tmp;
-    return retval;
+    return 0;
 }
 
 krb5_error_code
@@ -418,33 +627,72 @@ krad_packet_decode_response(krb5_context ctx, const char *secret,
                             krad_packet **rsppkt)
 {
     uchar auth[AUTH_FIELD_SIZE];
-    const krad_packet *tmp = NULL;
+    uint16_t len;
+    krb5_data validbuf;
+    const krad_packet *req = NULL;
+    krb5_boolean msgauth_required;
+    krb5_boolean req_matched = FALSE;
     krb5_error_code retval;
 
-    retval = decode_packet(ctx, secret, buffer, rsppkt);
-    if (cb != NULL && retval == 0) {
-        for (tmp = (*cb)(data, FALSE); tmp != NULL; tmp = (*cb)(data, FALSE)) {
-            if (pkt_id_get(*rsppkt) != pkt_id_get(tmp))
+    retval = validate_packet(buffer, &len);
+    if (retval)
+        goto cleanup;
+
+    validbuf = make_data(buffer->data, len);
+
+    msgauth_required = requires_msgauth(secret, buf_code_get(&validbuf));
+
+    /* When Message-Authenticator is required, a pending requests iterator must
+     * be provided in order to find the matching request. The request
+     * authenticator is needed to verify the Message-Authenticator. */
+    if (msgauth_required && !cb)
+        return EINVAL;
+
+    if (cb) {
+        while ((req = (*cb)(data, FALSE)) != NULL) {
+            if (buf_id_get(&validbuf) != pkt_id_get(req))
                 continue;
 
+            req_matched = TRUE;
+
             /* Response */
-            retval = auth_generate_response(ctx, secret, *rsppkt,
-                                            pkt_auth(tmp), auth);
-            if (retval != 0) {
-                krad_packet_free(*rsppkt);
-                break;
-            }
+            retval = auth_generate_response(ctx, secret, &validbuf,
+                                            pkt_auth(req), auth);
+            if (retval)
+                goto cleanup;
 
             /* If the authenticator matches, then the response is valid. */
-            if (memcmp(pkt_auth(*rsppkt), auth, sizeof(auth)) == 0)
-                break;
+            if (memcmp(buf_auth(&validbuf), auth, sizeof(auth)) != 0)
+                continue;
+
+            /* Verify Message-Authenticator if present. */
+            if (has_msgauth(&validbuf)) {
+                retval = verify_msgauth(secret, &validbuf, pkt_auth(req));
+                if (retval)
+                    continue;
+            } else if (msgauth_required) {
+                continue;
+            }
+
+            break;
+        }
+
+        if (!req) {
+            retval = req_matched ? EBADMSG : EBADE;
+            goto cleanup;
         }
     }
 
-    if (cb != NULL && (retval != 0 || tmp != NULL))
+    retval = decode_packet(ctx, secret, &validbuf, rsppkt);
+    if (retval)
+        goto cleanup;
+
+    *reqpkt = req;
+
+cleanup:
+    if (retval != 0 || req != NULL)
         (*cb)(data, TRUE);
 
-    *reqpkt = tmp;
     return retval;
 }
 
