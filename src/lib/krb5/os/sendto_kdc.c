@@ -70,6 +70,7 @@
 #ifndef _WIN32
 /* For FIONBIO.  */
 #include <sys/ioctl.h>
+#include <sys/un.h>
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
@@ -385,6 +386,7 @@ socktype_for_transport(k5_transport transport)
         return SOCK_DGRAM;
     case TCP:
     case HTTPS:
+    case UNIXSOCK:
         return SOCK_STREAM;
     default:
         return 0;
@@ -668,7 +670,7 @@ set_transport_message(struct conn_state *state, const krb5_data *realm,
     if (message == NULL || message->length == 0)
         return 0;
 
-    if (state->addr.transport == TCP) {
+    if (state->addr.transport == TCP || state->addr.transport == UNIXSOCK) {
         store_32_be(message->length, out->msg_len_buf);
         SG_SET(&out->sgbuf[0], out->msg_len_buf, 4);
         SG_SET(&out->sgbuf[1], message->data, message->length);
@@ -713,7 +715,7 @@ add_connection(struct conn_state **conns, k5_transport transport,
     state->fd = INVALID_SOCKET;
     state->server_index = server_index;
     SG_SET(&state->out.sgbuf[1], NULL, 0);
-    if (transport == TCP) {
+    if (transport == TCP || transport == UNIXSOCK) {
         state->service_connect = service_tcp_connect;
         state->service_write = service_tcp_write;
         state->service_read = service_tcp_read;
@@ -813,6 +815,40 @@ resolve_server(krb5_context context, const krb5_data *realm,
     krb5_boolean defer = FALSE;
     int err, result;
     char portbuf[PORT_LENGTH];
+
+#ifndef _WIN32
+    if (entry->transport == UNIXSOCK) {
+        struct sockaddr_un un = {
+            .sun_family = AF_UNIX,
+        };
+        size_t len = strlen(entry->uri_path);
+
+        if (len > (sizeof(un.sun_path) - 1))
+            return EINVAL;
+
+        memcpy(un.sun_path, entry->uri_path, len + 1);
+
+        entry->addrlen = sizeof(struct sockaddr_un);
+        memcpy(&entry->addr, &un, entry->addrlen);
+
+        ai.ai_socktype = socktype_for_transport(entry->transport);
+        ai.ai_family = entry->family;
+
+        ai.ai_addrlen = entry->addrlen;
+        ai.ai_addr = (struct sockaddr *)&entry->addr;
+
+        return add_connection(conns,
+                              entry->transport,
+                              FALSE, /* defer */
+                              &ai, /* addrinfo */
+                              ind,
+                              realm,
+                              NULL, /* hostname */
+                              NULL, /* port */
+                              NULL, /* uri_path */
+                              udpbufp);
+    }
+#endif
 
     /* Skip entries excluded by the strategy. */
     if (strategy == NO_UDP && entry->transport == UDP)
