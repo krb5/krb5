@@ -557,9 +557,11 @@ verify_pac_checksums(krb5_context context, const krb5_pac pac,
         ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_SERVER_CHECKSUM,
                                    &server_checksum);
         if (ret)
-            return ret;
-        if (server_checksum.length < PAC_SIGNATURE_DATA_LENGTH)
-            return KRB5_BAD_MSIZE;
+            goto cleanup;
+        if (server_checksum.length < PAC_SIGNATURE_DATA_LENGTH) {
+            ret = KRB5_BAD_MSIZE;
+            goto cleanup;
+        }
         server_checksum.data += PAC_SIGNATURE_DATA_LENGTH;
         server_checksum.length -= PAC_SIGNATURE_DATA_LENGTH;
 
