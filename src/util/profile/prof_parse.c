@@ -291,7 +291,7 @@ static errcode_t parse_line(char *line, struct parse_state *state,
                             char **ret_modspec)
 {
     char    *cp;
-
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     if (strncmp(line, "include", 7) == 0 && isspace(line[7])) {
         cp = skip_over_blanks(line + 7);
         strip_line(cp);
@@ -302,6 +302,7 @@ static errcode_t parse_line(char *line, struct parse_state *state,
         strip_line(cp);
         return parse_include_dir(cp, state->root_section);
     }
+#endif
     switch (state->state) {
     case STATE_INIT_COMMENT:
         if (strncmp(line, "module", 6) == 0 && isspace(line[6])) {
