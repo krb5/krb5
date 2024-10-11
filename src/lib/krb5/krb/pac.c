@@ -146,7 +146,7 @@ k5_pac_locate_buffer(krb5_context context, const krb5_pac pac, uint32_t type,
     if (buffer == NULL)
         return ENOENT;
 
-    assert(buffer->offset < pac->data.length);
+    assert(buffer->offset <= pac->data.length);
     assert(buffer->size <= pac->data.length - buffer->offset);
 
     if (data_out != NULL)
