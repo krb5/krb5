@@ -115,6 +115,7 @@ kpasswd_sendto_msg_callback(SOCKET fd, void *data, krb5_data *message)
     struct sendto_callback_context      *ctx = data;
     GETSOCKNAME_ARG3_TYPE               addrlen;
     krb5_data                           output;
+    krb5_boolean                        free_kaddr = FALSE;
 
     memset (message, 0, sizeof(krb5_data));
 
@@ -157,6 +158,8 @@ kpasswd_sendto_msg_callback(SOCKET fd, void *data, krb5_data *message)
         krb5_free_addresses(ctx->context, addrs);
         if (local_kaddr.contents == NULL)
             goto cleanup;
+        /* Make sure we free local_kaddr.contents on cleanup */
+        free_kaddr = TRUE;
     }
 
 
@@ -193,6 +196,8 @@ kpasswd_sendto_msg_callback(SOCKET fd, void *data, krb5_data *message)
     message->data = output.data;
 
 cleanup:
+    if (free_kaddr)
+        free(local_kaddr.contents);
     return code;
 }
 
