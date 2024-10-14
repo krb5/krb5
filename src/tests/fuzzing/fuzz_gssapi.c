@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/fuzzing/fuzz_marshal_cred.c */
+/* tests/fuzzing/fuzz_gssapi.c */
 /*
  * Copyright (C) 2024 by Arjun. All rights reserved.
  *
@@ -30,40 +30,75 @@
  */
 
 /*
- * Fuzzing harness implementation for k5_unmarshal_cred.
+ * Fuzzing harness implementation for krb5int_parse_enctype_list and
+ * gss_oid_to_str, gss_str_to_oid.
  */
 
 #include "autoconf.h"
-#include <cc-int.h>
-
-#define FIRST_VERSION 1
+#include <k5-int.h>
+#include <gssapi/gssapi_krb5.h>
 
 #define kMinInputLength 2
 #define kMaxInputLength 1024
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
+static void
+enctype_list(char *data_in)
+{
+    krb5_error_code ret;
+    krb5_context context;
+    krb5_enctype *ienc, zero = 0;
+
+    ret = krb5_init_context(&context);
+    if (ret)
+        return;
+
+    ret = krb5int_parse_enctype_list(context, "", data_in, &zero, &ienc);
+    if (!ret)
+        free(ienc);
+
+    krb5_free_context(context);
+}
+
+static void
+gss_oid(const uint8_t *data, size_t size)
+{
+    OM_uint32 minor;
+    gss_buffer_desc buf;
+    gss_OID oid;
+    gss_OID_desc oid_desc;
+
+    oid_desc.elements = (void *)data;
+    oid_desc.length = size;
+
+    gss_oid_to_str(&minor, &oid_desc, &buf);
+    gss_release_buffer(&minor, &buf);
+
+    buf.value = (void *)data;
+    buf.length = size;
+
+    gss_str_to_oid(&minor, &buf, &oid);
+    gss_release_oid(&minor, &oid);
+}
+
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     krb5_error_code ret;
-    krb5_creds cred;
-    int version;
-    struct k5buf buf;
+    char *data_in;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    for (version = FIRST_VERSION; version <= 4; version++) {
-        ret = k5_unmarshal_cred(data, size, version, &cred);
-        if (!ret) {
-            k5_buf_init_dynamic(&buf);
-            k5_marshal_cred(&buf, version, &cred);
-            k5_buf_free(&buf);
-        }
+    data_in = k5memdup0(data, size, &ret);
+    if (ret)
+        return 0;
 
-        krb5_free_cred_contents(NULL, &cred);
-    }
+    enctype_list(data_in);
+    gss_oid(data, size);
+
+    free(data_in);
 
     return 0;
 }

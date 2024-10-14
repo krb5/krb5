@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/fuzzing/fuzz_marshal_cred.c */
+/* tests/fuzzing/fuzz_des.c */
 /*
  * Copyright (C) 2024 by Arjun. All rights reserved.
  *
@@ -30,40 +30,88 @@
  */
 
 /*
- * Fuzzing harness implementation for k5_unmarshal_cred.
+ * Fuzzing harness implementation for mit_des_cbc_encrypt and
+ * mit_des_cbc_encrypt.
  */
 
 #include "autoconf.h"
-#include <cc-int.h>
+#include <k5-int.h>
+#include <des_int.h>
 
-#define FIRST_VERSION 1
+/* DO NOT TRY THIS AT HOME! */
+#include <f_cbc.c>
 
-#define kMinInputLength 2
-#define kMaxInputLength 1024
+#define kMinInputLength 32
+#define kMaxInputLength 128
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
+
+uint8_t default_ivec[8] = {0x12,0x34,0x56,0x78,0x90,0xab,0xcd,0xef};
+
+
+static void
+fuzz_des(uint8_t *input, mit_des_key_schedule sched)
+{
+    uint8_t encrypt[8];
+    uint8_t decrypt[8];
+
+    mit_des_cbc_encrypt((const mit_des_cblock *)input,
+                        (mit_des_cblock *)encrypt, 8,
+                        sched, default_ivec, MIT_DES_ENCRYPT);
+
+    mit_des_cbc_encrypt((const mit_des_cblock *)encrypt,
+                        (mit_des_cblock *)decrypt, 8,
+                        sched, default_ivec, MIT_DES_DECRYPT);
+
+    if (memcmp(input, decrypt, 8) != 0)
+        abort();
+}
+
+static void
+fuzz_decrypt(uint8_t *input, mit_des_key_schedule sched)
+{
+    uint8_t output[8];
+
+    mit_des_cbc_encrypt((const mit_des_cblock *)input,
+                        (mit_des_cblock *)output, 8,
+                        sched, default_ivec, MIT_DES_DECRYPT);
+}
+
+static void
+fuzz_cksum(uint8_t *input, mit_des_key_schedule sched)
+{
+    uint8_t output[8];
+
+    mit_des_cbc_cksum(input, output, 8, sched, default_ivec);
+}
 
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     krb5_error_code ret;
-    krb5_creds cred;
-    int version;
-    struct k5buf buf;
+    mit_des_key_schedule sched;
+    uint8_t *data_in, input[8];
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    for (version = FIRST_VERSION; version <= 4; version++) {
-        ret = k5_unmarshal_cred(data, size, version, &cred);
-        if (!ret) {
-            k5_buf_init_dynamic(&buf);
-            k5_marshal_cred(&buf, version, &cred);
-            k5_buf_free(&buf);
-        }
+    memcpy(input, data, 8);
+    ret = mit_des_key_sched(input, sched);
+    if (ret)
+        return 0;
 
-        krb5_free_cred_contents(NULL, &cred);
-    }
+    memcpy(input, data + 8, 8);
+    fuzz_des(input, sched);
+
+    memcpy(input, data + 16, 8);
+    fuzz_decrypt(input, sched);
+
+    data_in = k5memdup(data + 24, size - 24, &ret);
+    if (ret)
+        return 0;
+
+    fuzz_cksum(data_in, sched);
+    free(data_in);
 
     return 0;
 }
