@@ -202,6 +202,43 @@ static krb5_error_code
 create_identifiers_from_stack(STACK_OF(X509) *sk,
                               krb5_external_principal_identifier *** ids);
 
+#ifdef HAVE_OPENSSL_CMS
+/* Use CMS support present in OpenSSL. */
+#include <openssl/cms.h>
+#define pkinit_CMS_get0_content_signed(_cms) CMS_get0_content(_cms)
+#define pkinit_CMS_get0_content_data(_cms) CMS_get0_content(_cms)
+#define pkinit_CMS_free1_crls(_sk_x509crl)              \
+    sk_X509_CRL_pop_free((_sk_x509crl), X509_CRL_free)
+#define pkinit_CMS_free1_certs(_sk_x509)        \
+    sk_X509_pop_free((_sk_x509), X509_free)
+#define pkinit_CMS_SignerInfo_get_cert(_cms,_si,_x509_pp)       \
+    CMS_SignerInfo_get0_algs(_si,NULL,_x509_pp,NULL,NULL)
+#else
+/* Fake up CMS support using PKCS7. */
+#define pkinit_CMS_free1_crls(_stack_of_x509crls)   /* Don't free these */
+#define pkinit_CMS_free1_certs(_stack_of_x509certs) /* Don't free these */
+#define CMS_NO_SIGNER_CERT_VERIFY PKCS7_NOVERIFY
+#define CMS_NOATTR PKCS7_NOATTR
+#define CMS_ContentInfo PKCS7
+#define CMS_SignerInfo PKCS7_SIGNER_INFO
+#define d2i_CMS_ContentInfo d2i_PKCS7
+#define CMS_get0_type(_p7) ((_p7)->type)
+#define pkinit_CMS_get0_content_signed(_p7) (&((_p7)->d.sign->contents->d.other->value.octet_string))
+#define pkinit_CMS_get0_content_data(_p7) (&((_p7)->d.other->value.octet_string))
+#define CMS_set1_signers_certs(_p7,_stack_of_x509,_uint)
+#define CMS_get0_SignerInfos PKCS7_get_signer_info
+#define stack_st_CMS_SignerInfo stack_st_PKCS7_SIGNER_INFO
+#undef  sk_CMS_SignerInfo_value
+#define sk_CMS_SignerInfo_value sk_PKCS7_SIGNER_INFO_value
+#define CMS_get0_eContentType(_p7) (_p7->d.sign->contents->type)
+#define CMS_verify PKCS7_verify
+#define CMS_get1_crls(_p7) (_p7->d.sign->crl)
+#define CMS_get1_certs(_p7) (_p7->d.sign->cert)
+#define CMS_ContentInfo_free(_p7) PKCS7_free(_p7)
+#define pkinit_CMS_SignerInfo_get_cert(_p7,_si,_x509_pp)        \
+    (*_x509_pp) = PKCS7_cert_from_signer_info(_p7,_si)
+#endif
+
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 
 /* 1.1 standardizes constructor and destructor names, renaming
@@ -2002,7 +2039,7 @@ cms_signeddata_verify(krb5_context context,
     if (is_signed && !OBJ_cmp(type, oid)) {
         unsigned char *d;
         *is_signed = 0;
-        octets = CMS_get0_content(cms);
+        octets = pkinit_CMS_get0_content_data(cms);
         if (!octets || ((*octets)->type != V_ASN1_OCTET_STRING)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval,
@@ -2057,13 +2094,13 @@ cms_signeddata_verify(krb5_context context,
             goto cleanup;
         *is_signed = 0;
         /* We cannot use CMS_dataInit because there may be no digest */
-        octets = CMS_get0_content(cms);
+        octets = pkinit_CMS_get0_content_signed(cms);
         if (octets)
             out = BIO_new_mem_buf((*octets)->data, (*octets)->length);
         if (out == NULL)
             goto cleanup;
     } else {
-        CMS_SignerInfo_get0_algs(si, NULL, &x, NULL, NULL);
+        pkinit_CMS_SignerInfo_get_cert(cms, si, &x);
         if (x == NULL)
             goto cleanup;
 
@@ -2283,11 +2320,11 @@ cleanup:
         X509_STORE_free(store);
     if (cms != NULL) {
         if (signerCerts != NULL)
-            sk_X509_pop_free(signerCerts, X509_free);
+            pkinit_CMS_free1_certs(signerCerts);
         if (idctx->intermediateCAs != NULL && signerCerts)
             sk_X509_free(intermediateCAs);
         if (signerRevoked != NULL)
-            sk_X509_CRL_pop_free(signerRevoked, X509_CRL_free);
+            pkinit_CMS_free1_crls(signerRevoked);
         if (idctx->revoked != NULL && signerRevoked)
             sk_X509_CRL_free(revoked);
         CMS_ContentInfo_free(cms);
