@@ -288,12 +288,13 @@ The following tags may be specified in a [realms] subsection:
 
 **kadmind_listen**
     (Whitespace- or comma-separated list.)  Specifies the kadmin RPC
-    listening addresses and/or ports for the :ref:`kadmind(8)` daemon.
-    Each entry may be an interface address, a port number, or an
-    address and port number separated by a colon.  If the address
-    contains colons, enclose it in square brackets.  If no address is
-    specified, the wildcard address is used.  To disable listening,
-    set this relation to the empty string with
+    listening addresses, ports and/or unix domain socket for the
+    :ref:`kadmind(8)` daemon.
+    Each entry may be an interface address, a port number, an address
+    and port number or unix domain socket separated by a colon.  If
+    the address contains colons, enclose it in square brackets.  If no
+    address is specified, the wildcard address is used.  To disable
+    listening, set this relation to the empty string with
     ``kadmind_listen = ""``.
     If kadmind fails to bind to any of the specified addresses, it
     will fail to start.  The default is to bind to the wildcard
@@ -359,9 +360,10 @@ The following tags may be specified in a [realms] subsection:
     **kdc_tcp_listen** if that relation is not defined.
 
 **kpasswd_listen**
-    (Comma-separated list.)  Specifies the kpasswd listening addresses
-    and/or ports for the :ref:`kadmind(8)` daemon.  Each entry may be
-    an interface address, a port number, or an address and port number
+    (Comma-separated list.)  Specifies the kpasswd listening
+    addresses, ports and/or unix domain sockets for the
+    :ref:`kadmind(8)` daemon.  Each entry may be an interface address,
+    a port number, an address and port number, or unix domain socket
     separated by a colon.  If the address contains colons, enclose it
     in square brackets.  If no address is specified, the wildcard
     address is used.  To disable listening, set this relation to the
