@@ -237,19 +237,17 @@ requires_msgauth(const char *secret, krad_code code)
      * Message-Authenticator is required in Access-Request packets and all
      * potential responses when UDP or TCP transport is used.
      */
-    return code == krad_code_name2num("Access-Request") ||
-        code == krad_code_name2num("Access-Reject") ||
-        code == krad_code_name2num("Access-Accept") ||
-        code == krad_code_name2num("Access-Challenge");
+    return code == KRAD_CODE_ACCESS_REQUEST ||
+        code == KRAD_CODE_ACCESS_ACCEPT || code == KRAD_CODE_ACCESS_REJECT ||
+        code == KRAD_CODE_ACCESS_CHALLENGE;
 }
 
 /* Check if the packet has a Message-Authenticator attribute. */
 static inline krb5_boolean
 has_pkt_msgauth(const krad_packet *pkt)
 {
-    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
-
-    return krad_attrset_get(pkt->attrset, msgauth_type, 0) != NULL;
+    return krad_attrset_get(pkt->attrset, KRAD_ATTR_MESSAGE_AUTHENTICATOR,
+                            0) != NULL;
 }
 
 /* Return the beginning of the Message-Authenticator attribute in pkt, or NULL
@@ -257,14 +255,13 @@ has_pkt_msgauth(const krad_packet *pkt)
 static const uint8_t *
 lookup_msgauth_addr(const krad_packet *pkt)
 {
-    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
     size_t i;
     uint8_t *p;
 
     i = OFFSET_ATTR;
     while (i + 2 < pkt->pkt.length) {
         p = (uint8_t *)offset(&pkt->pkt, i);
-        if (msgauth_type == *p)
+        if (*p == KRAD_ATTR_MESSAGE_AUTHENTICATOR)
             return p;
         i += p[1];
     }
@@ -282,11 +279,12 @@ calculate_mac(const char *secret, const krad_packet *pkt,
               const uint8_t auth[AUTH_FIELD_SIZE],
               uint8_t mac_out[MD5_DIGEST_SIZE])
 {
-    uint8_t zeroed_msgauth[MSGAUTH_SIZE];
-    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
     const uint8_t *msgauth_attr, *msgauth_end, *pkt_end;
     krb5_crypto_iov input[5];
     krb5_data ksecr, mac;
+    static const uint8_t zeroed_msgauth[MSGAUTH_SIZE] = {
+        KRAD_ATTR_MESSAGE_AUTHENTICATOR, MSGAUTH_SIZE
+    };
 
     msgauth_attr = lookup_msgauth_addr(pkt);
     if (msgauth_attr == NULL)
@@ -308,11 +306,8 @@ calculate_mac(const char *secret, const krad_packet *pkt,
 
     /* Read Message-Authenticator with the data bytes all set to zero, per RFC
      * 2869 section 5.14. */
-    zeroed_msgauth[0] = msgauth_type;
-    zeroed_msgauth[1] = MSGAUTH_SIZE;
-    memset(zeroed_msgauth + 2, 0, MD5_DIGEST_SIZE);
     input[3].flags = KRB5_CRYPTO_TYPE_DATA;
-    input[3].data = make_data(zeroed_msgauth, MSGAUTH_SIZE);
+    input[3].data = make_data((uint8_t *)zeroed_msgauth, MSGAUTH_SIZE);
 
     /* Read any attributes after Message-Authenticator. */
     input[4].flags = KRB5_CRYPTO_TYPE_DATA;
@@ -377,8 +372,7 @@ krad_packet_new_request(krb5_context ctx, const char *secret, krad_code code,
         goto error;
 
     /* Determine if Message-Authenticator is required. */
-    msgauth_required = (*secret != '\0' &&
-                        code == krad_code_name2num("Access-Request"));
+    msgauth_required = (*secret != '\0' && code == KRAD_CODE_ACCESS_REQUEST);
 
     /* Encode the attributes. */
     retval = kr_attrset_encode(set, secret, pkt_auth(pkt), msgauth_required,
@@ -479,11 +473,10 @@ verify_msgauth(const char *secret, const krad_packet *pkt,
                const uint8_t auth[AUTH_FIELD_SIZE])
 {
     uint8_t mac[MD5_DIGEST_SIZE];
-    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
     const krb5_data *msgauth;
     krb5_error_code retval;
 
-    msgauth = krad_packet_get_attr(pkt, msgauth_type, 0);
+    msgauth = krad_packet_get_attr(pkt, KRAD_ATTR_MESSAGE_AUTHENTICATOR, 0);
     if (msgauth == NULL)
         return ENODATA;
 
