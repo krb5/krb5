@@ -260,7 +260,7 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     char **hostlist = NULL, *realmstr = NULL, *host = NULL;
     const char *hostspec;
     krb5_error_code code;
-    int i, default_port;
+    int i;
 
     Tprintf("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
             realm->data, name, udpport);
@@ -287,24 +287,47 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     }
 
     for (i = 0; hostlist[i]; i++) {
-        int port_num;
+        int default_port = 0;
+        int port_num = 0;
         k5_transport this_transport = transport;
         const char *uri_path = NULL;
+        int family = AF_UNSPEC;
 
         hostspec = hostlist[i];
         Tprintf("entry %d is '%s'\n", i, hostspec);
 
-        parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
+        if (hostspec[0] == '/') {
+            this_transport = UNIXSOCK;
+            family = AF_UNIX;
+            uri_path = hostspec;
+            host = strdup("localhost");
+            if (host == NULL)
+                goto cleanup;
+        } else {
+            parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
 
-        default_port = (this_transport == HTTPS) ? 443 : udpport;
-        code = k5_parse_host_string(hostspec, default_port, &host, &port_num);
-        if (code == 0 && host == NULL)
-            code = EINVAL;
-        if (code)
-            goto cleanup;
+            switch (this_transport) {
+            case TCP_OR_UDP:
+            case TCP:
+            case UDP:
+                default_port = udpport;
+                break;
+            case HTTPS:
+                default_port = 443;
+                break;
+            default:
+                break;
+            }
+
+            code = k5_parse_host_string(hostspec, default_port, &host, &port_num);
+            if (code == 0 && host == NULL)
+                code = EINVAL;
+            if (code)
+                goto cleanup;
+        }
 
         code = add_host_to_list(serverlist, host, port_num, this_transport,
-                                AF_UNSPEC, uri_path, -1);
+                                family, uri_path, -1);
         if (code)
             goto cleanup;
 

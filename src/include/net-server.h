@@ -67,6 +67,7 @@ krb5_error_code loop_add_rpc_service(int default_port, const char *addresses,
                                      u_long prognum, u_long versnum,
                                      void (*dispatchfn)(struct svc_req *,
                                                         SVCXPRT *));
+krb5_error_code loop_add_unix_socket(const char *socket_paths);
 
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname,
