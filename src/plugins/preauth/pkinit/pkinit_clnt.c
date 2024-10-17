@@ -361,7 +361,7 @@ verify_kdc_san(krb5_context context,
     char **certhosts = NULL, **cfghosts = NULL, **hostptr;
     krb5_principal *princs = NULL;
     unsigned char ***get_dns;
-    int i, j;
+    size_t i, j;
 
     *valid_san = 0;
     *need_eku_checking = 1;
@@ -758,7 +758,7 @@ pkinit_client_prep_questions(krb5_context context,
     krb5_error_code retval;
     pkinit_context plgctx = (pkinit_context)moddata;
     pkinit_req_context reqctx = (pkinit_req_context)modreq;
-    int i, n;
+    size_t i, n;
     const pkinit_deferred_id *deferred_ids;
     const char *identity;
     unsigned long ck_flags;

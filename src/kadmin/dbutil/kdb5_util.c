@@ -160,7 +160,7 @@ cmd_lookup(char *name)
 #define ARG_VAL (--argc > 0 ? (koptarg = *(++argv)) : (char *)(usage(), NULL))
 
 char **db5util_db_args = NULL;
-int    db5util_db_args_size = 0;
+size_t db5util_db_args_size = 0;
 
 static void
 extended_com_err_fn(const char *myprog, errcode_t code, const char *fmt,

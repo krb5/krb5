@@ -38,7 +38,7 @@
 static void
 free_list(char **list)
 {
-    int i;
+    size_t i;
 
     for (i = 0; list != NULL && list[i] != NULL; i++)
         free(list[i]);
@@ -355,7 +355,7 @@ cleanup:
 krb5_error_code
 krb5_ldap_list_policy(krb5_context context, char *containerdn, char ***policy)
 {
-    int                         i, j, count;
+    size_t                      i, j, count;
     char                        **list = NULL;
     char                        *policycontainerdn = containerdn;
     kdb5_dal_handle             *dal_handle=NULL;
@@ -451,7 +451,7 @@ krb5_ldap_list(krb5_context context, char ***list, char *objectclass,
 
     /* set the filter for the search operation */
     filterlen = strlen("(objectclass=") + strlen(objectclass) + 1 + 1;
-    filter = malloc ((unsigned) filterlen);
+    filter = malloc (filterlen);
     if (filter == NULL) {
         st = ENOMEM;
         goto cleanup;

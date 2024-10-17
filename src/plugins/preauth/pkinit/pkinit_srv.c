@@ -73,7 +73,7 @@ pkinit_find_realm_context(krb5_context context,
 static void
 free_realm_contexts(krb5_context context, pkinit_kdc_context *realm_contexts)
 {
-    int i;
+    size_t i;
 
     if (realm_contexts == NULL)
         return;
@@ -86,7 +86,7 @@ free_realm_contexts(krb5_context context, pkinit_kdc_context *realm_contexts)
 static void
 free_certauth_handles(krb5_context context, certauth_handle *list)
 {
-    int i;
+    size_t i;
 
     if (list == NULL)
         return;
@@ -181,7 +181,7 @@ verify_client_san(krb5_context context,
     krb5_principal *princs = NULL, upn;
     krb5_boolean match;
     char **upns = NULL;
-    int i;
+    size_t i;
 #ifdef DEBUG_SAN_INFO
     char *client_string = NULL, *san_string;
 #endif
@@ -711,7 +711,7 @@ pkinit_pick_kdf_alg(krb5_context context, krb5_data **kdf_list,
     krb5_data *req_oid = NULL;
     const krb5_data *supp_oid = NULL;
     krb5_data *tmp_oid = NULL;
-    int i, j = 0;
+    size_t i, j = 0;
 
     /* if we don't find a match, return NULL value */
     *alg_oid = NULL;
@@ -1068,7 +1068,7 @@ pkinit_find_realm_context(krb5_context context,
                           krb5_kdcpreauth_moddata moddata,
                           krb5_principal princ)
 {
-    int i;
+    size_t i;
     pkinit_kdc_context *realm_contexts;
 
     if (moddata == NULL)
