@@ -196,7 +196,6 @@ kr_attrset_encode(const krad_attrset *set, const char *secret,
                   unsigned char outbuf[MAX_ATTRSETSIZE], size_t *outlen)
 {
     krb5_error_code retval;
-    krad_attr msgauth_type = krad_attr_name2num("Message-Authenticator");
     const uint8_t zeroes[MD5_DIGEST_SIZE] = { 0 };
     krb5_data zerodata;
     size_t i = 0;
@@ -211,7 +210,8 @@ kr_attrset_encode(const krad_attrset *set, const char *secret,
         /* Encode Message-Authenticator as the first attribute, per
          * draft-ietf-radext-deprecating-radius-03 section 5.2. */
         zerodata = make_data((uint8_t *)zeroes, MD5_DIGEST_SIZE);
-        retval = append_attr(set->ctx, secret, auth, msgauth_type, &zerodata,
+        retval = append_attr(set->ctx, secret, auth,
+                             KRAD_ATTR_MESSAGE_AUTHENTICATOR, &zerodata,
                              outbuf, &i);
         if (retval)
             return retval;

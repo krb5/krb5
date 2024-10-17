@@ -63,16 +63,14 @@ main(void)
 
     /* Test decoding. */
     in = make_data((void *)encoded, sizeof(encoded));
-    noerror(kr_attr_decode(ctx, secret, auth,
-                           krad_attr_name2num("User-Password"),
+    noerror(kr_attr_decode(ctx, secret, auth, KRAD_ATTR_USER_PASSWORD,
                            &in, outbuf, &len));
     insist(len == strlen(decoded));
     insist(memcmp(outbuf, decoded, len) == 0);
 
     /* Test encoding. */
     in = string2data((char *)decoded);
-    retval = kr_attr_encode(ctx, secret, auth,
-                            krad_attr_name2num("User-Password"),
+    retval = kr_attr_encode(ctx, secret, auth, KRAD_ATTR_USER_PASSWORD,
                             &in, outbuf, &len);
     insist(retval == 0);
     insist(len == sizeof(encoded));
@@ -80,9 +78,9 @@ main(void)
 
     /* Test constraint. */
     in.length = 100;
-    insist(kr_attr_valid(krad_attr_name2num("User-Password"), &in) == 0);
+    insist(kr_attr_valid(KRAD_ATTR_USER_PASSWORD, &in) == 0);
     in.length = 200;
-    insist(kr_attr_valid(krad_attr_name2num("User-Password"), &in) != 0);
+    insist(kr_attr_valid(KRAD_ATTR_USER_PASSWORD, &in) != 0);
 
     krb5_free_context(ctx);
     return 0;
