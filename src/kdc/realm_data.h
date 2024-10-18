@@ -66,6 +66,7 @@ typedef struct __kdc_realm_data {
      */
     char                *realm_listen;  /* Per-realm KDC UDP listen */
     char                *realm_tcp_listen; /* Per-realm KDC TCP listen */
+    char                *realm_unixsock_listen; /* Per-realm KDC unix sock listen */
     /*
      * Per-realm parameters.
      */
