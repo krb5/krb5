@@ -59,12 +59,13 @@ util_buffer_set.so util_buffer_set.po $(OUTPRE)util_buffer_set.$(OBJEXT): \
   gssapi_generic.h util_buffer_set.c
 util_errmap.so util_errmap.po $(OUTPRE)util_errmap.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-input.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h errmap.h gssapiP_generic.h \
-  gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
-  util_errmap.c
+  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(srcdir)/../mechglue/mechglue.h \
+  $(srcdir)/../mechglue/mglueP.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-input.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
+  errmap.h gssapiP_generic.h gssapi_err_generic.h gssapi_ext.h \
+  gssapi_generic.h util_errmap.c
 util_seqstate.so util_seqstate.po $(OUTPRE)util_seqstate.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(COM_ERR_DEPS) \

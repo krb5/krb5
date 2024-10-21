@@ -1,6 +1,6 @@
 mydir=lib$(S)gssapi$(S)generic
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/..
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/../mechglue
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=generic
