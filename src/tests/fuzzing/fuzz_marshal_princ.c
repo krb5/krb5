@@ -46,21 +46,24 @@ extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    int version;
+    krb5_error_code ret;
     krb5_principal princ;
-    krb5_context context;
+    int version;
+    struct k5buf buf;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    if (krb5_init_context(&context) != 0)
-        return 0;
-
     for (version = FIRST_VERSION; version <= 4; version++) {
-        k5_unmarshal_princ(data, size, version, &princ);
-        krb5_free_principal(context, princ);
+        ret = k5_unmarshal_princ(data, size, version, &princ);
+        if (!ret) {
+            k5_buf_init_dynamic(&buf);
+            k5_marshal_princ(&buf, version, princ);
+            k5_buf_free(&buf);
+        }
+
+        krb5_free_principal(NULL, princ);
     }
 
-    krb5_free_context(context);
     return 0;
 }

@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/fuzzing/fuzz_marshal_cred.c */
+/* tests/fuzzing/fuzz_attrset.c */
 /*
  * Copyright (C) 2024 by Arjun. All rights reserved.
  *
@@ -30,13 +30,13 @@
  */
 
 /*
- * Fuzzing harness implementation for k5_unmarshal_cred.
+ * Fuzzing harness implementation for kr_attrset_decode and
+ * kr_attrset_encode.
  */
 
 #include "autoconf.h"
-#include <cc-int.h>
-
-#define FIRST_VERSION 1
+#include <k5-int.h>
+#include <internal.h>
 
 #define kMinInputLength 2
 #define kMaxInputLength 1024
@@ -47,23 +47,32 @@ int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     krb5_error_code ret;
-    krb5_creds cred;
-    int version;
-    struct k5buf buf;
+    krb5_context context;
+    krad_attrset *set;
+    krb5_data data_in;
+    uint8_t buffer[KRAD_PACKET_SIZE_MAX];
+    size_t encode_len;
+
+    uint8_t auth[] = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    for (version = FIRST_VERSION; version <= 4; version++) {
-        ret = k5_unmarshal_cred(data, size, version, &cred);
-        if (!ret) {
-            k5_buf_init_dynamic(&buf);
-            k5_marshal_cred(&buf, version, &cred);
-            k5_buf_free(&buf);
-        }
+    data_in = make_data((void *)data, size);
 
-        krb5_free_cred_contents(NULL, &cred);
-    }
+    ret = krb5_init_context(&context);
+    if (ret)
+        return 0;
+
+    ret = kr_attrset_decode(context, &data_in, "f", auth, &set);
+    if (!ret)
+        kr_attrset_encode(set, "f", auth, FALSE, buffer, &encode_len);
+
+    krad_attrset_free(set);
+    krb5_free_context(context);
 
     return 0;
 }

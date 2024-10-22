@@ -433,14 +433,22 @@ local.properties
 
 /src/tests/create/kdb5_mkdums
 
+/src/tests/fuzzing/fuzz_aes
+/src/tests/fuzzing/fuzz_asn
+/src/tests/fuzzing/fuzz_attrset
 /src/tests/fuzzing/fuzz_chpw
+/src/tests/fuzzing/fuzz_crypto
+/src/tests/fuzzing/fuzz_des
 /src/tests/fuzzing/fuzz_gss
 /src/tests/fuzzing/fuzz_json
+/src/tests/fuzzing/fuzz_kdc
 /src/tests/fuzzing/fuzz_krad
+/src/tests/fuzzing/fuzz_krb
 /src/tests/fuzzing/fuzz_krb5_ticket
 /src/tests/fuzzing/fuzz_marshal_cred
 /src/tests/fuzzing/fuzz_marshal_princ
 /src/tests/fuzzing/fuzz_ndr
+/src/tests/fuzzing/fuzz_oid
 /src/tests/fuzzing/fuzz_pac
 /src/tests/fuzzing/fuzz_profile
 /src/tests/fuzzing/fuzz_util

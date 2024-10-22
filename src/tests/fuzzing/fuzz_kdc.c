@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* tests/fuzzing/fuzz_marshal_cred.c */
+/* tests/fuzzing/fuzz_kdc.c */
 /*
  * Copyright (C) 2024 by Arjun. All rights reserved.
  *
@@ -30,16 +30,16 @@
  */
 
 /*
- * Fuzzing harness implementation for k5_unmarshal_cred.
+ * Fuzzing harness implementation for insert_entry and discard_entry.
  */
 
 #include "autoconf.h"
-#include <cc-int.h>
 
-#define FIRST_VERSION 1
+/* DO NOT TRY THIS AT HOME! */
+#include <replay.c>
 
 #define kMinInputLength 2
-#define kMaxInputLength 1024
+#define kMaxInputLength 256
 
 extern int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
@@ -47,23 +47,31 @@ int
 LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     krb5_error_code ret;
-    krb5_creds cred;
-    int version;
-    struct k5buf buf;
+    krb5_context context;
+    krb5_data req, rep;
+    struct entry *e;
 
     if (size < kMinInputLength || size > kMaxInputLength)
         return 0;
 
-    for (version = FIRST_VERSION; version <= 4; version++) {
-        ret = k5_unmarshal_cred(data, size, version, &cred);
-        if (!ret) {
-            k5_buf_init_dynamic(&buf);
-            k5_marshal_cred(&buf, version, &cred);
-            k5_buf_free(&buf);
-        }
+    ret = krb5_init_context(&context);
+    if (ret)
+        return 0;
 
-        krb5_free_cred_contents(NULL, &cred);
-    }
+    ret = kdc_init_lookaside(context);
+    if (ret)
+        goto cleanup;
+
+    req = make_data((void *)data, size);
+    rep = make_data((void *)data, size - 1);
+
+    e = insert_entry(context, &req, &rep, 0);
+    discard_entry(context, e);
+
+    kdc_free_lookaside(context);
+
+cleanup:
+    krb5_free_context(context);
 
     return 0;
 }
