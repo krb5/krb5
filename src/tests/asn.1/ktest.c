@@ -1068,7 +1068,7 @@ ktest_destroy_keyblock(krb5_keyblock **kb)
 void
 ktest_empty_authorization_data(krb5_authdata **ad)
 {
-    int i;
+    size_t i;
 
     if (*ad != NULL) {
         for (i=0; ad[i] != NULL; i++)
@@ -1097,7 +1097,7 @@ ktest_destroy_authdata(krb5_authdata **ad)
 void
 ktest_empty_pa_data_array(krb5_pa_data **pad)
 {
-    int i;
+    size_t i;
 
     for (i=0; pad[i] != NULL; i++)
         ktest_destroy_pa_data(&pad[i]);
@@ -1134,7 +1134,7 @@ ktest_destroy_address(krb5_address **a)
 void
 ktest_empty_addresses(krb5_address **a)
 {
-    int i;
+    size_t i;
 
     for (i=0; a[i] != NULL; i++)
         ktest_destroy_address(&a[i]);
@@ -1173,7 +1173,7 @@ ktest_destroy_sequence_of_integer(long **soi)
 void
 ktest_destroy_sequence_of_ticket(krb5_ticket ***sot)
 {
-    int i;
+    size_t i;
 
     for (i=0; (*sot)[i] != NULL; i++)
         ktest_destroy_ticket(&(*sot)[i]);
@@ -1220,7 +1220,7 @@ ktest_destroy_etype_info_entry(krb5_etype_info_entry *i)
 void
 ktest_destroy_etype_info(krb5_etype_info_entry **info)
 {
-    int i;
+    size_t i;
 
     for (i = 0; info[i] != NULL; i++)
         ktest_destroy_etype_info_entry(info[i]);
@@ -1371,7 +1371,7 @@ ktest_destroy_cred_info(krb5_cred_info **ci)
 void
 ktest_destroy_sequence_of_cred_info(krb5_cred_info ***soci)
 {
-    int i;
+    size_t i;
 
     for (i = 0; (*soci)[i] != NULL; i++)
         ktest_destroy_cred_info(&(*soci)[i]);
@@ -1413,7 +1413,7 @@ ktest_empty_cred(krb5_cred *c)
 void
 ktest_destroy_last_req(krb5_last_req_entry ***lr)
 {
-    int i;
+    size_t i;
 
     if (*lr) {
         for (i=0; (*lr)[i] != NULL; i++)
