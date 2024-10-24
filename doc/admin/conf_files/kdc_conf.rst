@@ -288,15 +288,18 @@ The following tags may be specified in a [realms] subsection:
 
 **kadmind_listen**
     (Whitespace- or comma-separated list.)  Specifies the kadmin RPC
-    listening addresses and/or ports for the :ref:`kadmind(8)` daemon.
-    Each entry may be an interface address, a port number, or an
-    address and port number separated by a colon.  If the address
-    contains colons, enclose it in square brackets.  If no address is
-    specified, the wildcard address is used.  If kadmind fails to bind
-    to any of the specified addresses, it will fail to start.  The
-    default is to bind to the wildcard address at the port specified
-    in **kadmind_port**, or the standard kadmin port (749).  New in
-    release 1.15.
+    listening addresses, ports and/or unix domain socket for the
+    :ref:`kadmind(8)` daemon.
+    Each entry may be an interface address, a port number, an address
+    and port number or unix domain socket separated by a colon.  If
+    the address contains colons, enclose it in square brackets.  If no
+    address is specified, the wildcard address is used.  To disable
+    listening, set this relation to the empty string with
+    ``kadmind_listen = ""``.
+    If kadmind fails to bind to any of the specified addresses, it
+    will fail to start.  The default is to bind to the wildcard
+    address at the port specified in **kadmind_port**, or the standard
+    kadmin port (749).  New in release 1.15.
 
 **kadmind_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`
@@ -316,10 +319,11 @@ The following tags may be specified in a [realms] subsection:
     address and port number separated by a colon.  If the address
     contains colons, enclose it in square brackets.  If no address is
     specified, the wildcard address is used.  If no port is specified,
-    the standard port (88) is used.  If the KDC daemon fails to bind
-    to any of the specified addresses, it will fail to start.  The
-    default is to bind to the wildcard address on the standard port.
-    New in release 1.15.
+    the standard port (88) is used.  To disable listening on UDP, set
+    this relation to the empty string with ``kdc_listen = ""``.
+    If the KDC daemon fails to bind to any of the specified addresses,
+    it will fail to start.  The default is to bind to the wildcard
+    address on the standard port.  New in release 1.15.
 
 **kdc_ports**
     (Whitespace- or comma-separated list, deprecated.)  Prior to
@@ -341,6 +345,13 @@ The following tags may be specified in a [realms] subsection:
     it will fail to start.  The default is to bind to the wildcard
     address on the standard port.  New in release 1.15.
 
+**kdc_unixsock_listen**
+    (Whitespace- or comma-separated list.)  Specifies the unix domain
+    socket path to listen on for the :ref:`krb5kdc(8)` daemon. If no
+    path is specified, the listener will be disabled. If the KDC
+    daemon fails to bind the unix domain socket path, it will fail to
+    start.  New in release 1.22.
+
 **kdc_tcp_ports**
     (Whitespace- or comma-separated list, deprecated.)  Prior to
     release 1.15, this relation lists the ports for the
@@ -349,15 +360,18 @@ The following tags may be specified in a [realms] subsection:
     **kdc_tcp_listen** if that relation is not defined.
 
 **kpasswd_listen**
-    (Comma-separated list.)  Specifies the kpasswd listening addresses
-    and/or ports for the :ref:`kadmind(8)` daemon.  Each entry may be
-    an interface address, a port number, or an address and port number
+    (Comma-separated list.)  Specifies the kpasswd listening
+    addresses, ports and/or unix domain sockets for the
+    :ref:`kadmind(8)` daemon.  Each entry may be an interface address,
+    a port number, an address and port number, or unix domain socket
     separated by a colon.  If the address contains colons, enclose it
     in square brackets.  If no address is specified, the wildcard
-    address is used.  If kadmind fails to bind to any of the specified
-    addresses, it will fail to start.  The default is to bind to the
-    wildcard address at the port specified in **kpasswd_port**, or the
-    standard kpasswd port (464).  New in release 1.15.
+    address is used.  To disable listening, set this relation to the
+    empty string with ``kpasswd_listen = ""``.
+    If kadmind fails to bind to any of the specified addresses, it
+    will fail to start.  The default is to bind to the wildcard
+    address at the port specified in **kpasswd_port**, or the standard
+    kpasswd port (464).  New in release 1.15.
 
 **kpasswd_port**
     (Port number.)  Specifies the port on which the :ref:`kadmind(8)`

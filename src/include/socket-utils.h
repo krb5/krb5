@@ -88,6 +88,12 @@ static inline struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in6 *) ss;
 }
+#ifdef AF_UNIX
+static inline struct sockaddr_un *ss2sun (struct sockaddr_storage *ss)
+{
+    return (struct sockaddr_un *) ss;
+}
+#endif
 
 /* Set the IPv4 or IPv6 port on sa to port.  Do nothing if sa is not an
  * Internet socket. */

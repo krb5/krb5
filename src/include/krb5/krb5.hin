@@ -322,6 +322,7 @@ typedef struct _krb5_address {
 
 /* per Kerberos v5 protocol spec */
 #define ADDRTYPE_INET           0x0002
+#define ADDRTYPE_DIRECTIONAL    0x0003
 #define ADDRTYPE_CHAOS          0x0005
 #define ADDRTYPE_XNS            0x0006
 #define ADDRTYPE_ISO            0x0007

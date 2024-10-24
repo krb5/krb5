@@ -10,6 +10,10 @@
 
 #include "misc.h"
 
+#ifdef AF_UNIX
+#include <sys/un.h>
+#endif
+
 #ifndef GETSOCKNAME_ARG3_TYPE
 #define GETSOCKNAME_ARG3_TYPE int
 #endif
@@ -241,6 +245,16 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         salen = sizeof(*sin6);
         break;
     }
+#ifdef AF_UNIX
+    case ADDRTYPE_DIRECTIONAL: {
+        struct sockaddr_un *sun = ss2sun(&ss);
+
+        sun->sun_family = AF_UNIX;
+        memcpy(&sun->sun_path, addr->contents, addr->length);
+        salen = sizeof(*sun);
+        break;
+    }
+#endif
     default: {
         struct sockaddr *sa = ss2sa(&ss);
 

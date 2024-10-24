@@ -40,6 +40,10 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef AF_UNIX
+#include <sys/un.h>
+#endif
+
 #ifndef GETSOCKNAME_ARG3_TYPE
 #define GETSOCKNAME_ARG3_TYPE int
 #endif
@@ -143,6 +147,12 @@ kpasswd_sendto_msg_callback(SOCKET fd, void *data, krb5_data *message)
         local_kaddr.addrtype = ADDRTYPE_INET6;
         local_kaddr.length = sizeof(ss2sin6(&local_addr)->sin6_addr);
         local_kaddr.contents = (krb5_octet *) &ss2sin6(&local_addr)->sin6_addr;
+#ifdef AF_UNIX
+    } else if (local_addr.ss_family == AF_UNIX) {
+        local_kaddr.addrtype = ADDRTYPE_DIRECTIONAL;
+        local_kaddr.length = strlen(ss2sun(&local_addr)->sun_path);
+        local_kaddr.contents = (krb5_octet *)ss2sun(&local_addr)->sun_path;
+#endif
     } else {
         code = krb5_os_localaddr(ctx->context, &addrs);
         if (code)

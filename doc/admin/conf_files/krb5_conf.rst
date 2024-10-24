@@ -530,7 +530,8 @@ following tags may be specified in the realm's subsection:
     been set to ``FILE:/tmp/my_proxy.pem``.
 
 **kdc**
-    The name or address of a host running a KDC for that realm.  An
+    The name or address of a host running a KDC for that realm or a
+    path to the unix domain socket of the locally running KDC.  An
     optional port number, separated from the hostname by a colon, may
     be included.  If the name or address contains colons (for example,
     if it is an IPv6 address), enclose it in square brackets to

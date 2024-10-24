@@ -46,6 +46,7 @@
 
 #ifndef _WIN32
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netdb.h>
 #endif
 
@@ -858,6 +859,21 @@ one_addr(krb5_address *a)
         sin6p->sin6_family = AF_INET6;
         memcpy(&sin6p->sin6_addr, a->contents, 16);
         break;
+#ifdef AF_UNIX
+    case ADDRTYPE_DIRECTIONAL: {
+        struct sockaddr_un *sun;
+
+        if (a->length > 108) {
+            printf(_("broken address (type %d length %d)"),
+                   a->addrtype, a->length);
+            return;
+        }
+        sun = ss2sun(&ss);
+        sun->sun_family = AF_UNIX;
+        memcpy(&sun->sun_path, a->contents, a->length);
+        break;
+    }
+#endif
     default:
         printf(_("unknown addrtype %d"), a->addrtype);
         return;
