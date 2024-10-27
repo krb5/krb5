@@ -382,7 +382,7 @@ krb5_ldap_list_policy(krb5_context context, char *containerdn, char ***policy)
 
     for (i = 0, j = 0; list[i] != NULL; i++, j++) {
         int ret;
-        ret = krb5_ldap_policydn_to_name (context, list[i], &(*policy)[i]);
+        ret = krb5_ldap_policydn_to_name (context, list[i], &(*policy)[j]);
         if (ret != 0)
             j--;
     }
