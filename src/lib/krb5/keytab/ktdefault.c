@@ -37,7 +37,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_kt_default(krb5_context context, krb5_keytab *id)
 {
-    char defname[BUFSIZ];
+    char defname[BUFSIZ] = {0};
     krb5_error_code retval;
 
     if ((retval = krb5_kt_default_name(context, defname, sizeof(defname))))
