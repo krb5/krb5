@@ -130,7 +130,7 @@ krb5_error_code
 kdc_init_lookaside(krb5_context context)
 {
     krb5_error_code ret;
-    uint8_t seed[K5_HASH_SEED_LEN];
+    uint8_t seed[K5_HASH_SEED_LEN] = {0};
     krb5_data d = make_data(seed, sizeof(seed));
 
     ret = krb5_c_random_make_octets(context, &d);
