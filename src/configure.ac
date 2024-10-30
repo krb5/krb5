@@ -466,7 +466,7 @@ AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
 AC_C_CONST
 AC_HEADER_DIRENT
 AC_FUNC_STRERROR_R
-AC_CHECK_FUNCS(strdup setvbuf seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror timegm explicit_bzero explicit_memset getresuid getresgid)
+AC_CHECK_FUNCS(strdup setvbuf seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror timegm explicit_bzero explicit_memset getresuid getresgid getentropy)
 
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
