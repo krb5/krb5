@@ -96,7 +96,27 @@ cleanup:
 static krb5_boolean
 get_os_entropy(unsigned char *buf, size_t len)
 {
-#if defined(__linux__) && defined(SYS_getrandom)
+#if defined(HAVE_GETENTROPY)
+    int r;
+    size_t seg;
+
+    /* getentropy() has a maximum length of 256. */
+    while (len > 0) {
+        seg = (len > 256) ? 256 : len;
+        r = getentropy(buf, len);
+        if (r != 0)
+            break;
+        len -= seg;
+        buf += seg;
+    }
+    if (len == 0)
+        return TRUE;
+#elif defined(__linux__) && defined(SYS_getrandom)
+    /*
+     * Linux added SYS_getrandom in 3.17 (2014), but glibc did not have a
+     * wrapper until 2.25 (2017).  This block can be deleted when that interval
+     * is far in the past.
+     */
     int r;
 
     while (len > 0) {
@@ -104,9 +124,6 @@ get_os_entropy(unsigned char *buf, size_t len)
          * Pull from the /dev/urandom pool, but require it to have been seeded.
          * This ensures strong randomness while only blocking during first
          * system boot.
-         *
-         * glibc does not currently provide a binding for getrandom:
-         * https://sourceware.org/bugzilla/show_bug.cgi?id=17252
          */
         errno = 0;
         r = syscall(SYS_getrandom, buf, len, 0);
