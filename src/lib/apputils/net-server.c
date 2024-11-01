@@ -1127,7 +1127,7 @@ kill_lru_tcp_or_rpc_connection(void *handle, verto_ev *newev)
     }
     if (oldest_c != NULL) {
         krb5_klog_syslog(LOG_INFO, _("dropping %s fd %d from %s"),
-                         c->type == CONN_RPC ? "rpc" : "tcp",
+                         oldest_c->type == CONN_RPC ? "rpc" : "tcp",
                          verto_get_fd(oldest_ev), oldest_c->addrbuf);
         if (oldest_c->type == CONN_RPC)
             oldest_c->rpc_force_close = 1;

@@ -4110,6 +4110,8 @@ pkinit_get_certs_pkcs12(krb5_context context,
 
         TRACE_PKINIT_PKCS_PARSE_FAIL_FIRST(context);
 
+        if (p12name == NULL)
+            goto cleanup;
         if (id_cryptoctx->defer_id_prompt) {
             /* Supply the identity name to be passed to the responder. */
             pkinit_set_deferred_id(&id_cryptoctx->deferred_ids, p12name, 0,

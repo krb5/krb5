@@ -165,6 +165,7 @@ main(int argc, char **argv)
 	  if (echo_resp == NULL) {
 	       fprintf(stderr, "RPC_TEST_ECHO call %d%s", i,
 		       clnt_sperror(clnt, ""));
+	       break;
 	  }
 	  if (strncmp(*echo_resp, "Echo: ", 6) &&
 	      strcmp(echo_arg, (*echo_resp) + 6) != 0)
