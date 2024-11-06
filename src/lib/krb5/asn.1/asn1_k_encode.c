@@ -250,7 +250,7 @@ decode_krb5_flags(const taginfo *t, const uint8_t *asn1, size_t len, void *val)
         return ret;
     /* Copy up to 32 bits into f, starting at the most significant byte. */
     for (i = 0; i < blen && i < 4; i++)
-        f |= bits[i] << (8 * (3 - i));
+        f |= (uint32_t)bits[i] << (8 * (3 - i));
     *(krb5_flags *)val = f;
     free(bits);
     return 0;
