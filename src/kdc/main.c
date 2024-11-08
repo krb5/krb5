@@ -965,18 +965,13 @@ int main(int argc, char **argv)
     /* Add each realm's listener addresses to the loop. */
     for (i = 0; i < shandle.kdc_numrealms; i++) {
         realm = shandle.kdc_realmlist[i];
-        if (*realm->realm_listen != '\0') {
-            retval = loop_add_udp_address(KRB5_DEFAULT_PORT,
-                                          realm->realm_listen);
-            if (retval)
-                goto net_init_error;
-        }
-        if (*realm->realm_tcp_listen != '\0') {
-            retval = loop_add_tcp_address(KRB5_DEFAULT_PORT,
-                                          realm->realm_tcp_listen);
-            if (retval)
-                goto net_init_error;
-        }
+        retval = loop_add_udp_address(KRB5_DEFAULT_PORT, realm->realm_listen);
+        if (retval)
+            goto net_init_error;
+        retval = loop_add_tcp_address(KRB5_DEFAULT_PORT,
+                                      realm->realm_tcp_listen);
+        if (retval)
+            goto net_init_error;
     }
 
     if (workers == 0) {

@@ -391,15 +391,8 @@ loop_add_addresses(const char *addresses, int default_port,
         goto cleanup;
     }
 
-    /* Start tokenizing the addresses string.  If we get NULL the string
-     * contained no addresses, so add a wildcard address. */
+    /* Loop through each address in the string and add it to the loop. */
     addr = strtok_r(addresses_copy, ADDRESSES_DELIM, &saveptr);
-    if (addr == NULL) {
-        ret = loop_add_address(NULL, default_port, type, rpc_data);
-        goto cleanup;
-    }
-
-    /* Loop through each address and add it to the loop. */
     for (; addr != NULL; addr = strtok_r(NULL, ADDRESSES_DELIM, &saveptr)) {
         /* Parse the host string. */
         ret = k5_parse_host_string(addr, default_port, &host, &port);
@@ -414,6 +407,7 @@ loop_add_addresses(const char *addresses, int default_port,
         host = NULL;
     }
 
+    ret = 0;
 cleanup:
     free(addresses_copy);
     free(host);
