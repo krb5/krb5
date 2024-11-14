@@ -180,7 +180,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
     struct remote_address *ra;
     const krb5_data *d;
     krb5_data data;
-    char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV], tmpbuf[200], *str;
+    char addrbuf[128], tmpbuf[200], *str;
     const char *p;
     krb5_const_principal princ;
     const krb5_keyblock *keyblock;
@@ -255,15 +255,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             else
                 k5_buf_add_fmt(&buf, "transport%d", ra->transport);
 
-            if (getnameinfo((struct sockaddr *)&ra->saddr, ra->len,
-                            addrbuf, sizeof(addrbuf), portbuf, sizeof(portbuf),
-                            NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
-                if (ra->family == AF_UNSPEC)
-                    k5_buf_add(&buf, " AF_UNSPEC");
-                else
-                    k5_buf_add_fmt(&buf, " af%d", ra->family);
-            } else
-                k5_buf_add_fmt(&buf, " %s:%s", addrbuf, portbuf);
+            k5_print_addr_port(ss2sa(&ra->saddr), addrbuf, sizeof(addrbuf));
+            k5_buf_add_fmt(&buf, " %s", addrbuf);
         } else if (strcmp(tmpbuf, "data") == 0) {
             d = va_arg(ap, krb5_data *);
             if (d == NULL || (d->length != 0 && d->data == NULL))

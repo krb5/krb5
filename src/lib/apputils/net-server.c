@@ -94,27 +94,6 @@ setv6only(int sock, int value)
 }
 #endif
 
-static const char *
-paddr(struct sockaddr *sa)
-{
-    static char buf[100];
-    char portbuf[10];
-    if (getnameinfo(sa, sa_socklen(sa),
-                    buf, sizeof(buf), portbuf, sizeof(portbuf),
-                    NI_NUMERICHOST|NI_NUMERICSERV))
-        strlcpy(buf, "<unprintable>", sizeof(buf));
-    else {
-        unsigned int len = sizeof(buf) - strlen(buf);
-        char *p = buf + strlen(buf);
-        if (len > 2+strlen(portbuf)) {
-            *p++ = '.';
-            len--;
-            strncpy(p, portbuf, len);
-        }
-    }
-    return buf;
-}
-
 /* KDC data.  */
 
 enum conn_type {
@@ -141,8 +120,6 @@ struct connection {
     struct sockaddr_storage addr_s;
     socklen_t addrlen;
     char addrbuf[56];
-    krb5_address remote_addr_buf;
-    krb5_fulladdr remote_addr;
 
     /* Incoming data (TCP) */
     size_t bufsiz;
@@ -587,14 +564,15 @@ create_server_socket(struct sockaddr *addr, int type, const char *prog,
                      int *fd_out)
 {
     int sock, e;
+    char addrbuf[128];
 
     *fd_out = -1;
 
     sock = socket(addr->sa_family, type, 0);
     if (sock == -1) {
         e = errno;
-        com_err(prog, e, _("Cannot create TCP server socket on %s"),
-                paddr(addr));
+        k5_print_addr_port(addr, addrbuf, sizeof(addrbuf));
+        com_err(prog, e, _("Cannot create TCP server socket on %s"), addrbuf);
         return e;
     }
     set_cloexec_fd(sock);
@@ -602,8 +580,9 @@ create_server_socket(struct sockaddr *addr, int type, const char *prog,
 #ifndef _WIN32                  /* Windows FD_SETSIZE is a count. */
     if (sock >= FD_SETSIZE) {
         close(sock);
+        k5_print_addr_port(addr, addrbuf, sizeof(addrbuf));
         com_err(prog, 0, _("TCP socket fd number %d (for %s) too high"),
-                sock, paddr(addr));
+                sock, addrbuf);
         return EMFILE;
     }
 #endif
@@ -626,7 +605,8 @@ create_server_socket(struct sockaddr *addr, int type, const char *prog,
 
     if (bind(sock, addr, sa_socklen(addr)) == -1) {
         e = errno;
-        com_err(prog, e, _("Cannot bind server socket on %s"), paddr(addr));
+        k5_print_addr_port(addr, addrbuf, sizeof(addrbuf));
+        com_err(prog, e, _("Cannot bind server socket on %s"), addrbuf);
         close(sock);
         return e;
     }
@@ -695,9 +675,11 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     verto_ev_flag flags;
     verto_ev *ev = NULL;
     int sock = -1;
+    char addrbuf[128];
 
+    k5_print_addr_port(sock_address, addrbuf, sizeof(addrbuf));
     krb5_klog_syslog(LOG_DEBUG, _("Setting up %s socket for address %s"),
-                     bind_type_names[ba->type], paddr(sock_address));
+                     bind_type_names[ba->type], addrbuf);
 
     /* Create the socket. */
     ret = create_server_socket(sock_address, bind_socktypes[ba->type], prog,
@@ -710,7 +692,7 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     if (ba->type == TCP && listen(sock, tcp_listen_backlog) != 0) {
         ret = errno;
         com_err(prog, errno, _("Cannot listen on %s server socket on %s"),
-                bind_type_names[ba->type], paddr(sock_address));
+                bind_type_names[ba->type], addrbuf);
         goto cleanup;
     }
 
@@ -719,7 +701,7 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
         ret = errno;
         com_err(prog, errno,
                 _("cannot set listening %s socket on %s non-blocking"),
-                bind_type_names[ba->type], paddr(sock_address));
+                bind_type_names[ba->type], addrbuf);
         goto cleanup;
     }
 
@@ -727,19 +709,19 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     if (ba->type == TCP && setnolinger(sock) != 0) {
         ret = errno;
         com_err(prog, errno, _("cannot set SO_LINGER on %s socket on %s"),
-                bind_type_names[ba->type], paddr(sock_address));
+                bind_type_names[ba->type], addrbuf);
         goto cleanup;
     }
 
     /* Try to turn on pktinfo for UDP wildcard sockets. */
     if (ba->type == UDP && sa_is_wildcard(sock_address)) {
         krb5_klog_syslog(LOG_DEBUG, _("Setting pktinfo on socket %s"),
-                         paddr(sock_address));
+                         addrbuf);
         ret = set_pktinfo(sock, sock_address->sa_family);
         if (ret) {
             com_err(prog, ret,
                     _("Cannot request packet info for UDP socket address "
-                      "%s port %d"), paddr(sock_address), ba->port);
+                      "%s port %d"), addrbuf, ba->port);
             krb5_klog_syslog(LOG_INFO, _("System does not support pktinfo yet "
                                          "binding to a wildcard address.  "
                                          "Packets are not guaranteed to "
@@ -812,6 +794,7 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     struct bind_address addr;
     struct addrinfo hints, *ai_list = NULL, *ai = NULL;
     verto_callback vcb;
+    char addrbuf[128];
 
     /* Check to make sure addresses were added to the server. */
     if (bind_addresses.n == 0) {
@@ -866,10 +849,10 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
                                tcp_listen_backlog, verto_callbacks[addr.type],
                                bind_conn_types[addr.type]);
             if (ret) {
+                k5_print_addr(ai->ai_addr, addrbuf, sizeof(addrbuf));
                 krb5_klog_syslog(LOG_ERR,
                                  _("Failed setting up a %s socket (for %s)"),
-                                 bind_type_names[addr.type],
-                                 paddr(ai->ai_addr));
+                                 bind_type_names[addr.type], addrbuf);
                 if (ret != EAFNOSUPPORT)
                     goto cleanup;
             } else {
@@ -924,45 +907,10 @@ loop_setup_network(verto_ctx *ctx, void *handle, const char *prog,
     return 0;
 }
 
-void
-init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
-{
-    switch (sa->sa_family) {
-    case AF_INET:
-        faddr->address->addrtype = ADDRTYPE_INET;
-        faddr->address->length = 4;
-        faddr->address->contents = (krb5_octet *) &sa2sin(sa)->sin_addr;
-        faddr->port = ntohs(sa2sin(sa)->sin_port);
-        break;
-    case AF_INET6:
-        if (IN6_IS_ADDR_V4MAPPED(&sa2sin6(sa)->sin6_addr)) {
-            faddr->address->addrtype = ADDRTYPE_INET;
-            faddr->address->length = 4;
-            faddr->address->contents = 12 + (krb5_octet *) &sa2sin6(sa)->sin6_addr;
-        } else {
-            faddr->address->addrtype = ADDRTYPE_INET6;
-            faddr->address->length = 16;
-            faddr->address->contents = (krb5_octet *) &sa2sin6(sa)->sin6_addr;
-        }
-        faddr->port = ntohs(sa2sin6(sa)->sin6_port);
-        break;
-    default:
-        faddr->address->addrtype = -1;
-        faddr->address->length = 0;
-        faddr->address->contents = 0;
-        faddr->port = 0;
-        break;
-    }
-}
-
 struct udp_dispatch_state {
     void *handle;
     const char *prog;
     int port_fd;
-    krb5_address remote_addr_buf;
-    krb5_fulladdr remote_addr;
-    krb5_address local_addr_buf;
-    krb5_fulladdr local_addr;
     struct sockaddr_storage saddr;
     struct sockaddr_storage daddr;
     aux_addressing_info auxaddr;
@@ -988,25 +936,13 @@ process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
     if (cc == -1) {
         /* Note that the local address (daddr*) has no port number
          * info associated with it. */
-        char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
-        char daddrbuf[NI_MAXHOST];
+        char sbuf[128], dbuf[128];
         int e = errno;
 
-        if (getnameinfo(ss2sa(&state->daddr), sa_socklen(ss2sa(&state->daddr)),
-                        daddrbuf, sizeof(daddrbuf), 0, 0,
-                        NI_NUMERICHOST) != 0) {
-            strlcpy(daddrbuf, "?", sizeof(daddrbuf));
-        }
-
-        if (getnameinfo(ss2sa(&state->saddr), sa_socklen(ss2sa(&state->saddr)),
-                        saddrbuf, sizeof(saddrbuf), sportbuf, sizeof(sportbuf),
-                        NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
-            strlcpy(saddrbuf, "?", sizeof(saddrbuf));
-            strlcpy(sportbuf, "?", sizeof(sportbuf));
-        }
-
-        com_err(state->prog, e, _("while sending reply to %s/%s from %s"),
-                saddrbuf, sportbuf, daddrbuf);
+        k5_print_addr_port(ss2sa(&state->saddr), sbuf, sizeof(sbuf));
+        k5_print_addr(ss2sa(&state->daddr), dbuf, sizeof(dbuf));
+        com_err(state->prog, e, _("while sending reply to %s from %s"),
+                sbuf, dbuf);
         goto out;
     }
     if ((size_t)cc != response->length) {
@@ -1074,14 +1010,7 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     state->request.length = cc;
     state->request.data = state->pktbuf;
 
-    state->remote_addr.address = &state->remote_addr_buf;
-    init_addr(&state->remote_addr, ss2sa(&state->saddr));
-
-    state->local_addr.address = &state->local_addr_buf;
-    init_addr(&state->local_addr, ss2sa(&state->daddr));
-
-    /* This address is in net order. */
-    dispatch(state->handle, &state->local_addr, &state->remote_addr,
+    dispatch(state->handle, ss2sa(&state->daddr), ss2sa(&state->saddr),
              &state->request, 0, ctx, process_packet_response, state);
 }
 
@@ -1124,16 +1053,14 @@ static void
 accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
 {
     int s;
-    struct sockaddr_storage addr_s;
-    struct sockaddr *addr = (struct sockaddr *)&addr_s;
-    socklen_t addrlen = sizeof(addr_s);
+    struct sockaddr_storage addr;
+    socklen_t addrlen = sizeof(addr);
     struct connection *newconn, *conn;
-    char tmpbuf[10];
     verto_ev_flag flags;
     verto_ev *newev;
 
     conn = verto_get_private(ev);
-    s = accept(verto_get_fd(ev), addr, &addrlen);
+    s = accept(verto_get_fd(ev), ss2sa(&addr), &addrlen);
     if (s < 0)
         return;
     set_cloexec_fd(s);
@@ -1153,23 +1080,9 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
     }
     newconn = verto_get_private(newev);
 
-    if (getnameinfo((struct sockaddr *)&addr_s, addrlen,
-                    newconn->addrbuf, sizeof(newconn->addrbuf),
-                    tmpbuf, sizeof(tmpbuf),
-                    NI_NUMERICHOST | NI_NUMERICSERV))
-        strlcpy(newconn->addrbuf, "???", sizeof(newconn->addrbuf));
-    else {
-        char *p, *end;
-        p = newconn->addrbuf;
-        end = p + sizeof(newconn->addrbuf);
-        p += strlen(p);
-        if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
-            *p++ = '.';
-            strlcpy(p, tmpbuf, end - p);
-        }
-    }
-
-    newconn->addr_s = addr_s;
+    k5_print_addr_port(ss2sa(&addr), newconn->addrbuf,
+                       sizeof(newconn->addrbuf));
+    newconn->addr_s = addr;
     newconn->addrlen = addrlen;
     newconn->bufsiz = 1024 * 1024;
     newconn->buffer = malloc(newconn->bufsiz);
@@ -1186,16 +1099,12 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
         return;
     }
     newconn->offset = 0;
-    newconn->remote_addr.address = &newconn->remote_addr_buf;
-    init_addr(&newconn->remote_addr, ss2sa(&newconn->addr_s));
     SG_SET(&newconn->sgbuf[0], newconn->lenbuf, 4);
     SG_SET(&newconn->sgbuf[1], 0, 0);
 }
 
 struct tcp_dispatch_state {
     struct sockaddr_storage local_saddr;
-    krb5_address local_addr_buf;
-    krb5_fulladdr local_addr;
     struct connection *conn;
     krb5_data request;
     verto_ctx *ctx;
@@ -1342,10 +1251,9 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                              error_message(errno));
             goto kill_tcp_connection;
         }
-        state->local_addr.address = &state->local_addr_buf;
-        init_addr(&state->local_addr, ss2sa(&state->local_saddr));
-        dispatch(state->conn->handle, &state->local_addr, &conn->remote_addr,
-                 &state->request, 1, ctx, process_tcp_response, state);
+        dispatch(state->conn->handle, ss2sa(&state->local_saddr),
+                 ss2sa(&conn->addr_s), &state->request, 1, ctx,
+                 process_tcp_response, state);
     }
 
     return;
@@ -1441,11 +1349,9 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 
     /* Scan svc_fdset for any new connections. */
     for (s = 0; s < FD_SETSIZE; s++) {
-        struct sockaddr_storage addr_s;
-        struct sockaddr *addr = (struct sockaddr *) &addr_s;
-        socklen_t addrlen = sizeof(addr_s);
+        struct sockaddr_storage addr;
+        socklen_t addrlen = sizeof(addr);
         struct connection *newconn;
-        char tmpbuf[10];
         verto_ev *newev;
 
         /* If we already have this fd, continue. */
@@ -1460,34 +1366,19 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 
         set_cloexec_fd(s);
 
-        if (getpeername(s, addr, &addrlen) ||
-            getnameinfo(addr, addrlen,
-                        newconn->addrbuf,
-                        sizeof(newconn->addrbuf),
-                        tmpbuf, sizeof(tmpbuf),
-                        NI_NUMERICHOST | NI_NUMERICSERV)) {
-            strlcpy(newconn->addrbuf, "???",
-                    sizeof(newconn->addrbuf));
+        if (getpeername(s, ss2sa(&addr), &addrlen) != 0) {
+            strlcpy(newconn->addrbuf, "<unknown>", sizeof(newconn->addrbuf));
         } else {
-            char *p, *end;
-            p = newconn->addrbuf;
-            end = p + sizeof(newconn->addrbuf);
-            p += strlen(p);
-            if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
-                *p++ = '.';
-                strlcpy(p, tmpbuf, end - p);
-            }
+            k5_print_addr_port(ss2sa(&addr), newconn->addrbuf,
+                               sizeof(newconn->addrbuf));
         }
 
-        newconn->addr_s = addr_s;
+        newconn->addr_s = addr;
         newconn->addrlen = addrlen;
         newconn->start_time = time(0);
 
         if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
             kill_lru_tcp_or_rpc_connection(newconn->handle, newev);
-
-        newconn->remote_addr.address = &newconn->remote_addr_buf;
-        init_addr(&newconn->remote_addr, ss2sa(&newconn->addr_s));
     }
 }
 

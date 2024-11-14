@@ -1186,6 +1186,7 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
                       krb5_enctype *etype, struct sockaddr_storage *my_sin)
 {
     krb5_error_code retval;
+    krb5_address addr;
     krb5_ticket *ticket;
     struct sockaddr_storage r_sin;
     GETSOCKNAME_ARG3_TYPE sin_length;
@@ -1198,8 +1199,13 @@ kerberos_authenticate(krb5_context context, int fd, krb5_principal *clientp,
         exit(1);
     }
 
-    sockaddr2krbaddr(context, r_sin.ss_family, (struct sockaddr *)&r_sin,
-                     &receiver_addr);
+    if (k5_sockaddr_to_address(ss2sa(my_sin), &addr) != 0)
+        abort();
+    retval = krb5_copy_addr(context, &addr, &receiver_addr);
+    if (retval) {
+        com_err(progname, retval, _("while converting local address"));
+        exit(1);
+    }
 
     if (debug) {
         retval = krb5_unparse_name(context, server, &name);
