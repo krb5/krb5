@@ -35,14 +35,6 @@
 /* The delimiter characters supported by the addresses string. */
 #define ADDRESSES_DELIM ",; "
 
-typedef struct _krb5_fulladdr {
-    krb5_address *      address;
-    krb5_ui_4           port;
-} krb5_fulladdr;
-
-/* exported from network.c */
-void init_addr(krb5_fulladdr *, struct sockaddr *);
-
 /* exported from net-server.c */
 verto_ctx *loop_init(verto_ev_type types);
 
@@ -88,8 +80,8 @@ void loop_free(verto_ctx *ctx);
  */
 typedef void (*loop_respond_fn)(void *arg, krb5_error_code code,
                                 krb5_data *response);
-void dispatch(void *handle, const krb5_fulladdr *local_addr,
-              const krb5_fulladdr *remote_addr, krb5_data *request,
+void dispatch(void *handle, const struct sockaddr *local_addr,
+              const struct sockaddr *remote_addr, krb5_data *request,
               int is_tcp, verto_ctx *vctx, loop_respond_fn respond, void *arg);
 krb5_error_code make_toolong_error (void *handle, krb5_data **);
 

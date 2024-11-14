@@ -2409,4 +2409,20 @@ krb5_error_code
 k5_hmac_md5(const krb5_data *key, const krb5_crypto_iov *data, size_t num_data,
             krb5_data *output);
 
+/*
+ * Translate sa to a krb5_address, putting the result in *out with contents
+ * aliased from *sa.  Return KRB5_PROG_ATYPE_NOSUPP if sa is not an IPv4 or
+ * IPv6 address.
+ */
+krb5_error_code
+k5_sockaddr_to_address(const struct sockaddr *sa, krb5_address *out);
+
+/* Place a printable representation of sa (without port) into buf. */
+void
+k5_print_addr(const struct sockaddr *sa, char *buf, size_t len);
+
+/* Place a printable representation of sa (with port) into buf. */
+void
+k5_print_addr_port(const struct sockaddr *sa, char *buf, size_t len);
+
 #endif /* _KRB5_INT_H */
