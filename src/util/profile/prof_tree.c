@@ -219,7 +219,8 @@ errcode_t profile_add_node(struct profile_node *section, const char *name,
         } else if (value == NULL && cmp == 0 &&
                    p->value == NULL && p->deleted != 1) {
             /* Found duplicate subsection, so don't make a new one. */
-            *ret_node = p;
+            if (ret_node)
+                *ret_node = p;
             return 0;
         } else if (check_final && cmp == 0 && p->final) {
             /* This key already exists with the final flag and we were asked

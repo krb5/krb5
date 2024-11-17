@@ -39,7 +39,7 @@ krb5_k_make_checksum_iov(krb5_context context,
     krb5_crypto_iov *checksum;
     const struct krb5_cksumtypes *ctp;
 
-    if (cksumtype == 0) {
+    if (cksumtype == 0 && key != NULL) {
         ret = krb5int_c_mandatory_cksumtype(context, key->keyblock.enctype,
                                             &cksumtype);
         if (ret != 0)
