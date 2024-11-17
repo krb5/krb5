@@ -101,7 +101,6 @@ main(int argc, char ** argv)
 
     krb5_ccache cc_source = NULL;
     const char * cc_source_tag = NULL;
-    const char * cc_source_tag_tmp = NULL;
     char * cmd = NULL, * exec_cmd = NULL;
     int errflg = 0;
     krb5_boolean auth_val;
@@ -274,23 +273,13 @@ main(int argc, char ** argv)
         case 'c':
             if (cc_source_tag == NULL) {
                 cc_source_tag = xstrdup(optarg);
-                if ( strchr(cc_source_tag, ':')){
-                    cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
-
-                    if (!ks_ccache_name_is_initialized(ksu_context,
-                                                       cc_source_tag)) {
-                        com_err(prog_name, errno,
-                                _("while looking for credentials cache %s"),
-                                cc_source_tag_tmp);
-                        exit (1);
-                    }
-                }
-                else {
-                    fprintf(stderr, _("malformed credential cache name %s\n"),
+                if (!ks_ccache_name_is_initialized(ksu_context,
+                                                   cc_source_tag)) {
+                    com_err(prog_name, errno,
+                            _("while looking for credentials cache %s"),
                             cc_source_tag);
-                    errflg++;
+                    exit(1);
                 }
-
             } else {
                 fprintf(stderr, _("Only one -c option allowed\n"));
                 errflg++;
@@ -374,11 +363,10 @@ main(int argc, char ** argv)
 
     if (cc_source_tag == NULL){
         cc_source_tag = krb5_cc_default_name(ksu_context);
-        cc_source_tag_tmp = strchr(cc_source_tag, ':');
-        if (cc_source_tag_tmp == 0)
-            cc_source_tag_tmp = cc_source_tag;
-        else
-            cc_source_tag_tmp++;
+        if (cc_source_tag == NULL) {
+            fprintf(stderr, _("ksu: failed to get default ccache name\n"));
+            exit(1);
+        }
     }
 
     /* get a handle for the cache */

@@ -3602,20 +3602,22 @@ pkinit_open_session(krb5_context context,
 
     /* Login if needed */
     if (tinfo.flags & CKF_LOGIN_REQUIRED) {
-        if (cctx->p11_module_name != NULL) {
-            if (cctx->slotid != PK_NOSLOT) {
-                if (asprintf(&p11name,
-                             "PKCS11:module_name=%s:slotid=%ld:token=%.*s",
-                             cctx->p11_module_name, (long)cctx->slotid,
-                             (int)label_len, tinfo.label) < 0)
-                    p11name = NULL;
-            } else {
-                if (asprintf(&p11name,
-                             "PKCS11:module_name=%s,token=%.*s",
-                             cctx->p11_module_name,
-                             (int)label_len, tinfo.label) < 0)
-                    p11name = NULL;
-            }
+        if (cctx->slotid != PK_NOSLOT) {
+            if (asprintf(&p11name,
+                         "PKCS11:module_name=%s:slotid=%ld:token=%.*s",
+                         cctx->p11_module_name, (long)cctx->slotid,
+                         (int)label_len, tinfo.label) < 0)
+                p11name = NULL;
+        } else {
+            if (asprintf(&p11name,
+                         "PKCS11:module_name=%s,token=%.*s",
+                         cctx->p11_module_name,
+                         (int)label_len, tinfo.label) < 0)
+                p11name = NULL;
+        }
+        if (p11name == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
         }
         if (cctx->defer_id_prompt) {
             /* Supply the identity name to be passed to the responder. */
