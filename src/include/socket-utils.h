@@ -66,15 +66,17 @@
  * "sockaddr_in *".
  *
  * The casts to (void *) are to get GCC to shut up about alignment
- * increasing.
+ * increasing.  We assume that struct sockaddr pointers are generally
+ * read-only; there are a few exceptions, but they all go through
+ * sa_setport().
  */
-static inline struct sockaddr_in *sa2sin (struct sockaddr *sa)
+static inline const struct sockaddr_in *sa2sin(const struct sockaddr *sa)
 {
-    return (struct sockaddr_in *) (void *) sa;
+    return (const struct sockaddr_in *)(void *)sa;
 }
-static inline struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
+static inline const struct sockaddr_in6 *sa2sin6(const struct sockaddr *sa)
 {
-    return (struct sockaddr_in6 *) (void *) sa;
+    return (const struct sockaddr_in6 *)(void *)sa;
 }
 static inline struct sockaddr *ss2sa (struct sockaddr_storage *ss)
 {
@@ -95,14 +97,14 @@ static inline void
 sa_setport(struct sockaddr *sa, uint16_t port)
 {
     if (sa->sa_family == AF_INET)
-        sa2sin(sa)->sin_port = htons(port);
+        ((struct sockaddr_in *)sa2sin(sa))->sin_port = htons(port);
     else if (sa->sa_family == AF_INET6)
-        sa2sin6(sa)->sin6_port = htons(port);
+        ((struct sockaddr_in6 *)sa2sin6(sa))->sin6_port = htons(port);
 }
 
 /* Get the Internet port number of sa, or 0 if it is not an Internet socket. */
 static inline uint16_t
-sa_getport(struct sockaddr *sa)
+sa_getport(const struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET)
         return ntohs(sa2sin(sa)->sin_port);
@@ -114,14 +116,14 @@ sa_getport(struct sockaddr *sa)
 
 /* Return true if sa is an IPv4 or IPv6 socket address. */
 static inline int
-sa_is_inet(struct sockaddr *sa)
+sa_is_inet(const struct sockaddr *sa)
 {
     return sa->sa_family == AF_INET || sa->sa_family == AF_INET6;
 }
 
 /* Return true if sa is an IPv4 or IPv6 wildcard address. */
 static inline int
-sa_is_wildcard(struct sockaddr *sa)
+sa_is_wildcard(const struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET6)
         return IN6_IS_ADDR_UNSPECIFIED(&sa2sin6(sa)->sin6_addr);
@@ -133,7 +135,7 @@ sa_is_wildcard(struct sockaddr *sa)
 /* Return the length of an IPv4 or IPv6 socket structure; abort if it is
  * neither. */
 static inline socklen_t
-sa_socklen(struct sockaddr *sa)
+sa_socklen(const struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET6)
         return sizeof(struct sockaddr_in6);

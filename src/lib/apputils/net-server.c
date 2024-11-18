@@ -963,8 +963,6 @@ struct udp_dispatch_state {
     krb5_fulladdr remote_addr;
     krb5_address local_addr_buf;
     krb5_fulladdr local_addr;
-    socklen_t saddr_len;
-    socklen_t daddr_len;
     struct sockaddr_storage saddr;
     struct sockaddr_storage daddr;
     aux_addressing_info auxaddr;
@@ -985,10 +983,8 @@ process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
         goto out;
 
     cc = send_to_from(state->port_fd, response->data,
-                      (socklen_t) response->length, 0,
-                      (struct sockaddr *)&state->saddr, state->saddr_len,
-                      (struct sockaddr *)&state->daddr, state->daddr_len,
-                      &state->auxaddr);
+                      (socklen_t)response->length, 0, ss2sa(&state->saddr),
+                      ss2sa(&state->daddr), &state->auxaddr);
     if (cc == -1) {
         /* Note that the local address (daddr*) has no port number
          * info associated with it. */
@@ -996,13 +992,13 @@ process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
         char daddrbuf[NI_MAXHOST];
         int e = errno;
 
-        if (getnameinfo((struct sockaddr *)&state->daddr, state->daddr_len,
+        if (getnameinfo(ss2sa(&state->daddr), sa_socklen(ss2sa(&state->daddr)),
                         daddrbuf, sizeof(daddrbuf), 0, 0,
                         NI_NUMERICHOST) != 0) {
             strlcpy(daddrbuf, "?", sizeof(daddrbuf));
         }
 
-        if (getnameinfo((struct sockaddr *)&state->saddr, state->saddr_len,
+        if (getnameinfo(ss2sa(&state->saddr), sa_socklen(ss2sa(&state->saddr)),
                         saddrbuf, sizeof(saddrbuf), sportbuf, sizeof(sportbuf),
                         NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
             strlcpy(saddrbuf, "?", sizeof(saddrbuf));
@@ -1029,6 +1025,7 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     int cc;
     struct connection *conn;
     struct udp_dispatch_state *state;
+    socklen_t slen;
 
     conn = verto_get_private(ev);
 
@@ -1043,13 +1040,9 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     state->port_fd = verto_get_fd(ev);
     assert(state->port_fd >= 0);
 
-    state->saddr_len = sizeof(state->saddr);
-    state->daddr_len = sizeof(state->daddr);
     memset(&state->auxaddr, 0, sizeof(state->auxaddr));
     cc = recv_from_to(state->port_fd, state->pktbuf, sizeof(state->pktbuf), 0,
-                      (struct sockaddr *)&state->saddr, &state->saddr_len,
-                      (struct sockaddr *)&state->daddr, &state->daddr_len,
-                      &state->auxaddr);
+                      &state->saddr, &state->daddr, &state->auxaddr);
     if (cc == -1) {
         if (errno != EINTR && errno != EAGAIN
             /*
@@ -1068,17 +1061,14 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
         return;
     }
 
-    if (state->daddr_len == 0 && conn->type == CONN_UDP) {
+    if (state->daddr.ss_family == AF_UNSPEC && conn->type == CONN_UDP) {
         /*
          * An address couldn't be obtained, so the PKTINFO option probably
          * isn't available.  If the socket is bound to a specific address, then
          * try to get the address here.
          */
-        state->daddr_len = sizeof(state->daddr);
-        if (getsockname(state->port_fd, (struct sockaddr *)&state->daddr,
-                        &state->daddr_len) != 0)
-            state->daddr_len = 0;
-        /* On failure, keep going anyways. */
+        slen = sizeof(state->daddr);
+        (void)getsockname(state->port_fd, ss2sa(&state->daddr), &slen);
     }
 
     state->request.length = cc;
