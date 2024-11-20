@@ -65,6 +65,19 @@
 
 #include "udppktinfo.h"
 
+/* List of systemd socket activation addresses and socket types. */
+struct sockact_list {
+    size_t nsockets;
+    struct {
+        struct sockaddr_storage addr;
+        int type;
+    } *fds;
+};
+
+/* When systemd socket activation is used, caller-provided sockets begin at
+ * file descriptor 3. */
+const int SOCKACT_START = 3;
+
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
@@ -694,6 +707,82 @@ static const enum conn_type bind_conn_types[] =
     [UNX] = CONN_UNIXSOCK_LISTENER
 };
 
+/* If any systemd socket activation fds are indicated by the environment, set
+ * them close-on-exec and put their addresses and socket types into *list. */
+static void
+init_sockact_list(struct sockact_list *list)
+{
+    const char *v;
+    char *end;
+    long lpid;
+    int fd;
+    size_t nfds, i;
+    socklen_t slen;
+
+    list->nsockets = 0;
+    list->fds = NULL;
+
+    /* Check if LISTEN_FDS is meant for this process. */
+    v = getenv("LISTEN_PID");
+    if (v == NULL)
+        return;
+    lpid = strtol(v, &end, 10);
+    if (end == NULL || end == v || *end != '\0' || lpid != getpid())
+        return;
+
+    /* Get the number of activated sockets. */
+    v = getenv("LISTEN_FDS");
+    if (v == NULL)
+        return;
+    nfds = strtoul(v, &end, 10);
+    if (end == NULL || end == v || *end != '\0')
+        return;
+    if (nfds == 0 || nfds > (size_t)INT_MAX - SOCKACT_START)
+        return;
+
+    list->fds = calloc(nfds, sizeof(*list->fds));
+    if (list->fds == NULL)
+        return;
+
+    for (i = 0; i < nfds; i++) {
+        fd = i + SOCKACT_START;
+        set_cloexec_fd(fd);
+        slen = sizeof(list->fds[i].addr);
+        (void)getsockname(fd, ss2sa(&list->fds[i].addr), &slen);
+        slen = sizeof(list->fds[i].type);
+        (void)getsockopt(fd, SOL_SOCKET, SO_TYPE, &list->fds[i].type, &slen);
+    }
+
+    list->nsockets = nfds;
+}
+
+/* Release any storage used by *list. */
+static void
+fini_sockact_list(struct sockact_list *list)
+{
+    free(list->fds);
+    list->fds = NULL;
+    list->nsockets = 0;
+}
+
+/* If sa matches an address in *list, return the associated file descriptor and
+ * clear the address from *list.  Otherwise return -1. */
+static int
+find_sockact(struct sockact_list *list, const struct sockaddr *sa, int type)
+{
+    size_t i;
+
+    for (i = 0; i < list->nsockets; i++) {
+        if (list->fds[i].type == type &&
+            sa_equal(ss2sa(&list->fds[i].addr), sa)) {
+            list->fds[i].type = -1;
+            memset(&list->fds[i].addr, 0, sizeof(list->fds[i].addr));
+            return i + SOCKACT_START;
+        }
+    }
+    return -1;
+}
+
 /*
  * Set up a listening socket.
  *
@@ -708,8 +797,9 @@ static const enum conn_type bind_conn_types[] =
  */
 static krb5_error_code
 setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
-             void *handle, const char *prog, verto_ctx *ctx,
-             int listen_backlog, verto_callback vcb, enum conn_type ctype)
+             struct sockact_list *sockacts, void *handle, const char *prog,
+             verto_ctx *ctx, int listen_backlog, verto_callback vcb,
+             enum conn_type ctype)
 {
     krb5_error_code ret;
     struct connection *conn;
@@ -722,20 +812,31 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     krb5_klog_syslog(LOG_DEBUG, _("Setting up %s socket for address %s"),
                      bind_type_names[ba->type], addrbuf);
 
-    /* Create the socket. */
-    ret = create_server_socket(sock_address, bind_socktypes[ba->type], prog,
-                               &sock);
-    if (ret)
-        goto cleanup;
+    if (sockacts->nsockets > 0) {
+        /* Look for a systemd socket activation fd matching sock_address. */
+        sock = find_sockact(sockacts, sock_address, bind_socktypes[ba->type]);
+        if (sock == -1) {
+            /* Ignore configured addresses that don't match any caller-provided
+             * sockets. */
+            ret = 0;
+            goto cleanup;
+        }
+    } else {
+        /* We're not using socket activation; create the socket. */
+        ret = create_server_socket(sock_address, bind_socktypes[ba->type],
+                                   prog, &sock);
+        if (ret)
+            goto cleanup;
 
-    /* Listen for backlogged connections on stream sockets.  (For RPC sockets
-     * this will be done by svc_register().) */
-    if ((ba->type == TCP || ba->type == UNX) &&
-        listen(sock, listen_backlog) != 0) {
-        ret = errno;
-        com_err(prog, errno, _("Cannot listen on %s server socket on %s"),
-                bind_type_names[ba->type], addrbuf);
-        goto cleanup;
+        /* Listen for backlogged connections on stream sockets.  (For RPC
+         * sockets this will be done by svc_register().) */
+        if ((ba->type == TCP || ba->type == UNX) &&
+            listen(sock, listen_backlog) != 0) {
+            ret = errno;
+            com_err(prog, errno, _("Cannot listen on %s server socket on %s"),
+                    bind_type_names[ba->type], addrbuf);
+            goto cleanup;
+        }
     }
 
     /* Set non-blocking I/O for non-RPC listener sockets. */
@@ -837,6 +938,7 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     struct bind_address addr;
     struct sockaddr_un sun;
     struct addrinfo hints, *ai_list = NULL, *ai = NULL;
+    struct sockact_list sockacts = { 0 };
     verto_callback vcb;
     char addrbuf[128];
 
@@ -855,6 +957,8 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     hints.ai_flags |= AI_NUMERICSERV;
 #endif
 
+    init_sockact_list(&sockacts);
+
     /* Add all the requested addresses. */
     for (i = 0; i < bind_addresses.n; i++) {
         addr = bind_addresses.data[i];
@@ -870,8 +974,9 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
                                  addr.address);
                 goto cleanup;
             }
-            ret = setup_socket(&addr, (struct sockaddr *)&sun, handle, prog,
-                               ctx, listen_backlog, verto_callbacks[addr.type],
+            ret = setup_socket(&addr, (struct sockaddr *)&sun, &sockacts,
+                               handle, prog, ctx, listen_backlog,
+                               verto_callbacks[addr.type],
                                bind_conn_types[addr.type]);
             if (ret) {
                 krb5_klog_syslog(LOG_ERR,
@@ -911,8 +1016,8 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
             /* Set the real port number. */
             sa_setport(ai->ai_addr, addr.port);
 
-            ret = setup_socket(&addr, ai->ai_addr, handle, prog, ctx,
-                               listen_backlog, verto_callbacks[addr.type],
+            ret = setup_socket(&addr, ai->ai_addr, &sockacts, handle, prog,
+                               ctx, listen_backlog, verto_callbacks[addr.type],
                                bind_conn_types[addr.type]);
             if (ret) {
                 k5_print_addr(ai->ai_addr, addrbuf, sizeof(addrbuf));
@@ -937,6 +1042,7 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
 cleanup:
     if (ai_list != NULL)
         freeaddrinfo(ai_list);
+    fini_sockact_list(&sockacts);
     return ret;
 }
 

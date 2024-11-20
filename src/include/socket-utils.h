@@ -43,6 +43,8 @@
 #ifndef SOCKET_UTILS_H
 #define SOCKET_UTILS_H
 
+#include <stdbool.h>
+
 /* Some useful stuff cross-platform for manipulating socket addresses.
    We assume at least ipv4 sockaddr_in support.  The sockaddr_storage
    stuff comes from the ipv6 socket api enhancements; socklen_t is
@@ -157,6 +159,39 @@ sa_socklen(const struct sockaddr *sa)
 #endif
     else
         abort();
+}
+
+/* Return true if a and b are the same address (and port if applicable). */
+static inline bool
+sa_equal(const struct sockaddr *a, const struct sockaddr *b)
+{
+    if (a == NULL || b == NULL || a->sa_family != b->sa_family)
+        return false;
+
+    if (a->sa_family == AF_INET) {
+        const struct sockaddr_in *x = sa2sin(a);
+        const struct sockaddr_in *y = sa2sin(b);
+
+        if (x->sin_port != y->sin_port)
+            return false;
+        return memcmp(&x->sin_addr, &y->sin_addr, sizeof(x->sin_addr)) == 0;
+    } else if (a->sa_family == AF_INET6) {
+        const struct sockaddr_in6 *x = sa2sin6(a);
+        const struct sockaddr_in6 *y = sa2sin6(b);
+
+        if (x->sin6_port != y->sin6_port)
+            return false;
+        return memcmp(&x->sin6_addr, &y->sin6_addr, sizeof(x->sin6_addr)) == 0;
+#ifndef _WIN32
+    } else if (a->sa_family == AF_UNIX) {
+        const struct sockaddr_un *x = sa2sun(a);
+        const struct sockaddr_un *y = sa2sun(b);
+
+        return strcmp(x->sun_path, y->sun_path) == 0;
+#endif
+    }
+
+    return false;
 }
 
 #endif /* SOCKET_UTILS_H */

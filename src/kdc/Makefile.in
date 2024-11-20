@@ -31,7 +31,8 @@ SRCS= \
 
 EXTRADEPSRCS= \
 	$(srcdir)/t_ndr.c \
-	$(srcdir)/t_replay.c
+	$(srcdir)/t_replay.c \
+	$(srcdir)/t_sockact.c
 
 OBJS= \
 	authind.o \
@@ -78,16 +79,21 @@ T_REPLAY_OBJS=t_replay.o
 t_replay: $(T_REPLAY_OBJS) replay.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_REPLAY_OBJS) $(CMOCKA_LIBS) $(KRB5_BASE_LIBS)
 
+t_sockact: t_sockact.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_sockact.o $(KRB5_BASE_LIBS)
+
 check-cmocka: t_replay
 	$(RUN_TEST) ./t_replay > /dev/null
 
-check-pytests:
+check-pytests: t_sockact
 	$(RUNPYTEST) $(srcdir)/t_workers.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_emptytgt.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_bigreply.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_sockact.py $(PYTESTFLAGS)
 
 install:
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 
 clean:
 	$(RM) krb5kdc rtest.o rtest t_replay.o t_replay t_ndr.o t_ndr
+	$(RM) t_sockact.o t_sockact
