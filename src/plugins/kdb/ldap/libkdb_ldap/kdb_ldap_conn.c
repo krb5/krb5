@@ -189,6 +189,7 @@ initialize_server(krb5_ldap_context *ldap_context, krb5_ldap_server_info *info)
     if (ret) {
         info->server_status = OFF;
         time(&info->downtime);
+        ldap_unbind_ext_s(server->ldap_handle);
         free(server);
         return ret;
     }
