@@ -353,7 +353,7 @@ extern kdb_vftabl krb5_ldap_kdb_function_table;
 #endif
 
 static krb5_error_code
-kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
+load_library(krb5_context kcontext, const char *lib_name, db_library *libptr)
 {
     krb5_error_code status;
     db_library lib;
@@ -396,7 +396,7 @@ static char *db_dl_location[] = DEFAULT_KDB_LIB_PATH;
 #define db_dl_n_locations (sizeof(db_dl_location) / sizeof(db_dl_location[0]))
 
 static krb5_error_code
-kdb_load_library(krb5_context kcontext, char *lib_name, db_library *lib)
+load_library(krb5_context kcontext, const char *lib_name, db_library *lib)
 {
     krb5_error_code status = 0;
     int     ndx;
@@ -496,7 +496,7 @@ clean_n_exit:
 #endif /* end of _KDB5_STATIC_LINK */
 
 static krb5_error_code
-kdb_find_library(krb5_context kcontext, char *lib_name, db_library *lib)
+find_library(krb5_context kcontext, const char *lib_name, db_library *lib)
 {
     /* lock here so that no two threads try to do the same at the same time */
     krb5_error_code status = 0;
@@ -524,7 +524,7 @@ kdb_find_library(krb5_context kcontext, char *lib_name, db_library *lib)
     }
 
     /* module not found. create and add to list */
-    status = kdb_load_library(kcontext, lib_name, lib);
+    status = load_library(kcontext, lib_name, lib);
     if (status)
         goto clean_n_exit;
 
@@ -585,43 +585,52 @@ clean_n_exit:
 }
 
 krb5_error_code
-krb5_db_setup_lib_handle(krb5_context kcontext)
+krb5_db_load_module(krb5_context kcontext, const char *name)
 {
-    char   *library = NULL;
-    krb5_error_code status = 0;
+    krb5_error_code ret;
     db_library lib = NULL;
     kdb5_dal_handle *dal_handle = NULL;
 
-    dal_handle = calloc((size_t) 1, sizeof(kdb5_dal_handle));
-    if (dal_handle == NULL) {
-        status = ENOMEM;
-        goto clean_n_exit;
-    }
+    if (name == NULL)
+        return EINVAL;
+    if (kcontext->dal_handle != NULL)
+        return EEXIST;
 
-    status = kdb_get_library_name(kcontext, &library);
-    if (library == NULL) {
-        k5_prependmsg(kcontext, status,
-                      _("Cannot initialize database library"));
-        goto clean_n_exit;
-    }
+    dal_handle = k5alloc(sizeof(*dal_handle), &ret);
+    if (dal_handle == NULL)
+        goto cleanup;
 
-    status = kdb_find_library(kcontext, library, &lib);
-    if (status)
-        goto clean_n_exit;
+    ret = find_library(kcontext, name, &lib);
+    if (ret)
+        goto cleanup;
 
     dal_handle->lib_handle = lib;
     kcontext->dal_handle = dal_handle;
+    lib = NULL;
+    dal_handle = NULL;
 
-clean_n_exit:
-    free(library);
+cleanup:
+    free(dal_handle);
+    if (lib != NULL)
+        kdb_free_library(lib);
+    return ret;
+}
 
-    if (status) {
-        free(dal_handle);
-        if (lib)
-            kdb_free_library(lib);
+krb5_error_code
+krb5_db_setup_lib_handle(krb5_context kcontext)
+{
+    char *library = NULL;
+    krb5_error_code ret;
+
+    ret = kdb_get_library_name(kcontext, &library);
+    if (library == NULL) {
+        k5_prependmsg(kcontext, ret, _("Cannot initialize database library"));
+        return ret;
     }
 
-    return status;
+    ret = krb5_db_load_module(kcontext, library);
+    free(library);
+    return ret;
 }
 
 static krb5_error_code

@@ -353,7 +353,17 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_EXCLUSIVE    0x0002
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
-/* libkdb.spec */
+/*
+ * Load the specified KDB module, to be used for KDB operations with kcontext.
+ * This function must be called prior to any KDB operations with kcontext.
+ * name will be looked up relative to the configured database directories, with
+ * platform-specific suffixes suitable for shared objects.  This function can
+ * be used to implement one KDB module in terms of another, but the outer
+ * module must supply a separate krb5_context from the one passed to its
+ * methods.
+ */
+krb5_error_code krb5_db_load_module(krb5_context kcontext, const char *name);
+
 krb5_error_code krb5_db_setup_lib_handle(krb5_context kcontext);
 krb5_error_code krb5_db_open( krb5_context kcontext, char **db_args, int mode );
 krb5_error_code krb5_db_init  ( krb5_context kcontext );
