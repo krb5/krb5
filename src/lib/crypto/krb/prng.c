@@ -56,6 +56,9 @@ get_os_entropy(unsigned char *buf, size_t len)
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_SYS_RANDOM_H
+#include <sys/random.h>
+#endif
 #ifdef __linux__
 #include <sys/syscall.h>
 #endif /* __linux__ */

@@ -490,7 +490,7 @@ AC_SUBST(GETTIMEOFDAY_ST_OBJ)
 AC_SUBST(EXTRA_SUPPORT_SYMS)
 
 DECLARE_SYS_ERRLIST
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h)
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h sys/random.h)
 AC_CHECK_HEADER(regexp.h, [], [],
 [#define INIT char *sp = instring;
 #define GETC() (*sp++)
