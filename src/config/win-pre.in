@@ -169,8 +169,7 @@ LOPTS=$(LOPTS) -debug
 INSTALLDBGSYMS=copy
 !endif
 
-# XXX - NOTE: We should probably use DllMainCRTStartup
-DLL_LINKOPTS=$(LOPTS) -dll -entry:DllMain
+DLL_LINKOPTS=$(LOPTS) -dll
 EXE_LINKOPTS=$(LOPTS)
 
 RM=$(BUILDTOP)\config\rm.bat
