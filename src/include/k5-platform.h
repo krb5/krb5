@@ -70,6 +70,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #define CAN_COPY_VA_LIST
 #endif
@@ -1150,5 +1154,9 @@ extern char *k5_secure_getenv(const char *name);
  * sorted according to strcmp().  Return 0 on success, or ENOENT/ENOMEM. */
 int k5_dir_filenames(const char *dirname, char ***fnames_out);
 void k5_free_filenames(char **fnames);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* K5_PLATFORM_H */
