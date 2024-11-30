@@ -715,53 +715,6 @@ KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
 #endif],daemon,1)])dnl
 
 dnl
-dnl KRB5_AC_NEED_LIBGEN --- check if libgen needs to be linked in for
-dnl 				compile/step	
-dnl
-dnl
-AC_DEFUN(KRB5_AC_NEED_LIBGEN,[
-AC_REQUIRE([AC_PROG_CC])dnl
-dnl
-dnl regcomp is present but non-functional on Solaris 2.4
-dnl
-AC_MSG_CHECKING(for working regcomp)
-AC_CACHE_VAL(ac_cv_func_regcomp,
-[AC_RUN_IFELSE(
-  [AC_LANG_PROGRAM(
-    [[#include <sys/types.h>
-      #include <regex.h>
-      regex_t x; regmatch_t m;]],
-    [[return regcomp(&x,"pat.*",0) || regexec(&x,"pattern",1,&m,0);]])],
-  [ac_cv_func_regcomp=yes], [ac_cv_func_regcomp=no],
-  [AC_MSG_ERROR([Cannot test regcomp when cross compiling])])])
-AC_MSG_RESULT($ac_cv_func_regcomp)
-test $ac_cv_func_regcomp = yes && AC_DEFINE(HAVE_REGCOMP,1,[Define if regcomp exists and functions])
-dnl
-dnl Check for the compile and step functions - only if regcomp is not available
-dnl
-if test $ac_cv_func_regcomp = no; then
- save_LIBS="$LIBS"
- LIBS=-lgen
-dnl this will fail if there's no compile/step in -lgen, or if there's
-dnl no -lgen.  This is fine.
- AC_CHECK_FUNCS(compile step)
- LIBS="$save_LIBS"
-dnl
-dnl Set GEN_LIB if necessary 
-dnl
- AC_CHECK_LIB(gen, compile, GEN_LIB=-lgen, GEN_LIB=)
- AC_SUBST(GEN_LIB)
-fi
-])
-dnl
-dnl KRB5_AC_REGEX_FUNCS --- check for different regular expression 
-dnl				support functions
-dnl
-AC_DEFUN(KRB5_AC_REGEX_FUNCS,[
-AC_CHECK_FUNCS(re_comp re_exec regexec)
-AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
-])dnl
-dnl
 dnl WITH_HESIOD
 dnl
 AC_DEFUN(WITH_HESIOD,
@@ -850,7 +803,6 @@ dnl Set variables to build a program.
 
 AC_DEFUN(KRB5_BUILD_PROGRAM,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
-AC_REQUIRE([KRB5_AC_NEED_LIBGEN])dnl
 AC_SUBST(CC_LINK)
 AC_SUBST(CXX_LINK)
 AC_SUBST(RPATH_FLAG)
