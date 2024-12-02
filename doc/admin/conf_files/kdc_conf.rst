@@ -312,10 +312,10 @@ The following tags may be specified in a [realms] subsection:
     ``/.k5.REALM``, where *REALM* is the Kerberos realm.
 
 **kdc_listen**
-    (Whitespace- or comma-separated list.)  Specifies the UDP
-    listening addresses and/or ports for the :ref:`krb5kdc(8)` daemon.
-    Each entry may be an interface address, a port number, an address
-    and port number separated by a colon, or a UNIX domain socket
+    (Whitespace- or comma-separated list.)  Specifies the listening
+    addresses and/or ports for the :ref:`krb5kdc(8)` daemon.  Each
+    entry may be an interface address, a port number, an address and
+    port number separated by a colon, or a UNIX domain socket
     pathname.  If the address contains colons, enclose it in square
     brackets.  If no address is specified, the wildcard address is
     used.  If no port is specified, the standard port (88) is used.
@@ -335,15 +335,10 @@ The following tags may be specified in a [realms] subsection:
 **kdc_tcp_listen**
     (Whitespace- or comma-separated list.)  Specifies the TCP
     listening addresses and/or ports for the :ref:`krb5kdc(8)` daemon.
-    Each entry may be an interface address, a port number, or an
-    address and port number separated by a colon.  If the address
-    contains colons, enclose it in square brackets.  If no address is
-    specified, the wildcard address is used.  If no port is specified,
-    the standard port (88) is used.  To disable listening on TCP, set
-    this relation to the empty string with ``kdc_tcp_listen = ""``.
-    If the KDC daemon fails to bind to any of the specified addresses,
-    it will fail to start.  The default is to bind to the wildcard
-    address on the standard port.  New in release 1.15.
+    The syntax is identical to that of **kdc_listen**.  To disable
+    listening on TCP, set this relation to the empty string with
+    ``kdc_tcp_listen = ""``.  The default is to bind to the same
+    addresses and ports as for UDP.  New in release 1.15.
 
 **kdc_tcp_ports**
     (Whitespace- or comma-separated list, deprecated.)  Prior to

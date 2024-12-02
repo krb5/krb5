@@ -197,7 +197,7 @@ combine(const char *val1, const char *val2, char **val_out)
  */
 static  krb5_error_code
 init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
-           char *def_mpname, krb5_enctype def_enctype, char *def_udp_listen,
+           char *def_mpname, krb5_enctype def_enctype, char *def_listen,
            char *def_tcp_listen, krb5_boolean def_manual,
            krb5_boolean def_restrict_anon, char **db_args, char *no_referral,
            char *hostbased)
@@ -260,7 +260,7 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         /* Try the old kdc_ports configuration option. */
         hierarchy[2] = KRB5_CONF_KDC_PORTS;
         if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &rdp->realm_listen))
-            rdp->realm_listen = strdup(def_udp_listen);
+            rdp->realm_listen = strdup(def_listen);
     }
     if (!rdp->realm_listen) {
         kret = ENOMEM;
@@ -272,12 +272,15 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
         /* Try the old kdc_tcp_ports configuration option. */
         hierarchy[2] = KRB5_CONF_KDC_TCP_PORTS;
         if (krb5_aprof_get_string(aprof, hierarchy, TRUE,
-                                  &rdp->realm_tcp_listen))
+                                  &rdp->realm_tcp_listen) &&
+            def_tcp_listen != NULL) {
+            /* Copy [kdcdefaults] value if one was given. */
             rdp->realm_tcp_listen = strdup(def_tcp_listen);
-    }
-    if (!rdp->realm_tcp_listen) {
-        kret = ENOMEM;
-        goto whoops;
+            if (rdp->realm_tcp_listen == NULL) {
+                kret = ENOMEM;
+                goto whoops;
+            }
+        }
     }
     /* Handle stash file */
     hierarchy[2] = KRB5_CONF_KEY_STASH_FILE;
@@ -605,7 +608,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
     kdc_realm_t         *rdatap = NULL;
     krb5_boolean        manual = FALSE;
     krb5_boolean        def_restrict_anon;
-    char                *def_udp_listen = NULL;
+    char                *def_listen = NULL;
     char                *def_tcp_listen = NULL;
     krb5_pointer        aprof = kcontext->profile;
     const char          *hierarchy[3];
@@ -619,10 +622,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
     hierarchy[0] = KRB5_CONF_KDCDEFAULTS;
     hierarchy[1] = KRB5_CONF_KDC_LISTEN;
     hierarchy[2] = NULL;
-    if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen)) {
+    if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_listen)) {
         hierarchy[1] = KRB5_CONF_KDC_PORTS;
-        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_udp_listen))
-            def_udp_listen = NULL;
+        if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_listen))
+            def_listen = NULL;
     }
     hierarchy[1] = KRB5_CONF_KDC_TCP_LISTEN;
     if (krb5_aprof_get_string(aprof, hierarchy, TRUE, &def_tcp_listen)) {
@@ -649,16 +652,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
     if (krb5_aprof_get_string_all(aprof, hierarchy, &hostbased))
         hostbased = 0;
 
-    if (def_udp_listen == NULL) {
-        def_udp_listen = strdup(DEFAULT_KDC_UDP_PORTLIST);
-        if (def_udp_listen == NULL) {
-            fprintf(stderr, _(" KDC cannot initialize. Not enough memory\n"));
-            exit(1);
-        }
-    }
-    if (def_tcp_listen == NULL) {
-        def_tcp_listen = strdup(DEFAULT_KDC_TCP_PORTLIST);
-        if (def_tcp_listen == NULL) {
+    if (def_listen == NULL) {
+        def_listen = strdup(DEFAULT_KDC_PORTLIST);
+        if (def_listen == NULL) {
             fprintf(stderr, _(" KDC cannot initialize. Not enough memory\n"));
             exit(1);
         }
@@ -693,9 +689,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
             if (!find_realm_data(&shandle, optarg, (krb5_ui_4) strlen(optarg))) {
                 if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
                     retval = init_realm(rdatap, aprof, optarg, mkey_name,
-                                        menctype, def_udp_listen,
-                                        def_tcp_listen, manual,
-                                        def_restrict_anon, db_args,
+                                        menctype, def_listen, def_tcp_listen,
+                                        manual, def_restrict_anon, db_args,
                                         no_referral, hostbased);
                     if (retval) {
                         fprintf(stderr, _("%s: cannot initialize realm %s - "
@@ -769,11 +764,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
             pid_file = optarg;
             break;
         case 'p':
-            free(def_udp_listen);
-            free(def_tcp_listen);
-            def_udp_listen = strdup(optarg);
-            def_tcp_listen = strdup(optarg);
-            if (def_udp_listen == NULL || def_tcp_listen == NULL) {
+            free(def_listen);
+            def_listen = strdup(optarg);
+            if (def_listen == NULL) {
                 fprintf(stderr, _(" KDC cannot initialize. Not enough "
                                   "memory\n"));
                 exit(1);
@@ -807,7 +800,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
         }
         if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
             retval = init_realm(rdatap, aprof, lrealm, mkey_name, menctype,
-                                def_udp_listen, def_tcp_listen, manual,
+                                def_listen, def_tcp_listen, manual,
                                 def_restrict_anon, db_args, no_referral,
                                 hostbased);
             if (retval) {
@@ -821,8 +814,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv,
         krb5_free_default_realm(kcontext, lrealm);
     }
 
-    if (def_udp_listen)
-        free(def_udp_listen);
+    if (def_listen)
+        free(def_listen);
     if (def_tcp_listen)
         free(def_tcp_listen);
     if (db_args)
@@ -896,6 +889,7 @@ int main(int argc, char **argv)
     krb5_error_code     retval;
     krb5_context        kcontext;
     kdc_realm_t *realm;
+    const char *tcp_listen;
     verto_ctx *ctx;
     int tcp_listen_backlog;
     int errout = 0;
@@ -972,8 +966,9 @@ int main(int argc, char **argv)
         retval = loop_add_unix_socket(realm->realm_listen);
         if (retval)
             goto net_init_error;
-        retval = loop_add_tcp_address(KRB5_DEFAULT_PORT,
-                                      realm->realm_tcp_listen);
+        tcp_listen = (realm->realm_tcp_listen != NULL) ?
+            realm->realm_tcp_listen : realm->realm_listen;
+        retval = loop_add_tcp_address(KRB5_DEFAULT_PORT, tcp_listen);
         if (retval)
             goto net_init_error;
     }
