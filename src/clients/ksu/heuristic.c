@@ -227,8 +227,11 @@ get_authorized_princ_names(const char *luser, char *cmd, char ***princ_list)
         }
     }
     if (!k5users_flag){
-        if ((users_fp = fopen(k5users_path, "r")) == NULL)
+        users_fp = fopen(k5users_path, "r");
+        if (users_fp == NULL) {
+            close_time(1, NULL, k5login_flag, login_fp);
             return 0;
+        }
 
         if ( fowner(users_fp, pwd->pw_uid) == FALSE){
             close_time(k5users_flag,users_fp, k5login_flag,login_fp);

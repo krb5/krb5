@@ -799,12 +799,6 @@ OM_uint32 gssint_create_union_context(
 	gss_union_ctx_id_t *	/* ctx_out */
 );
 
-OM_uint32 gssint_copy_oid_set(
-	OM_uint32 *,			/* minor_status */
-	const gss_OID_set_desc * const,	/* oid set */
-	gss_OID_set *			/* new oid set */
-);
-
 gss_OID gss_find_mechanism_from_name_type (gss_OID); /* name_type */
 
 OM_uint32 gss_add_mech_name_type

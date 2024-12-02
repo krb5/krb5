@@ -842,14 +842,15 @@ write_pid_file(const char *path)
 {
     FILE *file;
     unsigned long pid;
+    int st1, st2;
 
     file = fopen(path, "w");
     if (file == NULL)
         return errno;
-    pid = (unsigned long) getpid();
-    if (fprintf(file, "%ld\n", pid) < 0 || fclose(file) == EOF)
-        return errno;
-    return 0;
+    pid = (unsigned long)getpid();
+    st1 = (fprintf(file, "%ld\n", pid) < 0) ? errno : 0;
+    st2 = (fclose(file) == EOF) ? errno : 0;
+    return st1 ? st1 : st2;
 }
 
 static void

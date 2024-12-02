@@ -181,14 +181,15 @@ write_pid_file(const char *path)
 {
     FILE *fp;
     unsigned long pid;
+    int st1, st2;
 
     fp = fopen(path, "w");
     if (fp == NULL)
         return errno;
     pid = (unsigned long)getpid();
-    if (fprintf(fp, "%ld\n", pid) < 0 || fclose(fp) == EOF)
-        return errno;
-    return 0;
+    st1 = (fprintf(fp, "%ld\n", pid) < 0) ? errno : 0;
+    st2 = (fclose(fp) == EOF) ? errno : 0;
+    return st1 ? st1 : st2;
 }
 
 typedef void (*sig_handler_fn)(int sig);
