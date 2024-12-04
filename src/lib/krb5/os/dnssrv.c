@@ -110,7 +110,8 @@ place_srv_entry(struct srv_dns_entry **head, struct srv_dns_entry *new)
 
 krb5_error_code
 k5_make_uri_query(krb5_context context, const krb5_data *realm,
-                  const char *service, struct srv_dns_entry **answers)
+                  const char *service, const char *sitename,
+                  struct srv_dns_entry **answers)
 {
     /* Windows does not currently support the URI record type or make it
      * possible to query for a record type it does not have support for. */
