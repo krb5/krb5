@@ -157,6 +157,7 @@ typedef int socklen_t;
 
 #include <sys/types.h>
 #include <netinet/in.h>         /* For struct sockaddr_in and in_addr */
+#include <sys/un.h>             /* For struct sockaddr_un */
 #include <arpa/inet.h>          /* For inet_ntoa */
 #include <netdb.h>
 #include <string.h>             /* For memset */

@@ -90,6 +90,16 @@ static inline struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in6 *) ss;
 }
+#ifndef _WIN32
+static inline const struct sockaddr_un *sa2sun(const struct sockaddr *sa)
+{
+    return (const struct sockaddr_un *)(void *)sa;
+}
+static inline struct sockaddr_un *ss2sun(struct sockaddr_storage *ss)
+{
+    return (struct sockaddr_un *)ss;
+}
+#endif
 
 /* Set the IPv4 or IPv6 port on sa to port.  Do nothing if sa is not an
  * Internet socket. */
@@ -141,8 +151,48 @@ sa_socklen(const struct sockaddr *sa)
         return sizeof(struct sockaddr_in6);
     else if (sa->sa_family == AF_INET)
         return sizeof(struct sockaddr_in);
+#ifndef _WIN32
+    else if (sa->sa_family == AF_UNIX)
+        return sizeof(struct sockaddr_un);
+#endif
     else
         abort();
+}
+
+static inline int
+sa_compare(const struct sockaddr *sa1, const struct sockaddr *sa2)
+{
+    if (sa1 == NULL || sa2 == NULL)
+        return 1;
+
+    if (sa1->sa_family != sa2->sa_family)
+        return 1;
+
+    switch (sa1->sa_family) {
+    case AF_INET: {
+        const struct sockaddr_in *in1 = sa2sin(sa1);
+        const struct sockaddr_in *in2 = sa2sin(sa2);
+
+        if (in1->sin_port != in2->sin_port)
+            return 1;
+
+        return memcmp(&in1->sin_addr, &in2->sin_addr, sizeof(struct in_addr));
+    }
+    case AF_INET6: {
+        const struct sockaddr_in6 *in6_1 = sa2sin6(sa1);
+        const struct sockaddr_in6 *in6_2 = sa2sin6(sa2);
+
+        if (in6_1->sin6_port != in6_2->sin6_port)
+            return 1;
+
+        return memcmp(&in6_1->sin6_addr, &in6_2->sin6_addr,
+                      sizeof(struct in6_addr));
+    }
+    default:
+        break;
+    }
+
+    return 1;
 }
 
 #endif /* SOCKET_UTILS_H */

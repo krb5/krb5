@@ -13,6 +13,7 @@ RUN_TEST_LOCAL_CONF=$(RUN_SETUP) KRB5_CONFIG=$(srcdir)/td_krb5.conf LC_ALL=C \
 
 STLIBOBJS= \
 	accessor.o	\
+	addr.o		\
 	c_ustime.o	\
 	ccdefname.o	\
 	changepw.o	\
@@ -60,6 +61,7 @@ STLIBOBJS= \
 
 OBJS= \
 	$(OUTPRE)accessor.$(OBJEXT)	\
+	$(OUTPRE)addr.$(OBJEXT)		\
 	$(OUTPRE)c_ustime.$(OBJEXT)	\
 	$(OUTPRE)ccdefname.$(OBJEXT)	\
 	$(OUTPRE)changepw.$(OBJEXT)	\
@@ -107,6 +109,7 @@ OBJS= \
 
 SRCS= \
 	$(srcdir)/accessor.c    \
+	$(srcdir)/addr.c	\
 	$(srcdir)/c_ustime.c	\
 	$(srcdir)/ccdefname.c	\
 	$(srcdir)/changepw.c	\
