@@ -26,6 +26,10 @@ To build Kerberos 5 on Windows, you will need the following:
   tools are in your command-line path.  WiX version 3.11.1 is verified
   to work with this codebase.
 
+* If you wish to build with PKINIT support, you will need to provide
+  a copy of the OpenSSL development environment; this will need to include
+  the header files and the import .LIB files in additionl to the DLLs.
+
 A simple way to get the necessary Unix utilities is to install Git
 BASH from https://gitforwindows.org and configure it to add the Unix
 utilities to the command-line path.  In some versions of Windows (not
@@ -55,6 +59,12 @@ After Visual Studio is installed, you should be able to invoke command
 prompts via the start menu (Visual Studio 2017 -> x64 Native Tools
 Command Prompt).
 
+If you are building OpenSSL from source, note that as of this writing
+OpenSSL cannot be configured by using the Perl from Git for Windows;
+Strawberry Perl is known to work.  You will need separate development
+installations for both 32 and 64 bit environments if you want to build
+PKINIT for both.
+
 IMPORTANT NOTE: By default, the sources are built with debug
 information and linked against the debug version of the Microsoft C
 Runtime library, which is not found on most Windows systems unless
@@ -75,6 +85,10 @@ the MSI installer, this directory should be a temporary staging area in or
 near your build tree.  The directory must exist before nmake install
 is run.
 
+If you wish to build PKINIT, set the variable OPENSSL_DIR to point to the
+root of the development environment.  Include files should be in
+%OPENSSL_DIR%\include and the import .LIB files should be in %OPENSSL%\lib.
+
 To skip building the graphical ticket manager, run "set NO_LEASH=1"
 before building, and do not build the installer.
 
@@ -82,11 +96,12 @@ Run the following commands in a Visual Studio command prompt:
 
  1) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
  2) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
- 3) cd xxx\src                          # Go to where source lives
- 4) nmake [NODEBUG=1]                   # Build the sources
- 5) nmake install [NODEBUG=1]           # Copy libraries/executables
- 6) cd windows\installer\wix            # Go to the installer source
- 7) nmake [NODEBUG=1]                   # Build the installer
+ 3) set OPENSSL_DIR=\path\to\openssl    # Optional
+ 4) cd xxx\src                          # Go to where source lives
+ 5) nmake [NODEBUG=1]                   # Build the sources
+ 6) nmake install [NODEBUG=1]           # Copy libraries/executables
+ 7) cd windows\installer\wix            # Go to the installer source
+ 8) nmake [NODEBUG=1]                   # Build the installer
 
 Step 1 may be skipped if uicc is already in the command-line path (try
 running "uicc" to see if you get a usage message or a not-found
