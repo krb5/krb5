@@ -1,4 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* vi: set softtabstop=4 shiftwidth=4 tabstop=4 expandtab ai: */
 /*
  * COPYRIGHT (C) 2006,2007
  * THE REGENTS OF THE UNIVERSITY OF MICHIGAN
@@ -34,7 +35,6 @@
 #include "k5-err.h"
 #include "k5-hex.h"
 #include "pkinit.h"
-#include <dirent.h>
 
 #include <openssl/bn.h>
 #include <openssl/dh.h>
@@ -1867,7 +1867,7 @@ cms_signeddata_create(krb5_context context,
 #ifdef DEBUG_SIG
         print_buffer(sig, sig_len);
 #endif
-        free(abuf);
+        OPENSSL_free(abuf);
         if (retval)
             goto cleanup2;
 
@@ -4304,12 +4304,8 @@ pkinit_get_certs_dir(krb5_context context,
                      krb5_principal princ)
 {
     krb5_error_code retval = ENOMEM;
-    DIR *d = NULL;
-    struct dirent *dentry = NULL;
-    char certname[1024];
-    char keyname[1024];
-    int i = 0, len;
-    char *dirname, *suf;
+    int i = 0, j = 0, len;
+    char *dirname, *suf, *name, **fnames = NULL, *certname, *keyname;
 
     if (idopts->cert_filename == NULL) {
         TRACE_PKINIT_NO_CERT(context);
@@ -4317,37 +4313,32 @@ pkinit_get_certs_dir(krb5_context context,
     }
 
     dirname = idopts->cert_filename;
-    d = opendir(dirname);
-    if (d == NULL)
-        return errno;
+    if ((retval = k5_dir_filenames(dirname, &fnames)))
+	return retval;
 
     /*
      * We'll assume that certs are named XXX.crt and the corresponding
      * key is named XXX.key
      */
-    while ((i < MAX_CREDS_ALLOWED) &&  (dentry = readdir(d)) != NULL) {
-        /* Ignore subdirectories and anything starting with a dot */
-#ifdef DT_DIR
-        if (dentry->d_type == DT_DIR)
+    while ((i < MAX_CREDS_ALLOWED) && (name = fnames[j++]) != NULL) {
+        /* Ignore anything starting with a dot */
+        if (name[0] == '.')
             continue;
-#endif
-        if (dentry->d_name[0] == '.')
-            continue;
-        len = strlen(dentry->d_name);
+        len = strlen(name);
         if (len < 5)
             continue;
-        suf = dentry->d_name + (len - 4);
+        suf = name + (len - 4);
         if (strncmp(suf, ".crt", 4) != 0)
             continue;
 
-        /* Checked length */
-        if (strlen(dirname) + strlen(dentry->d_name) + 2 > sizeof(certname)) {
-            pkiDebug("%s: Path too long -- directory '%s' and file '%s'\n",
-                     __FUNCTION__, dirname, dentry->d_name);
-            continue;
+        if ((retval = k5_path_join(dirname, name, &certname)))
+            goto cleanup;
+
+        if ((retval = k5_path_join(dirname, name, &keyname))) {
+            free(certname);
+            goto cleanup;
         }
-        snprintf(certname, sizeof(certname), "%s/%s", dirname, dentry->d_name);
-        snprintf(keyname, sizeof(keyname), "%s/%s", dirname, dentry->d_name);
+
         len = strlen(keyname);
         keyname[len - 3] = 'k';
         keyname[len - 2] = 'e';
@@ -4355,8 +4346,12 @@ pkinit_get_certs_dir(krb5_context context,
 
         retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
                                              certname, keyname, i);
+
+        free(certname);
+        free(keyname);
+
         if (retval == 0) {
-            TRACE_PKINIT_LOADED_CERT(context, dentry->d_name);
+            TRACE_PKINIT_LOADED_CERT(context, name);
             i++;
         }
         else
@@ -4372,8 +4367,8 @@ pkinit_get_certs_dir(krb5_context context,
     retval = 0;
 
 cleanup:
-    if (d)
-        closedir(d);
+    if (fnames)
+        k5_free_filenames(fnames);
 
     return retval;
 }
@@ -5166,34 +5161,28 @@ load_cas_and_crls_dir(krb5_context context,
                       char *dirname)
 {
     krb5_error_code retval = EINVAL;
-    DIR *d = NULL;
-    struct dirent *dentry = NULL;
-    char filename[1024];
+    char **fnames = NULL, *filename;
+    int i;
 
     if (dirname == NULL)
         return EINVAL;
 
-    d = opendir(dirname);
-    if (d == NULL)
-        return ENOENT;
+    if ((retval = k5_dir_filenames(dirname, &fnames)))
+        return retval;
 
-    while ((dentry = readdir(d))) {
-        if (strlen(dirname) + strlen(dentry->d_name) + 2 > sizeof(filename)) {
-            pkiDebug("%s: Path too long -- directory '%s' and file '%s'\n",
-                     __FUNCTION__, dirname, dentry->d_name);
+    for (i = 0; fnames[i] != NULL; i++) {
+        /* Ignore anything starting with a dot */
+        if (fnames[i][0] == '.')
+            continue;
+
+        if ((retval = k5_path_join(dirname, fnames[i], &filename)))
             goto cleanup;
-        }
-        /* Ignore subdirectories and anything starting with a dot */
-#ifdef DT_DIR
-        if (dentry->d_type == DT_DIR)
-            continue;
-#endif
-        if (dentry->d_name[0] == '.')
-            continue;
-        snprintf(filename, sizeof(filename), "%s/%s", dirname, dentry->d_name);
 
         retval = load_cas_and_crls(context, plg_cryptoctx, req_cryptoctx,
                                    id_cryptoctx, catype, filename);
+
+        free(filename);
+
         if (retval)
             goto cleanup;
     }
@@ -5201,8 +5190,8 @@ load_cas_and_crls_dir(krb5_context context,
     retval = 0;
 
 cleanup:
-    if (d != NULL)
-        closedir(d);
+    if (fnames)
+        k5_free_filenames(fnames);
 
     return retval;
 }
@@ -5712,3 +5701,24 @@ parse_dh_min_bits(krb5_context context, const char *str)
     TRACE_PKINIT_DH_INVALID_MIN_BITS(context, str);
     return PKINIT_DEFAULT_DH_MIN_BITS;
 }
+
+#ifdef _WIN32
+/*
+ * Other Kerberos libraries use magic from win_glue.c, but since we're
+ * a plugin that doesn't quite seem appropriate, and there isn't an
+ * unload function; is that wrong?  I am not sure.  Use our own DllMain
+ * function and call the appropriate initializers.
+ */
+
+BOOL WINAPI DllMain (HANDLE hModule, DWORD fdwReason, LPVOID lpvReserved)
+{
+    switch (fdwReason)
+    {
+        case DLL_PROCESS_ATTACH:
+            pkinit_openssl_init__auxinit();
+            break;
+    }
+
+    return TRUE;
+}
+#endif /* _WIN32 */

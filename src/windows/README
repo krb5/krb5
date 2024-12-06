@@ -26,6 +26,10 @@ To build Kerberos 5 on Windows, you will need the following:
   tools are in your command-line path.  WiX version 3.11.1 is verified
   to work with this codebase.
 
+* If you wish to build with PKINIT support, you will need to provide
+  a copy of the OpenSSL development environment; this will need to include
+  the header files and the import .LIB files in additionl to the DLLs.
+
 A simple way to get the necessary Unix utilities is to install Git
 BASH from https://gitforwindows.org and configure it to add the Unix
 utilities to the command-line path.  In some versions of Windows (not
@@ -58,6 +62,12 @@ At the current time, Kerberos 5 can only be built for the x64 target
 if the host platform is also 64-bit, because it compiles and runs
 programs during the build.
 
+If you are building OpenSSL from source, note that as of this writing
+OpenSSL cannot be configured by using the Perl from Git for Windows;
+Strawberry Perl is known to work.  You will need separate development
+installations for both 32 and 64 bit environments if you want to build
+PKINIT for both.
+
 IMPORTANT NOTE: By default, the sources are built with debug
 information and linked against the debug version of the Microsoft C
 Runtime library, which is not found on most Windows systems unless
@@ -79,32 +89,38 @@ near your build tree.  The directory must exist before nmake install
 is run.  The 64-bit installer provides 32-bit libraries, so a 32-bit build
 and install must be performed before the 64-bit build.
 
+If you wish to build PKINIT, set the variable OPENSSL_DIR to point to the
+root of the development environment.  Include files should be in
+%OPENSSL_DIR%\include and the import .LIB files should be in %OPENSSL%\lib.
+
 To skip building the graphical ticket manager, run "set NO_LEASH=1"
 before building, and do not build the installers.
 
 In a 32-bit command shell:
 
  1) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
- 2) cd xxx\src                          # Go to where source lives
- 3) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
- 4) nmake [NODEBUG=1]                   # Build the sources
- 5) nmake install [NODEBUG=1]           # Copy headers, libs, executables
- 6) cd windows\installer\wix            # Go to where the installer source is
- 7) nmake [NODEBUG=1]                   # Build the installer
- 8) rename kfw.msi kfw32.msi            # Save the 32-bit installer
+ 2) set OPENSSL_DIR=\path\to\32bit\ssl	# Optional
+ 3) cd xxx\src                          # Go to where source lives
+ 4) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
+ 5) nmake [NODEBUG=1]                   # Build the sources
+ 6) nmake install [NODEBUG=1]           # Copy headers, libs, executables
+ 7) cd windows\installer\wix            # Go to where the installer source is
+ 8) nmake [NODEBUG=1]                   # Build the installer
+ 9) rename kfw.msi kfw32.msi            # Save the 32-bit installer
 
 In a 64-bit command shell:
 
- 9) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
-10) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
-11) cd xxx\src                          # Go to where source lives
-12) nmake clean                         # Clean up the 32-bit objects
-13) nmake [NODEBUG=1]                   # Build the sources for 64-bit
-14) nmake install [NODEBUG=1]           # Copy 64-bit lib/executables
-15) cd windows\installer\wix            # Back to the installer source
-16) nmake clean                         # Remove 32-bit leavings
-17) nmake [NODEBUG=1]                   # Build the 64-bit installer
-18) rename kfw.msi kfw64.msi            # And name it usefully
+10) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
+11) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
+12) set OPENSSL_DIR=\path\to\64bit\ssl	# Optional
+13) cd xxx\src                          # Go to where source lives
+14) nmake clean                         # Clean up the 32-bit objects
+15) nmake [NODEBUG=1]                   # Build the sources for 64-bit
+16) nmake install [NODEBUG=1]           # Copy 64-bit lib/executables
+17) cd windows\installer\wix            # Back to the installer source
+18) nmake clean                         # Remove 32-bit leavings
+19) nmake [NODEBUG=1]                   # Build the 64-bit installer
+20) rename kfw.msi kfw64.msi            # And name it usefully
 
 Step 9 may be skipped if uicc is already in the command-line path (try
 running "uicc" to see if you get a usage message or a not-found

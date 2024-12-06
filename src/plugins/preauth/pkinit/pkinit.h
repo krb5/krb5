@@ -97,7 +97,9 @@ static inline void pkiDebug (const char *fmt, ...) { }
 
 /* Solaris compiler doesn't grok __FUNCTION__
  * hack for now.  Fix all the uses eventually. */
+#ifndef _WIN32
 #define __FUNCTION__ __func__
+#endif
 
 /* Macros to deal with converting between various data types... */
 #define PADATA_TO_KRB5DATA(pad, k5d) \
