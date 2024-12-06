@@ -30,7 +30,6 @@
  */
 
 #include "pkinit.h"
-#include <dirent.h>
 
 static void
 free_list(char **list)
