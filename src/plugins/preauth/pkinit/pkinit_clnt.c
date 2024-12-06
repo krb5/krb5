@@ -33,7 +33,6 @@
 #include "pkinit.h"
 #include "k5-json.h"
 
-#include <unistd.h>
 #include <sys/stat.h>
 
 /**

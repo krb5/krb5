@@ -73,6 +73,10 @@
   <?define cmf_xpprof64_dll_name="xpprof64.dll"?>
   <?define cmf_spake64_dll_guid="0E97B52A-EC8E-494C-BF5D-83AAACFEFDBA"?>
   <?define cmf_spake64_dll_name="spake64.dll"?>
+  <?define cmf_pkinit64_dll_guid="5F7A1656-5A55-4067-842D-73380DF57442"?>
+  <?define cmf_pkinit64_dll_name="pkinit64.dll"?>
+  <?define cmf_openssl_crypto64_dll="6762F903-0B15-4F29-9128-1CEB4AFB99B3"?>
+  <?define cmf_openssl_crypto64_dll_name="libcrypto-$(var.OpenSSLVer)-x64.dll"?>
   <?define cmf_krb5cred_dll_guid="CC182AB1-E333-4501-8DEA-5A8D4FD36D0D"?>
   <?define cmf_krb5cred_dll_name="krb5cred.dll"?>
   <?define cmf_krb5cred_en_us_dll_guid="223B7E9D-290F-40b8-89B3-F8337A8E082D"?>

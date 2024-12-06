@@ -38,6 +38,8 @@
     <?define BinDir="$(env.KRB_INSTALL_DIR)\bin\"?>
     <?define PreauthDir=$(env.KRB_INSTALL_DIR)\bin\plugins\preauth?>
     <?define LibDir="$(env.KRB_INSTALL_DIR)\lib\"?>
+    <?define OpenSSLDir="$(env.OPENSSL_DIR)\bin"?>
+    <?define OpenSSLVer="$(env.OPENSSL_VERSION)"?>
     <?define InstallerVersion="450"?>
     <?ifndef env.VISUALSTUDIOVERSION?>
         <?define VCVer="100"?>

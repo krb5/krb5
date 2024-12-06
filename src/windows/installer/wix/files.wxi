@@ -272,6 +272,9 @@
                   <Component Id="cmf_xpprof64_dll" Guid="$(var.cmf_xpprof64_dll_guid)" DiskId="1">
                     <File Id="fil_xpprof64_dll" Name="$(var.cmf_xpprof64_dll_name)" KeyPath="yes" />
                   </Component>
+                  <Component Id="cmf_openssl_crypto64_dll" Guid="$(var.cmf_openssl_crypto64_dll)" DiskId="1">
+                    <File Id="fil_openssl_crypto64_dll" Name="$(var.cmf_openssl_crypto64_dll_name)" Source="$(var.OpenSSLDir)\libcrypto-$(var.OpenSSLVer)-x64.dll" KeyPath="yes" />
+                  </Component>
 
                   <!-- Debug symbols -->
                 <?ifdef DebugSyms?>
@@ -305,8 +308,12 @@
                       <Component Id="cmf_spake64_dll" Guid="$(var.cmf_spake64_dll_guid)" DiskId="1">
                         <File Id="fil_spake64_dll" Name="$(var.cmf_spake64_dll_name)" KeyPath="yes" />
                       </Component>
+                      <Component Id="cmf_pkinit64_dll" Guid="$(var.cmf_pkinit64_dll_guid)" DiskId="1">
+                        <File Id="fil_pkinit64_dll" Name="$(var.cmf_pkinit64_dll_name)" KeyPath="yes" />
+                      </Component>
                       <?ifdef DebugSyms?>
                         <Component Id="cmf_preauth_debug" Guid="$(var.cmf_preauth_debug_guid)" DiskId="1">
+                          <File Id="fil_pkinit64_pdb" Name="pkinit64.pdb" />
                           <File Id="fil_spake64_pdb" Name="spake64.pdb" />
                         </Component>
                       <?endif?>

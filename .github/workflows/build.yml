@@ -70,6 +70,8 @@ jobs:
         runs-on: windows-latest
         env:
             KRB_INSTALL_DIR: C:\kfw
+            OPENSSL_DIR: C:\Program Files\OpenSSL
+            OPENSSL_VERSION: 1_1
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
