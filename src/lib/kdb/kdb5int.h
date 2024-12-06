@@ -36,5 +36,8 @@ krb5int_put_principal_no_log(krb5_context kcontext,
 krb5_error_code
 krb5int_delete_principal_no_log(krb5_context kcontext,
                                 krb5_principal search_for);
+krb5_error_code
+kdb5int_extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
+                                     krb5_int16 *count, char ***db_argsp);
 
 #endif /* __KDB5INT_H__ */

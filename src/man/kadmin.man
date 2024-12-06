@@ -449,6 +449,17 @@ principal container configured in the realm.
 .UNINDENT
 .UNINDENT
 .UNINDENT
+.sp
+The options for the DB2 and LMDB database modules are:
+.INDENT 7.0
+.TP
+\fB\-x alias=\fP\fIprincipal@REALM\fP
+Specifies the Kerberos principal to point to the
+principal being created. When retrieving the newly created
+principal, all details except its name will be replaced by the aliasing entry.
+Since the entry keys will be replaced as well, it makes sense to use this option
+together with \fB-nokey\fP.
+.UNINDENT
 .UNINDENT
 .sp
 Example:
