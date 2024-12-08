@@ -805,14 +805,6 @@ OM_uint32 gssint_copy_oid_set(
 	gss_OID_set *			/* new oid set */
 );
 
-gss_OID gss_find_mechanism_from_name_type (gss_OID); /* name_type */
-
-OM_uint32 gss_add_mech_name_type
-	   (OM_uint32 *,	/* minor_status */
-	    gss_OID,		/* name_type */
-	    gss_OID		/* mech */
-	       );
-
 /*
  * Sun extensions to GSS-API v2
  */
