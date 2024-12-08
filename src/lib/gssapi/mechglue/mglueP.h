@@ -799,14 +799,6 @@ OM_uint32 gssint_create_union_context(
 	gss_union_ctx_id_t *	/* ctx_out */
 );
 
-gss_OID gss_find_mechanism_from_name_type (gss_OID); /* name_type */
-
-OM_uint32 gss_add_mech_name_type
-	   (OM_uint32 *,	/* minor_status */
-	    gss_OID,		/* name_type */
-	    gss_OID		/* mech */
-	       );
-
 /*
  * Sun extensions to GSS-API v2
  */
