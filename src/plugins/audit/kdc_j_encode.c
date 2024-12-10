@@ -630,6 +630,17 @@ addr_to_obj(krb5_address *a, k5_json_object obj)
         ret = k5_json_object_set(obj, AU_IP, arr);
         if (ret)
             goto error;
+    } else if (a->addrtype == ADDRTYPE_UNIXSOCK) {
+        k5_json_string str = NULL;
+
+        ret = k5_json_string_create_len(a->contents, a->length, &str);
+        if (ret)
+            return ret;
+
+        ret = k5_json_object_set(obj, AU_PATH, str);
+        k5_json_release(str);
+        if (ret)
+            goto error;
     }
 
 error:

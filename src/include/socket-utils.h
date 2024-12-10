@@ -90,6 +90,16 @@ static inline struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in6 *) ss;
 }
+#ifndef _WIN32
+static inline const struct sockaddr_un *sa2sun(const struct sockaddr *sa)
+{
+    return (const struct sockaddr_un *)(void *)sa;
+}
+static inline struct sockaddr_un *ss2sun(struct sockaddr_storage *ss)
+{
+    return (struct sockaddr_un *)ss;
+}
+#endif
 
 /* Set the IPv4 or IPv6 port on sa to port.  Do nothing if sa is not an
  * Internet socket. */
@@ -141,6 +151,10 @@ sa_socklen(const struct sockaddr *sa)
         return sizeof(struct sockaddr_in6);
     else if (sa->sa_family == AF_INET)
         return sizeof(struct sockaddr_in);
+#ifndef _WIN32
+    else if (sa->sa_family == AF_UNIX)
+        return sizeof(struct sockaddr_un);
+#endif
     else
         abort();
 }
