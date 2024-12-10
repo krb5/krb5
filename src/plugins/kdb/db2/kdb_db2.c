@@ -62,6 +62,7 @@
 #include <errno.h>
 #include <utime.h>
 #include "kdb5.h"
+#include "kdb5int.h"
 #include "kdb_db2.h"
 #include "kdb_xdr.h"
 #include "policy_db.h"
@@ -751,16 +752,22 @@ cleanup:
     return retval;
 }
 
+#define ALIAS_PREFIX "alias="
+#define ALIAS_PREFIX_LEN 6
+
 krb5_error_code
 krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
                        unsigned int flags, krb5_db_entry **entry)
 {
     krb5_db2_context *dbc;
-    krb5_error_code retval;
+    krb5_error_code retval, _retval;
     DB     *db;
     DBT     key, contents;
     krb5_data keydata, contdata;
-    int     dbret;
+    int     dbret, i;
+    char  **db_args = NULL;
+    krb5_db_entry *temp_entry = NULL;
+    krb5_principal alias_princ = NULL;
 
     *entry = NULL;
     if (!inited(context))
@@ -797,29 +804,101 @@ krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
         break;
     }
 
+    retval = kdb5int_extract_db_args_from_tl_data(context, &(*entry)->tl_data,
+                                                  &(*entry)->n_tl_data, &db_args);
+    if ((retval == 0) && (db_args != NULL)) {
+        for (i = 0; db_args[i] != NULL; i++) {
+            if (strncmp(db_args[i], ALIAS_PREFIX, ALIAS_PREFIX_LEN) == 0) {
+                retval = krb5_parse_name(context,
+                                         db_args[i] + ALIAS_PREFIX_LEN,
+                                         &alias_princ);
+                if (retval) {
+                    retval = EINVAL;
+                    goto cleanup;
+                }
+                (void) krb5_db2_unlock(context);
+                retval = krb5_db2_get_principal(context, alias_princ, flags, &temp_entry);
+                _retval = ctx_lock(context, dbc, KRB5_LOCKMODE_SHARED);
+                if ((retval == 0) && (_retval == 0)) {
+                    /* replace entry->princ by the aliasing entry princ */
+                    krb5_free_principal(context, temp_entry->princ);
+                    krb5_copy_principal(context, (*entry)->princ, &temp_entry->princ);
+                    krb5_db_free_principal(context, *entry);
+                    *entry = temp_entry;
+                    break;
+                }
+                if (retval != 0) {
+                    retval = KRB5_KDB_NOENTRY;
+                    k5_setmsg(context, KRB5_KDB_NOENTRY,
+                            _("Alias \"%s\" not found in the database"),
+                            db_args[i] + ALIAS_PREFIX_LEN);
+                    goto cleanup;
+                }
+            }
+        }
+    }
+
 cleanup:
     (void) krb5_db2_unlock(context); /* unlock read lock */
+    if (db_args != NULL) {
+        for (i = 0; db_args[i] != NULL; i++)
+            free(db_args[i]);
+        free(db_args);
+    }
+    krb5_free_principal(context, alias_princ);
     return retval;
 }
+
+static krb5_error_code
+db2_validate_db_args(krb5_context context, const char *arg)
+{
+    const char *alias = NULL;
+    krb5_principal alias_princ = NULL;
+    krb5_db_entry *tmp_entry = NULL;
+    krb5_error_code ret;
+    size_t len;
+    int cmp;
+
+    cmp = strncmp(arg, ALIAS_PREFIX, ALIAS_PREFIX_LEN);
+    if (cmp != 0) {
+        return EINVAL;
+    }
+
+    alias = arg + ALIAS_PREFIX_LEN;
+    len = strlen(alias);
+    if (len == 0) {
+        return EINVAL;
+    }
+
+    /* Check if alias is a valid princ */
+    ret = krb5_parse_name(context, alias, &alias_princ);
+    if (ret != 0) {
+        return ret;
+    }
+
+    /* Check if alias already exists */
+    ret = krb5_db2_get_principal(context, alias_princ, 0, &tmp_entry);
+    krb5_free_principal(context, alias_princ);
+
+    if (tmp_entry != NULL) {
+        krb5_db_free_principal(context, tmp_entry);
+    }
+
+    return ret;
+}
+
 
 krb5_error_code
 krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
                        char **db_args)
 {
-    int     dbret;
+    int     dbret, i;
     DB     *db;
     DBT     key, contents;
     krb5_data contdata, keydata;
     krb5_error_code retval;
     krb5_db2_context *dbc;
-
-    krb5_clear_error_message (context);
-    if (db_args) {
-        /* DB2 does not support db_args DB arguments for principal */
-        k5_setmsg(context, EINVAL, _("Unsupported argument \"%s\" for db2"),
-                  db_args[0]);
-        return EINVAL;
-    }
+    krb5_tl_data tl_data;
 
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
@@ -829,6 +908,34 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
         return retval;
 
     db = dbc->db;
+    krb5_clear_error_message (context);
+    if (db_args != NULL) {
+        retval = EINVAL;
+        for (i = 0; db_args[i] != NULL; i++) {
+            retval = db2_validate_db_args(context, db_args[i]);
+            switch(retval) {
+            case KRB5_KDB_NOENTRY:
+                k5_setmsg(context, EINVAL, _("Unknown alias \"%s\" for db2"),
+                          db_args[i] + ALIAS_PREFIX_LEN);
+                break;
+            case 0:
+                tl_data.tl_data_type = KRB5_TL_DB_ARGS;
+                tl_data.tl_data_length = strlen(db_args[i]) + 1;
+                tl_data.tl_data_contents = (krb5_octet*) db_args[i];
+
+                retval = krb5_dbe_update_tl_data(context, entry, &tl_data);
+                break;
+            default:
+                k5_setmsg(context, EINVAL, _("Unsupported argument \"%s\" for db2"),
+                          db_args[i]);
+                break;
+            }
+        }
+        if (retval != 0) {
+            return EINVAL;
+        }
+    }
+
 
     retval = krb5_encode_princ_entry(context, &contdata, entry);
     if (retval)
