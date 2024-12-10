@@ -43,6 +43,7 @@ typedef enum {
     TCP,
     UDP,
     HTTPS,
+    UNIXSOCK,
 } k5_transport;
 
 typedef enum {

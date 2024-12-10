@@ -157,6 +157,9 @@ setup_loop(kadm5_config_params *params, int proponly, verto_ctx **ctx_out)
                                    KADM, KADMVERS, kadm_1);
         if (ret)
             return ret;
+        ret = loop_add_unix_socket(params->kpasswd_listen);
+        if (ret)
+            return ret;
     }
 #ifndef DISABLE_IPROP
     if (params->iprop_enabled) {

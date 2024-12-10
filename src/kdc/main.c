@@ -969,6 +969,9 @@ int main(int argc, char **argv)
         retval = loop_add_udp_address(KRB5_DEFAULT_PORT, realm->realm_listen);
         if (retval)
             goto net_init_error;
+        retval = loop_add_unix_socket(realm->realm_listen);
+        if (retval)
+            goto net_init_error;
         retval = loop_add_tcp_address(KRB5_DEFAULT_PORT,
                                       realm->realm_tcp_listen);
         if (retval)

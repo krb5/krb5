@@ -295,6 +295,23 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
         hostspec = hostlist[i];
         Tprintf("entry %d is '%s'\n", i, hostspec);
 
+#ifndef _WIN32
+        if (hostspec[0] == '/') {
+            struct sockaddr_un sun = { 0 };
+
+            sun.sun_family = AF_UNIX;
+            if (strlcpy(sun.sun_path, hostspec, sizeof(sun.sun_path)) >=
+                sizeof(sun.sun_path)) {
+                code = ENAMETOOLONG;
+                goto cleanup;
+            }
+            code = add_addr_to_list(serverlist, UNIXSOCK, AF_UNIX, sizeof(sun),
+                                    (struct sockaddr *)&sun);
+            if (code)
+                goto cleanup;
+            continue;
+        }
+#endif
         parse_uri_if_https(hostspec, &this_transport, &hostspec, &uri_path);
 
         default_port = (this_transport == HTTPS) ? 443 : udpport;
