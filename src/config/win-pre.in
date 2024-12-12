@@ -125,11 +125,6 @@ CPPFLAGS=-I$(top_srcdir)\include -I$(top_srcdir)\include\krb5 $(DNSFLAGS) -DWIN3
 CCOPTS=-nologo /EHsc /W3 /we4020 /we4024 /we4047 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no -manifest
 
-!if  ("$(BITS)" == "64" )
-ENTRYPOINT=_DllMainCRTStartup
-!else
-ENTRYPOINT=_DllMainCRTStartup@12
-!endif
 CCLINKOPTION=
 DEBUGOPT=/guard:cf /Zi
 
@@ -169,8 +164,7 @@ LOPTS=$(LOPTS) -debug
 INSTALLDBGSYMS=copy
 !endif
 
-# XXX - NOTE: We should probably use DllMainCRTStartup
-DLL_LINKOPTS=$(LOPTS) -dll -entry:DllMain
+DLL_LINKOPTS=$(LOPTS) -dll
 EXE_LINKOPTS=$(LOPTS)
 
 RM=$(BUILDTOP)\config\rm.bat

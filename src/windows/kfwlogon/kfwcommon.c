@@ -351,7 +351,7 @@ void DebugEvent(char *b,...)
 static HANDLE hInitMutex = NULL;
 static BOOL bInit = FALSE;
 
-/* KFW_initialize cannot be called from DllEntryPoint */
+/* KFW_initialize cannot be called from DllMain */
 void
 KFW_initialize(void)
 {
