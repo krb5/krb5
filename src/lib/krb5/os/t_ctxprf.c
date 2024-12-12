@@ -76,4 +76,5 @@ main(int argc, char **argv)
     profile_abandon(p);
     k5_free_serverlist(&sl);
     krb5_free_context(ctx);
+    return 0;
 }
