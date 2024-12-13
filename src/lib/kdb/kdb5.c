@@ -867,9 +867,9 @@ free_db_args(char **db_args)
     }
 }
 
-static krb5_error_code
-extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
-                             krb5_int16 *count, char ***db_argsp)
+krb5_error_code
+kdb5int_extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
+                                     krb5_int16 *count, char ***db_argsp)
 {
     char **db_args = NULL;
     size_t db_args_size = 0;
@@ -945,9 +945,9 @@ krb5int_put_principal_no_log(krb5_context kcontext, krb5_db_entry *entry)
         return status;
     if (v->put_principal == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    status = extract_db_args_from_tl_data(kcontext, &entry->tl_data,
-                                          &entry->n_tl_data,
-                                          &db_args);
+    status = kdb5int_extract_db_args_from_tl_data(kcontext, &entry->tl_data,
+                                                  &entry->n_tl_data,
+                                                  &db_args);
     if (status)
         return status;
     status = v->put_principal(kcontext, entry, db_args);
