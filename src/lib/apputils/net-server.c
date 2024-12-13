@@ -65,6 +65,8 @@
 
 #include "udppktinfo.h"
 
+#define SYSTEMD_LISTEN_FDS_START 3 /* stdin, stdout, stderr */
+
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
@@ -695,6 +697,136 @@ static const enum conn_type bind_conn_types[] =
 };
 
 /*
+ * Support for socket activation using systemd
+ *
+ * This will check if the got socket activated by inspecting the environment
+ * variables LISTEN_PID and LISTEN_FDS.
+ *
+ * See also https://0pointer.de/blog/projects/socket-activation.html
+ */
+static int systemd_listen_fds(void) {
+    unsigned long ul = 0;
+    long l = 0;
+    int i;
+    const char *env = NULL;
+    char *end = NULL;
+    int fd = -1;
+    pid_t pid;
+
+    env = getenv("LISTEN_PID");
+    if (env == NULL) {
+        return 0;
+    }
+
+    ul = strtoul(env, &end, 10);
+    if (end == NULL || end == env || *end != '\0')
+        return -EINVAL;
+    pid = (pid_t)ul;
+
+    if ((unsigned long) pid != ul)
+        return -ERANGE;
+
+    if (pid == 0)
+        return -EINVAL;
+
+    /* Check if this is really for us */
+    if (pid != getpid()) {
+        return 0;
+    }
+
+    /* Get the fds */
+    env = getenv("LISTEN_FDS");
+    if (env == NULL)
+        return 0;
+
+    l = strtol(env, &end, 10);
+    if (end == NULL || end == env || *end != '\0')
+        return -EINVAL;
+
+    if (l <= 0 || l > INT_MAX - SYSTEMD_LISTEN_FDS_START)
+       return -EINVAL;
+    i = l;
+
+    for (fd = SYSTEMD_LISTEN_FDS_START; fd < SYSTEMD_LISTEN_FDS_START + i; fd++)
+        set_cloexec_fd(fd);
+
+    return i;
+}
+
+/*
+ * Check if we get started by socket activation.
+ *
+ * If we got an fd passed, we match it against the configuration and only
+ * set up those sockets. Others are ignored.
+ *
+ * See also https://0pointer.de/blog/projects/socket-activation2.html
+ */
+static int systemd_socket_activation(struct bind_address *ba,
+                                     struct sockaddr *sock_address,
+                                     const char *prog)
+{
+    /*
+     * If we return -ENOTCONN, we use socket activation, but the listener should
+     * not ignored.
+     */
+    int sock = -ENOTCONN;
+    int fd = -1;
+    int n = -1;
+
+    n = systemd_listen_fds();
+    if (n < 0) {
+        /* Error */
+        return n;
+    } else if (n == 0) {
+        /* No socket activation */
+        return 0;
+    }
+
+    /* Socket activation */
+    for (fd = SYSTEMD_LISTEN_FDS_START; fd < SYSTEMD_LISTEN_FDS_START + n;
+         fd++)
+    {
+        struct sockaddr_storage ss = {};
+        socklen_t ss_len = sizeof(struct sockaddr_storage);
+        struct sockaddr *sa = ss2sa(&ss);
+        int rc;
+
+        rc = getsockname(fd, ss2sa(&ss), &ss_len);
+        if (rc < 0) {
+            continue;
+        }
+
+        /* Try to match the systemd socket address to one of the listeners. */
+        switch (ss.ss_family) {
+        case AF_INET:
+        case AF_INET6:
+            if (ba->type == TCP || ba->type == UDP) {
+                int cmp = sa_compare(ss2sa(&ss), sock_address);
+                if (cmp == 0) {
+                    sock = fd;
+                    break;
+                }
+            }
+            continue;
+        case AF_UNIX:
+            if (ba->type == UNX) {
+                const struct sockaddr_un *un = sa2sun(sa);
+                int cmp = strcmp(un->sun_path, ba->address);
+                if (cmp == 0) {
+                    sock = fd;
+                    break;
+                }
+            }
+            continue;
+        default:
+            continue;
+        }
+    }
+
+    return sock;
+}
+
+/*
  * Set up a listening socket.
  *
  * Arguments:
@@ -715,12 +847,29 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
     struct connection *conn;
     verto_ev_flag flags;
     verto_ev *ev = NULL;
-    int sock = -1;
+    int n, sock = -1;
     char addrbuf[128];
 
     k5_print_addr_port(sock_address, addrbuf, sizeof(addrbuf));
     krb5_klog_syslog(LOG_DEBUG, _("Setting up %s socket for address %s"),
                      bind_type_names[ba->type], addrbuf);
+
+    n = systemd_socket_activation(ba, sock_address, prog);
+    if (n == -ENOTCONN) {
+        /* Socket activation, but don't setup the socket */
+        ret = 0;
+        goto cleanup;
+    } else if (n < 0) {
+        /* We got an error */
+        ret = n * -1;
+        com_err(prog, ret, _("Failed to acquire sockets from systemd"));
+        goto cleanup;
+    } else if (n > 0) {
+        /* Socket activation, matching listener. */
+        sock = n;
+        goto add_fd;
+    }
+    /* n == 0, no socket activation - normal setup */
 
     /* Create the socket. */
     ret = create_server_socket(sock_address, bind_socktypes[ba->type], prog,
@@ -771,6 +920,7 @@ setup_socket(struct bind_address *ba, struct sockaddr *sock_address,
         }
     }
 
+add_fd:
     /* Add the socket to the event loop. */
     flags = VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST |
         VERTO_EV_FLAG_REINITIABLE;
