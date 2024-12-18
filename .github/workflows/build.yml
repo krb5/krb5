@@ -79,32 +79,19 @@ jobs:
                 mkdir %KRB_INSTALL_DIR%
             - uses: ilammy/msvc-dev-cmd@v1
               with:
-                arch: x86
-            - name: Build 32-bit
-              shell: cmd
+                arch: x64
+            - name: Build
+              working-directory: src
               run: |
-                cd src
-                set
-                set PATH=%PATH%;%wix%bin
+                $env:Path += ';' + $env:WindowsSdkVerBinPath + '\\x86'
                 nmake -f Makefile.in prep-windows
                 nmake
-                nmake install
-                cd windows\installer\wix
-                nmake
-                rename kfw.msi kfw32.msi
-            - uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: x64
-            - name: Build 64-bit
-              shell: cmd
+            - name: Populate install dir
+              working-directory: src
               run: |
-                cd src
-                set
-                set PATH=%PATH%;%wix%bin;"%WindowsSdkVerBinPath%"\x86
-                nmake clean
-                nmake
                 nmake install
-                cd windows\installer\wix
-                nmake clean
+            - name: Build installer
+              working-directory: src\windows\installer\wix
+              run: |
+                $env:Path += ';' + $env:wix + 'bin'
                 nmake
-                rename kfw.msi kfw64.msi

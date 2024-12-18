@@ -51,12 +51,9 @@ checking out the sources with git and are using the Git BASH Perl,
 make sure to set git's core.autocrlf variable to "input" or "false" to
 avoid translating newlines.
 
-After Visual Studio is installed, you should be able to invoke 32-bit
-and 64-bit command prompts via the start menu (Visual Studio 2017 ->
-x86 Native Tools Command Prompt and x64 Native Tools Command Prompt).
-At the current time, Kerberos 5 can only be built for the x64 target
-if the host platform is also 64-bit, because it compiles and runs
-programs during the build.
+After Visual Studio is installed, you should be able to invoke command
+prompts via the start menu (Visual Studio 2017 -> x64 Native Tools
+Command Prompt).
 
 IMPORTANT NOTE: By default, the sources are built with debug
 information and linked against the debug version of the Microsoft C
@@ -76,43 +73,24 @@ You must also define KRB_INSTALL_DIR either in the environment or
 on the command line (for nmake install).  If you are proceeding to build
 the MSI installer, this directory should be a temporary staging area in or
 near your build tree.  The directory must exist before nmake install
-is run.  The 64-bit installer provides 32-bit libraries, so a 32-bit build
-and install must be performed before the 64-bit build.
+is run.
 
 To skip building the graphical ticket manager, run "set NO_LEASH=1"
-before building, and do not build the installers.
+before building, and do not build the installer.
 
-In a 32-bit command shell:
+Run the following commands in a Visual Studio command prompt:
 
- 1) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
- 2) cd xxx\src                          # Go to where source lives
- 3) nmake -f Makefile.in prep-windows   # Create Makefile for Windows
+ 1) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
+ 2) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
+ 3) cd xxx\src                          # Go to where source lives
  4) nmake [NODEBUG=1]                   # Build the sources
- 5) nmake install [NODEBUG=1]           # Copy headers, libs, executables
- 6) cd windows\installer\wix            # Go to where the installer source is
+ 5) nmake install [NODEBUG=1]           # Copy libraries/executables
+ 6) cd windows\installer\wix            # Go to the installer source
  7) nmake [NODEBUG=1]                   # Build the installer
- 8) rename kfw.msi kfw32.msi            # Save the 32-bit installer
 
-In a 64-bit command shell:
-
- 9) set PATH=%PATH%;"%WindowsSdkVerBinPath%"\x86  # To get uicc.exe
-10) set KRB_INSTALL_DIR=\path\to\dir    # Where bin/include/lib lives
-11) cd xxx\src                          # Go to where source lives
-12) nmake clean                         # Clean up the 32-bit objects
-13) nmake [NODEBUG=1]                   # Build the sources for 64-bit
-14) nmake install [NODEBUG=1]           # Copy 64-bit lib/executables
-15) cd windows\installer\wix            # Back to the installer source
-16) nmake clean                         # Remove 32-bit leavings
-17) nmake [NODEBUG=1]                   # Build the 64-bit installer
-18) rename kfw.msi kfw64.msi            # And name it usefully
-
-Step 9 may be skipped if uicc is already in the command-line path (try
+Step 1 may be skipped if uicc is already in the command-line path (try
 running "uicc" to see if you get a usage message or a not-found
 error), or if you are not building the graphical ticket manager.
-
-Visual Studio 2013 and 2015 provide only a single command prompt.
-Within this prompt, use "vcvarsall.bat x86" and "vcvarsall.bat amd64"
-to switch to 32-bit and 64-bit mode.
 
 
 Running Kerberos 5 Apps:
