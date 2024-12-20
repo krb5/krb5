@@ -51,6 +51,10 @@ static void ktest_free_pa_pk_as_rep(krb5_context context,
 static void ktest_free_reply_key_pack(krb5_context context,
                                       krb5_reply_key_pack *val);
 #endif
+#ifdef ENABLE_LDAP
+static void ktest_free_ldap_seqof_key_data(krb5_context context,
+                                           ldap_seqof_key_data *val);
+#endif
 static void ktest_free_kkdcp_message(krb5_context context,
                                      krb5_kkdcp_message *val);
 
@@ -1210,6 +1214,7 @@ main(int argc, char **argv)
         ktest_make_sample_principal(&ref);
         decode_run("krb5_principal_name","","30 2E A0 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A1 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61",
                    acc.decode_krb5_principal_name,equal_principal,krb5_free_principal);
+        ktest_destroy_principal(&ref);
     }
 
 #endif /* not DISABLE_PKINIT */
@@ -1218,8 +1223,8 @@ main(int argc, char **argv)
     /* ldap sequence_of_keys */
     {
         setup(ldap_seqof_key_data,ktest_make_sample_ldap_seqof_key_data);
-        decode_run("ldap_seqof_key_data","","30 81 87 A0 03 02 01 01 A1 03 02 01 01 A2 03 02 01 2A A3 03 02 01 0E A4 71 30 6F 30 23 A0 10 30 0E A0 03 02 01 00 A1 07 04 05 73 61 6C 74 30 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 30 30 23 A0 10 30 0E A0 03 02 01 01 A1 07 04 05 73 61 6C 74 31 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 31 30 23 A0 10 30 0E A0 03 02 01 02 A1 07 04 05 73 61 6C 74 32 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 32",acc.asn1_ldap_decode_sequence_of_keys,ktest_equal_ldap_sequence_of_keys,ktest_empty_ldap_seqof_key_data);
-        ktest_empty_ldap_seqof_key_data(test_context, &ref);
+        decode_run("ldap_seqof_key_data","","30 81 87 A0 03 02 01 01 A1 03 02 01 01 A2 03 02 01 2A A3 03 02 01 0E A4 71 30 6F 30 23 A0 10 30 0E A0 03 02 01 00 A1 07 04 05 73 61 6C 74 30 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 30 30 23 A0 10 30 0E A0 03 02 01 01 A1 07 04 05 73 61 6C 74 31 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 31 30 23 A0 10 30 0E A0 03 02 01 02 A1 07 04 05 73 61 6C 74 32 A1 0F 30 0D A0 03 02 01 02 A1 06 04 04 6B 65 79 32",acc.asn1_ldap_decode_sequence_of_keys,ktest_equal_ldap_sequence_of_keys,ktest_free_ldap_seqof_key_data);
+        ktest_empty_ldap_seqof_key_data(&ref);
     }
 
 #endif
@@ -1289,6 +1294,16 @@ ktest_free_reply_key_pack(krb5_context context, krb5_reply_key_pack *val)
 }
 
 #endif /* not DISABLE_PKINIT */
+
+#ifdef ENABLE_LDAP
+static void
+ktest_free_ldap_seqof_key_data(krb5_context context, ldap_seqof_key_data *val)
+{
+    if (val)
+        ktest_empty_ldap_seqof_key_data(val);
+    free(val);
+}
+#endif /* ENABLE_LDAP */
 
 static void
 ktest_free_kkdcp_message(krb5_context context,

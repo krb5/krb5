@@ -179,7 +179,8 @@ main(int argc, char **argv)
 	}
     }
 
-    if (!(num_to_check && prefix[0])) usage(prog, 1);
+    if (!(num_to_check && prefix[0]) || errflg)
+	usage(prog, 1);
 
     if (!cur_realm) {
 	if ((retval = krb5_get_default_realm(test_context, &cur_realm))) {
