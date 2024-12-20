@@ -840,7 +840,7 @@ main(int argc, char **argv)
         ktest_make_sample_ldap_seqof_key_data(&skd);
         encode_run(skd, "ldap_seqof_key_data", "",
                    acc.asn1_ldap_encode_sequence_of_keys);
-        ktest_empty_ldap_seqof_key_data(test_context, &skd);
+        ktest_empty_ldap_seqof_key_data(&skd);
     }
 #endif
 

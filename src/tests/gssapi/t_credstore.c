@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "common.h"
 
@@ -51,6 +52,7 @@ main(int argc, char *argv[])
     krb5_boolean store_creds = FALSE, replay = FALSE;
     char opt;
 
+    signal(SIGPIPE, SIG_IGN);
     /* Parse options. */
     for (argv++; *argv != NULL && **argv == '-'; argv++) {
         opt = (*argv)[1];

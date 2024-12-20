@@ -43,10 +43,7 @@
  * ldap get age
  */
 krb5_error_code
-krb5_ldap_get_age(context, db_name, age)
-    krb5_context context;
-    char *db_name;
-    time_t *age;
+krb5_ldap_get_age(krb5_context context, char *db_name, time_t *age)
 {
     time (age);
     return 0;
