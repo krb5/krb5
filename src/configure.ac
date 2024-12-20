@@ -490,18 +490,9 @@ AC_SUBST(GETTIMEOFDAY_ST_OBJ)
 AC_SUBST(EXTRA_SUPPORT_SYMS)
 
 DECLARE_SYS_ERRLIST
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h sys/random.h)
-AC_CHECK_HEADER(regexp.h, [], [],
-[#define INIT char *sp = instring;
-#define GETC() (*sp++)
-#define PEEKC() (*sp)
-#define UNGETC(c) (--sp)
-#define RETURN(c) return(c)
-#define ERROR(c)
-])
+AC_CHECK_HEADERS(unistd.h paths.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h sys/random.h)
 AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,struct stat.st_mtim.tv_nsec],,,[#include <sys/types.h>
 #include <sys/stat.h>])
-KRB5_AC_REGEX_FUNCS
 AC_TYPE_OFF_T
 
 # Fancy caching of perror result...
