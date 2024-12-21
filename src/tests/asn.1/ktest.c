@@ -1710,7 +1710,7 @@ void ktest_empty_pkinit_supp_pub_info(krb5_pkinit_supp_pub_info *p)
 
 #ifdef ENABLE_LDAP
 void
-ktest_empty_ldap_seqof_key_data(krb5_context ctx, ldap_seqof_key_data *p)
+ktest_empty_ldap_seqof_key_data(ldap_seqof_key_data *p)
 {
     int i;
 
@@ -1758,7 +1758,7 @@ ktest_empty_cammac(krb5_cammac *p)
 void
 ktest_empty_secure_cookie(krb5_secure_cookie *p)
 {
-    ktest_empty_pa_data_array(p->data);
+    ktest_destroy_pa_data_array(&p->data);
 }
 
 void

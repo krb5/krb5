@@ -14,17 +14,17 @@ jobs:
                 name: [linux-clang, linux-clang-openssl, linux-gcc]
                 include:
                     - name: linux-clang
-                      os: ubuntu-latest
+                      os: ubuntu-24.04
                       compiler: clang
                       makevars: CPPFLAGS=-Werror
                       configureopts: --enable-asan
                     - name: linux-clang-openssl
-                      os: ubuntu-latest
+                      os: ubuntu-24.04
                       compiler: clang
                       makevars: CPPFLAGS=-Werror
                       configureopts: --with-crypto-impl=openssl
                     - name: linux-gcc
-                      os: ubuntu-latest
+                      os: ubuntu-24.04
                       compiler: gcc
                       makevars: CPPFLAGS=-D_FORTIFY_SOURCE=3
         steps:
@@ -65,46 +65,3 @@ jobs:
                   git ls-files -o
                   exit 1
                 fi
-
-    windows:
-        runs-on: windows-latest
-        env:
-            KRB_INSTALL_DIR: C:\kfw
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v1
-            - name: Setup
-              shell: cmd
-              run: |
-                mkdir %KRB_INSTALL_DIR%
-            - uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: x86
-            - name: Build 32-bit
-              shell: cmd
-              run: |
-                cd src
-                set
-                set PATH=%PATH%;%wix%bin
-                nmake -f Makefile.in prep-windows
-                nmake
-                nmake install
-                cd windows\installer\wix
-                nmake
-                rename kfw.msi kfw32.msi
-            - uses: ilammy/msvc-dev-cmd@v1
-              with:
-                arch: x64
-            - name: Build 64-bit
-              shell: cmd
-              run: |
-                cd src
-                set
-                set PATH=%PATH%;%wix%bin;"%WindowsSdkVerBinPath%"\x86
-                nmake clean
-                nmake
-                nmake install
-                cd windows\installer\wix
-                nmake clean
-                nmake
-                rename kfw.msi kfw64.msi
