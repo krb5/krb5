@@ -131,6 +131,7 @@ kdb_check: kdc.conf krb5.conf
 check-pytests: adata conccache etinfo forward gcred hist hooks hrealm
 check-pytests: icinterleave icred kdbtest localauth plugorder rdreq replay
 check-pytests: responder s2p s4u2proxy unlockiter s4u2self
+	$(RUNPYTEST) $(srcdir)/t_alias.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_hooks.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_dump.py $(PYTESTFLAGS)

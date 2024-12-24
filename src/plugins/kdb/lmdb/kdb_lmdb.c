@@ -79,6 +79,7 @@
 #include "k5-int.h"
 #include <kadm5/admin.h>
 #include "kdb5.h"
+#include "kdb5int.h"
 #include "klmdb-int.h"
 #include <lmdb.h>
 
@@ -709,6 +710,9 @@ cleanup:
     return ret;
 }
 
+#define ALIAS_PREFIX "alias="
+#define ALIAS_PREFIX_LEN 6
+
 static krb5_error_code
 klmdb_get_principal(krb5_context context, krb5_const_principal searchfor,
                     unsigned int flags, krb5_db_entry **entry_out)
@@ -717,6 +721,10 @@ klmdb_get_principal(krb5_context context, krb5_const_principal searchfor,
     klmdb_context *dbc = context->dal_handle->db_context;
     MDB_val key, val;
     char *name = NULL;
+    char **db_args = NULL;
+    size_t i;
+    krb5_db_entry *temp_entry = NULL;
+    krb5_principal alias_princ;
 
     *entry_out = NULL;
     if (dbc == NULL)
@@ -737,10 +745,84 @@ klmdb_get_principal(krb5_context context, krb5_const_principal searchfor,
     if (ret)
         goto cleanup;
 
+    ret = kdb5int_extract_db_args_from_tl_data(context, &(*entry_out)->tl_data,
+                                                &(*entry_out)->n_tl_data, &db_args);
+    if ((ret == 0) && (db_args != NULL)) {
+        for (i = 0; db_args[i] != NULL; i++) {
+            if (strncmp(db_args[i], ALIAS_PREFIX, ALIAS_PREFIX_LEN) == 0) {
+                ret = krb5_parse_name(context, db_args[i] + ALIAS_PREFIX_LEN, &alias_princ);
+                if (ret != 0) {
+                    krb5_db_free_principal(context, *entry_out);
+                    *entry_out = NULL;
+                    goto cleanup;
+                }
+                ret = klmdb_get_principal(context, alias_princ, flags, &temp_entry);
+                krb5_free_principal(context, alias_princ);
+                if (ret != 0) {
+                    krb5_db_free_principal(context, *entry_out);
+                    *entry_out = NULL;
+                    k5_setmsg(context, KRB5_KDB_NOENTRY,
+                            _("Alias \"%s\" not found in the database"),
+                            db_args[i] + ALIAS_PREFIX_LEN);
+                    ret = KRB5_KDB_NOENTRY;
+                    goto cleanup;
+                }
+                /* replace entry->princ by the aliasing entry princ */
+                krb5_free_principal(context, temp_entry->princ);
+                krb5_copy_principal(context, (*entry_out)->princ, &temp_entry->princ);
+                krb5_db_free_principal(context, *entry_out);
+                *entry_out = temp_entry;
+                break;
+            }
+        }
+    }
     fetch_lockout(context, &key, *entry_out);
 
 cleanup:
+    if (db_args != NULL) {
+        for (i = 0; db_args[i] != NULL; i++)
+            free(db_args[i]);
+        free(db_args);
+    }
     krb5_free_unparsed_name(context, name);
+    return ret;
+}
+
+static krb5_error_code
+klmdb_validate_db_args(krb5_context context, const char *arg)
+{
+    const char *alias = NULL;
+    krb5_principal alias_princ = NULL;
+    krb5_db_entry *tmp_entry = NULL;
+    krb5_error_code ret;
+    size_t len;
+    int cmp;
+
+    cmp = strncmp(arg, ALIAS_PREFIX, ALIAS_PREFIX_LEN);
+    if (cmp != 0) {
+        return EINVAL;
+    }
+
+    alias = arg + ALIAS_PREFIX_LEN;
+    len = strlen(alias);
+    if (len == 0) {
+        return EINVAL;
+    }
+
+    /* Check if alias is a valid princ */
+    ret = krb5_parse_name(context, alias, &alias_princ);
+    if (ret != 0) {
+        return ret;
+    }
+
+    /* Check if alias already exists */
+    ret = klmdb_get_principal(context, alias_princ, 0, &tmp_entry);
+    krb5_free_principal(context, alias_princ);
+
+    if (tmp_entry != NULL) {
+        krb5_db_free_principal(context, tmp_entry);
+    }
+
     return ret;
 }
 
@@ -752,19 +834,40 @@ klmdb_put_principal(krb5_context context, krb5_db_entry *entry, char **db_args)
     MDB_val key, val, dummy;
     MDB_txn *txn = NULL;
     uint8_t lockout[LOCKOUT_RECORD_LEN], *enc;
-    size_t len;
+    size_t len, i;
     char *name = NULL;
     int err;
-
-    if (db_args != NULL) {
-        /* This module does not support DB arguments for put_principal. */
-        k5_setmsg(context, EINVAL, _("Unsupported argument \"%s\" for lmdb"),
-                  db_args[0]);
-        return EINVAL;
-    }
+    krb5_tl_data tl_data;
 
     if (dbc == NULL)
         return KRB5_KDB_DBNOTINITED;
+
+    if (db_args != NULL) {
+        ret = EINVAL;
+        for (i = 0; db_args[i] != NULL; i++) {
+            ret = klmdb_validate_db_args(context, db_args[i]);
+            switch(ret) {
+            case KRB5_KDB_NOENTRY:
+                k5_setmsg(context, EINVAL, _("Unknown alias \"%s\" for lmdb"),
+                          db_args[i] + ALIAS_PREFIX_LEN);
+                break;
+            case 0:
+                tl_data.tl_data_type = KRB5_TL_DB_ARGS;
+                tl_data.tl_data_length = strlen(db_args[i]) + 1;
+                tl_data.tl_data_contents = (krb5_octet*) db_args[i];
+
+                ret = krb5_dbe_update_tl_data(context, entry, &tl_data);
+                break;
+            default:
+                k5_setmsg(context, EINVAL, _("Unsupported argument \"%s\" for db2"),
+                          db_args[i]);
+                break;
+            }
+        }
+        if (ret != 0) {
+            return EINVAL;
+        }
+    }
 
     ret = krb5_unparse_name(context, entry->princ, &name);
     if (ret)
