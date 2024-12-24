@@ -159,4 +159,51 @@ sa_socklen(const struct sockaddr *sa)
         abort();
 }
 
+/**
+ * @brief Compare if two IP addresses are equal.
+ *
+ * @param sa1 The first IP address to compare.
+ *
+ * @param sa2 The second IP address to compare.
+ *
+ * @return Return 0 if they are equal and non-zero if they aren't equal.
+ * It uses memcmp() for byte comparison of the address, and returns the memcmp
+ * return values.
+ */
+static inline int
+sa_compare(const struct sockaddr *sa1, const struct sockaddr *sa2)
+{
+    if (sa1 == NULL || sa2 == NULL)
+        return 1;
+
+    if (sa1->sa_family != sa2->sa_family)
+        return 1;
+
+    switch (sa1->sa_family) {
+    case AF_INET: {
+        const struct sockaddr_in *in1 = sa2sin(sa1);
+        const struct sockaddr_in *in2 = sa2sin(sa2);
+
+        if (in1->sin_port != in2->sin_port)
+            return 1;
+
+        return memcmp(&in1->sin_addr, &in2->sin_addr, sizeof(struct in_addr));
+    }
+    case AF_INET6: {
+        const struct sockaddr_in6 *in6_1 = sa2sin6(sa1);
+        const struct sockaddr_in6 *in6_2 = sa2sin6(sa2);
+
+        if (in6_1->sin6_port != in6_2->sin6_port)
+            return 1;
+
+        return memcmp(&in6_1->sin6_addr, &in6_2->sin6_addr,
+                      sizeof(struct in6_addr));
+    }
+    default:
+        break;
+    }
+
+    return 1;
+}
+
 #endif /* SOCKET_UTILS_H */
