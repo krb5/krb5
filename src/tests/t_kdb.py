@@ -591,6 +591,9 @@ dbmod['ldap_kdc_sasl_authcid'] = 'digestuser'
 dbmod['ldap_kadmind_sasl_authcid'] = 'digestuser'
 dbmod['ldap_service_password_file'] = ldap_pwfile
 realm = K5Realm(create_kdb=False, kdc_conf=conf)
+# Work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1091694
+if runenv.asan == 'yes':
+    realm.env['ASAN_OPTIONS'] = 'detect_leaks=false'
 input = admin_pw + '\n' + admin_pw + '\n'
 realm.run([kdb5_ldap_util, 'stashsrvpw', 'digestuser'], input=input)
 realm.run([kdb5_ldap_util, 'create', '-s', '-P', 'master'])
