@@ -19,7 +19,7 @@ jobs:
                     # SIGPIPE exits from test programs.  See
                     # https://github.com/llvm/llvm-project/issues/120915
                     - name: linux-clang
-                      os: ubuntu-22.04
+                      os: ubuntu-24.04
                       compiler: clang
                       makevars: CPPFLAGS=-Werror
                       configureopts: --enable-asan

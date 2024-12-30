@@ -515,11 +515,13 @@ testrealm: runenv.py
 
 # environment variable settings to propagate to Python-based tests
 
+ASAN = @ASAN@
 pyrunenv.vals: Makefile
 	$(RUN_SETUP); \
 	for i in $(RUN_VARS); do \
 		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
 	done > $@
+	echo "asan = '$(ASAN)'" >> $@
 	echo "tls_impl = '$(TLS_IMPL)'" >> $@
 	echo "have_sasl = '$(HAVE_SASL)'" >> $@
 	echo "have_spake_openssl = '$(HAVE_SPAKE_OPENSSL)'" >> $@
