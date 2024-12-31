@@ -170,7 +170,8 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
                                            mkey_aux_data_head))) {
         goto clean_n_exit;
     }
-    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA;
+    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA | KADM5_MKVNO |
+                          KADM5_KVNO;
 
 clean_n_exit:
     krb5_dbe_free_mkey_aux_list(context, mkey_aux_data_head);
@@ -510,6 +511,8 @@ kdb5_use_mkey(int argc, char *argv[])
         goto cleanup_return;
     }
 
+    master_entry->mask |= KADM5_TL_DATA | KADM5_MOD_TIME;
+
     if ((retval = krb5_db_put_principal(util_context, master_entry))) {
         com_err(progname, retval,
                 _("while adding master key entry to the database"));
@@ -780,7 +783,7 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
         goto fail;
     }
 
-    ent->mask |= KADM5_KEY_DATA;
+    ent->mask |= KADM5_KEY_DATA | KADM5_MKVNO | KADM5_MOD_TIME;
 
     if ((retval = krb5_db_put_principal(util_context, ent))) {
         com_err(progname, retval, _("while updating principal '%s' key data "
@@ -1266,7 +1269,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         goto cleanup_return;
     }
 
-    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA;
+    master_entry->mask |= KADM5_KEY_DATA | KADM5_TL_DATA | KADM5_MOD_TIME;
 
     if ((retval = krb5_db_put_principal(util_context, master_entry))) {
         com_err(progname, retval,
