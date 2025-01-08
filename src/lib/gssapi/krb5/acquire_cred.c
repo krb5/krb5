@@ -1283,8 +1283,8 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
             ret = GSS_S_BAD_NAME;
             goto out;
         }
-        if (cred_usage == GSS_C_ACCEPT || desired_name == GSS_C_NO_NAME ||
-            ccache != NULL || client_keytab != NULL) {
+        if (cred_usage == GSS_C_ACCEPT || ccache != NULL ||
+            client_keytab != NULL) {
             *minor_status = (OM_uint32)G_BAD_USAGE;
             ret = GSS_S_FAILURE;
             goto out;
