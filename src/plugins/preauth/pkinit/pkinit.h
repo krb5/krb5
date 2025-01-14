@@ -341,7 +341,7 @@ void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);
 krb5_error_code pkinit_copy_krb5_data(krb5_data *dst, const krb5_data *src);
-
+void pkinit_pachecksum2_free(krb5_context context, krb5_pachecksum2 **packsum2);
 
 /*
  * Functions in pkinit_profile.c

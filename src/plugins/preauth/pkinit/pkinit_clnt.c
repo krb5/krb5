@@ -57,6 +57,7 @@ pkinit_as_req_create(krb5_context context, pkinit_context plgctx,
                      pkinit_req_context reqctx, krb5_timestamp ctsec,
                      krb5_int32 cusec, krb5_ui_4 nonce,
                      const krb5_checksum *cksum,
+                     const krb5_pachecksum2 *cksum2,
                      krb5_principal client, krb5_principal server,
                      krb5_data **as_req);
 
@@ -89,6 +90,7 @@ pa_pkinit_gen_req(krb5_context context,
     krb5_int32 cusec = 0;
     krb5_ui_4 nonce = 0;
     krb5_checksum cksum;
+    krb5_pachecksum2 *cksum2 = NULL;
     krb5_data *der_req = NULL;
     krb5_pa_data **return_pa_data = NULL;
 
@@ -121,9 +123,20 @@ pa_pkinit_gen_req(krb5_context context,
                                   &cksum);
     if (retval)
         goto cleanup;
-    TRACE_PKINIT_CLIENT_REQ_CHECKSUM(context, &cksum);
+    TRACE_PKINIT_CLIENT_REQ_PACHECKSUM(context, &cksum);
 #ifdef DEBUG_CKSUM
-    pkiDebug("calculating checksum on buf size (%d)\n", der_req->length);
+    pkiDebug("calculating SHA-1 checksum on buf size (%d)\n", der_req->length);
+    print_buffer(der_req->data, der_req->length);
+#endif
+
+    retval = pkinit_generate_pachecksum2(context, cms_sha256_id, der_req,
+                                         &cksum2);
+    if (retval)
+        goto cleanup;
+    TRACE_PKINIT_CLIENT_REQ_PACHECKSUM2(context, "SHA-256", cksum2);
+#ifdef DEBUG_CKSUM
+    pkiDebug("calculating SHA-256 checksum on buf size (%d)\n",
+             der_req->length);
     print_buffer(der_req->data, der_req->length);
 #endif
 
@@ -139,7 +152,8 @@ pa_pkinit_gen_req(krb5_context context,
     nonce = request->nonce;
 
     retval = pkinit_as_req_create(context, plgctx, reqctx, ctsec, cusec,
-                                  nonce, &cksum, request->client, request->server, &out_data);
+                                  nonce, &cksum, cksum2, request->client,
+                                  request->server, &out_data);
     if (retval) {
         pkiDebug("error %d on pkinit_as_req_create; aborting PKINIT\n",
                  (int) retval);
@@ -168,6 +182,7 @@ pa_pkinit_gen_req(krb5_context context,
 cleanup:
     krb5_free_data(context, der_req);
     krb5_free_checksum_contents(context, &cksum);
+    pkinit_pachecksum2_free(context, &cksum2);
     krb5_free_data(context, out_data);
     krb5_free_pa_data(context, return_pa_data);
     return retval;
@@ -181,6 +196,7 @@ pkinit_as_req_create(krb5_context context,
                      krb5_int32 cusec,
                      krb5_ui_4 nonce,
                      const krb5_checksum * cksum,
+                     const krb5_pachecksum2 * cksum2,
                      krb5_principal client,
                      krb5_principal server,
                      krb5_data ** as_req)
@@ -201,6 +217,7 @@ pkinit_as_req_create(krb5_context context,
     auth_pack.pkAuthenticator.paChecksum = *cksum;
     if (!reqctx->opts->disable_freshness)
         auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
+    auth_pack.pkAuthenticator.paChecksum2 = (krb5_pachecksum2 *)cksum2;
     auth_pack.clientDHNonce.length = 0;
     auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
 

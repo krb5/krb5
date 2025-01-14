@@ -542,9 +542,9 @@ pkinit_kdf(krb5_context context, krb5_data *secret, const krb5_data *alg_oid,
 	   const krb5_data *as_req, const krb5_data *pk_as_rep,
 	   krb5_keyblock *key_block);
 
-extern const krb5_data sha1_id;
-extern const krb5_data sha256_id;
-extern const krb5_data sha512_id;
+extern const krb5_data kdf_sha1_id;
+extern const krb5_data kdf_sha256_id;
+extern const krb5_data kdf_sha512_id;
 extern const krb5_data oakley_1024;
 extern const krb5_data oakley_2048;
 extern const krb5_data oakley_4096;
@@ -565,6 +565,11 @@ extern krb5_data const * const supported_kdf_alg_ids[];
  * decreasing preference. */
 extern krb5_data const * const supported_cms_algs[];
 
+extern krb5_data const * const cms_sha1_id;
+extern krb5_data const * const cms_sha256_id;
+extern krb5_data const * const cms_sha384_id;
+extern krb5_data const * const cms_sha512_id;
+
 krb5_error_code
 crypto_encode_der_cert(krb5_context context, pkinit_req_crypto_context reqctx,
 		       uint8_t **der_out, size_t *der_len);
@@ -576,5 +581,14 @@ crypto_req_cert_matching_data(krb5_context context,
 			      pkinit_cert_matching_data **md_out);
 
 int parse_dh_min_bits(krb5_context context, const char *str);
+
+krb5_error_code
+pkinit_generate_pachecksum2(krb5_context context, const krb5_data *alg_id,
+                            krb5_data *der_req_body,
+                            krb5_pachecksum2 **packsum2);
+krb5_error_code
+pkinit_verify_pachecksum2(krb5_context context,
+                          const krb5_pachecksum2 *packsum2,
+                          krb5_data *der_req_body, krb5_boolean *valid);
 
 #endif	/* _PKINIT_CRYPTO_H */

@@ -129,6 +129,11 @@ AuthPack ::= SEQUENCE {
    ...
 }
 
+PAChecksum2 ::= SEQUENCE {
+    checksum               [0] OCTET STRING,
+    algorithmIdentifier    [1] AlgorithmIdentifier,
+}
+
 PKAuthenticator ::= SEQUENCE {
    cusec                   [0] INTEGER (0..999999),
    ctime                   [1] KerberosTime,
@@ -140,6 +145,9 @@ PKAuthenticator ::= SEQUENCE {
    paChecksum              [3] OCTET STRING OPTIONAL,
             -- MUST be present.
             -- Contains the SHA1 checksum, performed over
+            -- KDC-REQ-BODY.
+   paChecksum2             [5] PAChecksum2 OPTIONAL,
+            -- Contains the SHA2 checksum, performed over
             -- KDC-REQ-BODY.
    ...
 }
