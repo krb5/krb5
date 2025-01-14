@@ -1394,20 +1394,30 @@ DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info,
 MAKE_ENCODER(encode_krb5_pkinit_supp_pub_info, pkinit_supp_pub_info);
 MAKE_ENCODER(encode_krb5_sp80056a_other_info, sp80056a_other_info);
 
-/* A krb5_checksum encoded as an OCTET STRING, for PKAuthenticator. */
-DEFCOUNTEDTYPE(ostring_checksum, krb5_checksum, contents, length, octetstring);
+DEFFIELD(pachecksum2_0, krb5_pachecksum2, checksum, 0, ostring_data);
+DEFFIELD(pachecksum2_1, krb5_pachecksum2, algorithmIdentifier, 1,
+         algorithm_identifier);
+static const struct atype_info *pachecksum2_fields[] = {
+    &k5_atype_pachecksum2_0, &k5_atype_pachecksum2_1
+};
+DEFSEQTYPE(pachecksum2, krb5_pachecksum2, pachecksum2_fields);
+
+DEFPTRTYPE(pachecksum2_ptr, pachecksum2);
+DEFOPTIONALZEROTYPE(opt_pachecksum2_ptr, pachecksum2_ptr);
 
 DEFFIELD(pk_authenticator_0, krb5_pk_authenticator, cusec, 0, int32);
 DEFFIELD(pk_authenticator_1, krb5_pk_authenticator, ctime, 1, kerberos_time);
 DEFFIELD(pk_authenticator_2, krb5_pk_authenticator, nonce, 2, int32);
 DEFFIELD(pk_authenticator_3, krb5_pk_authenticator, paChecksum, 3,
-         ostring_checksum);
+         ostring_data);
 DEFFIELD(pk_authenticator_4, krb5_pk_authenticator, freshnessToken, 4,
          opt_ostring_data_ptr);
+DEFFIELD(pk_authenticator_5, krb5_pk_authenticator, paChecksum2, 5,
+         opt_pachecksum2_ptr);
 static const struct atype_info *pk_authenticator_fields[] = {
     &k5_atype_pk_authenticator_0, &k5_atype_pk_authenticator_1,
     &k5_atype_pk_authenticator_2, &k5_atype_pk_authenticator_3,
-    &k5_atype_pk_authenticator_4
+    &k5_atype_pk_authenticator_4, &k5_atype_pk_authenticator_5
 };
 DEFSEQTYPE(pk_authenticator, krb5_pk_authenticator, pk_authenticator_fields);
 

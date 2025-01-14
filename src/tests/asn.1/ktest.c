@@ -700,9 +700,7 @@ ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
     p->cusec = SAMPLE_USEC;
     p->ctime = SAMPLE_TIME;
     p->nonce = SAMPLE_NONCE;
-    ktest_make_sample_checksum(&p->paChecksum);
-    /* We don't encode the checksum type, only the contents. */
-    p->paChecksum.checksum_type = 0;
+    ktest_make_sample_data(&p->paChecksum);
     p->freshnessToken = ealloc(sizeof(krb5_data));
     ktest_make_sample_data(p->freshnessToken);
 }
@@ -1604,8 +1602,7 @@ ktest_empty_pa_otp_req(krb5_pa_otp_req *p)
 static void
 ktest_empty_pk_authenticator(krb5_pk_authenticator *p)
 {
-    ktest_empty_checksum(&p->paChecksum);
-    p->paChecksum.contents = NULL;
+    ktest_empty_data(&p->paChecksum);
     krb5_free_data(NULL, p->freshnessToken);
     p->freshnessToken = NULL;
 }

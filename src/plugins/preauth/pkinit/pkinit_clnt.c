@@ -55,10 +55,9 @@ use_content_info(krb5_context context, pkinit_req_context req,
 static krb5_error_code
 pkinit_as_req_create(krb5_context context, pkinit_context plgctx,
                      pkinit_req_context reqctx, krb5_timestamp ctsec,
-                     krb5_int32 cusec, krb5_ui_4 nonce,
-                     const krb5_checksum *cksum,
-                     krb5_principal client, krb5_principal server,
-                     krb5_data **as_req);
+                     krb5_int32 cusec, krb5_ui_4 nonce, const krb5_data *cksum,
+                     const krb5_pachecksum2 *cksum2, krb5_principal client,
+                     krb5_principal server, krb5_data **as_req);
 
 static krb5_error_code
 pkinit_as_rep_parse(krb5_context context, pkinit_context plgctx,
@@ -88,7 +87,8 @@ pa_pkinit_gen_req(krb5_context context,
     krb5_timestamp ctsec = 0;
     krb5_int32 cusec = 0;
     krb5_ui_4 nonce = 0;
-    krb5_checksum cksum;
+    krb5_data cksum = empty_data();
+    krb5_pachecksum2 *cksum2 = NULL;
     krb5_data *der_req = NULL;
     krb5_pa_data **return_pa_data = NULL;
 
@@ -117,15 +117,10 @@ pa_pkinit_gen_req(krb5_context context,
         goto cleanup;
     }
 
-    retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
-                                  &cksum);
+    retval = crypto_generate_checksums(context, der_req, &cksum, &cksum2);
     if (retval)
         goto cleanup;
-    TRACE_PKINIT_CLIENT_REQ_CHECKSUM(context, &cksum);
-#ifdef DEBUG_CKSUM
-    pkiDebug("calculating checksum on buf size (%d)\n", der_req->length);
-    print_buffer(der_req->data, der_req->length);
-#endif
+    TRACE_PKINIT_CLIENT_REQ_CHECKSUMS(context, &cksum, cksum2);
 
     retval = cb->get_preauth_time(context, rock, TRUE, &ctsec, &cusec);
     if (retval)
@@ -139,7 +134,8 @@ pa_pkinit_gen_req(krb5_context context,
     nonce = request->nonce;
 
     retval = pkinit_as_req_create(context, plgctx, reqctx, ctsec, cusec,
-                                  nonce, &cksum, request->client, request->server, &out_data);
+                                  nonce, &cksum, cksum2, request->client,
+                                  request->server, &out_data);
     if (retval) {
         pkiDebug("error %d on pkinit_as_req_create; aborting PKINIT\n",
                  (int) retval);
@@ -167,23 +163,19 @@ pa_pkinit_gen_req(krb5_context context,
 
 cleanup:
     krb5_free_data(context, der_req);
-    krb5_free_checksum_contents(context, &cksum);
+    krb5_free_data_contents(context, &cksum);
+    free_pachecksum2(context, &cksum2);
     krb5_free_data(context, out_data);
     krb5_free_pa_data(context, return_pa_data);
     return retval;
 }
 
 static krb5_error_code
-pkinit_as_req_create(krb5_context context,
-                     pkinit_context plgctx,
-                     pkinit_req_context reqctx,
-                     krb5_timestamp ctsec,
-                     krb5_int32 cusec,
-                     krb5_ui_4 nonce,
-                     const krb5_checksum * cksum,
-                     krb5_principal client,
-                     krb5_principal server,
-                     krb5_data ** as_req)
+pkinit_as_req_create(krb5_context context, pkinit_context plgctx,
+                     pkinit_req_context reqctx, krb5_timestamp ctsec,
+                     krb5_int32 cusec, krb5_ui_4 nonce, const krb5_data *cksum,
+                     const krb5_pachecksum2 *cksum2, krb5_principal client,
+                     krb5_principal server, krb5_data **as_req)
 {
     krb5_error_code retval = ENOMEM;
     krb5_data spki = empty_data(), *coded_auth_pack = NULL;
@@ -201,6 +193,7 @@ pkinit_as_req_create(krb5_context context,
     auth_pack.pkAuthenticator.paChecksum = *cksum;
     if (!reqctx->opts->disable_freshness)
         auth_pack.pkAuthenticator.freshnessToken = reqctx->freshness_token;
+    auth_pack.pkAuthenticator.paChecksum2 = (krb5_pachecksum2 *)cksum2;
     auth_pack.clientDHNonce.length = 0;
     auth_pack.supportedKDFs = (krb5_data **)supported_kdf_alg_ids;
 
