@@ -29,6 +29,7 @@
  * SUCH DAMAGES.
  */
 
+#include "k5-int.h"
 #include "pkinit.h"
 
 #define FAKECERT
@@ -119,8 +120,9 @@ free_krb5_auth_pack(krb5_auth_pack **in)
 {
     if ((*in) == NULL) return;
     krb5_free_data_contents(NULL, &(*in)->clientPublicValue);
-    free((*in)->pkAuthenticator.paChecksum.contents);
+    free((*in)->pkAuthenticator.paChecksum.data);
     krb5_free_data(NULL, (*in)->pkAuthenticator.freshnessToken);
+    free_pachecksum2(NULL, &(*in)->pkAuthenticator.paChecksum2);
     if ((*in)->supportedCMSTypes != NULL)
         free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     if ((*in)->supportedKDFs) {
@@ -194,6 +196,18 @@ free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in)
     if (*in == NULL) return;
     free((*in)->subjectPublicKey.data);
     free(*in);
+}
+
+void
+free_pachecksum2(krb5_context context, krb5_pachecksum2 **in)
+{
+    if (*in == NULL)
+        return;
+    krb5_free_data_contents(context, &(*in)->checksum);
+    krb5_free_data_contents(context, &(*in)->algorithmIdentifier.algorithm);
+    krb5_free_data_contents(context, &(*in)->algorithmIdentifier.parameters);
+    free(*in);
+    *in = NULL;
 }
 
 void

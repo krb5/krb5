@@ -122,7 +122,7 @@ main(int argc, char **argv)
 
     /* TEST 1:  SHA-1/AES */
     /* set up algorithm id */
-    alg_id.algorithm = sha1_id;
+    alg_id.algorithm = kdf_sha1_id;
 
     enctype = enctype_aes;
 
@@ -150,7 +150,7 @@ main(int argc, char **argv)
 
     /* TEST 2: SHA-256/AES */
     /* set up algorithm id */
-    alg_id.algorithm = sha256_id;
+    alg_id.algorithm = kdf_sha256_id;
 
     enctype = enctype_aes;
 
@@ -178,7 +178,7 @@ main(int argc, char **argv)
 
     /* TEST 3: SHA-512/DES3 */
     /* set up algorithm id */
-    alg_id.algorithm = sha512_id;
+    alg_id.algorithm = kdf_sha512_id;
 
     enctype = enctype_des3;
 

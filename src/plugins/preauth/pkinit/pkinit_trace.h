@@ -52,8 +52,12 @@
     TRACE(c, "PKINIT client verified DH reply")
 #define TRACE_PKINIT_CLIENT_REP_DH_FAIL(c)              \
     TRACE(c, "PKINIT client could not verify DH reply")
-#define TRACE_PKINIT_CLIENT_REQ_CHECKSUM(c, cksum)                      \
-    TRACE(c, "PKINIT client computed kdc-req-body checksum {cksum}", cksum)
+#define TRACE_PKINIT_CLIENT_REQ_CHECKSUMS(c, ck1, ck2)                  \
+    TRACE(c, "PKINIT client computed checksums: {hexdata} {hexdata}",   \
+          ck1, &(ck2)->checksum)
+#define TRACE_PKINIT_CLIENT_REP_PACHECKSUM2_FAIL(c, expected, received) \
+    TRACE(c, "PKINIT client checksum mismatch: expected {hexdata}, "    \
+          "received {hexdata}", &(expected)->checksum, &(received)->checksum)
 #define TRACE_PKINIT_CLIENT_REQ_DH(c)                           \
     TRACE(c, "PKINIT client making DH request")
 #define TRACE_PKINIT_CLIENT_SAN_CONFIG_DNSNAME(c, host)                 \
