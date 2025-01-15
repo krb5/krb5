@@ -263,6 +263,8 @@ typedef struct __krb5_key_salt_tuple {
  * must use the get_strings and set_string RPCs. */
 #define KRB5_TL_STRING_ATTRS            0x000b
 
+#define KRB5_TL_ALIAS_TARGET            0x000c
+
 #define KRB5_TL_PAC_LOGON_INFO          0x0100 /* NDR encoded validation info */
 #define KRB5_TL_SERVER_REFERRAL         0x0200 /* ASN.1 encoded ServerReferralInfo */
 #define KRB5_TL_SVR_REFERRAL_DATA       0x0300 /* ASN.1 encoded PA-SVR-REFERRAL-DATA */
@@ -850,6 +852,17 @@ krb5_dbe_free_strings(krb5_context, krb5_string_attr *, int count);
 void
 krb5_dbe_free_string(krb5_context, char *);
 
+/* Set *out to a stub alias entry pointing to target. */
+krb5_error_code
+krb5_dbe_make_alias_entry(krb5_context context, krb5_const_principal alias,
+                          krb5_const_principal target, krb5_db_entry **out);
+
+/* If entry contains a stub alias entry, set *target_out to the alias target.
+ * If not, set *target_out to NULL and return 0. */
+krb5_error_code
+krb5_dbe_read_alias(krb5_context context, krb5_db_entry *entry,
+                    krb5_principal *target_out);
+
 /*
  * Register the KDB keytab type, allowing "KDB:" to be used as a keytab name.
  * For this type to work, the context used for keytab operations must have an
@@ -1080,13 +1093,18 @@ typedef struct _kdb_vftabl {
      * an entry are expected to contain correct values, regardless of whether
      * they are specified in the mask, so it is acceptable for a module to
      * ignore the mask and update the entire entry.
+     *
+     * If the module has its own representation of principal aliases, this
+     * method should recognize alias stub entries using krb5_dbe_read_alias()
+     * and should create the alias instead of storing the stub entry.
      */
     krb5_error_code (*put_principal)(krb5_context kcontext,
                                      krb5_db_entry *entry, char **db_args);
 
     /*
-     * Optional: Delete the entry for the principal search_for.  If the
-     * principal did not exist, return KRB5_KDB_NOENTRY.
+     * Optional: Delete search_for from the database.  If the principal did not
+     * exist, return KRB5_KDB_NOENTRY.  If search_for is an alias, delete the
+     * alias, not the entry for the canonical principal.
      */
     krb5_error_code (*delete_principal)(krb5_context kcontext,
                                         krb5_const_principal search_for);
@@ -1094,7 +1112,7 @@ typedef struct _kdb_vftabl {
     /*
      * Optional with default: Rename a principal.  If the source principal does
      * not exist, return KRB5_KDB_NOENTRY.  If the target exists, return an
-     * error.
+     * error.  This method will not be called if source is an alias.
      *
      * NOTE: If the module chooses to implement a custom function for renaming
      * a principal instead of using the default, then rename operations will
@@ -1109,6 +1127,10 @@ typedef struct _kdb_vftabl {
      * arguments func_arg and the entry data.  If match_entry is specified, the
      * module may narrow the iteration to principal names matching that regular
      * expression; a module may alternatively ignore match_entry.
+     *
+     * If the module has its own representation of principal aliases, this
+     * method should invoke func with a stub alias entry for each alias,
+     * created using krb5_dbe_make_alias_entry().
      */
     krb5_error_code (*iterate)(krb5_context kcontext,
                                char *match_entry,
