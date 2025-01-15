@@ -520,8 +520,6 @@ kadm5_ret_t
 kadm5_delete_principal(void *server_handle, krb5_principal principal)
 {
     unsigned int                ret;
-    krb5_db_entry               *kdb;
-    osa_princ_ent_rec           adb;
     kadm5_server_handle_t handle = server_handle;
 
     CHECK_HANDLE(server_handle);
@@ -535,18 +533,12 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
     if (krb5_principal_compare(handle->context, principal, master_princ))
         return KADM5_PROTECT_PRINCIPAL;
 
-    if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
-        return(ret);
     ret = k5_kadm5_hook_remove(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, principal);
-    if (ret) {
-        kdb_free_entry(handle, kdb, &adb);
+    if (ret)
         return ret;
-    }
 
     ret = kdb_delete_entry(handle, principal);
-
-    kdb_free_entry(handle, kdb, &adb);
 
     if (ret == 0)
         (void) k5_kadm5_hook_remove(handle->context,
@@ -2055,4 +2047,43 @@ kadm5_set_string(void *server_handle, krb5_principal principal,
 done:
     kdb_free_entry(handle, kdb, &adb);
     return ret;
+}
+
+kadm5_ret_t
+kadm5_create_alias(void *server_handle, krb5_principal alias,
+                   krb5_principal target)
+{
+    krb5_db_entry *kdb;
+    osa_princ_ent_rec adb = { 0 };
+    krb5_error_code ret;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+    if (alias == NULL || target == NULL)
+        return EINVAL;
+    if (!krb5_realm_compare(handle->context, alias, target))
+        return KADM5_ALIAS_REALM;
+
+    ret = kdb_get_entry(handle, alias, &kdb, NULL);
+    if (!ret) {
+        kdb_free_entry(handle, kdb, NULL);
+        return KADM5_DUP;
+    }
+
+    ret = k5_kadm5_hook_alias(handle->context, handle->hook_handles,
+                              KADM5_HOOK_STAGE_PRECOMMIT, alias, target);
+    if (ret)
+        return ret;
+
+    ret = krb5_dbe_make_alias_entry(handle->context, alias, target, &kdb);
+    if (ret)
+        return ret;
+    ret = kdb_put_entry(handle, kdb, &adb);
+    krb5_db_free_principal(handle->context, kdb);
+    if (ret)
+        return ret;
+
+    (void) k5_kadm5_hook_alias(handle->context, handle->hook_handles,
+                               KADM5_HOOK_STAGE_POSTCOMMIT, alias, target);
+    return 0;
 }

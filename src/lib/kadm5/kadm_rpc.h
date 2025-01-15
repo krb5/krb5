@@ -246,6 +246,13 @@ struct getpkeys_ret {
 };
 typedef struct getpkeys_ret getpkeys_ret;
 
+struct calias_arg {
+	krb5_ui_4 api_version;
+	krb5_principal alias;
+	krb5_principal target;
+};
+typedef struct calias_arg calias_arg;
+
 #define KADM 2112
 #define KADMVERS 2
 #define CREATE_PRINCIPAL 1
@@ -360,4 +367,9 @@ extern enum clnt_stat get_principal_keys_2(getpkeys_arg *, getpkeys_ret *,
 					   CLIENT *);
 extern  bool_t get_principal_keys_2_svc(getpkeys_arg *, getpkeys_ret *,
 					struct svc_req *);
+
+#define CREATE_ALIAS 27
+extern enum clnt_stat create_alias_2(calias_arg *, generic_ret *, CLIENT *);
+extern  bool_t create_alias_2_svc(calias_arg *, generic_ret *,
+				  struct svc_req *);
 #endif /* __KADM_RPC_H__ */

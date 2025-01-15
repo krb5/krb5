@@ -495,6 +495,9 @@ kadm5_ret_t    kadm5_free_strings(void *server_handle,
 kadm5_ret_t    kadm5_free_kadm5_key_data(krb5_context context, int n_key_data,
                                          kadm5_key_data *key_data);
 
+kadm5_ret_t    kadm5_create_alias(void *server_handle, krb5_principal alias,
+                                  krb5_principal target);
+
 KADM5INT_END_DECLS
 
 #endif /* __KADM5_ADMIN_H__ */

@@ -1209,3 +1209,18 @@ xdr_getpkeys_ret(XDR *xdrs, getpkeys_ret *objp)
 	}
 	return TRUE;
 }
+
+bool_t
+xdr_calias_arg(XDR *xdrs, calias_arg *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->alias)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->target)) {
+		return (FALSE);
+	}
+	return (TRUE);
+}

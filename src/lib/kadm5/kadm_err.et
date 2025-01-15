@@ -67,4 +67,5 @@ error_code KADM5_SETKEY_BAD_KVNO, "Invalid multiple or duplicate kvnos in setkey
 error_code KADM5_AUTH_EXTRACT, "Operation requires ``extract-keys'' privilege"
 error_code KADM5_PROTECT_KEYS, "Principal keys are locked down"
 error_code KADM5_AUTH_INITIAL, "Operation requires initial ticket"
+error_code KADM5_ALIAS_REALM, "Alias target must be within the same realm"
 end

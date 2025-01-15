@@ -59,6 +59,7 @@ kadm_1(struct svc_req *rqstp, SVCXPRT *transp)
 	  setkey3_arg setkey_principal3_2_arg;
 	  setkey4_arg setkey_principal4_2_arg;
 	  getpkeys_arg get_principal_keys_2_arg;
+	  calias_arg create_alias_2_arg;
      } argument;
      union {
 	  generic_ret gen_ret;
@@ -239,6 +240,12 @@ kadm_1(struct svc_req *rqstp, SVCXPRT *transp)
 	  xdr_argument = (xdrproc_t)xdr_getpkeys_arg;
 	  xdr_result = (xdrproc_t)xdr_getpkeys_ret;
 	  local = (bool_t (*)(char *, void *, struct svc_req *))get_principal_keys_2_svc;
+	  break;
+
+     case CREATE_ALIAS:
+	  xdr_argument = (xdrproc_t)xdr_calias_arg;
+	  xdr_result = (xdrproc_t)xdr_generic_ret;
+	  local = (bool_t (*)(char *, void *, struct svc_req *))create_alias_2_svc;
 	  break;
 
      default:

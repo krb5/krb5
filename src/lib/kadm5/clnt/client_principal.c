@@ -526,3 +526,23 @@ kadm5_get_principal_keys(void *server_handle, krb5_principal princ,
     }
     return r.code;
 }
+
+kadm5_ret_t
+kadm5_create_alias(void *server_handle, krb5_principal alias,
+                   krb5_principal target)
+{
+    calias_arg          arg;
+    generic_ret         r = { 0, 0 };
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.alias = alias;
+    arg.target = target;
+    arg.api_version = handle->api_version;
+    if (alias == NULL || target == NULL)
+        return EINVAL;
+    if (create_alias_2(&arg, &r, handle->clnt))
+        eret();
+    return r.code;
+}

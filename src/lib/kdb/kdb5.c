@@ -797,27 +797,49 @@ krb5_db_unlock(krb5_context kcontext)
     return v->unlock(kcontext);
 }
 
+#define MAX_ALIAS_DEPTH 10
+
 krb5_error_code
 krb5_db_get_principal(krb5_context kcontext, krb5_const_principal search_for,
-                      unsigned int flags, krb5_db_entry **entry)
+                      unsigned int flags, krb5_db_entry **entry_out)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
+    krb5_db_entry *entry;
+    krb5_principal alias_target;
+    int alias_depth = 0;
 
-    *entry = NULL;
+    *entry_out = NULL;
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
     if (v->get_principal == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    status = v->get_principal(kcontext, search_for, flags, entry);
+
+    status = v->get_principal(kcontext, search_for, flags, &entry);
     if (status)
         return status;
 
-    /* Sort the keys in the db entry as some parts of krb5 expect it to be. */
-    if ((*entry)->key_data != NULL)
-        krb5_dbe_sort_key_data((*entry)->key_data, (*entry)->n_key_data);
+    /* Resolve any aliases up to the maximum depth. */
+    for (;;) {
+        status = krb5_dbe_read_alias(kcontext, entry, &alias_target);
+        if (status)
+            return status;
+        if (alias_target == NULL)
+            break;
+        krb5_db_free_principal(kcontext, entry);
+        status = (++alias_depth > MAX_ALIAS_DEPTH) ? KRB5_KDB_NOENTRY :
+            v->get_principal(kcontext, alias_target, flags, &entry);
+        krb5_free_principal(kcontext, alias_target);
+        if (status)
+            return status;
+    }
 
+    /* Sort the keys in the db entry as some parts of krb5 expect it to be. */
+    if (entry->key_data != NULL)
+        krb5_dbe_sort_key_data(entry->key_data, entry->n_key_data);
+
+    *entry_out = entry;
     return 0;
 }
 
@@ -1036,6 +1058,7 @@ krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
     kdb_vftabl *v;
     krb5_error_code status;
     krb5_db_entry *entry;
+    krb5_boolean eq;
 
     status = get_vftabl(kcontext, &v);
     if (status)
@@ -1049,6 +1072,15 @@ krb5_db_rename_principal(krb5_context kcontext, krb5_principal source,
     if (v->rename_principal != krb5_db_def_rename_principal &&
         logging(kcontext))
         return KRB5_PLUGIN_OP_NOTSUPP;
+
+    /* Disallow the operation if source is an alias. */
+    status = krb5_db_get_principal(kcontext, source, 0, &entry);
+    if (status)
+        return status;
+    eq = krb5_principal_compare(kcontext, entry->princ, source);
+    krb5_db_free_principal(kcontext, entry);
+    if (!eq)
+        return KRB5_KDB_ALIAS_UNSUPPORTED;
 
     status = krb5_db_get_principal(kcontext, target, 0, &entry);
     if (status == 0) {
@@ -2788,4 +2820,74 @@ krb5_db_issue_pac(krb5_context context, unsigned int flags,
         return KRB5_PLUGIN_OP_NOTSUPP;
     return v->issue_pac(context, flags, client, replaced_reply_key, server,
                         krbtgt, authtime, old_pac, new_pac, auth_indicators);
+}
+
+krb5_error_code
+krb5_dbe_make_alias_entry(krb5_context context, krb5_const_principal alias,
+                          krb5_const_principal target, krb5_db_entry **out)
+{
+    krb5_error_code ret;
+    krb5_principal princ = NULL;
+    char *target_str = NULL;
+    krb5_tl_data *tl = NULL;
+    krb5_db_entry *ent;
+
+    *out = NULL;
+
+    ret = krb5_copy_principal(context, alias, &princ);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_unparse_name(context, target, &target_str);
+    if (ret)
+        goto cleanup;
+    tl = k5alloc(sizeof(*tl), &ret);
+    if (tl == NULL)
+        goto cleanup;
+    tl->tl_data_next = NULL;
+    tl->tl_data_type = KRB5_TL_ALIAS_TARGET;
+    tl->tl_data_length = strlen(target_str) + 1;
+    tl->tl_data_contents = (uint8_t *)target_str;
+
+    ent = k5alloc(sizeof(*ent), &ret);
+    if (ent == NULL)
+        goto cleanup;
+    ent->len = KRB5_KDB_V1_BASE_LENGTH;
+    ent->attributes = KRB5_KDB_DISALLOW_ALL_TIX;
+    ent->princ = princ;
+    ent->tl_data = tl;
+    ent->n_tl_data = 1;
+    princ = NULL;
+    target_str = NULL;
+    tl = NULL;
+    *out = ent;
+
+cleanup:
+    krb5_free_principal(context, princ);
+    krb5_free_unparsed_name(context, target_str);
+    free(tl);
+    return ret;
+}
+
+krb5_error_code
+krb5_dbe_read_alias(krb5_context context, krb5_db_entry *entry,
+                    krb5_principal *target_out)
+{
+    krb5_error_code ret;
+    krb5_tl_data tl;
+
+    *target_out = NULL;
+
+    tl.tl_data_type = KRB5_TL_ALIAS_TARGET;
+    ret = krb5_dbe_lookup_tl_data(context, entry, &tl);
+    if (ret)
+        return ret;
+
+    if (tl.tl_data_length == 0)
+        return 0;
+
+    if (tl.tl_data_contents[tl.tl_data_length - 1] != '\0')
+        return KRB5_KDB_TRUNCATED_RECORD;
+
+    return krb5_parse_name(context, (char *)tl.tl_data_contents, target_out);
 }
