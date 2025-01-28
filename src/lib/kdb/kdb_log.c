@@ -183,7 +183,7 @@ extend_file_to(int fd, unsigned int new_size)
  */
 static krb5_error_code
 resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd,
-       unsigned int recsize)
+       unsigned int recsize, const kdb_incr_update_t *upd)
 {
     unsigned int new_block, new_size;
 
@@ -195,6 +195,12 @@ resize(kdb_hlog_t *ulog, uint32_t ulogentries, int ulogfd,
     new_block *= ULOG_BLOCK;
     new_size += ulogentries * new_block;
 
+    if (new_block > UINT16_MAX) {
+        syslog(LOG_ERR, _("ulog overflow caused by principal %.*s"),
+               upd->kdb_princ_name.utf8str_t_len,
+               upd->kdb_princ_name.utf8str_t_val);
+        return KRB5_LOG_ERROR;
+    }
     if (new_size > MAXLOGLEN)
         return KRB5_LOG_ERROR;
 
@@ -291,7 +297,7 @@ store_update(kdb_log_context *log_ctx, kdb_incr_update_t *upd)
     recsize = sizeof(kdb_ent_header_t) + upd_size;
 
     if (recsize > ulog->kdb_block) {
-        retval = resize(ulog, ulogentries, log_ctx->ulogfd, recsize);
+        retval = resize(ulog, ulogentries, log_ctx->ulogfd, recsize, upd);
         if (retval)
             return retval;
     }
