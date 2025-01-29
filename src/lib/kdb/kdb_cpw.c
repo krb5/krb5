@@ -264,8 +264,7 @@ add_key_pwd(krb5_context context, krb5_keyblock *master_key,
                                                  &similar)))
                 return(retval);
 
-            if (similar &&
-                (ks_tuple[j].ks_salttype == ks_tuple[i].ks_salttype))
+            if (similar)
                 break;
         }
 
