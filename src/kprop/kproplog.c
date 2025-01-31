@@ -330,7 +330,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, uint32_t ulogentries,
     for (i = start_sno; i < ulog->kdb_last_sno; i++) {
         indx = i % ulogentries;
 
-        indx_log = INDEX(ulog, indx);
+        indx_log = ulog_index(ulog, indx);
 
         /*
          * Check for corrupt update entry
