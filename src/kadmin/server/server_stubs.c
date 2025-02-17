@@ -265,7 +265,7 @@ static kadm5_ret_t
 stub_setup(krb5_ui_4 api_version, struct svc_req *rqstp, krb5_principal princ,
            kadm5_server_handle_t *handle_out, krb5_ui_4 *api_version_out,
            gss_buffer_t client_name_out, gss_buffer_t service_name_out,
-           char **princ_str_out)
+           char **princ_str_out, kadm5_principal_ent_rec *rec_out)
 {
     kadm5_ret_t ret;
 
@@ -287,6 +287,13 @@ stub_setup(krb5_ui_4 api_version, struct svc_req *rqstp, krb5_principal princ,
             return KADM5_BAD_PRINCIPAL;
         if (krb5_unparse_name((*handle_out)->context, princ, princ_str_out))
             return KADM5_BAD_PRINCIPAL;
+    }
+
+    if (rec_out != NULL) {
+        if (princ == NULL)
+            return KADM5_BAD_PRINCIPAL;
+        return kadm5_get_principal(*handle_out, princ, rec_out,
+                                   KADM5_PRINCIPAL | KADM5_ATTRIBUTES);
     }
 
     return KADM5_OK;
@@ -324,10 +331,11 @@ stub_auth_pol(kadm5_server_handle_t handle, int opcode, const char *policy,
 
 static krb5_boolean
 stub_auth_restrict(kadm5_server_handle_t handle, int opcode,
-                   kadm5_principal_ent_t ent, long *mask)
+                   krb5_const_principal princ, kadm5_principal_ent_t ent,
+                   long *mask)
 {
     return auth_restrict(handle->context, opcode, handle->current_caller,
-                         ent, mask);
+                         princ, ent, mask);
 }
 
 /* Return true if the client authenticated to kadmin/changepw and princ is not
@@ -440,12 +448,13 @@ create_principal_2_svc(cprinc_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->rec.principal,
                            &handle, &ret->api_version, &client_name,
-                           &service_name, &prime_arg);
+                           &service_name, &prime_arg, NULL);
     if (ret->code)
         goto exit_func;
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth_restrict(handle, OP_ADDPRINC, &arg->rec, &arg->mask)) {
+        !stub_auth_restrict(handle, OP_ADDPRINC, arg->rec.principal,
+                            &arg->rec, &arg->mask)) {
         ret->code = KADM5_AUTH_ADD;
         log_unauth("kadm5_create_principal", prime_arg,
                    &client_name, &service_name, rqstp);
@@ -480,12 +489,13 @@ create_principal3_2_svc(cprinc3_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->rec.principal,
                            &handle, &ret->api_version, &client_name,
-                           &service_name, &prime_arg);
+                           &service_name, &prime_arg, NULL);
     if (ret->code)
         goto exit_func;
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth_restrict(handle, OP_ADDPRINC, &arg->rec, &arg->mask)) {
+        !stub_auth_restrict(handle, OP_ADDPRINC, arg->rec.principal, &arg->rec,
+                            &arg->mask)) {
         ret->code = KADM5_AUTH_ADD;
         log_unauth("kadm5_create_principal", prime_arg,
                    &client_name, &service_name, rqstp);
@@ -508,9 +518,15 @@ exit_func:
     return TRUE;
 }
 
-/* Return KADM5_PROTECT_KEYS if KRB5_KDB_LOCKDOWN_KEYS is set for princ. */
+/* Return KADM5_PROTECT_KEYS if KRB5_KDB_LOCKDOWN_KEYS is set for rec. */
+static inline kadm5_ret_t
+check_lockdown(kadm5_principal_ent_t rec)
+{
+    return (rec->attributes & KRB5_KDB_LOCKDOWN_KEYS) ? KADM5_PROTECT_KEYS : 0;
+}
+
 static kadm5_ret_t
-check_lockdown_keys(kadm5_server_handle_t handle, krb5_principal princ)
+check_lockdown_by_princ(kadm5_server_handle_t handle, krb5_principal princ)
 {
     kadm5_principal_ent_rec rec;
     kadm5_ret_t ret;
@@ -518,7 +534,7 @@ check_lockdown_keys(kadm5_server_handle_t handle, krb5_principal princ)
     ret = kadm5_get_principal(handle, princ, &rec, KADM5_ATTRIBUTES);
     if (ret)
         return ret;
-    ret = (rec.attributes & KRB5_KDB_LOCKDOWN_KEYS) ? KADM5_PROTECT_KEYS : 0;
+    ret = check_lockdown(&rec);
     kadm5_free_principal_ent(handle, &rec);
     return ret;
 }
@@ -535,7 +551,7 @@ delete_principal_2_svc(dprinc_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -545,7 +561,7 @@ delete_principal_2_svc(dprinc_arg *arg, generic_ret *ret,
         log_unauth("kadm5_delete_principal", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = check_lockdown_keys(handle, arg->princ);
+        ret->code = check_lockdown_by_princ(handle, arg->princ);
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_delete_principal", prime_arg, &client_name,
                        &service_name, rqstp);
@@ -577,6 +593,7 @@ modify_principal_2_svc(mprinc_arg *arg, generic_ret *ret,
                        struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 }, rec_copy;
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -584,18 +601,19 @@ modify_principal_2_svc(mprinc_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->rec.principal,
                            &handle, &ret->api_version, &client_name,
-                           &service_name, &prime_arg);
+                           &service_name, &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth_restrict(handle, OP_MODPRINC, &arg->rec, &arg->mask)) {
+        !stub_auth_restrict(handle, OP_MODPRINC, rec.principal, &arg->rec,
+                            &arg->mask)) {
         ret->code = KADM5_AUTH_MODIFY;
         log_unauth("kadm5_modify_principal", prime_arg,
                    &client_name, &service_name, rqstp);
     } else if ((arg->mask & KADM5_ATTRIBUTES) &&
                (!(arg->rec.attributes & KRB5_KDB_LOCKDOWN_KEYS))) {
-        ret->code = check_lockdown_keys(handle, arg->rec.principal);
+        ret->code = check_lockdown(&rec);
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_modify_principal", prime_arg, &client_name,
                        &service_name, rqstp);
@@ -604,7 +622,11 @@ modify_principal_2_svc(mprinc_arg *arg, generic_ret *ret,
     }
 
     if (ret->code == KADM5_OK) {
-        ret->code = kadm5_modify_principal(handle, &arg->rec, arg->mask);
+        /* Modify via the canonicalized principal name using a shallow copy of
+         * arg->rec, to ensure consistency with the ACL check. */
+        rec_copy = arg->rec;
+        rec_copy.principal = rec.principal;
+        ret->code = kadm5_modify_principal(handle, &rec_copy, arg->mask);
         if (ret->code != 0)
             errmsg = krb5_get_error_message(handle->context, ret->code);
 
@@ -616,6 +638,7 @@ modify_principal_2_svc(mprinc_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -634,7 +657,7 @@ rename_principal_2_svc(rprinc_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -658,7 +681,7 @@ rename_principal_2_svc(rprinc_arg *arg, generic_ret *ret,
         log_unauth("kadm5_rename_principal", prime_arg1, &client_name,
                    &service_name, rqstp);
     } else {
-        ret->code = check_lockdown_keys(handle, arg->src);
+        ret->code = check_lockdown_by_princ(handle, arg->src);
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_rename_principal", prime_arg1, &client_name,
                        &service_name, rqstp);
@@ -708,6 +731,7 @@ bool_t
 get_principal_2_svc(gprinc_arg *arg, gprinc_ret *ret, struct svc_req *rqstp)
 {
     char                            *funcname, *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -715,19 +739,19 @@ get_principal_2_svc(gprinc_arg *arg, gprinc_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     funcname = "kadm5_get_principal";
 
-    if (changepw_not_self(handle, rqstp, arg->princ) ||
-        !stub_auth(handle, OP_GETPRINC, arg->princ, NULL, NULL, NULL)) {
+    if (changepw_not_self(handle, rqstp, rec.principal) ||
+        !stub_auth(handle, OP_GETPRINC, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_GET;
         log_unauth(funcname, prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = kadm5_get_principal(handle, arg->princ, &ret->rec,
+        ret->code = kadm5_get_principal(handle, rec.principal, &ret->rec,
                                         arg->mask);
 
         if (ret->code != 0)
@@ -741,6 +765,7 @@ get_principal_2_svc(gprinc_arg *arg, gprinc_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -756,7 +781,7 @@ get_princs_2_svc(gprincs_arg *arg, gprincs_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -793,6 +818,7 @@ chpass_principal_2_svc(chpass_arg *arg, generic_ret *ret,
                        struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -800,26 +826,28 @@ chpass_principal_2_svc(chpass_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
-    ret->code = check_lockdown_keys(handle, arg->princ);
+    ret->code = check_lockdown(&rec);
     if (ret->code != KADM5_OK) {
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_chpass_principal", prime_arg, &client_name,
                        &service_name, rqstp);
             ret->code = KADM5_AUTH_CHANGEPW;
         }
-    } else if (changepw_not_self(handle, rqstp, arg->princ) ||
-               !stub_auth(handle, OP_CPW, arg->princ, NULL, NULL, NULL)) {
+    } else if (changepw_not_self(handle, rqstp, rec.principal) ||
+               !stub_auth(handle, OP_CPW, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_CHANGEPW;
         log_unauth("kadm5_chpass_principal", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = check_self_keychange(handle, rqstp, arg->princ);
-        if (!ret->code)
-            ret->code = kadm5_chpass_principal(handle, arg->princ, arg->pass);
+        ret->code = check_self_keychange(handle, rqstp, rec.principal);
+        if (!ret->code) {
+            ret->code = kadm5_chpass_principal(handle, rec.principal,
+                                               arg->pass);
+        }
     }
 
     if (ret->code != KADM5_AUTH_CHANGEPW) {
@@ -834,6 +862,7 @@ chpass_principal_2_svc(chpass_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -843,6 +872,7 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
                         struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -850,26 +880,26 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
-    ret->code = check_lockdown_keys(handle, arg->princ);
+    ret->code = check_lockdown(&rec);
     if (ret->code != KADM5_OK) {
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_chpass_principal", prime_arg, &client_name,
                        &service_name, rqstp);
             ret->code = KADM5_AUTH_CHANGEPW;
         }
-    } else if (changepw_not_self(handle, rqstp, arg->princ) ||
-               !stub_auth(handle, OP_CPW, arg->princ, NULL, NULL, NULL)) {
+    } else if (changepw_not_self(handle, rqstp, rec.principal) ||
+               !stub_auth(handle, OP_CPW, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_CHANGEPW;
         log_unauth("kadm5_chpass_principal", prime_arg,
                    &client_name, &service_name, rqstp);
     } else  {
-        ret->code = check_self_keychange(handle, rqstp, arg->princ);
+        ret->code = check_self_keychange(handle, rqstp, rec.principal);
         if (!ret->code) {
-            ret->code = kadm5_chpass_principal_3(handle, arg->princ,
+            ret->code = kadm5_chpass_principal_3(handle, rec.principal,
                                                  arg->keepold, arg->n_ks_tuple,
                                                  arg->ks_tuple, arg->pass);
         }
@@ -887,6 +917,7 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -896,6 +927,7 @@ setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
                        struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -903,11 +935,11 @@ setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
-    ret->code = check_lockdown_keys(handle, arg->princ);
+    ret->code = check_lockdown(&rec);
     if (ret->code != KADM5_OK) {
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_setkey_principal", prime_arg, &client_name,
@@ -915,9 +947,9 @@ setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
             ret->code = KADM5_AUTH_SETKEY;
         }
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
-               stub_auth(handle, OP_SETKEY, arg->princ, NULL, NULL, NULL)) {
-        ret->code = kadm5_setkey_principal(handle, arg->princ, arg->keyblocks,
-                                           arg->n_keys);
+               stub_auth(handle, OP_SETKEY, rec.principal, NULL, NULL, NULL)) {
+        ret->code = kadm5_setkey_principal(handle, rec.principal,
+                                           arg->keyblocks, arg->n_keys);
     } else {
         log_unauth("kadm5_setkey_principal", prime_arg,
                    &client_name, &service_name, rqstp);
@@ -936,6 +968,7 @@ setkey_principal_2_svc(setkey_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -945,6 +978,7 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
                         struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -952,11 +986,11 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
-    ret->code = check_lockdown_keys(handle, arg->princ);
+    ret->code = check_lockdown(&rec);
     if (ret->code != KADM5_OK) {
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_setkey_principal", prime_arg, &client_name,
@@ -964,10 +998,11 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
             ret->code = KADM5_AUTH_SETKEY;
         }
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
-               stub_auth(handle, OP_SETKEY, arg->princ, NULL, NULL, NULL)) {
-        ret->code = kadm5_setkey_principal_3(handle, arg->princ, arg->keepold,
-                                             arg->n_ks_tuple, arg->ks_tuple,
-                                             arg->keyblocks, arg->n_keys);
+               stub_auth(handle, OP_SETKEY, rec.principal, NULL, NULL, NULL)) {
+        ret->code = kadm5_setkey_principal_3(handle, rec.principal,
+                                             arg->keepold, arg->n_ks_tuple,
+                                             arg->ks_tuple, arg->keyblocks,
+                                             arg->n_keys);
     } else {
         log_unauth("kadm5_setkey_principal", prime_arg,
                    &client_name, &service_name, rqstp);
@@ -986,6 +1021,7 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -995,6 +1031,7 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
                         struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -1002,11 +1039,11 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
-    ret->code = check_lockdown_keys(handle, arg->princ);
+    ret->code = check_lockdown(&rec);
     if (ret->code != KADM5_OK) {
         if (ret->code == KADM5_PROTECT_KEYS) {
             log_unauth("kadm5_setkey_principal", prime_arg, &client_name,
@@ -1014,9 +1051,10 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
             ret->code = KADM5_AUTH_SETKEY;
         }
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
-               stub_auth(handle, OP_SETKEY, arg->princ, NULL, NULL, NULL)) {
-        ret->code = kadm5_setkey_principal_4(handle, arg->princ, arg->keepold,
-                                             arg->key_data, arg->n_key_data);
+               stub_auth(handle, OP_SETKEY, rec.principal, NULL, NULL, NULL)) {
+        ret->code = kadm5_setkey_principal_4(handle, rec.principal,
+                                             arg->keepold, arg->key_data,
+                                             arg->n_key_data);
     } else {
         log_unauth("kadm5_setkey_principal", prime_arg, &client_name,
                    &service_name, rqstp);
@@ -1035,6 +1073,7 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1042,13 +1081,13 @@ exit_func:
 /* Empty out *keys / *nkeys if princ is protected with the lockdown
  * attribute, or if we fail to check. */
 static kadm5_ret_t
-chrand_check_lockdown(kadm5_server_handle_t handle, krb5_principal princ,
+chrand_check_lockdown(kadm5_server_handle_t handle, kadm5_principal_ent_t rec,
                       krb5_keyblock **keys, int *nkeys)
 {
     kadm5_ret_t ret;
     int i;
 
-    ret = check_lockdown_keys(handle, princ);
+    ret = check_lockdown(rec);
     if (!ret)
         return 0;
 
@@ -1064,6 +1103,7 @@ bool_t
 chrand_principal_2_svc(chrand_arg *arg, chrand_ret *ret, struct svc_req *rqstp)
 {
     char                        *funcname, *prime_arg = NULL;
+    kadm5_principal_ent_rec     rec = { 0 };
     gss_buffer_desc             client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc             service_name = GSS_C_EMPTY_BUFFER;
     krb5_keyblock               *k;
@@ -1073,27 +1113,27 @@ chrand_principal_2_svc(chrand_arg *arg, chrand_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     funcname = "kadm5_randkey_principal";
 
-    if (changepw_not_self(handle, rqstp, arg->princ) ||
-        !stub_auth(handle, OP_CHRAND, arg->princ, NULL, NULL, NULL)) {
+    if (changepw_not_self(handle, rqstp, rec.principal) ||
+        !stub_auth(handle, OP_CHRAND, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_CHANGEPW;
         log_unauth(funcname, prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = check_self_keychange(handle, rqstp, arg->princ);
+        ret->code = check_self_keychange(handle, rqstp, rec.principal);
         if (!ret->code) {
-            ret->code = kadm5_randkey_principal(handle, arg->princ,
+            ret->code = kadm5_randkey_principal(handle, rec.principal,
                                                 &k, &nkeys);
         }
     }
 
     if (ret->code == KADM5_OK) {
-        ret->code = chrand_check_lockdown(handle, arg->princ, &k, &nkeys);
+        ret->code = chrand_check_lockdown(handle, &rec, &k, &nkeys);
         if (ret->code == KADM5_PROTECT_KEYS)
             ret->code = KADM5_OK;
         ret->keys = k;
@@ -1112,6 +1152,7 @@ chrand_principal_2_svc(chrand_arg *arg, chrand_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1121,6 +1162,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
                         struct svc_req *rqstp)
 {
     char                        *funcname, *prime_arg = NULL;
+    kadm5_principal_ent_rec     rec = { 0 };
     gss_buffer_desc             client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc             service_name = GSS_C_EMPTY_BUFFER;
     krb5_keyblock               *k;
@@ -1130,21 +1172,21 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     funcname = "kadm5_randkey_principal";
 
-    if (changepw_not_self(handle, rqstp, arg->princ) ||
-        !stub_auth(handle, OP_CHRAND, arg->princ, NULL, NULL, NULL)) {
+    if (changepw_not_self(handle, rqstp, rec.principal) ||
+        !stub_auth(handle, OP_CHRAND, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_CHANGEPW;
         log_unauth(funcname, prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = check_self_keychange(handle, rqstp, arg->princ);
+        ret->code = check_self_keychange(handle, rqstp, rec.principal);
         if (!ret->code) {
-            ret->code = kadm5_randkey_principal_3(handle, arg->princ,
+            ret->code = kadm5_randkey_principal_3(handle, rec.principal,
                                                   arg->keepold,
                                                   arg->n_ks_tuple,
                                                   arg->ks_tuple, &k, &nkeys);
@@ -1152,7 +1194,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
     }
 
     if (ret->code == KADM5_OK) {
-        ret->code = chrand_check_lockdown(handle, arg->princ, &k, &nkeys);
+        ret->code = chrand_check_lockdown(handle, &rec, &k, &nkeys);
         if (ret->code == KADM5_PROTECT_KEYS)
             ret->code = KADM5_OK;
         ret->keys = k;
@@ -1171,6 +1213,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1186,7 +1229,7 @@ create_policy_2_svc(cpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1228,7 +1271,7 @@ delete_policy_2_svc(dpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1268,7 +1311,7 @@ modify_policy_2_svc(mpol_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1313,7 +1356,7 @@ get_policy_2_svc(gpol_arg *arg, gpol_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1362,7 +1405,7 @@ get_pols_2_svc(gpols_arg *arg, gpols_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, NULL, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           NULL);
+                           NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1402,7 +1445,7 @@ get_privs_2_svc(krb5_ui_4 *arg, getprivs_ret *ret, struct svc_req *rqstp)
     const char                     *errmsg = NULL;
 
     ret->code = stub_setup(*arg, rqstp, NULL, &handle, &ret->api_version,
-                           &client_name, &service_name, NULL);
+                           &client_name, &service_name, NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1425,6 +1468,7 @@ bool_t
 purgekeys_2_svc(purgekeys_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 {
     char                        *funcname, *prime_arg = NULL;
+    kadm5_principal_ent_rec     rec = { 0 };
     gss_buffer_desc             client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc             service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t       handle;
@@ -1433,18 +1477,18 @@ purgekeys_2_svc(purgekeys_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     funcname = "kadm5_purgekeys";
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth(handle, OP_PURGEKEYS, arg->princ, NULL, NULL, NULL)) {
+        !stub_auth(handle, OP_PURGEKEYS, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_MODIFY;
         log_unauth(funcname, prime_arg, &client_name, &service_name, rqstp);
     } else {
-        ret->code = kadm5_purgekeys(handle, arg->princ, arg->keepkvno);
+        ret->code = kadm5_purgekeys(handle, rec.principal, arg->keepkvno);
         if (ret->code != 0)
             errmsg = krb5_get_error_message(handle->context, ret->code);
 
@@ -1456,6 +1500,7 @@ purgekeys_2_svc(purgekeys_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1464,6 +1509,7 @@ bool_t
 get_strings_2_svc(gstrings_arg *arg, gstrings_ret *ret, struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -1471,17 +1517,17 @@ get_strings_2_svc(gstrings_arg *arg, gstrings_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth(handle, OP_GETSTRS, arg->princ, NULL, NULL, NULL)) {
+        !stub_auth(handle, OP_GETSTRS, rec.principal, NULL, NULL, NULL)) {
         ret->code = KADM5_AUTH_GET;
         log_unauth("kadm5_get_strings", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = kadm5_get_strings(handle, arg->princ, &ret->strings,
+        ret->code = kadm5_get_strings(handle, rec.principal, &ret->strings,
                                       &ret->count);
         if (ret->code != 0)
             errmsg = krb5_get_error_message(handle->context, ret->code);
@@ -1494,6 +1540,7 @@ get_strings_2_svc(gstrings_arg *arg, gstrings_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1502,6 +1549,7 @@ bool_t
 set_string_2_svc(sstring_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -1509,18 +1557,19 @@ set_string_2_svc(sstring_arg *arg, generic_ret *ret, struct svc_req *rqstp)
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     if (CHANGEPW_SERVICE(rqstp) ||
-        !stub_auth(handle, OP_SETSTR, arg->princ, NULL,
+        !stub_auth(handle, OP_SETSTR, rec.principal, NULL,
                    arg->key, arg->value)) {
         ret->code = KADM5_AUTH_MODIFY;
         log_unauth("kadm5_mod_strings", prime_arg,
                    &client_name, &service_name, rqstp);
     } else {
-        ret->code = kadm5_set_string(handle, arg->princ, arg->key, arg->value);
+        ret->code = kadm5_set_string(handle, rec.principal,
+                                     arg->key, arg->value);
         if (ret->code != 0)
             errmsg = krb5_get_error_message(handle->context, ret->code);
 
@@ -1532,6 +1581,7 @@ set_string_2_svc(sstring_arg *arg, generic_ret *ret, struct svc_req *rqstp)
     }
 
 exit_func:
+    kadm5_free_principal_ent(handle, &rec);
     stub_cleanup(handle, prime_arg, &client_name, &service_name);
     return TRUE;
 }
@@ -1547,7 +1597,7 @@ init_2_svc(krb5_ui_4 *arg, generic_ret *ret, struct svc_req *rqstp)
     char *cdots, *sdots;
 
     ret->code = stub_setup(*arg, rqstp, NULL, &handle, &ret->api_version,
-                           &client_name, &service_name, NULL);
+                           &client_name, &service_name, NULL, NULL);
     if (ret->code)
         goto exit_func;
 
@@ -1592,6 +1642,7 @@ get_principal_keys_2_svc(getpkeys_arg *arg, getpkeys_ret *ret,
                          struct svc_req *rqstp)
 {
     char                            *prime_arg = NULL;
+    kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
     kadm5_server_handle_t           handle;
@@ -1599,13 +1650,13 @@ get_principal_keys_2_svc(getpkeys_arg *arg, getpkeys_ret *ret,
 
     ret->code = stub_setup(arg->api_version, rqstp, arg->princ, &handle,
                            &ret->api_version, &client_name, &service_name,
-                           &prime_arg);
+                           &prime_arg, &rec);
     if (ret->code)
         goto exit_func;
 
     if (!(CHANGEPW_SERVICE(rqstp)) &&
-        stub_auth(handle, OP_EXTRACT, arg->princ, NULL, NULL, NULL)) {
-        ret->code = kadm5_get_principal_keys(handle, arg->princ, arg->kvno,
+        stub_auth(handle, OP_EXTRACT, rec.principal, NULL, NULL, NULL)) {
+        ret->code = kadm5_get_principal_keys(handle, rec.principal, arg->kvno,
                                              &ret->key_data, &ret->n_key_data);
     } else {
         log_unauth("kadm5_get_principal_keys", prime_arg,
@@ -1614,7 +1665,7 @@ get_principal_keys_2_svc(getpkeys_arg *arg, getpkeys_ret *ret,
     }
 
     if (ret->code == KADM5_OK) {
-        ret->code = check_lockdown_keys(handle, arg->princ);
+        ret->code = check_lockdown(&rec);
         if (ret->code != KADM5_OK) {
             kadm5_free_kadm5_key_data(handle->context, ret->n_key_data,
                                       ret->key_data);
@@ -1635,6 +1686,42 @@ get_principal_keys_2_svc(getpkeys_arg *arg, getpkeys_ret *ret,
         log_done("kadm5_get_principal_keys", prime_arg, errmsg,
                  &client_name, &service_name, rqstp);
 
+        if (errmsg != NULL)
+            krb5_free_error_message(handle->context, errmsg);
+    }
+
+exit_func:
+    kadm5_free_principal_ent(handle, &rec);
+    stub_cleanup(handle, prime_arg, &client_name, &service_name);
+    return TRUE;
+}
+
+bool_t
+create_alias_2_svc(calias_arg *arg, generic_ret *ret, struct svc_req *rqstp)
+{
+    char                            *prime_arg = NULL;
+    gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
+    kadm5_server_handle_t           handle;
+    const char                      *errmsg = NULL;
+
+    ret->code = stub_setup(arg->api_version, rqstp, arg->alias, &handle,
+                           &ret->api_version, &client_name, &service_name,
+                           &prime_arg, NULL);
+    if (ret->code)
+        goto exit_func;
+
+    if (CHANGEPW_SERVICE(rqstp) ||
+        !stub_auth(handle, OP_ADDALIAS, arg->alias, arg->target, NULL, NULL)) {
+        ret->code = KADM5_AUTH_INSUFFICIENT;
+        log_unauth("kadm5_create_alias", prime_arg, &client_name,
+                   &service_name, rqstp);
+    } else {
+        ret->code = kadm5_create_alias(handle, arg->alias, arg->target);
+        if (ret->code)
+            errmsg = krb5_get_error_message(handle->context, ret->code);
+        log_done("kadm5_create_alias", prime_arg, errmsg, &client_name,
+                 &service_name, rqstp);
         if (errmsg != NULL)
             krb5_free_error_message(handle->context, errmsg);
     }
