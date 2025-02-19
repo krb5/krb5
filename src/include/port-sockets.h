@@ -73,6 +73,9 @@ typedef WSABUF sg_buf;
 #ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
 #endif
+#ifndef EAFNOSUPPORT
+#define EAFNOSUPPORT WSAEAFNOSUPPORT
+#endif
 
 /* Translate posix_error to its Winsock counterpart and set the last Winsock
  * error to the result. */
