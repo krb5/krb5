@@ -42,6 +42,8 @@ extern void kadmin_delprinc(int argc, char *argv[], int sci_idx,
                             void *info_ptr);
 extern void kadmin_renameprinc(int argc, char *argv[], int sci_idx,
                                void *info_ptr);
+extern void kadmin_addalias(int argc, char *argv[], int sci_idx,
+                            void *info_ptr);
 extern void kadmin_cpw(int argc, char *argv[], int sci_idx, void *info_ptr);
 extern void kadmin_addprinc(int argc, char *argv[], int sci_idx,
                             void *info_ptr);
