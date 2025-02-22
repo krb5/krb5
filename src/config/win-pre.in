@@ -117,7 +117,7 @@ KFWFLAGS=-DUSE_LEASH=1 -DDEBUG -D_CRTDBG_MAP_ALLOC
 CC=cl
 
 PDB_OPTS=-Fd$(OUTPRE)\ -FD
-CPPFLAGS=-I$(top_srcdir)\include -I$(top_srcdir)\include\krb5 $(DNSFLAGS) -DWIN32_LEAN_AND_MEAN -DKRB5_DEPRECATED=1 -DKRB5_PRIVATE -D_CRT_SECURE_NO_DEPRECATE $(KFWFLAGS) $(TIME_T_FLAGS)
+CPPFLAGS=-I$(top_srcdir)\include -I$(top_srcdir)\include\krb5 $(DNSFLAGS) -DWIN32_LEAN_AND_MEAN -DKRB5_DEPRECATED=1 -DKRB5_PRIVATE -D_CRT_SECURE_NO_DEPRECATE $(KFWFLAGS) $(TIME_T_FLAGS) $(OSSLINCLUDE)
 # Treat the following warnings as errors:
 #  4020: too many actual parameters
 #  4024: different types for formal and actual parameter
@@ -188,6 +188,16 @@ SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt$(BITS).lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi$(BITS).lib
 CCLIB=krbcc$(BITS)
 SPAKELIB=spake$(BITS)
+
+!ifdef OPENSSL_DIR
+OSSLLIB="$(OPENSSL_DIR)\lib\libcrypto.lib"
+OSSLINC="-I$(OPENSSL_DIR)\include"
+PKINITLIB=pkinit$(BITS)
+!else
+OSSLLIB=
+OSSLINC=
+PKINITLIB=
+!endif
 
 KRB4_INCLUDES=-I$(BUILDTOP)/include/kerberosIV
 
