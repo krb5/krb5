@@ -2651,11 +2651,11 @@ cleanup:
 static const EVP_MD *
 algid_to_md(const krb5_data *alg_id)
 {
-    if (data_eq(*alg_id, sha1_id))
+    if (data_eq(*alg_id, kdf_sha1_id))
         return EVP_sha1();
-    if (data_eq(*alg_id, sha256_id))
+    if (data_eq(*alg_id, kdf_sha256_id))
         return EVP_sha256();
-    if (data_eq(*alg_id, sha512_id))
+    if (data_eq(*alg_id, kdf_sha512_id))
         return EVP_sha512();
     return NULL;
 }
@@ -5697,6 +5697,98 @@ parse_dh_min_bits(krb5_context context, const char *str)
 
     TRACE_PKINIT_DH_INVALID_MIN_BITS(context, str);
     return PKINIT_DEFAULT_DH_MIN_BITS;
+}
+
+krb5_error_code
+pkinit_generate_pachecksum2(krb5_context context, const krb5_data *alg_id,
+                            krb5_data *der_req_body,
+                            krb5_pachecksum2 **packsum2)
+{
+    krb5_pachecksum2 *p2 = NULL;
+    const EVP_MD *md = NULL;
+    int md_size;
+    krb5_error_code retval = 0;
+
+    p2 = k5alloc(sizeof(*p2), &retval);
+    if (retval)
+        goto cleanup;
+
+    if (data_eq(*cms_sha1_id, *alg_id)) {
+        md = EVP_sha1();
+    } else if (data_eq(*cms_sha256_id, *alg_id)) {
+        md = EVP_sha256();
+    } else if (data_eq(*cms_sha384_id, *alg_id)) {
+        md = EVP_sha384();
+    } else if (data_eq(*cms_sha512_id, *alg_id)) {
+        md = EVP_sha512();
+    } else {
+        retval = KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED;
+        goto cleanup;
+    }
+
+    md_size = EVP_MD_size(md);
+    if (md_size < 1) {
+        retval = KRB5_CRYPTO_INTERNAL;
+        goto cleanup;
+    }
+
+    retval = alloc_data(&p2->checksum, md_size);
+    if (retval)
+        goto cleanup;
+
+    if (0 == EVP_Digest(der_req_body->data, der_req_body->length,
+                        (unsigned char *)p2->checksum.data, NULL, md, NULL)) {
+        retval = KRB5_CRYPTO_INTERNAL;
+        goto cleanup;
+    }
+
+    retval = krb5int_copy_data_contents(context, alg_id,
+                                        &p2->algorithmIdentifier.algorithm);
+    if (retval)
+        goto cleanup;
+
+    p2->algorithmIdentifier.parameters = empty_data();
+
+    *packsum2 = p2;
+
+cleanup:
+    if (retval)
+        pkinit_pachecksum2_free(context, &p2);
+
+    return retval;
+}
+
+krb5_error_code
+pkinit_verify_pachecksum2(krb5_context context,
+                          const krb5_pachecksum2 *packsum2,
+                          krb5_data *der_req_body, krb5_boolean *valid)
+{
+    krb5_pachecksum2 *expect_p2 = NULL;
+    krb5_error_code retval;
+
+    retval = pkinit_generate_pachecksum2(context,
+                                         &packsum2->algorithmIdentifier.algorithm,
+                                         der_req_body, &expect_p2);
+    if (retval)
+        return retval;
+
+    *valid = data_eq(packsum2->checksum, expect_p2->checksum);
+
+#ifdef DEBUG_CKSUM
+    if (!*valid) {
+        pkiDebug("calculating paChecksum2 on buf size (%u)\n",
+                 der_req_body->length);
+        print_buffer(der_req_body->data, der_req_body->length);
+        pkiDebug("received paChecksum2 size=%u ", packsum2->checksum.length);
+        print_buffer(packsum2->checksum.data, packsum2->checksum.length);
+        pkiDebug("expected paChecksum2 size=%u ", expect_p2->checksum.length);
+        print_buffer(expect_p2->checksum.data, expect_p2->checksum.length);
+    }
+#endif
+
+    pkinit_pachecksum2_free(context, &expect_p2);
+
+    return retval;
 }
 
 #ifdef _WIN32

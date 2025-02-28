@@ -431,6 +431,8 @@ pkinit_server_verify_padata(krb5_context context,
     pkinit_kdc_context plgctx = NULL;
     pkinit_kdc_req_context reqctx = NULL;
     krb5_checksum cksum = {0, 0, 0, NULL};
+    const krb5_pachecksum2 *cksum2;
+    krb5_boolean valid_cksum2;
     krb5_data *der_req = NULL;
     krb5_data k5data, *ftoken;
     int is_signed = 1;
@@ -551,13 +553,13 @@ pkinit_server_verify_padata(krb5_context context,
     retval = krb5_c_make_checksum(context, CKSUMTYPE_SHA1, NULL, 0, der_req,
                                   &cksum);
     if (retval) {
-        pkiDebug("unable to calculate AS REQ checksum\n");
+        pkiDebug("unable to calculate AS REQ SHA-1 paChecksum\n");
         goto cleanup;
     }
     if (cksum.length != auth_pack->pkAuthenticator.paChecksum.length ||
         k5_bcmp(cksum.contents, auth_pack->pkAuthenticator.paChecksum.contents,
                 cksum.length) != 0) {
-        pkiDebug("failed to match the checksum\n");
+        pkiDebug("failed to match the paChecksum\n");
 #ifdef DEBUG_CKSUM
         pkiDebug("calculating checksum on buf size (%d)\n", req_pkt->length);
         print_buffer(req_pkt->data, req_pkt->length);
@@ -573,6 +575,21 @@ pkinit_server_verify_padata(krb5_context context,
 
         retval = KRB5KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED;
         goto cleanup;
+    }
+
+    if (auth_pack->pkAuthenticator.paChecksum2) {
+        cksum2 = auth_pack->pkAuthenticator.paChecksum2;
+        retval = pkinit_verify_pachecksum2(context, cksum2, der_req,
+                                           &valid_cksum2);
+        if (retval) {
+            pkiDebug("unable to calculate AS-REQ paChecksum2\n");
+            goto cleanup;
+        }
+        if (!valid_cksum2) {
+            pkiDebug("failed to match the paChecksum2\n");
+            retval = KRB5KDC_ERR_SUMTYPE_NOSUPP;
+            goto cleanup;
+        }
     }
 
     ftoken = auth_pack->pkAuthenticator.freshnessToken;
