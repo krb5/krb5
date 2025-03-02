@@ -403,12 +403,8 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                 struct plugin_file_handle *handle = NULL;
                 char *filepath = NULL;
 
-                if (!err) {
-                    if (asprintf(&filepath, "%s/%s", dirnames[i], filenames[j]) < 0) {
-                        filepath = NULL;
-                        err = ENOMEM;
-                    }
-                }
+                if (!err)
+                    err = k5_path_join(dirnames[i], filenames[j], &filepath);
 
                 if (!err && krb5int_open_plugin(filepath, &handle, ep) == 0) {
                     err = krb5int_plugin_file_handle_array_add (&h, &count, handle);
@@ -432,10 +428,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                     strcmp(fnames[j], "..") == 0)
                     continue;
 
-                if (asprintf(&filepath, "%s/%s", dirnames[i], fnames[j]) < 0) {
-                    filepath = NULL;
-                    err = ENOMEM;
-                }
+                err = k5_path_join(dirnames[i], fnames[j], &filepath);
 
                 if (!err && krb5int_open_plugin(filepath, &handle, ep) == 0) {
                     err = krb5int_plugin_file_handle_array_add(&h, &count,
