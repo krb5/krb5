@@ -27,6 +27,8 @@ PKG_PROG_PKG_CONFIG
 AC_CHECK_HEADER([stdint.h], [],
   [AC_MSG_ERROR([stdint.h is required])])
 
+AC_SYS_LARGEFILE
+
 AC_CACHE_CHECK([whether integers are two's complement],
   [krb5_cv_ints_twos_compl],
   [AC_COMPILE_IFELSE(
