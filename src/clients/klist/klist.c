@@ -832,8 +832,9 @@ one_addr(krb5_address *a)
     struct sockaddr_storage ss;
     struct sockaddr_in *sinp;
     struct sockaddr_in6 *sin6p;
-    int err;
+    int err, i;
     char namebuf[NI_MAXHOST];
+    const uint8_t *p;
 
     memset(&ss, 0, sizeof(ss));
 
@@ -858,6 +859,16 @@ one_addr(krb5_address *a)
         sin6p->sin6_family = AF_INET6;
         memcpy(&sin6p->sin6_addr, a->contents, 16);
         break;
+    case ADDRTYPE_NETBIOS:
+        if (a->length != 16) {
+            printf(_("broken address (type %d length %d)"),
+                   a->addrtype, a->length);
+            return;
+        }
+        p = a->contents;
+        for (i = 0; i < 15 && p[i] != '\0' && p[i] != ' '; i++)
+            putchar(p[i]);
+        return;
     default:
         printf(_("unknown addrtype %d"), a->addrtype);
         return;
