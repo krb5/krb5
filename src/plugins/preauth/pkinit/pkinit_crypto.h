@@ -542,9 +542,13 @@ pkinit_kdf(krb5_context context, krb5_data *secret, const krb5_data *alg_oid,
 	   const krb5_data *as_req, const krb5_data *pk_as_rep,
 	   krb5_keyblock *key_block);
 
-extern const krb5_data sha1_id;
-extern const krb5_data sha256_id;
-extern const krb5_data sha512_id;
+extern const krb5_data kdf_sha1_id;
+extern const krb5_data kdf_sha256_id;
+extern const krb5_data kdf_sha512_id;
+extern const krb5_data cms_sha1_id;
+extern const krb5_data cms_sha256_id;
+extern const krb5_data cms_sha384_id;
+extern const krb5_data cms_sha512_id;
 extern const krb5_data oakley_1024;
 extern const krb5_data oakley_2048;
 extern const krb5_data oakley_4096;
@@ -576,5 +580,19 @@ crypto_req_cert_matching_data(krb5_context context,
 			      pkinit_cert_matching_data **md_out);
 
 int parse_dh_min_bits(krb5_context context, const char *str);
+
+/* Generate a SHA-1 checksum over body in *cksum1_out and a SHA-256 checksum
+ * over body in *cksum2_out with appropriate metadata. */
+krb5_error_code
+crypto_generate_checksums(krb5_context context, const krb5_data *body,
+			  krb5_data *cksum1_out,
+			  krb5_pachecksum2 **cksum2_out);
+
+/* Verify the SHA-1 checksum in cksum1 and the tagged checksum in cksum2.
+ * cksum2 may be NULL, in which case only cksum1 is verified. */
+krb5_error_code
+crypto_verify_checksums(krb5_context context, krb5_data *body,
+			const krb5_data *cksum1,
+			const krb5_pachecksum2 *cksum2);
 
 #endif	/* _PKINIT_CRYPTO_H */
