@@ -215,6 +215,9 @@ krb5_gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
         } else if (g_OID_equal(input_name_type, GSS_KRB5_NT_ENTERPRISE_NAME)) {
             stringrep = tmp;
             flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+            // if (how to detect if this is iakerb???)
+            //    /* realm discovery */
+            //    flags |= KRB5_PRINCIPAL_PARSE_NO_DEF_REALM
 #ifndef NO_PASSWORD
         } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
             uid = *(uid_t *) input_name_buffer->value;
