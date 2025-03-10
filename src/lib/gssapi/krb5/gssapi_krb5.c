@@ -934,7 +934,7 @@ static struct gss_config iakerb_mechanism = {
     krb5_gss_indicate_mechs,
     krb5_gss_compare_name,
     krb5_gss_display_name,
-    krb5_gss_import_name,
+    iakerb_gss_import_name,
     krb5_gss_release_name,
     krb5_gss_inquire_cred,
     NULL,                /* add_cred */

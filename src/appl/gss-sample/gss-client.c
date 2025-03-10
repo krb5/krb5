@@ -189,6 +189,7 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
     int token_flags;
     gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
     gss_OID_set_desc mechs, neg_mechs, *mechsp = GSS_C_NO_OID_SET;
+    gss_OID user_name_oid = (gss_OID) gss_nt_user_name;
 
     if (!auth_flag)
         return send_token(s, TOKEN_NOOP, empty_token);
@@ -209,9 +210,12 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
     if (username != NULL) {
         send_tok.value = username;
         send_tok.length = strlen(username);
+        if (memchr(send_tok.value, '@', send_tok.length) == NULL) {
+            user_name_oid = (gss_OID) GSS_KRB5_NT_ENTERPRISE_NAME;
+        }
 
         maj_stat = gss_import_name(&min_stat, &send_tok,
-                                   (gss_OID) gss_nt_user_name, &gss_username);
+                                   user_name_oid, &gss_username);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("parsing client name", maj_stat, min_stat);
             goto cleanup;

@@ -706,6 +706,13 @@ OM_uint32 KRB5_CALLCONV krb5_gss_import_name
  gss_name_t*       /* output_name */
 );
 
+OM_uint32 KRB5_CALLCONV iakerb_gss_import_name
+(OM_uint32*,       /* minor_status */
+ gss_buffer_t,     /* input_name_buffer */
+ gss_OID,          /* input_name_type */
+ gss_name_t*       /* output_name */
+);
+
 OM_uint32 KRB5_CALLCONV krb5_gss_release_name
 (OM_uint32*,       /* minor_status */
  gss_name_t*       /* input_name */
@@ -1447,5 +1454,4 @@ gss_krb5int_get_cred_impersonator(OM_uint32 *minor_status,
                                   const gss_cred_id_t cred_handle,
                                   const gss_OID desired_object,
                                   gss_buffer_set_t *data_set);
-
 #endif /* _GSSAPIP_KRB5_H_ */
