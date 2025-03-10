@@ -533,6 +533,29 @@ cleanup:
     return code;
 }
 
+static krb5_error_code
+iakerb_produce_token(iakerb_ctx_id_t ctx,
+                     krb5_data *realm,
+                     krb5_data *cookie,
+                     krb5_data *out,
+                     gss_buffer_t output_token)
+{
+    krb5_error_code code = 0;
+    assert(ctx->state != IAKERB_AP_REQ);
+
+    code = iakerb_make_token(ctx, realm, cookie, out, output_token);
+    if (code != 0)
+        return code;
+
+    /* Save the token for generating a future checksum */
+    code = iakerb_save_token(ctx, output_token);
+    if (code != 0)
+        return code;
+
+    ctx->count++;
+    return 0;
+}
+
 /*
  * Parse the IAKERB token in input_token and process the KDC
  * response.
@@ -548,7 +571,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                       gss_buffer_t output_token)
 {
     krb5_error_code code = 0;
-    krb5_data in = empty_data(), out = empty_data(), realm = empty_data();
+    krb5_data in = empty_data(), out = empty_data();
+    krb5_data realm = empty_data(), discovery_realm = empty_data();
     krb5_data *cookie = NULL;
     OM_uint32 tmp;
     unsigned int flags = 0;
@@ -558,7 +582,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     output_token->value = NULL;
 
     if (input_token != GSS_C_NO_BUFFER && input_token->length > 0) {
-        code = iakerb_parse_token(ctx, input_token, NULL, &cookie, &in);
+        code = iakerb_parse_token(ctx, input_token, &discovery_realm, &cookie, &in);
         if (code != 0)
             goto cleanup;
 
@@ -569,6 +593,18 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
     switch (ctx->state) {
     case IAKERB_AS_REQ:
+        if (cred->name->princ->realm.length == 0) {
+            if (discovery_realm.length > 0) {
+                /* Acceptor did send a discovered realm */
+                free(cred->name->princ->realm.data);
+                krb5_princ_set_realm(ctx->k5c, cred->name->princ, &discovery_realm);
+                discovery_realm = empty_data();
+            } else {
+                /* Send a discovery request */
+                code = iakerb_produce_token(ctx, &realm, cookie, &out, output_token);
+                goto cleanup;
+            }
+        }
         if (ctx->icc == NULL) {
             code = iakerb_init_creds_ctx(ctx, cred, time_req);
             if (code != 0)
@@ -625,18 +661,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     }
 
     if (out.length != 0) {
-        assert(ctx->state != IAKERB_AP_REQ);
-
-        code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
-        if (code != 0)
-            goto cleanup;
-
-        /* Save the token for generating a future checksum */
-        code = iakerb_save_token(ctx, output_token);
-        if (code != 0)
-            goto cleanup;
-
-        ctx->count++;
+        code = iakerb_produce_token(ctx, &realm, cookie, &out, output_token);
     }
 
 cleanup:
@@ -644,6 +669,7 @@ cleanup:
         gss_release_buffer(&tmp, output_token);
     krb5_free_data(ctx->k5c, cookie);
     krb5_free_data_contents(ctx->k5c, &out);
+    krb5_free_data_contents(ctx->k5c, &discovery_realm);
     krb5_free_data_contents(ctx->k5c, &realm);
 
     return code;

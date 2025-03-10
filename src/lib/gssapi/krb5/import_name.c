@@ -119,9 +119,10 @@ parse_hostbased(const char *str, size_t len,
     return 0;
 }
 
-OM_uint32 KRB5_CALLCONV
-krb5_gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
-                     gss_OID input_name_type, gss_name_t *output_name)
+static OM_uint32 KRB5_CALLCONV
+gss_krb5int_import_name_ext(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
+                            gss_OID input_name_type, bool iakerb,
+                            gss_name_t *output_name)
 {
     krb5_context context;
     krb5_principal princ = NULL;
@@ -215,6 +216,9 @@ krb5_gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
         } else if (g_OID_equal(input_name_type, GSS_KRB5_NT_ENTERPRISE_NAME)) {
             stringrep = tmp;
             flags |= KRB5_PRINCIPAL_PARSE_ENTERPRISE;
+	    if (iakerb == TRUE) {
+                flags |= KRB5_PRINCIPAL_PARSE_NO_DEF_REALM;
+            }
 #ifndef NO_PASSWORD
         } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
             uid = *(uid_t *) input_name_buffer->value;
@@ -339,4 +343,20 @@ cleanup:
     free(service);
     free(host);
     return status;
+}
+
+OM_uint32 KRB5_CALLCONV
+krb5_gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
+                     gss_OID input_name_type, gss_name_t *output_name)
+{
+    return gss_krb5int_import_name_ext(minor_status, input_name_buffer,
+                                       input_name_type, FALSE, output_name);
+}
+
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
+                       gss_OID input_name_type, gss_name_t *output_name)
+{
+    return gss_krb5int_import_name_ext(minor_status, input_name_buffer,
+                                       input_name_type, TRUE, output_name);
 }
