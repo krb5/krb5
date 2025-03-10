@@ -78,7 +78,12 @@ def tgs_test(realm, options, server_options=[]):
 def pw_test(realm, options, server_options=[]):
     if os.path.exists(realm.ccache):
         os.remove(realm.ccache)
-    options = options + ['-user', realm.user_princ, '-pass', password('user')]
+    if '-iakerb' in options:
+        # Use IAKERB realm discovery.
+        user = realm.user_princ.split('@')[0]
+    else:
+        user = realm.user_princ
+    options = options + ['-user', user, '-pass', password('user')]
     server_client_test(realm, options, server_options)
     if os.path.exists(realm.ccache):
         fail('gss_acquire_cred_with_password created ccache')

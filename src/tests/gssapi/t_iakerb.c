@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* tests/gssapi/t_iakerb.c - IAKERB tests */
 /*
- * Copyright (C) 2024 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2024, 2025 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,57 +32,56 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "common.h"
 
-static uint8_t
-realm_query[] = {
-    /* ASN.1 wrapper for IAKERB mech */
-    0x60, 0x10,
-    0x06, 0x06, 0x2B, 0x06, 0x01, 0x05, 0x02, 0x05,
-    /* IAKERB_PROXY token type */
-    0x05, 0x01,
-    /* IAKERB-HEADER with empty target-realm */
-    0x30, 0x04,
-    0xA1, 0x02, 0x0C, 0x00
-};
-
-static uint8_t
-realm_response[] = {
-    /* ASN.1 wrapper for IAKERB mech */
-    0x60, 0x1B,
-    0x06, 0x06, 0x2B, 0x06, 0x01, 0x05, 0x02, 0x05,
-    /* IAKERB_PROXY token type */
-    0x05, 0x01,
-    /* IAKERB-HEADER with configured realm */
-    0x30, 0x0F,
-    0xA1, 0x0D, 0x0C, 0x0B,
-    'K', 'R', 'B', 'T', 'E', 'S', 'T', '.', 'C', 'O', 'M'
-};
-
 int
-main(void)
+main(int argc, char **argv)
 {
     OM_uint32 major, minor;
-    gss_cred_id_t cred;
-    gss_buffer_desc in, out;
-    gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
+    const char *password;
+    gss_name_t iname, tname, aname;
+    gss_cred_id_t icred, acred;
+    gss_ctx_id_t ictx, actx;
+    gss_buffer_desc pwbuf;
 
-    major = gss_acquire_cred(&minor, GSS_C_NO_NAME, 0, &mechset_iakerb,
-                             GSS_C_ACCEPT, &cred, NULL, NULL);
-    check_gsserr("gss_acquire_cred", major, minor);
+    if (argc != 5) {
+        fprintf(stderr, "Usage: %s initiatorname password|- targetname "
+                "acceptorname\n", argv[0]);
+        return 1;
+    }
 
-    in.value = realm_query;
-    in.length = sizeof(realm_query);
-    major = gss_accept_sec_context(&minor, &ctx, cred, &in,
-                                   GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL, &out,
-                                   NULL, NULL, NULL);
-    check_gsserr("gss_accept_sec_context", major, minor);
-    assert(out.length == sizeof(realm_response));
-    assert(memcmp(out.value, realm_response, out.length) == 0);
+    iname = import_name(argv[1]);
+    password = argv[2];
+    tname = import_name(argv[3]);
+    aname = import_name(argv[4]);
 
-    gss_release_buffer(&minor, &out);
-    gss_delete_sec_context(&minor, &ctx, NULL);
-    gss_release_cred(&minor, &cred);
+    if (strcmp(password, "-") != 0) {
+        pwbuf.value = (void *)password;
+        pwbuf.length = strlen(password);
+        major = gss_acquire_cred_with_password(&minor, iname, &pwbuf, 0,
+                                               &mechset_iakerb, GSS_C_INITIATE,
+                                               &icred, NULL, NULL);
+        check_gsserr("gss_acquire_cred_with_password", major, minor);
+    } else {
+        major = gss_acquire_cred(&minor, iname, GSS_C_INDEFINITE,
+                                 &mechset_iakerb, GSS_C_INITIATE, &icred, NULL,
+                                 NULL);
+        check_gsserr("gss_acquire_cred(iname)", major, minor);
+    }
+
+    major = gss_acquire_cred(&minor, aname, GSS_C_INDEFINITE, &mechset_iakerb,
+                             GSS_C_ACCEPT, &acred, NULL, NULL);
+    check_gsserr("gss_acquire_cred(aname)", major, minor);
+
+    establish_contexts(&mech_iakerb, icred, acred, tname, 0, &ictx, &actx,
+                       NULL, NULL, NULL);
+
+    (void)gss_release_name(&minor, &iname);
+    (void)gss_release_name(&minor, &tname);
+    (void)gss_release_name(&minor, &aname);
+    (void)gss_release_cred(&minor, &icred);
+    (void)gss_release_cred(&minor, &acred);
+    (void)gss_delete_sec_context(&minor, &ictx, NULL);
+    (void)gss_delete_sec_context(&minor, &actx, NULL);
     return 0;
 }
