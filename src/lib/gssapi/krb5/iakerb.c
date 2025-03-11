@@ -49,6 +49,7 @@ struct _iakerb_ctx_id_rec {
     int initiate;
     int established;
     krb5_get_init_creds_opt *gic_opts;
+    krb5_data discovered_realm;
 };
 
 #define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
@@ -73,6 +74,7 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
     krb5_free_data_contents(ctx->k5c, &ctx->conv);
     krb5_get_init_creds_opt_free(ctx->k5c, ctx->gic_opts);
+    krb5_free_data_contents(ctx->k5c, &ctx->discovered_realm);
     krb5_free_context(ctx->k5c);
     free(ctx);
 }
@@ -497,6 +499,7 @@ iakerb_tkt_creds_ctx(iakerb_ctx_id_t ctx,
     krb5_error_code code;
     krb5_creds creds;
     krb5_timestamp now;
+    krb5_data new_realm = empty_data();
 
     assert(cred->name != NULL);
     assert(cred->name->princ != NULL);
@@ -505,6 +508,22 @@ iakerb_tkt_creds_ctx(iakerb_ctx_id_t ctx,
 
     creds.client = cred->name->princ;
     creds.server = name->princ;
+
+    if (ctx->discovered_realm.length > 0) {
+        /* client's realm should be adjusted already */
+        if (!krb5_realm_compare(ctx->k5c, creds.client, creds.server)) {
+            /* the target one is different and has to be adjusted */
+            new_realm.data = k5memdup0(ctx->discovered_realm.data,
+                                       ctx->discovered_realm.length, &code);
+            if (code != 0)
+                goto cleanup;
+
+            new_realm.length = ctx->discovered_realm.length;
+
+            krb5_free_data_contents(ctx->k5c, &creds.server->realm);
+            krb5_princ_set_realm(ctx->k5c, creds.server, &new_realm);
+        }
+    }
 
     if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
         code = krb5_timeofday(ctx->k5c, &now);
@@ -531,6 +550,34 @@ cleanup:
     krb5_free_authdata(ctx->k5c, creds.authdata);
 
     return code;
+}
+
+static krb5_error_code
+iakerb_set_discovered_realm(iakerb_ctx_id_t ctx,
+                            krb5_gss_cred_id_t cred,
+                            krb5_data *discovered_realm)
+{
+    krb5_data new_realm = empty_data();
+    krb5_error_code code = 0;
+
+    if (discovered_realm != NULL && discovered_realm->length != 0) {
+        new_realm.data = k5memdup0(discovered_realm->data,
+                                   discovered_realm->length, &code);
+        if (code != 0)
+            return code;
+
+        new_realm.length = discovered_realm->length;
+
+        krb5_free_data_contents(ctx->k5c, &ctx->discovered_realm);
+        ctx->discovered_realm = *discovered_realm;
+    }
+
+    if (cred->name->princ != NULL) {
+        krb5_free_data_contents(ctx->k5c, &cred->name->princ->realm);
+        krb5_princ_set_realm(ctx->k5c, cred->name->princ, &new_realm);
+    }
+
+    return 0;
 }
 
 static krb5_error_code
@@ -596,8 +643,11 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         if (cred->name->princ->realm.length == 0) {
             if (discovery_realm.length > 0) {
                 /* Acceptor did send a discovered realm */
-                free(cred->name->princ->realm.data);
-                krb5_princ_set_realm(ctx->k5c, cred->name->princ, &discovery_realm);
+                code = iakerb_set_discovered_realm(ctx, cred, &discovery_realm);
+                if (code != 0)
+                    goto cleanup;
+
+                /* discovered realm taken over by the context now */
                 discovery_realm = empty_data();
             } else {
                 /* Send a discovery request */
