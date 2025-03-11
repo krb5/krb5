@@ -1,0 +1,127 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "authors": [
+      {
+        "name": "@VCS_SBOM_AUTHORS@"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:github/krb5/krb5@@VCS_TAG@",
+      "cpe": "cpe:2.3:a:mit:kerberos_5:@VCS_TAG@:*:*:*:*:*:*:*",
+      "name": "krb5",
+      "version": "@VCS_VERSION@",
+      "description": "Reference implementation of Kerberos, a network authentication protocol",
+      "supplier": {
+        "name": "Massachusetts Institute of Technology"
+      },
+      "authors": [
+        {
+          "name": "@VCS_AUTHORS@"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        },
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        },
+        {
+          "license": {
+            "id": "BSD-4-Clause"
+          }
+        },
+        {
+          "license": {
+            "id": "Brian-Gladman-2-Clause"
+          }
+        },
+        {
+          "license": {
+            "id": "FSFULLRWD"
+          }
+        },
+        {
+          "license": {
+            "id": "HPND"
+          }
+        },
+        {
+          "license": {
+            "id": "HPND-export-US"
+          }
+        },
+        {
+          "license": {
+            "id": "HPND-export2-US"
+          }
+        },
+        {
+          "license": {
+            "id": "HPND-export-US-acknowledgement"
+          }
+        },
+        {
+          "license": {
+            "id": "HPND-export-US-modify"
+          }
+        },
+        {
+          "license": {
+            "id": "ISC"
+          }
+        },
+        {
+          "license": {
+            "id": "CMU-Mach-nodoc"
+          }
+        },
+        {
+          "license": {
+            "id": "GPL-2.0-or-later"
+          }
+        },
+        {
+          "license": {
+            "id": "MIT"
+          }
+        },
+        {
+          "license": {
+            "id": "MIT-CMU"
+          }
+        },
+        {
+          "license": {
+            "id": "OLDAP-2.8"
+          }
+        },
+        {
+          "license": {
+            "id": "OpenVision"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://kerberos.org/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/krb5/krb5"
+        }
+      ]
+    }
+  ]
+}
