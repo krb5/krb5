@@ -960,12 +960,16 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             OM_uint32 *time_rec)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
+    OM_uint32 mi = 0;
     krb5_error_code code;
     iakerb_ctx_id_t ctx;
     krb5_gss_cred_id_t kcred;
     krb5_gss_name_t kname;
     krb5_boolean cred_locked = FALSE;
     int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
+    krb5_gss_name_t adjusted_kname = NULL;
+    krb5_data new_realm = empty_data();
+    gss_name_t atarget_name = target_name;
 
     if (initialContextToken) {
         code = iakerb_alloc_context(&ctx, 1);
@@ -1039,11 +1043,32 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (ctx->gssc == GSS_C_NO_CONTEXT)
             input_token = GSS_C_NO_BUFFER;
 
+        if (ctx->discovered_realm.length > 0) {
+            if (!krb5_realm_compare(ctx->k5c, kname->princ, kcred->name->princ)) {
+                major_status = krb5_gss_duplicate_name(minor_status,
+                                                       target_name,
+                                                       (gss_name_t*) &adjusted_kname);
+                if (GSS_ERROR(major_status))
+                    goto cleanup;
+                /* the target one is different and has to be adjusted */
+                new_realm.data = k5memdup0(ctx->discovered_realm.data,
+                                           ctx->discovered_realm.length, &code);
+                if (code != 0)
+                    goto cleanup;
+
+                new_realm.length = ctx->discovered_realm.length;
+
+                krb5_free_data_contents(ctx->k5c, &adjusted_kname->princ->realm);
+                krb5_princ_set_realm(ctx->k5c, adjusted_kname->princ, &new_realm);
+                atarget_name = (gss_name_t) adjusted_kname;
+            }
+        }
+
         /* IAKERB is finished, or we skipped to Kerberos directly. */
         major_status = krb5_gss_init_sec_context_ext(minor_status,
                                                      (gss_cred_id_t) kcred,
                                                      &ctx->gssc,
-                                                     target_name,
+                                                     atarget_name,
                                                      (gss_OID)gss_mech_iakerb,
                                                      req_flags,
                                                      time_req,
@@ -1070,6 +1095,11 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 cleanup:
     if (cred_locked)
         k5_mutex_unlock(&kcred->lock);
+
+    if (atarget_name != NULL && atarget_name != target_name) {
+        (void) krb5_gss_release_name(&mi, &atarget_name);
+    }
+
     if (initialContextToken && GSS_ERROR(major_status)) {
         iakerb_release_context(ctx);
         *context_handle = GSS_C_NO_CONTEXT;
