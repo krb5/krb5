@@ -10,10 +10,36 @@ for realm in multipass_realms():
 
 realm = K5Realm()
 
+remove_default = {'libdefaults': {'default_realm': None}}
+change_default = {'libdefaults': {'default_realm': 'WRONG.REALM'}}
+no_default = realm.special_env('no_default', False, krb5_conf=remove_default)
+wrong_default = realm.special_env('wrong_default', False,
+                                  krb5_conf=change_default)
+
+# Test IAKERB with credentials.
+realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
+           'h:host'])
+
+# Test IAKERB getting initial credentials.
+realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
+           'h:host@' + hostname, 'h:host'])
+
+# Test IAKERB realm discovery.
+realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
+           'h:host'])
+
+# Test IAKERB realm discovery without default_realm set.  (Use a
+# GSS_KRB5_NT_PRINCIPAL_NAME acceptor name so that
+# gss_accept_sec_context() knows the realm.)
+realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
+           'p:' + realm.host_princ], env=no_default)
+
+# Test IAKERB realm discovery with a non-useful default_realm set.
+realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
+           'p:' + realm.host_princ], env=wrong_default)
+
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
-
-realm.run(['./t_iakerb'])
 
 ### Test acceptor name behavior.
 
@@ -34,8 +60,6 @@ realm.run([kadminl, 'renprinc', 'service1/abraham', 'service1/andrew'])
 
 # Test with no default realm and no dots in the server name.
 realm.run(['./t_accname', 'h:http@localhost'], expected_msg='http/localhost')
-remove_default = {'libdefaults': {'default_realm': None}}
-no_default = realm.special_env('no_default', False, krb5_conf=remove_default)
 realm.run(['./t_accname', 'h:http@localhost'], expected_msg='http/localhost',
           env=no_default)
 
