@@ -811,9 +811,9 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
     OM_uint32 major_status = GSS_S_FAILURE;
     OM_uint32 code;
     iakerb_ctx_id_t ctx;
-    int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
+    krb5_boolean first_token = (*context_handle == GSS_C_NO_CONTEXT);
 
-    if (initialContextToken) {
+    if (first_token) {
         code = iakerb_alloc_context(&ctx, 0);
         if (code != 0)
             goto cleanup;
@@ -834,10 +834,6 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)
             goto cleanup;
-        if (initialContextToken) {
-            *context_handle = (gss_ctx_id_t)ctx;
-            ctx = NULL;
-        }
         if (src_name != NULL)
             *src_name = GSS_C_NO_NAME;
         if (ret_flags != NULL)
@@ -872,9 +868,13 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
         *mech_type = gss_mech_iakerb;
 
 cleanup:
-    if (initialContextToken && GSS_ERROR(major_status)) {
-        iakerb_release_context(ctx);
-        *context_handle = GSS_C_NO_CONTEXT;
+    if (first_token) {
+        if (GSS_ERROR(major_status)) {
+            iakerb_release_context(ctx);
+            *context_handle = GSS_C_NO_CONTEXT;
+        } else {
+            *context_handle = (gss_ctx_id_t)ctx;
+        }
     }
 
     *minor_status = code;

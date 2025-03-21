@@ -116,6 +116,13 @@ for realm in multipass_realms():
     # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
     tgs_test(realm, ['-dce'])
 
+    mark('AP')
+    ccache_save(realm)
+    tgs_test(realm, ['-krb5'])
+    tgs_test(realm, ['-spnego'])
+    tgs_test(realm, ['-iakerb'], ['-iakerb'])
+    tgs_test(realm, ['-dce'])
+
     mark('pw')
     pw_test(realm, ['-krb5'])
     pw_test(realm, ['-spnego'])
