@@ -78,6 +78,46 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     free(ctx);
 }
 
+/* Encode a KRB-ERROR message with the given protocol code.  Use the server
+ * principal from verifier_cred if one is available. */
+static krb5_error_code
+iakerb_mk_error(krb5_context context, gss_cred_id_t verifier_cred,
+                int protocol_err, krb5_data *enc_err)
+{
+    krb5_error error = { 0 };
+    krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)verifier_cred;
+
+    error.error = protocol_err;
+
+    /* We must provide a server principal, although we expect the recipient to
+     * care chiefly about the error code. */
+    if (cred != NULL && cred->name != NULL)
+        error.server = cred->name->princ;
+    else
+        error.server = (krb5_principal)krb5_anonymous_principal();
+
+    return krb5_mk_error(context, &error, enc_err);
+}
+
+/* Decode a KRB-ERROR message and return the associated com_err code. */
+static krb5_error_code
+iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
+{
+    krb5_error_code ret;
+    krb5_error *error;
+
+    ret = krb5_rd_error(context, enc_err, &error);
+    if (ret)
+        return ret;
+
+    if (error->error > 0 && error->error <= KRB_ERR_MAX)
+        ret = error->error + ERROR_TABLE_BASE_krb5;
+    else
+        ret = KRB5KRB_ERR_GENERIC;
+    krb5_free_error(context, error);
+    return ret;
+}
+
 /*
  * Create a IAKERB-FINISHED structure containing a checksum of
  * the entire IAKERB exchange.
@@ -298,7 +338,6 @@ iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     OM_uint32 dummy;
     krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)verifier_cred;
     krb5_data realm = empty_data(), reply = empty_data();
-    krb5_error error = { 0 };
     char *defrealm = NULL;
 
     /* Get the acceptor realm from the verifier cred if we can; otherwise try
@@ -310,8 +349,8 @@ iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         ret = krb5_get_default_realm(ctx->k5c, &defrealm);
         if (ret) {
             /* Generate an error reply if there is no default realm. */
-            error.error = KRB_ERR_GENERIC;
-            ret = krb5_mk_error(ctx->k5c, &error, &reply);
+            ret = iakerb_mk_error(ctx->k5c, verifier_cred, KRB_ERR_GENERIC,
+                                  &reply);
             if (ret)
                 goto cleanup;
         } else {
@@ -346,7 +385,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     krb5_data request = empty_data(), reply = empty_data();
     krb5_data realm = empty_data();
     OM_uint32 tmp;
-    int tcp_only, use_primary;
+    int tcp_only, use_primary, protocol_err;
     krb5_ui_4 kdc_code;
 
     output_token->length = 0;
@@ -396,15 +435,10 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     }
 
     if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
-        krb5_error error;
-
-        memset(&error, 0, sizeof(error));
-        if (code == KRB5_KDC_UNREACH)
-            error.error = KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE;
-        else if (code == KRB5_REALM_UNKNOWN)
-            error.error = KRB_AP_ERR_IAKERB_KDC_NOT_FOUND;
-
-        code = krb5_mk_error(ctx->k5c, &error, &reply);
+        protocol_err = (code == KRB5_KDC_UNREACH) ?
+            KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE :
+            KRB_AP_ERR_IAKERB_KDC_NOT_FOUND;
+        code = iakerb_mk_error(ctx->k5c, verifier_cred, protocol_err, &reply);
         if (code != 0)
             goto cleanup;
     } else if (code != 0)
@@ -563,6 +597,11 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         code = iakerb_save_token(ctx, input_token);
         if (code != 0)
             goto cleanup;
+
+        if (krb5_is_krb_error(&in)) {
+            code = iakerb_rd_error(ctx->k5c, &in);
+            goto cleanup;
+        }
     }
 
     switch (ctx->state) {
