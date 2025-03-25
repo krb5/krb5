@@ -28,9 +28,14 @@ realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'h:host'])
 
-# Test IAKERB realm discovery without default_realm set.  (Use a
-# GSS_KRB5_NT_PRINCIPAL_NAME acceptor name so that
-# gss_accept_sec_context() knows the realm.)
+# Test IAKERB realm discovery without default_realm set.  We get an
+# error because the acceptor does not know the realm.
+realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
+           'h:host'], env=no_default, expected_code=1,
+          expected_msg='Generic error')
+
+# Test again, using a GSS_KRB5_NT_PRINCIPAL_NAME acceptor name so that
+# gss_accept_sec_context() knows the realm.
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'p:' + realm.host_princ], env=no_default)
 
