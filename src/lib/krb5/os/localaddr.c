@@ -1437,7 +1437,7 @@ static struct hostent *local_addr_fallback_kludge(void)
     if (err == SOCKET_ERROR)
         return NULL;
 
-    err = getsockname(sock, (LPSOCKADDR) &addr, (int *) size);
+    err = getsockname(sock, (LPSOCKADDR) &addr, &size);
     if (err == SOCKET_ERROR)
         return NULL;
 
