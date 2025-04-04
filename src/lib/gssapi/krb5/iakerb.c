@@ -349,8 +349,8 @@ iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         ret = krb5_get_default_realm(ctx->k5c, &defrealm);
         if (ret) {
             /* Generate an error reply if there is no default realm. */
-            ret = iakerb_mk_error(ctx->k5c, verifier_cred, KRB_ERR_GENERIC,
-                                  &reply);
+            ret = iakerb_mk_error(ctx->k5c, verifier_cred,
+                                  KRB_AP_ERR_IAKERB_KDC_NOT_FOUND, &reply);
             if (ret)
                 goto cleanup;
         } else {
@@ -600,7 +600,15 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
         if (krb5_is_krb_error(&in)) {
             code = iakerb_rd_error(ctx->k5c, &in);
-            goto cleanup;
+            if (code == KRB5KRB_AP_ERR_IAKERB_KDC_NOT_FOUND &&
+                ctx->state == IAKERB_REALM_DISCOVERY) {
+                save_error_string(code, _("The IAKERB proxy could not "
+                                          "determine its realm"));
+            }
+            if (code == KRB5KRB_AP_ERR_IAKERB_KDC_NOT_FOUND ||
+                code == KRB5KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE)
+                goto cleanup;
+            code = 0;
         }
     }
 

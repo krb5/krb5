@@ -9,6 +9,7 @@ for realm in multipass_realms():
     realm.run(['./t_pcontok', 'p:' + realm.host_princ])
 
 realm = K5Realm()
+realm.run([kadminl, 'modprinc', '+preauth', realm.user_princ])
 
 remove_default = {'libdefaults': {'default_realm': None}}
 change_default = {'libdefaults': {'default_realm': 'WRONG.REALM'}}
@@ -32,7 +33,7 @@ realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
 # error because the acceptor does not know the realm.
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'h:host'], env=no_default, expected_code=1,
-          expected_msg='Generic error')
+          expected_msg='The IAKERB proxy could not determine its realm')
 
 # Test again, using a GSS_KRB5_NT_PRINCIPAL_NAME acceptor name so that
 # gss_accept_sec_context() knows the realm.
