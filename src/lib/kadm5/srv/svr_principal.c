@@ -1304,9 +1304,7 @@ kadm5_chpass_principal_3(void *server_handle,
         goto done;
 
     kdb->pw_expiration = 0;
-    if ((adb.aux_attributes & KADM5_POLICY)) {
-        /* the policy was loaded before */
-
+    if (have_pol) {
         ret = check_pw_reuse(handle->context, hist_keyblocks,
                              kdb->n_key_data, kdb->key_data,
                              1, &hist);
