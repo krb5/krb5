@@ -1606,7 +1606,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             if (tl == NULL)
                 goto cleanup;
             tl->tl_data_type = KRB5_TL_CONSTRAINED_DELEGATION_ACL;
-            tl->tl_data_length = strlen(a2d2[i]);
+            tl->tl_data_length = strlen(a2d2[i]) + 1;
             tl->tl_data_contents = (unsigned char *)strdup(a2d2[i]);
             if (tl->tl_data_contents == NULL) {
                 ret = ENOMEM;
