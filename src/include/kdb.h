@@ -636,7 +636,7 @@ krb5_dbe_cpw( krb5_context        kcontext,
               int                         ks_tuple_count,
               char              * passwd,
               int                         new_kvno,
-              krb5_boolean        keepold,
+              unsigned int        keepold,
               krb5_db_entry     * db_entry);
 
 
@@ -652,7 +652,7 @@ krb5_dbe_crk( krb5_context        context,
               krb5_keyblock       * master_key,
               krb5_key_salt_tuple       * ks_tuple,
               int                         ks_tuple_count,
-              krb5_boolean        keepold,
+              unsigned int        keepold,
               krb5_db_entry     * db_entry);
 
 krb5_error_code
@@ -774,7 +774,7 @@ krb5_dbe_def_cpw( krb5_context    context,
                   int                     ks_tuple_count,
                   char          * passwd,
                   int                     new_kvno,
-                  krb5_boolean    keepold,
+                  unsigned int    keepold,
                   krb5_db_entry * db_entry);
 
 krb5_error_code
@@ -1250,7 +1250,7 @@ typedef struct _kdb_vftabl {
                                   krb5_keyblock *master_key,
                                   krb5_key_salt_tuple *ks_tuple,
                                   int ks_tuple_count, char *passwd,
-                                  int new_kvno, krb5_boolean keepold,
+                                  int new_kvno, unsigned int keepold,
                                   krb5_db_entry *db_entry);
 
     /*

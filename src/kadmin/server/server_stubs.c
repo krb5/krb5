@@ -17,6 +17,10 @@
 #include "misc.h"
 #include "auth.h"
 
+/* A principal changing its own keys may retain at most this many key
+ * versions. */
+#define MAX_SELF_KEEPOLD 5
+
 extern gss_name_t                       gss_changepw_name;
 extern gss_name_t                       gss_oldchangepw_name;
 extern void *                           global_server_handle;
@@ -375,6 +379,24 @@ check_self_keychange(kadm5_server_handle_t handle, struct svc_req *rqstp,
         return KADM5_AUTH_INITIAL;
 
     return check_min_life(handle, princ, NULL, 0);
+}
+
+/*
+ * Return the appropriate libkadm5 keepold value for a key change request,
+ * given the boolean keepold input from the client.  0 means discard all old
+ * keys, 1 means retain all old keys, and a greater value means to retain that
+ * many key versions including the new one.  A principal modifying its own keys
+ * is allowed to retain only a limited number of key versions.
+ */
+static unsigned int
+clamp_self_keepold(kadm5_server_handle_t handle, krb5_principal princ,
+                   krb5_boolean keepold)
+{
+    if (!keepold)
+        return 0;
+    if (krb5_principal_compare(handle->context, handle->current_caller, princ))
+        return MAX_SELF_KEEPOLD;
+    return 1;
 }
 
 static int
@@ -875,6 +897,7 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
     kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
+    unsigned int                    keepold;
     kadm5_server_handle_t           handle;
     const char                      *errmsg = NULL;
 
@@ -899,8 +922,9 @@ chpass_principal3_2_svc(chpass3_arg *arg, generic_ret *ret,
     } else  {
         ret->code = check_self_keychange(handle, rqstp, rec.principal);
         if (!ret->code) {
+            keepold = clamp_self_keepold(handle, rec.principal, arg->keepold);
             ret->code = kadm5_chpass_principal_3(handle, rec.principal,
-                                                 arg->keepold, arg->n_ks_tuple,
+                                                 keepold, arg->n_ks_tuple,
                                                  arg->ks_tuple, arg->pass);
         }
     }
@@ -981,6 +1005,7 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
     kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
+    unsigned int                    keepold;
     kadm5_server_handle_t           handle;
     const char                      *errmsg = NULL;
 
@@ -999,10 +1024,10 @@ setkey_principal3_2_svc(setkey3_arg *arg, generic_ret *ret,
         }
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
                stub_auth(handle, OP_SETKEY, rec.principal, NULL, NULL, NULL)) {
-        ret->code = kadm5_setkey_principal_3(handle, rec.principal,
-                                             arg->keepold, arg->n_ks_tuple,
-                                             arg->ks_tuple, arg->keyblocks,
-                                             arg->n_keys);
+        keepold = clamp_self_keepold(handle, rec.principal, arg->keepold);
+        ret->code = kadm5_setkey_principal_3(handle, rec.principal, keepold,
+                                             arg->n_ks_tuple, arg->ks_tuple,
+                                             arg->keyblocks, arg->n_keys);
     } else {
         log_unauth("kadm5_setkey_principal", prime_arg,
                    &client_name, &service_name, rqstp);
@@ -1034,6 +1059,7 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
     kadm5_principal_ent_rec         rec = { 0 };
     gss_buffer_desc                 client_name = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc                 service_name = GSS_C_EMPTY_BUFFER;
+    unsigned int                    keepold;
     kadm5_server_handle_t           handle;
     const char                      *errmsg = NULL;
 
@@ -1052,9 +1078,9 @@ setkey_principal4_2_svc(setkey4_arg *arg, generic_ret *ret,
         }
     } else if (!(CHANGEPW_SERVICE(rqstp)) &&
                stub_auth(handle, OP_SETKEY, rec.principal, NULL, NULL, NULL)) {
-        ret->code = kadm5_setkey_principal_4(handle, rec.principal,
-                                             arg->keepold, arg->key_data,
-                                             arg->n_key_data);
+        keepold = clamp_self_keepold(handle, rec.principal, arg->keepold);
+        ret->code = kadm5_setkey_principal_4(handle, rec.principal, keepold,
+                                             arg->key_data, arg->n_key_data);
     } else {
         log_unauth("kadm5_setkey_principal", prime_arg, &client_name,
                    &service_name, rqstp);
@@ -1167,6 +1193,7 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
     gss_buffer_desc             service_name = GSS_C_EMPTY_BUFFER;
     krb5_keyblock               *k;
     int                         nkeys;
+    unsigned int                keepold;
     kadm5_server_handle_t       handle;
     const char                  *errmsg = NULL;
 
@@ -1186,9 +1213,9 @@ chrand_principal3_2_svc(chrand3_arg *arg, chrand_ret *ret,
     } else {
         ret->code = check_self_keychange(handle, rqstp, rec.principal);
         if (!ret->code) {
+            keepold = clamp_self_keepold(handle, rec.principal, arg->keepold);
             ret->code = kadm5_randkey_principal_3(handle, rec.principal,
-                                                  arg->keepold,
-                                                  arg->n_ks_tuple,
+                                                  keepold, arg->n_ks_tuple,
                                                   arg->ks_tuple, &k, &nkeys);
         }
     }
