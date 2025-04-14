@@ -1218,7 +1218,7 @@ kadm5_chpass_principal(void *server_handle,
 
 kadm5_ret_t
 kadm5_chpass_principal_3(void *server_handle,
-                         krb5_principal principal, krb5_boolean keepold,
+                         krb5_principal principal, unsigned int keepold,
                          int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
                          char *password)
 {
@@ -1387,7 +1387,7 @@ kadm5_randkey_principal(void *server_handle,
 kadm5_ret_t
 kadm5_randkey_principal_3(void *server_handle,
                           krb5_principal principal,
-                          krb5_boolean keepold,
+                          unsigned int keepold,
                           int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
                           krb5_keyblock **keyblocks,
                           int *n_keys)
@@ -1518,7 +1518,7 @@ kadm5_setkey_principal(void *server_handle,
 kadm5_ret_t
 kadm5_setkey_principal_3(void *server_handle,
                          krb5_principal principal,
-                         krb5_boolean keepold,
+                         unsigned int keepold,
                          int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
                          krb5_keyblock *keyblocks,
                          int n_keys)
@@ -1579,7 +1579,7 @@ make_ks_from_key_data(krb5_context context, kadm5_key_data *key_data,
 
 kadm5_ret_t
 kadm5_setkey_principal_4(void *server_handle, krb5_principal principal,
-                         krb5_boolean keepold, kadm5_key_data *key_data,
+                         unsigned int keepold, kadm5_key_data *key_data,
                          int n_key_data)
 {
     krb5_db_entry *kdb;
