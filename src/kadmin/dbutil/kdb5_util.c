@@ -522,7 +522,7 @@ add_random_key(int argc, char **argv)
 
     int free_keysalts;
     char *me = progname;
-    char *ks_str = NULL;
+    char *ks_str = "";
     char *pr_str;
     krb5_keyblock *tmp_mkey;
 
