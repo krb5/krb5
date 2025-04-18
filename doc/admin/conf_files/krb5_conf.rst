@@ -1052,8 +1052,10 @@ information for PKINIT is as follows:
     a particular smard card reader or token if there is more than one
     available.  ``certid=`` and/or ``certlabel=`` may be specified to
     force the selection of a particular certificate on the device.
-    See the **pkinit_cert_match** configuration option for more ways
-    to select a particular certificate to use for PKINIT.
+    Specifier values must not contain colon characters, as colons are
+    always treated as separators.  See the **pkinit_cert_match**
+    configuration option for more ways to select a particular
+    certificate to use for PKINIT.
 
 **ENV:**\ *envvar*
     *envvar* specifies the name of an environment variable which has
