@@ -56,7 +56,7 @@ create_socket(const struct sockaddr *addr)
         abort();
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) != 0)
         abort();
-#ifdef SO_REUSEPORT
+#if defined(SO_REUSEPORT) && defined(__APPLE__)
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one)) != 0)
         abort();
 #endif

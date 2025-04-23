@@ -92,7 +92,9 @@ setreuseaddr(int sock, int value)
     st = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value));
     if (st)
         return st;
-#ifdef SO_REUSEPORT
+#if defined(SO_REUSEPORT) && defined(__APPLE__)
+    /* macOS experimentally needs this flag as well to avoid conflicts between
+     * recently exited server processes and new ones. */
     st = setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &value, sizeof(value));
     if (st)
         return st;
