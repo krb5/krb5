@@ -685,7 +685,7 @@ Release 1.21
   - Improved the test framework's detection of memory errors in daemon
     processes when used with asan.
 
-Release 1.21
+Release 1.22
 
 * User experience:
 
@@ -697,10 +697,24 @@ Release 1.21
     make fewer DNS queries in some configurations.
 
   - The realm configuration variable "sitename" can be set to cause
-    the client look for site-specific DNS records when making KDC
+    the client to query site-specific DNS records when making KDC
     requests.
 
+* Administrator experience:
+
+  - Principal aliases are supported in the DB2 and LMDB KDB modules
+    and in the kadmin protocol.  (The LDAP KDB module has supported
+    aliases since release 1.7.)
+
+  - UNIX domain sockets are supported for the Kerberos and kpasswd
+    protocols.
+
+  - systemd socket activation is supported for krb5kdc and kadmind.
+
 * Developer experience:
+
+  - KDB modules can be be implemented in terms of other modules using
+    the new krb5_db_load_module() function.
 
   - The profile library supports the modification of empty profiles
     and the copying of modified profiles, making it possible to
@@ -713,21 +727,25 @@ Release 1.21
 
 * Protocol evolution:
 
-  - PKINIT has support for elliptic curve client certificates and for
-    ECDH key exchange.
+  - The PKINIT preauth module supports elliptic curve client
+    certificates, ECDH key exchange, and the Microsoft paChecksum2
+    field.
 
-  - The IAKERB implementation has been changed to comply with the
-    standard.
+  - The IAKERB implementation has been changed to comply with the most
+    recent draft standard and to support realm discovery.
+
+  - Message-Authenticator is supported in the RADIUS implementation
+    used by the OTP kdcpreauth module.
 
 * Code quality:
 
-  - Old-style function declarations have been removed, to accomodate
-    compilers removing support for them.
+  - Removed old-style function declarations, to accomodate compilers
+    which have removed support for them.
 
-  - OSS-Fuzz support has been added to the project's continuous
-    integration infrastructure.
+  - Added OSS-Fuzz to the project's continuous integration
+    infrastructure.
 
-  - GSS per-message token parsing code has been rewritten for improved
+  - Rewrote the GSS per-message token parsing code for improved
     safety.
 
 `Pre-authentication mechanisms`
