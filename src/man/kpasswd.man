@@ -55,11 +55,11 @@ identity of the user invoking the kpasswd command.
 .UNINDENT
 .SH ENVIRONMENT
 .sp
-See kerberos(7) for a description of Kerberos environment
+See \fI\%kerberos\fP for a description of Kerberos environment
 variables.
 .SH SEE ALSO
 .sp
-kadmin(1), kadmind(8), kerberos(7)
+\fI\%kadmin\fP, \fI\%kadmind\fP, \fI\%kerberos\fP
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

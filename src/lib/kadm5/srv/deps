@@ -227,9 +227,9 @@ svr_iters.so svr_iters.po $(OUTPRE)svr_iters.$(OBJEXT): \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
   $(top_srcdir)/include/gssrpc/svc.h $(top_srcdir)/include/gssrpc/svc_auth.h \
-  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/kdb.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/plugin.h \
-  svr_iters.c
+  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/k5-regex.h \
+  $(top_srcdir)/include/kdb.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/plugin.h svr_iters.c
 svr_chpass_util.so svr_chpass_util.po $(OUTPRE)svr_chpass_util.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \

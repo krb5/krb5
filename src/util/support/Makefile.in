@@ -172,7 +172,7 @@ SRCS=\
 	$(srcdir)/getopt.c \
 	$(srcdir)/getopt_long.c \
 	$(srcdir)/secure_getenv.c \
-	$(srcdir)/regex.c
+	$(srcdir)/regex.cpp
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.

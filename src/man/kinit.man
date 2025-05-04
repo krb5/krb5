@@ -68,7 +68,7 @@ choice of principal name.
 display verbose output.
 .TP
 \fB\-l\fP \fIlifetime\fP
-(duration string.)  Requests a ticket with the lifetime
+(\fI\%Time duration\fP string.)  Requests a ticket with the lifetime
 \fIlifetime\fP\&.
 .sp
 For example, \fBkinit \-l 5:30\fP or \fBkinit \-l 5h30m\fP\&.
@@ -79,7 +79,7 @@ longer than the maximum ticket lifetime (configured by each site)
 will not override the configured maximum ticket lifetime.
 .TP
 \fB\-s\fP \fIstart_time\fP
-(duration string.)  Requests a postdated ticket.  Postdated
+(\fI\%Time duration\fP string.)  Requests a postdated ticket.  Postdated
 tickets are issued with the \fBinvalid\fP flag set, and need to be
 resubmitted to the KDC for validation before use.
 .sp
@@ -87,7 +87,7 @@ resubmitted to the KDC for validation before use.
 can become valid.
 .TP
 \fB\-r\fP \fIrenewable_life\fP
-(duration string.)  Requests renewable tickets, with a total
+(\fI\%Time duration\fP string.)  Requests renewable tickets, with a total
 lifetime of \fIrenewable_life\fP\&.
 .TP
 \fB\-f\fP
@@ -128,9 +128,9 @@ expired ticket cannot be renewed, even if the ticket is still
 within its renewable life.
 .sp
 Note that renewable tickets that have expired as reported by
-klist(1) may sometimes be renewed using this option,
+\fI\%klist\fP may sometimes be renewed using this option,
 because the KDC applies a grace period to account for client\-KDC
-clock skew.  See krb5.conf(5) \fBclockskew\fP setting.
+clock skew.  See \fI\%krb5.conf\fP \fBclockskew\fP setting.
 .TP
 \fB\-k\fP [\fB\-i\fP | \fB\-t\fP \fIkeytab_file\fP]
 requests a ticket, obtained from a key in the local host\(aqs keytab.
@@ -149,7 +149,7 @@ Requests anonymous processing.  Two types of anonymous principals
 are supported.
 .sp
 For fully anonymous Kerberos, configure pkinit on the KDC and
-configure \fBpkinit_anchors\fP in the client\(aqs krb5.conf(5)\&.
+configure \fBpkinit_anchors\fP in the client\(aqs \fI\%krb5.conf\fP\&.
 Then use the \fB\-n\fP option with a principal of the form \fB@REALM\fP
 (an empty principal name followed by the at\-sign and a realm
 name).  If permitted by the KDC, an anonymous ticket will be
@@ -208,7 +208,7 @@ specify a pre\-authentication \fIattribute\fP and \fIvalue\fP to be
 interpreted by pre\-authentication modules.  The acceptable
 attribute and value values vary from module to module.  This
 option may be specified multiple times to specify multiple
-attributes.  If no value is specified, it is assumed to be "yes".
+attributes.  If no value is specified, it is assumed to be \(dqyes\(dq.
 .sp
 The following attributes are recognized by the PKINIT
 pre\-authentication mechanism:
@@ -233,7 +233,7 @@ supported.
 .UNINDENT
 .SH ENVIRONMENT
 .sp
-See kerberos(7) for a description of Kerberos environment
+See \fI\%kerberos\fP for a description of Kerberos environment
 variables.
 .SH FILES
 .INDENT 0.0
@@ -246,7 +246,7 @@ default location for the local host\(aqs keytab.
 .UNINDENT
 .SH SEE ALSO
 .sp
-klist(1), kdestroy(1), kerberos(7)
+\fI\%klist\fP, \fI\%kdestroy\fP, \fI\%kerberos\fP
 .SH AUTHOR
 MIT
 .SH COPYRIGHT

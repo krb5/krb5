@@ -36,16 +36,16 @@ sclient \- sample Kerberos version 5 client
 .SH DESCRIPTION
 .sp
 sclient is a sample application, primarily useful for testing
-purposes.  It contacts a sample server sserver(8) and
+purposes.  It contacts a sample server \fI\%sserver\fP and
 authenticates to it using Kerberos version 5 tickets, then displays
 the server\(aqs response.
 .SH ENVIRONMENT
 .sp
-See kerberos(7) for a description of Kerberos environment
+See \fI\%kerberos\fP for a description of Kerberos environment
 variables.
 .SH SEE ALSO
 .sp
-kinit(1), sserver(8), kerberos(7)
+\fI\%kinit\fP, \fI\%sserver\fP, \fI\%kerberos\fP
 .SH AUTHOR
 MIT
 .SH COPYRIGHT
