@@ -1331,9 +1331,6 @@ init_creds_step_request(krb5_context context,
     /* Don't continue after a keyboard interrupt. */
     if (code == KRB5_LIBOS_PWDINTR)
         goto cleanup;
-    /* Don't continue if fallback is disabled. */
-    if (code && ctx->fallback_disabled)
-        goto cleanup;
     if (code) {
         /* See if we can try a different preauth mech before giving up. */
         k5_save_ctx_error(context, code, &save);
