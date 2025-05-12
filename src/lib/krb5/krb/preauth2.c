@@ -552,7 +552,9 @@ set_cc_config(krb5_context context, krb5_clpreauth_rock rock,
 static void
 disable_fallback(krb5_context context, krb5_clpreauth_rock rock)
 {
-    ((krb5_init_creds_context)rock)->fallback_disabled = TRUE;
+    krb5_init_creds_context ctx = (krb5_init_creds_context)rock;
+
+    ctx->allowed_preauth_type = ctx->current_preauth_type;
 }
 
 static struct krb5_clpreauth_callbacks_st callbacks = {
@@ -676,6 +678,7 @@ process_pa_data(krb5_context context, krb5_init_creds_context ctx,
             if (real && previously_failed(ctx, pa->pa_type))
                 continue;
             mod_pa = NULL;
+            ctx->current_preauth_type = pa->pa_type;
             ret = clpreauth_process(context, h, modreq, ctx->opt, &callbacks,
                                     (krb5_clpreauth_rock)ctx, ctx->request,
                                     ctx->inner_request_body,
@@ -908,6 +911,7 @@ k5_preauth_tryagain(krb5_context context, krb5_init_creds_context ctx,
     if (h == NULL)
         return KRB5KRB_ERR_GENERIC;
     mod_pa = NULL;
+    ctx->current_preauth_type = pa_type;
     ret = clpreauth_tryagain(context, h, modreq, ctx->opt, &callbacks,
                              (krb5_clpreauth_rock)ctx, ctx->request,
                              ctx->inner_request_body,
@@ -954,6 +958,7 @@ fill_response_items(krb5_context context, krb5_init_creds_context ctx,
         h = find_module(context, ctx, pa->pa_type, &modreq);
         if (h == NULL)
             continue;
+        ctx->current_preauth_type = pa->pa_type;
         ret = clpreauth_prep_questions(context, h, modreq, ctx->opt,
                                        &callbacks, (krb5_clpreauth_rock)ctx,
                                        ctx->request, ctx->inner_request_body,
