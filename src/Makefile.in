@@ -25,6 +25,7 @@ SUBDIRS=util include lib \
 	@lmdb_plugin_dir@ \
 	plugins/kdb/test \
 	plugins/kdcpolicy/test \
+	plugins/kdcpolicy/xrealmauthz \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
 	plugins/preauth/spake \

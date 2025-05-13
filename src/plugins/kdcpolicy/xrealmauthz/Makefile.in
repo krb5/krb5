@@ -1,0 +1,18 @@
+mydir=plugins$(S)kdcpolicy$(S)xrealmauthz
+BUILDTOP=$(REL)..$(S)..$(S)..
+
+LIBBASE=xrealmauthz
+LIBMAJOR=0
+LIBMINOR=0
+RELDIR=../plugins/kdcpolicy/xrealmauthz
+SHLIB_EXPDEPS=$(KRB5_BASE_DEPLIBS) $(KDB5_DEPLIB)
+SHLIB_EXPLIBS=$(KRB5_BASE_LIBS) $(KDB5_LIB)
+STLIBOBJS=main.o
+
+SRCS=$(srcdir)/main.c
+
+all-unix: all-libs
+install-unix:
+clean-unix:: clean-libs clean-libobjs
+@libnover_frag@
+@libobj_frag@
