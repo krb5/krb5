@@ -1,0 +1,4 @@
+main.so main.po $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/krb5/plugin.h \
+  $(BUILDTOP)/include/krb5/kdcpolicy_plugin.h $(BUILDTOP)/include/kdb.h \
+  $(COM_ERR_DEPS) main.c
