@@ -217,7 +217,7 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
     if (policyname == NULL  || policy == NULL) {
         st = EINVAL;
         k5_setmsg(context, st, _("Ticket Policy Object information missing"));
-        goto cleanup;
+        return st;
     }
 
     SETUP_CONTEXT();
