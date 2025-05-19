@@ -1163,10 +1163,8 @@ krb5_ldap_get_reference_count(krb5_context context, char *dn, char *refattr,
     krb5_ldap_server_handle *ldap_server_handle = NULL;
     LDAPMessage *result = NULL;
 
-    if (dn == NULL || refattr == NULL) {
-        st = EINVAL;
-        goto cleanup;
-    }
+    if (dn == NULL || refattr == NULL)
+        return EINVAL;
 
     SETUP_CONTEXT();
     if (ld == NULL) {
