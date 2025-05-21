@@ -31,16 +31,9 @@
  */
 
 /*
- * BIND 4 doesn't have the ns_initparse() API, so we need to do some
- * manual parsing via the HEADER struct.  BIND 8 does have
- * ns_initparse(), but has enums for the various protocol constants
- * rather than the BIND 4 macros.  BIND 9 (at least on macOS 10.3)
- * appears to disable res_nsearch() if BIND_8_COMPAT is defined
- * (which is necessary to obtain the HEADER struct).
- *
- * We use ns_initparse() if available at all, and never define
- * BIND_8_COMPAT.  If there is no ns_initparse(), we do manual parsing
- * by using the HEADER struct.
+ * BIND 4 doesn't have the ns_initparse() API, so we need to do some manual
+ * parsing.  BIND 8 does have ns_initparse(), but has enums for the various
+ * protocol constants rather than the BIND 4 macros.
  */
 
 #ifndef KRB5_DNSGLUE_H
@@ -50,6 +43,7 @@
 #ifdef KRB5_DNS_LOOKUP
 
 #include "k5-int.h"
+#include "k5-input.h"
 #include "os-proto.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -117,40 +111,27 @@
 #define T_URI 256
 #endif
 
-/*
- * INCR_OK
- *
- * Given moving pointer PTR offset from BASE, return true if adding
- * INCR to PTR doesn't move it PTR than MAX bytes from BASE.
- */
-#define INCR_OK(base, max, ptr, incr)                           \
-    ((incr) <= (max) - ((const unsigned char *)(ptr)            \
-                        - (const unsigned char *)(base)))
+struct k5_dns_state;
+
+/* Perform a name lookup and set *ds_out to a handle for iteration over the
+ * answers.  Return -1 on error, 0 on success. */
+int k5_dns_init(const char *host, int nclass, int ntype,
+                struct k5_dns_state **ds_out);
 
 /*
- * SAFE_GETUINT16
- *
- * Given PTR offset from BASE, if at least INCR bytes are safe to
- * read, get network byte order uint16 into S, and increment PTR.  On
- * failure, goto LABEL.
+ * Initialize *ans_out with the record data of the next matching answer from
+ * ds, or with the empty string if there are no more matching answers.  Return
+ * -1 on error, 0 on success.
  */
+int k5_dns_nextans(struct k5_dns_state *ds, struct k5input *ans_out);
 
-#define SAFE_GETUINT16(base, max, ptr, incr, s, label)  \
-    do {                                                \
-        if (!INCR_OK(base, max, ptr, incr)) goto label; \
-        (s) = (unsigned short)(ptr)[0] << 8             \
-            | (unsigned short)(ptr)[1];                 \
-        (ptr) += (incr);                                \
-    } while (0)
+/* Expand a compressed name from in into buf (a buffer with at least len bytes
+ * of space) and advance past it.  Return -1 on error, 0 on success. */
+int k5_dns_expand(struct k5_dns_state *ds, struct k5input *in,
+                  char *buf, int len);
 
-struct krb5int_dns_state;
-
-int krb5int_dns_init(struct krb5int_dns_state **, char *, int, int);
-int krb5int_dns_nextans(struct krb5int_dns_state *,
-                        const unsigned char **, int *);
-int krb5int_dns_expand(struct krb5int_dns_state *,
-                       const unsigned char *, char *, int);
-void krb5int_dns_fini(struct krb5int_dns_state *);
+/* Release ds. */
+void k5_dns_fini(struct k5_dns_state *ds);
 
 #endif /* KRB5_DNS_LOOKUP */
 #endif /* !defined(KRB5_DNSGLUE_H) */

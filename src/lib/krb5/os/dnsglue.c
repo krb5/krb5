@@ -37,34 +37,24 @@
 #endif
 
 /*
- * Only use res_ninit() if there's also a res_ndestroy(), to avoid
- * memory leaks (Linux & Solaris) and outright corruption (AIX 4.x,
- * 5.x).  While we're at it, make sure res_nsearch() is there too.
- *
- * In any case, it is probable that platforms having broken
- * res_ninit() will have thread safety hacks for res_init() and _res.
- */
-
-/*
  * Opaque handle
  */
-struct krb5int_dns_state {
+struct k5_dns_state {
     int nclass;
     int ntype;
-    void *ansp;
-    int anslen;
-    int ansmax;
+    uint8_t *ans;
+    uint8_t *ansend;
 #if HAVE_NS_INITPARSE
     int cur_ans;
     ns_msg msg;
 #else
-    unsigned char *ptr;
+    struct k5input in;
     unsigned short nanswers;
 #endif
 };
 
 #if !HAVE_NS_INITPARSE
-static int initparse(struct krb5int_dns_state *);
+static int initparse(struct k5_dns_state *);
 #endif
 
 /*
@@ -110,35 +100,25 @@ static int initparse(struct krb5int_dns_state *);
 
 #endif
 
-/*
- * krb5int_dns_init()
- *
- * Initialize an opaque handle.  Do name lookup and initial parsing of
- * reply, skipping question section.  Prepare to iterate over answer
- * section.  Returns -1 on error, 0 on success.
- */
 int
-krb5int_dns_init(struct krb5int_dns_state **dsp,
-                 char *host, int nclass, int ntype)
+k5_dns_init(const char *host, int nclass, int ntype,
+            struct k5_dns_state **ds_out)
 {
-    struct krb5int_dns_state *ds;
-    int len, ret;
-    size_t nextincr, maxincr;
-    unsigned char *p;
+    struct k5_dns_state *ds;
+    int bufsize, len, ret = -1;
+    const int maxlen = 64 * 1024;
+    uint8_t *p;
     DECLARE_HANDLE(h);
 
-    *dsp = ds = malloc(sizeof(*ds));
+    *ds_out = NULL;
+
+    ds = malloc(sizeof(*ds));
     if (ds == NULL)
         return -1;
 
-    ret = -1;
     ds->nclass = nclass;
     ds->ntype = ntype;
-    ds->ansp = NULL;
-    ds->anslen = 0;
-    ds->ansmax = 0;
-    nextincr = 4096;
-    maxincr = INT_MAX;
+    ds->ans = ds->ansend = NULL;
 
 #if HAVE_NS_INITPARSE
     ds->cur_ans = 0;
@@ -147,78 +127,61 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     if (!INIT_HANDLE(h))
         return -1;
 
+    len = 0;
+    bufsize = 4096;
     do {
-        p = (ds->ansp == NULL)
-            ? malloc(nextincr) : realloc(ds->ansp, nextincr);
+        /* Use a buffer size larger than the previously returned length.  (We
+         * may go up to 128K to confirm that a 64K answer wasn't truncated.) */
+        while (bufsize <= len && bufsize <= maxlen)
+            bufsize *= 2;
 
-        if (p == NULL) {
-            ret = -1;
-            goto errout;
-        }
-        ds->ansp = p;
-        ds->ansmax = nextincr;
+        p = realloc(ds->ans, bufsize);
+        if (p == NULL)
+            goto cleanup;
+        ds->ans = p;
 
-        len = SEARCH(h, host, ds->nclass, ds->ntype, ds->ansp, ds->ansmax);
-        if ((size_t) len > maxincr) {
-            ret = -1;
-            goto errout;
-        }
-        while (nextincr < (size_t) len)
-            nextincr *= 2;
-        if (len < 0 || nextincr > maxincr) {
-            ret = -1;
-            goto errout;
-        }
-    } while (len > ds->ansmax);
+        len = SEARCH(h, host, ds->nclass, ds->ntype, ds->ans, bufsize);
+        if (len < 0 || len > maxlen)
+            goto cleanup;
 
-    ds->anslen = len;
+        /* A length equal to bufsize may indicate a truncated reply. */
+    } while (len >= bufsize);
+
+    ds->ansend = ds->ans + len;
 #if HAVE_NS_INITPARSE
-    ret = ns_initparse(ds->ansp, ds->anslen, &ds->msg);
+    ret = ns_initparse(ds->ans, len, &ds->msg);
 #else
     ret = initparse(ds);
 #endif
     if (ret < 0)
-        goto errout;
+        goto cleanup;
 
+    *ds_out = ds;
+    ds = NULL;
     ret = 0;
 
-errout:
+cleanup:
     DESTROY_HANDLE(h);
-    if (ret < 0) {
-        if (ds->ansp != NULL) {
-            free(ds->ansp);
-            ds->ansp = NULL;
-        }
-    }
-
+    k5_dns_fini(ds);
     return ret;
 }
 
 #if HAVE_NS_INITPARSE
-/*
- * krb5int_dns_nextans - get next matching answer record
- *
- * Sets pp to NULL if no more records.  Returns -1 on error, 0 on
- * success.
- */
 int
-krb5int_dns_nextans(struct krb5int_dns_state *ds,
-                    const unsigned char **pp, int *lenp)
+k5_dns_nextans(struct k5_dns_state *ds, struct k5input *ans_out)
 {
     int len;
     ns_rr rr;
 
-    *pp = NULL;
-    *lenp = 0;
+    k5_input_init(ans_out, NULL, 0);
     while (ds->cur_ans < ns_msg_count(ds->msg, ns_s_an)) {
         len = ns_parserr(&ds->msg, ns_s_an, ds->cur_ans, &rr);
         if (len < 0)
             return -1;
         ds->cur_ans++;
-        if (ds->nclass == (int)ns_rr_class(rr)
-            && ds->ntype == (int)ns_rr_type(rr)) {
-            *pp = ns_rr_rdata(rr);
-            *lenp = ns_rr_rdlen(rr);
+        if (ds->nclass == (int)ns_rr_class(rr) &&
+            ds->ntype == (int)ns_rr_type(rr)) {
+            k5_input_init(ans_out, ns_rr_rdata(rr), ns_rr_rdlen(rr));
             return 0;
         }
     }
@@ -226,35 +189,33 @@ krb5int_dns_nextans(struct krb5int_dns_state *ds,
 }
 #endif
 
-/*
- * krb5int_dns_expand - wrapper for dn_expand()
- */
 int
-krb5int_dns_expand(struct krb5int_dns_state *ds, const unsigned char *p,
-                   char *buf, int len)
+k5_dns_expand(struct k5_dns_state *ds, struct k5input *in, char *buf, int len)
 {
+    int clen;
 
+    if (in->status)
+        return -1;
+
+    /* Uncompress the name into buf. */
 #if HAVE_NS_NAME_UNCOMPRESS
-    return ns_name_uncompress(ds->ansp,
-                              (unsigned char *)ds->ansp + ds->anslen,
-                              p, buf, (size_t)len);
+    clen = ns_name_uncompress(ds->ans, ds->ansend, in->ptr, buf, (size_t)len);
 #else
-    return dn_expand(ds->ansp,
-                     (unsigned char *)ds->ansp + ds->anslen,
-                     p, buf, len);
+    clen = dn_expand(ds->ans, ds->ansend, in->ptr, buf, len);
 #endif
+
+    /* Advance in past the compressed name. */
+    (void)k5_input_get_bytes(in, clen);
+
+    return in->status ? -1 : 0;
 }
 
-/*
- * Free stuff.
- */
 void
-krb5int_dns_fini(struct krb5int_dns_state *ds)
+k5_dns_fini(struct k5_dns_state *ds)
 {
     if (ds == NULL)
         return;
-    if (ds->ansp != NULL)
-        free(ds->ansp);
+    free(ds->ans);
     free(ds);
 }
 
@@ -263,102 +224,83 @@ krb5int_dns_fini(struct krb5int_dns_state *ds)
  */
 #if !HAVE_NS_INITPARSE
 
-/*
- * initparse
- *
- * Skip header and question section of reply.  Set a pointer to the
- * beginning of the answer section, and prepare to iterate over
- * answer records.
- */
 static int
-initparse(struct krb5int_dns_state *ds)
+namelen(const uint8_t *ptr, const uint8_t *ans, const uint8_t *ansend)
 {
-    HEADER *hdr;
-    unsigned char *p;
-    unsigned short nqueries, nanswers;
-    int len;
-#if !HAVE_DN_SKIPNAME
-    char host[MAXDNAME];
-#endif
-
-    if ((size_t) ds->anslen < sizeof(HEADER))
-        return -1;
-
-    hdr = (HEADER *)ds->ansp;
-    p = ds->ansp;
-    nqueries = ntohs((unsigned short)hdr->qdcount);
-    nanswers = ntohs((unsigned short)hdr->ancount);
-    p += sizeof(HEADER);
-
-    /*
-     * Skip query records.
-     */
-    while (nqueries--) {
 #if HAVE_DN_SKIPNAME
-        len = dn_skipname(p, (unsigned char *)ds->ansp + ds->anslen);
+    return dn_skipname(ptr, ansend);
 #else
-        len = dn_expand(ds->ansp, (unsigned char *)ds->ansp + ds->anslen,
-                        p, host, sizeof(host));
+    char host[MAXDNAME];
+
+    return dn_expand(ans, ansend, ptr, host, sizeof(host));
 #endif
-        if (len < 0 || !INCR_OK(ds->ansp, ds->anslen, p, len + 4))
-            return -1;
-        p += len + 4;
-    }
-    ds->ptr = p;
-    ds->nanswers = nanswers;
-    return 0;
 }
 
-/*
- * krb5int_dns_nextans() - get next answer record
- *
- * Sets pp to NULL if no more records.
- */
-int
-krb5int_dns_nextans(struct krb5int_dns_state *ds,
-                    const unsigned char **pp, int *lenp)
+static void
+skipname(struct k5_dns_state *ds)
 {
     int len;
-    unsigned char *p;
-    unsigned short ntype, nclass, rdlen;
-#if !HAVE_DN_SKIPNAME
-    char host[MAXDNAME];
-#endif
 
-    *pp = NULL;
-    *lenp = 0;
-    p = ds->ptr;
+    if (ds->in.status)
+        return;
+    len = namelen(ds->in.ptr, ds->ans, ds->ansend);
+    if (len < 0)
+        k5_input_set_status(&ds->in, EINVAL);
+    else
+        (void)k5_input_get_bytes(&ds->in, len);
+}
 
+/* Prepare to iterate over answer records by reading the reply header and
+ * advancing past the questions section. */
+static int
+initparse(struct k5_dns_state *ds)
+{
+    uint16_t nqueries, nanswers;
+
+    k5_input_init(&ds->in, ds->ans, ds->ansend - ds->ans);
+
+    /* Skip id and flags. */
+    (void)k5_input_get_bytes(&ds->in, 4);
+
+    nqueries = k5_input_get_uint16_be(&ds->in);
+    nanswers = k5_input_get_uint16_be(&ds->in);
+
+    /* Skip nscount and arcount. */
+    (void)k5_input_get_bytes(&ds->in, 4);
+
+    /* Skip query records. */
+    while (nqueries--) {
+        /* Skip qname, then qtype and qclass. */
+        skipname(ds);
+        (void)k5_input_get_bytes(&ds->in, 4);
+    }
+    ds->nanswers = nanswers;
+    return ds->in.status ? -1 : 0;
+}
+
+int
+k5_dns_nextans(struct k5_dns_state *ds, struct k5input *ans_out)
+{
+    uint16_t ntype, nclass, rdlen;
+    const uint8_t *rdata;
+
+    k5_input_init(ans_out, NULL, 0);
     while (ds->nanswers--) {
-#if HAVE_DN_SKIPNAME
-        len = dn_skipname(p, (unsigned char *)ds->ansp + ds->anslen);
-#else
-        len = dn_expand(ds->ansp, (unsigned char *)ds->ansp + ds->anslen,
-                        p, host, sizeof(host));
-#endif
-        if (len < 0 || !INCR_OK(ds->ansp, ds->anslen, p, len))
-            return -1;
-        p += len;
-        SAFE_GETUINT16(ds->ansp, ds->anslen, p, 2, ntype, out);
-        /* Also skip 4 bytes of TTL */
-        SAFE_GETUINT16(ds->ansp, ds->anslen, p, 6, nclass, out);
-        SAFE_GETUINT16(ds->ansp, ds->anslen, p, 2, rdlen, out);
-
-        if (!INCR_OK(ds->ansp, ds->anslen, p, rdlen))
-            return -1;
-        if (rdlen > INT_MAX)
+        skipname(ds);
+        ntype = k5_input_get_uint16_be(&ds->in);
+        nclass = k5_input_get_uint16_be(&ds->in);
+        /* Skip TTL. */
+        (void)k5_input_get_bytes(&ds->in, 4);
+        rdlen = k5_input_get_uint16_be(&ds->in);
+        rdata = k5_input_get_bytes(&ds->in, rdlen);
+        if (rdata == NULL)
             return -1;
         if (nclass == ds->nclass && ntype == ds->ntype) {
-            *pp = p;
-            *lenp = rdlen;
-            ds->ptr = p + rdlen;
+            k5_input_init(ans_out, rdata, rdlen);
             return 0;
         }
-        p += rdlen;
     }
     return 0;
-out:
-    return -1;
 }
 
 #endif /* !HAVE_NS_INITPARSE */
@@ -451,10 +393,11 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
                     char **realm)
 {
     krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
-    const unsigned char *p, *base;
+    const uint8_t *p;
     char *txtname = NULL;
-    int ret, rdlen, len;
-    struct krb5int_dns_state *ds = NULL;
+    int ret, len;
+    struct k5_dns_state *ds = NULL;
+    struct k5input in = { 0 };
 
     /*
      * Form our query, and send it via DNS
@@ -463,33 +406,31 @@ k5_try_realm_txt_rr(krb5_context context, const char *prefix, const char *name,
     txtname = txt_lookup_name(prefix, name);
     if (txtname == NULL)
         return ENOMEM;
-    ret = krb5int_dns_init(&ds, txtname, C_IN, T_TXT);
+    ret = k5_dns_init(txtname, C_IN, T_TXT, &ds);
     if (ret < 0) {
         TRACE_TXT_LOOKUP_NOTFOUND(context, txtname);
         goto errout;
     }
 
-    ret = krb5int_dns_nextans(ds, &base, &rdlen);
-    if (ret < 0 || rdlen < 2 || *base == 0 || *base > rdlen - 1)
+    ret = k5_dns_nextans(ds, &in);
+    if (ret < 0 || in.len < 2)
         goto errout;
 
-    p = base;
-    len = *p++;
-    *realm = malloc((size_t)len + 1);
-    if (*realm == NULL) {
-        retval = ENOMEM;
+    len = k5_input_get_byte(&in);
+    p = k5_input_get_bytes(&in, len);
+    if (len == 0 || p == NULL)
         goto errout;
-    }
-    strncpy(*realm, (const char *)p, (size_t)len);
-    (*realm)[len] = '\0';
+    *realm = k5memdup0(p, len, &retval);
+    if (*realm == NULL)
+        goto errout;
     /* Avoid a common error. */
-    if ( (*realm)[len-1] == '.' )
-        (*realm)[len-1] = '\0';
-    retval = 0;
+    if ((*realm)[len - 1] == '.')
+        (*realm)[len - 1] = '\0';
+
     TRACE_TXT_LOOKUP_SUCCESS(context, txtname, *realm);
 
 errout:
-    krb5int_dns_fini(ds);
+    k5_dns_fini(ds);
     free(txtname);
     return retval;
 }
