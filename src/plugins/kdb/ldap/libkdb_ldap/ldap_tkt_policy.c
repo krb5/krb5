@@ -61,11 +61,8 @@ krb5_ldap_create_policy(krb5_context context, krb5_ldap_policy_params *policy,
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policy == NULL || policy->policy == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Ticket Policy Name missing"));
-        goto cleanup;
-    }
+    if (policy == NULL || policy->policy == NULL)
+        return EINVAL;
 
     SETUP_CONTEXT();
     GET_HANDLE();
@@ -137,11 +134,8 @@ krb5_ldap_modify_policy(krb5_context context, krb5_ldap_policy_params *policy,
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policy == NULL || policy->policy==NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Ticket Policy Name missing"));
-        goto cleanup;
-    }
+    if (policy == NULL || policy->policy == NULL)
+        return EINVAL;
 
     SETUP_CONTEXT();
     GET_HANDLE();
@@ -214,11 +208,8 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policyname == NULL  || policy == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Ticket Policy Object information missing"));
-        goto cleanup;
-    }
+    if (policyname == NULL || policy == NULL)
+        return EINVAL;
 
     SETUP_CONTEXT();
     GET_HANDLE();
@@ -306,12 +297,8 @@ krb5_ldap_delete_policy(krb5_context context, char *policyname)
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
-    if (policyname == NULL) {
-        st = EINVAL;
-        k5_prependmsg(context, st, _("Ticket Policy Object DN missing"));
-        goto cleanup;
-    }
-
+    if (policyname == NULL)
+        return EINVAL;
 
     SETUP_CONTEXT();
     GET_HANDLE();

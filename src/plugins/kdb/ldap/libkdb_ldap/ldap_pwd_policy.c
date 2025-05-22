@@ -348,10 +348,8 @@ krb5_ldap_get_password_policy(krb5_context context, char *name,
     krb5_clear_error_message(context);
 
     /* validate the input parameters */
-    if (name == NULL) {
-        st = EINVAL;
-        goto cleanup;
-    }
+    if (name == NULL)
+        return EINVAL;
 
     st = krb5_ldap_name_to_policydn(context, name, &policy_dn);
     if (st != 0)
