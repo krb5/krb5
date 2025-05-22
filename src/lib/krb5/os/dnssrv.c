@@ -189,12 +189,12 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
                   const char *service, const char *sitename,
                   struct srv_dns_entry **answers)
 {
-    const unsigned char *p = NULL, *base = NULL;
     char *name = NULL;
-    int size, ret, rdlen;
-    unsigned short priority, weight;
-    struct krb5int_dns_state *ds = NULL;
+    int size, ret;
+    uint16_t priority, weight;
+    struct k5_dns_state *ds = NULL;
     struct srv_dns_entry *head = NULL, *uri = NULL;
+    struct k5input in = { 0 };
 
     *answers = NULL;
 
@@ -205,7 +205,7 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
 
     TRACE_DNS_URI_SEND(context, name);
 
-    size = krb5int_dns_init(&ds, name, C_IN, T_URI);
+    size = k5_dns_init(name, C_IN, T_URI, &ds);
     if (size < 0 && sitename != NULL) {
         /* Try again without the site name. */
         free(name);
@@ -215,14 +215,14 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
         goto out;
 
     for (;;) {
-        ret = krb5int_dns_nextans(ds, &base, &rdlen);
-        if (ret < 0 || base == NULL)
+        ret = k5_dns_nextans(ds, &in);
+        if (ret < 0 || in.len == 0)
             goto out;
 
-        p = base;
-
-        SAFE_GETUINT16(base, rdlen, p, 2, priority, out);
-        SAFE_GETUINT16(base, rdlen, p, 2, weight, out);
+        priority = k5_input_get_uint16_be(&in);
+        weight = k5_input_get_uint16_be(&in);
+        if (in.status)
+            goto out;
 
         uri = k5alloc(sizeof(*uri), &ret);
         if (uri == NULL)
@@ -230,8 +230,7 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
 
         uri->priority = priority;
         uri->weight = weight;
-        /* rdlen - 4 bytes remain after the priority and weight. */
-        uri->host = k5memdup0(p, rdlen - 4, &ret);
+        uri->host = k5memdup0(in.ptr, in.len, &ret);
         if (uri->host == NULL) {
             free(uri);
             goto out;
@@ -242,7 +241,7 @@ k5_make_uri_query(krb5_context context, const krb5_data *realm,
     }
 
 out:
-    krb5int_dns_fini(ds);
+    k5_dns_fini(ds);
     free(name);
     *answers = head;
     return 0;
@@ -261,12 +260,12 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
                              const char *sitename,
                              struct srv_dns_entry **answers)
 {
-    const unsigned char *p = NULL, *base = NULL;
     char *name = NULL, host[MAXDNAME];
-    int size, ret, rdlen, nlen;
-    unsigned short priority, weight, port;
-    struct krb5int_dns_state *ds = NULL;
+    int size, ret;
+    uint16_t priority, weight, port;
+    struct k5_dns_state *ds = NULL;
     struct srv_dns_entry *head = NULL, *srv = NULL;
+    struct k5input in = { 0 };
 
     /*
      * First off, build a query of the form:
@@ -285,7 +284,7 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
 
     TRACE_DNS_SRV_SEND(context, name);
 
-    size = krb5int_dns_init(&ds, name, C_IN, T_SRV);
+    size = k5_dns_init(name, C_IN, T_SRV, &ds);
     if (size < 0 && sitename) {
         /* Try again without the site name. */
         free(name);
@@ -296,22 +295,20 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
         goto out;
 
     for (;;) {
-        ret = krb5int_dns_nextans(ds, &base, &rdlen);
-        if (ret < 0 || base == NULL)
+        ret = k5_dns_nextans(ds, &in);
+        if (ret < 0 || in.len == 0)
             goto out;
 
-        p = base;
-
-        SAFE_GETUINT16(base, rdlen, p, 2, priority, out);
-        SAFE_GETUINT16(base, rdlen, p, 2, weight, out);
-        SAFE_GETUINT16(base, rdlen, p, 2, port, out);
+        priority = k5_input_get_uint16_be(&in);
+        weight = k5_input_get_uint16_be(&in);
+        port = k5_input_get_uint16_be(&in);
 
         /*
          * RFC 2782 says the target is never compressed in the reply;
          * do we believe that?  We need to flatten it anyway, though.
          */
-        nlen = krb5int_dns_expand(ds, p, host, sizeof(host));
-        if (nlen < 0 || !INCR_OK(base, rdlen, p, nlen))
+        ret = k5_dns_expand(ds, &in, host, sizeof(host));
+        if (ret < 0)
             goto out;
 
         /*
@@ -340,7 +337,7 @@ krb5int_make_srv_query_realm(krb5_context context, const krb5_data *realm,
     }
 
 out:
-    krb5int_dns_fini(ds);
+    k5_dns_fini(ds);
     free(name);
     *answers = head;
     return 0;
