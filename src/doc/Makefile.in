@@ -11,6 +11,7 @@ DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
 PKCS11_MODNAME=@PKCS11_MODNAME@
+VENDORDIR=@VENDORDIR@
 
 RST_SOURCES= _static \
 	_templates \
@@ -36,6 +37,12 @@ PDFDIR=$(docsrc)/pdf
 PDFDOCS= admin appdev basic build plugindev user
 LATEXOPTS=
 
+if [ $(USE_VENDORDIR) = 1 ]; then \
+   USEVENDORDIR = "use_vendordir";\
+else \
+   USEVENDORDIR = "no_vendordir";\
+fi
+
 # Create HTML documentation in $(docsrc)/html suitable for a
 # release tarball or the web site (that is, without substitutions for
 # configured paths).  This can be done in an unconfigured source tree
@@ -43,7 +50,7 @@ LATEXOPTS=
 #     make -f Makefile.in SPHINX_ARGS= htmlsrc
 html: composite
 	rm -rf $(docsrc)/html
-	$(SPHINX_BUILD) -q rst_composite $(docsrc)/html
+	$(SPHINX_BUILD) -q rst_composite -t $(USEVENDORDIR) $(docsrc)/html
 
 # Dummy target for use in an unconfigured source tree.
 htmlsrc:
@@ -59,13 +66,13 @@ substhtml: composite paths.py
 
 # Create an ASCII (okay, UTF-8) version of the NOTICE file
 notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst $(docsrc)/version.py
-	$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .
+	$(SPHINX_BUILD) -b text -t notice -t $(USEVENDORDIR) -q $(docsrc) .
 
 NOTICE: notice.txt
 	cp notice.txt $(top_srcdir)/../NOTICE
 
 $(PDFDIR): composite
-	$(SPHINX_BUILD) -b latex -q rst_composite $(PDFDIR)
+	$(SPHINX_BUILD) -b latex -q -t $(USEVENDORDIR) rst_composite $(PDFDIR)
 	# sphinx-build generates a gmake-specific Makefile that we don't use
 	mv $(PDFDIR)/Makefile $(PDFDIR)/GMakefile
 
@@ -116,6 +123,7 @@ paths.py:
 	echo 'localstatedir = "``$(localstatedir)``"' >> $@
 	echo 'runstatedir = "``$(runstatedir)``"' >> $@
 	echo 'sysconfdir = "``$(sysconfdir)``"' >> $@
+	echo 'vendordir = "``$(VENDORDIR)``"' >> $@
 	echo 'ccache = "``$(DEFCCNAME)``"' >> $@
 	echo 'keytab = "``$(DEFKTNAME)``"' >> $@
 	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
