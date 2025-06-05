@@ -1447,6 +1447,31 @@ fi
 AC_SUBST(OSX)
 AC_SUBST(MACOS_FRAMEWORK)
 
+# Vendordir
+AC_ARG_WITH([vendordir],
+  AS_HELP_STRING([--with-vendordir=DIR], [Directory for distribution provided configuration files]),
+  [ if test ! -z "$with_vendordir" ; then
+		case $with_vendordir in
+			yes|no)
+				VENDORDIR="/usr/etc"
+				;;
+			/*)
+				VENDORDIR="$with_vendordir"
+				;;
+			*)
+                                AC_MSG_ERROR(You must specify an absolute path to --with-vendordir=DIR)
+				;;
+		esac
+	fi
+  ],
+  [])
+
+AS_IF([test "x$with_vendordir" != x], [
+  AC_DEFINE([USE_VENDORDIR], [1], [Define to 1 to use vendordir])
+  AC_DEFINE_UNQUOTED(VENDORDIR, "$VENDORDIR", [location of vendor configuration files])
+  AC_MSG_NOTICE([Used vendor dir: $with_vendordir])
+])
+
 # Build-time default ccache, keytab, and client keytab names.  These
 # can be given as variable arguments DEFCCNAME, DEFKTNAME, and
 # DEFCKTNAME.  Otherwise, we try to get the OS defaults from
