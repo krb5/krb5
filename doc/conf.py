@@ -239,7 +239,7 @@ if 'mansubs' in tags:
     localstatedir = '``@LOCALSTATEDIR@``'
     runstatedir = '``@RUNSTATEDIR@``'
     sysconfdir = '``@SYSCONFDIR@``'
-    vendordir = '``@VENDORDIR@``'
+    vendor_dir = '``@VENDOR_DIR@``'
     ccache = '``@CCNAME@``'
     keytab = '``@KTNAME@``'
     ckeytab = '``@CKTNAME@``'
@@ -254,7 +254,7 @@ else:
     localstatedir = ':ref:`LOCALSTATEDIR <paths>`'
     runstatedir = ':ref:`RUNSTATEDIR <paths>`'
     sysconfdir = ':ref:`SYSCONFDIR <paths>`'
-    vendordir = ':ref:`VENDORDIR <paths>`'
+    vendor_dir = ':ref:`VENDOR_DIR <paths>`'
     ccache = ':ref:`DEFCCNAME <paths>`'
     keytab = ':ref:`DEFKTNAME <paths>`'
     ckeytab = ':ref:`DEFCKTNAME <paths>`'
@@ -280,7 +280,7 @@ else:
     rst_epilog += '.. |keytab| replace:: %s\n' % keytab
     rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
     rst_epilog += '.. |pkcs11_modname| replace:: %s\n' % pkcs11_modname
-    rst_epilog += '.. |vendorkrb5conf| replace:: %s/krb5.conf\n' % vendordir
+    rst_epilog += '.. |vendorkrb5conf| replace:: %s/krb5.conf\n' % vendor_dir
     rst_epilog += '.. |krb5conf| replace:: %s/krb5.conf\n' % sysconfdir
     rst_epilog += '''
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal``

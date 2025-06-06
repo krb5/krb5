@@ -9,7 +9,7 @@ DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
 PKCS11_MODNAME=@PKCS11_MODNAME@
-VENDORDIR=@VENDORDIR@
+vendordir=@VENDORDIR@
 USE_VENDORDIR=@USE_VENDORDIR@
 
 MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadm5.acl.sub kadmin.sub \
@@ -52,7 +52,7 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h
 	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' \
 	    -e 's|@RUNSTATEDIR@|$(runstatedir)|g' \
 	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' \
-	    -e 's|@VENDORDIR@|$(VENDORDIR)|g' \
+	    -e 's|@VENDOR_DIR@|$(vendordir)|g' \
 	    -e 's|@CCNAME@|$(DEFCCNAME)|g' \
 	    -e 's|@KTNAME@|$(DEFKTNAME)|g' \
 	    -e 's|@CKTNAME@|$(DEFCKTNAME)|g' \
