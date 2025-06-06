@@ -12,6 +12,7 @@ DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
 PKCS11_MODNAME=@PKCS11_MODNAME@
 VENDORDIR=@VENDORDIR@
+USE_VENDORDIR=@USE_VENDORDIR@
 
 RST_SOURCES= _static \
 	_templates \
@@ -37,12 +38,6 @@ PDFDIR=$(docsrc)/pdf
 PDFDOCS= admin appdev basic build plugindev user
 LATEXOPTS=
 
-if [ $(USE_VENDORDIR) = 1 ]; then \
-   USEVENDORDIR = "use_vendordir";\
-else \
-   USEVENDORDIR = "no_vendordir";\
-fi
-
 # Create HTML documentation in $(docsrc)/html suitable for a
 # release tarball or the web site (that is, without substitutions for
 # configured paths).  This can be done in an unconfigured source tree
@@ -50,7 +45,11 @@ fi
 #     make -f Makefile.in SPHINX_ARGS= htmlsrc
 html: composite
 	rm -rf $(docsrc)/html
-	$(SPHINX_BUILD) -q rst_composite -t $(USEVENDORDIR) $(docsrc)/html
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -q rst_composite -t use_vendordir $(docsrc)/html; \
+	else \
+		$(SPHINX_BUILD) -q rst_composite $(docsrc)/html; \
+	fi
 
 # Dummy target for use in an unconfigured source tree.
 htmlsrc:
@@ -62,12 +61,19 @@ htmlsrc:
 substhtml: composite paths.py
 	rm -rf html_subst
 	cp paths.py rst_composite
-	$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -t pathsubs -q -t use_vendordir rst_composite html_subst; \
+	else \
+		$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst; \
+        fi
 
 # Create an ASCII (okay, UTF-8) version of the NOTICE file
 notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst $(docsrc)/version.py
-	$(SPHINX_BUILD) -b text -t notice -t $(USEVENDORDIR) -q $(docsrc) .
-
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -b text -t notice -t use_vendordir -q $(docsrc) .; \
+	else \
+		$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .; \
+	fi
 NOTICE: notice.txt
 	cp notice.txt $(top_srcdir)/../NOTICE
 

@@ -1469,6 +1469,9 @@ AC_ARG_WITH([vendordir],
 AS_IF([test "x$with_vendordir" != x], [
   AC_DEFINE([USE_VENDORDIR], [1], [Define to 1 to use vendordir])
   AC_DEFINE_UNQUOTED(VENDORDIR, "$VENDORDIR", [location of vendor configuration files])
+  AC_SUBST(VENDORDIR)
+  USE_VENDORDIR="1"
+  AC_SUBST(USE_VENDORDIR)
   AC_MSG_NOTICE([Used vendor dir: $with_vendordir])
 ])
 
