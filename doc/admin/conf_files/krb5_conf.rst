@@ -12,7 +12,7 @@ Normally, you should install your indivual krb5.conf file in the directory
 
 .. only:: use_vendordir
 
-  If there is no individual one, the dafault one |vendorkrb5conf| will
+  If there is no individual one, the default one |vendorkrb5conf| will
   be taken.
 
 You can override the default location by setting the
