@@ -605,7 +605,7 @@ pkinit_server_verify_padata(krb5_context context,
     reqctx = NULL;
 
 cleanup:
-    if (retval && data->pa_type == KRB5_PADATA_PK_AS_REQ) {
+    if (retval && reqctx != NULL && data->pa_type == KRB5_PADATA_PK_AS_REQ) {
         pkiDebug("pkinit_verify_padata failed: creating e-data\n");
         if (pkinit_create_edata(context, plgctx->cryptoctx, reqctx->cryptoctx,
                                 plgctx->idctx, plgctx->opts, retval, &e_data))
