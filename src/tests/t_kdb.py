@@ -632,6 +632,5 @@ realm.run([kdb5_ldap_util, 'destroy', '-f'])
 # * Out-of-memory error conditions
 # * Handling of failures from slapd (including krb5_retry_get_ldap_handle)
 # * Handling of servers which don't support mod-increment
-# * krb5_ldap_delete_krbcontainer (only happens if krb5_ldap_create fails)
 
 success('LDAP and DB2 KDB tests')
