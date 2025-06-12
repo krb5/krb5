@@ -218,12 +218,6 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
 
     SETUP_CONTEXT ();
 
-    if (lrealm == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Realm information not available"));
-        goto cleanup;
-    }
-
     if ((st=krb5_ldap_read_realm_params(context, lrealm, &rparam, &mask)) != 0)
         goto cleanup;
 
@@ -357,11 +351,6 @@ krb5_ldap_modify_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     if (mask == 0)
         return 0;
 
-    if (rparams == NULL) {
-        st = EINVAL;
-        return st;
-    }
-
     SETUP_CONTEXT ();
 
     /* Check validity of arguments */
@@ -484,12 +473,6 @@ krb5_ldap_create_krbcontainer(krb5_context context, const char *dn)
     /* get ldap handle */
     GET_HANDLE ();
 
-    if (dn == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Kerberos Container information is missing"));
-        goto cleanup;
-    }
-
     strval[0] = "krbContainer";
     strval[1] = NULL;
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
@@ -530,46 +513,6 @@ cleanup:
 }
 
 /*
- * Delete the Kerberos container in the Directory
- */
-
-krb5_error_code
-krb5_ldap_delete_krbcontainer(krb5_context context, const char *dn)
-{
-    LDAP                        *ld=NULL;
-    krb5_error_code             st=0;
-    kdb5_dal_handle             *dal_handle=NULL;
-    krb5_ldap_context           *ldap_context=NULL;
-    krb5_ldap_server_handle     *ldap_server_handle=NULL;
-
-    SETUP_CONTEXT ();
-
-    /* get ldap handle */
-    GET_HANDLE ();
-
-    if (dn == NULL) {
-        st = EINVAL;
-        k5_setmsg(context, st, _("Kerberos Container information is missing"));
-        goto cleanup;
-    }
-
-    /* delete the kerberos container */
-    if ((st = ldap_delete_ext_s(ld, dn, NULL, NULL)) != LDAP_SUCCESS) {
-        int ost = st;
-        st = translate_ldap_error (st, OP_ADD);
-        k5_setmsg(context, st, _("Kerberos Container delete FAILED: %s"),
-                  ldap_err2string(ost));
-        goto cleanup;
-    }
-
-cleanup:
-
-    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-    return(st);
-}
-
-
-/*
  * Create Realm in eDirectory. This is used by kdb5_util
  */
 
@@ -593,15 +536,10 @@ krb5_ldap_create_realm(krb5_context context, krb5_ldap_realm_params *rparams,
     SETUP_CONTEXT ();
 
     /* Check input validity ... */
-    if (ldap_context->container_dn == NULL ||
-        rparams == NULL ||
-        rparams->realm_name == NULL ||
-        ((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
-        ((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
-        0) {
-        st = EINVAL;
-        return st;
-    }
+    if (ldap_context->container_dn == NULL || rparams->realm_name == NULL ||
+        ((mask & LDAP_REALM_SUBTREE) && rparams->subtree == NULL) ||
+        ((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL))
+        return EINVAL;
 
     /* get ldap handle */
     GET_HANDLE ();
@@ -729,10 +667,8 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
     SETUP_CONTEXT ();
 
     /* validate the input parameter */
-    if (lrealm == NULL || ldap_context->container_dn == NULL) {
-        st = EINVAL;
-        goto cleanup;
-    }
+    if (ldap_context->container_dn == NULL)
+        return EINVAL;
 
     /* get ldap handle */
     GET_HANDLE ();

@@ -146,7 +146,7 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     krb5_clear_error_message(context);
 
     /* validate the input parameters */
-    if (policy == NULL || policy->name == NULL)
+    if (policy->name == NULL)
         return EINVAL;
 
     SETUP_CONTEXT();
@@ -200,7 +200,7 @@ krb5_ldap_put_password_policy(krb5_context context, osa_policy_ent_t policy)
     krb5_clear_error_message(context);
 
     /* validate the input parameters */
-    if (policy == NULL || policy->name == NULL)
+    if (policy->name == NULL)
         return EINVAL;
 
     SETUP_CONTEXT();
@@ -296,10 +296,6 @@ krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
-    /* validate the input parameters */
-    if (pol_dn == NULL)
-        return EINVAL;
-
     *policy = NULL;
     SETUP_CONTEXT();
     GET_HANDLE();
@@ -347,12 +343,6 @@ krb5_ldap_get_password_policy(krb5_context context, char *name,
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
-    /* validate the input parameters */
-    if (name == NULL) {
-        st = EINVAL;
-        goto cleanup;
-    }
-
     st = krb5_ldap_name_to_policydn(context, name, &policy_dn);
     if (st != 0)
         goto cleanup;
@@ -378,10 +368,6 @@ krb5_ldap_delete_password_policy(krb5_context context, char *policy)
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
-
-    /* validate the input parameters */
-    if (policy == NULL)
-        return EINVAL;
 
     SETUP_CONTEXT();
     GET_HANDLE();
