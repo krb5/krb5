@@ -41,7 +41,4 @@ krb5_ldap_read_krbcontainer_dn(krb5_context, char **);
 krb5_error_code
 krb5_ldap_create_krbcontainer(krb5_context, const char *);
 
-krb5_error_code
-krb5_ldap_delete_krbcontainer(krb5_context, const char *);
-
 #endif
