@@ -25,6 +25,7 @@ SUBDIRS=util include lib \
 	@lmdb_plugin_dir@ \
 	plugins/kdb/test \
 	plugins/kdcpolicy/test \
+	plugins/kdcpolicy/xrealmauthz \
 	plugins/preauth/otp \
 	plugins/preauth/pkinit \
 	plugins/preauth/spake \
@@ -70,7 +71,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(FILE_CATDIR) $(OVERVIEW_CATDIR) \
 		$(KRB5_LIBDIR) $(KRB5_INCDIR) \
 		$(KRB5_DB_MODULE_DIR) $(KRB5_PA_MODULE_DIR) \
-		$(KRB5_AD_MODULE_DIR) \
+		$(KRB5_AD_MODULE_DIR) $(KRB5_KDCPOLICY_MODULE_DIR) \
 		$(KRB5_LIBKRB5_MODULE_DIR) $(KRB5_TLS_MODULE_DIR) \
 		$(localstatedir) $(localstatedir)/krb5kdc \
 		$(runstatedir) $(runstatedir)/krb5kdc \
