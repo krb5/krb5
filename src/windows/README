@@ -29,7 +29,7 @@ To build Kerberos 5 on Windows, you will need the following:
 * A version of Perl.  We recommend Strawberry Perl as it will work
   to build OpenSSL.
 
-* Some common Unix utilities such as sed/awk/cp/cat installed in the
+* Some common Unix utilities (sed/awk/cp/cat/mv/rm) installed in the
   command-line path.
 
 * To build an MSI installer, the Windows Installer XML (WiX) toolkit,
@@ -71,10 +71,10 @@ defining DEBUG_SYMBOL in the environment or on the nmake command line.
 Building the code and installer:
 -------------------------------
 
-First, make sure you have sed, (g)awk, cat, and cp.
-You must also define KRB_INSTALL_DIR either in the environment or
-on the command line (for nmake install).  If you are proceeding to build
-the MSI installer, this directory should be a temporary staging area in or
+First, make sure you have sed, (g)awk, cat, mv, rm and cp.  You must
+also define KRB_INSTALL_DIR either in the environment or on the
+command line (for nmake install).  If you are proceeding to build the
+MSI installer, this directory should be a temporary staging area in or
 near your build tree.  The directory must exist before nmake install
 is run.
 
