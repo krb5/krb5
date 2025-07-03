@@ -221,6 +221,10 @@ change_set_password(krb5_context context,
     struct sockaddr_storage     remote_addr;
     struct serverlist           sl = SERVERLIST_INIT;
 
+    *result_string = empty_data();
+    if (result_code_string != NULL)
+        *result_code_string = empty_data();
+
     memset(&chpw_rep, 0, sizeof(krb5_data));
     memset( &callback_ctx, 0, sizeof(struct sendto_callback_context));
     callback_ctx.context = context;
@@ -348,6 +352,10 @@ krb5_set_password_using_ccache(krb5_context context,
     krb5_creds          creds;
     krb5_creds          *credsp;
     krb5_error_code     code;
+
+    *result_string = empty_data();
+    if (result_code_string != NULL)
+        *result_code_string = empty_data();
 
     /*
     ** get the proper creds for use with krb5_set_password -
