@@ -5026,6 +5026,13 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
  *
  * Change the password for the existing principal identified by @a creds.
  *
+ * The error code and strings are returned in @a result_code,
+ * @a result_code_string and @a result_string.  The caller may pass a
+ * @a result_code_string of NULL if it is not needed, but a valid
+ * @a result_string pointer must be supplied.  Use krb5_free_data_contents()
+ * to free @a result_code_string and @a result_string when they are no longer
+ * needed.
+ *
  * The possible values of the output @a result_code are:
  *
  * @li #KRB5_KPASSWD_SUCCESS   (0) - success
@@ -5062,7 +5069,11 @@ krb5_change_password(krb5_context context, krb5_creds *creds,
  * performed on the principal name passed in @a change_password_for.
  *
  * The error code and strings are returned in @a result_code,
- * @a result_code_string and @a result_string.
+ * @a result_code_string and @a result_string.  The caller may pass a
+ * @a result_code_string of NULL if it is not needed, but a valid
+ * @a result_string pointer must be supplied.  Use krb5_free_data_contents()
+ * to free @a result_code_string and @a result_string when they are no longer
+ * needed.
  *
  * @sa krb5_set_password_using_ccache()
  *
@@ -5093,7 +5104,11 @@ krb5_set_password(krb5_context context, krb5_creds *creds, const char *newpw,
  * the credential cache.
  *
  * The error code and strings are returned in @a result_code,
- * @a result_code_string and @a result_string.
+ * @a result_code_string and @a result_string.  The caller may pass a
+ * @a result_code_string of NULL if it is not needed, but a valid
+ * @a result_string pointer must be supplied.  Use krb5_free_data_contents()
+ * to free @a result_code_string and @a result_string when they are no longer
+ * needed.
  *
  * @note If @a change_password_for is set to NULL, the change is performed on
  * the default principal in @a ccache. If @a change_password_for is non null,
