@@ -247,9 +247,12 @@ krb5_cc_set_config(krb5_context context, krb5_ccache id,
     if (ret)
         goto out;
 
-    if (data == NULL) {
-        ret = krb5_cc_remove_cred(context, id, 0, &cred);
-    } else {
+    /* Try to clear any existing value for key.  Avoid trace logging. */
+    ret = id->ops->remove_cred(context, id, 0, &cred);
+
+    if (data != NULL) {
+        /* Ignore remove_cred errors if we are setting a value. */
+        krb5_clear_error_message(context);
         ret = krb5int_copy_data_contents(context, data, &cred.ticket);
         if (ret)
             goto out;
