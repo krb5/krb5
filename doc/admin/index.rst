@@ -30,5 +30,4 @@ For administrators
    ../mitK5defaults.rst
    env_variables.rst
    troubleshoot.rst
-   advanced/index.rst
    various_envs.rst
