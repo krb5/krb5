@@ -505,7 +505,7 @@ encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
     ASN1_TYPE parameter;
     ASN1_STRING param_str, pubkey_str;
 
-    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
+    if (EVP_PKEY_get_base_id(pkey) != EVP_PKEY_DH) {
         /* Only DH keys require special encoding. */
         len = i2d_PUBKEY(pkey, NULL);
         ret = alloc_data(spki_out, len);
@@ -4011,7 +4011,7 @@ create_signature(unsigned char **sig, unsigned int *sig_len,
         return ENOMEM;
     EVP_SignInit(ctx, EVP_sha256());
     EVP_SignUpdate(ctx, data, data_len);
-    *sig_len = EVP_PKEY_size(pkey);
+    *sig_len = EVP_PKEY_get_size(pkey);
     if ((*sig = malloc(*sig_len)) == NULL)
         goto cleanup;
     EVP_SignFinal(ctx, *sig, sig_len, pkey);
