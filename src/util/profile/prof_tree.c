@@ -536,7 +536,8 @@ errcode_t profile_node_iterator(void **iter_p,
      */
     if (iter->file)
         k5_mutex_lock(&iter->file->data->lock);
-    if (iter->node && (iter->file->data->upd_serial != iter->file_serial)) {
+    if (iter->node &&
+        (!iter->file || (iter->file->data->upd_serial != iter->file_serial))) {
         iter->flags &= ~PROFILE_ITER_FINAL_SEEN;
         skip_num = iter->num;
         iter->node = 0;
