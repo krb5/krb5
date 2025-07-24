@@ -669,12 +669,12 @@ create_server_socket(struct sockaddr *addr, int type, const char *prog,
     return 0;
 }
 
-static const int one = 1;
+static int one = 1;
 
 static int
 setnbio(int sock)
 {
-    return ioctlsocket(sock, FIONBIO, (const void *)&one);
+    return ioctlsocket(sock, FIONBIO, (void *)&one);
 }
 
 static int
