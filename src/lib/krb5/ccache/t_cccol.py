@@ -2,10 +2,10 @@ from k5test import *
 
 realm = K5Realm(create_kdb=False)
 
-keyctl = which('keyctl')
+status = subprocess.call(['keyctl', 'list', '@s'], stderr=subprocess.STDOUT,
+                         stdout=subprocess.DEVNULL)
 out = realm.run([klist, '-c', 'KEYRING:process:abcd'], expected_code=1)
-test_keyring = (keyctl is not None and
-                'Unknown credential cache type' not in out)
+test_keyring = (not status and 'Unknown credential cache type' not in out)
 if not test_keyring:
     skipped('keyring collection tests', 'keyring support not built')
 
