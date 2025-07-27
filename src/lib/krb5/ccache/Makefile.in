@@ -145,11 +145,11 @@ t_marshal: $(T_MARSHAL_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_MARSHAL_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix: t_cc t_marshal
-	$(RUN_TEST) ./t_cc
+	$(RUN_TEST) $(KEYCTL_SESSION) ./t_cc
 	$(RUN_TEST) ./t_marshal testcache
 
 check-pytests: t_cccursor t_cccol
-	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
+	$(KEYCTL_SESSION) $(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o t_cccol t_cccol.o

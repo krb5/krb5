@@ -150,7 +150,7 @@ check-pytests: responder s2p s4u2proxy unlockiter s4u2self
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
-	$(RUNPYTEST) $(srcdir)/t_ccache.py $(PYTESTFLAGS)
+	$(KEYCTL_SESSION) $(RUNPYTEST) $(srcdir)/t_ccache.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_sesskeynego.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_crossrealm.py $(PYTESTFLAGS)

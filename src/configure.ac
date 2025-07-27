@@ -351,6 +351,14 @@ if test "$with_keyutils" != no; then
   fi
 fi
 
+# Check for keyctl.  If it is found, define a command prefix for
+# running a command inside a keyring session.  Include "env" in the
+# wrapper to allow environment variable settings in the wrapped
+# command.
+AC_CHECK_PROG(KEYCTL,keyctl,keyctl)
+AS_IF([test x"$KEYCTL" != x], [KEYCTL_SESSION="keyctl session - env"])
+AC_SUBST([KEYCTL_SESSION])
+
 # The SPAKE preauth plugin currently supports edwards25519 natively,
 # and can support three NIST groups using OpenSSL.
 HAVE_SPAKE_OPENSSL=no
