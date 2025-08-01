@@ -92,18 +92,6 @@ enum xdr_op {
 		    * BYTES_PER_XDR_UNIT)
 
 /*
- * A xdrproc_t exists for each data type which is to be encoded or decoded.
- *
- * The second argument to the xdrproc_t is a pointer to an opaque pointer.
- * The opaque pointer generally points to a structure of the data type
- * to be decoded.  If this pointer is 0, then the type routines should
- * allocate dynamic storage of the appropriate size and return it.
- * bool_t	(*xdrproc_t)(XDR *, caddr_t *);
- *
- * XXX can't actually prototype it, because some take three args!!!
- */
-
-/*
  * The XDR handle.
  * Contains operation which is being applied to the stream,
  * an operations vector for the particular implementation (e.g. see xdr_mem.c),
@@ -142,6 +130,10 @@ typedef struct XDR {
 	int		x_handy;	/* extra private word */
 } XDR;
 
+/*
+ * A xdrproc_t exists for each data type which is to be encoded or decoded.
+ * The second argument points to an object of the data type.
+ */
 typedef	bool_t (*xdrproc_t)(XDR *, void *);
 
 /*
