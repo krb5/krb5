@@ -115,6 +115,7 @@ struct k_opts
 
     int canonicalize;
     int enterprise;
+    int mfa_anonymous;
 };
 
 struct k5_data
@@ -132,7 +133,7 @@ struct k5_data
  * *(struct[2]), the array index which was specified is stored in *index, and
  * long_getopt() returns 0.
  */
-const char *shopts = "r:fpFPn54aAVl:s:c:kit:T:RS:vX:CEI:";
+const char *shopts = "r:fpFPnN54aAVl:s:c:kit:T:RS:vX:CEI:";
 
 #define USAGE_BREAK "\n\t"
 
@@ -159,6 +160,7 @@ usage(void)
     fprintf(stderr, _("\t-p proxiable\n"));
     fprintf(stderr, _("\t-P not proxiable\n"));
     fprintf(stderr, _("\t-n anonymous\n"));
+    fprintf(stderr, _("\t-N handle MFA with anonymous PKINIT automatically\n"));
     fprintf(stderr, _("\t-a include addresses\n"));
     fprintf(stderr, _("\t-A do not include addresses\n"));
     fprintf(stderr, _("\t-v validate\n"));
@@ -273,6 +275,9 @@ parse_options(int argc, char **argv, struct k_opts *opts)
             break;
         case 'n':
             opts->anonymous = 1;
+            break;
+        case 'N':
+            opts->mfa_anonymous = 1;
             break;
         case 'a':
             opts->addresses = 1;
@@ -851,6 +856,60 @@ cleanup:
     return notix ? 0 : 1;
 }
 
+static int
+k5_anon_armor(struct k_opts *opts, struct k5_data *k5)
+{
+    struct k5_data armor_k5;
+    struct k_opts armor_opts = *opts;
+    krb5_error_code ret = 0;
+    krb5_context ctx = NULL;
+    krb5_principal me = NULL;
+    krb5_data *armor_realm = NULL;
+    int result = 0;
+
+    int flags = armor_opts.enterprise ? KRB5_PRINCIPAL_PARSE_ENTERPRISE : 0;
+
+    armor_opts.anonymous = 1;
+    armor_opts.k5_out_cache_name = "MEMORY:armor_ccache";
+    armor_opts.principal_name = NULL;
+
+    /* Use the specified principal name. */
+    ret = krb5_init_context(&ctx);
+    ret = krb5_parse_name_flags(ctx, opts->principal_name, flags, &me);
+    if (ret) {
+        com_err(progname, ret, _("when parsing name %s"),
+                opts->principal_name);
+        goto cleanup;
+    }
+
+    armor_realm = krb5_princ_realm(ctx, me);
+    ret = asprintf(&armor_opts.principal_name, "@%.*s",
+                   (int) armor_realm->length, armor_realm->data);
+    if (ret == -1) {
+        com_err(progname, ret, _("when constructing realm name from %s"),
+                opts->principal_name);
+        goto cleanup;
+    }
+
+    ret = 0;
+
+    memset(&armor_k5, 0, sizeof(armor_k5));
+    if (k5_begin(&armor_opts, &armor_k5))
+        result = k5_kinit(&armor_opts, &armor_k5);
+
+    if (result) {
+        /* replace armor_ccache in opts to use new creds */
+        opts->armor_ccache = "MEMORY:armor_ccache";
+    }
+cleanup:
+    k5_end(&armor_k5);
+    if (ret) {
+        krb5_free_principal(ctx, me);
+        free(armor_opts.principal_name);
+        krb5_free_context(ctx);
+    }
+    return result;
+}
 int
 main(int argc, char *argv[])
 {
@@ -877,6 +936,17 @@ main(int argc, char *argv[])
     set_com_err_hook(extended_com_err_fn);
 
     parse_options(argc, argv, &opts);
+
+    if (opts.mfa_anonymous && opts.armor_ccache == NULL) {
+        authed_k5 = k5_anon_armor(&opts, &k5);
+        if (authed_k5) {
+            if (opts.verbose)
+                fprintf(stderr, _("Obtained Anonymous PKINIT ticket\n"));
+        } else {
+            fprintf(stderr, _("Could not obtain Anonymous PKINIT ticket, "
+                            "multi-factor pre-auth methods will not work\n"));
+        }
+    }
 
     if (k5_begin(&opts, &k5))
         authed_k5 = k5_kinit(&opts, &k5);
