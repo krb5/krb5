@@ -52,6 +52,6 @@
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 22
 #define KRB5_PATCHLEVEL 0
-#define KRB5_RELTAIL "beta1-postrelease"
+#define KRB5_RELTAIL "final"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "krb5-1.22"
+#define KRB5_RELTAG "krb5-1.22-final"

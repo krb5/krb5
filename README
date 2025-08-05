@@ -97,8 +97,8 @@ removed.
 Beginning with the krb5-1.18 release, all support for single-DES
 encryption types has been removed.
 
-Major changes in 1.22
----------------------
+Major changes in 1.22 (2025-08-05)
+----------------------------------
 
 User experience:
 
@@ -223,6 +223,7 @@ krb5-1.22 changes by ticket ID
 9171    Fix getsockname() call in Windows localaddr
 9172    Check lengths in xdr_krb5_key_data()
 9173    Limit -keepold for self-service key changes
+9179    Avoid large numbers of refresh_time cache entries
 
 Acknowledgements
 ----------------
@@ -448,6 +449,7 @@ reports, suggestions, and valuable resources:
     Zentaro Kavanagh
     Mubashir Kazia
     W. Trevor King
+    Steffen Kieß
     Patrik Kis
     Martin Kittel
     Thomas Klausner
