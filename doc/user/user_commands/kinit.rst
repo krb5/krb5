@@ -22,6 +22,7 @@ SYNOPSIS
 [**-k** [**-i** | -**t** *keytab_file*]]
 [**-c** *cache_name*]
 [**-n**]
+[**-N**]
 [**-S** *service_name*]
 [**-I** *input_ccache*]
 [**-T** *armor_ccache*]
@@ -142,6 +143,14 @@ OPTIONS
 
     As of release 1.8, the MIT Kerberos KDC only supports fully
     anonymous operation.
+
+**-N**
+    Automatically request anonymous PKINIT ticket and use it for the armor
+    ccache when obtaining an initial ticket for the specified principal.
+
+    Assumes that Anonymous PKINIT is available on KDC. This option can be
+    thought as a combination of two invocations of kinit: first to obtain an
+    anonymous ticket and second to use this ticket as an armor.
 
 **-I** *input_ccache*
 
