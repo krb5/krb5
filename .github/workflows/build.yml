@@ -67,18 +67,18 @@ jobs:
                 fi
 
     windows:
-        runs-on: windows-latest
+        runs-on: windows-2025
         env:
             KRB_INSTALL_DIR: C:\kfw
             OPENSSL_DIR: C:\Program Files\OpenSSL
-            OPENSSL_VERSION: 1_1
+            OPENSSL_VERSION: 3
         steps:
             - name: Checkout repository
               uses: actions/checkout@v1
             - name: Setup
-              shell: cmd
               run: |
-                mkdir %KRB_INSTALL_DIR%
+                mkdir "$env:KRB_INSTALL_DIR"
+                copy "$env:OPENSSL_DIR\lib\VC\x64\MD\libcrypto.lib" "$env:OPENSSL_DIR\lib"
             - uses: ilammy/msvc-dev-cmd@v1
               with:
                 arch: x64
