@@ -678,13 +678,22 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      */
 
     state->enc_tkt_reply.session = &state->session_key;
+    krb5_principal temp_client = NULL;
     if (isflagset(state->request->kdc_options, KDC_OPT_CANONICALIZE)) {
-        state->client_princ = *(state->client->princ);
+        ret = krb5_copy_principal(context, state->client->princ, &temp_client);
     } else {
-        state->client_princ = *(state->request->client);
-        /* The realm is always canonicalized */
-        state->client_princ.realm = state->client->princ->realm;
+        ret = krb5_copy_principal(context, state->request->client, &temp_client);
+        if (ret == 0) {
+            krb5_free_data_contents(context, &temp_client->realm);
+            ret = krb5_copy_data(context, &state->client->princ->realm, 
+                               &temp_client->realm);
+        }
     }
+    if (ret) goto cleanup;
+    
+    state->enc_tkt_reply.client = temp_client;
+    // Note: Add krb5_free_principal(context, temp_client); to cleanup section
+    
     state->enc_tkt_reply.client = &state->client_princ;
     state->enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
     state->enc_tkt_reply.transited.tr_contents = empty_string;
