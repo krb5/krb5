@@ -188,10 +188,9 @@ if test "$enable_thread_support" = yes; then
       PTHREAD_CFLAGS=
       ;;
     hpux*)
-      # These are the flags that "gcc -pthread" adds.  But we don't
-      # want "-pthread" because that has link-time effects, and we
-      # don't exclude CFLAGS when linking.  *sigh*
-      PTHREAD_CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
+      # On HP-UX, thread support is always available with the '-mt'
+      # compiler and linker flag.
+      AC_DEFINE(NO_WEAK_PTHREADS,1,[Define if references to pthread routines should be non-weak.])
       ;;
     solaris2.[[1-9]])
       # On Solaris 10 with gcc 3.4.3, the autoconf archive macro doesn't
