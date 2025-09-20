@@ -64,12 +64,6 @@ osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
 hpux.exports: $(SHLIB_EXPORT_FILE) Makefile
 	$(RM) hpux.tmp hpux.exports
 	sed "s/^/+e /" < $(SHLIB_EXPORT_FILE) > hpux.tmp
-	a=""; \
-	for f in . $(LIBFINIFUNC); do \
-	  if test "$$f" != .; then \
-	    a="+I $${f}__auxfini $$a"; \
-	  else :; fi; \
-	done; echo "$$a" >> hpux.tmp
 	echo "+e errno" >> hpux.tmp
 	mv -f hpux.tmp hpux.exports
 
