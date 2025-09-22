@@ -595,7 +595,7 @@ def _find_symbolizer():
 # be used by the test script.
 def _parse_args():
     global args, verbose, testpass, _debug, _debugger_command
-    global _stop_before, _stop_after, _shell_before, _shell_after
+    global _stop_before, _stop_after, _shell_before, _shell_after, _trace
     parser = optparse.OptionParser()
     parser.add_option('-v', '--verbose', action='store_true', dest='verbose',
                       default=False, help='Display verbose output')
@@ -613,6 +613,8 @@ def _parse_args():
                       help='Spawn shell before numbered command (or "all")')
     parser.add_option('--shell-after', dest='shella', metavar='NUM',
                       help='Spawn shell after numbered command (or "all")')
+    parser.add_option('--trace', dest='trace', metavar='NUM',
+                      help='Collect trace log for numbered command (or "all")')
     (options, args) = parser.parse_args()
     verbose = options.verbose
     testpass = options.testpass
@@ -621,6 +623,7 @@ def _parse_args():
     _stop_after = _parse_cmdnum('--stop-after', options.stopa)
     _shell_before = _parse_cmdnum('--shell-before', options.shellb)
     _shell_after = _parse_cmdnum('--shell-after', options.shella)
+    _trace = _parse_cmdnum('--trace', options.trace)
 
     if options.debugger is not None:
         _debugger_command = shlex.split(options.debugger)
@@ -736,10 +739,11 @@ def _check_trace(trace, expected):
 def _run_cmd(args, env, input=None, expected_code=0, expected_msg=None,
              expected_trace=None, return_trace=False):
     global null_input, _cmd_index, _last_cmd, _last_cmd_output, _debug
-    global _stop_before, _stop_after, _shell_before, _shell_after
+    global _stop_before, _stop_after, _shell_before, _shell_after, _trace
 
     tracefile = None
-    if expected_trace is not None or return_trace:
+    if (expected_trace is not None or return_trace or
+        _match_cmdnum(_trace, _cmd_index)):
         tracefile = 'testtrace'
         if os.path.exists(tracefile):
             os.remove(tracefile)
@@ -813,7 +817,7 @@ def _debug_cmd(args, env, input):
 # Clean up the daemon process on exit.
 def _start_daemon(args, env, sentinel):
     global null_input, _cmd_index, _last_cmd, _last_cmd_output, _debug
-    global _stop_before, _stop_after, _shell_before, _shell_after
+    global _stop_before, _stop_after, _shell_before, _shell_after, _trace
 
     if (_match_cmdnum(_debug, _cmd_index)):
         output('*** [%d] Warning: ' % _cmd_index, True)
@@ -821,6 +825,14 @@ def _start_daemon(args, env, sentinel):
         _debug_cmd(args, env, None)
         output('*** Exiting after debugging daemon\n', True)
         sys.exit(1)
+
+    if (_match_cmdnum(_trace, _cmd_index)):
+        tracefile = 'testtrace.' + str(_cmd_index)
+        output('*** [%d] trace log in %s\n' % (_cmd_index, tracefile), True)
+        if os.path.exists(tracefile):
+            os.remove(tracefile)
+        env = env.copy()
+        env['KRB5_TRACE'] = tracefile
 
     args = _valgrind(args)
     _last_cmd = _shell_equiv(args)

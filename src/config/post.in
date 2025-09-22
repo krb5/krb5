@@ -168,7 +168,7 @@ clean: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
-	$(RM) et-[ch]-*.et et-[ch]-*.[ch] testlog testtrace runenv.sh
+	$(RM) et-[ch]-*.et et-[ch]-*.[ch] testlog testtrace* runenv.sh
 	-$(RM) -r testdir
 
 clean-windows::

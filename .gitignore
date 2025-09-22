@@ -21,7 +21,7 @@ obj/
 skiptests
 testdir/
 testlog
-testtrace
+testtrace*
 
 # Ignore the build directory
 /build/
