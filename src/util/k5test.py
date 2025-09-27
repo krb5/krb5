@@ -776,20 +776,24 @@ def _run_cmd(args, env, input=None, expected_code=0, expected_msg=None,
     _stop_or_shell(_stop_after, _shell_after, env, _cmd_index)
     _cmd_index += 1
 
-    # Check the return code and return the output.
-    if code != expected_code:
-        fail('%s failed with code %d.' % (args[0], code))
-
-    if expected_msg is not None and expected_msg not in outdata:
-        fail('Expected string not found in command output: ' + expected_msg)
-
+    # Copy trace output into the log if we collected it.
     if tracefile is not None:
         with open(tracefile, 'r') as f:
             trace = f.read()
         output('*** Trace output for previous command:\n')
         output(trace)
-        if expected_trace is not None:
-            _check_trace(trace, expected_trace)
+
+    # Check the return code.
+    if code != expected_code:
+        fail('%s failed with code %d.' % (args[0], code))
+
+    # Check for the expected message if given.
+    if expected_msg is not None and expected_msg not in outdata:
+        fail('Expected string not found in command output: ' + expected_msg)
+
+    # Check for expected trace log messages if given.
+    if expected_trace is not None:
+        _check_trace(trace, expected_trace)
 
     return (outdata, trace) if return_trace else outdata
 
