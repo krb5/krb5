@@ -671,6 +671,8 @@ def _build_env():
     # Make sure we don't get confused by translated messages
     # or localized times.
     env['LC_ALL'] = 'C'
+    # Enforce proper argument order in tests with GNU getopt.
+    env['POSIXLY_CORRECT'] = '1'
     return env
 
 

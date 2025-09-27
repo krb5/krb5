@@ -331,7 +331,7 @@ rb.extract_keytab('user@B', rb.keytab)
 
 usercache = 'FILE:' + os.path.join(rb.testdir, 'usercache')
 rb.kinit(rb.user_princ, None, ['-k', '-f', '-c', usercache])
-rb.run([kvno, '-C', 'impersonator@A', '-c', usercache])
+rb.run([kvno, '-C', '-c', usercache, 'impersonator@A'])
 
 ra.kinit('impersonator@A', None, ['-f', '-k', '-t', ra.keytab])
 ra.run(['./s4u2proxy', usercache, 'resource@A'])
