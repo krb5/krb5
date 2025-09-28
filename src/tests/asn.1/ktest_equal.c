@@ -835,6 +835,18 @@ ktest_equal_sequence_of_spake_factor(krb5_spake_factor **ref,
 #ifndef DISABLE_PKINIT
 
 static int
+ktest_equal_pachecksum2(krb5_pachecksum2 *ref, krb5_pachecksum2 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(checksum);
+    p = p && struct_equal(algorithmIdentifier,
+                          ktest_equal_algorithm_identifier);
+    return p;
+}
+
+static int
 ktest_equal_pk_authenticator(krb5_pk_authenticator *ref,
                              krb5_pk_authenticator *var)
 {
@@ -844,7 +856,8 @@ ktest_equal_pk_authenticator(krb5_pk_authenticator *ref,
     p = p && scalar_equal(cusec);
     p = p && scalar_equal(ctime);
     p = p && scalar_equal(nonce);
-    p = p && data_eq(ref->paChecksum, var->paChecksum);
+    p = p && equal_str(paChecksum);
+    p = p && ptr_equal(paChecksum2, ktest_equal_pachecksum2);
     return p;
 }
 
