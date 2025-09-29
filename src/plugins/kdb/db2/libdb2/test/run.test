@@ -104,7 +104,7 @@ test1()
 	done
 	echo "Test 1: recno: small key, small data pairs"
 	rm -f $TMP2 $TMP3
-	awk '{ 
+	$AWK '{
 		++i;
 		printf("p\nk%d\nd%s\ng\nk%d\n", i, $0, i);
 	}' < $TMP1 > $TMP2
@@ -123,7 +123,7 @@ test2()
 	echo "Test 2: btree, hash: small key, medium data pairs"
 	mdata=abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
 	echo $mdata |
-	awk '{ for (i = 1; i < 201; ++i) print $0 }' > $TMP1
+	$AWK '{ for (i = 1; i < 201; ++i) print $0 }' > $TMP1
 	for type in hash btree; do
 		rm -f $TMP2 $TMP3
 		for i in `getnwords 200`; do
@@ -143,7 +143,7 @@ test2()
 	echo "Test 2: recno: small key, medium data pairs"
 	rm -f $TMP2 $TMP3
 	echo $mdata | 
-	awk '{  for (i = 1; i < 201; ++i)
+	$AWK '{  for (i = 1; i < 201; ++i)
 		printf("p\nk%d\nd%s\ng\nk%d\n", i, $0, i);
 	}' > $TMP2
 	$PROG -o $TMP3 recno $TMP2
@@ -198,7 +198,7 @@ test3()
 	done
 	echo "Test 3: recno: big data pairs"
 	rm -f $TMP2 $TMP3
-	awk '{
+	$AWK '{
 		++i;
 		printf("p\nk%d\nD%s\ng\nk%d\n", i, $0, i);
 	}' < $BINFILES > $TMP2
@@ -218,7 +218,7 @@ test4()
 {
 	echo "Test 4: recno: random entries"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 37; i <= 37 + 88 * 17; i += 17) {
 			if (i % 41)
 				s = substr($0, 1, i % 41);
@@ -244,7 +244,7 @@ test4()
 	}' > $TMP1
 	rm -f $TMP2 $TMP3
 	cat $TMP1 |
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 			i = 37;
 			incr = 17;
 		}
@@ -282,7 +282,7 @@ test5()
 {
 	echo "Test 5: recno: reverse order entries"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk ' {
+	$AWK ' {
 		for (i = 1500; i; --i) {
 			if (i % 34)
 				s = substr($0, 1, i % 34);
@@ -294,7 +294,7 @@ test5()
 	}' > $TMP1
 	rm -f $TMP2 $TMP3
 	cat $TMP1 |
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 			i = 1500;
 		}
 		{
@@ -318,7 +318,7 @@ test6()
 {
 	echo "Test 6: recno: alternating order entries"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk ' {
+	$AWK ' {
 		for (i = 1; i < 1200; i += 2) {
 			if (i % 34)
 				s = substr($0, 1, i % 34);
@@ -337,7 +337,7 @@ test6()
 	}' > $TMP1
 	rm -f $TMP2 $TMP3
 	cat $TMP1 |
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 			i = 1;
 			even = 0;
 		}
@@ -370,7 +370,7 @@ test7()
 {
 	echo "Test 7: btree, recno: delete cursor record"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 1; i <= 120; ++i)
 			printf("%05d: input key %d: %s\n", i, i, $0);
 		printf("%05d: input key %d: %s\n", 120, 120, $0);
@@ -383,7 +383,7 @@ test7()
 
 	for type in btree recno; do
 		cat $TMP1 |
-		awk '{
+		$AWK '{
 			if (i == 120)
 				exit;
 			printf("p\nk%d\nd%s\n", ++i, $0);
@@ -426,7 +426,7 @@ test8()
 	    exit 1
 	fi
 	echo "" | 
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 		for (i = 1; i <= 10; ++i) {
 			printf("p\nkkey1\nD/bin/sh\n");
 			printf("p\nkkey2\nD'$tfile'\n");
@@ -454,7 +454,7 @@ test9()
 {
 	echo "Test 9: btree: duplicate keys"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 1; i <= 543; ++i)
 			printf("%05d: input key %d: %s\n", i, i, $0);
 		exit;
@@ -463,7 +463,7 @@ test9()
 
 	for type in btree; do
 		cat $TMP1 | 
-		awk '{
+		$AWK '{
 			if (i++ % 2)
 				printf("p\nkduplicatekey\nd%s\n", $0);
 			else
@@ -487,7 +487,7 @@ test10()
 {
 	echo "Test 10: btree, recno: test cursor flag use"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 1; i <= 20; ++i)
 			printf("%05d: input key %d: %s\n", i, i, $0);
 		exit;
@@ -497,7 +497,7 @@ test10()
 	# Test that R_CURSOR doesn't succeed before cursor initialized
 	for type in btree recno; do
 		cat $TMP1 |
-		awk '{
+		$AWK '{
 			if (i == 10)
 				exit;
 			printf("p\nk%d\nd%s\n", ++i, $0);
@@ -514,7 +514,7 @@ test10()
 	done
 	for type in btree recno; do
 		cat $TMP1 |
-		awk '{
+		$AWK '{
 			if (i == 10)
 				exit;
 			printf("p\nk%d\nd%s\n", ++i, $0);
@@ -536,7 +536,7 @@ test11()
 {
 	echo "Test 11: recno: reverse order insert"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 1; i <= 779; ++i)
 			printf("%05d: input key %d: %s\n", i, i, $0);
 		exit;
@@ -545,7 +545,7 @@ test11()
 
 	for type in recno; do
 		cat $TMP1 |
-		awk '{
+		$AWK '{
 			if (i == 0) {
 				i = 1;
 				printf("p\nk1\nd%s\n", $0);
@@ -585,7 +585,7 @@ test12()
 	echo "Test 12: btree: lots of keys, small page size"
 	mdata=abcdefghijklmnopqrstuvwxy
 	echo $mdata |
-	awk '{ for (i = 1; i < 20001; ++i) print $0 }' > $TMP1
+	$AWK '{ for (i = 1; i < 20001; ++i) print $0 }' > $TMP1
 	for type in btree; do
 		rm -f $TMP2 $TMP3
 		for i in `getnwords 20000 | rev`; do
@@ -654,7 +654,7 @@ test20()
 	echo\
     "Test 20: hash: bucketsize, fill factor; nelem 25000 cachesize 65536"
 	echo "abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg" |
-	awk '{
+	$AWK '{
 		for (i = 1; i <= 10000; ++i) {
 			if (i % 34)
 				s = substr($0, 1, i % 34);
@@ -665,7 +665,7 @@ test20()
 		exit;
 	}' > $TMP1
 	getnwords 10000 |
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 		ds="abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg abcdefg"
 	}
 	{
@@ -676,7 +676,7 @@ test20()
 		printf("p\nk%s\nd%s\n", $0, s);
 	}' > $TMP2
 	getnwords 10000 |
-	awk '{
+	$AWK '{
 		++i;
 		printf("g\nk%s\n", $0);
 	}' >> $TMP2
@@ -770,7 +770,7 @@ test40 () {
 	e=:
 	for psize in 512 1024 2048 4096 8192; do
 		echo "    page size $psize"
-		kdsizes=`awk 'BEGIN {
+		kdsizes=`$AWK 'BEGIN {
 			psize = '$psize'; hsize = int(psize/2);
 			for (kdsize = hsize-40; kdsize <= hsize; kdsize++) {
 				print kdsize;
@@ -786,7 +786,7 @@ test40 () {
 		# for a split on index 0.
 
 		for kdsize in $kdsizes; do
-			awk 'BEGIN {
+			$AWK 'BEGIN {
 				kdsize = '$kdsize';
 				for (i = 8; i-- > 0; ) {
 					s = sprintf("a%03d:%09d", i, kdsize);
@@ -890,7 +890,7 @@ EOF
 	echo "$list") |
 	# awk script input:
 	# {p|g|r} key [datasize]
-	awk '/^[pgr]/{
+	$AWK '/^[pgr]/{
 		printf("%s\nk%s\n", $1, $2);
 	}
 	/^p/{
@@ -903,7 +903,7 @@ EOF
 	!/^[pgr]/{
 		print $0;
 	}' > $TMP2
-	(echo "$list"; echo "$list") | awk '{
+	(echo "$list"; echo "$list") | $AWK '{
 		s = $2;
 		for (i = 0; i < $3; i++) {
 			s = s "x";
@@ -936,9 +936,9 @@ test50 () {
 		print "u";
 		print "u";
 	}'
-	(echo $fill | awk "$script"; echo o) > $TMP2
+	(echo $fill | $AWK "$script"; echo o) > $TMP2
 	echo $fill |
-	awk '{
+	$AWK '{
 		for (i = 0; i < 20000; i++) {
 			printf("%05d%s\n", i, $0);
 		}
@@ -948,7 +948,7 @@ test50 () {
 		echo "test50: btree: unexpected success after unlinking pages"
 		exit 1
 	fi
-	(echo $fill | awk "$script"; echo O) > $TMP2
+	(echo $fill | $AWK "$script"; echo O) > $TMP2
 	$PROG -o $TMP3 -i psize=512 btree $TMP2
 	if (cmp -s $TMP1 $TMP3); then :
 	else
@@ -961,7 +961,7 @@ test60 () {
 	echo "Test 60: btree: big key, small data, byteswap unaligned access"
 	# 488 = 512 - 20 (header) - 3 ("foo") - 1 (newline)
 	(echo foo; echo bar) |
-	awk '{
+	$AWK '{
 		s = $0
 		for (i = 0; i < 488; i++) {
 			s = s "x";
@@ -977,7 +977,7 @@ test61 () {
 	echo "Test 61: btree: small key, big data, byteswap unaligned access"
 	# 484 = 512 - 20 (header) - 7 ("foo1234") - 1 (newline)
 	(echo foo1234; echo bar1234) |
-	awk '{
+	$AWK '{
 		s = $0
 		for (i = 0; i < 484; i++) {
 			s = s "x";
@@ -992,7 +992,7 @@ test61 () {
 test62 () {
 	echo "Test 62: btree: small key, big data, known byte order files"
 	(echo foo1234; echo bar1234) |
-	awk '{
+	$AWK '{
 		s = $0
 		for (i = 0; i < 484; i++) {
 			s = s "x";
@@ -1017,7 +1017,7 @@ test63 () {
 	# 223 = 232 - 8 (key pointer)
 	# 232 = bt_ovflsize = (512 - 20 (header)) / 2 (DEFMINKEYPAGE)
 	#	- (2 (indx_t) + 12 (NBLEAFDBT(0,0)))
-	awk 'BEGIN {
+	$AWK 'BEGIN {
 		s = "";
 		for (i = 0; i < 488; i++) {
 			s = s "x";
