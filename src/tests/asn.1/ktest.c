@@ -695,17 +695,6 @@ ktest_make_maximal_pa_otp_req(krb5_pa_otp_req *p)
 #ifndef DISABLE_PKINIT
 
 static void
-ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
-{
-    p->cusec = SAMPLE_USEC;
-    p->ctime = SAMPLE_TIME;
-    p->nonce = SAMPLE_NONCE;
-    ktest_make_sample_data(&p->paChecksum);
-    p->freshnessToken = ealloc(sizeof(krb5_data));
-    ktest_make_sample_data(p->freshnessToken);
-}
-
-static void
 ktest_make_sample_oid(krb5_data *p)
 {
     krb5_data_parse(p, "\052\206\110\206\367\022\001\002\002");
@@ -724,6 +713,26 @@ ktest_make_sample_algorithm_identifier_no_params(krb5_algorithm_identifier *p)
 {
     ktest_make_sample_oid(&p->algorithm);
     p->parameters = empty_data();
+}
+
+static void
+ktest_make_sample_pa_checksum2(krb5_pachecksum2 *p)
+{
+    ktest_make_sample_data(&p->checksum);
+    ktest_make_sample_algorithm_identifier(&p->algorithmIdentifier);
+}
+
+static void
+ktest_make_sample_pk_authenticator(krb5_pk_authenticator *p)
+{
+    p->cusec = SAMPLE_USEC;
+    p->ctime = SAMPLE_TIME;
+    p->nonce = SAMPLE_NONCE;
+    ktest_make_sample_data(&p->paChecksum);
+    p->freshnessToken = ealloc(sizeof(krb5_data));
+    ktest_make_sample_data(p->freshnessToken);
+    p->paChecksum2 = ealloc(sizeof(krb5_pachecksum2));
+    ktest_make_sample_pa_checksum2(p->paChecksum2);
 }
 
 static void
@@ -1600,11 +1609,22 @@ ktest_empty_pa_otp_req(krb5_pa_otp_req *p)
 #ifndef DISABLE_PKINIT
 
 static void
+ktest_empty_pa_checksum2(krb5_pachecksum2 *p)
+{
+    ktest_empty_data(&p->checksum);
+    ktest_empty_algorithm_identifier(&p->algorithmIdentifier);
+}
+
+static void
 ktest_empty_pk_authenticator(krb5_pk_authenticator *p)
 {
     ktest_empty_data(&p->paChecksum);
     krb5_free_data(NULL, p->freshnessToken);
     p->freshnessToken = NULL;
+    if (p->paChecksum2 != NULL)
+        ktest_empty_pa_checksum2(p->paChecksum2);
+    free(p->paChecksum2);
+    p->paChecksum2 = NULL;
 }
 
 static void
