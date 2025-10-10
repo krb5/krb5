@@ -363,7 +363,7 @@ set_msg_from_ip_sendsrcaddr(struct msghdr *msg, struct cmsghdr *cmsgptr,
 }
 
 #else /* HAVE_IP_PKTINFO || IP_SENDSRCADDR */
-#define set_msg_from_ipv4(m, c, f, l, a) EINVAL
+#define set_msg_from_ipv4(m, c, f, a) EINVAL
 #endif /* HAVE_IP_PKTINFO || IP_SENDSRCADDR */
 
 #ifdef HAVE_IPV6_PKTINFO
