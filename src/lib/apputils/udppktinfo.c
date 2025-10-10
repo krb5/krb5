@@ -210,7 +210,7 @@ check_cmsg_ip_recvdstaddr(struct cmsghdr *cmsgptr, struct sockaddr_in *to,
 }
 
 #else /* HAVE_IP_PKTINFO || IP_RECVDSTADDR */
-#define check_cmsg_v4_pktinfo(c, t, l, a) 0
+#define check_cmsg_v4_pktinfo(c, t, a) 0
 #endif /* HAVE_IP_PKTINFO || IP_RECVDSTADDR */
 
 #ifdef HAVE_IPV6_PKTINFO
@@ -240,7 +240,7 @@ check_cmsg_ipv6_pktinfo(struct cmsghdr *cmsgptr, struct sockaddr_in6 *to,
     return 0;
 }
 #else /* HAVE_IPV6_PKTINFO */
-#define check_cmsg_v6_pktinfo(c, t, l, a) 0
+#define check_cmsg_v6_pktinfo(c, t, a) 0
 #endif /* HAVE_IPV6_PKTINFO */
 
 static int
@@ -363,7 +363,7 @@ set_msg_from_ip_sendsrcaddr(struct msghdr *msg, struct cmsghdr *cmsgptr,
 }
 
 #else /* HAVE_IP_PKTINFO || IP_SENDSRCADDR */
-#define set_msg_from_ipv4(m, c, f, l, a) EINVAL
+#define set_msg_from_ipv4(m, c, f, a) EINVAL
 #endif /* HAVE_IP_PKTINFO || IP_SENDSRCADDR */
 
 #ifdef HAVE_IPV6_PKTINFO
@@ -398,7 +398,7 @@ set_msg_from_ipv6_pktinfo(struct msghdr *msg, struct cmsghdr *cmsgptr,
 }
 
 #else /* HAVE_IPV6_PKTINFO */
-#define set_msg_from_ipv6(m, c, f, l, a) EINVAL
+#define set_msg_from_ipv6(m, c, f, a) EINVAL
 #endif /* HAVE_IPV6_PKTINFO */
 
 static krb5_error_code
