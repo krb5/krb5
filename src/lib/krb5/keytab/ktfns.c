@@ -138,7 +138,7 @@ match_entries(krb5_context context, krb5_keytab keytab,
     krb5_error_code ret;
     krb5_keytab_entry ent;
     krb5_kt_cursor cursor;
-    krb5_boolean match;
+    krb5_boolean match = FALSE;
 
     /* Scan the keytab for host-based entries matching accprinc. */
     ret = krb5_kt_start_seq_get(context, keytab, &cursor);
