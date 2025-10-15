@@ -1072,7 +1072,7 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_keyblock *as_key = NULL;
     krb5_pa_otp_req *req = NULL;
     krb5_error_code retval = 0;
-    krb5_data value, pin;
+    krb5_data value = {0}, pin = {0};
     const char *answer;
 
     if (modreq == NULL)
@@ -1094,6 +1094,12 @@ otp_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     retval = codec_decode_answer(context, answer, chl->tokeninfo, &ti, &value,
                                  &pin);
     if (retval != 0) {
+        /* If caller didn't setup the prompter, bail out */
+        if (prompter == NULL) {
+            retval = EINVAL;
+            goto error;
+        }
+
         /* If the responder doesn't have a token selection,
          * we need to select the token via prompting. */
         retval = prompt_for_token(context, prompter, prompter_data,

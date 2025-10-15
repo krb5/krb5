@@ -168,6 +168,109 @@ krb5int_fast_prep_req_body(krb5_context context,
     return retval;
 }
 
+static krb5_boolean
+fast_is_pkinit_allowed(krb5_context context, krb5_data *realm)
+{
+    int value;
+    krb5_error_code retval = EINVAL;
+    char realmstr[1024];
+    const char *option = "auto_fast_armor";
+    const int def_value = FALSE;
+
+    if (realm != NULL && realm->length > sizeof(realmstr)-1)
+        return FALSE;
+
+    if (realm != NULL) {
+        strncpy(realmstr, realm->data, realm->length);
+        realmstr[realm->length] = '\0';
+
+        retval = profile_get_boolean(context->profile,
+                                     KRB5_CONF_REALMS, realmstr,
+                                     option, def_value, &value);
+    }
+
+    return retval ? FALSE : value;
+
+}
+
+static krb5_error_code
+fast_acquire_pkinit_armor(krb5_context context,
+                           struct krb5int_fast_request_state *state,
+                           krb5_get_init_creds_opt *opt, krb5_kdc_req *request)
+{
+    krb5_context ctx;
+    krb5_get_init_creds_opt *options = NULL;
+    krb5_error_code retval = 0;
+    krb5_data *target_realm = &request->server->realm;
+    krb5_creds creds;
+    krb5_principal anon_princ = NULL;
+    krb5_ccache out_cc;
+
+    /* short circuit, we are asked to perform Anonymous PKINIT already */
+    if (opt->flags & KRB5_GET_INIT_CREDS_OPT_ANONYMOUS) {
+        return EINVAL;
+    }
+
+    /* skip realms which do not allow use of automated FAST armor */
+    if (!fast_is_pkinit_allowed(context, target_realm)) {
+        return EINVAL;
+    }
+
+    retval = krb5_init_context(&ctx);
+    if (retval != 0) {
+        return retval;
+    }
+    retval = krb5_get_init_creds_opt_alloc(ctx, &options);
+    if (retval != 0) {
+        goto cleanup;
+    }
+    krb5_get_init_creds_opt_set_anonymous(options, 1);
+    retval = krb5_cc_new_unique(ctx, "MEMORY", NULL, &out_cc);
+    if (retval != 0) {
+        goto cleanup;
+    }
+
+    retval = krb5_get_init_creds_opt_set_out_ccache(ctx, options, out_cc);
+    if (retval != 0) {
+        goto cleanup;
+    }
+
+    retval = krb5_build_principal_ext(ctx, &anon_princ,
+                                      target_realm->length, target_realm->data,
+                                      strlen(KRB5_WELLKNOWN_NAMESTR),
+                                      KRB5_WELLKNOWN_NAMESTR,
+                                      strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                      KRB5_ANONYMOUS_PRINCSTR, 0);
+    if (retval != 0) {
+        goto cleanup;
+    }
+
+    retval = krb5_get_init_creds_password(ctx, &creds, anon_princ, 0,
+                                          NULL /* no prompter */, NULL,
+                                          0, NULL /* service name */,
+                                          options);
+    if (retval == 0) {
+        state->fast_state_flags |= KRB5INT_FAST_OWN_ARMOR;
+        state->armor_ccache = out_cc;
+    }
+cleanup:
+    if (retval != 0 && out_cc != NULL) {
+        (void) krb5_cc_destroy(ctx, out_cc);
+    }
+    if (retval == 0) {
+        krb5_free_cred_contents(ctx, &creds);
+    }
+    if (options != NULL) {
+        krb5_get_init_creds_opt_free(ctx, options);
+    }
+    if (anon_princ != NULL) {
+        krb5_free_principal(ctx, anon_princ);
+    }
+    krb5_free_context(ctx);
+
+    return retval;
+}
+
 krb5_error_code
 krb5int_fast_as_armor(krb5_context context,
                       struct krb5int_fast_request_state *state,
@@ -178,10 +281,20 @@ krb5int_fast_as_armor(krb5_context context,
     krb5_principal target_principal = NULL;
     krb5_data *target_realm;
     const char *ccname = k5_gic_opt_get_fast_ccache_name(opt);
+    char *fast_ccname = NULL;
     krb5_flags fast_flags;
 
     krb5_clear_error_message(context);
     target_realm = &request->server->realm;
+    if (ccname == NULL) {
+        retval = fast_acquire_pkinit_armor(context, state, opt, request);
+        if (retval == 0) {
+            retval = krb5_cc_get_full_name(context, state->armor_ccache, &fast_ccname);
+            if (retval == 0 && fast_ccname != NULL)
+                ccname = fast_ccname;
+        }
+        retval = 0;
+    }
     if (ccname != NULL) {
         TRACE_FAST_ARMOR_CCACHE(context, ccname);
         state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
@@ -220,6 +333,8 @@ krb5int_fast_as_armor(krb5_context context,
         krb5_cc_close(context, ccache);
     if (target_principal)
         krb5_free_principal(context, target_principal);
+    if (fast_ccname)
+        free(fast_ccname);
     return retval;
 }
 
@@ -615,6 +730,9 @@ krb5int_fast_free_state(krb5_context context,
     /*We are responsible for none of the store in the fast_outer_req*/
     krb5_free_keyblock(context, state->armor_key);
     krb5_free_fast_armor(context, state->armor);
+    if (state->fast_state_flags & KRB5INT_FAST_OWN_ARMOR) {
+        krb5_cc_destroy(context, state->armor_ccache);
+    }
     free(state);
 }
 
