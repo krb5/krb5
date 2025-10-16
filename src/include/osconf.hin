@@ -53,6 +53,7 @@
 #define DEFAULT_SECURE_PROFILE_PATH     "/etc/krb5.conf@SYSCONFCONF"
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH
 #endif
+#define SYSCONFDIR "@SYSCONFDIR"
 #endif /* _WINDOWS  */
 
 #ifdef _WIN32
