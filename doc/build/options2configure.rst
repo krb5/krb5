@@ -343,6 +343,12 @@ Optional packages
     implemented crypto backend is ``openssl``.  (See
     :ref:`mitK5features`)
 
+**-**\ **-with-tls-impl=**\ *IMPL*
+    Use specified TLS implementation (e.g., **-**\
+    **-with-tls-impl=**\ *openssl*) or ``no`` to build without TLS
+    support.  The default is ``auto``, which uses OpenSSL if available
+    and builds without TLS support otherwise.
+
 **-**\ **-without-libedit**
     Do not compile and link against libedit.  Some utilities will no
     longer offer command history or completion in interactive mode if
