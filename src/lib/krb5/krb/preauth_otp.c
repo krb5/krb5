@@ -479,6 +479,9 @@ doprompt(krb5_context context, krb5_prompter_fct prompter, void *prompter_data,
     krb5_error_code retval;
     krb5_prompt_type prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
 
+    if (prompter == NULL)
+        return EIO;
+
     if (prompttxt == NULL || out == NULL)
         return EINVAL;
 
