@@ -28,16 +28,6 @@
 #include "fake-addrinfo.h"
 #include "os-proto.h"
 
-#ifdef KRB5_DNS_LOOKUP
-
-#define DEFAULT_LOOKUP_KDC 1
-#if KRB5_DNS_LOOKUP_REALM
-#define DEFAULT_LOOKUP_REALM 1
-#else
-#define DEFAULT_LOOKUP_REALM 0
-#endif
-#define DEFAULT_URI_LOOKUP TRUE
-
 struct kdclist_entry {
     krb5_data realm;
     struct server_entry server;
@@ -47,6 +37,16 @@ struct kdclist {
     size_t count;
     struct kdclist_entry *list;
 };
+
+#ifdef KRB5_DNS_LOOKUP
+
+#define DEFAULT_LOOKUP_KDC 1
+#if KRB5_DNS_LOOKUP_REALM
+#define DEFAULT_LOOKUP_REALM 1
+#else
+#define DEFAULT_LOOKUP_REALM 0
+#endif
+#define DEFAULT_URI_LOOKUP TRUE
 
 static int
 maybe_use_dns (krb5_context context, const char *name, int defalt)
