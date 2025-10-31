@@ -70,6 +70,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifndef O_CLOEXEC
 #define O_CLOEXEC 0
 #endif
@@ -1310,9 +1314,20 @@ fcc_replace(krb5_context context, krb5_ccache id, krb5_principal princ,
     if (st != 0)
         goto errno_cleanup;
 
+#ifdef _WIN32
+    /* On Windows, rename() fails if the destination file is open.
+     * Try to unlink first, then rename. If unlink fails because the file
+     * is open, try rename anyway - it may succeed if the file was closed
+     * between unlink and rename attempts. */
+    (void)unlink(data->filename);
     st = rename(tmpname, data->filename);
     if (st != 0)
         goto errno_cleanup;
+#else
+    st = rename(tmpname, data->filename);
+    if (st != 0)
+        goto errno_cleanup;
+#endif
     tmpfile_exists = FALSE;
 
 cleanup:
