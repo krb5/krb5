@@ -51,9 +51,6 @@ MAKE_INIT_FUNCTION(init_openssl);
 int
 init_openssl(void)
 {
-    SSL_library_init();
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
     ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     ex_handle_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     return 0;
