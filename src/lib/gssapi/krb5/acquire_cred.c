@@ -894,29 +894,7 @@ krb_error_out:
     ret = GSS_S_FAILURE;
 
 error_out:
-    if (cred != NULL) {
-        if (cred->ccache) {
-            if (cred->destroy_ccache)
-                krb5_cc_destroy(context, cred->ccache);
-            else
-                krb5_cc_close(context, cred->ccache);
-        }
-        if (cred->client_keytab)
-            krb5_kt_close(context, cred->client_keytab);
-#ifndef LEAN_CLIENT
-        if (cred->keytab)
-            krb5_kt_close(context, cred->keytab);
-#endif /* LEAN_CLIENT */
-        if (cred->rcache)
-            k5_rc_close(context, cred->rcache);
-        if (cred->name)
-            kg_release_name(context, &cred->name);
-        krb5_free_principal(context, cred->impersonator);
-        krb5_free_principal(context, cred->acceptor_mprinc);
-        zapfreestr(cred->password);
-        k5_mutex_destroy(&cred->lock);
-        xfree(cred);
-    }
+    kg_release_cred(context, cred);
     save_error_info(*minor_status, context);
     return ret;
 }

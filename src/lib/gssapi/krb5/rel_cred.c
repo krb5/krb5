@@ -23,74 +23,51 @@
 
 #include "gssapiP_krb5.h"
 
+krb5_error_code
+kg_release_cred(krb5_context context, krb5_gss_cred_id_t cred)
+{
+    krb5_error_code ret = 0;
+
+    if (cred == NULL)
+        return 0;
+    k5_mutex_destroy(&cred->lock);
+    if (cred->ccache != NULL) {
+        if (cred->destroy_ccache)
+            ret = krb5_cc_destroy(context, cred->ccache);
+        else
+            ret = krb5_cc_close(context, cred->ccache);
+    }
+    if (cred->client_keytab != NULL)
+        krb5_kt_close(context, cred->client_keytab);
+#ifndef LEAN_CLIENT
+    if (cred->keytab != NULL)
+        krb5_kt_close(context, cred->keytab);
+#endif /* LEAN_CLIENT */
+    if (cred->rcache != NULL)
+        k5_rc_close(context, cred->rcache);
+    kg_release_name(context, &cred->name);
+    krb5_free_principal(context, cred->acceptor_mprinc);
+    krb5_free_principal(context, cred->impersonator);
+    free(cred->req_enctypes);
+    zapfreestr(cred->password);
+    free(cred);
+    return ret;
+}
+
 OM_uint32 KRB5_CALLCONV
 krb5_gss_release_cred(OM_uint32 *minor_status, gss_cred_id_t *cred_handle)
 {
     krb5_context context;
-    krb5_gss_cred_id_t cred;
-    krb5_error_code code1, code2;
-
-    code1 = krb5_gss_init_context(&context);
-    if (code1) {
-        *minor_status = code1;
-        return GSS_S_FAILURE;
-    }
-
-    if (*cred_handle == GSS_C_NO_CREDENTIAL) {
-        *minor_status = 0;
-        krb5_free_context(context);
-        return(GSS_S_COMPLETE);
-    }
-
-    cred = (krb5_gss_cred_id_t)*cred_handle;
-
-    k5_mutex_destroy(&cred->lock);
-    /* ignore error destroying mutex */
-
-    if (cred->ccache) {
-        if (cred->destroy_ccache)
-            code1 = krb5_cc_destroy(context, cred->ccache);
-        else
-            code1 = krb5_cc_close(context, cred->ccache);
-    } else
-        code1 = 0;
-
-    if (cred->client_keytab)
-        krb5_kt_close(context, cred->client_keytab);
-
-#ifndef LEAN_CLIENT
-    if (cred->keytab)
-        code2 = krb5_kt_close(context, cred->keytab);
-    else
-#endif /* LEAN_CLIENT */
-        code2 = 0;
-
-    if (cred->rcache)
-        k5_rc_close(context, cred->rcache);
-    if (cred->name)
-        kg_release_name(context, &cred->name);
-
-    krb5_free_principal(context, cred->acceptor_mprinc);
-    krb5_free_principal(context, cred->impersonator);
-
-    if (cred->req_enctypes)
-        free(cred->req_enctypes);
-
-    if (cred->password != NULL)
-        zapfree(cred->password, strlen(cred->password));
-
-    xfree(cred);
-
-    *cred_handle = NULL;
 
     *minor_status = 0;
-    if (code1)
-        *minor_status = code1;
-    if (code2)
-        *minor_status = code2;
-
+    if (*cred_handle == GSS_C_NO_CREDENTIAL)
+        return GSS_S_COMPLETE;
+    *minor_status = krb5_gss_init_context(&context);
+    if (*minor_status)
+        return GSS_S_FAILURE;
+    *minor_status = kg_release_cred(context, (krb5_gss_cred_id_t)*cred_handle);
     if (*minor_status)
         save_error_info(*minor_status, context);
     krb5_free_context(context);
-    return(*minor_status?GSS_S_FAILURE:GSS_S_COMPLETE);
+    return *minor_status ? GSS_S_FAILURE : GSS_S_COMPLETE;
 }

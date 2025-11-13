@@ -940,6 +940,9 @@ krb5_error_code gss_krb5int_make_seal_token_v3(krb5_context,
 
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
+krb5_error_code
+kg_release_cred(krb5_context context, krb5_gss_cred_id_t cred);
+
 /* naming_exts.c */
 #define KG_INIT_NAME_NO_COPY 0x1
 
