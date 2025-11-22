@@ -295,13 +295,10 @@ AC_ARG_WITH([tls-impl],
   [TLS_IMPL=$withval], [TLS_IMPL=auto])
 case "$TLS_IMPL" in
 openssl|auto)
-  AC_CHECK_LIB(ssl,SSL_CTX_new,[have_lib_ssl=true],[have_lib_ssl=false],
-               -lcrypto)
-  AC_MSG_CHECKING([for OpenSSL])
+  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.1.0], [have_lib_ssl=true], [have_lib_ssl=false])
   if test x$have_lib_ssl = xtrue ; then
     AC_DEFINE(TLS_IMPL_OPENSSL,1,[Define if TLS implementation is OpenSSL])
-    AC_MSG_RESULT([yes])
-    TLS_IMPL_LIBS="-lssl -lcrypto"
+    TLS_IMPL_LIBS=$OPENSSL_LIBS
     TLS_IMPL=openssl
     AC_MSG_NOTICE([TLS module will use OpenSSL])
   else
