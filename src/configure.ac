@@ -1449,31 +1449,28 @@ AC_SUBST(MACOS_FRAMEWORK)
 
 # Vendordir
 AC_ARG_WITH([vendordir],
-  AS_HELP_STRING([--with-vendordir=DIR], [Directory for distribution provided configuration files]),
-  [ if test ! -z "$with_vendordir" ; then
-		case $with_vendordir in
-			yes|no)
-				VENDORDIR="/usr/etc"
-				;;
-			/*)
-				VENDORDIR="$with_vendordir"
-				;;
-			*)
-                                AC_MSG_ERROR(You must specify an absolute path to --with-vendordir=DIR)
-				;;
-		esac
-	fi
-  ],
-  [])
+            AS_HELP_STRING([--with-vendordir=DIR], [Directory for distribution provided configuration files]),
+            [
+              case $with_vendordir in
+                /*)
+                ;;
+                *)
+                  AC_MSG_ERROR(You must specify an absolute path to --with-vendordir=DIR)
+                ;;
+              esac
+              VENDORDIR="$with_vendordir"
+            ],
+            [ VENDORDIR="/usr/etc" ])
+AC_DEFINE_UNQUOTED(VENDORDIR, ["$VENDORDIR"], [Location of vendor configuration files])
+AC_SUBST(VENDORDIR)
 
-AS_IF([test "x$with_vendordir" != x], [
-  AC_DEFINE([USE_VENDORDIR], [1], [Define to 1 to use vendordir])
-  AC_DEFINE_UNQUOTED(VENDORDIR, "$VENDORDIR", [location of vendor configuration files])
-  AC_SUBST(VENDORDIR)
-  USE_VENDORDIR="1"
-  AC_SUBST(USE_VENDORDIR)
-  AC_MSG_NOTICE([Used vendor dir: $with_vendordir])
-])
+AC_ARG_ENABLE([vendordir],
+              [AS_HELP_STRING([--enable-vendordir], [Enable support for distribution provided configuration files])],
+              [], [enable_vendordir=no])
+if test "$enable_vendordir" != no; then
+  AC_DEFINE(USE_VENDORDIR, 1, [Define if distribution provided configuration files should be used.])
+  AC_MSG_NOTICE([Used vendor dir: $VENDORDIR])
+fi
 
 # Build-time default ccache, keytab, and client keytab names.  These
 # can be given as variable arguments DEFCCNAME, DEFKTNAME, and

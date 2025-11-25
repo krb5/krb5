@@ -7,12 +7,11 @@ The krb5.conf file contains Kerberos configuration information,
 including the locations of KDCs and admin servers for the Kerberos
 realms of interest, defaults for the current realm and for Kerberos
 applications, and mappings of hostnames onto Kerberos realms.
-Normally, you should install your indivual krb5.conf file in the directory
+Normally, you should install your individual krb5.conf file in the directory
 ``/etc``.
 
 .. only:: use_vendordir
-
-  If there is no individual one, the default one |vendorkrb5conf| will
+  If there is no individual one the dafault one |vendorkrb5conf| will
   be taken.
 
 You can override the default location by setting the
