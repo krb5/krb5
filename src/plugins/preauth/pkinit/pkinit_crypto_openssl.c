@@ -5030,7 +5030,7 @@ load_cas_and_crls(krb5_context context,
                   pkinit_req_crypto_context req_cryptoctx,
                   pkinit_identity_crypto_context id_cryptoctx,
                   int catype,
-                  char *filename)
+                  const char *filename)
 {
     STACK_OF(X509_INFO) *sk = NULL;
     STACK_OF(X509) *ca_certs = NULL;
@@ -5188,7 +5188,7 @@ load_cas_and_crls_dir(krb5_context context,
                       pkinit_req_crypto_context req_cryptoctx,
                       pkinit_identity_crypto_context id_cryptoctx,
                       int catype,
-                      char *dirname)
+                      const char *dirname)
 {
     krb5_error_code retval = EINVAL;
     char **fnames = NULL, *filename;
@@ -5232,7 +5232,7 @@ crypto_load_cas_and_crls(krb5_context context,
                          pkinit_identity_crypto_context id_cryptoctx,
                          int idtype,
                          int catype,
-                         char *id)
+                         const char *id)
 {
     switch (idtype) {
     case IDTYPE_FILE:
