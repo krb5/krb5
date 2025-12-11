@@ -331,12 +331,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     if (errcode)
         goto egress;
 
-    /* these parts are left on as a courtesy from krb5_encode_kdc_rep so we
-       can use them in raw form if needed.  But, we don't... */
-    memset(state->reply.enc_part.ciphertext.data, 0,
-           state->reply.enc_part.ciphertext.length);
-    free(state->reply.enc_part.ciphertext.data);
-
     log_as_req(context, state->local_addr, state->remote_addr,
                state->request, &state->reply, state->client, state->cname,
                state->server, state->sname, state->kdc_time, 0, 0, 0);
@@ -405,12 +399,8 @@ egress:
     krb5_db_free_principal(context, state->local_tgt_storage);
     if (state->session_key.contents != NULL)
         krb5_free_keyblock_contents(context, &state->session_key);
-    if (state->ticket_reply.enc_part.ciphertext.data != NULL) {
-        memset(state->ticket_reply.enc_part.ciphertext.data , 0,
-               state->ticket_reply.enc_part.ciphertext.length);
-        free(state->ticket_reply.enc_part.ciphertext.data);
-    }
-
+    free(state->ticket_reply.enc_part.ciphertext.data);
+    free(state->reply.enc_part.ciphertext.data);
     krb5_free_pa_data(context, state->e_data);
     krb5_free_data(context, state->inner_body);
     kdc_free_rstate(state->rstate);
