@@ -185,7 +185,7 @@ krb5_pac_get_types(krb5_context context, krb5_pac pac, size_t *len_out,
 {
     size_t i;
 
-    *types_out = calloc(pac->nbuffers, sizeof(*types_out));
+    *types_out = calloc(pac->nbuffers, sizeof(**types_out));
     if (*types_out == NULL)
         return ENOMEM;
 
