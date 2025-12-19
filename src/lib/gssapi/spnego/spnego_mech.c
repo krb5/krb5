@@ -138,7 +138,7 @@ make_spnego_tokenInit_msg(spnego_gss_ctx_id_t,
 			gss_buffer_t,
 			OM_uint32, gss_buffer_t, send_token_flag,
 			gss_buffer_t);
-static OM_uint32
+static int
 make_spnego_tokenTarg_msg(uint8_t, gss_OID, gss_buffer_t,
 			gss_buffer_t, send_token_flag,
 			gss_buffer_t);
@@ -3698,7 +3698,7 @@ make_spnego_tokenInit_msg(spnego_gss_ctx_id_t spnego_ctx, int negHintsCompat,
  * gss_accept_sec_context and eventually up to the application program
  * and over to the client.
  */
-static OM_uint32
+static int
 make_spnego_tokenTarg_msg(uint8_t status, gss_OID mech_wanted,
 			  gss_buffer_t token, gss_buffer_t mic,
 			  send_token_flag sendtoken,
@@ -3709,9 +3709,9 @@ make_spnego_tokenTarg_msg(uint8_t status, gss_OID mech_wanted,
 	struct k5buf buf;
 
 	if (outbuf == GSS_C_NO_BUFFER)
-		return (GSS_S_DEFECTIVE_TOKEN);
+		return (-1);
 	if (sendtoken == INIT_TOKEN_SEND && mech_wanted == GSS_C_NO_OID)
-		return (GSS_S_DEFECTIVE_TOKEN);
+		return (-1);
 
 	outbuf->length = 0;
 	outbuf->value = NULL;
@@ -3744,7 +3744,7 @@ make_spnego_tokenTarg_msg(uint8_t status, gss_OID mech_wanted,
 	/* Allocate space and prepare a buffer. */
 	t = gssalloc_malloc(choice_len);
 	if (t == NULL)
-		return (GSS_S_DEFECTIVE_TOKEN);
+		return (-1);
 	k5_buf_init_fixed(&buf, t, choice_len);
 
 	/* Add the choice tag and begin the sequence. */
