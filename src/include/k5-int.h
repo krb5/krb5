@@ -293,6 +293,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_REALM_TRY_DOMAINS            "realm_try_domains"
 #define KRB5_CONF_REJECT_BAD_TRANSIT           "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME               "renew_lifetime"
+#define KRB5_CONF_REPORT_CANONICAL_CLIENT_NAME "report_canonical_client_name"
 #define KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT    "restrict_anonymous_to_tgt"
 #define KRB5_CONF_SITENAME                     "sitename"
 #define KRB5_CONF_SUPPORTED_ENCTYPES           "supported_enctypes"
@@ -1249,6 +1250,7 @@ struct _krb5_context {
     krb5_boolean allow_rc4;
     krb5_boolean ignore_acceptor_hostname;
     krb5_boolean enforce_ok_as_delegate;
+    krb5_boolean report_canonical_client_name;
     enum dns_canonhost dns_canonicalize_hostname;
 
     krb5_trace_callback trace_callback;
