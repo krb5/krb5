@@ -439,6 +439,54 @@ k5_pac_validate_client(krb5_context context, const krb5_pac pac,
     return ret;
 }
 
+static krb5_error_code
+krb5_pac_get_upn_dns_name(krb5_context context, const krb5_pac pac,
+                          char **princname_out)
+{
+    krb5_error_code ret = 0;
+    krb5_data upn_dns_info;
+    char *canon_princname = NULL;
+    uint32_t flags = 0;
+    uint16_t canon_princ_length = 0;
+    uint16_t canon_princ_offset = 0;
+
+    *princname_out = NULL;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_UPN_DNS_INFO,
+                               &upn_dns_info);
+    if (ret)
+        return ret;
+
+    if (upn_dns_info.length < PAC_UPN_DNS_INFO_LENGTH)
+        return ERANGE;
+
+    flags = load_32_le(upn_dns_info.data + 8);
+
+    if (flags & PAC_UPN_DNS_INFO_FLAGS_HAS_SAM_NAME_AND_SID) {
+        if (upn_dns_info.length < PAC_UPN_DNS_INFO_EX_LENGTH)
+            return ERANGE;
+
+        canon_princ_length =
+            load_16_le(upn_dns_info.data + PAC_UPN_DNS_INFO_LENGTH);
+        canon_princ_offset =
+            load_16_le(upn_dns_info.data + PAC_UPN_DNS_INFO_LENGTH + 2);
+
+        if (upn_dns_info.length < PAC_UPN_DNS_INFO_LENGTH + canon_princ_length ||
+            canon_princ_length % 2)
+            return ERANGE;
+
+        ret = k5_utf16le_to_utf8((unsigned char *)upn_dns_info.data +
+                                 canon_princ_offset,
+                                 canon_princ_length, &canon_princname);
+        if (ret)
+            return ret;
+
+        *princname_out = canon_princname;
+    }
+
+    return 0;
+}
+
 /* Zero out the signature in a copy of the PAC data. */
 static krb5_error_code
 zero_signature(krb5_context context, const krb5_pac pac, uint32_t type,
@@ -854,6 +902,26 @@ mspac_verify(krb5_context context, krb5_authdata_context actx,
                           req->ticket->enc_part2->client, key, NULL);
     if (ret)
         TRACE_MSPAC_VERIFY_FAIL(context, ret);
+
+    if (context->report_canonical_client_name) {
+        char *client_name = NULL;
+        krb5_principal canon_principal;
+
+        ret = krb5_pac_get_upn_dns_name(context, pacctx->pac, &client_name);
+        if (ret)
+            return ret;
+
+        if (client_name != NULL) {
+            ret = krb5_parse_name(context, client_name, &canon_principal);
+            free(client_name);
+            if (ret) {
+                return ret;
+            }
+
+            krb5_free_principal(context, req->ticket->enc_part2->client);
+            req->ticket->enc_part2->client = canon_principal;
+        }
+    }
 
     /*
      * If the above verification failed, don't fail the whole authentication,
