@@ -541,27 +541,34 @@ handle_mic(OM_uint32 *minor_status, gss_buffer_t mic_in,
 	   gss_buffer_t *mic_out,
 	   OM_uint32 *negState, send_token_flag *tokflag)
 {
-	OM_uint32 ret;
-
-	ret = GSS_S_FAILURE;
-	*mic_out = GSS_C_NO_BUFFER;
-	if (mic_in != GSS_C_NO_BUFFER) {
-		if (sc->mic_rcvd) {
-			/* Reject MIC if we've already received a MIC. */
-			*negState = REJECT;
-			*tokflag = ERROR_TOKEN_SEND;
-			return GSS_S_DEFECTIVE_TOKEN;
+ 	OM_uint32 ret;
+	const char *allow_no_mic_env = getenv("KRB5_SPNEGO_ALLOW_NO_ACCEPTOR_MIC");
+ 
+ 	ret = GSS_S_FAILURE;
+ 	*mic_out = GSS_C_NO_BUFFER;
+ 	if (mic_in != GSS_C_NO_BUFFER) {
+ 		if (sc->mic_rcvd) {
+ 			/* Reject MIC if we've already received a MIC. */
+ 			*negState = REJECT;
+ 			*tokflag = ERROR_TOKEN_SEND;
+ 			return GSS_S_DEFECTIVE_TOKEN;
+ 		}
+ 	} else if (sc->mic_reqd && !send_mechtok) {
+		if (allow_no_mic_env != NULL &&
+		    g_OID_equal(sc->internal_mech, &gss_mech_ntlmssp_oid) &&
+		    sc->mic_sent) {
+			sc->mic_reqd = 0;
+		} else {
+ 		/*
+ 		 * If the peer sends the final mechanism token, it
+ 		 * must send the MIC with that token if the
+ 		 * negotiation requires MICs.
+ 		 */
+ 		*negState = REJECT;
+ 		*tokflag = ERROR_TOKEN_SEND;
+ 		return GSS_S_DEFECTIVE_TOKEN;
 		}
-	} else if (sc->mic_reqd && !send_mechtok) {
-		/*
-		 * If the peer sends the final mechanism token, it
-		 * must send the MIC with that token if the
-		 * negotiation requires MICs.
-		 */
-		*negState = REJECT;
-		*tokflag = ERROR_TOKEN_SEND;
-		return GSS_S_DEFECTIVE_TOKEN;
-	}
+ 	}
 	ret = process_mic(minor_status, mic_in, sc, mic_out,
 			  negState, tokflag);
 	if (ret != GSS_S_COMPLETE) {
