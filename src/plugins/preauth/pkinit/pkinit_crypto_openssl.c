@@ -1067,8 +1067,6 @@ static struct pkcs11_errstrings {
 };
 #endif
 
-MAKE_INIT_FUNCTION(pkinit_openssl_init);
-
 static krb5_error_code oerr(krb5_context context, krb5_error_code code,
                             const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
@@ -1140,8 +1138,6 @@ pkinit_init_plg_crypto(krb5_context context,
 {
     krb5_error_code retval = ENOMEM;
     pkinit_plg_crypto_context ctx = NULL;
-
-    (void)CALL_INIT_FUNCTION(pkinit_openssl_init);
 
     ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
@@ -1775,7 +1771,7 @@ cms_signeddata_create(krb5_context context,
             goto cleanup;
         X509_STORE_CTX_init(certctx, certstore, id_cryptoctx->my_cert,
                             id_cryptoctx->intermediateCAs);
-        X509_STORE_CTX_trusted_stack(certctx, id_cryptoctx->trustedCAs);
+        X509_STORE_CTX_set0_trusted_stack(certctx, id_cryptoctx->trustedCAs);
         if (!X509_verify_cert(certctx)) {
             retval = oerr_cert(context, 0, certctx,
                                _("Failed to verify own certificate"));
@@ -2118,7 +2114,7 @@ cms_signeddata_verify(krb5_context context,
 
         /* add trusted CAs certificates for cert verification */
         if (idctx->trustedCAs != NULL)
-            X509_STORE_CTX_trusted_stack(cert_ctx, idctx->trustedCAs);
+            X509_STORE_CTX_set0_trusted_stack(cert_ctx, idctx->trustedCAs);
         else {
             pkiDebug("unable to find any trusted CAs\n");
             goto cleanup;
@@ -3088,15 +3084,6 @@ cleanup:
     free(server_key);
 
     return retval;
-}
-
-int
-pkinit_openssl_init(void)
-{
-    /* Initialize OpenSSL. */
-    ERR_load_crypto_strings();
-    OpenSSL_add_all_algorithms();
-    return 0;
 }
 
 static krb5_error_code
@@ -5813,8 +5800,6 @@ crypto_verify_checksums(krb5_context context, krb5_data *body,
 BOOL WINAPI
 DllMain(HANDLE hModule, DWORD fdwReason, LPVOID lpvReserved)
 {
-    if (fdwReason == DLL_PROCESS_ATTACH)
-        pkinit_openssl_init__auxinit();
     return TRUE;
 }
 #endif /* _WIN32 */
