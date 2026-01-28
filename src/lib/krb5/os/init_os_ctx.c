@@ -25,10 +25,15 @@
  */
 
 #define NEED_WINDOWS
+#define KRB5_CONF "krb5.conf"
 
 #include "k5-int.h"
 #include "os-proto.h"
 #include "../krb/int-proto.h"
+
+#ifdef USE_VENDORDIR
+#include <sys/stat.h>
+#endif
 
 #if defined(_WIN32)
 #include <winsock.h>
@@ -294,11 +299,27 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     unsigned int ent_len;
     const char *s, *t;
 
-    if (secure) {
-        filepath = DEFAULT_SECURE_PROFILE_PATH;
-    } else {
-        filepath = secure_getenv("KRB5_CONFIG");
-        if (!filepath) filepath = DEFAULT_PROFILE_PATH;
+#ifdef USE_VENDORDIR
+    struct stat stats = { 0 };
+#endif /* USE_VENDORDIR */  
+
+     if (secure) {
+         filepath = DEFAULT_SECURE_PROFILE_PATH;
+#ifdef USE_VENDORDIR
+        if (stat(filepath, &stats) < 0) {
+            filepath = DEFAULT_VENDOR_SECURE_PROFILE_PATH;
+        }
+#endif /* USE_VENDORDIR */
+     } else {
+         filepath = secure_getenv("KRB5_CONFIG");
+         if (!filepath) {
+             filepath = DEFAULT_PROFILE_PATH;
+#ifdef USE_VENDORDIR
+            if (stat(filepath, &stats) < 0) {
+                filepath = DEFAULT_VENDOR_PROFILE_PATH;
+            }
+#endif /* USE_VENDORDIR */
+        }
     }
 
     /* count the distinct filename components */
