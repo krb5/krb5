@@ -37,7 +37,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <gssrpc/rpc.h>
