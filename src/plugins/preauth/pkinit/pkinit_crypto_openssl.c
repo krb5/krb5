@@ -2002,7 +2002,7 @@ cms_signeddata_verify(krb5_context context,
         unsigned char *d;
         *is_signed = 0;
         octets = CMS_get0_content(cms);
-        if (!octets || ((*octets)->type != V_ASN1_OCTET_STRING)) {
+        if (!octets || (ASN1_STRING_type(*octets) != V_ASN1_OCTET_STRING)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval,
                                    _("Invalid pkinit packet: octet string "
@@ -2058,7 +2058,8 @@ cms_signeddata_verify(krb5_context context,
         /* We cannot use CMS_dataInit because there may be no digest */
         octets = CMS_get0_content(cms);
         if (octets)
-            out = BIO_new_mem_buf((*octets)->data, (*octets)->length);
+            out = BIO_new_mem_buf(ASN1_STRING_get0_data(*octets),
+                                  ASN1_STRING_length(*octets));
         if (out == NULL)
             goto cleanup;
     } else {
@@ -2379,8 +2380,8 @@ crypto_retrieve_X509_sans(krb5_context context,
         gen = sk_GENERAL_NAME_value(ialt, i);
         switch (gen->type) {
         case GEN_OTHERNAME:
-            name.length = gen->d.otherName->value->value.sequence->length;
-            name.data = (char *)gen->d.otherName->value->value.sequence->data;
+            name.length = ASN1_STRING_length(gen->d.otherName->value->value.sequence);
+            name.data = (char *)ASN1_STRING_get0_data(gen->d.otherName->value->value.sequence);
             if (princs != NULL &&
                 OBJ_cmp(plgctx->id_pkinit_san,
                         gen->d.otherName->type_id) == 0) {
@@ -2414,12 +2415,13 @@ crypto_retrieve_X509_sans(krb5_context context,
         case GEN_DNS:
             if (dnss != NULL) {
                 /* Prevent abuse of embedded null characters. */
-                if (memchr(gen->d.dNSName->data, '\0', gen->d.dNSName->length))
+                if (memchr(ASN1_STRING_get0_data(gen->d.dNSName), '\0',
+                           ASN1_STRING_length(gen->d.dNSName)))
                     break;
                 pkiDebug("%s: found dns name = %s\n", __FUNCTION__,
-                         gen->d.dNSName->data);
+                         ASN1_STRING_get0_data(gen->d.dNSName));
                 dnss[d] = (unsigned char *)
-                    strdup((char *)gen->d.dNSName->data);
+                    strdup((char *)ASN1_STRING_get0_data(gen->d.dNSName));
                 if (dnss[d] == NULL) {
                     pkiDebug("%s: failed to duplicate dns name\n",
                              __FUNCTION__);
