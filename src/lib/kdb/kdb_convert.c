@@ -745,6 +745,18 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
 #undef u
     }
 
+    if (ent->len == 0) {
+        /*
+         * The len field should have been set in the existing principal or (for
+         * a creation update) set in the update entry.  If was not set, we just
+         * applied a non-creation update to a nonexistent principal, implying
+         * that our database is out of sync with our ulog metadata.  Return an
+         * error to force a full resync.
+         */
+        ret = KRB5_KDB_NOENTRY;
+        goto cleanup;
+    }
+
     /*
      * process mod_princ_data request
      */
