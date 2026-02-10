@@ -142,6 +142,8 @@ static const char *port = KPROP_SERVICE;
 static char **db_args = NULL;
 static size_t db_args_size = 0;
 
+static int signal_received = 0;
+
 static void parse_args(int argc, char **argv);
 static void do_standalone(void);
 static void doit(int fd);
@@ -244,6 +246,12 @@ atexit_kill_do_standalone(void)
 {
     if (fullprop_child > 0)
         kill(fullprop_child, SIGHUP);
+}
+
+static void
+iprop_signal_handler(int sig)
+{
+    signal_received = sig;
 }
 
 int
@@ -743,6 +751,8 @@ reinit:
     if (debug)
         fprintf(stderr, _("kadm5 initialization succeeded\n"));
 
+    signal_wrapper(SIGTERM, iprop_signal_handler);
+
     /*
      * Reset re-initialization count to zero now.
      */
@@ -756,6 +766,16 @@ reinit:
     for (;;) {
         incr_ret = NULL;
         full_ret = NULL;
+
+        if (signal_received != 0) {
+            /*
+             * SIGTERM caught during db updates casuses corruption,
+             * terminate gracefully
+             */
+            if (debug)
+                fprintf(stderr, _("signal %d received in do_iprop loop, terminating\n"), signal_received);
+            goto done;
+        }
 
         /*
          * Get the most recent ulog entry sno + ts, which
@@ -999,7 +1019,7 @@ done:
     ulog_fini(kpropd_context);
     krb5_free_context(kpropd_context);
 
-    return (runonce == 1) ? 0 : 1;
+    return (runonce == 1 || signal_received != 0) ? 0 : 1;
 }
 
 
