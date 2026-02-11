@@ -938,7 +938,7 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
     size_t i;
     int err, bound_any;
     struct bind_address addr;
-    struct sockaddr_un sun;
+    struct sockaddr_un unaddr;
     struct addrinfo hints, *ai_list = NULL, *ai = NULL;
     struct sockact_list sockacts = { 0 };
     verto_callback vcb;
@@ -967,16 +967,16 @@ setup_addresses(verto_ctx *ctx, void *handle, const char *prog,
         hints.ai_socktype = bind_socktypes[addr.type];
 
         if (addr.type == UNX) {
-            sun.sun_family = AF_UNIX;
-            if (strlcpy(sun.sun_path, addr.address, sizeof(sun.sun_path)) >=
-                sizeof(sun.sun_path)) {
+            unaddr.sun_family = AF_UNIX;
+            if (strlcpy(unaddr.sun_path, addr.address,
+                        sizeof(unaddr.sun_path)) >= sizeof(unaddr.sun_path)) {
                 ret = ENAMETOOLONG;
                 krb5_klog_syslog(LOG_ERR,
                                  _("UNIX domain socket path too long: %s"),
                                  addr.address);
                 goto cleanup;
             }
-            ret = setup_socket(&addr, (struct sockaddr *)&sun, &sockacts,
+            ret = setup_socket(&addr, (struct sockaddr *)&unaddr, &sockacts,
                                handle, prog, ctx, listen_backlog,
                                verto_callbacks[addr.type],
                                bind_conn_types[addr.type]);

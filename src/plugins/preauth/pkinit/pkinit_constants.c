@@ -32,19 +32,27 @@
 
 #include "pkinit.h"
 
+#define DATA_FROM_ARRAY(a) { KV5M_DATA, sizeof(a), (char *)a }
+
 /* RFC 8636 id-pkinit-kdf-ah-sha1: iso(1) identified-organization(3) dod(6)
  * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha1(1) */
-static char kdf_sha1[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x01 };
+static uint8_t kdf_sha1[8] = {
+    0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x01
+};
 /* RFC 8636 id-pkinit-kdf-ah-sha256: iso(1) identified-organization(3) dod(6)
  * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha256(2) */
-static char kdf_sha256[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x02 };
+static uint8_t kdf_sha256[8] = {
+    0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x02
+};
 /* RFC 8636 id-pkinit-kdf-ah-sha512: iso(1) identified-organization(3) dod(6)
  * internet(1) security(5) kerberosv5(2) pkinit(3) kdf(6) sha512(3) */
-static char kdf_sha512[8] = { 0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x03 };
+static uint8_t kdf_sha512[8] = {
+    0x2B, 0x06, 0x01, 0x05, 0x02, 0x03, 0x06, 0x03
+};
 
-const krb5_data kdf_sha1_id = { KV5M_DATA, sizeof(kdf_sha1), kdf_sha1 };
-const krb5_data kdf_sha256_id = { KV5M_DATA, sizeof(kdf_sha256), kdf_sha256 };
-const krb5_data kdf_sha512_id = { KV5M_DATA, sizeof(kdf_sha512), kdf_sha512 };
+const krb5_data kdf_sha1_id = DATA_FROM_ARRAY(kdf_sha1);
+const krb5_data kdf_sha256_id = DATA_FROM_ARRAY(kdf_sha256);
+const krb5_data kdf_sha512_id = DATA_FROM_ARRAY(kdf_sha512);
 
 krb5_data const * const supported_kdf_alg_ids[] = {
     &kdf_sha256_id,
@@ -55,81 +63,69 @@ krb5_data const * const supported_kdf_alg_ids[] = {
 
 /* RFC 3370 sha-1: iso(1) identified-organization(3) oiw(14) secsig(3)
  * algorithm(2) 26 */
-static char cms_sha1[] = { 0x2b, 0x0e, 0x03, 0x02, 0x1a };
+static uint8_t cms_sha1[] = { 0x2b, 0x0e, 0x03, 0x02, 0x1a };
 /* RFC 5754 id-sha256: joint-iso-itu-t(2) country(16) us(840) organization(1)
  * gov(101) csor(3) nistalgorithm(4) hashalgs(2) 1 */
-static char cms_sha256[] = {
+static uint8_t cms_sha256[] = {
     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01
 };
 /* RFC 5754 id-sha384: joint-iso-itu-t(2) country(16) us(840) organization(1)
  * gov(101) csor(3) nistalgorithm(4) hashalgs(2) 2 */
-static char cms_sha384[] = {
+static uint8_t cms_sha384[] = {
     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02
 };
 /* RFC 5754 id-sha512: joint-iso-itu-t(2) country(16) us(840) organization(1)
  * gov(101) csor(3) nistalgorithm(4) hashalgs(2) 3 */
-static char cms_sha512[] = {
+static uint8_t cms_sha512[] = {
     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03
 };
 
-const krb5_data cms_sha1_id = { KV5M_DATA, sizeof(cms_sha1), cms_sha1 };
-const krb5_data cms_sha256_id = { KV5M_DATA, sizeof(cms_sha256), cms_sha256 };
-const krb5_data cms_sha384_id = { KV5M_DATA, sizeof(cms_sha384), cms_sha384 };
-const krb5_data cms_sha512_id = { KV5M_DATA, sizeof(cms_sha512), cms_sha512 };
+const krb5_data cms_sha1_id = DATA_FROM_ARRAY(cms_sha1);
+const krb5_data cms_sha256_id = DATA_FROM_ARRAY(cms_sha256);
+const krb5_data cms_sha384_id = DATA_FROM_ARRAY(cms_sha384);
+const krb5_data cms_sha512_id = DATA_FROM_ARRAY(cms_sha512);
 
 /* RFC 4055 sha256WithRSAEncryption: iso(1) member-body(2) us(840)
  * rsadsi(113549) pkcs(1) 1 11 */
-static char sha256WithRSAEncr_oid[9] = {
+static uint8_t sha256WithRSAEncr_oid[9] = {
     0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0b
 };
 /* RFC 4055 sha256WithRSAEncryption: iso(1) member-body(2) us(840)
  * rsadsi(113549) pkcs(1) 1 13 */
-static char sha512WithRSAEncr_oid[9] = {
+static uint8_t sha512WithRSAEncr_oid[9] = {
     0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x0d
 };
 
 /* RFC 3279 ecdsa-with-SHA1: iso(1) member-body(2) us(840) ansi-X9-62(10045)
  * signatures(4) 1 */
-static char ecdsaWithSha1_oid[] = {
+static uint8_t ecdsaWithSha1_oid[] = {
     0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x01
 };
 
 /* RFC 5758 ecdsa-with-SHA256: iso(1) member-body(2) us(840) ansi-X9-62(10045)
  * signatures(4) ecdsa-with-SHA2(3) 2 */
-static char ecdsaWithSha256_oid[] = {
+static uint8_t ecdsaWithSha256_oid[] = {
     0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x02
 };
 
 /* RFC 5758 ecdsa-with-SHA384: iso(1) member-body(2) us(840) ansi-X9-62(10045)
  * signatures(4) ecdsa-with-SHA2(3) 3 */
-static char ecdsaWithSha384_oid[] = {
+static uint8_t ecdsaWithSha384_oid[] = {
     0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x03
 };
 
 /* RFC 5758 ecdsa-with-SHA512: iso(1) member-body(2) us(840) ansi-X9-62(10045)
  * signatures(4) ecdsa-with-SHA2(3) 4 */
-static char ecdsaWithSha512_oid[] = {
+static uint8_t ecdsaWithSha512_oid[] = {
     0x2a, 0x86, 0x48, 0xce, 0x3d, 0x04, 0x03, 0x04
 };
 
-const krb5_data sha256WithRSAEncr_id = {
-    KV5M_DATA, sizeof(sha256WithRSAEncr_oid), sha256WithRSAEncr_oid
-};
-const krb5_data sha512WithRSAEncr_id = {
-    KV5M_DATA, sizeof(sha512WithRSAEncr_oid), sha512WithRSAEncr_oid
-};
-const krb5_data ecdsaWithSha1_id = {
-    KV5M_DATA, sizeof(ecdsaWithSha1_oid), ecdsaWithSha1_oid
-};
-const krb5_data ecdsaWithSha256_id = {
-    KV5M_DATA, sizeof(ecdsaWithSha256_oid), ecdsaWithSha256_oid
-};
-const krb5_data ecdsaWithSha384_id = {
-    KV5M_DATA, sizeof(ecdsaWithSha384_oid), ecdsaWithSha384_oid
-};
-const krb5_data ecdsaWithSha512_id = {
-    KV5M_DATA, sizeof(ecdsaWithSha512_oid), ecdsaWithSha512_oid
-};
+const krb5_data sha256WithRSAEncr_id = DATA_FROM_ARRAY(sha256WithRSAEncr_oid);
+const krb5_data sha512WithRSAEncr_id = DATA_FROM_ARRAY(sha512WithRSAEncr_oid);
+const krb5_data ecdsaWithSha1_id = DATA_FROM_ARRAY(ecdsaWithSha1_oid);
+const krb5_data ecdsaWithSha256_id = DATA_FROM_ARRAY(ecdsaWithSha256_oid);
+const krb5_data ecdsaWithSha384_id = DATA_FROM_ARRAY(ecdsaWithSha384_oid);
+const krb5_data ecdsaWithSha512_id = DATA_FROM_ARRAY(ecdsaWithSha512_oid);
 
 krb5_data const * const supported_cms_algs[] = {
     &ecdsaWithSha512_id,

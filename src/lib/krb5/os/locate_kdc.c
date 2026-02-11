@@ -296,16 +296,17 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
 #ifndef _WIN32
         if (hostspec[0] == '/') {
-            struct sockaddr_un sun = { 0 };
+            struct sockaddr_un unaddr = { 0 };
 
-            sun.sun_family = AF_UNIX;
-            if (strlcpy(sun.sun_path, hostspec, sizeof(sun.sun_path)) >=
-                sizeof(sun.sun_path)) {
+            unaddr.sun_family = AF_UNIX;
+            if (strlcpy(unaddr.sun_path, hostspec, sizeof(unaddr.sun_path)) >=
+                sizeof(unaddr.sun_path)) {
                 code = ENAMETOOLONG;
                 goto cleanup;
             }
-            code = add_addr_to_list(serverlist, UNIXSOCK, AF_UNIX, sizeof(sun),
-                                    (struct sockaddr *)&sun);
+            code = add_addr_to_list(serverlist, UNIXSOCK, AF_UNIX,
+                                    sizeof(unaddr),
+                                    (struct sockaddr *)&unaddr);
             if (code)
                 goto cleanup;
             continue;

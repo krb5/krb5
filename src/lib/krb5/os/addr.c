@@ -62,10 +62,9 @@ k5_sockaddr_to_address(const struct sockaddr *sa, krb5_boolean local_use,
         }
 #ifndef _WIN32
     } else if (sa->sa_family == AF_UNIX && local_use) {
-        const struct sockaddr_un *sun = sa2sun(sa);
         out->addrtype = ADDRTYPE_UNIXSOCK;
-        out->length = strlen(sun->sun_path);
-        out->contents = (uint8_t *)sun->sun_path;
+        out->length = strlen(sa2sun(sa)->sun_path);
+        out->contents = (uint8_t *)sa2sun(sa)->sun_path;
 #endif
     } else {
         return KRB5_PROG_ATYPE_NOSUPP;
