@@ -4766,7 +4766,7 @@ out:
 }
 
 static krb5_error_code
-rfc2253_name(X509_NAME *name, char **str_out)
+rfc2253_name(const X509_NAME *name, char **str_out)
 {
     BIO *b = NULL;
     char *str;
@@ -5227,7 +5227,7 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
     int i = 0, sk_size = sk_X509_num(sk);
     krb5_external_principal_identifier **krb5_cas = NULL;
     X509 *x = NULL;
-    X509_NAME *xn = NULL;
+    const X509_NAME *xn = NULL;
     unsigned char *p = NULL;
     int len = 0;
     PKCS7_ISSUER_AND_SERIAL *is = NULL;
