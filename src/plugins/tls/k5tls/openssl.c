@@ -38,6 +38,24 @@
 #include <openssl/x509v3.h>
 #include <dirent.h>
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+/* Make X509_get_subject_name() accept a const pointer by adding a cast. */
+#define X509_get_subject_name(a) X509_get_subject_name((X509 *)a)
+
+/* OpenSSL 1.0 did not have TLS_client_method(); use the best alternative. */
+#define TLS_client_method() SSLv23_client_method()
+#endif
+
+#if OPENSSL_VERSION_NUMBER < 0x40000000L
+/*
+ * OpenSSL 4.0 constifies the result of X509_STORE_CTX_get_current_cert() and
+ * the input of X509_check_host() and X509_check_ip_asc().  For prior versions,
+ * make the latter two functions accept const pointers via a cast.
+ */
+#define X509_check_host(a, b, c, d, e) X509_check_host((X509 *)a, b, c, d, e)
+#define X509_check_ip_asc(a, b, c) X509_check_ip_asc((X509 *)a, b, c)
+#endif
+
 struct k5_tls_handle_st {
     SSL *ssl;
     char *servername;
@@ -51,9 +69,11 @@ MAKE_INIT_FUNCTION(init_openssl);
 int
 init_openssl(void)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
     SSL_library_init();
     SSL_load_error_strings();
     OpenSSL_add_all_algorithms();
+#endif
     ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     ex_handle_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     return 0;
@@ -72,7 +92,7 @@ flush_errors(krb5_context context)
 }
 
 static krb5_boolean
-check_cert_name_or_ip(X509 *x, const char *expected_name)
+check_cert_name_or_ip(const X509 *x, const char *expected_name)
 {
     struct in_addr in;
     struct in6_addr in6;
@@ -89,7 +109,7 @@ check_cert_name_or_ip(X509 *x, const char *expected_name)
 static int
 verify_callback(int preverify_ok, X509_STORE_CTX *store_ctx)
 {
-    X509 *x;
+    const X509 *x;
     SSL *ssl;
     BIO *bio;
     krb5_context context;
@@ -246,7 +266,7 @@ setup(krb5_context context, SOCKET fd, const char *servername,
         return KRB5_PLUGIN_OP_NOTSUPP;
 
     /* Do general SSL library setup. */
-    ctx = SSL_CTX_new(SSLv23_client_method());
+    ctx = SSL_CTX_new(TLS_client_method());
     if (ctx == NULL)
         goto error;
 
