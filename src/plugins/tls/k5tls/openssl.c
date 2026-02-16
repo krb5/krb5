@@ -142,7 +142,7 @@ static GENERAL_NAMES *
 get_cert_sans(X509 *x)
 {
     int ext;
-    X509_EXTENSION *san_ext;
+    const X509_EXTENSION *san_ext;
 
     ext = X509_get_ext_by_NID(x, NID_subject_alt_name, -1);
     if (ext < 0)
