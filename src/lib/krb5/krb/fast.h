@@ -34,6 +34,7 @@ struct krb5int_fast_request_state {
     krb5_kdc_req fast_outer_request;
     krb5_keyblock *armor_key; /*non-null means fast is in use*/
     krb5_fast_armor *armor;
+    krb5_ccache armor_ccache;
     krb5_ui_4 fast_state_flags;
     krb5_ui_4 fast_options;
     krb5_int32 nonce;
@@ -41,6 +42,7 @@ struct krb5int_fast_request_state {
 
 #define KRB5INT_FAST_DO_FAST     (1l<<0)  /* Perform FAST */
 #define KRB5INT_FAST_ARMOR_AVAIL (1l<<1)
+#define KRB5INT_FAST_OWN_ARMOR   (1l<<2)
 
 krb5_error_code
 krb5int_fast_prep_req_body(krb5_context context,
