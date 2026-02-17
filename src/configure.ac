@@ -1,4 +1,6 @@
-K5_AC_INIT([aclocal.m4])
+m4_include([version.m4])
+AC_INIT(Kerberos 5, K5_VERSION, K5_BUGADDR, krb5)
+AC_CONFIG_SRCDIR([aclocal.m4])
 
 # If $runstatedir isn't set by autoconf (<2.70), set it manually.
 if test x"$runstatedir" = x; then
