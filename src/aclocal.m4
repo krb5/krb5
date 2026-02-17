@@ -16,30 +16,6 @@ ac_config_fragdir=$ac_reltopdir/config
 AC_CONFIG_AUX_DIR(K5_TOPDIR/config)
 ])dnl
 dnl
-dnl Version info.
-dnl
-pushdef([x],esyscmd([sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p' < ]K5_TOPDIR/patchlevel.h))
-define([PL_KRB5_MAJOR_RELEASE],regexp(x,[KRB5_MAJOR_RELEASE=\(.*\)],[\1]))
-ifelse(PL_KRB5_MAJOR_RELEASE,,[errprint([Can't determine KRB5_MAJOR_RELEASE value from patchlevel.h.
-]) m4exit(1) dnl sometimes that does not work?
-builtin(m4exit,1)])
-define([PL_KRB5_MINOR_RELEASE],regexp(x,[KRB5_MINOR_RELEASE=\(.*\)],[\1]))
-ifelse(PL_KRB5_MINOR_RELEASE,,[errprint([Can't determine KRB5_MINOR_RELEASE value from patchlevel.h.
-]) m4exit(1) dnl sometimes that does not work?
-builtin(m4exit,1)])
-define([PL_KRB5_PATCHLEVEL],regexp(x,[KRB5_PATCHLEVEL=\(.*\)],[\1]))
-ifelse(PL_KRB5_PATCHLEVEL,,[errprint([Can't determine KRB5_PATCHLEVEL value from patchlevel.h.
-]) m4exit(1) dnl sometimes that does not work?
-builtin(m4exit,1)])
-define([PL_KRB5_RELTAIL],regexp(x,[KRB5_RELTAIL="\(.*\)"],[\1]))
-dnl RELTAIL is allowed to not be defined.
-popdef([x])
-define([K5_VERSION],PL_KRB5_MAJOR_RELEASE.PL_KRB5_MINOR_RELEASE[]ifelse(PL_KRB5_PATCHLEVEL,0,,.PL_KRB5_PATCHLEVEL)ifelse(PL_KRB5_RELTAIL,,,-PL_KRB5_RELTAIL))
-define([K5_BUGADDR],krb5-bugs@mit.edu)
-define([K5_AC_INIT],[AC_INIT(Kerberos 5, K5_VERSION, K5_BUGADDR, krb5)
-AC_CONFIG_SRCDIR($1)
-build_dynobj=no])
-dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 AC_DEFUN(CONFIG_RULES,[dnl
