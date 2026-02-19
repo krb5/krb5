@@ -2156,7 +2156,7 @@ cms_signeddata_verify(krb5_context context,
         i = X509_verify_cert(cert_ctx);
         if (i <= 0) {
             int j = X509_STORE_CTX_get_error(cert_ctx);
-            X509 *cert;
+            const X509 *cert;
 
             cert = X509_STORE_CTX_get_current_cert(cert_ctx);
             reqctx->received_cert = X509_dup(cert);
