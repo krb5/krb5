@@ -445,7 +445,7 @@ setup(krb5_context context, SOCKET fd, const char *servername,
         return KRB5_PLUGIN_OP_NOTSUPP;
 
     /* Do general SSL library setup. */
-    ctx = SSL_CTX_new(SSLv23_client_method());
+    ctx = SSL_CTX_new(TLS_client_method());
     if (ctx == NULL)
         goto error;
 
