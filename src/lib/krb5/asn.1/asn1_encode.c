@@ -261,6 +261,21 @@ k5_asn1_decode_generaltime(const uint8_t *asn1, size_t len, time_t *time_out)
         if ((uint8_t)c2i(s[i]) > 9)
             return ASN1_BAD_TIMEFORMAT;
     }
+#if SIZEOF_TIME_T == 4
+    /*
+     * Microsoft clients and KDCs use timestamps in 2100 to indicate "never",
+     * both in AS-REQ till values and in AS-REP LastReq values.  On 32-bit
+     * platforms we cannot represent these timestamps in a time_t result.
+     * Clamping the result as we do here is not safe (it could cause issues if
+     * we ever need to re-encode an ASN.1 value containing a timestamp), but it
+     * does solve the interoperability issues caused by these specific uses of
+     * large timestamp values.
+     */
+    if (memcmp(s, "20380119031407Z", 15) > 0) {
+        *time_out = (time_t)INT32_MAX;
+        return 0;
+    }
+#endif
     ts.tm_year = 1000 * c2i(s[0]) + 100 * c2i(s[1]) + 10 * c2i(s[2]) +
         c2i(s[3]) - 1900;
     ts.tm_mon = 10 * c2i(s[4]) + c2i(s[5]) - 1;
