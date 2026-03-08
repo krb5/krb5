@@ -142,4 +142,43 @@ for realm in multipass_realms():
     kt_test(realm, ['-iakerb'], ['-iakerb'])
     kt_test(realm, ['-dce'])
 
+# Test IAKerb with auto_fast_armor: exercise the IAKERB_ARMOR_AS_REQ state,
+# where the initiator transparently acquires an Anonymous PKINIT armor ticket
+# through the IAKerb proxy before sending the main password-based AS-REQ.
+if pkinit_enabled:
+    mark('IAKerb auto_fast_armor')
+
+    armor_krb5_conf = {'realms': {'$realm': {'auto_fast_armor': 'true'}}}
+    armor_kdc_conf = {'realms': {'$realm': {
+        'pkinit_eku_checking': 'none'}}}
+
+    armor_realm = K5Realm(krb5_conf=armor_krb5_conf, kdc_conf=armor_kdc_conf,
+                          pkinit=True)
+    armor_realm.addprinc('WELLKNOWN/ANONYMOUS')
+
+    # IAKerb realm discovery followed by armor acquisition and password AS-REQ,
+    # all routed through the IAKerb proxy (no direct KDC contact).
+    pw_test(armor_realm, ['-iakerb'], ['-iakerb'])
+
+    armor_realm.stop()
+
+    mark('IAKerb auto_fast_armor with preauth required')
+
+    preauth_kdc_conf = {'realms': {'$realm': {
+        'pkinit_eku_checking': 'none',
+        'default_principal_flags': '+preauth'}}}
+
+    preauth_realm = K5Realm(krb5_conf=armor_krb5_conf,
+                            kdc_conf=preauth_kdc_conf, pkinit=True)
+    preauth_realm.addprinc('WELLKNOWN/ANONYMOUS')
+
+    # Same as above but with pre-authentication required for all principals,
+    # as in a typical FreeIPA deployment.  The armor exchange requires an
+    # extra round trip (KDC_ERR_PREAUTH_REQUIRED for WELLKNOWN/ANONYMOUS),
+    # which previously triggered a use-after-free on the armor init-creds
+    # options and caused "No credentials cache found".
+    pw_test(preauth_realm, ['-iakerb'], ['-iakerb'])
+
+    preauth_realm.stop()
+
 success('GSS sample application')
