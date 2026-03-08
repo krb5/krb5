@@ -168,8 +168,8 @@ krb5int_fast_prep_req_body(krb5_context context,
     return retval;
 }
 
-static krb5_boolean
-fast_is_pkinit_allowed(krb5_context context, krb5_data *realm)
+krb5_boolean
+k5_fast_is_pkinit_allowed(krb5_context context, krb5_data *realm)
 {
     int value;
     krb5_error_code retval = EINVAL;
@@ -212,7 +212,7 @@ fast_acquire_pkinit_armor(krb5_context context,
     }
 
     /* skip realms which do not allow use of automated FAST armor */
-    if (!fast_is_pkinit_allowed(context, target_realm)) {
+    if (!k5_fast_is_pkinit_allowed(context, target_realm)) {
         return EINVAL;
     }
 
