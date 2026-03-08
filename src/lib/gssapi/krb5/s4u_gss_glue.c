@@ -53,6 +53,17 @@ kg_impersonate_name(OM_uint32 *minor_status,
     *output_cred = NULL;
     memset(&in_creds, 0, sizeof(in_creds));
 
+    if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
+        krb5_timestamp now;
+
+        code = krb5_timeofday(context, &now);
+        if (code != 0) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
+        in_creds.times.endtime = ts_incr(now, time_req);
+    }
+
     if (user->is_cert)
         subject_cert = user->princ->data;
     else
