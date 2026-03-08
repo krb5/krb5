@@ -32,6 +32,7 @@
 
 enum iakerb_state {
     IAKERB_REALM_DISCOVERY, /* querying server for its realm */
+    IAKERB_ARMOR_AS_REQ, /* acquiring Anonymous PKINIT armor for FAST via IAKerb */
     IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
     IAKERB_TGS_REQ,     /* acquiring ticket with TGT */
     IAKERB_AP_REQ       /* hand-off to normal GSS AP-REQ exchange */
@@ -43,6 +44,9 @@ struct _iakerb_ctx_id_rec {
     gss_cred_id_t defcred;              /* Initiator only */
     enum iakerb_state state;            /* Initiator only */
     krb5_init_creds_context icc;        /* Initiator only */
+    krb5_init_creds_context armor_icc;  /* Initiator only; armor acq. context */
+    krb5_get_init_creds_opt *armor_opts; /* Initiator only; opts for armor_icc */
+    krb5_ccache armor_ccache;           /* Initiator only; in-memory anon TGT */
     krb5_tkt_creds_context tcc;         /* Initiator only */
     gss_ctx_id_t gssc;
     krb5_data conv;                     /* conversation for checksumming */
@@ -69,6 +73,10 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
         return;
 
     krb5_gss_release_cred(&tmp, &ctx->defcred);
+    krb5_init_creds_free(ctx->k5c, ctx->armor_icc);
+    krb5_get_init_creds_opt_free(ctx->k5c, ctx->armor_opts);
+    if (ctx->armor_ccache != NULL)
+        krb5_cc_destroy(ctx->k5c, ctx->armor_ccache);
     krb5_init_creds_free(ctx->k5c, ctx->icc);
     krb5_tkt_creds_free(ctx->k5c, ctx->tcc);
     krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
@@ -457,6 +465,75 @@ cleanup:
 }
 
 /*
+ * Return IAKERB_ARMOR_AS_REQ when entering a new AS exchange.  The state
+ * handles both cases: when auto_fast_armor is configured it acquires Anonymous
+ * PKINIT armor before the real AS request; otherwise it skips straight to
+ * IAKERB_AS_REQ.  Using IAKERB_ARMOR_AS_REQ unconditionally here lets the
+ * fall-through in the switch work correctly even when armor is not needed.
+ */
+static enum iakerb_state
+iakerb_next_as_state(void)
+{
+    return IAKERB_ARMOR_AS_REQ;
+}
+
+/*
+ * Initialise the krb5_init_creds context for Anonymous PKINIT armor
+ * acquisition.  The KDC exchange is driven step-by-step by
+ * iakerb_initiator_step() so that all traffic goes through the IAKerb proxy.
+ */
+static krb5_error_code
+iakerb_init_armor_ctx(iakerb_ctx_id_t ctx, krb5_gss_cred_id_t cred)
+{
+    krb5_error_code code;
+    krb5_get_init_creds_opt *armor_opts = NULL;
+    krb5_principal anon_princ = NULL;
+    krb5_data *realm = &cred->name->princ->realm;
+
+    code = krb5_get_init_creds_opt_alloc(ctx->k5c, &armor_opts);
+    if (code != 0)
+        goto cleanup;
+
+    krb5_get_init_creds_opt_set_anonymous(armor_opts, 1);
+
+    code = krb5_cc_new_unique(ctx->k5c, "MEMORY", NULL, &ctx->armor_ccache);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_get_init_creds_opt_set_out_ccache(ctx->k5c, armor_opts,
+                                                   ctx->armor_ccache);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_build_principal_ext(ctx->k5c, &anon_princ,
+                                    realm->length, realm->data,
+                                    strlen(KRB5_WELLKNOWN_NAMESTR),
+                                    KRB5_WELLKNOWN_NAMESTR,
+                                    strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                    KRB5_ANONYMOUS_PRINCSTR, 0);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_init_creds_init(ctx->k5c, anon_princ,
+                                NULL,   /* no prompter */
+                                NULL,   /* no prompter data */
+                                0,      /* start_time */
+                                armor_opts,
+                                &ctx->armor_icc);
+    if (code == 0) {
+        /* Keep armor_opts alive for the lifetime of armor_icc; ctx->armor_icc
+         * stores a raw pointer to it (not a copy) and accesses it throughout
+         * the init-creds exchange.  iakerb_release_context() will free it. */
+        ctx->armor_opts = armor_opts;
+        armor_opts = NULL;
+    }
+cleanup:
+    krb5_free_principal(ctx->k5c, anon_princ);
+    krb5_get_init_creds_opt_free(ctx->k5c, armor_opts);
+    return code;
+}
+
+/*
  * Initialise the krb5_init_creds context for the IAKERB context
  */
 static krb5_error_code
@@ -474,9 +551,11 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     assert(cred->name != NULL);
     assert(cred->name->princ != NULL);
 
-    code = krb5_get_init_creds_opt_alloc(ctx->k5c, &ctx->gic_opts);
-    if (code != 0)
-        goto cleanup;
+    if (ctx->gic_opts == NULL) {
+        code = krb5_get_init_creds_opt_alloc(ctx->k5c, &ctx->gic_opts);
+        if (code != 0)
+            goto cleanup;
+    }
 
     if (time_req != 0 && time_req != GSS_C_INDEFINITE)
         krb5_get_init_creds_opt_set_tkt_life(ctx->gic_opts, time_req);
@@ -631,8 +710,68 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         cred->name->princ->realm = server_realm;
         server_realm = empty_data();
 
-        ctx->state = IAKERB_AS_REQ;
-        /* Done with realm discovery; fall through to AS request. */
+        ctx->state = iakerb_next_as_state();
+        /* Done with realm discovery; fall through to armor or AS request. */
+    case IAKERB_ARMOR_AS_REQ:
+        if (!k5_fast_is_pkinit_allowed(ctx->k5c, &cred->name->princ->realm)) {
+            /*
+             * auto_fast_armor is not configured for this realm; skip armor
+             * acquisition and proceed directly to the main AS exchange.
+             */
+            ctx->state = IAKERB_AS_REQ;
+            in = empty_data();
+        } else {
+            /* Drive Anonymous PKINIT armor acquisition step by step. */
+            if (ctx->armor_icc == NULL) {
+                /*
+                 * Ensure gic_opts is allocated now so we can store the armor
+                 * ccache name on it once acquisition is complete.
+                 */
+                if (ctx->gic_opts == NULL) {
+                    code = krb5_get_init_creds_opt_alloc(ctx->k5c,
+                                                         &ctx->gic_opts);
+                    if (code != 0)
+                        goto cleanup;
+                }
+                code = iakerb_init_armor_ctx(ctx, cred);
+                if (code != 0)
+                    goto cleanup;
+            }
+
+            code = krb5_init_creds_step(ctx->k5c, ctx->armor_icc,
+                                        &in, &out, &realm, &flags);
+            if (code != 0)
+                goto cleanup;
+
+            if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
+                /*
+                 * Anonymous PKINIT armor acquired.  Pass the armor ccache to
+                 * the main init-creds options so that krb5int_fast_as_armor()
+                 * picks it up directly and never falls into the synchronous
+                 * fast_acquire_pkinit_armor() path.
+                 * krb5int_fast_verify_nego() will have stored fast_avail in
+                 * armor_ccache during AS-REP processing, enabling FAST for
+                 * the main AS exchange.
+                 */
+                char *ccname = NULL;
+                krb5_init_creds_free(ctx->k5c, ctx->armor_icc);
+                ctx->armor_icc = NULL;
+                code = krb5_cc_get_full_name(ctx->k5c, ctx->armor_ccache,
+                                             &ccname);
+                if (code == 0) {
+                    code = krb5_get_init_creds_opt_set_fast_ccache_name(
+                               ctx->k5c, ctx->gic_opts, ccname);
+                }
+                free(ccname);
+                if (code != 0)
+                    goto cleanup;
+                ctx->state = IAKERB_AS_REQ;
+            } else {
+                break; /* Wait for next armor exchange round-trip. */
+            }
+            in = empty_data();
+        }
+        /* Done with armor check (or acquisition); fall through to AS request. */
     case IAKERB_AS_REQ:
         if (ctx->icc == NULL) {
             code = iakerb_init_creds_ctx(ctx, cred, time_req);
@@ -750,7 +889,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
 
     /* Make an AS request if we have no creds or it's time to refresh them. */
     if (cred->expire == 0 || kg_cred_time_to_refresh(ctx->k5c, cred)) {
-        *state = IAKERB_AS_REQ;
+        *state = iakerb_next_as_state();
         code = 0;
         goto cleanup;
     }
@@ -758,7 +897,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
     code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED, cred->ccache,
                                 &in_creds, &out_creds);
     if (code == KRB5_CC_NOTFOUND || code == KRB5_CC_NOT_KTYPE) {
-        *state = cred->have_tgt ? IAKERB_TGS_REQ : IAKERB_AS_REQ;
+        *state = cred->have_tgt ? IAKERB_TGS_REQ : iakerb_next_as_state();
         code = 0;
     } else if (code == 0) {
         *state = IAKERB_AP_REQ;
