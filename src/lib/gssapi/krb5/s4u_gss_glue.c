@@ -192,14 +192,35 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
  */
 static krb5_error_code
 make_proxy_cred(krb5_context context, krb5_gss_cred_id_t cred,
-                krb5_gss_cred_id_t impersonator_cred)
+                krb5_gss_cred_id_t impersonator_cred,
+                krb5_timestamp max_endtime)
 {
     krb5_error_code code;
     krb5_data data;
+    krb5_cc_cursor cur = 0;
+    krb5_creds cur_creds;
     char *str;
 
-    code = krb5_cc_copy_creds(context, impersonator_cred->ccache,
-                              cred->ccache);
+    /* Copy credentials from the impersonator ccache, bounding endtime when
+     * requested so copied TGTs don't outlive the S4U2Self evidence ticket. */
+    code = krb5_cc_start_seq_get(context, impersonator_cred->ccache, &cur);
+    if (code)
+        return code;
+
+    while (!(code = krb5_cc_next_cred(context, impersonator_cred->ccache,
+                                      &cur, &cur_creds))) {
+        if (max_endtime != 0 && cur_creds.times.endtime > max_endtime)
+            cur_creds.times.endtime = max_endtime;
+        code = krb5_cc_store_cred(context, cred->ccache, &cur_creds);
+        krb5_free_cred_contents(context, &cur_creds);
+        if (code)
+            break;
+    }
+
+    if (cur)
+        krb5_cc_end_seq_get(context, impersonator_cred->ccache, &cur);
+    if (code == KRB5_CC_END)
+        code = 0;
     if (code)
         return code;
 
@@ -275,7 +296,11 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     if (code != 0)
         goto cleanup;
 
-    code = make_proxy_cred(context, cred, impersonator_cred);
+    /* Bound copied credentials to the evidence ticket's endtime when the
+     * caller specified a time_req, so TGTs don't outlive the impersonation. */
+    code = make_proxy_cred(context, cred, impersonator_cred,
+                           (time_req != 0 && time_req != GSS_C_INDEFINITE) ?
+                           subject_creds->times.endtime : 0);
     if (code != 0)
         goto cleanup;
 
