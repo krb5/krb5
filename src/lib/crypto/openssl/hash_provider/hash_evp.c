@@ -37,13 +37,6 @@
 
 #include <openssl/evp.h>
 
-/* 1.1 standardizes constructor and destructor names, renaming
- * EVP_MD_CTX_create and EVP_MD_CTX_destroy. */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-#define EVP_MD_CTX_new EVP_MD_CTX_create
-#define EVP_MD_CTX_free EVP_MD_CTX_destroy
-#endif
-
 static krb5_error_code
 hash_evp(const EVP_MD *type, const krb5_crypto_iov *data, size_t num_data,
          krb5_data *output)

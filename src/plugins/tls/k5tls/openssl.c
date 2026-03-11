@@ -38,14 +38,6 @@
 #include <openssl/x509v3.h>
 #include <dirent.h>
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-/* Make X509_get_subject_name() accept a const pointer by adding a cast. */
-#define X509_get_subject_name(a) X509_get_subject_name((X509 *)a)
-
-/* OpenSSL 1.0 did not have TLS_client_method(); use the best alternative. */
-#define TLS_client_method() SSLv23_client_method()
-#endif
-
 #if OPENSSL_VERSION_NUMBER < 0x40000000L
 /*
  * OpenSSL 4.0 constifies the result of X509_STORE_CTX_get_current_cert() and
@@ -69,11 +61,6 @@ MAKE_INIT_FUNCTION(init_openssl);
 int
 init_openssl(void)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    SSL_library_init();
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
-#endif
     ex_context_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     ex_handle_id = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
     return 0;

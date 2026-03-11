@@ -63,33 +63,6 @@
 #include <openssl/hmac.h>
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-
-/* OpenSSL 1.1 makes HMAC_CTX opaque, while 1.0 does not have pointer
- * constructors or destructors. */
-
-#define HMAC_CTX_new compat_hmac_ctx_new
-static HMAC_CTX *
-compat_hmac_ctx_new(void)
-{
-    HMAC_CTX *ctx;
-
-    ctx = calloc(1, sizeof(*ctx));
-    if (ctx != NULL)
-        HMAC_CTX_init(ctx);
-    return ctx;
-}
-
-#define HMAC_CTX_free compat_hmac_ctx_free
-static void
-compat_hmac_ctx_free(HMAC_CTX *ctx)
-{
-    HMAC_CTX_cleanup(ctx);
-    free(ctx);
-}
-
-#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
-
 /*
  * the HMAC transform looks like:
  *
