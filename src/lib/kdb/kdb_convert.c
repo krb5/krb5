@@ -745,6 +745,15 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
 #undef u
     }
 
+    if (ent->len == 0) {
+        /*
+         * Update for a non-existing entry is a sign of a gap in replication,
+         * return something sane to force full resync
+         */
+        ret = KRB5_KDB_NOENTRY;
+        goto cleanup;
+    }
+
     /*
      * process mod_princ_data request
      */
