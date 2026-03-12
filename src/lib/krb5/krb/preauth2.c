@@ -130,8 +130,10 @@ k5_init_preauth_context(krb5_context context)
         return;
 
     /* Auto-register built-in modules. */
+#ifndef DISABLE_PKINIT
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_CLPREAUTH, "pkinit",
                            "preauth");
+#endif /* not DISABLE_PKINIT */
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_CLPREAUTH, "spake",
                            "preauth");
     k5_plugin_register(context, PLUGIN_INTERFACE_CLPREAUTH,
