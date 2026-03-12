@@ -30,6 +30,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "autoconf.h"
 #include <k5-platform.h>
 #undef strerror_r
 
