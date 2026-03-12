@@ -1279,19 +1279,25 @@ fi
 ldap_plugin_dir=""
 ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
-  AC_CHECK_HEADERS(ldap.h lber.h, :, [AC_MSG_ERROR($ac_header not found)])
-  AC_CHECK_LIB(ldap, ldap_str2dn, :, [AC_MSG_ERROR(libldap not found or missing ldap_str2dn)])
-
-  BER_OKAY=0
-  AC_CHECK_LIB(ldap, ber_init, [BER_OKAY=1])
-  if test "$BER_OKAY" = "1"; then
-    LDAP_LIBS='-lldap'
+  PKG_PROG_PKG_CONFIG()
+  if test -n "$PKG_CONFIG"; then
+    PKG_CHECK_MODULES([LDAP], [ldap])
   else
-    AC_CHECK_LIB(lber, ber_init, [BER_OKAY=1], [AC_MSG_WARN([libber not found])])
+    AC_CHECK_HEADERS([ldap.h lber.h], :, [AC_MSG_ERROR($ac_header not found)])
+    AC_CHECK_LIB([ldap], [ldap_str2dn], :, [AC_MSG_ERROR(libldap not found)])
+
+    BER_OKAY=0
+    AC_CHECK_LIB([ldap], [ber_init], [BER_OKAY=1])
     if test "$BER_OKAY" = "1"; then
-      LDAP_LIBS='-lldap -llber'
+      LDAP_LIBS='-lldap'
     else
-      AC_MSG_ERROR("BER library missing - cannot build LDAP database module")
+      AC_CHECK_LIB([lber], [ber_init], [BER_OKAY=1],
+                   [AC_MSG_WARN([libber not found])])
+      if test "$BER_OKAY" = "1"; then
+        LDAP_LIBS='-lldap -llber'
+      else
+        AC_MSG_ERROR([BER library missing - cannot build LDAP database module])
+      fi
     fi
   fi
   AC_DEFINE([ENABLE_LDAP], 1, [Define if LDAP KDB support within the Kerberos library (mainly ASN.1 code) should be enabled.])
