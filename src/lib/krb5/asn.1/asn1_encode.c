@@ -261,6 +261,12 @@ k5_asn1_decode_generaltime(const uint8_t *asn1, size_t len, time_t *time_out)
         if ((uint8_t)c2i(s[i]) > 9)
             return ASN1_BAD_TIMEFORMAT;
     }
+#if SIZEOF_TIME_T == 4
+    if (memcmp(s, "20380119031407Z", 15) > 0) {
+        *time_out = (time_t)KRB5_INT32_MAX;
+        return 0;
+    }
+#endif
     ts.tm_year = 1000 * c2i(s[0]) + 100 * c2i(s[1]) + 10 * c2i(s[2]) +
         c2i(s[3]) - 1900;
     ts.tm_mon = 10 * c2i(s[4]) + c2i(s[5]) - 1;
