@@ -168,6 +168,22 @@ typedef struct _krb5_gss_name_rec {
     krb5_authdata_context ad_context;
 } krb5_gss_name_rec, *krb5_gss_name_t;
 
+typedef enum _krb5_gss_client_interact_type {
+    GSS_KRB5_CLIENT_INTERACT_NOTHING = 0,
+    GSS_KRB5_CLIENT_INTERACT_PROMPTER = 1,
+    GSS_KRB5_CLIENT_INTERACT_RESPONDER = 2
+} krb5_gss_client_interact_type;
+
+typedef struct _krb5_gss_client_interact {
+    krb5_gss_client_interact_type type;
+    void *data;
+    union {
+        krb5_prompter_fct prompter;
+        krb5_responder_fn responder;
+    } cb;
+} krb5_gss_client_interact;
+
+
 typedef struct _krb5_gss_cred_id_rec {
     /* protect against simultaneous accesses */
     k5_mutex_t lock;
@@ -194,6 +210,8 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_timestamp refresh_time;
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
+    krb5_gss_client_interact client_interact;
+    const char* fast_ccache;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {
@@ -1307,6 +1325,11 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_RCACHE_URN "rcache"
 #define KRB5_CS_PASSWORD_URN "password"
 #define KRB5_CS_VERIFY_URN "verify"
+#define KRB5_CS_PROMPTER_URN "prompter"
+#define KRB5_CS_PROMPTER_DATA_URN "prompter_data"
+#define KRB5_CS_RESPONDER_URN "responder"
+#define KRB5_CS_RESPONDER_DATA_URN "responder_data"
+#define KRB5_CS_ARMOR_CCACHE_URN "armor_ccache"
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,
