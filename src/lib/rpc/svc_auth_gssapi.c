@@ -253,8 +253,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       goto error;
 	  }
      } else {
-	  if (creds.client_handle.length == 0) {
-	       PRINTF(("svcauth_gssapi: expected non-empty creds\n"));
+	  if (creds.client_handle.length < 4) {
+	       PRINTF(("svcauth_gssapi: expected creds length at least 4\n"));
 	       LOG_MISCERR("protocol error in client credentials");
 	       ret = AUTH_FAILED;
 	       goto error;
