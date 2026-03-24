@@ -31,7 +31,7 @@ Supported platforms \/ OS distributions:
 
 Crypto backends:
     - builtin - MIT Kerberos native crypto library
-    - OpenSSL (1.0\+) - https://www.openssl.org
+    - OpenSSL (1.1\+) - https://www.openssl.org
 
 Database backends: LDAP, DB2, LMDB
 

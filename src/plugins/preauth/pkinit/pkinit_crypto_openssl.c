@@ -201,99 +201,8 @@ static krb5_error_code
 create_identifiers_from_stack(STACK_OF(X509) *sk,
                               krb5_external_principal_identifier *** ids);
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-
-/* 1.1 standardizes constructor and destructor names, renaming
- * EVP_MD_CTX_{create,destroy} and deprecating ASN1_STRING_data. */
-
-#define EVP_MD_CTX_new EVP_MD_CTX_create
-#define EVP_MD_CTX_free EVP_MD_CTX_destroy
-#define ASN1_STRING_get0_data ASN1_STRING_data
-#define X509_STORE_CTX_set0_trusted_stack X509_STORE_CTX_trusted_stack
-
-/*
- * 1.0.2 adds DHX support, which uses the RFC 3279 DomainParameters encoding we
- * need for PKINIT.  For 1.0 we must use the original DH type when creating
- * EVP_PKEY objects.
- */
-#ifndef EVP_PKEY_DHX
-#define EVP_PKEY_DHX EVP_PKEY_DH
-#endif
-
-/* Make X509_NAME_print_ex() accept a const name pointer by adding a cast. */
-#define X509_NAME_print_ex(a, b, c, d)          \
-    X509_NAME_print_ex(a, (X509_NAME *)b, c, d)
-
-/* 1.1 makes many handle types opaque and adds accessors.  Add compatibility
- * versions of the new accessors we use for pre-1.1. */
-
-#define OBJ_get0_data(o) ((o)->data)
-#define OBJ_length(o) ((o)->length)
-
-#define DH_set0_key compat_dh_set0_key
-static int
-compat_dh_set0_key(DH *dh, BIGNUM *pub, BIGNUM *priv)
-{
-    if (pub != NULL) {
-        BN_clear_free(dh->pub_key);
-        dh->pub_key = pub;
-    }
-    if (priv != NULL) {
-        BN_clear_free(dh->priv_key);
-        dh->priv_key = priv;
-    }
-    return 1;
-}
-
-#define DH_get0_key compat_dh_get0_key
-static void compat_dh_get0_key(const DH *dh, const BIGNUM **pub,
-                               const BIGNUM **priv)
-{
-    if (pub != NULL)
-        *pub = dh->pub_key;
-    if (priv != NULL)
-        *priv = dh->priv_key;
-}
-
-#define EVP_PKEY_get0_DH compat_get0_DH
-static DH *
-compat_get0_DH(const EVP_PKEY *pkey)
-{
-    if (pkey->type != EVP_PKEY_DH)
-        return NULL;
-    return pkey->pkey.dh;
-
-}
-
-#define EVP_PKEY_get0_EC_KEY compat_get0_EC
-static EC_KEY *
-compat_get0_EC(const EVP_PKEY *pkey)
-{
-    if (pkey->type != EVP_PKEY_EC)
-        return NULL;
-    return pkey->pkey.ec;
-}
-
-#define ECDSA_SIG_set0 compat_ECDSA_SIG_set0
-static int
-compat_ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s)
-{
-    sig->r = r;
-    sig->s = s;
-    return 1;
-}
-
-/* Return true if the cert c includes a key usage which doesn't include u.
- * Define using direct member access for pre-1.1. */
-#define ku_reject(c, u)                                                 \
-    (((c)->ex_flags & EXFLAG_KUSAGE) && !((c)->ex_kusage & (u)))
-
-#else /* OPENSSL_VERSION_NUMBER >= 0x10100000L */
-
 /* Return true if the cert x includes a key usage which doesn't include u. */
 #define ku_reject(c, u) (!(X509_get_key_usage(c) & (u)))
-
-#endif
 
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
 /* OpenSSL 3.0 changes several preferred function names. */
@@ -371,8 +280,6 @@ decode_bn_der(const uint8_t *der, size_t len)
     return bn;
 }
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 static EVP_PKEY *
 decode_params(const krb5_data *params_der, const char *type)
@@ -442,196 +349,6 @@ decode_spki(const krb5_data *spki)
     return d2i_PUBKEY(NULL, &inptr, spki->length);
 }
 
-#else /* OPENSSL_VERSION_NUMBER < 0x10100000L */
-
-/*
- * OpenSSL 1.0 has no DHX support, so we need a custom decoder for RFC 3279
- * DomainParameters, and we need to use X509_PUBKEY values to marshal
- * SubjectPublicKeyInfo.
- */
-
-typedef struct {
-    ASN1_BIT_STRING *seed;
-    BIGNUM *counter;
-} int_dhvparams;
-
-typedef struct {
-    BIGNUM *p;
-    BIGNUM *q;
-    BIGNUM *g;
-    BIGNUM *j;
-    int_dhvparams *vparams;
-} int_dhxparams;
-
-ASN1_SEQUENCE(int_dhvparams) = {
-    ASN1_SIMPLE(int_dhvparams, seed, ASN1_BIT_STRING),
-    ASN1_SIMPLE(int_dhvparams, counter, BIGNUM)
-} ASN1_SEQUENCE_END(int_dhvparams);
-
-ASN1_SEQUENCE(int_dhxparams) = {
-    ASN1_SIMPLE(int_dhxparams, p, BIGNUM),
-    ASN1_SIMPLE(int_dhxparams, g, BIGNUM),
-    ASN1_SIMPLE(int_dhxparams, q, BIGNUM),
-    ASN1_OPT(int_dhxparams, j, BIGNUM),
-    ASN1_OPT(int_dhxparams, vparams, int_dhvparams)
-} ASN1_SEQUENCE_END(int_dhxparams);
-
-static EVP_PKEY *
-decode_dh_params(const krb5_data *params_der)
-{
-    int_dhxparams *params;
-    DH *dh;
-    EVP_PKEY *pkey;
-    const uint8_t *p;
-
-    dh = DH_new();
-    if (dh == NULL)
-        return NULL;
-
-    p = (uint8_t *)params_der->data;
-    params = (int_dhxparams *)ASN1_item_d2i(NULL, &p, params_der->length,
-                                            ASN1_ITEM_rptr(int_dhxparams));
-    if (params == NULL) {
-        DH_free(dh);
-        return NULL;
-    }
-
-    /* Steal p, q, and g from dhparams for dh.  Ignore j and vparams. */
-    dh->p = params->p;
-    dh->q = params->q;
-    dh->g = params->g;
-    params->p = params->q = params->g = NULL;
-    ASN1_item_free((ASN1_VALUE *)params, ASN1_ITEM_rptr(int_dhxparams));
-    pkey = dh_to_pkey(&dh);
-    DH_free(dh);
-    return pkey;
-}
-
-static krb5_error_code
-encode_spki(EVP_PKEY *pkey, krb5_data *spki_out)
-{
-    krb5_error_code ret = ENOMEM;
-    const DH *dh;
-    uint8_t *param_der = NULL, *pubkey_der = NULL, *outptr;
-    int param_der_len, pubkey_der_len, len;
-    X509_PUBKEY pubkey;
-    int_dhxparams dhxparams;
-    X509_ALGOR algor;
-    ASN1_OBJECT algorithm;
-    ASN1_TYPE parameter;
-    ASN1_STRING param_str, pubkey_str;
-
-    if (EVP_PKEY_get_base_id(pkey) != EVP_PKEY_DH) {
-        /* Only DH keys require special encoding. */
-        len = i2d_PUBKEY(pkey, NULL);
-        ret = alloc_data(spki_out, len);
-        if (ret)
-            goto cleanup;
-        outptr = (uint8_t *)spki_out->data;
-        (void)i2d_PUBKEY(pkey, &outptr);
-        return 0;
-    }
-
-    dh = EVP_PKEY_get0_DH(pkey);
-    if (dh == NULL)
-        goto cleanup;
-
-    dhxparams.p = dh->p;
-    dhxparams.q = dh->q;
-    dhxparams.g = dh->g;
-    dhxparams.j = NULL;
-    dhxparams.vparams = NULL;
-    param_der_len = ASN1_item_i2d((ASN1_VALUE *)&dhxparams, &param_der,
-                                  ASN1_ITEM_rptr(int_dhxparams));
-    if (param_der_len < 0)
-        goto cleanup;
-    param_str.length = param_der_len;
-    param_str.type = V_ASN1_SEQUENCE;
-    param_str.data = param_der;
-    param_str.flags = 0;
-    parameter.type = V_ASN1_SEQUENCE;
-    parameter.value.sequence = &param_str;
-
-    memset(&algorithm, 0, sizeof(algorithm));
-    algorithm.data = (uint8_t *)dh_oid.data;
-    algorithm.length = dh_oid.length;
-
-    algor.algorithm = &algorithm;
-    algor.parameter = &parameter;
-
-    if (!encode_bn_der(dh->pub_key, &pubkey_der, &pubkey_der_len))
-        goto cleanup;
-    pubkey_str.length = pubkey_der_len;
-    pubkey_str.type = V_ASN1_BIT_STRING;
-    pubkey_str.data = pubkey_der;
-    pubkey_str.flags = ASN1_STRING_FLAG_BITS_LEFT;
-
-    pubkey.algor = &algor;
-    pubkey.public_key = &pubkey_str;
-    len = i2d_X509_PUBKEY(&pubkey, NULL);
-    if (len < 0)
-        goto cleanup;
-    ret = alloc_data(spki_out, len);
-    if (ret)
-        goto cleanup;
-    outptr = (uint8_t *)spki_out->data;
-    i2d_X509_PUBKEY(&pubkey, &outptr);
-
-cleanup:
-    OPENSSL_free(param_der);
-    free(pubkey_der);
-    return ret;
-}
-
-static EVP_PKEY *
-decode_spki(const krb5_data *spki)
-{
-    X509_PUBKEY *pubkey = NULL;
-    const uint8_t *inptr;
-    DH *dh;
-    EVP_PKEY *pkey = NULL, *pkey_ret = NULL;
-    const ASN1_STRING *params;
-    const ASN1_BIT_STRING *public_key;
-    krb5_data d;
-
-    inptr = (uint8_t *)spki->data;
-    pubkey = d2i_X509_PUBKEY(NULL, &inptr, spki->length);
-    if (pubkey == NULL)
-        goto cleanup;
-
-    if (OBJ_cmp(pubkey->algor->algorithm, OBJ_nid2obj(NID_dhKeyAgreement))) {
-        /* This is not a DH key, so we don't need special decoding. */
-        X509_PUBKEY_free(pubkey);
-        inptr = (uint8_t *)spki->data;
-        return d2i_PUBKEY(NULL, &inptr, spki->length);
-    }
-
-    if (pubkey->algor->parameter->type != V_ASN1_SEQUENCE)
-        goto cleanup;
-    params = pubkey->algor->parameter->value.sequence;
-    d = make_data(params->data, params->length);
-    pkey = decode_dh_params(&d);
-    if (pkey == NULL)
-        goto cleanup;
-    dh = EVP_PKEY_get0_DH(pkey);
-    if (dh == NULL)
-        goto cleanup;
-    public_key = pubkey->public_key;
-    dh->pub_key = decode_bn_der(public_key->data, public_key->length);
-    if (dh->pub_key == NULL)
-        goto cleanup;
-
-    pkey_ret = pkey;
-    pkey = NULL;
-
-cleanup:
-    X509_PUBKEY_free(pubkey);
-    EVP_PKEY_free(pkey);
-    return pkey_ret;
-}
-
-#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
-
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 
 static EVP_PKEY *
@@ -673,19 +390,13 @@ set_padded_derivation(EVP_PKEY_CTX *ctx)
 {
     EVP_PKEY_CTX_set_dh_pad(ctx, 1);
 }
-#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+#else
 static void
 set_padded_derivation(EVP_PKEY_CTX *ctx)
 {
     /* We would use EVP_PKEY_CTX_set_dh_pad() but it doesn't work with DHX. */
     EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_DHX, EVP_PKEY_OP_DERIVE,
                       EVP_PKEY_CTRL_DH_PAD, 1, NULL);
-}
-#else
-static void
-set_padded_derivation(EVP_PKEY_CTX *ctx)
-{
-    /* There's no support for padded derivation in 1.0. */
 }
 #endif
 
@@ -809,29 +520,6 @@ dh_pubkey_der(EVP_PKEY *pkey, uint8_t **pubkey_out, unsigned int *len_out)
 }
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-/* OpenSSL 1.1 and later will copy the q parameter when generating keys. */
-static int
-copy_q_openssl10(EVP_PKEY *src, EVP_PKEY *dest)
-{
-    return 1;
-}
-#else
-/* OpenSSL 1.0 won't copy the q parameter, so we have to do it. */
-static int
-copy_q_openssl10(EVP_PKEY *src, EVP_PKEY *dest)
-{
-    DH *dhsrc = EVP_PKEY_get0_DH(src), *dhdest = EVP_PKEY_get0_DH(dest);
-
-    if (dhsrc == NULL || dhsrc->q == NULL || dhdest == NULL)
-        return 0;
-    if (dhdest->q != NULL)
-        return 1;
-    dhdest->q = BN_dup(dhsrc->q);
-    return dhdest->q != NULL;
-}
-#endif
-
 static EVP_PKEY *
 generate_dh_pkey(EVP_PKEY *params)
 {
@@ -845,11 +533,6 @@ generate_dh_pkey(EVP_PKEY *params)
         goto cleanup;
     if (EVP_PKEY_keygen(ctx, &pkey) <= 0)
         goto cleanup;
-    if (EVP_PKEY_get_base_id(pkey) == EVP_PKEY_DH &&
-        !copy_q_openssl10(params, pkey)) {
-        EVP_PKEY_free(pkey);
-        pkey = NULL;
-    }
 
 cleanup:
     EVP_PKEY_CTX_free(ctx);
@@ -900,33 +583,6 @@ cleanup:
 
 #else /* OPENSSL_VERSION_NUMBER < 0x30000000L */
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-static DH *
-dup_dh_params(DH *src)
-{
-    return DHparams_dup(src);
-}
-#else
-/* DHparams_dup() won't copy q in OpenSSL 1.0. */
-static DH *
-dup_dh_params(DH *src)
-{
-    DH *dh;
-
-    dh = DH_new();
-    if (dh == NULL)
-        return NULL;
-    dh->p = BN_dup(src->p);
-    dh->q = BN_dup(src->q);
-    dh->g = BN_dup(src->g);
-    if (dh->p == NULL || dh->q == NULL || dh->g == NULL) {
-        DH_free(dh);
-        return NULL;
-    }
-    return dh;
-}
-#endif
-
 static EVP_PKEY *
 compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
 {
@@ -966,7 +622,7 @@ compose_dh_pkey(EVP_PKEY *params, const uint8_t *pubkey_der, size_t der_len)
         dhparams = EVP_PKEY_get0_DH(params);
         if (dhparams == NULL)
             goto cleanup;
-        dh = dup_dh_params(dhparams);
+        dh = DHparams_dup(dhparams);
         if (dh == NULL)
             goto cleanup;
         if (!DH_set0_key(dh, pubkey_bn, NULL))
@@ -1083,8 +739,6 @@ static struct pkcs11_errstrings {
 };
 #endif
 
-MAKE_INIT_FUNCTION(pkinit_openssl_init);
-
 static krb5_error_code oerr(krb5_context context, krb5_error_code code,
                             const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
@@ -1163,8 +817,6 @@ pkinit_init_plg_crypto(krb5_context context,
 {
     krb5_error_code retval = ENOMEM;
     pkinit_plg_crypto_context ctx = NULL;
-
-    (void)CALL_INIT_FUNCTION(pkinit_openssl_init);
 
     ctx = malloc(sizeof(*ctx));
     if (ctx == NULL)
@@ -3112,17 +2764,6 @@ cleanup:
     free(server_key);
 
     return retval;
-}
-
-int
-pkinit_openssl_init(void)
-{
-    /* Initialize OpenSSL. */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    ERR_load_crypto_strings();
-    OpenSSL_add_all_algorithms();
-#endif
-    return 0;
 }
 
 static krb5_error_code
@@ -5834,13 +5475,3 @@ crypto_verify_checksums(krb5_context context, krb5_data *body,
 
     return 0;
 }
-
-#ifdef _WIN32
-BOOL WINAPI
-DllMain(HANDLE hModule, DWORD fdwReason, LPVOID lpvReserved)
-{
-    if (fdwReason == DLL_PROCESS_ATTACH)
-        pkinit_openssl_init__auxinit();
-    return TRUE;
-}
-#endif /* _WIN32 */
