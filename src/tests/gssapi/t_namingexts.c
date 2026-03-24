@@ -113,6 +113,52 @@ test_greet_authz_data(gss_name_t name)
 }
 
 static void
+test_greet_absence(gss_name_t name, krb5_boolean expect_absent)
+{
+    OM_uint32 major, minor;
+    gss_buffer_desc attr, value, display_value;
+    int authenticated, complete, more;
+    const char *expected_msg = "greeting was absent";
+
+    attr.value = "urn:greet:was_absent";
+    attr.length = strlen((char *)attr.value);
+    value.value = NULL;
+    display_value.value = NULL;
+    major = gss_get_name_attribute(&minor, name, &attr, &authenticated,
+                                   &complete, &value, &display_value, &more);
+
+    if (expect_absent) {
+        /* Attribute should be present with the expected message. */
+        if (major != GSS_S_COMPLETE) {
+            fprintf(stderr,
+                    "Expected urn:greet:was_absent attribute not found\n");
+            exit(1);
+        }
+        if (display_value.length != strlen(expected_msg) ||
+            memcmp(display_value.value, expected_msg,
+                   display_value.length) != 0) {
+            fprintf(stderr, "Expected message '%s', got '%.*s'\n",
+                    expected_msg, (int)display_value.length,
+                    (char *)display_value.value);
+            exit(1);
+        }
+        printf("urn:greet:was_absent attribute verified: \"%.*s\"\n",
+               (int)display_value.length, (char *)display_value.value);
+    } else {
+        /* Attribute should not be present. */
+        if (major == GSS_S_COMPLETE) {
+            fprintf(stderr,
+                    "Unexpected urn:greet:was_absent attribute found\n");
+            exit(1);
+        }
+        printf("urn:greet:was_absent not present (as expected)\n");
+    }
+
+    gss_release_buffer(&minor, &value);
+    gss_release_buffer(&minor, &display_value);
+}
+
+static void
 test_map_name_to_any(gss_name_t name)
 {
     OM_uint32 major, minor;
@@ -169,6 +215,7 @@ init_accept_sec_context(gss_cred_id_t verifier_cred_handle)
     enumerate_attributes(source_name, 1);
     test_export_import_name(source_name);
     test_map_name_to_any(source_name);
+    test_greet_absence(source_name, TRUE);
 
     (void)gss_release_name(&minor, &source_name);
     (void)gss_release_name(&minor, &target_name);
@@ -201,6 +248,7 @@ main(int argc, char *argv[])
     (void)gss_release_name(&minor, &tmp_name);
 
     test_greet_authz_data(name);
+    test_greet_absence(name, FALSE);
 
     if (argc >= 3) {
         major = krb5_gss_register_acceptor_identity(argv[2]);
@@ -209,7 +257,9 @@ main(int argc, char *argv[])
 
     mechs = use_spnego ? &mechset_spnego : &mechset_krb5;
 
-    /* get default cred */
+    /* re-import name (to flush the greet authdata) and get a cred for it */
+    (void)gss_release_name(&minor, &name);
+    name = import_name(argv[1]);
     major = gss_acquire_cred(&minor, name, GSS_C_INDEFINITE, mechs, GSS_C_BOTH,
                              &cred_handle, &actual_mechs, NULL);
     check_gsserr("gss_acquire_cred", major, minor);

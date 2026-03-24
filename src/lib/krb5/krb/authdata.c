@@ -680,6 +680,11 @@ krb5int_authdata_verify(krb5_context kcontext,
             if (module->flags & AD_USAGE_AP_REQ)
                 authen_usage = TRUE;
 
+            /* If AD_ABSENT is set, default to searching all ticket and
+             * authenticator authdata. */
+            if ((module->flags & AD_ABSENT) && !ticket_usage && !authen_usage)
+                ticket_usage = authen_usage = TRUE;
+
             code = krb5_find_authdata(kcontext,
                                       ticket_usage ? ticket_authdata : NULL,
                                       authen_usage ? authen_authdata : NULL,
@@ -688,10 +693,14 @@ krb5int_authdata_verify(krb5_context kcontext,
                 break;
         }
 
-        if (authdata == NULL)
-            continue;
-
-        assert(authdata[0] != NULL);
+        if (authdata == NULL) {
+            /* If AD_ABSENT is set, invoke the module even when authdata is
+             * absent by passing NULL to import_authdata(). */
+            if (!(module->flags & AD_ABSENT))
+                continue;
+        } else {
+            assert(authdata[0] != NULL);
+        }
 
         code = (*module->ftable->import_authdata)(kcontext,
                                                   context,

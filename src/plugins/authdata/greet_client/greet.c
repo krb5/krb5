@@ -27,13 +27,22 @@
 #include <krb5/authdata_plugin.h>
 #include <assert.h>
 
+#define ABSENT_MSG "greeting was absent"
+static const krb5_data absent_msg = {
+    KV5M_DATA, sizeof(ABSENT_MSG) - 1, ABSENT_MSG
+};
+
 struct greet_context {
     krb5_data greeting;
     krb5_boolean verified;
+    krb5_boolean was_absent;
 };
 
 static krb5_data greet_attr = {
     KV5M_DATA, sizeof("urn:greet:greeting") - 1, "urn:greet:greeting" };
+
+static krb5_data greet_absent_attr = {
+    KV5M_DATA, sizeof("urn:greet:was_absent") - 1, "urn:greet:was_absent" };
 
 static krb5_error_code
 greet_init(krb5_context kcontext, void **plugin_context)
@@ -48,7 +57,8 @@ greet_flags(krb5_context kcontext,
             krb5_authdatatype ad_type,
             krb5_flags *flags)
 {
-    *flags = AD_USAGE_AP_REQ | AD_USAGE_KDC_ISSUED | AD_INFORMATIONAL;
+    *flags = AD_USAGE_AP_REQ | AD_USAGE_KDC_ISSUED | AD_INFORMATIONAL |
+        AD_ABSENT;
 }
 
 static void
@@ -72,6 +82,7 @@ greet_request_init(krb5_context kcontext,
     greet->greeting.data = NULL;
     greet->greeting.length = 0;
     greet->verified = FALSE;
+    greet->was_absent = FALSE;
 
     *request_context = greet;
 
@@ -117,7 +128,14 @@ greet_import_authdata(krb5_context kcontext,
     krb5_data data;
 
     krb5_free_data_contents(kcontext, &greet->greeting);
-    greet->verified = FALSE;
+    greet->verified = greet->was_absent = FALSE;
+
+    /* Check for authdata type absence.  With AD_ABSENT is set in the flags,
+     * authdata will be NULL when no element of the type is present. */
+    if (authdata == NULL) {
+        greet->was_absent = TRUE;
+        return 0;
+    }
 
     assert(authdata[0] != NULL);
 
@@ -154,23 +172,25 @@ greet_get_attribute_types(krb5_context kcontext,
 {
     krb5_error_code code;
     struct greet_context *greet = (struct greet_context *)request_context;
+    krb5_data *list;
+    const krb5_data *attr;
 
-    if (greet->greeting.length == 0)
+    *out_attrs = NULL;
+
+    if (greet->greeting.length == 0 && !greet->was_absent)
         return ENOENT;
 
-    *out_attrs = calloc(2, sizeof(krb5_data));
-    if (*out_attrs == NULL)
+    list = calloc(2, sizeof(*list));
+    if (list == NULL)
         return ENOMEM;
 
-    code = krb5int_copy_data_contents_add0(kcontext,
-                                           &greet_attr,
-                                           &(*out_attrs)[0]);
-    if (code != 0) {
-        free(*out_attrs);
-        *out_attrs = NULL;
+    attr = greet->was_absent ? &greet_absent_attr : &greet_attr;
+    code = krb5int_copy_data_contents_add0(kcontext, attr, &list[0]);
+    if (code) {
+        free(list);
         return code;
     }
-
+    *out_attrs = list;
     return 0;
 }
 
@@ -188,24 +208,31 @@ greet_get_attribute(krb5_context kcontext,
 {
     struct greet_context *greet = (struct greet_context *)request_context;
     krb5_error_code code;
+    const krb5_data *val;
+    krb5_data copy1, copy2;
 
-    if (!data_eq(*attribute, greet_attr) || greet->greeting.length == 0)
+    if (data_eq(*attribute, greet_attr) && greet->greeting.length > 0)
+        val = &greet->greeting;
+    else if (data_eq(*attribute, greet_absent_attr) && greet->was_absent)
+        val = &absent_msg;
+    else
         return ENOENT;
 
-    *authenticated = greet->verified;
-    *complete = TRUE;
-    *more = 0;
-
-    code = krb5int_copy_data_contents_add0(kcontext, &greet->greeting, value);
-    if (code == 0) {
-        code = krb5int_copy_data_contents_add0(kcontext,
-                                               &greet->greeting,
-                                               display_value);
-        if (code != 0)
-            krb5_free_data_contents(kcontext, value);
+    code = krb5int_copy_data_contents_add0(kcontext, val, &copy1);
+    if (code)
+        return code;
+    code = krb5int_copy_data_contents_add0(kcontext, val, &copy2);
+    if (code) {
+        krb5_free_data_contents(kcontext, &copy1);
+        return code;
     }
 
-    return code;
+    *authenticated = greet->verified;
+    *more = 0;
+    *value = copy1;
+    *display_value = copy2;
+    *complete = TRUE;
+    return 0;
 }
 
 static krb5_error_code
@@ -264,6 +291,7 @@ greet_size(krb5_context kcontext,
 
     *sizep += sizeof(krb5_int32) +
         greet->greeting.length +
+        sizeof(krb5_int32) +
         sizeof(krb5_int32);
 
     return 0;
@@ -286,12 +314,13 @@ greet_externalize(krb5_context kcontext,
     if (*lenremain < required)
         return ENOMEM;
 
-    /* Greeting Length | Greeting Contents | Verified */
+    /* Greeting Length | Greeting Contents | Verified | Was Absent */
     krb5_ser_pack_int32(greet->greeting.length, buffer, lenremain);
     krb5_ser_pack_bytes((krb5_octet *)greet->greeting.data,
                         (size_t)greet->greeting.length,
                         buffer, lenremain);
     krb5_ser_pack_int32((krb5_int32)greet->verified, buffer, lenremain);
+    krb5_ser_pack_int32((krb5_int32)greet->was_absent, buffer, lenremain);
 
     return 0;
 }
@@ -309,6 +338,7 @@ greet_internalize(krb5_context kcontext,
     krb5_int32 length;
     krb5_octet *contents = NULL;
     krb5_int32 verified;
+    krb5_int32 was_absent;
     krb5_octet *bp;
     size_t remain;
 
@@ -340,10 +370,18 @@ greet_internalize(krb5_context kcontext,
         return code;
     }
 
+    /* Was Absent */
+    code = krb5_ser_unpack_int32(&was_absent, &bp, &remain);
+    if (code != 0) {
+        free(contents);
+        return code;
+    }
+
     krb5_free_data_contents(kcontext, &greet->greeting);
     greet->greeting.length = length;
     greet->greeting.data = (char *)contents;
     greet->verified = (verified != 0);
+    greet->was_absent = (was_absent != 0);
 
     *buffer = bp;
     *lenremain = remain;
