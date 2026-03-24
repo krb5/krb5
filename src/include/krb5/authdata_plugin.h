@@ -26,7 +26,14 @@
  * Authorization data plugin definitions for Kerberos 5.
  * This is considered an INTERNAL interface at this time.
  *
- * Some work is needed before exporting it:
+ * Absence detection:
+ *
+ * If the AD_ABSENT flag is set using the flags() member function, the module
+ * will be invoked even when the authdata type is not present.  When invoked
+ * for an absent type, the authdata parameter to import_authdata() will be
+ * NULL.
+ *
+ * Some work is needed before exporting this interface:
  *
  * + Documentation.
  * + Sample code.
@@ -51,13 +58,17 @@ typedef krb5_error_code
 (*authdata_client_plugin_init_proc)(krb5_context context,
                                     void **plugin_context);
 
+/* Usage flags */
 #define AD_USAGE_AS_REQ         0x01
 #define AD_USAGE_TGS_REQ        0x02
 #define AD_USAGE_AP_REQ         0x04
 #define AD_USAGE_KDC_ISSUED     0x08
-#define AD_INFORMATIONAL        0x10
 #define AD_CAMMAC_PROTECTED     0x20
 #define AD_USAGE_MASK           0x2F
+
+/* Module behavior flags */
+#define AD_INFORMATIONAL        0x10
+#define AD_ABSENT               0x40
 
 struct _krb5_authdata_context;
 

@@ -688,10 +688,14 @@ krb5int_authdata_verify(krb5_context kcontext,
                 break;
         }
 
-        if (authdata == NULL)
-            continue;
-
-        assert(authdata[0] != NULL);
+        if (authdata == NULL) {
+            /* If AD_ABSENT is set, invoke the module even when authdata is
+             * absent by passing NULL to import_authdata(). */
+            if (!(module->flags & AD_ABSENT))
+                continue;
+        } else {
+            assert(authdata[0] != NULL);
+        }
 
         code = (*module->ftable->import_authdata)(kcontext,
                                                   context,
