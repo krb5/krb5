@@ -164,9 +164,16 @@ get_credentials(krb5_context context, krb5_gss_cred_id_t cred,
     /* Try constrained delegation if we have proxy credentials. */
     if (cred->impersonator != NULL) {
         /* If we are trying to get a ticket to ourselves, we should use the
-         * the evidence ticket directly from cache. */
-        if (krb5_principal_compare(context, cred->impersonator,
-                                   server->princ)) {
+         * the evidence ticket directly from cache.  For host-based targets,
+         * use realm-insensitive comparison since the target realm may be
+         * presented under an alias (e.g. a UUID-based internal realm name vs.
+         * a friendly DNS-derived realm name), mirroring the realm-stripping
+         * already applied to server_data above. */
+        if (server_data.type == KRB5_NT_SRV_HST
+            ? krb5_principal_compare_any_realm(context, cred->impersonator,
+                                               server->princ)
+            : krb5_principal_compare(context, cred->impersonator,
+                                     server->princ)) {
             flags |= KRB5_GC_CACHED;
         } else {
             memset(&mcreds, 0, sizeof(mcreds));
