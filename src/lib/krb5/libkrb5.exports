@@ -137,6 +137,8 @@ k5_externalize_context
 k5_externalize_keyblock
 k5_externalize_principal
 k5_fast_is_pkinit_allowed
+k5_tkt_creds_set_s4u2self
+k5_tkt_creds_set_s4u2proxy
 k5_free_algorithm_identifier
 k5_free_cammac
 k5_free_data_ptr_list
