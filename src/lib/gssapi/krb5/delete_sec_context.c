@@ -82,6 +82,9 @@ krb5_gss_delete_sec_context(OM_uint32 *minor_status,
     if (ctx->authdata)
         krb5_free_authdata(context, ctx->authdata);
 
+    if (ctx->proxy_step_ctx)
+        kg_release_s4u2proxy_step_ctx(context, ctx->proxy_step_ctx);
+
     if (ctx->k5_context)
         krb5_free_context(ctx->k5_context);
 
