@@ -332,6 +332,23 @@ krb5_gss_acquire_cred_impersonate_name_step(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
+/*
+ * Retrieve the target KDC realm for the current step of a step-based
+ * S4U2Proxy exchange that is in progress on context_handle.
+ *
+ * During gss_init_sec_context(), when the call returns GSS_S_CONTINUE_NEEDED
+ * and a step-based S4U2Proxy exchange is active, the output_token is a raw
+ * Kerberos TGS-REQ.  The caller should send it to the KDC identified by the
+ * realm returned here and pass the reply as input_token on the next call.
+ *
+ * Returns GSS_S_UNAVAILABLE if no step-based S4U2Proxy is in progress.
+ * The returned realm_buf must be freed with gss_release_buffer().
+ */
+OM_uint32 KRB5_CALLCONV
+krb5_gss_get_proxy_realm(OM_uint32 *minor_status,
+                          gss_ctx_id_t context_handle,
+                          gss_buffer_t realm_buf);
+
 
 #ifdef __cplusplus
 }
