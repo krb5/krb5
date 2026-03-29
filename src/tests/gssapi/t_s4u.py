@@ -128,6 +128,13 @@ realm.run(['./t_imp_step', '--bad-input', puser],
 realm.run(['./t_imp_step', '--abandon', puser],
           expected_msg='abandon: ok (no crash)')
 
+# Step-based S4U2Proxy via gss_init_sec_context with a use_step_proxy
+# credential obtained from krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Proxy (gss_init_sec_context with use_step_proxy cred)')
+out = realm.run(['./t_proxy_step', puser, pservice2])
+if 'proxy-auth: ' + realm.user_princ not in out:
+    fail('t_proxy_step basic')
+
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
 realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,
