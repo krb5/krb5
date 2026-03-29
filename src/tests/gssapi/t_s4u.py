@@ -118,6 +118,16 @@ out = realm.run(['./t_s4u', puser, pservice2])
 mark('S4U2Self time_req bounds impersonator TGT in delegated ccache')
 realm.run(['./t_s4u', '--time-req', '600', puser, pservice2])
 
+# Step-based S4U2Self via krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Self (krb5_gss_acquire_cred_impersonate_name_step)')
+out = realm.run(['./t_imp_step', puser])
+if 'impersonated: ' + realm.user_princ not in out:
+    fail('t_imp_step basic')
+realm.run(['./t_imp_step', '--bad-input', puser],
+          expected_msg='bad-input: correctly returned error')
+realm.run(['./t_imp_step', '--abandon', puser],
+          expected_msg='abandon: ok (no crash)')
+
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
 realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,
