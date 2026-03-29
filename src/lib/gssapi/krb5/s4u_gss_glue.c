@@ -40,6 +40,97 @@ kg_release_imp_step_ctx(kg_imp_step_ctx_t sctx)
     free(sctx);
 }
 
+void
+kg_release_s4u2proxy_step_ctx(krb5_context context, kg_s4u2proxy_step_ctx_t sctx)
+{
+    if (sctx == NULL)
+        return;
+    krb5_tkt_creds_free(context, sctx->proxy_tcc);
+    krb5_free_data_contents(context, &sctx->realm);
+    free(sctx);
+}
+
+/*
+ * Initialise a step-based S4U2Proxy TGS exchange.  tgt_ccache is the ccache
+ * that holds the service TGT (used as the authenticator for the TGS-REQ).
+ * client_princ is the impersonated user, server_princ is the target service,
+ * and evidence is the DER-encoded S4U2Self ticket.  On success *out_sctx owns
+ * the new context; the caller must free it with kg_release_s4u2proxy_step_ctx.
+ */
+krb5_error_code
+kg_s4u2proxy_step_init(krb5_context context,
+                       krb5_ccache tgt_ccache,
+                       krb5_principal client_princ,
+                       krb5_principal server_princ,
+                       const krb5_data *evidence,
+                       OM_uint32 time_req,
+                       kg_s4u2proxy_step_ctx_t *out_sctx)
+{
+    krb5_error_code code;
+    kg_s4u2proxy_step_ctx_t sctx = NULL;
+    krb5_creds in_creds;
+    krb5_timestamp now;
+
+    *out_sctx = NULL;
+
+    sctx = k5alloc(sizeof(*sctx), &code);
+    if (sctx == NULL)
+        return code;
+
+    memset(&in_creds, 0, sizeof(in_creds));
+    in_creds.client = client_princ;
+    in_creds.server = server_princ;
+
+    if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
+        code = krb5_timeofday(context, &now);
+        if (code != 0)
+            goto cleanup;
+        in_creds.times.endtime = ts_incr(now, time_req);
+    }
+
+    code = krb5_tkt_creds_init(context, tgt_ccache, &in_creds, 0,
+                               &sctx->proxy_tcc);
+    if (code != 0)
+        goto cleanup;
+
+    code = k5_tkt_creds_set_s4u2proxy(context, sctx->proxy_tcc, evidence);
+    if (code != 0)
+        goto cleanup;
+
+    *out_sctx = sctx;
+    sctx = NULL;
+
+cleanup:
+    kg_release_s4u2proxy_step_ctx(context, sctx);
+    return code;
+}
+
+/*
+ * Drive one step of a step-based S4U2Proxy exchange.  in is the KDC reply
+ * from the previous step (empty_data() on the first call).  On return, if
+ * KRB5_TKT_CREDS_STEP_FLAG_CONTINUE is set in *flags, out contains the next
+ * TGS-REQ to send and sctx->realm names the target KDC realm.
+ */
+krb5_error_code
+kg_s4u2proxy_step(krb5_context context, kg_s4u2proxy_step_ctx_t sctx,
+                  krb5_data *in, krb5_data *out, unsigned int *flags)
+{
+    krb5_error_code code;
+    krb5_data realm = empty_data();
+
+    *out = empty_data();
+    *flags = 0;
+
+    code = krb5_tkt_creds_step(context, sctx->proxy_tcc, in, out, &realm,
+                               flags);
+    if (code != 0)
+        return code;
+
+    krb5_free_data_contents(context, &sctx->realm);
+    sctx->realm = realm;
+    return 0;
+}
+
 /*
  * Create a MEMORY ccache initialised with princ as the default principal and
  * containing a copy of every credential in src.  Used to preserve the service
@@ -1020,3 +1111,47 @@ cleanup:
     return major;
 }
 
+/*
+ * Return the target KDC realm for the current step of a step-based S4U2Proxy
+ * exchange in progress on context_handle.  The returned buffer is a copy and
+ * must be released with gss_release_buffer().  Returns GSS_S_UNAVAILABLE if
+ * no step-based S4U2Proxy exchange is in progress.
+ */
+OM_uint32 KRB5_CALLCONV
+krb5_gss_get_proxy_realm(OM_uint32 *minor_status,
+                          gss_ctx_id_t context_handle,
+                          gss_buffer_t realm_buf)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    kg_s4u2proxy_step_ctx_t sctx;
+
+    *minor_status = 0;
+    realm_buf->value = NULL;
+    realm_buf->length = 0;
+
+    if (context_handle == GSS_C_NO_CONTEXT)
+        return GSS_S_NO_CONTEXT;
+
+    /* Unwrap a mechglue union context if one was passed. */
+    {
+        gss_union_ctx_id_t uc = (gss_union_ctx_id_t)context_handle;
+        if (uc->loopback == uc)
+            context_handle = uc->internal_ctx_id;
+    }
+
+    ctx = (krb5_gss_ctx_id_rec *)context_handle;
+    sctx = ctx->proxy_step_ctx;
+
+    if (sctx == NULL || sctx->realm.length == 0)
+        return GSS_S_UNAVAILABLE;
+
+    realm_buf->value = malloc(sctx->realm.length + 1);
+    if (realm_buf->value == NULL) {
+        *minor_status = ENOMEM;
+        return GSS_S_FAILURE;
+    }
+    memcpy(realm_buf->value, sctx->realm.data, sctx->realm.length);
+    ((char *)realm_buf->value)[sctx->realm.length] = '\0';
+    realm_buf->length = sctx->realm.length;
+    return GSS_S_COMPLETE;
+}

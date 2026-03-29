@@ -577,10 +577,62 @@ kg_new_connection(
                                   &ctx->there)))
         goto cleanup;
 
-    code = get_credentials(context, cred, ctx->there, now,
-                           ctx->krb_times.endtime, &k_cred);
-    if (code)
-        goto cleanup;
+    if (cred->use_step_proxy) {
+        /* Step-based S4U2Proxy: initialise the async TGS exchange and
+         * drive the first step.  The output token is a raw TGS-REQ
+         * the caller must forward to the KDC identified by the realm
+         * returned by krb5_gss_get_proxy_realm(). */
+        krb5_data proxy_out = empty_data();
+        krb5_data empty_in = empty_data();
+        unsigned int proxy_flags = 0;
+
+        code = kg_s4u2proxy_step_init(context, cred->s4u_tgt_ccache,
+                                      cred->impersonator,
+                                      ctx->there->princ,
+                                      &cred->s4u_evidence,
+                                      time_req, &ctx->proxy_step_ctx);
+        if (code)
+            goto cleanup;
+
+        code = kg_s4u2proxy_step(context, ctx->proxy_step_ctx,
+                                 &empty_in, &proxy_out, &proxy_flags);
+        if (code) {
+            krb5_free_data_contents(context, &proxy_out);
+            goto cleanup;
+        }
+
+        if (proxy_flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE) {
+            /* Return raw TGS-REQ; caller routes it to the KDC. */
+            output_token->value = proxy_out.data;
+            output_token->length = proxy_out.length;
+            *context_handle = (gss_ctx_id_t)ctx;
+            ctx_free = NULL;
+            *minor_status = 0;
+            major_status = GSS_S_CONTINUE_NEEDED;
+            goto cleanup;
+        }
+
+        /* Single-step completion (unusual but valid). */
+        krb5_free_data_contents(context, &proxy_out);
+        k_cred = malloc(sizeof(*k_cred));
+        if (k_cred == NULL) {
+            code = ENOMEM;
+            goto cleanup;
+        }
+        memset(k_cred, 0, sizeof(*k_cred));
+        code = krb5_tkt_creds_get_creds(context,
+                                        ctx->proxy_step_ctx->proxy_tcc,
+                                        k_cred);
+        if (code)
+            goto cleanup;
+        kg_release_s4u2proxy_step_ctx(context, ctx->proxy_step_ctx);
+        ctx->proxy_step_ctx = NULL;
+    } else {
+        code = get_credentials(context, cred, ctx->there, now,
+                               ctx->krb_times.endtime, &k_cred);
+        if (code)
+            goto cleanup;
+    }
 
     ctx->krb_times = k_cred->times;
 
@@ -874,6 +926,171 @@ fail:
     return (major_status);
 }
 
+/*
+ * proxy_step_cont
+ *
+ * Handle one step of an in-progress step-based S4U2Proxy exchange.
+ * Called from krb5_gss_init_sec_context_ext() when ctx->proxy_step_ctx
+ * is non-NULL.  input_token is the raw KDC reply from the previous step.
+ * On CONTINUE_NEEDED, output_token receives the next raw TGS-REQ.
+ * On COMPLETE (or CONTINUE for mutual auth), output_token receives the AP-REQ.
+ *
+ * cred->lock must be held by the caller.
+ */
+static OM_uint32
+proxy_step_cont(
+    OM_uint32 *minor_status,
+    krb5_gss_cred_id_t cred,
+    gss_ctx_id_t *context_handle,
+    gss_OID mech_type,
+    OM_uint32 req_flags,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_buffer_t input_token,
+    gss_OID *actual_mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    krb5_context context,
+    krb5_gss_ctx_ext_t exts)
+{
+    OM_uint32 major_status;
+    krb5_error_code code;
+    krb5_gss_ctx_id_rec *ctx;
+    krb5_data in, proxy_out;
+    unsigned int proxy_flags;
+    krb5_creds k_cred;
+    krb5_keyblock *keyblock;
+    krb5_timestamp now;
+    int cbt_flag = (req_flags & GSS_C_CHANNEL_BOUND_FLAG) != 0;
+
+    major_status = GSS_S_FAILURE;
+    proxy_out = empty_data();
+    proxy_flags = 0;
+    memset(&k_cred, 0, sizeof(k_cred));
+
+    ctx = (krb5_gss_ctx_id_t)*context_handle;
+
+    /* Feed the KDC reply into the S4U2Proxy exchange. */
+    if (input_token == GSS_C_NO_BUFFER || input_token->length == 0) {
+        code = EINVAL;
+        goto fail;
+    }
+    in = make_data(input_token->value, (unsigned int)input_token->length);
+
+    code = kg_s4u2proxy_step(context, ctx->proxy_step_ctx,
+                             &in, &proxy_out, &proxy_flags);
+    if (code)
+        goto fail;
+
+    if (proxy_flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE) {
+        /* More KDC round-trips needed: return the next TGS-REQ raw. */
+        output_token->value = proxy_out.data;
+        output_token->length = proxy_out.length;
+        *minor_status = 0;
+        return GSS_S_CONTINUE_NEEDED;
+    }
+
+    /* Exchange complete: retrieve the proxy ticket. */
+    krb5_free_data_contents(context, &proxy_out);
+
+    code = krb5_tkt_creds_get_creds(context,
+                                    ctx->proxy_step_ctx->proxy_tcc,
+                                    &k_cred);
+    if (code)
+        goto fail;
+
+    kg_release_s4u2proxy_step_ctx(context, ctx->proxy_step_ctx);
+    ctx->proxy_step_ctx = NULL;
+
+    /* Apply delegation policy from the proxy ticket flags. */
+    if ((req_flags & GSS_C_DELEG_POLICY_FLAG) &&
+        (k_cred.ticket_flags & TKT_FLG_OK_AS_DELEGATE))
+        ctx->gss_flags |= GSS_C_DELEG_FLAG | GSS_C_DELEG_POLICY_FLAG;
+
+    /* Set the mechanism OID on the context. */
+    if (generic_gss_copy_oid(minor_status, mech_type,
+                             &ctx->mech_used) != GSS_S_COMPLETE) {
+        code = *minor_status;
+        goto fail;
+    }
+    ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
+
+    /* Build the AP-REQ (also sets ctx->krb_times and ctx->krb_flags). */
+    {
+        krb5_int32 seq_temp;
+
+        code = make_ap_req_v1(context, ctx, cred, &k_cred,
+                              ctx->here->ad_context,
+                              input_chan_bindings, mech_type, cbt_flag,
+                              output_token, exts);
+        if (code) {
+            if (code == KRB5_FCC_NOFILE || code == KRB5_CC_NOTFOUND ||
+                code == KG_EMPTY_CCACHE)
+                major_status = GSS_S_NO_CRED;
+            if (code == KRB5KRB_AP_ERR_TKT_EXPIRED)
+                major_status = GSS_S_CREDENTIALS_EXPIRED;
+            goto fail;
+        }
+
+        krb5_auth_con_getlocalseqnumber(context, ctx->auth_context,
+                                        &seq_temp);
+        ctx->seq_send = (uint32_t)seq_temp;
+        code = krb5_auth_con_getsendsubkey(context, ctx->auth_context,
+                                           &keyblock);
+        if (code)
+            goto fail;
+        code = krb5_k_create_key(context, keyblock, &ctx->subkey);
+        krb5_free_keyblock(context, keyblock);
+        if (code)
+            goto fail;
+    }
+
+    ctx->enc = NULL;
+    ctx->seq = NULL;
+    ctx->have_acceptor_subkey = 0;
+    code = kg_setup_keys(context, ctx, ctx->subkey, &ctx->cksumtype);
+    if (code)
+        goto fail;
+
+    if (!(ctx->gss_flags & GSS_C_MUTUAL_FLAG)) {
+        ctx->seq_recv = ctx->seq_send;
+        code = g_seqstate_init(&ctx->seqstate, ctx->seq_recv,
+                               (ctx->gss_flags & GSS_C_REPLAY_FLAG) != 0,
+                               (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0,
+                               ctx->proto);
+        if (code)
+            goto fail;
+    }
+
+    if (time_rec) {
+        if ((code = krb5_timeofday(context, &now)))
+            goto fail;
+        *time_rec = ts_interval(now, ctx->krb_times.endtime);
+    }
+
+    if (ret_flags)
+        *ret_flags = ctx->gss_flags;
+    if (actual_mech_type)
+        *actual_mech_type = mech_type;
+
+    krb5_free_cred_contents(context, &k_cred);
+    *minor_status = 0;
+    if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
+        ctx->established = 0;
+        return GSS_S_CONTINUE_NEEDED;
+    }
+    ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
+    ctx->established = 1;
+    return GSS_S_COMPLETE;
+
+fail:
+    krb5_free_cred_contents(context, &k_cred);
+    krb5_free_data_contents(context, &proxy_out);
+    (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+    *minor_status = code;
+    return major_status;
+}
+
 OM_uint32
 krb5_gss_init_sec_context_ext(
     OM_uint32 *minor_status,
@@ -979,16 +1196,50 @@ krb5_gss_init_sec_context_ext(
         } else
             ((krb5_gss_ctx_id_rec *) *context_handle)->k5_context = context;
     } else {
-        /* mutual_auth doesn't care about the credentials */
-        major_status = mutual_auth(minor_status, context_handle,
-                                   target_name, mech_type, req_flags,
-                                   time_req, input_chan_bindings,
-                                   input_token, actual_mech_type,
-                                   output_token, ret_flags, time_rec,
-                                   context);
-        /* If context_handle is now NO_CONTEXT, mutual_auth called
-           delete_sec_context, which would've zapped the krb5 context
-           too.  */
+        krb5_gss_ctx_id_rec *step_ctx =
+            (krb5_gss_ctx_id_t)*context_handle;
+
+        if (step_ctx->proxy_step_ctx != NULL) {
+            /* Step-based S4U2Proxy exchange in progress. */
+            if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
+                major_status = kg_get_defcred(minor_status, &defcred);
+                if (GSS_ERROR(major_status)) {
+                    save_error_info(*minor_status, context);
+                    return major_status;
+                }
+                claimant_cred_handle = defcred;
+            }
+            major_status = kg_cred_resolve(minor_status, context,
+                                           claimant_cred_handle,
+                                           target_name);
+            if (GSS_ERROR(major_status)) {
+                save_error_info(*minor_status, context);
+                krb5_gss_release_cred(&tmp_min_stat, &defcred);
+                return major_status;
+            }
+            cred = (krb5_gss_cred_id_t)claimant_cred_handle;
+            major_status = proxy_step_cont(minor_status, cred,
+                                           context_handle, mech_type,
+                                           req_flags, input_chan_bindings,
+                                           input_token, actual_mech_type,
+                                           output_token, ret_flags,
+                                           time_rec, context, exts);
+            k5_mutex_unlock(&cred->lock);
+            krb5_gss_release_cred(&tmp_min_stat, &defcred);
+            /* If context_handle is now NO_CONTEXT, proxy_step_cont
+               called delete_sec_context which zapped the krb5 context. */
+        } else {
+            /* mutual_auth doesn't care about the credentials */
+            major_status = mutual_auth(minor_status, context_handle,
+                                       target_name, mech_type, req_flags,
+                                       time_req, input_chan_bindings,
+                                       input_token, actual_mech_type,
+                                       output_token, ret_flags, time_rec,
+                                       context);
+            /* If context_handle is now NO_CONTEXT, mutual_auth called
+               delete_sec_context, which would've zapped the krb5 context
+               too.  */
+        }
     }
 
     return(major_status);
