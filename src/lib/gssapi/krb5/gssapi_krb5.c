@@ -966,7 +966,7 @@ static struct gss_config iakerb_mechanism = {
     iakerb_gss_unwrap_iov,
     iakerb_gss_wrap_iov_length,
     NULL,               /* complete_auth_token */
-    NULL,               /* acquire_cred_impersonate_name */
+    iakerb_gss_acquire_cred_impersonate_name,
     NULL,               /* add_cred_impersonate_name */
     NULL,               /* display_name_ext */
     krb5_gss_inquire_name,
