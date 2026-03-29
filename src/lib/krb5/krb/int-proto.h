@@ -127,6 +127,31 @@ krb5int_process_tgs_reply(krb5_context context,
                           krb5_pa_data ***out_enc_padata,
                           krb5_creds **out_cred);
 
+/* S4U helper functions shared between s4u_creds.c and get_creds.c */
+krb5_error_code
+build_pa_for_user(krb5_context context, krb5_creds *tgt,
+                  krb5_s4u_userid *userid, krb5_pa_data **out_padata);
+
+krb5_error_code
+build_pa_s4u_x509_user(krb5_context context, krb5_keyblock *subkey,
+                        krb5_kdc_req *tgsreq, void *gcvt_data);
+
+krb5_error_code
+verify_s4u2self_reply(krb5_context context, krb5_keyblock *subkey,
+                      krb5_pa_s4u_x509_user *req_s4u_user,
+                      krb5_pa_data **rep_padata, krb5_pa_data **enc_padata,
+                      krb5_boolean update_req_user);
+
+/* Step-based S4U2Self support for krb5_tkt_creds_context */
+krb5_error_code
+k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
+                           krb5_principal user, const krb5_data *subject_cert);
+
+/* Step-based S4U2Proxy support for krb5_tkt_creds_context */
+krb5_error_code
+k5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
+                            const krb5_data *evidence_ticket_der);
+
 /* The subkey field is an output parameter; if a
  * tgs-rep is received then the subkey will be filled
  * in with the subkey needed to decrypt the TGS

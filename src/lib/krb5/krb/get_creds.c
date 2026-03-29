@@ -238,6 +238,14 @@ struct _krb5_tkt_creds_context {
     krb5_data *caller_out;      /* Caller's out parameter */
     krb5_data *caller_realm;    /* Caller's realm parameter */
     unsigned int *caller_flags; /* Caller's flags parameter */
+
+    /* S4U2Self mode (optional, set by k5_tkt_creds_set_s4u2self). */
+    krb5_pa_s4u_x509_user *s4u_user;  /* padata state; NULL unless S4U2Self */
+    krb5_data s4u_subject_cert;        /* owned copy of subject cert */
+    krb5_boolean s4u_first_req;        /* TRUE before first referral reply */
+
+    /* S4U2Proxy mode (optional, set by k5_tkt_creds_set_s4u2proxy). */
+    krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
 };
 
 /* Convert ticket flags to necessary KDC options */
@@ -288,6 +296,9 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
 {
     krb5_error_code code;
     krb5_data request = empty_data();
+    krb5_pa_data **padata = NULL;
+    k5_pacb_fn pacb_fn = NULL;
+    void *pacb_data = NULL;
 
     ctx->kdcopt = extra_options | FLAGS2OPTS(ctx->cur_tgt->ticket_flags);
 
@@ -304,10 +315,65 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
 
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
-    code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt, ctx->kdcopt,
-                           ctx->cur_tgt->addresses, NULL, ctx->tgs_in_creds,
-                           NULL, NULL, &request, &ctx->timestamp, &ctx->nonce,
-                           &ctx->subkey);
+
+    if (ctx->s4u_user != NULL) {
+        krb5_pa_data *pa0 = NULL, *pa1 = NULL;
+
+        /* Free any checksum from a prior round. */
+        krb5_free_checksum_contents(context, &ctx->s4u_user->cksum);
+
+        /* Build a padata array: PA-S4U-X509-USER placeholder + optional
+         * PA-FOR-USER.  The placeholder is filled in by the callback. */
+        padata = k5calloc(3, sizeof(*padata), &code);
+        if (padata == NULL)
+            return code;
+
+        pa0 = k5alloc(sizeof(*pa0), &code);
+        if (pa0 == NULL) {
+            free(padata);
+            return code;
+        }
+        pa0->magic = KV5M_PA_DATA;
+        pa0->pa_type = KRB5_PADATA_S4U_X509_USER;
+        pa0->length = 0;
+        pa0->contents = NULL;
+        padata[0] = pa0;
+
+        if (ctx->s4u_user->user_id.user != NULL &&
+            ctx->s4u_user->user_id.user->length > 0) {
+            code = build_pa_for_user(context, ctx->cur_tgt,
+                                     &ctx->s4u_user->user_id, &pa1);
+            if (code == KRB5_CRYPTO_INTERNAL)
+                code = 0;   /* skip PA-FOR-USER on unsupported enctype */
+            if (code != 0) {
+                krb5_free_pa_data(context, padata);
+                return code;
+            }
+            padata[1] = pa1;   /* may be NULL if skipped */
+        }
+
+        pacb_fn = build_pa_s4u_x509_user;
+        pacb_data = ctx->s4u_user;
+    }
+
+    if (ctx->s4u2proxy_evidence.length > 0) {
+        /* Temporarily install the evidence ticket as second_ticket so
+         * k5_make_tgs_req encodes it in additional-tickets.  Restore after. */
+        krb5_data saved = ctx->tgs_in_creds->second_ticket;
+        ctx->kdcopt |= KDC_OPT_CNAME_IN_ADDL_TKT;
+        ctx->tgs_in_creds->second_ticket = ctx->s4u2proxy_evidence;
+        code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt,
+                               ctx->kdcopt, ctx->cur_tgt->addresses, padata,
+                               ctx->tgs_in_creds, pacb_fn, pacb_data, &request,
+                               &ctx->timestamp, &ctx->nonce, &ctx->subkey);
+        ctx->tgs_in_creds->second_ticket = saved;
+    } else {
+        code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt,
+                               ctx->kdcopt, ctx->cur_tgt->addresses, padata,
+                               ctx->tgs_in_creds, pacb_fn, pacb_data, &request,
+                               &ctx->timestamp, &ctx->nonce, &ctx->subkey);
+    }
+    krb5_free_pa_data(context, padata);
     if (code != 0)
         return code;
 
@@ -387,14 +453,22 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_data *reply)
 {
     krb5_error_code code;
+    krb5_pa_data **out_padata = NULL, **out_enc_padata = NULL;
+    /* Minimal padata marker to signal S4U2Self mode to process_tgs_reply. */
+    krb5_pa_data s4u_marker = { KV5M_PA_DATA, KRB5_PADATA_S4U_X509_USER,
+                                 0, NULL };
+    krb5_pa_data *s4u_padata[2] = { &s4u_marker, NULL };
 
     krb5_free_creds(context, ctx->reply_creds);
     ctx->reply_creds = NULL;
     code = krb5int_process_tgs_reply(context, ctx->fast_state,
                                      reply, ctx->cur_tgt, ctx->kdcopt,
-                                     ctx->cur_tgt->addresses, NULL,
+                                     ctx->cur_tgt->addresses,
+                                     ctx->s4u_user != NULL ? s4u_padata : NULL,
                                      ctx->tgs_in_creds, ctx->timestamp,
-                                     ctx->nonce, ctx->subkey, NULL, NULL,
+                                     ctx->nonce, ctx->subkey,
+                                     ctx->s4u_user != NULL ? &out_padata : NULL,
+                                     ctx->s4u_user != NULL ? &out_enc_padata : NULL,
                                      &ctx->reply_creds);
     if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
         /* Instruct the caller to re-send the request with TCP. */
@@ -403,6 +477,20 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
             return code;
         return KRB5KRB_ERR_RESPONSE_TOO_BIG;
     }
+
+    /* For S4U2Self mode, verify the reply padata and update user_id if needed. */
+    if (ctx->s4u_user != NULL && code == 0 && ctx->reply_creds != NULL) {
+        code = verify_s4u2self_reply(context, ctx->subkey, ctx->s4u_user,
+                                     out_padata, out_enc_padata,
+                                     ctx->s4u_first_req);
+        if (code == 0 && ctx->s4u_first_req) {
+            /* After the first authoritative reply, stop sending subject_cert. */
+            ctx->s4u_user->user_id.subject_cert = empty_data();
+            ctx->s4u_first_req = FALSE;
+        }
+    }
+    krb5_free_pa_data(context, out_padata);
+    krb5_free_pa_data(context, out_enc_padata);
 
     /* Depending on our state, we may or may not be able to handle an error.
      * For now, store it in the context and return success. */
@@ -1163,6 +1251,70 @@ cleanup:
     return code;
 }
 
+/*
+ * Configure ctx for S4U2Self mode.  Must be called before the first
+ * krb5_tkt_creds_step() call.  Subsequent steps will include PA-S4U-X509-USER
+ * padata in TGS-REQs and verify the reply padata.
+ */
+krb5_error_code
+k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
+                           krb5_principal user, const krb5_data *subject_cert)
+{
+    krb5_error_code code;
+    krb5_pa_s4u_x509_user *s4u_user;
+
+    if (ctx->state != STATE_BEGIN)
+        return EINVAL;
+
+    s4u_user = k5alloc(sizeof(*s4u_user), &code);
+    if (s4u_user == NULL)
+        return code;
+    memset(s4u_user, 0, sizeof(*s4u_user));
+
+    s4u_user->user_id.options = KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
+
+    if (user != NULL) {
+        code = krb5_copy_principal(context, user, &s4u_user->user_id.user);
+        if (code != 0) {
+            free(s4u_user);
+            return code;
+        }
+    }
+
+    if (subject_cert != NULL && subject_cert->length > 0) {
+        code = krb5int_copy_data_contents(context, subject_cert,
+                                          &ctx->s4u_subject_cert);
+        if (code != 0) {
+            krb5_free_principal(context, s4u_user->user_id.user);
+            free(s4u_user);
+            return code;
+        }
+        s4u_user->user_id.subject_cert = ctx->s4u_subject_cert;
+    }
+
+    ctx->s4u_user = s4u_user;
+    ctx->s4u_first_req = TRUE;
+    return 0;
+}
+
+/*
+ * Configure ctx for S4U2Proxy (constrained delegation).  Must be called after
+ * k5_tkt_creds_set_s4u2self() and before the first krb5_tkt_creds_step() call.
+ * evidence_ticket_der is the DER-encoded S4U2Self evidence ticket; it will be
+ * sent as additional-tickets[0] in the S4U2Proxy TGS-REQ.
+ */
+krb5_error_code
+k5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
+                            const krb5_data *evidence_ticket_der)
+{
+    if (ctx->state != STATE_BEGIN)
+        return EINVAL;
+    if (evidence_ticket_der == NULL || evidence_ticket_der->length == 0)
+        return EINVAL;
+    return krb5int_copy_data_contents(context, evidence_ticket_der,
+                                      &ctx->s4u2proxy_evidence);
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds)
@@ -1201,6 +1353,13 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_data_contents(context, &ctx->previous_request);
     krb5int_free_data_list(context, ctx->realm_path);
     krb5_free_creds(context, ctx->reply_creds);
+    if (ctx->s4u_user != NULL) {
+        krb5_free_checksum_contents(context, &ctx->s4u_user->cksum);
+        krb5_free_principal(context, ctx->s4u_user->user_id.user);
+        free(ctx->s4u_user);
+    }
+    krb5_free_data_contents(context, &ctx->s4u_subject_cert);
+    krb5_free_data_contents(context, &ctx->s4u2proxy_evidence);
     free(ctx);
 }
 
