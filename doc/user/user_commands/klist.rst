@@ -8,7 +8,7 @@ SYNOPSIS
 
 **klist**
 [**-e**]
-[[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]]]
+[[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]] [**-I** *keytab*]]
 [**-C**]
 [**-k** [**-i**] [**-t**] [**-K**]]
 [**-V**]
@@ -96,6 +96,15 @@ OPTIONS
 
 **-d**
     Display the authdata types (if any) for each entry.
+
+**-I** *keytab*
+    Decrypt service tickets in the credentials cache using keys from
+    *keytab* and display any authentication indicators
+    (see :ref:`auth_indicator`) found in the tickets.  Authentication
+    indicators are stored inside the ticket's encrypted body within a
+    CAMMAC container (RFC 9509) and are not accessible without the
+    service's long-term key.  Credentials whose service key is not
+    present in *keytab* are silently skipped.
 
 **-V**
     Display the Kerberos version number and exit.
