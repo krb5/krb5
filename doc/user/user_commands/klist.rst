@@ -8,7 +8,8 @@ SYNOPSIS
 
 **klist**
 [**-e**]
-[[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]]]
+[[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]]
+[**-I** *keytab*]]
 [**-C**]
 [**-k** [**-i**] [**-t**] [**-K**]]
 [**-V**]
@@ -96,6 +97,16 @@ OPTIONS
 
 **-d**
     Display the authdata types (if any) for each entry.
+
+**-I** *keytab*
+    Decrypt service tickets in the credentials cache using keys from
+    *keytab* and display any authentication indicators
+    (see :ref:`auth_indicator`) found in the tickets.  Use ``-`` to
+    select the default keytab.  Authentication indicators are stored
+    inside the encrypted part of the ticket and are not accessible
+    without the service's long-term key.  Indicators will not be
+    displayed for credentials whose service key is not present in
+    *keytab*.
 
 **-V**
     Display the Kerberos version number and exit.

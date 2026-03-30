@@ -192,6 +192,13 @@ realm.run([kadminl, 'cpw', '-randkey', '-keepold', '-e', 'aes128-cts',
 realm.kinit(realm.user_princ, None, ['-R'])
 realm.run([kvno, realm.host_princ])
 
+mark('klist -I keytab auth indicators')
+realm.kinit(realm.user_princ, password('user'),
+            ['-X', 'indicators=indcl', '-S', realm.host_princ])
+realm.run([klist, '-I', realm.keytab],
+          expected_msg='Authentication indicators: indcl')
+realm.run([klist, '-I', '-'], expected_msg='Authentication indicators: indcl')
+
 realm.stop()
 realm2.stop()
 
