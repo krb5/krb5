@@ -424,6 +424,159 @@ set.  If the library does not support the query,
 gss_inquire_cred_by_oid will return **GSS_S_UNAVAILABLE**.
 
 
+Step-based impersonation for non-blocking applications
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The blocking ``gss_acquire_cred_impersonate_name()`` performs the entire
+S4U2Self TGS exchange internally, which may be unsuitable for event-driven
+or non-blocking applications.  The following MIT krb5 extension, declared
+in ``<gssapi/gssapi_krb5.h>``, offers a step-based alternative that gives
+the caller control over each KDC network round-trip::
+
+    OM_uint32 krb5_gss_acquire_cred_impersonate_name_step(
+        OM_uint32 *minor_status,
+        gss_cred_id_t impersonator_cred_handle,
+        gss_name_t desired_name,
+        OM_uint32 time_req,
+        gss_OID_set desired_mechs,
+        gss_cred_usage_t cred_usage,
+        gss_buffer_t input_token,
+        gss_cred_id_t *cred_handle,
+        gss_buffer_t output_token,
+        gss_buffer_t target_realm,
+        gss_OID_set *actual_mechs,
+        OM_uint32 *time_rec);
+
+The parameters are the same as for ``gss_acquire_cred_impersonate_name()``,
+with two extra in/out parameters (*input_token* and *cred_handle*) that
+carry state between calls, and *output_token* and *target_realm* that carry
+the outgoing KDC request and its destination.
+
+The exchange protocol is:
+
+* **First call**: set *input_token* to **GSS_C_NO_BUFFER** and
+  *\*cred_handle* to **GSS_C_NO_CREDENTIAL**.  A return of
+  **GSS_S_CONTINUE_NEEDED** means *output_token* contains a raw Kerberos
+  TGS-REQ and *target_realm* names the KDC to send it to; *\*cred_handle*
+  is set to an in-progress handle.
+
+* **Subsequent calls**: send *output_token* to the KDC identified by
+  *target_realm* using whatever network transport the application uses, then
+  call the function again with the raw KDC reply in *input_token* and the
+  same *\*cred_handle* returned by the previous call.  Repeat until
+  **GSS_S_COMPLETE** is returned.
+
+* **Completion**: *\*cred_handle* is a fully finalized impersonation
+  credential, and *output_token* and *target_realm* are empty.
+
+* **On error**: *\*cred_handle* is released and set to
+  **GSS_C_NO_CREDENTIAL** automatically.
+
+The tokens exchanged are raw Kerberos TGS messages, **not** GSSAPI tokens.
+The application is responsible for routing each *output_token* to the KDC
+at *target_realm* and for supplying the exact reply bytes as *input_token*
+on the next call.
+
+Step-based S4U2Proxy with gss_init_sec_context
+'''''''''''''''''''''''''''''''''''''''''''''''
+
+A credential obtained from
+``krb5_gss_acquire_cred_impersonate_name_step()`` can be passed directly to
+gss_init_sec_context_ as the *initiator_cred_handle*, exactly like one from
+``gss_acquire_cred_impersonate_name()``.  When the credential was acquired
+via the step-based path, gss_init_sec_context_ also performs the subsequent
+S4U2Proxy exchange in step-based mode: each **GSS_S_CONTINUE_NEEDED** return
+during the proxy phase carries a raw TGS-REQ in *output_token*, and the
+following MIT krb5 extension distinguishes such returns from ordinary mutual
+authentication rounds::
+
+    OM_uint32 krb5_gss_get_proxy_realm(OM_uint32 *minor_status,
+                                        gss_ctx_id_t context_handle,
+                                        gss_buffer_t realm_buf);
+
+Call this function with the in-progress *context_handle* whenever
+gss_init_sec_context_ returns **GSS_S_CONTINUE_NEEDED**:
+
+* **GSS_S_COMPLETE**: an S4U2Proxy step is in progress.  *realm_buf* is
+  set to a NUL-terminated realm string identifying the KDC to receive the
+  TGS-REQ in *output_token*.  Forward *output_token* to that KDC and pass
+  the raw reply as *input_token* on the next call to gss_init_sec_context_.
+  The caller must release *realm_buf* with ``gss_release_buffer()``.
+
+* **GSS_S_UNAVAILABLE**: no step-based S4U2Proxy is active.  The context
+  was established with **GSS_C_MUTUAL_FLAG** and the continuation is a
+  normal mutual-authentication round with the acceptor.
+
+When gss_init_sec_context_ returns **GSS_S_COMPLETE**, the S4U2Proxy
+exchange is finished and *output_token* is the AP-REQ for the target
+service.
+
+The following sketch illustrates the two-phase exchange::
+
+    /* Phase 1: step-based S4U2Self */
+    gss_cred_id_t step_cred = GSS_C_NO_CREDENTIAL;
+    gss_buffer_desc output = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc realm  = GSS_C_EMPTY_BUFFER;
+    OM_uint32 major, minor, time_rec;
+
+    major = krb5_gss_acquire_cred_impersonate_name_step(
+        &minor, imp_cred, user_name, GSS_C_INDEFINITE,
+        GSS_C_NO_OID_SET, GSS_C_INITIATE,
+        GSS_C_NO_BUFFER, &step_cred,
+        &output, &realm, NULL, &time_rec);
+
+    while (major == GSS_S_CONTINUE_NEEDED) {
+        gss_buffer_desc reply = GSS_C_EMPTY_BUFFER;
+
+        send_to_kdc(&realm, &output, &reply); /* application-supplied */
+        gss_release_buffer(&minor, &output);
+        gss_release_buffer(&minor, &realm);
+
+        major = krb5_gss_acquire_cred_impersonate_name_step(
+            &minor, imp_cred, user_name, GSS_C_INDEFINITE,
+            GSS_C_NO_OID_SET, GSS_C_INITIATE,
+            &reply, &step_cred,
+            &output, &realm, NULL, &time_rec);
+        free_kdc_reply(&reply);           /* application-supplied */
+    }
+    if (GSS_ERROR(major))
+        handle_error(major, minor);
+
+    /* Phase 2: step-based S4U2Proxy inside gss_init_sec_context */
+    gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
+
+    major = gss_init_sec_context(
+        &minor, step_cred, &ctx, target_name, &mech_krb5,
+        GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG, 0,
+        GSS_C_NO_CHANNEL_BINDINGS, GSS_C_NO_BUFFER,
+        NULL, &output, NULL, NULL);
+
+    while (major == GSS_S_CONTINUE_NEEDED) {
+        gss_buffer_desc proxy_realm = GSS_C_EMPTY_BUFFER;
+        OM_uint32 pr = krb5_gss_get_proxy_realm(&minor, ctx, &proxy_realm);
+
+        if (pr == GSS_S_COMPLETE) {
+            /* output is a TGS-REQ: route it to the KDC */
+            gss_buffer_desc reply = GSS_C_EMPTY_BUFFER;
+            send_to_kdc(&proxy_realm, &output, &reply);
+            gss_release_buffer(&minor, &output);
+            gss_release_buffer(&minor, &proxy_realm);
+
+            major = gss_init_sec_context(
+                &minor, step_cred, &ctx, target_name, &mech_krb5,
+                GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG, 0,
+                GSS_C_NO_CHANNEL_BINDINGS, &reply,
+                NULL, &output, NULL, NULL);
+            free_kdc_reply(&reply);
+        } else {
+            /* GSS_S_UNAVAILABLE: mutual-auth round with the acceptor */
+            gss_release_buffer(&minor, &proxy_realm);
+            /* ... forward output to acceptor, put acceptor reply in input ... */
+        }
+    }
+    /* output is now the AP-REQ for target_name */
+
+
 Channel binding behavior and GSS_C_CHANNEL_BOUND_FLAG
 -----------------------------------------------------
 
