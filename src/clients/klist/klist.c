@@ -54,6 +54,7 @@ int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
 int show_adtype = 0, show_all = 0, list_all = 0, use_client_keytab = 0;
 int show_config = 0;
 char *progname;
+char *authind_keytab = NULL;
 krb5_timestamp now;
 unsigned int timestamp_width;
 
@@ -82,7 +83,8 @@ static void
 usage(void)
 {
     fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] "
-                      "[-a [-n]]] [-k [-i] [-t] [-K]] [-C] [name]\n"),
+                      "[-a [-n]] [-I keytab]] [-k [-i] [-t] [-K]] [-C] "
+                      "[name]\n"),
             progname);
     fprintf(stderr, _("\t-c specifies credentials cache\n"));
     fprintf(stderr, _("\t-k specifies keytab\n"));
@@ -100,6 +102,8 @@ usage(void)
                       "existence\n"));
     fprintf(stderr, _("\t\t-a displays the address list\n"));
     fprintf(stderr, _("\t\t\t-n do not reverse-resolve\n"));
+    fprintf(stderr, _("\t\t-I keytab decrypts tickets using keytab and "
+                      "shows authentication indicators\n"));
     fprintf(stderr, _("\toptions for keytabs:\n"));
     fprintf(stderr, _("\t\t-t shows keytab entry timestamps\n"));
     fprintf(stderr, _("\t\t-K shows keytab entry keys\n"));
@@ -134,7 +138,7 @@ main(int argc, char *argv[])
     name = NULL;
     mode = DEFAULT;
     /* V = version so v can be used for verbose later if desired. */
-    while ((c = getopt(argc, argv, "dfetKsnacki45lAVC")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnacki45lAVCI:")) != -1) {
         switch (c) {
         case 'd':
             show_adtype = 1;
@@ -188,6 +192,9 @@ main(int argc, char *argv[])
         case 'C':
             show_config = 1;
             break;
+        case 'I':
+            authind_keytab = optarg;
+            break;
         case 'V':
             print_version = 1;
             break;
@@ -207,7 +214,7 @@ main(int argc, char *argv[])
             usage();
     } else {
         if (show_flags || status_only || show_addresses ||
-            show_all || list_all)
+            show_all || list_all || authind_keytab != NULL)
             usage();
     }
 
@@ -675,6 +682,107 @@ print_config_data(int col, krb5_data *data)
         putchar('\n');
 }
 
+/*
+ * Decrypt cred's service ticket using authind_keytab, then extract and
+ * display authentication indicators from any CAMMAC authorization data.
+ * Failures are silently ignored (key not in keytab, no indicators, etc.).
+ */
+/*
+ * Decrypt tkt using authind_keytab, then extract and display any
+ * authentication indicators embedded in CAMMAC authorization data.
+ * Failures are silently ignored (key not in keytab, no indicators, etc.).
+ */
+static void
+show_auth_indicators(krb5_ticket *tkt)
+{
+    krb5_error_code ret;
+    krb5_keytab kt = NULL;
+    krb5_keytab_entry entry;
+    krb5_authdata **authdata, **inner, **cammac_contents;
+    krb5_data **indicators;
+    int i, j, k;
+
+    memset(&entry, 0, sizeof(entry));
+    inner = NULL;
+    cammac_contents = NULL;
+    indicators = NULL;
+
+    ret = krb5_kt_resolve(context, authind_keytab, &kt);
+    if (ret) {
+        com_err(progname, ret, _("while resolving keytab %s"), authind_keytab);
+        return;
+    }
+
+    ret = krb5_kt_get_entry(context, kt, tkt->server,
+                            tkt->enc_part.kvno, tkt->enc_part.enctype, &entry);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_decrypt_tkt_part(context, &entry.key, tkt);
+    if (ret)
+        goto cleanup;
+
+    if (tkt->enc_part2 == NULL || tkt->enc_part2->authorization_data == NULL)
+        goto cleanup;
+
+    authdata = tkt->enc_part2->authorization_data;
+    for (i = 0; authdata[i] != NULL; i++) {
+        if (authdata[i]->ad_type != KRB5_AUTHDATA_IF_RELEVANT)
+            continue;
+
+        ret = krb5_decode_authdata_container(context, KRB5_AUTHDATA_IF_RELEVANT,
+                                             authdata[i], &inner);
+        if (ret)
+            continue;
+
+        for (j = 0; inner[j] != NULL; j++) {
+            if (inner[j]->ad_type != KRB5_AUTHDATA_CAMMAC)
+                continue;
+
+            /*
+             * The CAMMAC service verifier is computed with the service's
+             * long-term key (the same key used to encrypt the ticket).
+             */
+            ret = k5_unwrap_cammac_svc(context, inner[j], &entry.key,
+                                       &cammac_contents);
+            if (ret) {
+                cammac_contents = NULL;
+                continue;
+            }
+
+            for (k = 0; cammac_contents[k] != NULL; k++) {
+                if (cammac_contents[k]->ad_type != KRB5_AUTHDATA_AUTH_INDICATOR)
+                    continue;
+                (void)k5_authind_decode(cammac_contents[k], &indicators);
+            }
+
+            krb5_free_authdata(context, cammac_contents);
+            cammac_contents = NULL;
+        }
+
+        krb5_free_authdata(context, inner);
+        inner = NULL;
+    }
+
+    if (indicators != NULL) {
+        printf(_("\tAuthentication indicators: "));
+        for (i = 0; indicators[i] != NULL; i++) {
+            if (i)
+                printf(", ");
+            printf("%.*s", (int)indicators[i]->length, indicators[i]->data);
+        }
+        printf("\n");
+    }
+
+cleanup:
+    krb5_free_authdata(context, inner);
+    krb5_free_authdata(context, cammac_contents);
+    k5_free_data_ptr_list(indicators);
+    krb5_free_keytab_entry_contents(context, &entry);
+    if (kt != NULL)
+        krb5_kt_close(context, kt);
+}
+
 static void
 show_credential(krb5_creds *cred, const char *defname)
 {
@@ -815,6 +923,9 @@ show_credential(krb5_creds *cred, const char *defname)
         printf(_("\tTicket server: %s\n"), tktsname);
         krb5_free_unparsed_name(context, tktsname);
     }
+
+    if (authind_keytab != NULL && !is_config && tkt != NULL)
+        show_auth_indicators(tkt);
 
 cleanup:
     krb5_free_unparsed_name(context, name);
