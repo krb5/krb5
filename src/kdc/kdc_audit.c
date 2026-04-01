@@ -95,7 +95,7 @@ load_audit_modules(krb5_context context)
         hdl = k5alloc(sizeof(*hdl), &ret);
         if (hdl == NULL)
             goto cleanup;
-        ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&hdl->vt);
+        ret = (*mod)(context, 1, 2, (krb5_plugin_vtable)&hdl->vt);
         if (ret) {
             free(hdl);
             hdl = NULL;
