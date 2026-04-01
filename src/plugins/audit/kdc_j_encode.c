@@ -63,6 +63,9 @@ rep_to_value(krb5_kdc_rep *rep, const krb5_boolean ev_success,
              k5_json_object obj);
 static krb5_error_code
 tkt_to_value(krb5_ticket *tkt, k5_json_object obj, const char *key);
+static krb5_error_code
+indicators_to_value(krb5_data **indicators, k5_json_object obj,
+                    const char *key);
 static char *map_patype(krb5_preauthtype pa_type);
 
 #define NULL_STATE "state is NULL"
@@ -171,6 +174,10 @@ kau_j_as_req(const krb5_boolean ev_success, krb5_audit_state *state,
     /* Reply/ticket info. */
     ret = rep_to_value(state->reply, ev_success, obj);
     if (ret == ENOMEM)
+        goto error;
+    /* Authentication indicators on the issued ticket. */
+    ret = indicators_to_value(state->auth_indicators, obj, AU_AUTH_INDICATORS);
+    if (ret)
         goto error;
     ret = k5_json_encode(obj, jout);
 
@@ -894,6 +901,41 @@ tkt_to_value(krb5_ticket *tkt, k5_json_object obj,
 
 error:
     k5_json_release(tmp);
+    return ret;
+}
+
+/* Convert an array of auth indicator strings into a JSON array property of
+ * obj.  Do not add a property if no indicators are present. */
+static krb5_error_code
+indicators_to_value(krb5_data **indicators, k5_json_object obj,
+                    const char *key)
+{
+    krb5_error_code ret;
+    k5_json_array arr = NULL;
+    k5_json_string str;
+    krb5_data **ind;
+
+    if (indicators == NULL || *indicators == NULL)
+        return 0;
+
+    ret = k5_json_array_create(&arr);
+    if (ret)
+        return ENOMEM;
+
+    for (ind = indicators; *ind != NULL; ind++) {
+        ret = k5_json_string_create_len((*ind)->data, (*ind)->length, &str);
+        if (ret)
+            goto cleanup;
+        ret = k5_json_array_add(arr, str);
+        k5_json_release(str);
+        if (ret)
+            goto cleanup;
+    }
+
+    ret = k5_json_object_set(obj, key, arr);
+
+cleanup:
+    k5_json_release(arr);
     return ret;
 }
 

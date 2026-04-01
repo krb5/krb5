@@ -80,6 +80,7 @@
 #define AU_AUTHTIME           "authtime"
 #define AU_TR_CONTENTS        "tr_contents"
 #define AU_CADDRS             "caddrs"
+#define AU_AUTH_INDICATORS    "auth_indicators"
 /* S4U and U2U */
 #define AU_VIOLATION       "violation"   /* policy or protocol restrictions */
 #define AU_REQ_S4U2S_USER  "s4u2self_user"

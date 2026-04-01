@@ -342,6 +342,7 @@ egress:
 
     au_state->status = state->status;
     au_state->reply = &state->reply;
+    au_state->auth_indicators = state->auth_indicators;
     kau_as_req(context, (errcode || state->preauth_err) ? FALSE : TRUE,
                au_state);
     kau_free_kdc_req(au_state);
