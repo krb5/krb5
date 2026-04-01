@@ -126,9 +126,11 @@ get_plugin_vtables(krb5_context context,
     *vtables_out = NULL;
     *n_tables_out = *n_systems_out = 0;
 
-    /* Auto-register encrypted challenge and (if possible) pkinit. */
+    /* Auto-register built-in modules. */
+#ifndef DISABLE_PKINIT
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "pkinit",
                            "preauth");
+#endif
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "otp",
                            "preauth");
     k5_plugin_register_dyn(context, PLUGIN_INTERFACE_KDCPREAUTH, "spake",
