@@ -2432,4 +2432,9 @@ k5_print_addr(const struct sockaddr *sa, char *buf, size_t len);
 void
 k5_print_addr_port(const struct sockaddr *sa, char *buf, size_t len);
 
+/* Check if Automated PKINIT is allowed for the realm */
+krb5_boolean
+k5_fast_is_pkinit_allowed(krb5_context context, krb5_data *realm);
+
+
 #endif /* _KRB5_INT_H */
