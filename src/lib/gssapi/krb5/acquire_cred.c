@@ -613,7 +613,7 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
 {
     krb5_error_code code;
     krb5_get_init_creds_opt *opt = NULL;
-    krb5_creds creds;
+    krb5_creds creds = { 0 };
 
     code = krb5_get_init_creds_opt_alloc(context, &opt);
     if (code)
@@ -648,8 +648,8 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
     cred->name->princ = creds.client;
     creds.client = NULL;
 
-    krb5_free_cred_contents(context, &creds);
 cleanup:
+    krb5_free_cred_contents(context, &creds);
     krb5_get_init_creds_opt_free(context, opt);
     return code;
 }
