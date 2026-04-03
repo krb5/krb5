@@ -67,7 +67,7 @@ k5_sp800_108_counter_hmac(const struct krb5_hash_provider *hash,
 
     ret = krb5int_hmac(hash, key, iov, 5, &prf);
     if (!ret)
-        memcpy(rnd_out->data, prf.data, rnd_out->length);
+        k5memcpy(rnd_out->data, prf.data, rnd_out->length);
     zapfree(prf.data, prf.length);
     return ret;
 }

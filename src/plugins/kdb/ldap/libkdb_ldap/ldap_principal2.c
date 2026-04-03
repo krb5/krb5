@@ -637,7 +637,7 @@ tl_data2berval (krb5_tl_data *in, struct berval **out)
     }
 
     STORE16_INT((*out)->bv_val, in->tl_data_type);
-    memcpy ((*out)->bv_val + 2, in->tl_data_contents, in->tl_data_length);
+    k5memcpy((*out)->bv_val + 2, in->tl_data_contents, in->tl_data_length);
 
     return 0;
 }

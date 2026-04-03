@@ -73,7 +73,7 @@ krb5_dbe_update_tl_data(krb5_context context, krb5_db_entry *entry,
     tl_data->tl_data_type = new_tl_data->tl_data_type;
     tl_data->tl_data_length = new_tl_data->tl_data_length;
     tl_data->tl_data_contents = tmp;
-    memcpy(tmp, new_tl_data->tl_data_contents, tl_data->tl_data_length);
+    k5memcpy(tmp, new_tl_data->tl_data_contents, tl_data->tl_data_length);
 
     return(0);
 }

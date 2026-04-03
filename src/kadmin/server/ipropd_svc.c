@@ -122,7 +122,8 @@ buf_to_string(gss_buffer_desc *b)
     char *s = malloc(b->length+1);
 
     if (s) {
-	memcpy(s, b->value, b->length);
+	if (b->length > 0)
+	    memcpy(s, b->value, b->length);
 	s[b->length] = 0;
     }
     (void) gss_release_buffer(&min_stat, b);

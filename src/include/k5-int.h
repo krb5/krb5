@@ -2313,6 +2313,22 @@ k5memdup0(const void *in, size_t len, krb5_error_code *code)
     return ptr;
 }
 
+/* memcpy if len > 0, to avoid passing null pointers (which is undefined). */
+static inline void
+k5memcpy(void *dest, const void *src, size_t len)
+{
+    if (len > 0)
+        memcpy(dest, src, len);
+}
+
+/* memmove if len > 0, to avoid passing null pointers (which is undefined). */
+static inline void
+k5memmove(void *dest, const void *src, size_t len)
+{
+    if (len > 0)
+        memmove(dest, src, len);
+}
+
 /* Convert a krb5_timestamp to a time_t value, treating the negative range of
  * krb5_timestamp as times between 2038 and 2106 (if time_t is 64-bit). */
 static inline time_t

@@ -85,7 +85,7 @@ main(int argc, char **argv)
         otrans.data = (char *) malloc(otrans.length);
     else
         otrans.data = 0;
-    memcpy(otrans.data,argv[1], otrans.length);
+    k5memcpy(otrans.data,argv[1], otrans.length);
 
     tgs = make_princ(ctx, argv[2], argv[0]);
     cl  = make_princ(ctx, argv[3], argv[0]);

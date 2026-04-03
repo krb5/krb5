@@ -129,7 +129,8 @@ xdrmem_getbytes(XDR *xdrs, caddr_t addr, u_int len)
 		return (FALSE);
 	else
 		xdrs->x_handy -= len;
-	memmove(addr, xdrs->x_private, len);
+	if (len > 0)
+		memmove(addr, xdrs->x_private, len);
 	xdrs->x_private = (char *)xdrs->x_private + len;
 	return (TRUE);
 }
@@ -142,7 +143,8 @@ xdrmem_putbytes(XDR *xdrs, caddr_t addr, u_int len)
 		return (FALSE);
 	else
 		xdrs->x_handy -= len;
-	memmove(xdrs->x_private, addr, len);
+	if (len > 0)
+		memmove(xdrs->x_private, addr, len);
 	xdrs->x_private = (char *)xdrs->x_private + len;
 	return (TRUE);
 }

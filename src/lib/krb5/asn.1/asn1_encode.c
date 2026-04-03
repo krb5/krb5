@@ -49,8 +49,8 @@ insert_byte(asn1buf *buf, uint8_t o)
 static inline void
 insert_bytes(asn1buf *buf, const void *bytes, size_t len)
 {
-    if (buf->ptr != NULL && len > 0) {
-        memcpy(buf->ptr - len, bytes, len);
+    if (buf->ptr != NULL) {
+        k5memcpy(buf->ptr - len, bytes, len);
         buf->ptr -= len;
     }
     buf->count += len;
