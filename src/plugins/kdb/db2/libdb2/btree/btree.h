@@ -196,9 +196,11 @@ typedef struct _bleaf {
 	p += sizeof(u_int32_t);						\
 	*(u_char *)p = flags;						\
 	p += sizeof(u_char);						\
-	memmove(p, key->data, key->size);				\
+	if (key->size > 0)						\
+	    memmove(p, key->data, key->size);				\
 	p += key->size;							\
-	memmove(p, data->data, data->size);				\
+	if (data->size > 0)						\
+	    memmove(p, data->data, data->size);				\
 }
 
 /* For the recno leaf pages, the item is a data entry. */

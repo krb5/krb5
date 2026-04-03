@@ -111,7 +111,7 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
     if (t.data == NULL)
         goto cleanup;
 
-    memcpy(ns.data + 4, prf_in->value, prf_in->length);
+    k5memcpy(ns.data + 4, prf_in->value, prf_in->length);
     i = 0;
     p = (unsigned char *)prf_out->value;
     while (desired_output_len > 0) {

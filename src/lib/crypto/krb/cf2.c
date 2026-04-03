@@ -61,7 +61,7 @@ krb5_c_prfplus(krb5_context context, const krb5_keyblock *k,
 
     /* Concatenate PRF(k, 1||input) || PRF(k, 2||input) || ... to produce the
      * desired number of bytes. */
-    memcpy(&prf_in.data[1], input->data, input->length);
+    k5memcpy(&prf_in.data[1], input->data, input->length);
     for (i = 0; i < nblocks; i++) {
         prf_in.data[0] = i + 1;
         ret = krb5_c_prf(context, k, &prf_in, &prf_out);
