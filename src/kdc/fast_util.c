@@ -453,7 +453,7 @@ make_padata(krb5_preauthtype pa_type, const void *contents, size_t len,
 {
     if (k5_alloc_pa_data(pa_type, len, out) != 0)
         return ENOMEM;
-    memcpy((*out)->contents, contents, len);
+    k5memcpy((*out)->contents, contents, len);
     return 0;
 }
 

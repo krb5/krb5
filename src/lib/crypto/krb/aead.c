@@ -179,7 +179,8 @@ k5_iov_cursor_get(struct iov_cursor *cursor, unsigned char *block)
         if (nbytes > remain)
             nbytes = remain;
 
-        memcpy(block + bsz - remain, iov->data.data + cursor->in_pos, nbytes);
+        k5memcpy(block + bsz - remain, iov->data.data + cursor->in_pos,
+                 nbytes);
         cursor->in_pos += nbytes;
         remain -= nbytes;
 
@@ -211,7 +212,8 @@ k5_iov_cursor_put(struct iov_cursor *cursor, unsigned char *block)
         if (nbytes > remain)
             nbytes = remain;
 
-        memcpy(iov->data.data + cursor->out_pos, block + bsz - remain, nbytes);
+        k5memcpy(iov->data.data + cursor->out_pos, block + bsz - remain,
+                 nbytes);
         cursor->out_pos += nbytes;
         remain -= nbytes;
 

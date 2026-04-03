@@ -67,7 +67,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_ser_pack_bytes(krb5_octet *ostring, size_t osize, krb5_octet **bufp, size_t *remainp)
 {
     if (*remainp >= osize) {
-        memcpy(*bufp, ostring, osize);
+        k5memcpy(*bufp, ostring, osize);
         *bufp += osize;
         *remainp -= osize;
         return(0);

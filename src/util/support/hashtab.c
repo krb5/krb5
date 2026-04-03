@@ -94,7 +94,8 @@ siphash24(const uint8_t *data, size_t len, uint64_t k0, uint64_t k1)
     }
 
     /* Process the last 0-7 bytes followed by the length mod 256. */
-    memcpy(last, end, len % 8);
+    if (len % 8 > 0)
+        memcpy(last, end, len % 8);
     last[7] = len & 0xFF;
     mi = load_64_le(last);
     v3 ^= mi;
