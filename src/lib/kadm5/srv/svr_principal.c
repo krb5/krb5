@@ -124,12 +124,12 @@ get_policy(kadm5_server_handle_t handle, const char *name,
  * key/salts outside the policy.  We re-order the requested ks tuples
  * (which may be a subset of the policy) to reflect the policy order.
  */
-static kadm5_ret_t
+static krb5_error_code
 apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
                      int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
                      int *new_n_kstp, krb5_key_salt_tuple **new_kstp)
 {
-    kadm5_ret_t ret;
+    krb5_error_code ret;
     kadm5_policy_ent_rec polent;
     krb5_boolean have_polent;
     int ak_n_ks_tuple = 0;
@@ -157,12 +157,10 @@ apply_keysalt_policy(kadm5_server_handle_t handle, const char *policy,
             ks_tuple = handle->params.keysalts;
         }
         /* Dup the requested or defaulted keysalt tuples. */
-        new_ks_tuple = malloc(n_ks_tuple * sizeof(*new_ks_tuple));
-        if (new_ks_tuple == NULL) {
-            ret = ENOMEM;
+        new_ks_tuple = k5calloc(n_ks_tuple, sizeof(*new_ks_tuple), &ret);
+        if (new_ks_tuple == NULL)
             goto cleanup;
-        }
-        memcpy(new_ks_tuple, ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple));
+        k5memcpy(new_ks_tuple, ks_tuple, n_ks_tuple * sizeof(*new_ks_tuple));
         new_n_ks_tuple = n_ks_tuple;
         ret = 0;
         goto cleanup;

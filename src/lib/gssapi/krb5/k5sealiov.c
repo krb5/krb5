@@ -98,7 +98,8 @@ make_seal_token_v1_iov(krb5_context context,
         /* Initialize padding buffer to pad itself */
         if (padding != NULL) {
             padding->buffer.length = gss_padlen;
-            memset(padding->buffer.value, (int)gss_padlen, gss_padlen);
+            if (gss_padlen > 0)
+                memset(padding->buffer.value, (int)gss_padlen, gss_padlen);
         }
 
         if (ctx->gss_flags & GSS_C_DCE_STYLE)

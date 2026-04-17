@@ -57,7 +57,8 @@ concat_iov(gss_iov_buffer_desc *iov, size_t iovlen, char **buf_out,
     for (i = 0; i < iovlen; i++) {
         if (GSS_IOV_BUFFER_TYPE(iov[i].type) == GSS_IOV_BUFFER_TYPE_SIGN_ONLY)
             continue;
-        memcpy(buf + len, iov[i].buffer.value, iov[i].buffer.length);
+        if (iov[i].buffer.length > 0)
+            memcpy(buf + len, iov[i].buffer.value, iov[i].buffer.length);
         len += iov[i].buffer.length;
     }
     *buf_out = buf;

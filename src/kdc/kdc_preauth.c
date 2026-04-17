@@ -1386,6 +1386,8 @@ keyblock_equal(const krb5_keyblock *k1, const krb5_keyblock *k2)
         return FALSE;
     if (k1->length != k2->length)
         return FALSE;
+    if (k1->length == 0)
+        return TRUE;
     return memcmp(k1->contents, k2->contents, k1->length) == 0;
 }
 

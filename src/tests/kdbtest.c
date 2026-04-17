@@ -224,7 +224,8 @@ check_entry(krb5_db_entry *ent)
         for (j = 0; j < k1->key_data_ver; j++) {
             CHECK_COND(k1->key_data_type[j] == k2->key_data_type[j]);
             CHECK_COND(k1->key_data_length[j] == k2->key_data_length[j]);
-            CHECK_COND(memcmp(k1->key_data_contents[j],
+            CHECK_COND(k1->key_data_length[j] == 0 ||
+                       memcmp(k1->key_data_contents[j],
                               k2->key_data_contents[j],
                               k1->key_data_length[j]) == 0);
         }
