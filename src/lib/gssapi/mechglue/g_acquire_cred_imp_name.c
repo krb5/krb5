@@ -454,10 +454,12 @@ gss_add_cred_impersonate_name(OM_uint32 *minor_status,
     /*
      * OK, expand the mechanism array and the credential array
      */
-    (void) memcpy(new_mechs_array, union_cred->mechs_array,
-		  sizeof (gss_OID_desc) * union_cred->count);
-    (void) memcpy(new_cred_array, union_cred->cred_array,
-		  sizeof (gss_cred_id_t) * union_cred->count);
+    if (union_cred->count > 0) {
+	memcpy(new_mechs_array, union_cred->mechs_array,
+	       sizeof (gss_OID_desc) * union_cred->count);
+	memcpy(new_cred_array, union_cred->cred_array,
+	       sizeof (gss_cred_id_t) * union_cred->count);
+    }
 
     new_cred_array[union_cred->count] = cred;
     if ((new_mechs_array[union_cred->count].elements =
