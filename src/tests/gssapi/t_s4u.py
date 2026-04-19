@@ -113,6 +113,28 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 # Successful S4U2Self -> S4U2Proxy.
 out = realm.run(['./t_s4u', puser, pservice2])
 
+# Verify that time_req bounds all credentials in the delegated ccache,
+# including the impersonator TGT copied by make_proxy_cred().
+mark('S4U2Self time_req bounds impersonator TGT in delegated ccache')
+realm.run(['./t_s4u', '--time-req', '600', puser, pservice2])
+
+# Step-based S4U2Self via krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Self (krb5_gss_acquire_cred_impersonate_name_step)')
+out = realm.run(['./t_imp_step', puser])
+if 'impersonated: ' + realm.user_princ not in out:
+    fail('t_imp_step basic')
+realm.run(['./t_imp_step', '--bad-input', puser],
+          expected_msg='bad-input: correctly returned error')
+realm.run(['./t_imp_step', '--abandon', puser],
+          expected_msg='abandon: ok (no crash)')
+
+# Step-based S4U2Proxy via gss_init_sec_context with a use_step_proxy
+# credential obtained from krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Proxy (gss_init_sec_context with use_step_proxy cred)')
+out = realm.run(['./t_proxy_step', puser, pservice2])
+if 'proxy-auth: ' + realm.user_princ not in out:
+    fail('t_proxy_step basic')
+
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
 realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,

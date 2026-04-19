@@ -181,6 +181,7 @@ typedef struct _krb5_gss_cred_id_rec {
     unsigned int iakerb_mech : 1;
     unsigned int destroy_ccache : 1;
     unsigned int suppress_ci_flags : 1;
+    unsigned int use_step_proxy : 1;  /* cred from step API; wants async S4U2Proxy */
 
     /* keytab (accept) data */
     krb5_keytab keytab;
@@ -194,7 +195,42 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_timestamp refresh_time;
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
+
+    /* deferred S4U2Self: set by iakerb_gss_acquire_cred_impersonate_name,
+     * consumed by IAKERB_S4U2SELF_TGS_REQ state in iakerb_initiator_step. */
+    krb5_principal s4u_user;  /* user to impersonate; NULL if cert-only */
+    krb5_data s4u_cert;       /* optional subject certificate */
+
+    /* Step-based S4U2Self: set by krb5_gss_acquire_cred_impersonate_name_step,
+     * non-NULL while the exchange is in progress. */
+    struct _kg_imp_step_ctx *imp_step_ctx;
+
+    /* Step-based S4U2Proxy: saved before kg_finalize_impersonation() is called
+     * so gss_init_sec_context() can drive the S4U2Proxy exchange asynchronously.
+     * Non-NULL only when use_step_proxy is set. */
+    krb5_data s4u_evidence;       /* DER-encoded S4U2Self evidence ticket */
+    krb5_ccache s4u_tgt_ccache;   /* MEMORY ccache holding the service TGT */
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
+
+/*
+ * In-progress state for krb5_gss_acquire_cred_impersonate_name_step().
+ * Owned by the in-progress credential; freed by kg_release_imp_step_ctx().
+ */
+typedef struct _kg_imp_step_ctx {
+    krb5_context context;        /* private krb5 context for the step sequence */
+    krb5_tkt_creds_context tcc;  /* in-progress S4U2Self TGS step context */
+} *kg_imp_step_ctx_t;
+
+/*
+ * In-progress state for a step-based S4U2Proxy TGS exchange.  Used by both
+ * IAKERB (stored in iakerb_ctx_id_rec) and the non-IAKERB gss_init_sec_context
+ * path (stored in krb5_gss_ctx_id_rec as proxy_step_ctx).
+ * Freed by kg_release_s4u2proxy_step_ctx().
+ */
+typedef struct _kg_s4u2proxy_step_ctx {
+    krb5_tkt_creds_context proxy_tcc;  /* S4U2Proxy TGS step context */
+    krb5_data realm;                    /* current target realm for KDC routing */
+} *kg_s4u2proxy_step_ctx_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {
     struct {
@@ -245,6 +281,10 @@ typedef struct _krb5_gss_ctx_id_rec {
     krb5_cksumtype acceptor_subkey_cksumtype;
     int cred_rcache;             /* did we get rcache from creds? */
     krb5_authdata **authdata;
+    /* Step-based S4U2Proxy: non-NULL while the S4U2Proxy exchange is in
+     * progress; the caller drives each round-trip and passes the KDC reply
+     * as input_token to the next gss_init_sec_context() call. */
+    kg_s4u2proxy_step_ctx_t proxy_step_ctx;
 } krb5_gss_ctx_id_rec, *krb5_gss_ctx_id_t;
 
 #ifndef LEAN_CLIENT
@@ -925,6 +965,17 @@ OM_uint32 KRB5_CALLCONV krb5_gss_acquire_cred_impersonate_name(
     gss_OID_set *,          /* actual_mechs */
     OM_uint32 *);           /* time_rec */
 
+OM_uint32 KRB5_CALLCONV iakerb_gss_acquire_cred_impersonate_name(
+    OM_uint32 *,            /* minor_status */
+    const gss_cred_id_t,    /* impersonator_cred_handle */
+    const gss_name_t,       /* desired_name */
+    OM_uint32,              /* time_req */
+    const gss_OID_set,      /* desired_mechs */
+    gss_cred_usage_t,       /* cred_usage */
+    gss_cred_id_t *,        /* output_cred_handle */
+    gss_OID_set *,          /* actual_mechs */
+    OM_uint32 *);           /* time_rec */
+
 OM_uint32
 krb5_gss_validate_cred_1(OM_uint32 * /* minor_status */,
                          gss_cred_id_t /* cred_handle */,
@@ -1047,6 +1098,35 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t *output_cred,
                       OM_uint32 *time_rec,
                       krb5_context context);
+
+/*
+ * Finalize an impersonation credential in-place with ticket_creds.
+ * Used by both iakerb.c (IAKERB state machine) and s4u_gss_glue.c
+ * (step-based API).  Caller retains ownership of ticket_creds.
+ */
+krb5_error_code
+kg_finalize_impersonation(krb5_context context, krb5_gss_cred_id_t cred,
+                          krb5_creds *ticket_creds);
+
+/* Free a kg_imp_step_ctx and all resources it owns. */
+void
+kg_release_imp_step_ctx(kg_imp_step_ctx_t sctx);
+
+/* Free a kg_s4u2proxy_step_ctx and all resources it owns. */
+void
+kg_release_s4u2proxy_step_ctx(krb5_context context, kg_s4u2proxy_step_ctx_t sctx);
+
+/* Initialise a step-based S4U2Proxy exchange. */
+krb5_error_code
+kg_s4u2proxy_step_init(krb5_context context, krb5_ccache tgt_ccache,
+                       krb5_principal client_princ, krb5_principal server_princ,
+                       const krb5_data *evidence, OM_uint32 time_req,
+                       kg_s4u2proxy_step_ctx_t *out_sctx);
+
+/* Drive one step of a step-based S4U2Proxy exchange. */
+krb5_error_code
+kg_s4u2proxy_step(krb5_context context, kg_s4u2proxy_step_ctx_t sctx,
+                  krb5_data *in, krb5_data *out, unsigned int *flags);
 
 /*
  * These take unglued krb5-mech-specific contexts.
