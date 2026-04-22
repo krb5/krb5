@@ -127,6 +127,31 @@ iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
 }
 
 /*
+ * If enc_err is a KDC_ERR_PREAUTH_REQUIRED error, copy the server realm into
+ * *realm_out.  Leave *realm_out as empty_data() for any other error or if the
+ * server principal carries no realm.
+ */
+static krb5_error_code
+iakerb_preauth_error_realm(krb5_context context, const krb5_data *enc_err,
+                            krb5_data *realm_out)
+{
+    krb5_error_code ret;
+    krb5_error *error;
+
+    *realm_out = empty_data();
+    ret = krb5_rd_error(context, enc_err, &error);
+    if (ret)
+        return ret;
+
+    if (error->error == KDC_ERR_PREAUTH_REQUIRED &&
+        error->server != NULL && error->server->realm.length > 0)
+        ret = krb5int_copy_data_contents(context, &error->server->realm,
+                                         realm_out);
+    krb5_free_error(context, error);
+    return ret;
+}
+
+/*
  * Create a IAKERB-FINISHED structure containing a checksum of
  * the entire IAKERB exchange.
  */
@@ -773,6 +798,28 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         }
         /* Done with armor check (or acquisition); fall through to AS request. */
     case IAKERB_AS_REQ:
+        /*
+         * If the KDC returned PREAUTH_REQUIRED with a realm that differs from
+         * the client principal's current realm, update the principal and
+         * restart the AS exchange so the next AS-REQ uses the correct realm.
+         */
+        if (krb5_is_krb_error(&in)) {
+            krb5_data err_realm = empty_data();
+            code = iakerb_preauth_error_realm(ctx->k5c, &in, &err_realm);
+            if (code != 0)
+                goto cleanup;
+            if (err_realm.length > 0 &&
+                !data_eq(err_realm, cred->name->princ->realm)) {
+                krb5_free_data_contents(ctx->k5c, &cred->name->princ->realm);
+                cred->name->princ->realm = err_realm;
+                err_realm = empty_data();
+                krb5_init_creds_free(ctx->k5c, ctx->icc);
+                ctx->icc = NULL;
+                in = empty_data();
+            }
+            krb5_free_data_contents(ctx->k5c, &err_realm);
+        }
+
         if (ctx->icc == NULL) {
             code = iakerb_init_creds_ctx(ctx, cred, time_req);
             if (code != 0)
