@@ -99,16 +99,32 @@ iakerb_mk_error(krb5_context context, gss_cred_id_t verifier_cred,
     return krb5_mk_error(context, &error, enc_err);
 }
 
-/* Decode a KRB-ERROR message and return the associated com_err code. */
+/*
+ * Decode a KRB-ERROR message and return the associated com_err code.
+ * On success, set *realm_out to a copy of the error's server realm (empty if
+ * no server principal was present); the caller must free it.
+ */
 static krb5_error_code
-iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
+iakerb_rd_error(krb5_context context, const krb5_data *enc_err,
+                krb5_data *realm_out)
 {
     krb5_error_code ret;
     krb5_error *error;
 
+    *realm_out = empty_data();
+
     ret = krb5_rd_error(context, enc_err, &error);
     if (ret)
         return ret;
+
+    if (error->server != NULL) {
+        ret = krb5int_copy_data_contents(context, &error->server->realm,
+                                         realm_out);
+        if (ret) {
+            krb5_free_error(context, error);
+            return ret;
+        }
+    }
 
     if (error->error > 0 && error->error <= KRB_ERR_MAX)
         ret = error->error + ERROR_TABLE_BASE_krb5;
@@ -578,6 +594,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     krb5_error_code code = 0;
     krb5_data in = empty_data(), out = empty_data();
     krb5_data realm = empty_data(), server_realm = empty_data();
+    krb5_data err_realm = empty_data();
     krb5_data *cookie = NULL;
     OM_uint32 tmp;
     unsigned int flags = 0;
@@ -599,7 +616,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             goto cleanup;
 
         if (krb5_is_krb_error(&in)) {
-            code = iakerb_rd_error(ctx->k5c, &in);
+            code = iakerb_rd_error(ctx->k5c, &in, &err_realm);
             if (code == KRB5KRB_AP_ERR_IAKERB_KDC_NOT_FOUND &&
                 ctx->state == IAKERB_REALM_DISCOVERY) {
                 save_error_string(code, _("The IAKERB proxy could not "
@@ -691,6 +708,14 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
     if (out.length != 0) {
         assert(ctx->state != IAKERB_AP_REQ);
+        /* Use the realm from the KRB-ERROR server principal for routing if
+         * available; it may differ from the requested realm (e.g. when the
+         * proxy's KDC is in a different realm than the client). */
+        if (err_realm.length != 0) {
+            krb5_free_data_contents(ctx->k5c, &realm);
+            realm = err_realm;
+            err_realm = empty_data();
+        }
         code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
     }
 
@@ -700,6 +725,7 @@ cleanup:
     krb5_free_data(ctx->k5c, cookie);
     krb5_free_data_contents(ctx->k5c, &out);
     krb5_free_data_contents(ctx->k5c, &server_realm);
+    krb5_free_data_contents(ctx->k5c, &err_realm);
     krb5_free_data_contents(ctx->k5c, &realm);
 
     return code;
