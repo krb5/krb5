@@ -44,6 +44,20 @@ realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'p:' + realm.host_princ], env=wrong_default)
 
+# Test IAKERB with a client alias that the KDC canonicalizes.  The
+# initiator must look up its TGT using the canonical client name from
+# the AS reply.
+realm.run([kadminl, 'alias', 'ualias', realm.user_princ])
+canon_conf = {'libdefaults': {'canonicalize': 'true'}}
+canon = realm.special_env('canon', False, krb5_conf=canon_conf)
+realm.run(['./t_iakerb', 'p:ualias@' + realm.realm, password('user'),
+           'h:host@' + hostname, 'h:host'], env=canon)
+
+# Test again with an enterprise name, which implies canonicalization
+# (as Windows clients do with UPNs), combined with realm discovery.
+realm.run(['./t_iakerb', 'e:ualias', password('user'), 'h:host@' + hostname,
+           'h:host'])
+
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
 

@@ -668,6 +668,20 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                 goto cleanup;
             }
         } else if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
+            krb5_creds creds;
+
+            code = krb5_init_creds_get_creds(ctx->k5c, ctx->icc, &creds);
+            if (code != 0)
+                goto cleanup;
+
+            /* Steal the canonical client principal name from creds and save
+             * it in the credential name, matching the behavior of
+             * get_initial_cred() in acquire_cred.c. */
+            krb5_free_principal(ctx->k5c, cred->name->princ);
+            cred->name->princ = creds.client;
+            creds.client = NULL;
+            krb5_free_cred_contents(ctx->k5c, &creds);
+
             krb5_init_creds_get_times(ctx->k5c, ctx->icc, &times);
             kg_cred_set_initial_refresh(ctx->k5c, cred, &times);
             cred->expire = times.endtime;
