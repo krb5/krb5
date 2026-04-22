@@ -1064,11 +1064,18 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (ctx->gssc == GSS_C_NO_CONTEXT)
             input_token = GSS_C_NO_BUFFER;
 
-        /* IAKERB is finished, or we skipped to Kerberos directly. */
+        /* If IAKERB proxy tokens were exchanged, use the krb5 mech OID so
+         * that the AP-REQ token framing matches what Windows AD and other
+         * implementations expect, and so mutual_auth() can verify the
+         * AP-REP header (servers always respond with the krb5 OID).
+         * If we skipped IAKERB entirely (cached ticket), use the IAKERB
+         * OID so the server's mechglue dispatches to the IAKERB acceptor. */
         major_status = krb5_gss_init_sec_context_ext(minor_status,
                                                      (gss_cred_id_t) kcred,
                                                      &ctx->gssc,
                                                      target_name,
+                                                     ctx->count > 0 ?
+                                                     (gss_OID)gss_mech_krb5 :
                                                      (gss_OID)gss_mech_iakerb,
                                                      req_flags,
                                                      time_req,

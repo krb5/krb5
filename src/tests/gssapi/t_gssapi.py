@@ -19,7 +19,13 @@ wrong_default = realm.special_env('wrong_default', False,
 
 # Test IAKERB with credentials.
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
-           'h:host'])
+           'h:host'], expected_msg='AP-REQ mech: krb5')
+
+# Test IAKERB with a cached service ticket.  The initiator skips the
+# IAKERB exchange and must frame the AP-REQ with the IAKERB OID so the
+# acceptor's mechglue dispatches to the IAKERB mechanism.
+realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
+           'h:host'], expected_msg='AP-REQ mech: iakerb')
 
 # Test IAKERB getting initial credentials.
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
