@@ -220,6 +220,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_ERR_FMT                      "err_fmt"
 #define KRB5_CONF_EXTRA_ADDRESSES              "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                  "forwardable"
+#define KRB5_CONF_FORWARD_LIFETIME             "forward_lifetime"
 #define KRB5_CONF_HOST_BASED_SERVICES          "host_based_services"
 #define KRB5_CONF_HTTP_ANCHORS                 "http_anchors"
 #define KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME     "ignore_acceptor_hostname"
