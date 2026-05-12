@@ -1196,24 +1196,23 @@ mspac_internalize(krb5_context context, krb5_authdata_context actx,
     krb5_error_code ret;
     int32_t ibuf;
     uint8_t *bp;
-    size_t remain;
+    size_t remain, len;
     krb5_pac pac = NULL;
 
     bp = *buffer;
     remain = *lenremain;
 
-    /* length */
-    ret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+    ret = k5_ser_unpack_len(&len, &bp, &remain);
     if (ret)
         return ret;
 
-    if (ibuf != 0) {
-        ret = krb5_pac_parse(context, bp, ibuf, &pac);
+    if (len > 0) {
+        ret = krb5_pac_parse(context, bp, len, &pac);
         if (ret)
             return ret;
 
-        bp += ibuf;
-        remain -= ibuf;
+        bp += len;
+        remain -= len;
     }
 
     /* verified */
