@@ -316,7 +316,7 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
 
-    if (ctx->s4u_user != NULL) {
+    if (ctx->s4u_user != NULL && !IS_TGS_PRINC(ctx->tgs_in_creds->server)) {
         krb5_pa_data *pa0 = NULL, *pa1 = NULL;
 
         /* Free any checksum from a prior round. */
@@ -356,7 +356,8 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
         pacb_data = ctx->s4u_user;
     }
 
-    if (ctx->s4u2proxy_evidence.length > 0) {
+    if (ctx->s4u2proxy_evidence.length > 0 &&
+        !IS_TGS_PRINC(ctx->tgs_in_creds->server)) {
         /* Temporarily install the evidence ticket as second_ticket so
          * k5_make_tgs_req encodes it in additional-tickets.  Restore after. */
         krb5_data saved = ctx->tgs_in_creds->second_ticket;
@@ -458,17 +459,20 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
     krb5_pa_data s4u_marker = { KV5M_PA_DATA, KRB5_PADATA_S4U_X509_USER,
                                  0, NULL };
     krb5_pa_data *s4u_padata[2] = { &s4u_marker, NULL };
+    krb5_boolean is_s4u2self_req =
+        (ctx->s4u_user != NULL &&
+         (ctx->state == STATE_REFERRALS || ctx->state == STATE_NON_REFERRAL));
 
     krb5_free_creds(context, ctx->reply_creds);
     ctx->reply_creds = NULL;
     code = krb5int_process_tgs_reply(context, ctx->fast_state,
                                      reply, ctx->cur_tgt, ctx->kdcopt,
                                      ctx->cur_tgt->addresses,
-                                     ctx->s4u_user != NULL ? s4u_padata : NULL,
+                                     is_s4u2self_req ? s4u_padata : NULL,
                                      ctx->tgs_in_creds, ctx->timestamp,
                                      ctx->nonce, ctx->subkey,
-                                     ctx->s4u_user != NULL ? &out_padata : NULL,
-                                     ctx->s4u_user != NULL ? &out_enc_padata : NULL,
+                                     is_s4u2self_req ? &out_padata : NULL,
+                                     is_s4u2self_req ? &out_enc_padata : NULL,
                                      &ctx->reply_creds);
     if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
         /* Instruct the caller to re-send the request with TCP. */
@@ -479,7 +483,7 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
     }
 
     /* For S4U2Self mode, verify the reply padata and update user_id if needed. */
-    if (ctx->s4u_user != NULL && code == 0 && ctx->reply_creds != NULL) {
+    if (is_s4u2self_req && code == 0 && ctx->reply_creds != NULL) {
         code = verify_s4u2self_reply(context, ctx->subkey, ctx->s4u_user,
                                      out_padata, out_enc_padata,
                                      ctx->s4u_first_req);
