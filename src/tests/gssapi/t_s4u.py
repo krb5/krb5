@@ -219,6 +219,14 @@ msgs = ('Getting credentials user@UREALM -> user@SREALM',
 r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
        expected_trace=msgs)
 
+# Test cross-realm step-based S4U2Self.  The service (user@SREALM) must
+# navigate to the user's realm (UREALM) first, then follow referrals back.
+mark('cross-realm step-based S4U2Self')
+shutil.copyfile(savefile, r1.ccache)
+out = r1.run(['./t_imp_step', 'p:' + r2.user_princ])
+if 'impersonated: ' + r2.user_princ not in out:
+    fail('cross-realm t_imp_step')
+
 # Test realm identification of enterprise principal names ([MS-SFU]
 # 3.1.5.1.1.1).  Attach a bogus realm to the enterprise name to verify
 # that we start at the server realm.

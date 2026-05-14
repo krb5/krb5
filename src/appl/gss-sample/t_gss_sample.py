@@ -142,9 +142,8 @@ for realm in multipass_realms():
     kt_test(realm, ['-iakerb'], ['-iakerb'])
     kt_test(realm, ['-dce'])
 
-# Test IAKerb with auto_fast_armor: exercise the IAKERB_ARMOR_AS_REQ state,
-# where the initiator transparently acquires an Anonymous PKINIT armor ticket
-# through the IAKerb proxy before sending the main password-based AS-REQ.
+# Test IAKerb with auto_fast_armor: acquire Anonymous PKINIT armor through
+# the IAKerb proxy before sending the main password-based AS-REQ.
 if pkinit_enabled:
     mark('IAKerb auto_fast_armor')
 
@@ -153,7 +152,7 @@ if pkinit_enabled:
         'pkinit_eku_checking': 'none'}}}
 
     armor_realm = K5Realm(krb5_conf=armor_krb5_conf, kdc_conf=armor_kdc_conf,
-                          pkinit=True)
+                          pkinit=True, get_creds=False)
     armor_realm.addprinc('WELLKNOWN/ANONYMOUS')
 
     # IAKerb realm discovery followed by armor acquisition and password AS-REQ,
@@ -169,7 +168,8 @@ if pkinit_enabled:
         'default_principal_flags': '+preauth'}}}
 
     preauth_realm = K5Realm(krb5_conf=armor_krb5_conf,
-                            kdc_conf=preauth_kdc_conf, pkinit=True)
+                            kdc_conf=preauth_kdc_conf, pkinit=True,
+                            get_creds=False)
     preauth_realm.addprinc('WELLKNOWN/ANONYMOUS')
 
     # Same as above but with pre-authentication required for all principals,
