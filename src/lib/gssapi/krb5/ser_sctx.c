@@ -65,7 +65,7 @@ kg_oid_internalize(gss_OID *argp, krb5_octet **buffer, size_t *lenremain)
     gss_OID oid;
     krb5_int32 ibuf;
     krb5_octet         *bp;
-    size_t             remain;
+    size_t             remain, len;
 
     bp = *buffer;
     remain = *lenremain;
@@ -80,16 +80,12 @@ kg_oid_internalize(gss_OID *argp, krb5_octet **buffer, size_t *lenremain)
     oid = (gss_OID) malloc(sizeof(gss_OID_desc));
     if (oid == NULL)
         return ENOMEM;
-    if (krb5_ser_unpack_int32(&ibuf, &bp, &remain)) {
+    if (k5_ser_unpack_len(&len, &bp, &remain)) {
         free(oid);
         return EINVAL;
     }
-    if (ibuf < 0 || (size_t)ibuf > remain) {
-        free(oid);
-        return EINVAL;
-    }
-    oid->length = ibuf;
-    oid->elements = malloc((size_t)ibuf);
+    oid->length = len;
+    oid->elements = malloc(len);
     if (oid->elements == 0) {
         free(oid);
         return ENOMEM;
@@ -493,7 +489,7 @@ kg_ctx_internalize(krb5_context kcontext, krb5_gss_ctx_id_t *argp,
     krb5_gss_ctx_id_rec *ctx;
     krb5_int32          ibuf;
     krb5_octet          *bp;
-    size_t              remain;
+    size_t              remain, len, i;
     krb5int_access kaccess;
     krb5_principal        princ;
 
@@ -635,21 +631,14 @@ kg_ctx_internalize(krb5_context kcontext, krb5_gss_ctx_id_t *argp,
             ctx->cred_rcache = ibuf;
             /* authdata */
             if (!kret)
-                kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-            if (!kret && (ibuf < 0 || (size_t)ibuf > remain))
-                kret = ENOMEM;
-            if (!kret) {
-                krb5_int32 nadata = ibuf, i;
-
-                if (nadata > 0) {
-                    ctx->authdata = (krb5_authdata **)calloc((size_t)nadata + 1,
-                                                             sizeof(krb5_authdata *));
-                    if (ctx->authdata == NULL) {
-                        kret = ENOMEM;
-                    } else {
-                        for (i = 0; !kret && i < nadata; i++)
-                            kret = k5_internalize_authdata(&ctx->authdata[i],
-                                                           &bp, &remain);
+                kret = k5_ser_unpack_len(&len, &bp, &remain);
+            if (!kret && len > 0) {
+                ctx->authdata = k5calloc(len + 1, sizeof(*ctx->authdata),
+                                         &kret);
+                if (ctx->authdata != NULL) {
+                    for (i = 0; !kret && i < len; i++) {
+                        kret = k5_internalize_authdata(&ctx->authdata[i],
+                                                       &bp, &remain);
                     }
                 }
             }

@@ -335,22 +335,19 @@ greet_internalize(krb5_context kcontext,
 {
     struct greet_context *greet = (struct greet_context *)request_context;
     krb5_error_code code;
-    krb5_int32 length;
     krb5_octet *contents = NULL;
     krb5_int32 verified;
     krb5_int32 was_absent;
     krb5_octet *bp;
-    size_t remain;
+    size_t remain, length;
 
     bp = *buffer;
     remain = *lenremain;
 
     /* Greeting Length */
-    code = krb5_ser_unpack_int32(&length, &bp, &remain);
+    code = k5_ser_unpack_len(&length, &bp, &remain);
     if (code != 0)
         return code;
-    if (length < 0 || (size_t)length > remain)
-        return ENOMEM;
 
     /* Greeting Contents */
     if (length != 0) {
@@ -358,7 +355,7 @@ greet_internalize(krb5_context kcontext,
         if (contents == NULL)
             return ENOMEM;
 
-        code = krb5_ser_unpack_bytes(contents, (size_t)length, &bp, &remain);
+        code = krb5_ser_unpack_bytes(contents, length, &bp, &remain);
         if (code != 0) {
             free(contents);
             return code;

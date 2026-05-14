@@ -259,18 +259,14 @@ authind_internalize(krb5_context kcontext, krb5_authdata_context context,
 {
     struct authind_context *aictx = request_context;
     krb5_error_code ret;
-    int32_t count, len, i;
     uint8_t *bp = *buffer;
-    size_t remain = *lenremain;
+    size_t remain = *lenremain, len, count, i;
     krb5_data **inds = NULL;
 
     /* Get the count. */
-    ret = krb5_ser_unpack_int32(&count, &bp, &remain);
+    ret = k5_ser_unpack_len(&count, &bp, &remain);
     if (ret)
         return ret;
-
-    if (count < 0 || (size_t)count > remain)
-        return ERANGE;
 
     if (count > 0) {
         inds = k5calloc(count + 1, sizeof(*inds), &ret);
@@ -280,13 +276,9 @@ authind_internalize(krb5_context kcontext, krb5_authdata_context context,
 
     for (i = 0; i < count; i++) {
         /* Get the length. */
-        ret = krb5_ser_unpack_int32(&len, &bp, &remain);
+        ret = k5_ser_unpack_len(&len, &bp, &remain);
         if (ret)
             goto cleanup;
-        if (len < 0 || (size_t)len > remain) {
-            ret = ERANGE;
-            goto cleanup;
-        }
 
         /* Get the indicator. */
         inds[i] = k5alloc(sizeof(*inds[i]), &ret);
