@@ -316,7 +316,7 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
 
-    if (ctx->s4u_user != NULL) {
+    if (ctx->s4u_user != NULL && !IS_TGS_PRINC(ctx->tgs_in_creds->server)) {
         krb5_pa_data *pa0 = NULL, *pa1 = NULL;
 
         /* Free any checksum from a prior round. */
