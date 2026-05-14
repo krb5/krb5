@@ -413,6 +413,42 @@ make_request_for_tgt(krb5_context context, krb5_tkt_creds_context ctx,
     return code;
 }
 
+/*
+ * Create an enterprise-form copy of princ with realm set to tgt_realm.
+ * Used for cross-realm S4U2Self to let the foreign KDC resolve the service
+ * via referrals rather than performing a direct local lookup.
+ */
+static krb5_error_code
+make_s4u_enterprise_princ(krb5_context context, krb5_principal princ,
+                           const krb5_data *tgt_realm,
+                           krb5_principal *eprinc_out)
+{
+    krb5_error_code code;
+    char *str = NULL;
+    krb5_principal ep = NULL;
+
+    *eprinc_out = NULL;
+    code = krb5_unparse_name(context, princ, &str);
+    if (code != 0)
+        return code;
+    code = krb5_parse_name_flags(context, str,
+                                 KRB5_PRINCIPAL_PARSE_ENTERPRISE |
+                                 KRB5_PRINCIPAL_PARSE_IGNORE_REALM,
+                                 &ep);
+    krb5_free_unparsed_name(context, str);
+    if (code != 0)
+        return code;
+    /* IGNORE_REALM leaves ep->realm empty; replace it with tgt_realm. */
+    krb5_free_data_contents(context, &ep->realm);
+    code = krb5int_copy_data_contents(context, tgt_realm, &ep->realm);
+    if (code != 0) {
+        krb5_free_principal(context, ep);
+        return code;
+    }
+    *eprinc_out = ep;
+    return 0;
+}
+
 /* Set up a request for the desired service principal, using ctx->cur_tgt.
  * Optionally allow the answer to be a referral. */
 static krb5_error_code
@@ -443,6 +479,32 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
     if (referral)
         context->use_conf_ktypes = TRUE;
     ctx->tgs_in_creds = ctx->in_creds;
+
+    /*
+     * For cross-realm S4U2Self: when the current TGT is from a foreign realm
+     * (not the service realm), use an enterprise principal so the foreign KDC
+     * can resolve the service name via its referral machinery rather than
+     * attempting a direct local lookup (which fails with GET_LOCAL_TGT).
+     */
+    if (ctx->s4u_use_enterprise &&
+        !data_eq(ctx->cur_tgt->server->data[1], ctx->s4u_service_realm)) {
+        krb5_principal eprinc = NULL, saved_server;
+
+        code = make_s4u_enterprise_princ(context, ctx->server,
+                                         &ctx->cur_tgt->server->data[1],
+                                         &eprinc);
+        if (code == 0) {
+            saved_server = ctx->tgs_in_creds->server;
+            ctx->tgs_in_creds->server = eprinc;
+            code = make_request(context, ctx, extra_options);
+            ctx->tgs_in_creds->server = saved_server;
+            krb5_free_principal(context, eprinc);
+        }
+        if (referral)
+            context->use_conf_ktypes = FALSE;
+        return code;
+    }
+
     code = make_request(context, ctx, extra_options);
     if (referral)
         context->use_conf_ktypes = FALSE;
