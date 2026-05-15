@@ -517,3 +517,6 @@ EXPORTS
 	encode_krb5_pkinit_supp_pub_info		@478 ; PRIVATE
 	krb5int_copy_data_contents			@479 ; PRIVATE
 	krb5_free_pa_data				@480 ; PRIVATE
+	k5_fast_is_pkinit_allowed			@481 ; PRIVATE GSSAPI k5-int.h
+	k5_tkt_creds_set_s4u2self			@482 ; PRIVATE GSSAPI
+	k5_tkt_creds_set_s4u2proxy			@483 ; PRIVATE GSSAPI

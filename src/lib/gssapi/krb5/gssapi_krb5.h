@@ -298,6 +298,58 @@ gss_krb5_import_cred(OM_uint32 *minor_status,
                      krb5_keytab keytab,
                      gss_cred_id_t *cred);
 
+/*
+ * Step-based S4U2Self (protocol transition) credential acquisition for the
+ * Kerberos GSS mechanism.  Provides a non-blocking alternative to
+ * gss_acquire_cred_impersonate_name() for event-driven applications.
+ *
+ * Protocol:
+ *   First call:  input_token = GSS_C_NO_BUFFER, *cred_handle = GSS_C_NO_CREDENTIAL
+ *   Each call:   returns output_token (raw KDC TGS-REQ) + target_realm
+ *                and GSS_S_CONTINUE_NEEDED while the exchange is in progress.
+ *   Final call:  returns GSS_S_COMPLETE; *cred_handle is the finalized
+ *                impersonation credential.  output_token and target_realm are
+ *                empty on the final call.
+ *
+ *   The caller is responsible for sending each output_token to the KDC
+ *   identified by target_realm and supplying the KDC reply as input_token
+ *   on the next call.
+ *
+ * On any error, *cred_handle is released and set to GSS_C_NO_CREDENTIAL.
+ */
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_impersonate_name_step(
+    OM_uint32 *minor_status,
+    gss_cred_id_t impersonator_cred_handle,
+    gss_name_t desired_name,
+    OM_uint32 time_req,
+    gss_OID_set desired_mechs,
+    gss_cred_usage_t cred_usage,
+    gss_buffer_t input_token,    /* GSS_C_NO_BUFFER on first call; KDC reply subsequently */
+    gss_cred_id_t *cred_handle,  /* GSS_C_NO_CREDENTIAL on first call; in-progress handle subsequently */
+    gss_buffer_t output_token,   /* KDC TGS-REQ to send to target_realm */
+    gss_buffer_t target_realm,   /* realm of KDC to send output_token to */
+    gss_OID_set *actual_mechs,
+    OM_uint32 *time_rec);
+
+/*
+ * Retrieve the target KDC realm for the current step of a step-based
+ * S4U2Proxy exchange that is in progress on context_handle.
+ *
+ * During gss_init_sec_context(), when the call returns GSS_S_CONTINUE_NEEDED
+ * and a step-based S4U2Proxy exchange is active, the output_token is a raw
+ * Kerberos TGS-REQ.  The caller should send it to the KDC identified by the
+ * realm returned here and pass the reply as input_token on the next call.
+ *
+ * Returns GSS_S_UNAVAILABLE if no step-based S4U2Proxy is in progress.
+ * The returned realm_buf must be freed with gss_release_buffer().
+ */
+OM_uint32 KRB5_CALLCONV
+krb5_gss_get_proxy_realm(OM_uint32 *minor_status,
+                          gss_ctx_id_t context_handle,
+                          gss_buffer_t realm_buf);
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

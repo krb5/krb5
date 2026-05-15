@@ -48,6 +48,12 @@ kg_release_cred(krb5_context context, krb5_gss_cred_id_t cred)
     kg_release_name(context, &cred->name);
     krb5_free_principal(context, cred->acceptor_mprinc);
     krb5_free_principal(context, cred->impersonator);
+    krb5_free_principal(context, cred->s4u_user);
+    krb5_free_data_contents(context, &cred->s4u_cert);
+    kg_release_imp_step_ctx(cred->imp_step_ctx);
+    krb5_free_data_contents(context, &cred->s4u_evidence);
+    if (cred->s4u_tgt_ccache != NULL)
+        krb5_cc_destroy(context, cred->s4u_tgt_ccache);
     free(cred->req_enctypes);
     zapfreestr(cred->password);
     free(cred);
