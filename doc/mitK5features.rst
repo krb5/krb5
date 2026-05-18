@@ -748,6 +748,18 @@ Release 1.22
   - Rewrote the GSS per-message token parsing code for improved
     safety.
 
+Release 1.23
+
+* User experience:
+
+  - The libdefaults configuration variable "forward_lifetime" and
+    the KRB5_FORWARD_LIFETIME environment variable can be used to
+    bound the lifetime of credentials forwarded during GSSAPI
+    credential delegation and to make them non-renewable, reducing
+    the exposure of unconstrained delegation when the destination
+    service is not configured for constrained delegation
+    (S4U2Proxy).
+
 `Pre-authentication mechanisms`
 
 - PW-SALT                                         :rfc:`4120#section-5.2.7.3`
