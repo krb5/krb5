@@ -665,13 +665,13 @@ get_pac_princ_with_realm(krb5_context context, krb5_pac pac,
 
     ret = krb5_parse_name_flags(context, client_str, flags, princ_out);
     if (ret)
-        return ret;
+        goto cleanup;
 
     (*princ_out)->type = KRB5_NT_MS_PRINCIPAL;
 
 cleanup:
     free(client_str);
-    return 0;
+    return ret;
 }
 
 /* This probably wants to be updated if you support last_req stuff */
