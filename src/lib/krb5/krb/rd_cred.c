@@ -98,6 +98,11 @@ make_cred_list(krb5_context context, krb5_cred *krbcred,
             goto cleanup;
 
         info = encpart->ticket_info[i];
+        if (info == NULL) {
+            /* We unexpectedly reached the end of the encrypted ticket info. */
+            ret = KRB5KRB_AP_ERR_MODIFIED;
+            goto cleanup;
+        }
         ret = krb5_copy_principal(context, info->client, &list[i]->client);
         if (ret)
             goto cleanup;
