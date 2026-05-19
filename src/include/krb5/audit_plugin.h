@@ -38,7 +38,7 @@
  * the KDC to produce log output or audit records in any desired form.
  *
  * The audit interface has a single supported major version, which is 1.  Major
- * version 1 has a current minor version of 1.  Audit modules should define a
+ * version 1 has a current minor version of 2.  Audit modules should define a
  * function named audit_<modulename>_initvt, matching the signature:
  *
  *   krb5_error_code
@@ -92,6 +92,8 @@ typedef struct _krb5_audit_state {
     krb5_data *cl_realm;     /**< referrals: remote client's realm */
     krb5_principal s4u2self_user; /**< impersonated user */
     int violation;           /**< local or protocol policy problem */
+    /** auth indicators set on the issued ticket (minor version 2) */
+    krb5_data **auth_indicators;
 } krb5_audit_state;
 
 /** An abstract type for audit module data. */
@@ -154,6 +156,9 @@ typedef krb5_error_code
  * - If available, the information about the encryption types of the short- and
  *   long-term keys, non-local client's referral realm, KDC status, the TGT
  *   and its ticket ID
+ * - If available (minor version >= 2), the authentication indicators set on
+ *   the issued ticket in @a state->auth_indicators (NULL-terminated array of
+ *   krb5_data pointers, each containing an indicator string)
  *
  * @note Optional.
  *
