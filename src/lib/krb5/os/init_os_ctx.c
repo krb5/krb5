@@ -416,8 +416,12 @@ k5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
     krb5_os_context os_ctx;
     krb5_error_code    retval = 0;
 #ifdef _WIN32
-    WORD wVersionRequested;
+    WORD wVersionRequested = 0x0101;
     WSADATA wsaData;
+
+    /* Initialize winsock to version 1.1.  Do this first so that we know it was
+     * done in k5_os_free_context(), and can safely call WSACleanup(). */
+    WSAStartup(wVersionRequested, &wsaData);
 #endif /* _WIN32 */
 
     os_ctx = &ctx->os_context;
@@ -437,14 +441,6 @@ k5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
         retval = os_init_paths(ctx, (flags & KRB5_INIT_CONTEXT_KDC) != 0);
     if (retval)
         return retval;
-
-#ifdef _WIN32
-    /* We initialize winsock to version 1.1 but
-     * we do not care if we succeed or fail.
-     */
-    wVersionRequested = 0x0101;
-    WSAStartup (wVersionRequested, &wsaData);
-#endif /* _WIN32 */
 
     return 0;
 }
