@@ -170,6 +170,9 @@ __kdb2_hash_open(const char *file, int flags, int mode, const HASHINFO *info,
 		    (hashp->hdr.bsize << BYTE_SHIFT) - 1) >>
 		    (hashp->hdr.bshift + BYTE_SHIFT);
 
+		if (bpages > NCACHED || bpages < 0)
+			RETURN_ERROR(EFTYPE, error1);
+
 		hashp->nmaps = bpages;
 		(void)memset(&hashp->mapp[0], 0, bpages * sizeof(u_int32_t *));
 	}
