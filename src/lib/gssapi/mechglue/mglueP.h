@@ -46,15 +46,6 @@ typedef struct gss_name_struct {
 } gss_union_name_desc, *gss_union_name_t;
 
 /*
- * Structure for holding list of mechanism-specific name types
- */
-typedef struct gss_mech_spec_name_t {
-    gss_OID	name_type;
-    gss_OID	mech;
-    struct gss_mech_spec_name_t	*next, *prev;
-} gss_mech_spec_name_desc, *gss_mech_spec_name;
-
-/*
  * Set of Credentials typed on mechanism OID
  */
 typedef struct gss_cred_id_struct {
