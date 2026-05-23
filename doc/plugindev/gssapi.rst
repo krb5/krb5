@@ -20,6 +20,20 @@ a module does not wish to implement a GSSAPI extension, it can simply
 refrain from exporting it, and the mechglue will fail gracefully if
 the application calls that function.
 
+GSSAPI mechanism modules should implement a
+**gss_internal_release_oid** function, to help protect against an
+application mistakenly calling **gss_release_oid** on a statically
+allocated OID pointer.  The function should have the following
+signature::
+
+    OM_uint32 gss_internal_release_oid(OM_uint32 *minor_status,
+        gss_OID *oid);
+
+If the function recognizes ``*oid`` as a pointer that could be yielded
+by one of the module's other functions, it should set ``*oid`` to
+**GSS_C_NO_OID** and return **GSS_S_COMPLETE**.  Otherwise it should
+return **GSS_S_CONTINUE_NEEDED**.
+
 The mechglue does not invoke a module's **gss_add_cred**,
 **gss_add_cred_from**, **gss_add_cred_impersonate_name**, or
 **gss_add_cred_with_password** function.  A mechanism only needs to
