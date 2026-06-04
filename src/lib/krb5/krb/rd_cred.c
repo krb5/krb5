@@ -98,8 +98,9 @@ make_cred_list(krb5_context context, krb5_cred *krbcred,
             goto cleanup;
 
         info = encpart->ticket_info[i];
-        if (info == NULL) {
-            /* We unexpectedly reached the end of the encrypted ticket info. */
+        if (info == NULL || info->client == NULL || info->server == NULL) {
+            /* We unexpectedly reached the end of the encrypted ticket info,
+             * or the ticket info is unexpectedly missing a principal name. */
             ret = KRB5KRB_AP_ERR_MODIFIED;
             goto cleanup;
         }
