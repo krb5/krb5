@@ -85,7 +85,7 @@ ldap_filter_correct (char *in)
         in += count;
         if (*in == '\0')
             break;
-        k5_buf_add_fmt(&buf, "\\%2x", (unsigned char)*in++);
+        k5_buf_add_fmt(&buf, "\\%02x", (unsigned char)*in++);
     }
     return k5_buf_cstring(&buf);
 }
@@ -724,7 +724,7 @@ krb5_ldap_read_realm_params(krb5_context context, char *lrealm,
     {
         if ((values=ldap_get_values(ld, ent, "krbSubTrees")) != NULL) {
             rlparams->subtreecount = ldap_count_values(values);
-            rlparams->subtree = (char **) malloc(sizeof(char *) * (rlparams->subtreecount + 1));
+            rlparams->subtree = (char **) calloc((unsigned int)rlparams->subtreecount + 1, sizeof(char *));
             if (rlparams->subtree == NULL) {
                 st = ENOMEM;
                 goto cleanup;
