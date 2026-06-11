@@ -437,6 +437,7 @@ local.properties
 /src/tests/fuzzing/fuzz_aes
 /src/tests/fuzzing/fuzz_asn
 /src/tests/fuzzing/fuzz_attrset
+/src/tests/fuzzing/fuzz_ccache
 /src/tests/fuzzing/fuzz_chpw
 /src/tests/fuzzing/fuzz_crypto
 /src/tests/fuzzing/fuzz_des

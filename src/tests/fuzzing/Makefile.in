@@ -11,6 +11,7 @@ OBJS= \
 	fuzz_aes.o \
 	fuzz_asn.o \
 	fuzz_attrset.o \
+	fuzz_ccache.o \
 	fuzz_chpw.o \
 	fuzz_crypto.o \
 	fuzz_des.o \
@@ -32,6 +33,7 @@ SRCS= \
 	$(srcdir)/fuzz_aes.c \
 	$(srcdir)/fuzz_asn.c \
 	$(srcdir)/fuzz_attrset.c \
+	$(srcdir)/fuzz_ccache.c \
 	$(srcdir)/fuzz_chpw.c \
 	$(srcdir)/fuzz_crypto.c \
 	$(srcdir)/fuzz_des.c \
@@ -53,6 +55,7 @@ FUZZ_TARGETS= \
 	fuzz_aes \
 	fuzz_asn \
 	fuzz_attrset \
+	fuzz_ccache \
 	fuzz_chpw \
 	fuzz_crypto \
 	fuzz_des \
@@ -83,6 +86,9 @@ fuzz_asn: fuzz_asn.o $(KRB5_BASE_DEPLIBS)
 
 fuzz_attrset: fuzz_attrset.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_attrset.o -lkrad $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_ccache: fuzz_ccache.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_ccache.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_chpw: fuzz_chpw.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_chpw.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
