@@ -17,9 +17,9 @@ pushd src/tests/fuzzing
 
 fuzzers=("fuzz_aes" "fuzz_asn" "fuzz_attrset" "fuzz_ccache" "fuzz_chpw"
 	 "fuzz_crypto" "fuzz_des" "fuzz_gss" "fuzz_json" "fuzz_kdc"
-	 "fuzz_krad" "fuzz_krb" "fuzz_krb5_ticket" "fuzz_marshal_cred"
-	 "fuzz_marshal_princ" "fuzz_ndr" "fuzz_oid" "fuzz_pac" "fuzz_profile"
-	 "fuzz_util")
+	 "fuzz_keytab" "fuzz_krad" "fuzz_krb" "fuzz_krb5_ticket"
+	 "fuzz_marshal_cred" "fuzz_marshal_princ" "fuzz_ndr" "fuzz_oid"
+	 "fuzz_pac" "fuzz_profile" "fuzz_util")
 
 for fuzzer in "${fuzzers[@]}"; do
     cp "$fuzzer" "$OUT/$fuzzer"
