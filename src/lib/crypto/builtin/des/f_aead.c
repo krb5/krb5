@@ -28,7 +28,7 @@
 
 #ifdef K5_BUILTIN_DES
 
-const mit_des_cblock mit_des_zeroblock /* = all zero */;
+const mit_des_cblock mit_des_zeroblock = { 0, 0, 0 };
 
 void
 krb5int_des_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
