@@ -39,6 +39,7 @@
 #include <string.h>
 #include <errno.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 
 #include "simple.h"
