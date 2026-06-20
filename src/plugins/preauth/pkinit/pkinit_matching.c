@@ -224,7 +224,8 @@ parse_list_value(krb5_context context,
         }
 
         for (; ku->value != NULL; ku++) {
-            if (strncasecmp(value, ku->value, len) == 0) {
+            if (len == ku->length &&
+                strncasecmp(value, ku->value, ku->length) == 0) {
                 *bitptr |= ku->bitval;
                 found = 1;
                 pkiDebug("%s: Found value '%s', bitfield is now 0x%x\n",
