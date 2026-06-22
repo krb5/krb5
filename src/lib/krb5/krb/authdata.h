@@ -68,7 +68,11 @@ struct krb5_pac_data {
 #define PACTYPE_LENGTH              8U
 #define PAC_SIGNATURE_DATA_LENGTH   4U
 #define PAC_CLIENT_INFO_LENGTH      10U
+#define PAC_UPN_DNS_INFO_LENGTH     12U
+#define PAC_UPN_DNS_INFO_EX_LENGTH  20U
 #define PAC_INFO_BUFFER_LENGTH  16
+
+#define PAC_UPN_DNS_INFO_FLAGS_HAS_SAM_NAME_AND_SID 0x2
 
 #define NT_TIME_EPOCH               11644473600LL
 
