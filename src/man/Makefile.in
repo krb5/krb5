@@ -9,6 +9,8 @@ DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
 PKCS11_MODNAME=@PKCS11_MODNAME@
+vendordir=@VENDORDIR@
+USE_VENDORDIR=@USE_VENDORDIR@
 
 MANSUBS=k5identity.sub k5login.sub k5srvutil.sub kadm5.acl.sub kadmin.sub \
 	kadmind.sub kdb5_ldap_util.sub kdb5_util.sub kdc.conf.sub \
@@ -26,7 +28,11 @@ docsrc=$(top_srcdir)/../doc
 # manpage writer outputs near the end of its output files.
 man: $(docsrc)/version.py
 	rm -rf rst_man
-	$(SPHINX_BUILD) -q -t mansubs -b man $(docsrc) rst_man
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -q -t mansubs -t use_vendordir -b man $(docsrc) rst_man; \
+	else \
+		$(SPHINX_BUILD) -q -t mansubs -b man $(docsrc) rst_man; \
+	fi
 	for f in rst_man/*.[0-9]; do \
 		name=`echo $$f | sed -e 's|^.*/\(.*\)\.[0-9]$$|\1|'`; \
 		sed -e '/^\.\\" $$/d' \
@@ -46,6 +52,7 @@ $(docsrc)/version.py: $(top_srcdir)/patchlevel.h
 	    -e 's|@LOCALSTATEDIR@|$(localstatedir)|g' \
 	    -e 's|@RUNSTATEDIR@|$(runstatedir)|g' \
 	    -e 's|@SYSCONFDIR@|$(sysconfdir)|g' \
+	    -e 's|@VENDOR_DIR@|$(vendordir)|g' \
 	    -e 's|@CCNAME@|$(DEFCCNAME)|g' \
 	    -e 's|@KTNAME@|$(DEFKTNAME)|g' \
 	    -e 's|@CKTNAME@|$(DEFCKTNAME)|g' \
