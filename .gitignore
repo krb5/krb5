@@ -444,6 +444,7 @@ local.properties
 /src/tests/fuzzing/fuzz_gss
 /src/tests/fuzzing/fuzz_json
 /src/tests/fuzzing/fuzz_kdc
+/src/tests/fuzzing/fuzz_keytab
 /src/tests/fuzzing/fuzz_krad
 /src/tests/fuzzing/fuzz_krb
 /src/tests/fuzzing/fuzz_krb5_ticket
