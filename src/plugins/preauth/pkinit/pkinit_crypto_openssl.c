@@ -758,6 +758,7 @@ oerr(krb5_context context, krb5_error_code code, const char *fmt, ...)
     unsigned long err;
     va_list ap;
     char *str, buf[128];
+    const char *reason;
     int r;
 
     if (!code)
@@ -770,12 +771,20 @@ oerr(krb5_context context, krb5_error_code code, const char *fmt, ...)
         return code;
 
     err = ERR_peek_error();
-    if (err) {
-        krb5_set_error_message(context, code, _("%s: %s"), str,
-                               ERR_reason_error_string(err));
-    } else {
-        krb5_set_error_message(context, code, "%s", str);
+    reason = err ? ERR_reason_error_string(err) : NULL;
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    /* Fall back to strerror_r() for system errors. */
+    if (reason == NULL && ERR_SYSTEM_ERROR(err)) {
+        if (strerror_r(ERR_GET_REASON(err), buf, sizeof(buf)) == 0)
+            reason = buf;
     }
+#endif
+
+    if (reason != NULL)
+        krb5_set_error_message(context, code, _("%s: %s"), str, reason);
+    else
+        krb5_set_error_message(context, code, "%s", str);
 
     TRACE_PKINIT_OPENSSL_ERROR(context, str);
     while ((err = ERR_get_error()) != 0) {
