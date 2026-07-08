@@ -49,9 +49,10 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
 	  else
 	       size = strlen(*objp) + 1;
      }
-     if (! xdr_u_int(xdrs, &size)) {
+     if (!xdr_u_int(xdrs, &size) ||
+	 size > GSSRPC_MAX_ELEMENT_SIZE && xdrs->x_op != XDR_FREE) {
 	  return FALSE;
-	}
+     }
      switch (xdrs->x_op) {
      case XDR_DECODE:
 	  if (size == 0) {
@@ -276,12 +277,12 @@ bool_t xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp)
      if (xdrs->x_op == XDR_FREE) {
 	  tmp = (unsigned int) objp->key_data_length[0];
 	  if (!xdr_bytes(xdrs, (char **) &objp->key_data_contents[0],
-			 &tmp, ~0))
+			 &tmp, GSSRPC_MAX_ELEMENT_SIZE))
 	       return FALSE;
 
 	  tmp = (unsigned int) objp->key_data_length[1];
 	  if (!xdr_bytes(xdrs, (char **) &objp->key_data_contents[1],
-			 &tmp, ~0))
+			 &tmp, GSSRPC_MAX_ELEMENT_SIZE))
 	       return FALSE;
      }
 
@@ -328,7 +329,8 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 	       if (!xdr_krb5_int16(xdrs, &tl->tl_data_type))
 		    return FALSE;
 	       len = tl->tl_data_length;
-	       if (!xdr_bytes(xdrs, (char **) &tl->tl_data_contents, &len, ~0))
+	       if (!xdr_bytes(xdrs, (char **) &tl->tl_data_contents, &len,
+			      GSSRPC_MAX_ELEMENT_SIZE))
 		    return FALSE;
 	       tl = tl->tl_data_next;
 	  }
@@ -347,7 +349,8 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 	       memset(tl2, 0, sizeof(krb5_tl_data));
 	       if (!xdr_krb5_int16(xdrs, &tl2->tl_data_type))
 		    return FALSE;
-	       if (!xdr_bytes(xdrs, (char **)&tl2->tl_data_contents, &len, ~0))
+	       if (!xdr_bytes(xdrs, (char **)&tl2->tl_data_contents, &len,
+			      GSSRPC_MAX_ELEMENT_SIZE))
 		    return FALSE;
 	       tl2->tl_data_length = len;
 
@@ -575,7 +578,8 @@ xdr_cprinc3_arg(XDR *xdrs, cprinc3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
-		       (unsigned int *)&objp->n_ks_tuple, ~0,
+		       (unsigned int *)&objp->n_ks_tuple,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_key_salt_tuple),
 		       (xdrproc_t)xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
@@ -667,6 +671,8 @@ xdr_gprincs_ret(XDR *xdrs, gprincs_ret *objp)
 	  if (!xdr_int(xdrs, &objp->count)) {
 	       return (FALSE);
 	  }
+	  /* xdr_gprincs_ret() is not used by kadmind, and may contain many
+	   * entries for a large KDB; accept unbound length. */
 	  if (!xdr_array(xdrs, (caddr_t *) &objp->princs,
 			 (unsigned int *) &objp->count, ~0,
 			 sizeof(char *), (xdrproc_t)xdr_nullstring)) {
@@ -705,7 +711,8 @@ xdr_chpass3_arg(XDR *xdrs, chpass3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
-		       (unsigned int*)&objp->n_ks_tuple, ~0,
+		       (unsigned int*)&objp->n_ks_tuple,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_key_salt_tuple),
 		       (xdrproc_t)xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
@@ -726,7 +733,8 @@ xdr_setkey_arg(XDR *xdrs, setkey_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *) &objp->keyblocks,
-		       (unsigned int *) &objp->n_keys, ~0,
+		       (unsigned int *) &objp->n_keys,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_keyblock), (xdrproc_t)xdr_krb5_keyblock)) {
 		return (FALSE);
 	}
@@ -746,13 +754,15 @@ xdr_setkey3_arg(XDR *xdrs, setkey3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *) &objp->ks_tuple,
-		       (unsigned int *) &objp->n_ks_tuple, ~0,
+		       (unsigned int *) &objp->n_ks_tuple,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_key_salt_tuple),
 		       (xdrproc_t)xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *) &objp->keyblocks,
-		       (unsigned int *) &objp->n_keys, ~0,
+		       (unsigned int *) &objp->n_keys,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_keyblock), (xdrproc_t)xdr_krb5_keyblock)) {
 		return (FALSE);
 	}
@@ -772,7 +782,8 @@ xdr_setkey4_arg(XDR *xdrs, setkey4_arg *objp)
 		return FALSE;
 	}
 	if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
-		       (unsigned int *) &objp->n_key_data, ~0,
+		       (unsigned int *) &objp->n_key_data,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(kadm5_key_data),
 		       (xdrproc_t)xdr_kadm5_key_data)) {
 		return FALSE;
@@ -805,7 +816,8 @@ xdr_chrand3_arg(XDR *xdrs, chrand3_arg *objp)
 		return (FALSE);
 	}
 	if (!xdr_array(xdrs, (caddr_t *)&objp->ks_tuple,
-		       (unsigned int*)&objp->n_ks_tuple, ~0,
+		       (unsigned int*)&objp->n_ks_tuple,
+		       GSSRPC_MAX_ARRAY_COUNT,
 		       sizeof(krb5_key_salt_tuple),
 		       (xdrproc_t)xdr_krb5_key_salt_tuple)) {
 		return (FALSE);
@@ -824,7 +836,8 @@ xdr_chrand_ret(XDR *xdrs, chrand_ret *objp)
 	}
 	if (objp->code == KADM5_OK) {
 		if (!xdr_array(xdrs, (char **)&objp->keys,
-			       (unsigned int *)&objp->n_keys, ~0,
+			       (unsigned int *)&objp->n_keys,
+			       GSSRPC_MAX_ARRAY_COUNT,
 			       sizeof(krb5_keyblock),
 			       (xdrproc_t)xdr_krb5_keyblock))
 			return FALSE;
@@ -968,7 +981,8 @@ xdr_gpols_ret(XDR *xdrs, gpols_ret *objp)
 	       return (FALSE);
 	  }
 	  if (!xdr_array(xdrs, (caddr_t *) &objp->pols,
-			 (unsigned int *) &objp->count, ~0,
+			 (unsigned int *) &objp->count,
+			 GSSRPC_MAX_ARRAY_COUNT,
 			 sizeof(char *), (xdrproc_t)xdr_nullstring)) {
 	       return (FALSE);
 	  }
@@ -1032,7 +1046,8 @@ xdr_gstrings_ret(XDR *xdrs, gstrings_ret *objp)
 			return (FALSE);
 		}
 		if (!xdr_array(xdrs, (caddr_t *) &objp->strings,
-			       (unsigned int *) &objp->count, ~0,
+			       (unsigned int *) &objp->count,
+			       GSSRPC_MAX_ARRAY_COUNT,
 			       sizeof(krb5_string_attr),
 			       (xdrproc_t)xdr_krb5_string_attr)) {
 			return (FALSE);
@@ -1141,7 +1156,7 @@ xdr_krb5_keyblock(XDR *xdrs, krb5_keyblock *objp)
    if(!xdr_krb5_enctype(xdrs, &objp->enctype))
       return FALSE;
    cp = (char *)objp->contents;
-   if(!xdr_bytes(xdrs, &cp, &objp->length, ~0))
+   if (!xdr_bytes(xdrs, &cp, &objp->length, GSSRPC_MAX_ELEMENT_SIZE))
       return FALSE;
    objp->contents = (uint8_t *)cp;
    return TRUE;
@@ -1170,7 +1185,7 @@ xdr_kadm5_key_data(XDR *xdrs, kadm5_key_data *objp)
 	if (!xdr_krb5_int16(xdrs, &objp->salt.type))
 		return FALSE;
 	if (!xdr_bytes(xdrs, &objp->salt.data.data,
-		       &objp->salt.data.length, ~0))
+		       &objp->salt.data.length, GSSRPC_MAX_ELEMENT_SIZE))
 		return FALSE;
 	return TRUE;
 }
@@ -1201,7 +1216,8 @@ xdr_getpkeys_ret(XDR *xdrs, getpkeys_ret *objp)
 	}
 	if (objp->code == KADM5_OK) {
 		if (!xdr_array(xdrs, (caddr_t *) &objp->key_data,
-			       (unsigned int *) &objp->n_key_data, ~0,
+			       (unsigned int *) &objp->n_key_data,
+			       GSSRPC_MAX_ARRAY_COUNT,
 			       sizeof(kadm5_key_data),
 			       (xdrproc_t)xdr_kadm5_key_data)) {
 		    return FALSE;
