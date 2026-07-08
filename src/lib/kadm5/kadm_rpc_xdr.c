@@ -302,7 +302,7 @@ xdr_krb5_key_salt_tuple(XDR *xdrs, krb5_key_salt_tuple *objp)
 
 bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 {
-     krb5_tl_data *tl, *tl2;
+     krb5_tl_data *tl = NULL, *tl2 = NULL;
      bool_t more;
      unsigned int len;
 
@@ -340,22 +340,23 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 	  tl = NULL;
 	  while (1) {
 	       if (!xdr_bool(xdrs, &more))
-		    return FALSE;
+		    goto decode_fail;
 	       if (more == FALSE)
 		    break;
 	       tl2 = (krb5_tl_data *) malloc(sizeof(krb5_tl_data));
 	       if (tl2 == NULL)
-		    return FALSE;
+		    goto decode_fail;
 	       memset(tl2, 0, sizeof(krb5_tl_data));
 	       if (!xdr_krb5_int16(xdrs, &tl2->tl_data_type))
-		    return FALSE;
+		    goto decode_fail;
 	       if (!xdr_bytes(xdrs, (char **)&tl2->tl_data_contents, &len,
 			      GSSRPC_MAX_ELEMENT_SIZE))
-		    return FALSE;
+		    goto decode_fail;
 	       tl2->tl_data_length = len;
 
 	       tl2->tl_data_next = tl;
 	       tl = tl2;
+	       tl2 = NULL;
 	  }
 
 	  *tl_data_head = tl;
@@ -363,6 +364,11 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
      }
 
      return TRUE;
+
+decode_fail:
+     xdr_free((xdrproc_t)xdr_krb5_tl_data, &tl);
+     xdr_free((xdrproc_t)xdr_krb5_tl_data, &tl2);
+     return FALSE;
 }
 
 bool_t
