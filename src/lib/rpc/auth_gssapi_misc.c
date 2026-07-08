@@ -35,20 +35,14 @@ bool_t xdr_gss_buf(
      XDR *xdrs,
      gss_buffer_t buf)
 {
-     /*
-      * On decode, xdr_bytes will only allocate buf->value if the
-      * length read in is < maxsize (last arg).  This is dumb, because
-      * the whole point of allocating memory is so that I don't *have*
-      * to know the maximum length.  -1 effectively disables this
-      * braindamage.
-      */
      bool_t result;
      /* Fix type mismatches between APIs.  */
      unsigned int length = buf->length;
      char *cp = buf->value;
      result = xdr_bytes(xdrs, &cp, &length,
 			(xdrs->x_op == XDR_DECODE && buf->value == NULL)
-			? (unsigned int) -1 : (unsigned int) buf->length);
+			? GSSRPC_MAX_MESSAGE_SIZE
+			: (unsigned int) buf->length);
      buf->value = cp;
      buf->length = length;
      return result;
@@ -285,10 +279,10 @@ bool_t auth_gssapi_unwrap_data(
      in_buf.value = NULL;
      out_buf.value = NULL;
      cp = in_buf.value;
-     if (! xdr_bytes(in_xdrs, &cp, &length, (unsigned int) -1)) {
+     if (! xdr_bytes(in_xdrs, &cp, &length, GSSRPC_MAX_MESSAGE_SIZE)) {
 	 PRINTF(("gssapi_unwrap_data: deserializing encrypted data failed\n"));
 	 temp_xdrs.x_op = XDR_FREE;
-	 (void)xdr_bytes(&temp_xdrs, &cp, &length, (unsigned int) -1);
+	 (void)xdr_bytes(&temp_xdrs, &cp, &length, GSSRPC_MAX_MESSAGE_SIZE);
 	 in_buf.value = NULL;
 	 return FALSE;
      }
