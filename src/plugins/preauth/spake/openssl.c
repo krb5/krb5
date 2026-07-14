@@ -143,7 +143,14 @@ unmarshal_w(const groupdata *gdata, const uint8_t *wbytes)
     if (w == NULL)
         return NULL;
 
+#if !defined(OPENSSL_IS_AWSLC)
+    /*
+     * AWS-LC performs all BIGNUM operations in constant time and does not
+     * define BN_FLG_CONSTTIME, so this hint is both unnecessary and
+     * unavailable there. Retain it for stock OpenSSL and other backends.
+     */
     BN_set_flags(w, BN_FLG_CONSTTIME);
+#endif
 
     if (BN_bin2bn(wbytes, reg->mult_len, w) &&
         BN_div(NULL, w, w, gdata->order, gdata->ctx))
