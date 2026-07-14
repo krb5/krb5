@@ -46,6 +46,8 @@
 #define SHA384_BLOCK_SIZE 128
 #define SHA512_BLOCK_SIZE 128
 
+#ifdef K5_BUILTIN_SHA2
+
 struct sha256state {
   unsigned int sz[2];
   uint32_t counter[8];
@@ -74,5 +76,7 @@ void k5_sha384_final(void *, SHA384_CTX *);
 void k5_sha512_init(SHA512_CTX *);
 void k5_sha512_update(SHA512_CTX *, const void *, size_t);
 void k5_sha512_final(void *, SHA512_CTX *);
+
+#endif /* K5_BUILTIN_SHA2 */
 
 #endif /* SHA2_H */
