@@ -138,6 +138,7 @@ struct test {
     },
 
     /* Kc, Ke, Ki for a Camellia-128 key */
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
         { KV5M_DATA, 16,
@@ -200,6 +201,7 @@ struct test {
           "\xFA\x62\x4F\xA0\xE5\x23\x99\x3F\xA3\x88\xAE\xFD\xC6\x7E\x67\xEB"
           "\xCD\x8C\x08\xE8\xA0\x24\x6B\x1D\x73\xB0\xD1\xDD\x9F\xC5\x82\xB0" }
     },
+#endif
 
     /* Kc, Ke, Ki for an aes128-sha2 key. */
     {
@@ -289,8 +291,10 @@ get_enc_provider(krb5_enctype enctype)
     case ENCTYPE_DES3_CBC_SHA1:              return &krb5int_enc_des3;
     case ENCTYPE_AES128_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes128;
     case ENCTYPE_AES256_CTS_HMAC_SHA1_96:    return &krb5int_enc_aes256;
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     case ENCTYPE_CAMELLIA128_CTS_CMAC:       return &krb5int_enc_camellia128;
     case ENCTYPE_CAMELLIA256_CTS_CMAC:       return &krb5int_enc_camellia256;
+#endif
     case ENCTYPE_AES128_CTS_HMAC_SHA256_128: return &krb5int_enc_aes128;
     case ENCTYPE_AES256_CTS_HMAC_SHA384_192: return &krb5int_enc_aes256;
     }

@@ -62,7 +62,9 @@
 #endif
 
 #define K5_OPENSSL_AES
+#ifndef OPENSSL_NO_CAMELLIA
 #define K5_OPENSSL_CAMELLIA
+#endif
 #define K5_OPENSSL_DES
 #define K5_OPENSSL_HMAC
 #define K5_OPENSSL_MD5
@@ -474,8 +476,10 @@ extern const struct krb5_enc_provider krb5int_enc_aes128;
 extern const struct krb5_enc_provider krb5int_enc_aes256;
 extern const struct krb5_enc_provider krb5int_enc_aes128_ctr;
 extern const struct krb5_enc_provider krb5int_enc_aes256_ctr;
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
 extern const struct krb5_enc_provider krb5int_enc_camellia128;
 extern const struct krb5_enc_provider krb5int_enc_camellia256;
+#endif
 
 extern const struct krb5_hash_provider krb5int_hash_md4;
 extern const struct krb5_hash_provider krb5int_hash_md5;

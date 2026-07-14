@@ -28,6 +28,10 @@
  */
 
 #include <stdio.h>
+#include <openssl/opensslconf.h>
+#ifdef OPENSSL_NO_CAMELLIA
+int main(void) { return 0; }
+#else
 #include "crypto_int.h"
 
 static char key[32];
@@ -139,3 +143,4 @@ int main (int argc, char *argv[])
 	vt_test();
     return 0;
 }
+#endif

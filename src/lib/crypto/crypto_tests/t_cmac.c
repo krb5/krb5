@@ -40,6 +40,10 @@
 
 #include "crypto_int.h"
 
+#if !defined(K5_OPENSSL_CAMELLIA) && !defined(K5_BUILTIN_CAMELLIA)
+int main(void) { return 0; }
+#else
+
 /* All examples use the following Camellia-128 key. */
 static unsigned char keybytes[] = {
     0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
@@ -145,3 +149,4 @@ main(int argc, char **argv)
     krb5_k_free_key(context, key);
     return 0;
 }
+#endif

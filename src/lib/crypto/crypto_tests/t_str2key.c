@@ -250,6 +250,7 @@ struct test {
     },
 
     /* The same inputs applied to Camellia enctypes. */
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
         "password",
@@ -410,6 +411,7 @@ struct test {
         KRB5_ERR_BAD_S2K_PARAMS,
         FALSE
     },
+#endif
 
     {
         ENCTYPE_AES128_CTS_HMAC_SHA256_128,

@@ -300,6 +300,7 @@ struct test {
           "\xB7\x34\xD4\xD4\x98\xB6\x71\x4F\x1C\x1D" }
     },
 
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     {
         ENCTYPE_CAMELLIA128_CTS_CMAC,
         { KV5M_DATA, 0, "", }, 0,
@@ -406,6 +407,7 @@ struct test {
           "\xF3\x4A\xD1\x25\x5A\x34\x49\x99\xAD\x37\x14\x68\x87\xA6\xC6\x84"
           "\x57\x31\xAC\x7F\x46\x37\x6A\x05\x04\xCD\x06\x57\x14\x74" }
     },
+#endif
 
     {
         ENCTYPE_AES128_CTS_HMAC_SHA256_128,
@@ -529,8 +531,10 @@ enctypes[] = {
     ENCTYPE_ARCFOUR_HMAC_EXP,
     ENCTYPE_AES128_CTS_HMAC_SHA1_96,
     ENCTYPE_AES256_CTS_HMAC_SHA1_96,
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     ENCTYPE_CAMELLIA128_CTS_CMAC,
     ENCTYPE_CAMELLIA256_CTS_CMAC,
+#endif
     ENCTYPE_AES128_CTS_HMAC_SHA256_128,
     ENCTYPE_AES256_CTS_HMAC_SHA384_192
 };

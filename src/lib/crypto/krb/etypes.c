@@ -103,6 +103,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       CKSUMTYPE_HMAC_SHA1_96_AES256,
       0 /*flags*/, 256 },
 
+#if defined(K5_OPENSSL_CAMELLIA) || defined(K5_BUILTIN_CAMELLIA)
     { ENCTYPE_CAMELLIA128_CTS_CMAC,
       "camellia128-cts-cmac", { "camellia128-cts" },
       "Camellia-128 CTS mode with CMAC",
@@ -125,6 +126,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_cmac_prf,
       CKSUMTYPE_CMAC_CAMELLIA256,
       0 /*flags */, 256 },
+#endif
 
     { ENCTYPE_AES128_CTS_HMAC_SHA256_128,
       "aes128-cts-hmac-sha256-128", { "aes128-sha2" },
