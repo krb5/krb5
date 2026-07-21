@@ -124,7 +124,7 @@ get_credentials(krb5_context context, krb5_gss_cred_id_t cred,
 {
     krb5_error_code     code;
     krb5_creds          in_creds, evidence_creds, mcreds, *result_creds = NULL;
-    krb5_flags          flags = 0;
+    krb5_flags          flags = 0, cmpflag = 0;
     krb5_principal_data server_data;
 
     *out_creds = NULL;
@@ -163,10 +163,17 @@ get_credentials(krb5_context context, krb5_gss_cred_id_t cred,
 
     /* Try constrained delegation if we have proxy credentials. */
     if (cred->impersonator != NULL) {
-        /* If we are trying to get a ticket to ourselves, we should use the
-         * the evidence ticket directly from cache. */
-        if (krb5_principal_compare(context, cred->impersonator,
-                                   server->princ)) {
+        /*
+         * If we are trying to get a ticket to the impersonator, we should use
+         * the the evidence ticket directly from the cache.  If the server name
+         * is host-based, ignore the realm for this comparison;
+         * krb5_sname_to_principal() probably yielded an empty realm, and
+         * host-based principals generally only exist in one realm.
+         */
+        if (server->princ->type == KRB5_NT_SRV_HST)
+            cmpflag = KRB5_PRINCIPAL_COMPARE_IGNORE_REALM;
+        if (krb5_principal_compare_flags(context, cred->impersonator,
+                                         server->princ, cmpflag)) {
             flags |= KRB5_GC_CACHED;
         } else {
             memset(&mcreds, 0, sizeof(mcreds));
