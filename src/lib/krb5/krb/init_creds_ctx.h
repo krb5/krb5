@@ -64,6 +64,10 @@ struct _krb5_init_creds_context {
     krb5_boolean info_pa_permitted;
     krb5_boolean restarted;
     krb5_boolean encts_disabled;
+    /* Automatic FAST armor state machine and memory cache */
+    krb5_init_creds_context auto_armor_ctx;
+    krb5_get_init_creds_opt *auto_armor_opt;
+    krb5_ccache auto_armor_ccache;
     struct krb5_responder_context_st rctx;
     krb5_preauthtype current_preauth_type;
     krb5_preauthtype selected_preauth_type;

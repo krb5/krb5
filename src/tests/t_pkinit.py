@@ -105,10 +105,6 @@ realm.kinit(realm.user_princ, password=password('user'))
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
-# Having tested password preauth, remove the keys for better error
-# reporting.
-realm.run([kadminl, 'purgekeys', '-all', realm.user_princ])
-
 # Test anonymous PKINIT.
 mark('anonymous')
 realm.kinit('@%s' % realm.realm, flags=['-n'], expected_code=1,
@@ -123,6 +119,29 @@ if '97:' in out:
 # Verify start_realm setting and test referrals TGS request.
 realm.run([klist, '-C'], expected_msg='start_realm = KRBTEST.COM')
 realm.run([kvno, '-S', 'host', hostname])
+
+# Test auto_fast_armor.
+mark('auto_fast_armor')
+afa_conf = {'realms': {'$realm': {'auto_fast_armor': 'true'}}}
+afa_env = realm.special_env('auto_fast', False, krb5_conf=afa_conf)
+msgs = ('Acquiring anonymous PKINIT armor ticket for FAST',
+        'Getting initial credentials for WELLKNOWN/ANONYMOUS@%s' % realm.realm,
+        'Using FAST due to armor ccache negotiation result',
+        'Preauth module encrypted_challenge (138) (real) returned: 0/Success')
+realm.kinit(realm.user_princ, password=password('user'), env=afa_env,
+            expected_trace=msgs)
+realm.klist(realm.user_princ)
+
+# auto_fast_armor shouldn't trigger for direct use of anonymous PKINIT.
+mark('anonymous (auto_fast_armor=true)')
+out, trace = realm.kinit('@%s' % realm.realm, flags=['-n'], env=afa_env,
+                         return_trace=True)
+if 'Acquiring anonymous PKINIT armor ticket for FAST' in trace:
+    fail('auto_fast_armor improperly triggered for anonymous kinit')
+
+# For the remaining tests in this realm, remove the keys on user for
+# better error reporting (by preventing encrypted timestamp fallback).
+realm.run([kadminl, 'purgekeys', '-all', realm.user_princ])
 
 # Test anonymous kadmin.
 mark('anonymous kadmin')

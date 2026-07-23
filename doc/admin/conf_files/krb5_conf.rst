@@ -487,6 +487,17 @@ following tags may be specified in the realm's subsection:
     names to local user names.  The tag is the mapping name, and the
     value is the corresponding local user name.
 
+**auto_fast_armor**
+    If this flag is true, initial credential acquisition will acquire
+    an anonymous PKINIT ticket to use as FAST armor before making the
+    real ticket request, unless an armor ccache is already configured
+    (as with kinit's **-T** option).  This flag allows
+    preauthentication mechanisms that require FAST, such as OTP, to
+    work without a pre-existing ticket.  This flag should only be set
+    for realms known to support anonymous PKINIT.  This flag has no
+    effect if the client principal is itself the anonymous principal.
+    The default value is false.  New in release 1.23.
+
 **default_domain**
     This tag specifies the domain used to expand hostnames when
     translating Kerberos 4 service principals to Kerberos 5 principals

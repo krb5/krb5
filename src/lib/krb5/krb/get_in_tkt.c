@@ -537,6 +537,10 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_data_contents(context, &ctx->salt);
     krb5_free_data_contents(context, &ctx->s2kparams);
     krb5_free_keyblock_contents(context, &ctx->as_key);
+    krb5_init_creds_free(context, ctx->auto_armor_ctx);
+    krb5_get_init_creds_opt_free(context, ctx->auto_armor_opt);
+    if (ctx->auto_armor_ccache != NULL)
+        krb5_cc_destroy(context, ctx->auto_armor_ccache);
     k5_json_release(ctx->cc_config_in);
     k5_json_release(ctx->cc_config_out);
     free(ctx);
@@ -771,6 +775,87 @@ encts_disabled(profile_t profile, const krb5_data *realm)
     return (ret == 0) ? bval : FALSE;
 }
 
+/* Return true if auto_fast_armor is enabled for realm. */
+static krb5_boolean
+auto_fast_armor_enabled(profile_t profile, const krb5_data *realm)
+{
+    krb5_error_code ret;
+    char *realmstr;
+    int bval;
+
+    realmstr = k5memdup0(realm->data, realm->length, &ret);
+    if (realmstr == NULL)
+        return FALSE;
+    ret = profile_get_boolean(profile, KRB5_CONF_REALMS, realmstr,
+                              KRB5_CONF_AUTO_FAST_ARMOR, FALSE, &bval);
+    free(realmstr);
+    return (ret == 0) ? bval : FALSE;
+}
+
+/*
+ * Return true if ctx should first acquire FAST armor using anonymous PKINIT.
+ * This decision is primarily dependent on the auto_fast_armor config option,
+ * but we don't acquire armor if the caller passed in an armor ccache or if the
+ * state machine is already performing an anonymous PKINIT request.
+ */
+static krb5_boolean
+want_auto_armor(krb5_context context, krb5_init_creds_context ctx)
+{
+    if (k5_gic_opt_get_fast_ccache_name(ctx->opt) != NULL)
+        return FALSE;
+    if (krb5_principal_compare_any_realm(context, ctx->request->client,
+                                         krb5_anonymous_principal()))
+        return FALSE;
+    return auto_fast_armor_enabled(context->profile,
+                                   &ctx->request->client->realm);
+}
+
+/* Create a memory ccache and nested init_creds context for acquiring FAST amor
+ * via anonymous PKINIT. */
+static krb5_error_code
+begin_auto_armor(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_error_code ret;
+    krb5_principal anon_princ = NULL;
+    const krb5_data *realm = &ctx->request->client->realm;
+
+    TRACE_INIT_CREDS_AUTO_FAST_ARMOR(context);
+
+    ret = krb5_cc_new_unique(context, "MEMORY", NULL, &ctx->auto_armor_ccache);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_build_principal_ext(context, &anon_princ,
+                                   realm->length, realm->data,
+                                   strlen(KRB5_WELLKNOWN_NAMESTR),
+                                   KRB5_WELLKNOWN_NAMESTR,
+                                   strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                   KRB5_ANONYMOUS_PRINCSTR, 0);
+    if (ret)
+        goto cleanup;
+    anon_princ->type = KRB5_NT_WELLKNOWN;
+
+    ret = krb5_get_init_creds_opt_alloc(context, &ctx->auto_armor_opt);
+    if (ret)
+        goto cleanup;
+    krb5_get_init_creds_opt_set_anonymous(ctx->auto_armor_opt, 1);
+    krb5_get_init_creds_opt_set_tkt_life(ctx->auto_armor_opt, 60 * 60);
+    ret = krb5_get_init_creds_opt_set_out_ccache(context, ctx->auto_armor_opt,
+                                                 ctx->auto_armor_ccache);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_init_creds_init(context, anon_princ, NULL, NULL,
+                               ctx->start_time, ctx->auto_armor_opt,
+                               &ctx->auto_armor_ctx);
+    if (ret)
+        goto cleanup;
+
+cleanup:
+    krb5_free_principal(context, anon_princ);
+    return ret;
+}
+
 /**
  * Throw away any pre-authentication realm state and begin with a
  * unauthenticated or optimistically authenticated request.  If fast_upgrade is
@@ -827,7 +912,7 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
         goto cleanup;
 
     code = krb5int_fast_as_armor(context, ctx->fast_state, ctx->opt,
-                                 ctx->request);
+                                 ctx->auto_armor_ccache, ctx->request);
     if (code != 0)
         goto cleanup;
     /* give the preauth plugins a chance to prep the request body */
@@ -1041,6 +1126,12 @@ krb5_init_creds_init(krb5_context context,
                                          krb5_anonymous_principal())) {
         ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
         ctx->request->client->type = KRB5_NT_WELLKNOWN;
+    }
+
+    if (want_auto_armor(context, ctx)) {
+        code = begin_auto_armor(context, ctx);
+        if (code)
+            goto cleanup;
     }
 
     *pctx = ctx;
@@ -1891,7 +1982,23 @@ krb5_init_creds_step(krb5_context context,
     if (code)
         return code;
 
-    if (in->length != 0) {
+    if (ctx->auto_armor_ctx != NULL) {
+        /* Drive the nested context to acquire an anonymous TGT. */
+        code = krb5_init_creds_step(context, ctx->auto_armor_ctx, in, out,
+                                    realm, flags);
+        if (code || (*flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
+            return code;
+
+        /* The nested context is complete.  Discard it to signal that the outer
+         * state machine should proceed using auto_armor_ccache. */
+        krb5_init_creds_free(context, ctx->auto_armor_ctx);
+        ctx->auto_armor_ctx = NULL;
+
+        /* Begin the actual AS request, asserting that FAST is available. */
+        code = restart_init_creds_loop(context, ctx, TRUE);
+        if (code)
+            return code;
+    } else if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
             code2 = krb5int_copy_data_contents(context,

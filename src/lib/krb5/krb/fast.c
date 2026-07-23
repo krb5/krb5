@@ -171,55 +171,62 @@ krb5int_fast_prep_req_body(krb5_context context,
 krb5_error_code
 krb5int_fast_as_armor(krb5_context context,
                       struct krb5int_fast_request_state *state,
-                      krb5_get_init_creds_opt *opt, krb5_kdc_req *request)
+                      krb5_get_init_creds_opt *opt,
+                      krb5_ccache armor_ccache, krb5_kdc_req *request)
 {
     krb5_error_code retval = 0;
     krb5_ccache ccache = NULL;
     krb5_principal target_principal = NULL;
-    krb5_data *target_realm;
+    krb5_data *target_realm, config_data = empty_data();
     const char *ccname = k5_gic_opt_get_fast_ccache_name(opt);
     krb5_flags fast_flags;
 
     krb5_clear_error_message(context);
     target_realm = &request->server->realm;
-    if (ccname != NULL) {
-        TRACE_FAST_ARMOR_CCACHE(context, ccname);
-        state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
+
+    if (armor_ccache == NULL) {
+        /* Stop if no armor ccache was provided by the direct caller or the GIC
+         * options. */
+        if (ccname == NULL)
+            return 0;
+        /* Resolve the armor ccache name provided in the GIC options. */
         retval = krb5_cc_resolve(context, ccname, &ccache);
-        if (retval == 0) {
-            retval = krb5int_tgtname(context, target_realm, target_realm,
-                                     &target_principal);
-        }
-        if (retval == 0) {
-            krb5_data config_data;
-            config_data.data = NULL;
-            retval = krb5_cc_get_config(context, ccache, target_principal,
-                                        KRB5_CC_CONF_FAST_AVAIL, &config_data);
-            if ((retval == 0) && config_data.data) {
-                TRACE_FAST_CCACHE_CONFIG(context);
-                state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
-            }
-            krb5_free_data_contents(context, &config_data);
-            retval = 0;
-        }
-        fast_flags = k5_gic_opt_get_fast_flags(opt);
-        if (fast_flags & KRB5_FAST_REQUIRED) {
-            TRACE_FAST_REQUIRED(context);
-            state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
-        }
-        if (retval == 0 && (state->fast_state_flags & KRB5INT_FAST_DO_FAST)) {
-            retval = fast_armor_ap_request(context, state, ccache,
-                                           target_principal);
-        }
-        if (retval != 0) {
-            k5_prependmsg(context, retval,
-                          _("Error constructing AP-REQ armor"));
-        }
+        if (retval)
+            goto cleanup;
+        armor_ccache = ccache;
     }
+
+    TRACE_FAST_ARMOR_CCACHE(context, armor_ccache);
+
+    state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
+    retval = krb5int_tgtname(context, target_realm, target_realm,
+                             &target_principal);
+    if (retval)
+        goto cleanup;
+
+    retval = krb5_cc_get_config(context, armor_ccache, target_principal,
+                                KRB5_CC_CONF_FAST_AVAIL, &config_data);
+    if (!retval && config_data.data != NULL) {
+        TRACE_FAST_CCACHE_CONFIG(context);
+        state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+    }
+
+    fast_flags = k5_gic_opt_get_fast_flags(opt);
+    if (fast_flags & KRB5_FAST_REQUIRED) {
+        TRACE_FAST_REQUIRED(context);
+        state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+    }
+
+    retval = fast_armor_ap_request(context, state, armor_ccache,
+                                   target_principal);
+    if (retval)
+        k5_prependmsg(context, retval, _("Error constructing AP-REQ armor"));
+
+cleanup:
     if (ccache)
         krb5_cc_close(context, ccache);
-    if (target_principal)
-        krb5_free_principal(context, target_principal);
+    krb5_free_principal(context, target_principal);
+    krb5_free_data_contents(context, &config_data);
     return retval;
 }
 

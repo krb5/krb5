@@ -255,4 +255,22 @@ check_lifetime('actx gss_accept_sec_context', ln[7], 8000 * 86400 + 300)
 check_lifetime('actx gss_inquire_context', ln[8], 8000 * 86400 + 300)
 check_lifetime('actx gss_context_time', ln[9], 8000 * 86400 + 300)
 
+realm.stop()
+
+# Test auto_fast_armor with IAKERB driving the state machine.
+if pkinit_enabled:
+    mark('IAKERB with auto_fast_armor')
+    afa_conf = {'realms': {'$realm': {'auto_fast_armor': 'true'}}}
+    realm = K5Realm(krb5_conf=afa_conf, get_creds=False, pkinit=True)
+    realm.run([kadminl, 'modprinc', '+preauth', realm.user_princ])
+    realm.addprinc('WELLKNOWN/ANONYMOUS')
+    msgs = ('Acquiring anonymous PKINIT armor ticket for FAST',
+            'Getting initial credentials for WELLKNOWN/ANONYMOUS',
+            'Using FAST due to armor ccache negotiation result',
+            'Preauth module encrypted_challenge (138) (real) returned: 0')
+    realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
+               'h:host@' + hostname, 'h:host'], expected_trace=msgs)
+else:
+    print('Skipping IAKERB auto_fast_armor test: PKINIT not built')
+
 success('GSSAPI tests')

@@ -185,6 +185,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_ALLOW_WEAK_CRYPTO            "allow_weak_crypto"
 #define KRB5_CONF_AUTH_TO_LOCAL                "auth_to_local"
 #define KRB5_CONF_AUTH_TO_LOCAL_NAMES          "auth_to_local_names"
+#define KRB5_CONF_AUTO_FAST_ARMOR              "auto_fast_armor"
 #define KRB5_CONF_CANONICALIZE                 "canonicalize"
 #define KRB5_CONF_CCACHE_TYPE                  "ccache_type"
 #define KRB5_CONF_CLOCKSKEW                    "clockskew"

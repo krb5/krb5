@@ -173,8 +173,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 #define TRACE_DNS_URI_SEND(c, domain)                   \
     TRACE(c, "Sending DNS URI query for {str}", domain)
 
-#define TRACE_FAST_ARMOR_CCACHE(c, ccache_name)         \
-    TRACE(c, "FAST armor ccache: {str}", ccache_name)
+#define TRACE_FAST_ARMOR_CCACHE(c, ccache)              \
+    TRACE(c, "FAST armor ccache: {ccache}", ccache)
 #define TRACE_FAST_ARMOR_CCACHE_KEY(c, keyblock)                \
     TRACE(c, "Armor ccache session key: {keyblock}", keyblock)
 #define TRACE_FAST_ARMOR_KEY(c, keyblock)               \
@@ -217,6 +217,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 
 #define TRACE_INIT_CREDS(c, princ)                              \
     TRACE(c, "Getting initial credentials for {princ}", princ)
+#define TRACE_INIT_CREDS_AUTO_FAST_ARMOR(c)                             \
+    TRACE(c, "Acquiring anonymous PKINIT armor ticket for FAST")
 #define TRACE_INIT_CREDS_AS_KEY_GAK(c, keyblock)                        \
     TRACE(c, "AS key obtained from gak_fct: {keyblock}", keyblock)
 #define TRACE_INIT_CREDS_AS_KEY_PREAUTH(c, keyblock)                    \
