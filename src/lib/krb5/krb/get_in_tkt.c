@@ -511,6 +511,9 @@ build_in_tkt_name(krb5_context context,
     return 0;
 }
 
+static void
+free_armor_state(krb5_context context, krb5_init_creds_context ctx);
+
 void KRB5_CALLCONV
 krb5_init_creds_free(krb5_context context,
                      krb5_init_creds_context ctx)
@@ -518,6 +521,7 @@ krb5_init_creds_free(krb5_context context,
     if (ctx == NULL)
         return;
 
+    free_armor_state(context, ctx);
     k5_response_items_free(ctx->rctx.items);
     free(ctx->in_tkt_service);
     zapfree(ctx->gakpw.storage.data, ctx->gakpw.storage.length);
@@ -928,6 +932,12 @@ krb5_init_creds_init(krb5_context context,
         tmp = 0;
     if (tmp)
         ctx->request->kdc_options |= KDC_OPT_CANONICALIZE;
+
+    /* automatic anonymous FAST armor bootstrap */
+    if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
+                                   KRB5_CONF_REQUEST_ANONYMOUS_ARMOR,
+                                   &tmp) == 0)
+        ctx->request_anon_armor = tmp;
 
     /* allow_postdate */
     if (ctx->start_time > 0)
@@ -1659,6 +1669,175 @@ cleanup:
     return ret;
 }
 
+/*
+ * Determine whether we should bootstrap anonymous FAST armor in
+ * response to the current KDC error.  True only when the
+ * request_anonymous_armor option is set, this context is not itself
+ * an anonymous-armor acquisition, no armor ccache is already
+ * configured, the client is not the anonymous principal, and the KDC
+ * advertised FAST support (PA-FX-FAST) in its error padata.
+ */
+static krb5_boolean
+want_anon_armor(krb5_context context, krb5_init_creds_context ctx)
+{
+    if (!ctx->request_anon_armor || ctx->no_auto_armor)
+        return FALSE;
+    if (ctx->armor_ctx != NULL)
+        return FALSE;
+    if (k5_gic_opt_get_fast_ccache_name(ctx->opt) != NULL)
+        return FALSE;
+    if (krb5_principal_compare_any_realm(context, ctx->request->client,
+                                         krb5_anonymous_principal()))
+        return FALSE;
+    if (krb5int_find_pa_data(context, ctx->err_padata,
+                             KRB5_PADATA_FX_FAST) == NULL)
+        return FALSE;
+    return TRUE;
+}
+
+/*
+ * Begin acquiring an anonymous-PKINIT ticket to use as FAST armor.  Creates a
+ * throwaway MEMORY ccache and a nested init_creds context for
+ * WELLKNOWN/ANONYMOUS@<realm>.  The nested context is subsequently driven by
+ * krb5_init_creds_step() so that its request/reply tokens travel over the same
+ * transport as the outer exchange (e.g. IAKerb).  The no_auto_armor guard on
+ * the nested context prevents infinite recursion.
+ */
+static krb5_error_code
+begin_armor_ccache_acquire(krb5_context context, krb5_init_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_principal anon_princ = NULL;
+    const krb5_data *realm = &ctx->request->client->realm;
+
+    TRACE_INIT_CREDS_ANON_ARMOR(context);
+
+    code = krb5_cc_new_unique(context, "MEMORY", NULL, &ctx->armor_ccache);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_build_principal_ext(context, &anon_princ,
+                                    realm->length, realm->data,
+                                    strlen(KRB5_WELLKNOWN_NAMESTR),
+                                    KRB5_WELLKNOWN_NAMESTR,
+                                    strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                    KRB5_ANONYMOUS_PRINCSTR, 0);
+    if (code != 0)
+        goto cleanup;
+    anon_princ->type = KRB5_NT_WELLKNOWN;
+
+    code = krb5_get_init_creds_opt_alloc(context, &ctx->armor_opt);
+    if (code != 0)
+        goto cleanup;
+    krb5_get_init_creds_opt_set_anonymous(ctx->armor_opt, 1);
+    krb5_get_init_creds_opt_set_tkt_life(ctx->armor_opt, 60 * 60);
+    code = krb5_get_init_creds_opt_set_out_ccache(context, ctx->armor_opt,
+                                                  ctx->armor_ccache);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_init_creds_init(context, anon_princ, NULL, NULL,
+                                ctx->start_time, ctx->armor_opt,
+                                &ctx->armor_ctx);
+    if (code != 0)
+        goto cleanup;
+    /* Never let the armor acquisition itself trigger another bootstrap. */
+    ctx->armor_ctx->no_auto_armor = TRUE;
+    ctx->armor_ctx->request_anon_armor = FALSE;
+
+cleanup:
+    krb5_free_principal(context, anon_princ);
+    return code;
+}
+
+/* Free any state associated with an in-progress or completed armor
+ * bootstrap. */
+static void
+free_armor_state(krb5_context context, krb5_init_creds_context ctx)
+{
+    if (ctx->armor_ctx != NULL) {
+        krb5_init_creds_free(context, ctx->armor_ctx);
+        ctx->armor_ctx = NULL;
+    }
+    if (ctx->armor_opt != NULL) {
+        krb5_get_init_creds_opt_free(context, ctx->armor_opt);
+        ctx->armor_opt = NULL;
+    }
+    if (ctx->armor_ccache != NULL) {
+        krb5_cc_destroy(context, ctx->armor_ccache);
+        ctx->armor_ccache = NULL;
+    }
+}
+
+/*
+ * The nested anonymous-armor acquisition has produced a TGT in armor_ccache.
+ * Install it as the FAST armor ccache, tear down the nested context (but keep
+ * armor_ccache alive; the fast ccache name resolves it on each restart), and
+ * restart the real exchange, emitting its first FAST-armored request into out.
+ */
+static krb5_error_code
+install_armor_and_restart(krb5_context context, krb5_init_creds_context ctx,
+                          krb5_data *out, krb5_data *realm,
+                          unsigned int *flags)
+{
+    krb5_error_code code;
+    char *ccname = NULL;
+
+    code = krb5_cc_get_full_name(context, ctx->armor_ccache, &ccname);
+    if (code != 0)
+        return code;
+    code = krb5_get_init_creds_opt_set_fast_ccache_name(context, ctx->opt,
+                                                        ccname);
+    krb5_free_string(context, ccname);
+    if (code != 0)
+        return code;
+
+    /* Done stepping the nested context; keep armor_ccache for the fast
+     * name. */
+    krb5_init_creds_free(context, ctx->armor_ctx);
+    ctx->armor_ctx = NULL;
+    krb5_get_init_creds_opt_free(context, ctx->armor_opt);
+    ctx->armor_opt = NULL;
+
+    /* Restart the real exchange, now with armor available. */
+    ctx->restarted = TRUE;
+    code = restart_init_creds_loop(context, ctx, TRUE);
+    if (code != 0)
+        return code;
+    code = init_creds_step_request(context, ctx, out);
+    if (code != 0)
+        return code;
+    ctx->loopcount++;
+    code = krb5int_copy_data_contents(context, &ctx->request->server->realm,
+                                      realm);
+    if (code != 0)
+        return code;
+    *flags = ctx->complete ? 0 : KRB5_INIT_CREDS_STEP_FLAG_CONTINUE;
+    return 0;
+}
+
+/*
+ * Drive the nested anonymous-armor acquisition by one step.  While it
+ * needs more round-trips, its request is emitted in out (and travels
+ * over the same transport as the outer exchange).  When it completes,
+ * install the armor and restart the real exchange.  On any failure we
+ * return the error and never fall back to an un-armored request.
+ */
+static krb5_error_code
+step_armor(krb5_context context, krb5_init_creds_context ctx, krb5_data *in,
+           krb5_data *out, krb5_data *realm, unsigned int *flags)
+{
+    krb5_error_code code;
+
+    code = krb5_init_creds_step(context, ctx->armor_ctx, in, out, realm,
+                                flags);
+    if (code != 0)
+        return code;
+    if (*flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)
+        return 0;
+    return install_armor_and_restart(context, ctx, out, realm, flags);
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1703,6 +1882,15 @@ init_creds_step_reply(krb5_context context,
             TRACE_FAST_PADATA_UPGRADE(context);
             ctx->restarted = TRUE;
             code = restart_init_creds_loop(context, ctx, TRUE);
+        } else if (want_anon_armor(context, ctx)) {
+            /*
+             * The KDC supports FAST but we have no armor ccache and
+             * no TGT.  Bootstrap anonymous-PKINIT armor;
+             * krb5_init_creds_step() will drive the nested acquisition
+             * and then restart this exchange FAST-armored.  Do not
+             * fall back to an un-armored request.
+             */
+            code = begin_armor_ccache_acquire(context, ctx);
         } else if (!ctx->restarted && reply_code == KDC_ERR_PREAUTH_FAILED &&
                    ctx->selected_preauth_type == KRB5_PADATA_NONE) {
             /* The KDC didn't like our informational padata (probably a pre-1.7
@@ -1891,6 +2079,11 @@ krb5_init_creds_step(krb5_context context,
     if (code)
         return code;
 
+    /* If a nested anonymous-armor acquisition is in progress, this exchange
+     * belongs to it; drive it instead of the outer request. */
+    if (ctx->armor_ctx != NULL)
+        return step_armor(context, ctx, in, out, realm, flags);
+
     if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
@@ -1905,6 +2098,12 @@ krb5_init_creds_step(krb5_context context,
         }
         if (code != 0 || ctx->complete)
             goto cleanup;
+        /* Reply processing may have started an anonymous-armor bootstrap; emit
+         * the first nested request over the same transport. */
+        if (ctx->armor_ctx != NULL) {
+            krb5_data none = empty_data();
+            return step_armor(context, ctx, &none, out, realm, flags);
+        }
     } else {
         code = restart_init_creds_loop(context, ctx, FALSE);
         if (code)

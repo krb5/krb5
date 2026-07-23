@@ -64,6 +64,21 @@ struct _krb5_init_creds_context {
     krb5_boolean info_pa_permitted;
     krb5_boolean restarted;
     krb5_boolean encts_disabled;
+    /*
+     * Automatic anonymous FAST armor bootstrap.  When
+     * request_anon_armor is set (via the request_anonymous_armor
+     * libdefaults option) and the KDC advertises FAST support but no
+     * armor ccache is available, we acquire an anonymous PKINIT
+     * ticket into armor_ccache using the nested armor_ctx, then use it
+     * as the FAST armor for the real request.  no_auto_armor guards
+     * the nested acquisition against triggering another bootstrap
+     * (infinite recursion).
+     */
+    krb5_boolean request_anon_armor;
+    krb5_boolean no_auto_armor;
+    krb5_init_creds_context armor_ctx;
+    krb5_ccache armor_ccache;
+    krb5_get_init_creds_opt *armor_opt;
     struct krb5_responder_context_st rctx;
     krb5_preauthtype current_preauth_type;
     krb5_preauthtype selected_preauth_type;

@@ -217,6 +217,8 @@ void krb5int_trace(krb5_context context, const char *fmt, ...);
 
 #define TRACE_INIT_CREDS(c, princ)                              \
     TRACE(c, "Getting initial credentials for {princ}", princ)
+#define TRACE_INIT_CREDS_ANON_ARMOR(c)                                  \
+    TRACE(c, "KDC supports FAST; acquiring anonymous armor ticket")
 #define TRACE_INIT_CREDS_AS_KEY_GAK(c, keyblock)                        \
     TRACE(c, "AS key obtained from gak_fct: {keyblock}", keyblock)
 #define TRACE_INIT_CREDS_AS_KEY_PREAUTH(c, keyblock)                    \
