@@ -270,7 +270,48 @@ if pkinit_enabled:
             'Preauth module encrypted_challenge (138) (real) returned: 0')
     realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
                'h:host@' + hostname, 'h:host'], expected_trace=msgs)
+    realm.stop()
 else:
     print('Skipping IAKERB auto_fast_armor test: PKINIT not built')
+
+# Test FAST OTP over IAKERB and regular GSS krb5.
+if pkinit_enabled and have_pyrad:
+    mark('IAKERB with FAST OTP')
+    otp_conf = {'plugins': {'kdcpreauth': {'enable_only': ['otp', 'pkinit']}},
+                'otp': {'unix': {'server': '$testdir/radius.socket',
+                                 'strip_realm': 'true'}}}
+    afa_conf = {'realms': {'$realm': {'auto_fast_armor': 'true'}}}
+    realm = K5Realm(kdc_conf=otp_conf, krb5_conf=afa_conf, get_creds=False,
+                    pkinit=True)
+    socket_file = os.path.join(realm.testdir, 'radius.socket')
+    otpval = 'otptestvalue'
+    daemon = start_mockradius(socket_file, otpval)
+
+    realm.run([kadminl, 'modprinc', '+requires_preauth', realm.user_princ])
+    realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+               '[{"type": "unix"}]'])
+    realm.addprinc('WELLKNOWN/ANONYMOUS')
+
+    msgs = ('Acquiring anonymous PKINIT armor ticket for FAST',
+            'Preauth module otp (141) (real) returned: 0')
+    realm.run(['./t_iakerb', 'p:' + realm.user_princ, 'otp:' + otpval,
+               'h:host@' + hostname, 'h:host'], expected_trace=msgs)
+
+    check_mockradius(daemon, 'True user %s' % otpval)
+
+    # Test the otp option with the regular krb5 mechanism, which acquires
+    # initial credentials eagerly during gss_acquire_cred_from().
+    mark('krb5 mech with OTP credential store option')
+    daemon = start_mockradius(socket_file, otpval)
+
+    # Use the -k option to suppress SPNEGO (which would generate a
+    # second OTP request; the mock RADIUS daemon only handles one).
+    realm.run(['./t_credstore', '-i', '-k', 'p:' + realm.user_princ,
+               'otp', otpval], expected_trace=msgs)
+
+    check_mockradius(daemon, 'True user %s' % otpval)
+    realm.stop()
+else:
+    print('Skipping GSS OTP tests: PKINIT not built or pyrad not found')
 
 success('GSSAPI tests')
