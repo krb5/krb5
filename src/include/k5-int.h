@@ -293,6 +293,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_REALM_TRY_DOMAINS            "realm_try_domains"
 #define KRB5_CONF_REJECT_BAD_TRANSIT           "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME               "renew_lifetime"
+#define KRB5_CONF_REQUEST_ANONYMOUS_ARMOR      "request_anonymous_armor"
 #define KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT    "restrict_anonymous_to_tgt"
 #define KRB5_CONF_SITENAME                     "sitename"
 #define KRB5_CONF_SUPPORTED_ENCTYPES           "supported_enctypes"

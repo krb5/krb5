@@ -466,4 +466,29 @@ realm.kinit(realm.user_princ, flags=['-X', p11_attr], password='userpin')
 realm.klist(realm.user_princ)
 realm.run([kvno, realm.host_princ])
 
+# Test request_anonymous_armor: with no armor ccache configured and no
+# pre-existing TGT, initial credential acquisition should bootstrap an
+# anonymous PKINIT ticket to use as FAST armor when the KDC advertises
+# FAST support, then complete the real request FAST-armored.
+mark('request_anonymous_armor')
+armor_conf = {'libdefaults': {'request_anonymous_armor': 'true'}}
+armor_realm = K5Realm(kdc_conf=pkinit_kdc_conf, krb5_conf=armor_conf,
+                      pkinit=True)
+armor_realm.addprinc('WELLKNOWN/ANONYMOUS')
+msgs = ('KDC supports FAST; acquiring anonymous armor ticket',
+       'Getting initial credentials for WELLKNOWN/ANONYMOUS@%s' %
+       armor_realm.realm,
+       'Using FAST due to armor ccache negotiation result',
+       'Destroying ccache MEMORY:')
+armor_realm.kinit(armor_realm.user_princ, password=password('user'),
+                  expected_trace=msgs)
+armor_realm.klist(armor_realm.user_princ)
+
+# The bootstrap must not recur for the anonymous principal itself
+# (request_anon_armor is off for the nested acquisition, and
+# want_anon_armor() also excludes the anonymous principal directly).
+# This would hang or fail if the guard were broken.
+armor_realm.kinit('@%s' % armor_realm.realm, flags=['-n'])
+armor_realm.stop()
+
 success('PKINIT tests')

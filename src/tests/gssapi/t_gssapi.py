@@ -1,4 +1,6 @@
 from k5test import *
+import io
+import multiprocessing
 
 # Test krb5 negotiation under SPNEGO for all enctype configurations.  Also
 # test IOV wrap/unwrap with and without SPNEGO.
@@ -43,6 +45,91 @@ realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
 # Test IAKERB realm discovery with a non-useful default_realm set.
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'p:' + realm.host_princ], env=wrong_default)
+
+# Regression test for IAKERB initial credential acquisition with OTP
+# preauth.  The KDC only offers OTP once a FAST armor is available, and
+# IAKERB has no way to supply an armor ccache of its own, so this relies
+# on request_anonymous_armor to bootstrap one.  IAKERB also has no
+# prompter (init creds is driven programmatically), so the OTP preauth
+# client needs a responder to supply the OTP value; without one, it
+# fails with EIO.
+try:
+    from pyrad import packet, dictionary
+    have_pyrad = True
+except ImportError:
+    have_pyrad = False
+
+if not pkinit_enabled:
+    have_pyrad = False
+
+if have_pyrad:
+    multiprocessing.set_start_method('fork', force=True)
+
+    radius_dict = dictionary.Dictionary(io.StringIO('''
+ATTRIBUTE    User-Name    1    string
+ATTRIBUTE    User-Password   2    octets
+ATTRIBUTE    Message-Authenticator 80 octets
+'''))
+    radius_secret = b'otptest'
+
+    # Receive one RADIUS Access-Request and accept it if the OTP value
+    # matches expect_pass, then report the result on outq.
+    def otp_radius_once(addr, expect_pass, outq):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((addr.split(':')[0], int(addr.split(':')[1])))
+        buf, peer = sock.recvfrom(4096)
+        pkt = packet.AuthPacket(secret=radius_secret, dict=radius_dict,
+                                packet=buf)
+        passwd = list(map(pkt.PwDecrypt, pkt['User-Password']))
+        reply = pkt.CreateReply()
+        reply.code = (packet.AccessAccept if passwd == [expect_pass]
+                     else packet.AccessReject)
+        reply.add_message_authenticator()
+        outq.put(passwd == [expect_pass])
+        sock.sendto(reply.ReplyPacket(), peer)
+        sock.close()
+
+    otp_secret_file = '/tmp/%d.iakerb-otp.secret' % os.getpid()
+    with open(otp_secret_file, 'w') as f:
+        f.write(radius_secret.decode('ascii'))
+    atexit.register(lambda: os.remove(otp_secret_file))
+
+    armor_conf = {'libdefaults': {'request_anonymous_armor': 'true'}}
+    otp_conf = {'realms': {'$realm': {
+                    'default_principal_flags': '+preauth',
+                    'pkinit_eku_checking': 'none'}},
+               'plugins': {'kdcpreauth': {'enable_only': ['otp', 'pkinit']}},
+               'otp': {'udp': {'server': '127.0.0.1:$port9',
+                               'secret': otp_secret_file,
+                               'strip_realm': 'true'}}}
+    # Use a distinct portbase and testdir: the outer realm is still
+    # running.  (The realm name must stay KRBTEST.COM to match the
+    # test PKINIT certificates' SAN.)
+    otp_realm = K5Realm(kdc_conf=otp_conf, krb5_conf=armor_conf,
+                        get_creds=False, pkinit=True, portbase=62000,
+                        testdir=os.path.join(realm.testdir, 'otp'))
+    otp_realm.addprinc('WELLKNOWN/ANONYMOUS')
+    otp_realm.run([kadminl, 'modprinc', '+requires_preauth',
+                   otp_realm.user_princ])
+    otp_realm.run([kadminl, 'setstr', otp_realm.user_princ, 'otp',
+                   '[{"type": "udp"}]'])
+
+    server_addr = '127.0.0.1:' + str(otp_realm.portbase + 9)
+    otp_queue = multiprocessing.Queue()
+    otp_daemon = multiprocessing.Process(target=otp_radius_once,
+                                         args=(server_addr, 'accept',
+                                               otp_queue))
+    otp_daemon.start()
+    mark('IAKERB with OTP responder and anonymous FAST armor')
+    otp_realm.run(['./t_iakerb', 'p:' + otp_realm.user_princ, 'accept',
+                  'h:host@' + hostname, 'h:host'])
+    if not otp_queue.get(timeout=5):
+        fail('RADIUS daemon rejected expected OTP value')
+    otp_daemon.join()
+    otp_realm.stop()
+else:
+    print('Skipping IAKERB OTP responder test: '
+         'pyrad module not found or PKINIT not built')
 
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])

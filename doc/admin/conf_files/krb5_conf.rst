@@ -372,6 +372,18 @@ The libdefaults section may contain any of the following relations:
     (:ref:`duration` string.)  Sets the default renewable lifetime
     for initial ticket requests.  The default value is 0.
 
+**request_anonymous_armor**
+    If this flag is true, initial credential acquisition will
+    automatically bootstrap an anonymous PKINIT ticket to use as a
+    FAST armor when the KDC indicates that FAST is supported but no
+    armor ccache is otherwise configured (as with kinit's **-T**
+    option).  This allows preauthentication mechanisms that require
+    FAST, such as OTP, to work without a pre-existing ticket.  The
+    bootstrapped ticket is discarded once the real request completes.
+    This flag has no effect if the client principal is itself the
+    anonymous principal.  The default value is false.  New in release
+    1.23.
+
 **request_timeout**
     (:ref:`duration` string.)  Sets the maximum total time for KDC and
     password change requests.  This timeout does not affect the
