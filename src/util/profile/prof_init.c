@@ -654,12 +654,12 @@ errcode_t profile_ser_internalize(profile_t *profilep,
         goto cleanup;
     }
 
-    if ((retval = profile_init((const_profile_filespec_t *) flist,
-                               profilep)))
-        goto cleanup;
-
+    /* Update the buffer pointer even if profile initialization fails, so the
+     * caller can keep deserializing from the correct position.  */
     *bufpp = bp;
     *remainp = remain;
+
+    retval = profile_init((const_profile_filespec_t *) flist, profilep);
 
 cleanup:
     if (flist) {
