@@ -50,8 +50,8 @@ krb5_k_verify_checksum_iov(krb5_context context,
     if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
 
-    ret = verify_key(ctp, key);
-    if (ret != 0)
+    ret = verify_cksumtype_and_key(ctp, key, usage);
+    if (ret)
         return ret;
 
     checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data,
