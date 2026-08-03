@@ -2030,7 +2030,8 @@ cms_signeddata_verify(krb5_context context,
         unsigned char *d;
         *is_signed = 0;
         octets = CMS_get0_content(cms);
-        if (!octets || (ASN1_STRING_type(*octets) != V_ASN1_OCTET_STRING)) {
+        if (octets == NULL || *octets == NULL ||
+            (ASN1_STRING_type(*octets) != V_ASN1_OCTET_STRING)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval,
                                    _("Invalid pkinit packet: octet string "
@@ -2085,9 +2086,10 @@ cms_signeddata_verify(krb5_context context,
         *is_signed = 0;
         /* We cannot use CMS_dataInit because there may be no digest */
         octets = CMS_get0_content(cms);
-        if (octets)
+        if (octets != NULL && *octets != NULL) {
             out = BIO_new_mem_buf(ASN1_STRING_get0_data(*octets),
                                   ASN1_STRING_length(*octets));
+        }
         if (out == NULL)
             goto cleanup;
     } else {
