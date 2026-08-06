@@ -18,8 +18,7 @@ Mailing lists
 * krbcore@mit.edu is a private list for the MIT krb5 core team.  Send
   mail to this list if you need to contact the core team.
 * krbcore-security@mit.edu is the point of contact for security problems
-  with MIT Kerberos.  Please use PGP-encrypted mail to report possible
-  vulnerabilities to this list.
+  with MIT Kerberos.
 
 
 IRC channels
