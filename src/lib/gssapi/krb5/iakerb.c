@@ -456,6 +456,30 @@ cleanup:
     return code;
 }
 
+/* Answer an OTP challenge with the caller-supplied password.  IAKERB provides
+ * no prompter, so the OTP preauth module cannot otherwise collect a value. */
+static krb5_error_code
+iakerb_otp_responder(krb5_context context, void *data,
+                     krb5_responder_context rctx)
+{
+    const char *password = data;
+    krb5_responder_otp_challenge *chl = NULL;
+    krb5_error_code ret;
+
+    if (krb5_responder_get_challenge(context, rctx,
+                                     KRB5_RESPONDER_QUESTION_OTP) == NULL)
+        return 0;
+
+    ret = krb5_responder_otp_get_challenge(context, rctx, &chl);
+    if (ret != 0 || chl == NULL)
+        return 0;
+
+    /* Answer the first token-info with the password as the OTP value. */
+    ret = krb5_responder_otp_set_answer(context, rctx, 0, password, NULL);
+    krb5_responder_otp_challenge_free(context, rctx, chl);
+    return ret;
+}
+
 /*
  * Initialise the krb5_init_creds context for the IAKERB context
  */
@@ -485,6 +509,15 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
                                                   cred->ccache);
     if (code != 0)
         goto cleanup;
+
+    /* Answer OTP challenges with the password, as we have no prompter. */
+    if (cred->password != NULL) {
+        code = krb5_get_init_creds_opt_set_responder(ctx->k5c, ctx->gic_opts,
+                                                     iakerb_otp_responder,
+                                                     cred->password);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = krb5_init_creds_init(ctx->k5c,
                                 cred->name->princ,

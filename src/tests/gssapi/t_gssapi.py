@@ -270,7 +270,93 @@ if pkinit_enabled:
             'Preauth module encrypted_challenge (138) (real) returned: 0')
     realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
                'h:host@' + hostname, 'h:host'], expected_trace=msgs)
+    realm.stop()
 else:
     print('Skipping IAKERB auto_fast_armor test: PKINIT not built')
+
+# Test iakerb_otp_responder() together with auto_fast_armor.  Requires
+# pyrad to simulate the RADIUS backend the otp kdcpreauth module talks to.
+try:
+    from pyrad import packet, dictionary
+except ImportError:
+    packet = None
+
+if pkinit_enabled and packet is not None:
+    import atexit
+    import io
+    import multiprocessing
+
+    multiprocessing.set_start_method('fork', force=True)
+
+    radius_attributes = '''
+ATTRIBUTE    User-Name    1    string
+ATTRIBUTE    User-Password   2    octets
+ATTRIBUTE    Message-Authenticator 80 octets
+'''
+
+    class OneShotRadiusDaemon(multiprocessing.Process):
+        DICTIONARY = dictionary.Dictionary(io.StringIO(radius_attributes))
+
+        def run(self):
+            addr, secretfile, otpval, outq = self._args
+            with open(secretfile, 'rb') as f:
+                secret = f.read().strip()
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.bind((addr.split(':')[0], int(addr.split(':')[1])))
+            outq.put('started')
+            buf, clientaddr = sock.recvfrom(4096)
+            pkt = packet.AuthPacket(secret=secret,
+                                    dict=OneShotRadiusDaemon.DICTIONARY,
+                                    packet=buf)
+            passwd = list(map(pkt.PwDecrypt, pkt['User-Password']))
+            accepted = (passwd == [otpval])
+            reply = pkt.CreateReply()
+            reply.code = (packet.AccessAccept if accepted
+                         else packet.AccessReject)
+            reply.add_message_authenticator()
+            outq.put(accepted)
+            sock.sendto(reply.ReplyPacket(), clientaddr)
+            sock.close()
+
+    mark('IAKERB with OTP responder')
+    otpval = 'otptestvalue'
+    secret_file = '/tmp/%d.otpsecret' % os.getpid()
+    with open(secret_file, 'w') as f:
+        f.write('otpresponder')
+    atexit.register(lambda: os.remove(secret_file))
+
+    otp_conf = {'plugins': {'kdcpreauth': {'enable_only': ['otp', 'pkinit']}},
+               'otp': {'udp': {'server': '127.0.0.1:$port9',
+                               'secret': secret_file,
+                               'strip_realm': 'true'}}}
+    afa_conf = {'realms': {'$realm': {'auto_fast_armor': 'true'}}}
+    realm = K5Realm(kdc_conf=otp_conf, krb5_conf=afa_conf, get_creds=False,
+                    pkinit=True)
+    realm.run([kadminl, 'modprinc', '+requires_preauth', realm.user_princ])
+    realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
+               '[{"type": "udp"}]'])
+    realm.addprinc('WELLKNOWN/ANONYMOUS')
+
+    queue = multiprocessing.Queue()
+    server_addr = '127.0.0.1:' + str(realm.portbase + 9)
+    daemon = OneShotRadiusDaemon(args=(server_addr, secret_file, otpval,
+                                       queue))
+    daemon.daemon = True
+    daemon.start()
+    queue.get()
+
+    msgs = ('Acquiring anonymous PKINIT armor ticket for FAST',
+            'Preauth module otp (141) (real) returned: 0')
+    realm.run(['./t_iakerb', 'p:' + realm.user_princ, otpval,
+               'h:host@' + hostname, 'h:host'], expected_trace=msgs)
+
+    accepted = queue.get(timeout=5)
+    if not accepted:
+        fail('RADIUS daemon rejected the OTP value fed by the responder')
+    daemon.join()
+    realm.stop()
+else:
+    print('Skipping IAKERB OTP responder test: PKINIT not built or pyrad '
+         'not found')
 
 success('GSSAPI tests')
