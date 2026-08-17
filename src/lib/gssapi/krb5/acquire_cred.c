@@ -325,7 +325,7 @@ can_get_initial_creds(krb5_context context, krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
 
-    if (cred->password != NULL)
+    if (cred->password != NULL || cred->otp != NULL)
         return TRUE;
 
     if (cred->client_keytab == NULL)
@@ -579,8 +579,9 @@ kg_cred_set_initial_refresh(krb5_context context, krb5_gss_cred_id_rec *cred,
 {
     krb5_timestamp refresh;
 
-    /* For now, we only mark keytab-acquired credentials for refresh. */
-    if (cred->password != NULL)
+    /* For now, we only mark keytab-acquired credentials for refresh.  An OTP
+     * value is single-use, so it cannot be used to refresh. */
+    if (cred->password != NULL || cred->otp != NULL)
         return;
 
     /* Make a note to refresh these when they are halfway to expired. */
@@ -606,7 +607,35 @@ verify_initial_cred(krb5_context context, krb5_creds *creds,
                                   verify->keytab, NULL, &vopts);
 }
 
-/* Get initial credentials using the supplied password or client keytab. */
+/*
+ * Answer an OTP challenge with the OTP value from the credential store.  No
+ * prompter is available during credential acquisition, so the OTP preauth
+ * module cannot otherwise collect a value.
+ */
+krb5_error_code KRB5_CALLCONV
+kg_otp_responder(krb5_context context, void *data,
+                 krb5_responder_context rctx)
+{
+    const char *otp = data;
+    krb5_responder_otp_challenge *chl = NULL;
+    krb5_error_code ret;
+
+    if (krb5_responder_get_challenge(context, rctx,
+                                     KRB5_RESPONDER_QUESTION_OTP) == NULL)
+        return 0;
+
+    ret = krb5_responder_otp_get_challenge(context, rctx, &chl);
+    if (ret != 0 || chl == NULL)
+        return 0;
+
+    /* Answer the first token-info with the OTP value. */
+    ret = krb5_responder_otp_set_answer(context, rctx, 0, otp, NULL);
+    krb5_responder_otp_challenge_free(context, rctx, chl);
+    return ret;
+}
+
+/* Get initial credentials using the supplied password, OTP value, or client
+ * keytab. */
 static krb5_error_code
 get_initial_cred(krb5_context context, const struct verify_params *verify,
                  krb5_gss_cred_id_rec *cred)
@@ -621,7 +650,14 @@ get_initial_cred(krb5_context context, const struct verify_params *verify,
     code = krb5_get_init_creds_opt_set_out_ccache(context, opt, cred->ccache);
     if (code)
         goto cleanup;
-    if (cred->password != NULL) {
+    if (cred->otp != NULL) {
+        code = krb5_get_init_creds_opt_set_responder(context, opt,
+                                                     kg_otp_responder,
+                                                     cred->otp);
+        if (code)
+            goto cleanup;
+    }
+    if (cred->password != NULL || cred->otp != NULL) {
         code = krb5_get_init_creds_password(context, &creds, cred->name->princ,
                                             cred->password, NULL, NULL, 0,
                                             NULL, opt);
@@ -680,7 +716,7 @@ maybe_get_initial_cred(krb5_context context,
 static OM_uint32
 acquire_init_cred(krb5_context context, OM_uint32 *minor_status,
                   krb5_ccache req_ccache, gss_buffer_t password,
-                  krb5_keytab client_keytab,
+                  const char *otp, krb5_keytab client_keytab,
                   const struct verify_params *verify,
                   krb5_gss_cred_id_rec *cred)
 {
@@ -695,13 +731,23 @@ acquire_init_cred(krb5_context context, OM_uint32 *minor_status,
                                                  &caller_ccname)))
         return GSS_S_FAILURE;
 
+    if (otp != NULL) {
+        cred->otp = strdup(otp);
+        if (cred->otp == NULL) {
+            code = ENOMEM;
+            goto error;
+        }
+    }
+
     if (password != GSS_C_NO_BUFFER) {
         pwdata = make_data(password->value, password->length);
         code = krb5int_copy_data_contents_add0(context, &pwdata, &pwcopy);
         if (code)
             goto error;
         cred->password = pwcopy.data;
+    }
 
+    if (password != GSS_C_NO_BUFFER || otp != NULL) {
         /* We will fetch the credential into a private memory ccache. */
         assert(req_ccache == NULL);
         code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
@@ -781,10 +827,10 @@ error:
 static OM_uint32
 acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
                      gss_name_t desired_name, gss_buffer_t password,
-                     OM_uint32 time_req, gss_cred_usage_t cred_usage,
-                     krb5_ccache ccache, krb5_keytab client_keytab,
-                     krb5_keytab keytab, const char *rcname,
-                     const struct verify_params *verify,
+                     const char *otp, OM_uint32 time_req,
+                     gss_cred_usage_t cred_usage, krb5_ccache ccache,
+                     krb5_keytab client_keytab, krb5_keytab keytab,
+                     const char *rcname, const struct verify_params *verify,
                      krb5_boolean iakerb, gss_cred_id_t *output_cred_handle,
                      OM_uint32 *time_rec)
 {
@@ -853,7 +899,7 @@ acquire_cred_context(krb5_context context, OM_uint32 *minor_status,
      * in cred->name if it wasn't set above.
      */
     if (cred_usage == GSS_C_INITIATE || cred_usage == GSS_C_BOTH) {
-        ret = acquire_init_cred(context, minor_status, ccache, password,
+        ret = acquire_init_cred(context, minor_status, ccache, password, otp,
                                 client_keytab, verify, cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
@@ -925,8 +971,8 @@ acquire_cred(OM_uint32 *minor_status, gss_name_t desired_name,
     }
 
     ret = acquire_cred_context(context, minor_status, desired_name, password,
-                               time_req, cred_usage, ccache, NULL, keytab,
-                               NULL, NULL, iakerb, output_cred_handle,
+                               NULL, time_req, cred_usage, ccache, NULL,
+                               keytab, NULL, NULL, iakerb, output_cred_handle,
                                time_rec);
 
 out:
@@ -1187,7 +1233,7 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
     krb5_keytab keytab = NULL;
     krb5_ccache ccache = NULL;
     krb5_principal verify_princ = NULL;
-    const char *rcname, *value;
+    const char *rcname, *value, *otp = NULL;
     struct verify_params vparams = { NULL };
     const struct verify_params *verify = NULL;
     gss_buffer_desc pwbuf;
@@ -1273,6 +1319,25 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
         password = &pwbuf;
     }
 
+    ret = kg_value_from_cred_store(cred_store, KRB5_CS_OTP_URN, &otp);
+    if (GSS_ERROR(ret))
+        goto out;
+
+    if (otp != NULL) {
+        /* An OTP value answers OTP preauth challenges during initial
+         * credential acquisition, with the same constraints as a password. */
+        if (desired_name == GSS_C_NO_NAME) {
+            ret = GSS_S_BAD_NAME;
+            goto out;
+        }
+        if (cred_usage == GSS_C_ACCEPT || ccache != NULL ||
+            client_keytab != NULL) {
+            *minor_status = (OM_uint32)G_BAD_USAGE;
+            ret = GSS_S_FAILURE;
+            goto out;
+        }
+    }
+
     ret = kg_value_from_cred_store(cred_store, KRB5_CS_VERIFY_URN, &value);
     if (GSS_ERROR(ret))
         goto out;
@@ -1297,8 +1362,8 @@ acquire_cred_from(OM_uint32 *minor_status, const gss_name_t desired_name,
         verify = &vparams;
     }
     ret = acquire_cred_context(context, minor_status, desired_name, password,
-                               time_req, cred_usage, ccache, client_keytab,
-                               keytab, rcname, verify, iakerb,
+                               otp, time_req, cred_usage, ccache,
+                               client_keytab, keytab, rcname, verify, iakerb,
                                output_cred_handle, time_rec);
 
 out:

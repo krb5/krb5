@@ -265,6 +265,12 @@ The following options are supported by the krb5 mechanism:
   be used for verification when initiator credentials are acquired
   using a password and verified.
 
+* **otp**: For acquiring initiator credentials, a one-time password
+  value to be used if the KDC requests OTP preauthentication.  This
+  option may not be used with the **ccache** or **client_keytab**
+  options, and a *desired_name* must be specified.  (New in release
+  1.23.)
+
 * **password**: For acquiring initiator credentials, this option
   instructs the mechanism to acquire fresh credentials into a unique
   memory credential cache.  This option may not be used with the
