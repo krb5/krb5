@@ -439,6 +439,102 @@ k5_pac_validate_client(krb5_context context, const krb5_pac pac,
     return ret;
 }
 
+static krb5_error_code
+krb5_pac_get_upn_dns_name(krb5_context context, const krb5_pac pac,
+                          krb5_principal *canon_princ_out)
+{
+    krb5_error_code ret = 0;
+    krb5_data upn_dns_info;
+    char *dns_domain_name = NULL;
+    char *canon_name = NULL;
+    size_t idx = 0;
+    uint32_t flags = 0;
+    uint16_t dns_domain_name_length = 0;
+    uint16_t dns_domain_name_offset = 0;
+    uint16_t canon_name_length = 0;
+    uint16_t canon_name_offset = 0;
+
+    *canon_princ_out = NULL;
+
+    ret = k5_pac_locate_buffer(context, pac, KRB5_PAC_UPN_DNS_INFO,
+                               &upn_dns_info);
+    if (ret) {
+        /* Don’t return an error code if the buffer doesn’t exist. */
+        if (ret == ENOENT)
+            ret = 0;
+        goto cleanup;
+    }
+
+    if (upn_dns_info.length < PAC_UPN_DNS_INFO_LENGTH) {
+        ret = ERANGE;
+        goto cleanup;
+    }
+
+    /* The first four bytes are for the UPN. */
+    idx += 4;
+
+    dns_domain_name_length = load_16_le(upn_dns_info.data + idx);
+    idx += 2;
+    dns_domain_name_offset = load_16_le(upn_dns_info.data + idx);
+    idx += 2;
+    flags = load_32_le(upn_dns_info.data + idx);
+    idx += 4;
+
+    if (flags & PAC_UPN_DNS_INFO_FLAGS_HAS_SAM_NAME_AND_SID) {
+        /* Ensure that there is room for the extended structure. */
+        if (upn_dns_info.length < PAC_UPN_DNS_INFO_EX_LENGTH) {
+            ret = ERANGE;
+            goto cleanup;
+        }
+
+        canon_name_length = load_16_le(upn_dns_info.data + idx);
+        idx += 2;
+        canon_name_offset = load_16_le(upn_dns_info.data + idx);
+        idx += 2;
+    }
+
+    if (upn_dns_info.length < dns_domain_name_offset + dns_domain_name_length ||
+        dns_domain_name_length % 2) {
+        ret = ERANGE;
+        goto cleanup;
+    }
+
+    ret = k5_utf16le_to_utf8((unsigned char *)upn_dns_info.data +
+                             dns_domain_name_offset,
+                             dns_domain_name_length, &dns_domain_name);
+    if (ret)
+        goto cleanup;
+
+    if (canon_name_offset) {
+        if (upn_dns_info.length < canon_name_offset + canon_name_length ||
+            canon_name_length % 2) {
+            ret = ERANGE;
+            goto cleanup;
+        }
+
+        ret = k5_utf16le_to_utf8((unsigned char *)upn_dns_info.data +
+                                 canon_name_offset,
+                                 canon_name_length, &canon_name);
+        if (ret)
+            goto cleanup;
+
+        ret = krb5_parse_name_flags(context, canon_name,
+                                    KRB5_PRINCIPAL_PARSE_NO_REALM |
+                                        KRB5_PRINCIPAL_PARSE_NO_DEF_REALM,
+                                    canon_princ_out);
+        if (ret)
+            goto cleanup;
+
+        (*canon_princ_out)->realm = string2data(dns_domain_name);
+        dns_domain_name = NULL;
+    }
+
+cleanup:
+    free(canon_name);
+    free(dns_domain_name);
+    return ret;
+}
+
 /* Zero out the signature in a copy of the PAC data. */
 static krb5_error_code
 zero_signature(krb5_context context, const krb5_pac pac, uint32_t type,
@@ -845,6 +941,7 @@ mspac_verify(krb5_context context, krb5_authdata_context actx,
 {
     krb5_error_code ret;
     struct mspac_context *pacctx = (struct mspac_context *)request_context;
+    krb5_principal canon_principal = NULL;
 
     if (pacctx->pac == NULL)
         return EINVAL;
@@ -854,6 +951,16 @@ mspac_verify(krb5_context context, krb5_authdata_context actx,
                           req->ticket->enc_part2->client, key, NULL);
     if (ret)
         TRACE_MSPAC_VERIFY_FAIL(context, ret);
+
+    ret = krb5_pac_get_upn_dns_name(context, pacctx->pac, &canon_principal);
+    if (ret)
+        return ret;
+
+    if (canon_principal != NULL) {
+        /* Replace the ticket principal with the canonical principal. */
+        krb5_free_principal(context, req->ticket->enc_part2->client);
+        req->ticket->enc_part2->client = canon_principal;
+    }
 
     /*
      * If the above verification failed, don't fail the whole authentication,
