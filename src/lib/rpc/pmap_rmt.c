@@ -48,7 +48,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #include <gssrpc/pmap_clnt.h>
 #include <gssrpc/pmap_rmt.h>
 #include <sys/socket.h>
-#ifdef sun
+#if defined(sun) || defined(__HAIKU__)
 #include <sys/sockio.h>
 #endif
 #ifdef OSF1

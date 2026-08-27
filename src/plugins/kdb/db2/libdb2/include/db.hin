@@ -38,6 +38,7 @@
 
 #include <db-config.h>
 
+#include <stdint.h>
 #include <sys/types.h>
 
 #define	RET_ERROR	-1		/* Return values. */
