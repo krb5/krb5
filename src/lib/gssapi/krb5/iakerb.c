@@ -486,6 +486,14 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
+    if (cred->otp != NULL) {
+        code = krb5_get_init_creds_opt_set_responder(ctx->k5c, ctx->gic_opts,
+                                                     kg_otp_responder,
+                                                     cred->otp);
+        if (code != 0)
+            goto cleanup;
+    }
+
     code = krb5_init_creds_init(ctx->k5c,
                                 cred->name->princ,
                                 NULL,   /* prompter */
@@ -502,7 +510,9 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     } else if (cred->client_keytab != NULL) {
         code = krb5_init_creds_set_keytab(ctx->k5c, ctx->icc,
                                           cred->client_keytab);
-    } else {
+    } else if (cred->otp == NULL) {
+        /* We need a password, keytab, or OTP value (whose preauth module
+         * determines the reply key) to get initial credentials. */
         code = KRB5_KT_NOTFOUND;
     }
     if (code != 0)
