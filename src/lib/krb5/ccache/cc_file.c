@@ -479,7 +479,7 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     k5_cc_mutex_lock(context, &data->lock);
 
     unlink(data->filename);
-    flags = O_CREAT | O_EXCL | O_RDWR | O_BINARY | O_CLOEXEC;
+    flags = O_CREAT | O_RDWR | O_BINARY | O_CLOEXEC;
     fd = open(data->filename, flags, 0600);
     if (fd == -1) {
         ret = interpret_errno(context, errno);
@@ -503,6 +503,12 @@ fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
     if (ret)
         goto cleanup;
     file_locked = TRUE;
+
+    st = ftruncate(fd, 0);
+    if (st == -1) {
+        ret = interpret_errno(context, errno);
+        goto cleanup;
+    }
 
     /* Prepare the header and principal in buf. */
     k5_buf_init_dynamic(&buf);
