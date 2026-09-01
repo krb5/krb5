@@ -44,6 +44,8 @@
  * or implied warranty.
  */
 
+#include <autoconf.h>
+
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>
