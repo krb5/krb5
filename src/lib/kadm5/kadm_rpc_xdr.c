@@ -1089,33 +1089,32 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
     char	    *p = NULL;
     krb5_principal  pr = NULL;
     static krb5_context context = NULL;
+    bool_t success = FALSE;
 
     /* using a static context here is ugly, but should work
        ok, and the other solutions are even uglier */
 
     if (!context &&
 	kadm5_init_krb5_context(&context))
-       return(FALSE);
+       goto cleanup;
 
     switch(xdrs->x_op) {
     case XDR_ENCODE:
 	if (*objp) {
 	     if((ret = krb5_unparse_name(context, *objp, &p)) != 0)
-		  return FALSE;
+		  goto cleanup;
 	}
 	if(!xdr_nullstring(xdrs, &p))
-	    return FALSE;
-	if (p) free(p);
+	    goto cleanup;
 	break;
     case XDR_DECODE:
 	if(!xdr_nullstring(xdrs, &p))
-	    return FALSE;
+	    goto cleanup;
 	if (p) {
 	     ret = krb5_parse_name(context, p, &pr);
 	     if(ret != 0)
-		  return FALSE;
+		  goto cleanup;
 	     *objp = pr;
-	     free(p);
 	} else
 	     *objp = NULL;
 	break;
@@ -1125,7 +1124,11 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 	*objp = NULL;
 	break;
     }
-    return TRUE;
+    success = TRUE;
+
+cleanup:
+    free(p);
+    return success;
 }
 
 bool_t
