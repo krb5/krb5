@@ -272,6 +272,10 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
 
 chpwfail:
 
+    /* Wipe any decrypted data in clear if present, and reuse it for the error
+     * message plaintext. */
+    zapfree(clear.data, clear.length);
+    clear = empty_data();
     ret = alloc_data(&clear, 2 + strlen(strresult));
     if (ret)
         goto bailout;
