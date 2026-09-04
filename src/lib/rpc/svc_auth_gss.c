@@ -197,6 +197,10 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 			 (caddr_t)&recv_tok))
 		return (FALSE);
 
+	/* Release any prior client name from a previous call. */
+	gss_release_name(&min_stat, &gd->client_name);
+	gd->client_name = GSS_C_NO_NAME;
+
 	gr->gr_major = gss_accept_sec_context(&gr->gr_minor,
 					      &gd->ctx,
 					      gd->cred,
@@ -216,7 +220,6 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 	if (gr->gr_major != GSS_S_COMPLETE &&
 	    gr->gr_major != GSS_S_CONTINUE_NEEDED) {
 		badauth(gr->gr_major, gr->gr_minor, rqst->rq_xprt);
-		gd->ctx = GSS_C_NO_CONTEXT;
 		goto errout;
 	}
 	gr->gr_ctx.value = "xxxx";
@@ -237,6 +240,8 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 		/* spkm3: no src_name (anonymous) */
 		if(!g_OID_equal(gss_mech_spkm3, mech)) {
 #endif
+		    /* Release any prior name in case we get here twice. */
+		    gss_release_buffer(&min_stat, &gd->cname);
 		    maj_stat = gss_display_name(&min_stat, gd->client_name,
 					    &gd->cname, &gd->sec.mech);
 #ifdef SPKM
@@ -488,6 +493,9 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 			ret_freegc (AUTH_FAILED);		/* XXX ? */
 
 		if (!svcauth_gss_acquire_cred(gd))
+			ret_freegc (AUTH_FAILED);
+
+		if (gd->established)
 			ret_freegc (AUTH_FAILED);
 
 		if (!svcauth_gss_accept_sec_context(rqst, &gr))
