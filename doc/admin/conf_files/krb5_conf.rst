@@ -261,6 +261,11 @@ The libdefaults section may contain any of the following relations:
     If this flag is true, initial tickets will be forwardable by
     default, if allowed by the KDC.  The default value is false.
 
+**forward_lifetime**
+    (:ref:`duration` string.)  Limits the lifetime of credentials
+    forwarded during GSSAPI credential delegation, and makes them
+    non-renewable.  By default, no limit is applied.
+
 **ignore_acceptor_hostname**
     When accepting GSSAPI or krb5 security contexts for host-based
     service principals, ignore any hostname passed by the calling

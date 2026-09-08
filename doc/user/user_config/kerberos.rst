@@ -139,6 +139,13 @@ programs.  These include:
     Default client keytab file name.  If unset, |ckeytab| will be
     used).
 
+**KRB5_FORWARD_LIFETIME**
+    Limits the lifetime of credentials forwarded during GSSAPI
+    credential delegation, and makes them non-renewable.  The value
+    is a duration string (see :ref:`duration`).  If not set, the
+    value of **forward_lifetime** from configuration files will be
+    used.  If that is also not set, no limit is applied.
+
 **KPROP_PORT**
     :ref:`kprop(8)` port to use.  Defaults to 754.
 
