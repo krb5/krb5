@@ -939,8 +939,8 @@ static const struct atype_info *pa_enc_ts_fields[] = {
 DEFSEQTYPE(pa_enc_ts, krb5_pa_enc_ts, pa_enc_ts_fields);
 
 DEFFIELD(setpw_0, struct krb5_setpw_req, password, 0, ostring_data);
-DEFFIELD(setpw_1, struct krb5_setpw_req, target, 1, principal);
-DEFFIELD(setpw_2, struct krb5_setpw_req, target, 2, realm_of_principal);
+DEFFIELD(setpw_1, struct krb5_setpw_req, target, 1, opt_principal);
+DEFFIELD(setpw_2, struct krb5_setpw_req, target, 2, opt_realm_of_principal);
 static const struct atype_info *setpw_req_fields[] = {
     &k5_atype_setpw_0, &k5_atype_setpw_1, &k5_atype_setpw_2
 };
