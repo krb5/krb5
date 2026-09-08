@@ -161,9 +161,11 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     krb5_kdb_encode_int16(entry->n_key_data, nextloc);
     nextloc += 2;
 
-    /* Put extended fields here */
-    if (entry->len != KRB5_KDB_V1_BASE_LENGTH)
-        abort();
+    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        k5_setmsg(context, retval, _("KDB entry length must be at least %d"),
+                  KRB5_KDB_V1_BASE_LENGTH);
+    }
 
     /* Any extra data that this version doesn't understand. */
     if (entry->e_length) {
