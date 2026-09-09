@@ -190,6 +190,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
      /* use AUTH_NONE until there is a client_handle */
      rqst->rq_xprt->xp_auth = &svc_auth_none;
 
+     memset(&call_arg, 0, sizeof(call_arg));
      memset(&call_res, 0, sizeof(call_res));
      creds.client_handle.length = 0;
      creds.client_handle.value = NULL;
@@ -314,7 +315,6 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	  }
 
 	  /* call is for us, deserialize arguments */
-	  memset(&call_arg, 0, sizeof(call_arg));
 	  if (! svc_getargs(rqst->rq_xprt, (xdrproc_t)xdr_authgssapi_init_arg,
 			    &call_arg)) {
 	       PRINTF(("svcauth_gssapi: cannot decode args\n"));
@@ -454,8 +454,9 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	  gssstat = call_res.gss_major;
 	  minor_stat = call_res.gss_minor;
 
-	  /* done with call args */
+	  /* Done with call_arg (it may be reused for AUTH_GSSAPI_MSG). */
 	  xdr_free((xdrproc_t)xdr_authgssapi_init_arg, &call_arg);
+	  memset(&call_arg, 0, sizeof(call_arg));
 
 	  PRINTF(("svcauth_gssapi: accept_sec_context returned %#x %#x\n",
 		  call_res.gss_major, call_res.gss_minor));
@@ -591,14 +592,11 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       switch (rqst->rq_proc) {
 	       case AUTH_GSSAPI_MSG:
 		    PRINTF(("svcauth_gssapi: GSSAPI_MSG, getting args\n"));
-		    memset(&call_arg, 0, sizeof(call_arg));
 		    if (! svc_getargs(rqst->rq_xprt,
 				      (xdrproc_t)xdr_authgssapi_init_arg,
 				      &call_arg)) {
 			 PRINTF(("svcauth_gssapi: cannot decode args\n"));
 			 LOG_MISCERR("protocol error in call arguments");
-			 xdr_free((xdrproc_t)xdr_authgssapi_init_arg,
-				  &call_arg);
 			 ret = AUTH_BADCRED;
 			 goto error;
 		    }
@@ -659,6 +657,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
      return AUTH_OK;
 
 error:
+     xdr_free((xdrproc_t)xdr_authgssapi_init_arg, &call_arg);
      if (creds.client_handle.length != 0) {
 	  PRINTF(("svcauth_gssapi: freeing client_handle len %d\n",
 		  (int) creds.client_handle.length));
