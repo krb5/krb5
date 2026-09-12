@@ -265,23 +265,34 @@ The following options are supported by the krb5 mechanism:
   be used for verification when initiator credentials are acquired
   using a password and verified.
 
+* **otp**: For acquiring initiator credentials, this option instructs
+  the mechanism to acquire fresh credentials into a unique memory
+  credential cache.  The value is used as a one-time password
+  credential if the KDC requests OTP preauthentication.  This option
+  may not be used with the **ccache** or **client_keytab** options,
+  and a *desired_name* must be specified.  (New in release 1.23.)
+
 * **password**: For acquiring initiator credentials, this option
   instructs the mechanism to acquire fresh credentials into a unique
-  memory credential cache.  This option may not be used with the
-  **ccache** or **client_keytab** options, and a *desired_name* must
-  be specified.  (New in release 1.19.)
+  memory credential cache.  The option value is used as the Kerberos
+  password.  This option may not be used with the **ccache** or
+  **client_keytab** options, and a *desired_name* must be specified.
+  This option may be used with the **otp** option, but only one of the
+  values will be used, depending on what preauthentication mechanisms
+  are made available by the KDC.  (New in release 1.19.)
 
 * **rcache**: For acquiring acceptor credentials, the name of the
   :ref:`replay cache <rcache_definition>` to be used when processing
   the initiator tokens.  (New in release 1.13.)
 
-* **verify**: For acquiring initiator credentials, this option
-  instructs the mechanism to verify the credentials by obtaining a
-  ticket to a service with a known key.  The service key is obtained
-  from the keytab specified with the **keytab** option or the default
-  keytab.  The value may be the name of a principal in the keytab, or
-  the empty string.  If the empty string is given, any ``host``
-  service principal in the keytab may be used.  (New in release 1.19.)
+* **verify**: When acquiring fresh initiator credentials with the
+  **password** or **otp** options, this option instructs the mechanism
+  to verify the credentials by obtaining a ticket to a service with a
+  known key.  The service key is obtained from the keytab specified
+  with the **keytab** option or the default keytab.  The value may be
+  the name of a principal in the keytab, or the empty string.  If the
+  empty string is given, any ``host`` service principal in the keytab
+  may be used.  (New in release 1.19.)
 
 In release 1.20 or later, if a collection name is specified for
 **cache** in a call to gss_store_cred_into(), an existing cache for
