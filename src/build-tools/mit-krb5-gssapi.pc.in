@@ -8,4 +8,4 @@ Description: Kerberos implementation of the GSSAPI
 Version: @KRB5_VERSION@
 Requires.private: mit-krb5
 Cflags: -I${includedir}
-Libs: -L${libdir} -lgssapi_krb5
+Libs: -L${libdir} @GSSAPI_PC_LIBS@
