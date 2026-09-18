@@ -2009,6 +2009,8 @@ crypto_retrieve_X509_sans(krb5_context context,
     const X509_EXTENSION *ext = NULL;
     GENERAL_NAMES *ialt = NULL;
     GENERAL_NAME *gen = NULL;
+    const ASN1_OBJECT *otype;
+    const ASN1_TYPE *ovalue;
 
     if (princs_ret != NULL)
         *princs_ret = NULL;
@@ -2069,10 +2071,15 @@ crypto_retrieve_X509_sans(krb5_context context,
         gen = sk_GENERAL_NAME_value(ialt, i);
         switch (gen->type) {
         case GEN_OTHERNAME:
-            name = asn1string_to_data(gen->d.otherName->value->value.sequence);
-            if (princs != NULL &&
-                OBJ_cmp(plgctx->id_pkinit_san,
-                        gen->d.otherName->type_id) == 0) {
+            otype = gen->d.otherName->type_id;
+            ovalue = gen->d.otherName->value;
+            if (princs != NULL && OBJ_cmp(plgctx->id_pkinit_san, otype) == 0) {
+                if (ovalue->type != V_ASN1_SEQUENCE) {
+                    pkiDebug("%s: id-pkinit-san name is not a sequence\n",
+                             __FUNCTION__);
+                    continue;
+                }
+                name = asn1string_to_data(ovalue->value.sequence);
 #ifdef DEBUG_ASN1
                 print_buffer_bin((unsigned char *)name.data, name.length,
                                  "/tmp/pkinit_san");
@@ -2084,8 +2091,13 @@ crypto_retrieve_X509_sans(krb5_context context,
                     p++;
                 }
             } else if (upns != NULL &&
-                       OBJ_cmp(plgctx->id_ms_san_upn,
-                               gen->d.otherName->type_id) == 0) {
+                       OBJ_cmp(plgctx->id_ms_san_upn, otype) == 0) {
+                if (ovalue->type != V_ASN1_UTF8STRING) {
+                    pkiDebug("%s: id-ms-san-upn name is not a UTF-8 string\n",
+                             __FUNCTION__);
+                    continue;
+                }
+                name = asn1string_to_data(ovalue->value.utf8string);
                 /* Prevent abuse of embedded null characters. */
                 if (memchr(name.data, '\0', name.length))
                     break;
