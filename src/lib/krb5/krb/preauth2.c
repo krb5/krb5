@@ -955,7 +955,8 @@ fill_response_items(krb5_context context, krb5_init_creds_context ctx,
     k5_response_items_reset(ctx->rctx.items);
     for (i = 0; in_padata[i] != NULL; i++) {
         pa = in_padata[i];
-        if (!pa_type_allowed(ctx, pa->pa_type))
+        if (!pa_type_allowed(ctx, pa->pa_type) ||
+            previously_failed(ctx, pa->pa_type))
             continue;
         h = find_module(context, ctx, pa->pa_type, &modreq);
         if (h == NULL)
