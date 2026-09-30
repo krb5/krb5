@@ -165,11 +165,11 @@ cleanup:
 static krb5_error_code
 get_from_known_folder(
     int folderId,
+    const char* software_suffix,
     char** pbuffer
 )
 {
     char szPath[MAX_PATH];
-    const char * software_suffix = "\\MIT\\Kerberos5";
     krb5_error_code retval = 0;
     size_t size;
     struct _stat s;
@@ -260,12 +260,14 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     }
 
     if (!name && !secure) {
-        retval = get_from_known_folder(CSIDL_APPDATA, &name);
+        retval = get_from_known_folder(CSIDL_APPDATA, "\\MIT\\Kerberos5",
+                                       &name);
         if (retval) return retval;
     }
 
     if (!name) {
-        retval = get_from_known_folder(CSIDL_COMMON_APPDATA, &name);
+        retval = get_from_known_folder(CSIDL_PROGRAM_FILES, "\\MIT\\Kerberos",
+                                       &name);
         if (retval) return retval;
     }
 
