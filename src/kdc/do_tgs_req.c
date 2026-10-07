@@ -923,7 +923,8 @@ check_tgs_req(kdc_realm_t *realm, struct tgs_req_info *t,
     /* Consult kdcpolicy modules, giving them a chance to modify the times of
      * the issued ticket. */
     ret = check_kdcpolicy_tgs(context, t->req, t->server, t->header_tkt,
-                              t->auth_indicators, kdc_time, times, status);
+                              t->auth_indicators, t->armor, kdc_time, times,
+                              status);
     if (ret)
         return ret;
 

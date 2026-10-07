@@ -217,8 +217,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     errcode = check_kdcpolicy_as(context, state->request, state->client,
                                  state->server, state->auth_indicators,
-                                 state->kdc_time, &state->enc_tkt_reply.times,
-                                 &state->status);
+                                 state->rstate->armor, state->kdc_time,
+                                 &state->enc_tkt_reply.times, &state->status);
     if (errcode)
         goto egress;
 
