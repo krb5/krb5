@@ -128,6 +128,23 @@ realm.kinit(realm.user_princ, password('user'),
 realm.run(['./adata', realm.krbtgt_princ],
           expected_msg='+97: [indcl, indcl2, indcl3]')
 
+# Test the kdcpreauth FAST armor ticket and PAC callbacks. The test
+# module asserts indicators describing the armor when the client has
+# the armorind string attribute.
+mark('kdcpreauth FAST armor callbacks')
+armor_ccache = os.path.join(realm.testdir, 'armor')
+realm.kinit(realm.host_princ, None, ['-k', '-c', armor_ccache])
+realm.run([kadminl, 'setstr', realm.user_princ, 'armorind', 'y'])
+realm.kinit(realm.user_princ, password('user'),
+            ['-T', armor_ccache, '-X', 'indicators=indcl'])
+realm.run(['./adata', realm.krbtgt_princ],
+          expected_msg='+97: [indcl, armor:%s, armorpac, armorclient]' %
+          realm.host_princ)
+realm.kinit(realm.user_princ, password('user'), ['-X', 'indicators=indcl'])
+realm.run(['./adata', realm.krbtgt_princ],
+          expected_msg='+97: [indcl, armor:none]')
+realm.run([kadminl, 'delstr', realm.user_princ, 'armorind'])
+
 # AS request to local TGT (resulting creds are used for TGS tests)
 mark('AS-REQ to local TGT auth indicator')
 realm.kinit(realm.user_princ, password('user'), ['-X', 'indicators=indcl'])

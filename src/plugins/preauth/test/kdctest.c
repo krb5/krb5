@@ -58,6 +58,12 @@
  * - It receives a space-separated list from the clpreauth module and asserts
  *   each string as an authentication indicator.  It always succeeds in
  *   pre-authenticating the request.
+ *
+ * - If the "armorind" attribute is set on the client principal, it also
+ *   asserts "armor:<armor ticket client>" (or "armor:none"), "armorpac" if the
+ *   armor ticket has a PAC, and "armorclient" if the KDC found the armor
+ *   client's database entry, using the fast_armor_ticket, fast_armor_pac, and
+ *   fast_armor_client callbacks.
  */
 
 #include "k5-int.h"
@@ -67,6 +73,31 @@
 #define TEST_PA_TYPE -123
 
 static krb5_preauthtype pa_types[] = { TEST_PA_TYPE, 0 };
+
+/* Assert authentication indicators describing the request's FAST armor. */
+static void
+add_armor_indicators(krb5_context context, krb5_kdcpreauth_callbacks cb,
+                     krb5_kdcpreauth_rock rock)
+{
+    krb5_error_code ret;
+    const krb5_ticket *armor = cb->fast_armor_ticket(context, rock);
+    char *name = NULL, *ind;
+
+    if (armor != NULL) {
+        ret = krb5_unparse_name(context, armor->enc_part2->client, &name);
+        assert(!ret);
+    }
+    if (asprintf(&ind, "armor:%s", (name != NULL) ? name : "none") < 0)
+        abort();
+    cb->add_auth_indicator(context, rock, ind);
+    free(ind);
+    krb5_free_unparsed_name(context, name);
+
+    if (cb->fast_armor_pac(context, rock) != NULL)
+        cb->add_auth_indicator(context, rock, "armorpac");
+    if (cb->fast_armor_client(context, rock) != NULL)
+        cb->add_auth_indicator(context, rock, "armorclient");
+}
 
 static void
 test_edata(krb5_context context, krb5_kdc_req *req,
@@ -119,7 +150,7 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_pa_data **list = NULL;
     krb5_data cookie_data, d;
     char *str, *ind, *toksave = NULL;
-    char *attr_err, *attr_2rt, *attr_fail2rt, *attr_failopt;
+    char *attr_err, *attr_2rt, *attr_fail2rt, *attr_failopt, *attr_armorind;
 
     ret = cb->get_string(context, rock, "err", &attr_err);
     assert(!ret);
@@ -128,6 +159,8 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     ret = cb->get_string(context, rock, "fail2rt", &attr_fail2rt);
     assert(!ret);
     ret = cb->get_string(context, rock, "failopt", &attr_failopt);
+    assert(!ret);
+    ret = cb->get_string(context, rock, "armorind", &attr_armorind);
     assert(!ret);
 
     /* Check the incoming cookie value. */
@@ -175,6 +208,8 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
             ind = strtok_r(NULL, " ", &toksave);
         }
         free(str);
+        if (attr_armorind != NULL)
+            add_armor_indicators(context, cb, rock);
         enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
     }
 
@@ -182,6 +217,7 @@ test_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
     cb->free_string(context, rock, attr_2rt);
     cb->free_string(context, rock, attr_fail2rt);
     cb->free_string(context, rock, attr_failopt);
+    cb->free_string(context, rock, attr_armorind);
     (*respond)(arg, ret, NULL, list, NULL);
 }
 
