@@ -31,13 +31,14 @@
  */
 
 /*
- * Usage: ./adata [-c ccname] [-p clientprinc] serviceprinc
+ * Usage: ./adata [-c ccname] [-p clientprinc] [-a armorccname] serviceprinc
  *            [ad-type ad-contents ...]
  *
  * This program acquires credentials for the specified service principal, using
  * the specified or default ccache, possibly including requested authdata.  The
  * resulting ticket is decrypted using the default keytab, and the authdata in
- * the ticket are displayed to stdout.
+ * the ticket are displayed to stdout.  If -a is given, the TGS requests are
+ * made with explicit FAST armor using a TGT from armorccname.
  *
  * In the requested authdata types, the type may be prefixed with '?' for an
  * AD-IF-RELEVANT container, '!' for an AD-MANDATORY-FOR-KDC container, or '^'
@@ -298,6 +299,8 @@ main(int argc, char **argv)
     krb5_principal client, server;
     krb5_ccache ccache;
     krb5_keytab keytab;
+    krb5_ccache armor_ccache = NULL;
+    krb5_tkt_creds_context tctx;
     krb5_creds in_creds, *creds;
     krb5_ticket *ticket;
     krb5_authdata **req_authdata = NULL, *ad;
@@ -307,8 +310,11 @@ main(int argc, char **argv)
 
     check(krb5_init_context(&ctx));
 
-    while ((c = getopt(argc, argv, "+c:p:")) != -1) {
+    while ((c = getopt(argc, argv, "+a:c:p:")) != -1) {
         switch (c) {
+        case 'a':
+            check(krb5_cc_resolve(ctx, optarg, &armor_ccache));
+            break;
         case 'c':
             ccname = optarg;
             break;
@@ -350,8 +356,20 @@ main(int argc, char **argv)
     in_creds.server = server;
     in_creds.authdata = req_authdata;
 
-    check(krb5_get_credentials(ctx, KRB5_GC_NO_STORE, ccache, &in_creds,
-                               &creds));
+    if (armor_ccache != NULL) {
+        creds = calloc(1, sizeof(*creds));
+        assert(creds != NULL);
+        check(krb5_tkt_creds_init(ctx, ccache, &in_creds, KRB5_GC_NO_STORE,
+                                  &tctx));
+        check(krb5_tkt_creds_set_fast_ccache(ctx, tctx, armor_ccache));
+        check(krb5_tkt_creds_get(ctx, tctx));
+        check(krb5_tkt_creds_get_creds(ctx, tctx, creds));
+        krb5_tkt_creds_free(ctx, tctx);
+        krb5_cc_close(ctx, armor_ccache);
+    } else {
+        check(krb5_get_credentials(ctx, KRB5_GC_NO_STORE, ccache, &in_creds,
+                                   &creds));
+    }
 
     assert(in_creds.authdata == NULL || creds->authdata != NULL);
 

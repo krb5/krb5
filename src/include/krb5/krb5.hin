@@ -7677,6 +7677,30 @@ krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_ticket_times *times);
 
 /**
+ * Use explicit FAST armor for the TGS requests of a TGS request context.
+ *
+ * @param[in] context           Library context
+ * @param[in] ctx               TGS request context
+ * @param[in] ccache            Credential cache holding the armor TGT
+ *
+ * Each TGS request made through @a ctx is armored with an AP-REQ using a
+ * ticket-granting ticket from @a ccache for the realm of the KDC being
+ * contacted, in addition to the TGS request's own ticket. This allows the
+ * KDC to identify the device making the request (for example, to issue device
+ * claims) and is typically used with a host's credentials as @a ccache.  The
+ * context keeps its own handle to @a ccache. This function must be called
+ * before the first call to krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @version New in 1.23
+ *
+ * @retval 0  Success; otherwise - Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_fast_ccache(krb5_context context,
+                               krb5_tkt_creds_context ctx,
+                               krb5_ccache ccache);
+
+/**
  * Get initial credentials using a key table.
  *
  * @param [in]  context         Library context

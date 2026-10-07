@@ -220,6 +220,7 @@ struct _krb5_tkt_creds_context {
     krb5_keyblock *subkey;      /* subkey of request */
     krb5_data previous_request; /* Encoded request (for TCP retransmission) */
     struct krb5int_fast_request_state *fast_state;
+    krb5_ccache armor_ccache;   /* Explicit FAST armor ccache, if set */
 
     /* The following fields are used when acquiring foreign TGTs. */
     krb5_data *realm_path;      /* Path from client to server realm */
@@ -301,6 +302,7 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     code = krb5int_fast_make_state(context, &ctx->fast_state);
     if (code)
         return code;
+    ctx->fast_state->tgs_armor_ccache = ctx->armor_ccache;
 
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
@@ -1191,6 +1193,8 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_creds(context, ctx->in_creds);
     free_canonprinc(&ctx->iter);
     krb5_cc_close(context, ctx->ccache);
+    if (ctx->armor_ccache != NULL)
+        krb5_cc_close(context, ctx->armor_ccache);
     krb5_free_data_contents(context, &ctx->start_realm);
     krb5_free_principal(context, ctx->req_server);
     krb5_free_authdata(context, ctx->authdata);
@@ -1202,6 +1206,22 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5int_free_data_list(context, ctx->realm_path);
     krb5_free_creds(context, ctx->reply_creds);
     free(ctx);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_fast_ccache(krb5_context context,
+                               krb5_tkt_creds_context ctx, krb5_ccache ccache)
+{
+    krb5_error_code code;
+    krb5_ccache dup;
+
+    code = krb5_cc_dup(context, ccache, &dup);
+    if (code)
+        return code;
+    if (ctx->armor_ccache != NULL)
+        krb5_cc_close(context, ctx->armor_ccache);
+    ctx->armor_ccache = dup;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
