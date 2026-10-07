@@ -248,6 +248,7 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
     }
     switch (ret) {
     case KADM5_AUTH_CHANGEPW:
+    case KADM5_PROTECT_KEYS:
         numresult = KRB5_KPASSWD_ACCESSDENIED;
         break;
     case KADM5_AUTH_INITIAL:
