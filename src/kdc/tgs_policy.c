@@ -343,7 +343,7 @@ check_tgs_s4u2self(kdc_realm_t *realm, krb5_kdc_req *req,
         /* Validate the client policy.  Use an empty server principal to bypass
          * server policy checks. */
         return validate_as_request(realm, req, client, &empty_server, kdc_time,
-                                   status, e_data);
+                                   NULL, status, e_data);
     } else {
         /* The header ticket PAC must be for the subject, with realm. */
         if (krb5_pac_verify_ext(context, pac, tkt->enc_part2->times.authtime,
@@ -524,8 +524,8 @@ check_s4u2proxy_policy(krb5_context context, krb5_kdc_req *req,
                        krb5_principal impersonator_name,
                        krb5_db_entry *impersonator, krb5_pac impersonator_pac,
                        krb5_principal resource_name, krb5_db_entry *resource,
-                       krb5_boolean is_crossrealm, krb5_boolean is_referral,
-                       const char **status)
+                       const krb5_kdb_armor *armor, krb5_boolean is_crossrealm,
+                       krb5_boolean is_referral, const char **status)
 {
     krb5_error_code ret;
     krb5_boolean support_rbcd, policy_denial = FALSE;
@@ -547,9 +547,10 @@ check_s4u2proxy_policy(krb5_context context, krb5_kdc_req *req,
 
     /* Try resource-based authorization if the client supports RBCD. */
     if (support_rbcd) {
-        ret = krb5_db_allowed_to_delegate_from(context, desired_client,
-                                               impersonator_name,
-                                               impersonator_pac, resource);
+        ret = krb5_db_allowed_to_delegate_from_armor(context, desired_client,
+                                                     impersonator_name,
+                                                     impersonator_pac,
+                                                     resource, armor);
         if (ret == KRB5KDC_ERR_BADOPTION)
             policy_denial = TRUE;
         else if (ret != KRB5_PLUGIN_OP_NOTSUPP)
@@ -734,9 +735,9 @@ check_tgs_policy(kdc_realm_t *realm, krb5_kdc_req *request,
                  krb5_db_entry *server, krb5_ticket *ticket,
                  krb5_pac pac, const krb5_ticket *stkt, krb5_pac stkt_pac,
                  krb5_principal stkt_pac_client, krb5_db_entry *stkt_server,
-                 krb5_timestamp kdc_time, krb5_boolean is_crossrealm,
-                 krb5_boolean is_referral, const char **status,
-                 krb5_pa_data ***e_data)
+                 krb5_timestamp kdc_time, const krb5_kdb_armor *armor,
+                 krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                 const char **status, krb5_pa_data ***e_data)
 {
     krb5_context context = realm->realm_context;
     int errcode;
@@ -753,8 +754,8 @@ check_tgs_policy(kdc_realm_t *realm, krb5_kdc_req *request,
         errcode = check_s4u2proxy_policy(context, request, desired_client,
                                          ticket->enc_part2->client,
                                          stkt_server, pac, request->server,
-                                         server, is_crossrealm, is_referral,
-                                         status);
+                                         server, armor, is_crossrealm,
+                                         is_referral, status);
         if (errcode != 0)
             return errcode;
     }

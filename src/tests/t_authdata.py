@@ -281,6 +281,28 @@ out = realm.run(['./adata', '-p', 'user2', 'service/2', '-2', 'proxy_ad'])
 if ' -2: self_ad' not in out or ' -2: proxy_ad' not in out:
     fail('expected authdata not seen in S4U2Proxy ticket')
 
+# Test the KDB issue_pac_armor method.  The test KDB module adds a
+# PAC_DEVICE_INFO(14) buffer naming the armor client to tickets issued
+# in response to TGS requests with explicit FAST armor.
+mark('issue_pac_armor (explicit TGS armor)')
+armorcache = 'FILE:' + os.path.join(realm.testdir, 'armorcache')
+realm.kinit('service/1', None, ['-k', '-c', armorcache])
+realm.kinit(realm.user_princ, None, ['-k'])
+realm.run(['./adata', '-a', armorcache, 'service/2'],
+          expected_msg='?128: [1, 6, 7, 10, 14, 16, 19]')
+out = realm.run(['./adata', 'service/2'])
+if '?128: [1, 6, 7, 10, 16, 19]' not in out:
+    fail('PAC device info present without explicit armor')
+
+# Test the KDB check_policy_as_armor method.  The test KDB module
+# rejects AS requests armored with a ticket for service/2.
+mark('check_policy_as_armor')
+realm.kinit(realm.user_princ, None, ['-k', '-T', armorcache])
+armorcache2 = 'FILE:' + os.path.join(realm.testdir, 'armorcache2')
+realm.kinit('service/2', None, ['-k', '-c', armorcache2])
+realm.kinit(realm.user_princ, None, ['-k', '-T', armorcache2],
+            expected_code=1, expected_msg='KDC policy rejects request')
+
 # Test alteration of auth indicators by KDB module (AS and TGS).
 realm.kinit(realm.user_princ, None, ['-k', '-X', 'indicators=dummy dbincr1'])
 realm.run(['./adata', realm.krbtgt_princ], expected_msg='+97: [dbincr2]')
