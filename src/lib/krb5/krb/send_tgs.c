@@ -175,8 +175,17 @@ k5_make_tgs_req(krb5_context context,
         return ret;
     TRACE_SEND_TGS_SUBKEY(context, subkey);
 
-    ret = krb5int_fast_tgs_armor(context, fast_state, subkey, &tgt->keyblock,
-                                 NULL, NULL);
+    /* Use explicit armor if requested; the armor TGT must be for the realm of
+     * the KDC we are contacting, which is the TGT's second component. */
+    if (fast_state->tgs_armor_ccache != NULL && tgt->server->length >= 2) {
+        ret = krb5int_fast_tgs_armor(context, fast_state, subkey,
+                                     &tgt->keyblock,
+                                     fast_state->tgs_armor_ccache,
+                                     &tgt->server->data[1]);
+    } else {
+        ret = krb5int_fast_tgs_armor(context, fast_state, subkey,
+                                     &tgt->keyblock, NULL, NULL);
+    }
     if (ret)
         goto cleanup;
 

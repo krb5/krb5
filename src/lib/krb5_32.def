@@ -525,3 +525,6 @@ EXPORTS
 	k5_free_data_ptr_list				@483 ; PRIVATE
 ; private symbol used by GSSAPI serialization
 	k5_ser_unpack_len				@484 ; PRIVATE
+
+; new in 1.23
+	krb5_tkt_creds_set_fast_ccache			@485

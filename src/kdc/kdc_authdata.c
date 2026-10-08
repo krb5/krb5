@@ -466,7 +466,8 @@ handle_pac(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
            krb5_keyblock *replaced_reply_key, krb5_enc_tkt_part *subject_tkt,
            krb5_pac subject_pac, krb5_kdc_req *req,
            krb5_const_principal altcprinc, krb5_timestamp authtime,
-           krb5_enc_tkt_part *enc_tkt_reply, krb5_data ***auth_indicators)
+           const krb5_kdb_armor *armor, krb5_enc_tkt_part *enc_tkt_reply,
+           krb5_data ***auth_indicators)
 {
     krb5_context context = realm->realm_context;
     krb5_error_code ret;
@@ -504,9 +505,9 @@ handle_pac(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
     else
         signing_tgt = local_tgt;
 
-    ret = krb5_db_issue_pac(context, flags, client, replaced_reply_key, server,
-                            signing_tgt, authtime, subject_pac, new_pac,
-                            auth_indicators);
+    ret = krb5_db_issue_pac_armor(context, flags, client, replaced_reply_key,
+                                  server, signing_tgt, authtime, subject_pac,
+                                  new_pac, auth_indicators, armor);
     if (ret) {
         if (ret == KRB5_PLUGIN_OP_NOTSUPP)
             ret = 0;
@@ -581,7 +582,8 @@ handle_authdata(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
                 krb5_keyblock *subject_key, krb5_keyblock *replaced_reply_key,
                 krb5_data *req_pkt, krb5_kdc_req *req,
                 krb5_const_principal altcprinc, krb5_pac subject_pac,
-                krb5_enc_tkt_part *enc_tkt_req, krb5_data ***auth_indicators,
+                krb5_enc_tkt_part *enc_tkt_req, const krb5_kdb_armor *armor,
+                krb5_data ***auth_indicators,
                 krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_context context = realm->realm_context;
@@ -623,6 +625,6 @@ handle_authdata(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
     return handle_pac(realm, flags, client, server, subject_server, local_tgt,
                       local_tgt_key, server_key, subject_key,
                       replaced_reply_key, enc_tkt_req, subject_pac, req,
-                      altcprinc, enc_tkt_reply->times.authtime, enc_tkt_reply,
-                      auth_indicators);
+                      altcprinc, enc_tkt_reply->times.authtime, armor,
+                      enc_tkt_reply, auth_indicators);
 }

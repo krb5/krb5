@@ -594,6 +594,7 @@ krb5_tkt_creds_get
 krb5_tkt_creds_get_creds
 krb5_tkt_creds_get_times
 krb5_tkt_creds_init
+krb5_tkt_creds_set_fast_ccache
 krb5_tkt_creds_step
 krb5_timeofday
 krb5_timestamp_to_sfstring

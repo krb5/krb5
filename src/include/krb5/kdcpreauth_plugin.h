@@ -271,6 +271,39 @@ typedef struct krb5_kdcpreauth_callbacks_st {
 
     /* End of version 6 kdcpreauth callbacks. */
 
+    /*
+     * Get the ticket from the request's FAST armor, or NULL if the request
+     * was not armored with an AP-REQ. The armor ticket is a TGT for this
+     * realm: either a local TGT, or a cross-realm TGT whose server principal
+     * realm is the issuing realm. Its client principal is the anonymous
+     * principal for anonymous armor. The ticket is owned by the KDC and must
+     * not be modified or freed.
+     */
+    const krb5_ticket *(*fast_armor_ticket)(krb5_context context,
+                                            krb5_kdcpreauth_rock rock);
+
+    /*
+     * Get the PAC of the FAST armor ticket, or NULL if there is no armor
+     * ticket or it has no PAC. The PAC's server signature has been verified.
+     * For a cross-realm armor ticket the PAC was produced by the issuing realm
+     * and has not been filtered. The PAC is owned by the KDC and must not be
+     * freed.
+     */
+    krb5_pac (*fast_armor_pac)(krb5_context context,
+                               krb5_kdcpreauth_rock rock);
+
+    /*
+     * Get a pointer to the database entry of the FAST armor ticket client,
+     * which the module can cast to (krb5_db_entry *) if it includes <kdb.h>.
+     * The KDC has checked that the entry may obtain tickets. Return NULL if
+     * there is no armor ticket, for anonymous armor, and for cross-realm armor
+     * whose client has no local entry. The entry must not be freed.
+     */
+    void *(*fast_armor_client)(krb5_context context,
+                               krb5_kdcpreauth_rock rock);
+
+    /* End of version 7 kdcpreauth callbacks. */
+
 } *krb5_kdcpreauth_callbacks;
 
 /* Optional: preauth plugin initialization function. */
