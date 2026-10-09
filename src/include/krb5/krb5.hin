@@ -7291,7 +7291,7 @@ krb5_get_init_creds_opt_set_responder(krb5_context context,
  * @retval
  *  KRB5_KDC_UNREACH Cannot contact any KDC for requested realm
  * @retval
- *  KRB5_PREAUTH_FAILED Generic Pre-athentication failure
+ *  KRB5_PREAUTH_FAILED Generic Pre-authentication failure
  * @retval
  *  KRB5_LIBOS_PWDINTR Password read interrupted
  * @retval
