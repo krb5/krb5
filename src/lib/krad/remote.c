@@ -64,7 +64,7 @@ struct krad_remote_st {
     char *secret;
     struct addrinfo *info;
     struct request_head list;
-    char buffer_[KRAD_PACKET_SIZE_MAX];
+    char buffer_[KRAD_PACKET_SIZE_MAX_STREAM];
     krb5_data buffer;
 };
 
@@ -459,6 +459,13 @@ kr_remote_send(krad_remote *rr, krad_code code, krad_attrset *attrs,
                                      iterator, &r, &tmp);
     if (retval != 0)
         goto error;
+
+    /* Only stream transports carry packets larger than RFC 2865 allows. */
+    if (rr->info->ai_socktype != SOCK_STREAM &&
+        krad_packet_encode(tmp)->length > KRAD_PACKET_SIZE_MAX) {
+        retval = EMSGSIZE;
+        goto error;
+    }
 
     K5_TAILQ_FOREACH(r, &rr->list, list) {
         if (r->request == tmp) {

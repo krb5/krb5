@@ -163,6 +163,47 @@ out:
     return retval;
 }
 
+/* Packets larger than RFC 2865 allows, as carried over stream transports
+ * (RFC 7930), must encode and decode intact. */
+static void
+test_large_packet(krb5_context ctx)
+{
+    char chunk[MAX_ATTRSIZE];
+    krad_attrset *set;
+    krad_packet *req, *decreq;
+    const krad_packet *dupreq;
+    const krb5_data *encpkt;
+    krb5_data data, hdr;
+    int i, count = 24;
+
+    memset(chunk, 'x', sizeof(chunk));
+    data = make_data(chunk, sizeof(chunk));
+
+    noerror(krad_attrset_new(ctx, &set));
+    for (i = 0; i < count; i++)
+        noerror(krad_attrset_add(set, KRAD_ATTR_PROXY_STATE, &data));
+    noerror(krad_packet_new_request(ctx, "foo",
+                                    krad_code_name2num("Access-Request"),
+                                    set, NULL, NULL, &req));
+    krad_attrset_free(set);
+
+    encpkt = krad_packet_encode(req);
+    insist(encpkt->length > KRAD_PACKET_SIZE_MAX);
+    insist(krad_packet_bytes_needed(encpkt) == 0);
+    hdr = make_data(encpkt->data, 4);
+    insist(krad_packet_bytes_needed(&hdr) ==
+           (ssize_t)(encpkt->length - hdr.length));
+
+    noerror(krad_packet_decode_request(ctx, "foo", encpkt, NULL, NULL,
+                                       &dupreq, &decreq));
+    for (i = 0; i < count; i++)
+        insist(krad_packet_get_attr(decreq, KRAD_ATTR_PROXY_STATE, i) != NULL);
+    insist(krad_packet_get_attr(decreq, KRAD_ATTR_PROXY_STATE, count) == NULL);
+
+    krad_packet_free(decreq);
+    krad_packet_free(req);
+}
+
 int
 main(int argc, const char **argv)
 {
@@ -175,6 +216,10 @@ main(int argc, const char **argv)
     krad_packet *decreq;
 
     username = string2data("testUser");
+
+    noerror(krb5_init_context(&ctx));
+    test_large_packet(ctx);
+    krb5_free_context(ctx);
 
     if (!daemon_start(argc, argv)) {
         fprintf(stderr, "Unable to start pyrad daemon, skipping test...\n");

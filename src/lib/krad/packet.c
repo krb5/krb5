@@ -55,7 +55,7 @@ typedef unsigned char uchar;
 #define pkt_attr(p) ((unsigned char *)offset(&(p)->pkt, OFFSET_ATTR))
 
 struct krad_packet_st {
-    char buffer[KRAD_PACKET_SIZE_MAX];
+    char buffer[KRAD_PACKET_SIZE_MAX_STREAM];
     krad_attrset *attrset;
     krb5_data pkt;
 };
@@ -327,7 +327,7 @@ krad_packet_bytes_needed(const krb5_data *buffer)
         return OFFSET_AUTH - buffer->length;
 
     len = load_16_be(offset(buffer, OFFSET_LENGTH));
-    if (len > KRAD_PACKET_SIZE_MAX)
+    if (len > KRAD_PACKET_SIZE_MAX_STREAM)
         return -1;
 
     return (buffer->length > len) ? 0 : len - buffer->length;
