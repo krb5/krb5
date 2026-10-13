@@ -209,13 +209,15 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 
 		/* Decode databody_integ. */
 		if (!xdr_rpc_gss_buf(xdrs, &databuf, mem_budget)) {
+			xdr_free((xdrproc_t)xdr_rpc_gss_buf, &databuf);
 			log_debug("xdr decode databody_integ failed");
 			return (FALSE);
 		}
 		mem_budget -= databuf.length;
 		/* Decode checksum. */
 		if (!xdr_rpc_gss_buf(xdrs, &wrapbuf, mem_budget)) {
-			gss_release_buffer(&min_stat, &databuf);
+			xdr_free((xdrproc_t)xdr_rpc_gss_buf, &wrapbuf);
+			xdr_free((xdrproc_t)xdr_rpc_gss_buf, &databuf);
 			log_debug("xdr decode checksum failed");
 			return (FALSE);
 		}
@@ -225,7 +227,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		free(wrapbuf.value);
 
 		if (maj_stat != GSS_S_COMPLETE || qop_state != qop) {
-			gss_release_buffer(&min_stat, &databuf);
+			xdr_free((xdrproc_t)xdr_rpc_gss_buf, &databuf);
 			log_status("gss_verify_mic", maj_stat, min_stat);
 			return (FALSE);
 		}
@@ -233,6 +235,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 	else if (svc == RPCSEC_GSS_SVC_PRIVACY) {
 		/* Decode databody_priv. */
 		if (!xdr_rpc_gss_buf(xdrs, &wrapbuf, GSSRPC_MAX_MESSAGE_SIZE)) {
+			xdr_free((xdrproc_t)xdr_rpc_gss_buf, &wrapbuf);
 			log_debug("xdr decode databody_priv failed");
 			return (FALSE);
 		}
@@ -255,7 +258,10 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 	xdr_stat = (xdr_u_int32(&tmpxdrs, &seq_num) &&
 		    (*xdr_func)(&tmpxdrs, xdr_ptr));
 	XDR_DESTROY(&tmpxdrs);
-	gss_release_buffer(&min_stat, &databuf);
+	if (svc == RPCSEC_GSS_SVC_INTEGRITY)
+		xdr_free((xdrproc_t)xdr_rpc_gss_buf, &databuf);
+	else if (svc == RPCSEC_GSS_SVC_PRIVACY)
+		gss_release_buffer(&min_stat, &databuf);
 
 	/* Verify sequence number. */
 	if (xdr_stat == TRUE && seq_num != seq) {

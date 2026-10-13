@@ -427,6 +427,8 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	gc = (struct rpc_gss_cred *)rqst->rq_clntcred;
 	memset(gc, 0, sizeof(*gc));
 
+#define ret_freegc(code) do { retstat = code; goto freegc; } while (0)
+
 	log_debug("calling xdrmem_create()");
 	log_debug("oa_base=%p, oa_length=%u", rqst->rq_cred.oa_base,
 		  rqst->rq_cred.oa_length);
@@ -437,13 +439,11 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	if (!xdr_rpc_gss_cred(&xdrs, gc)) {
 		log_debug("xdr_rpc_gss_cred() failed");
 		XDR_DESTROY(&xdrs);
-		return (AUTH_BADCRED);
+		ret_freegc (AUTH_BADCRED);
 	}
 	XDR_DESTROY(&xdrs);
 
 	retstat = AUTH_FAILED;
-
-#define ret_freegc(code) do { retstat = code; goto freegc; } while (0)
 
 	/* Check version. */
 	if (gc->gc_v != RPCSEC_GSS_VERSION)
