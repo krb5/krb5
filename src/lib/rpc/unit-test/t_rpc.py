@@ -18,6 +18,9 @@ for i in range(4):
         fail('unexpected server message: ' + line)
     output(line)
 
+mark('RPCSEC_GSS service levels')
+realm.run(['./client', '-t', '-g', hostname, portstr, 'host@' + hostname])
+
 realm.addprinc('nokey/' + hostname)
 
 realm.run(['./client', '-t', hostname, portstr, 'nokey@' + hostname, '1026'],
