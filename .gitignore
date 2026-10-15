@@ -348,6 +348,7 @@ local.properties
 /src/lib/krb5/krb/t_expire_warn
 /src/lib/krb5/krb/t_get_etype_info
 /src/lib/krb5/krb/t_in_ccache
+/src/lib/krb5/krb/t_init_creds_step
 /src/lib/krb5/krb/t_kerb
 /src/lib/krb5/krb/t_pac
 /src/lib/krb5/krb/t_parse_host_string
