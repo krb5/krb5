@@ -11,6 +11,7 @@
  * side of RPC.
  */
 
+#include "k5-platform.h"
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -172,6 +173,14 @@ enum auth_stat gssrpc__svcauth_gssapi(
      enum auth_stat ret;
      OM_uint32 ret_flags;
      uint32_t seq_num;
+
+     /*
+      * AUTH_GSSAPI is vulnerable to denial-of-service attacks.  It is disabled
+      * by default, but can be re-enabled by setting the
+      * GSSRPC_ALLOW_AUTH_GSSAPI environment variable.
+      */
+     if (secure_getenv("GSSRPC_ALLOW_AUTH_GSSAPI") == NULL)
+	  return AUTH_REJECTEDCRED;
 
      PRINTF(("svcauth_gssapi: starting\n"));
 

@@ -3,6 +3,7 @@ import re
 from k5test import *
 
 realm = K5Realm()
+realm.env['GSSRPC_ALLOW_AUTH_GSSAPI'] = 'yes'
 
 server = realm.start_server(['./server', '-t'], 'running')
 line = server.stdout.readline()
