@@ -231,7 +231,6 @@ svcauth_gss_accept_sec_context(struct svc_req *rqst,
 	/* Save client info. */
 	gd->sec.mech = mech;
 	gd->sec.qop = GSS_C_QOP_DEFAULT;
-	gd->sec.svc = gc->gc_svc;
 	gd->seq = gc->gc_seq;
 	gd->win = gr->gr_win;
 
@@ -388,6 +387,53 @@ svcauth_gss_nextverf(struct svc_req *rqst, u_int num)
 	return (TRUE);
 }
 
+/*
+ * Check an RPCSEC_GSS_DATA or RPCSEC_GSS_DESTROY call: verify its
+ * credential, then take its sequence number and service from it.  Calls
+ * outside the sequence window or already seen are discarded before the
+ * verifier is checked, without changing any state.
+ */
+static enum auth_stat
+svcauth_gss_check_call(struct svc_req *rqst, struct svc_rpc_gss_data *gd,
+		       struct rpc_gss_cred *gc, struct rpc_msg *msg,
+		       bool_t *no_dispatch)
+{
+	int	offset;
+
+	if (!gd->established)
+		return (RPCSEC_GSS_CREDPROBLEM);
+
+	if (gc->gc_seq > MAXSEQ)
+		return (RPCSEC_GSS_CTXPROBLEM);
+
+	offset = gd->seqlast - gc->gc_seq;
+	if (offset >= 0 && ((u_int)offset >= gd->win ||
+			    (gd->seqmask & (1 << offset)))) {
+		*no_dispatch = 1;
+		return (RPCSEC_GSS_CTXPROBLEM);
+	}
+
+	if (!svcauth_gss_validate(rqst, gd, msg))
+		return (RPCSEC_GSS_CREDPROBLEM);
+
+	if (offset < 0) {
+		gd->seqlast = gc->gc_seq;
+		gd->seqmask <<= 0 - offset;
+		offset = 0;
+	}
+	gd->seqmask |= (1 << offset);
+	gd->seq = gc->gc_seq;
+
+	/*
+	 * Protect the arguments and results of this call with the service
+	 * named in its credential, which the verifier covers.  The service
+	 * sent during context establishment is not integrity-protected and
+	 * is not used.
+	 */
+	gd->sec.svc = gc->gc_svc;
+	return (AUTH_OK);
+}
+
 enum auth_stat
 gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	bool_t *no_dispatch)
@@ -398,7 +444,8 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	struct svc_rpc_gss_data	*gd;
 	struct rpc_gss_cred	*gc;
 	struct rpc_gss_init_res	 gr;
-	int			 call_stat, offset;
+	enum auth_stat		 auth_stat;
+	int			 call_stat;
 	OM_uint32		 min_stat;
 
 	log_debug("in svcauth_gss()");
@@ -460,25 +507,6 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 	    gc->gc_svc != RPCSEC_GSS_SVC_PRIVACY)
 		ret_freegc (AUTH_BADCRED);
 
-	/* Check sequence number. */
-	if (gd->established) {
-		if (gc->gc_seq > MAXSEQ)
-			ret_freegc (RPCSEC_GSS_CTXPROBLEM);
-
-		if ((offset = gd->seqlast - gc->gc_seq) < 0) {
-			gd->seqlast = gc->gc_seq;
-			offset = 0 - offset;
-			gd->seqmask <<= offset;
-			offset = 0;
-		} else if ((u_int)offset >= gd->win ||
-			   (gd->seqmask & (1 << offset))) {
-			*no_dispatch = 1;
-			ret_freegc (RPCSEC_GSS_CTXPROBLEM);
-		}
-		gd->seq = gc->gc_seq;
-		gd->seqmask |= (1 << offset);
-	}
-
 	if (gd->established) {
 		rqst->rq_clntname = (char *)gd->client_name;
 		rqst->rq_svccred = (char *)gd->ctx;
@@ -522,8 +550,10 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 		break;
 
 	case RPCSEC_GSS_DATA:
-		if (!svcauth_gss_validate(rqst, gd, msg))
-			ret_freegc (RPCSEC_GSS_CREDPROBLEM);
+		auth_stat = svcauth_gss_check_call(rqst, gd, gc, msg,
+						   no_dispatch);
+		if (auth_stat != AUTH_OK)
+			ret_freegc (auth_stat);
 
 		if (!svcauth_gss_nextverf(rqst, htonl(gc->gc_seq)))
  			ret_freegc (AUTH_FAILED);
@@ -533,8 +563,10 @@ gssrpc__svcauth_gss(struct svc_req *rqst, struct rpc_msg *msg,
 		if (rqst->rq_proc != NULLPROC)
 			ret_freegc (AUTH_FAILED);		/* XXX ? */
 
-		if (!svcauth_gss_validate(rqst, gd, msg))
-			ret_freegc (RPCSEC_GSS_CREDPROBLEM);
+		auth_stat = svcauth_gss_check_call(rqst, gd, gc, msg,
+						   no_dispatch);
+		if (auth_stat != AUTH_OK)
+			ret_freegc (auth_stat);
 
 		if (!svcauth_gss_nextverf(rqst, htonl(gc->gc_seq)))
 			ret_freegc (AUTH_FAILED);
