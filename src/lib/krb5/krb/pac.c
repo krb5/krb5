@@ -538,6 +538,8 @@ verify_pac_checksums(krb5_context context, const krb5_pac pac,
         /* Verify the server checksum over the PAC copy. */
         ret = verify_checksum(context, pac, KRB5_PAC_SERVER_CHECKSUM, server,
                               KRB5_KEYUSAGE_APP_DATA_CKSUM, &copy);
+        if (ret)
+            goto cleanup;
     }
 
     if (privsvr != NULL && expect_full_checksum) {
@@ -711,15 +713,17 @@ krb5_pac_verify_ext(krb5_context context,
 {
     krb5_error_code ret;
 
-    if (server != NULL || privsvr != NULL) {
-        ret = verify_pac_checksums(context, pac, FALSE, server, privsvr);
+    /* Validate the client first, so that the PAC is only marked as verified
+     * if all of the requested checks pass. */
+    if (principal != NULL) {
+        ret = k5_pac_validate_client(context, pac, authtime,
+                                     principal, with_realm);
         if (ret)
             return ret;
     }
 
-    if (principal != NULL) {
-        ret = k5_pac_validate_client(context, pac, authtime,
-                                     principal, with_realm);
+    if (server != NULL || privsvr != NULL) {
+        ret = verify_pac_checksums(context, pac, FALSE, server, privsvr);
         if (ret)
             return ret;
     }
