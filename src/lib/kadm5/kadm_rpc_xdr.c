@@ -1156,16 +1156,16 @@ bool_t
 xdr_krb5_keyblock(XDR *xdrs, krb5_keyblock *objp)
 {
    char *cp;
+   bool_t r;
 
    /* XXX This only works because free_keyblock assumes ->contents
       is allocated by malloc() */
    if(!xdr_krb5_enctype(xdrs, &objp->enctype))
       return FALSE;
    cp = (char *)objp->contents;
-   if (!xdr_bytes(xdrs, &cp, &objp->length, GSSRPC_MAX_ELEMENT_SIZE))
-      return FALSE;
+   r = xdr_bytes(xdrs, &cp, &objp->length, GSSRPC_MAX_ELEMENT_SIZE);
    objp->contents = (uint8_t *)cp;
-   return TRUE;
+   return r;
 }
 
 bool_t
