@@ -54,6 +54,26 @@ struct _iakerb_ctx_id_rec {
 
 #define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
 
+/*
+ * header-flags: an undocumented Microsoft extension field in IAKERB-HEADER,
+ * not defined by draft-ietf-kitten-iakerb-03 (which has only target-realm
+ * and cookie).  It is a 32-bit BIT STRING at context tag [3] (bit names per
+ * Wireshark's packet-spnego.c dissector).
+ *
+ * Its bits match netr_DsRGetDCName_flags (librpc/idl/netlogon.idl in the
+ * Samba tree): force-rediscovery is DS_FORCE_REDISCOVERY (0x00000001), and
+ * likewise for every other bit that enum assigns.  key-list-support-required
+ * (0x01000000) falls in a gap netr_DsRGetDCName_flags leaves unused, so it
+ * looks like a Kerberos-specific bit layered onto the same flags word.
+ *
+ * Real Windows IAKERB acceptors always set key-list-support-required.  They
+ * also set force-rediscovery on every response after the first one sent on
+ * a given GSS context. Leaving it unset on a later response causes the
+ * Windows client to reset the connection.
+ */
+#define IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT 0x01000000
+#define IAKERB_HEADER_FLAG_FORCE_REDISCOVERY 0x00000001
+
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
 typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
 
@@ -300,6 +320,7 @@ static krb5_error_code
 iakerb_make_token(iakerb_ctx_id_t ctx,
                   krb5_data *realm,
                   krb5_data *cookie,
+                  krb5_flags header_flags,
                   krb5_data *request,
                   gss_buffer_t token)
 {
@@ -318,6 +339,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
      */
     iah.target_realm = *realm;
     iah.cookie = cookie;
+    iah.header_flags = header_flags;
 
     code = encode_krb5_iakerb_header(&iah, &data);
     if (code != 0)
@@ -390,7 +412,9 @@ iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         }
     }
 
-    ret = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
+    ret = iakerb_make_token(ctx, &realm, NULL,
+                            IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT, &reply,
+                            output_token);
     if (ret)
         goto cleanup;
 
@@ -419,6 +443,8 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     OM_uint32 tmp;
     int tcp_only, use_primary, protocol_err;
     krb5_ui_4 kdc_code;
+    krb5_flags header_flags;
+    krb5_boolean first_response;
 
     output_token->length = 0;
     output_token->value = NULL;
@@ -427,6 +453,10 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         code = KRB5_KDC_UNREACH;
         goto cleanup;
     }
+
+    /* ctx->count is 0 only before any token has been sent or received on
+     * this context, i.e. while building the first acceptor response. */
+    first_response = (ctx->count == 0);
 
     code = iakerb_parse_token(ctx, input_token, &realm, NULL, &request);
     if (code != 0)
@@ -484,7 +514,12 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     } else if (code != 0)
         goto cleanup;
 
-    code = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
+    header_flags = IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT;
+    if (!first_response)
+        header_flags |= IAKERB_HEADER_FLAG_FORCE_REDISCOVERY;
+
+    code = iakerb_make_token(ctx, &realm, NULL, header_flags, &reply,
+                             output_token);
 
 cleanup:
     if (code != 0)
@@ -657,7 +692,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     case IAKERB_REALM_DISCOVERY:
         if (first_token) {
             /* Send the discovery request. */
-            code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
+            code = iakerb_make_token(ctx, &realm, cookie, 0, &out,
+                                     output_token);
             goto cleanup;
         }
 
@@ -754,7 +790,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             realm = err_realm;
             err_realm = empty_data();
         }
-        code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
+        code = iakerb_make_token(ctx, &realm, cookie, 0, &out, output_token);
     }
 
 cleanup:
