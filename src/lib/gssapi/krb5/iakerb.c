@@ -78,25 +78,41 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     free(ctx);
 }
 
-/* Encode a KRB-ERROR message with the given protocol code.  Use the server
- * principal from verifier_cred if one is available. */
+/*
+ * Encode a KRB-ERROR message with the given protocol code.  Use the server
+ * principal from verifier_cred if one is available.  The initiator may use
+ * the server principal's realm to retry against the correct realm, so when
+ * verifier_cred has no bound name, fall back to the acceptor's default
+ * realm instead of the realm-less anonymous principal.
+ */
 static krb5_error_code
 iakerb_mk_error(krb5_context context, gss_cred_id_t verifier_cred,
                 int protocol_err, krb5_data *enc_err)
 {
+    krb5_error_code ret;
     krb5_error error = { 0 };
     krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)verifier_cred;
+    krb5_principal server = NULL;
+    char *defrealm = NULL;
 
     error.error = protocol_err;
 
-    /* We must provide a server principal, although we expect the recipient to
-     * care chiefly about the error code. */
-    if (cred != NULL && cred->name != NULL)
+    if (cred != NULL && cred->name != NULL) {
         error.server = cred->name->princ;
-    else
+    } else if (krb5_get_default_realm(context, &defrealm) == 0) {
+        ret = krb5_build_principal_ext(context, &server, strlen(defrealm),
+                                       defrealm, 0);
+        krb5_free_default_realm(context, defrealm);
+        if (ret)
+            return ret;
+        error.server = server;
+    } else {
         error.server = (krb5_principal)krb5_anonymous_principal();
+    }
 
-    return krb5_mk_error(context, &error, enc_err);
+    ret = krb5_mk_error(context, &error, enc_err);
+    krb5_free_principal(context, server);
+    return ret;
 }
 
 /*
@@ -451,9 +467,17 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     }
 
     if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
+        /*
+         * KRB5_REALM_UNKNOWN means the initiator guessed a realm we have no
+         * KDC for (e.g. a Windows client that skips IAKERB realm discovery
+         * and sends its own hostname as target-realm).  Report this with
+         * the standard cross-realm referral error rather than an
+         * IAKERB-specific one, since initiators already know to retry
+         * against the realm named in a KDC_ERR_WRONG_REALM error.
+         */
         protocol_err = (code == KRB5_KDC_UNREACH) ?
             KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE :
-            KRB_AP_ERR_IAKERB_KDC_NOT_FOUND;
+            KDC_ERR_WRONG_REALM;
         code = iakerb_mk_error(ctx->k5c, verifier_cred, protocol_err, &reply);
         if (code != 0)
             goto cleanup;
