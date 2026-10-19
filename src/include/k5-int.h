@@ -827,6 +827,7 @@ typedef struct _krb5_ad_kdcissued {
 typedef struct _krb5_iakerb_header {
     krb5_data target_realm;
     krb5_data *cookie;
+    krb5_flags header_flags;
 } krb5_iakerb_header;
 
 typedef struct _krb5_iakerb_finished {

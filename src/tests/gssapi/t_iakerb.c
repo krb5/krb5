@@ -30,8 +30,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <string.h>
+#include "k5-int.h"
+#include "k5-der.h"
 #include "common.h"
 
 /* Token IDs from lib/gssapi/krb5/gssapiP_krb5.h. */
@@ -69,6 +69,31 @@ parse_token_header(gss_buffer_t tok, gss_OID_desc *oid_out)
     return (p[0] << 8) | p[1];
 }
 
+/* Decode the IAKERB-HEADER of proxy token tok, whose mechanism OID was
+ * aliased into *oid by parse_token_header(), and return its header-flags. */
+static krb5_flags
+get_header_flags(gss_buffer_t tok, const gss_OID_desc *oid)
+{
+    const unsigned char *body, *end;
+    struct k5input in, seq;
+    krb5_iakerb_header *iah;
+    krb5_data data;
+    krb5_flags flags;
+
+    /* The IAKERB-HEADER follows the two-byte token ID. */
+    body = (const unsigned char *)oid->elements + oid->length + 2;
+    end = (const unsigned char *)tok->value + tok->length;
+    k5_input_init(&in, body, end - body);
+    if (!k5_der_get_value(&in, 0x30, &seq))
+        errout("IAKERB proxy token lacks an IAKERB-HEADER");
+    data = make_data((void *)body, seq.ptr + seq.len - body);
+    if (decode_krb5_iakerb_header(&data, &iah) != 0)
+        errout("Cannot decode IAKERB-HEADER");
+    flags = iah->header_flags;
+    krb5_free_iakerb_header(NULL, iah);
+    return flags;
+}
+
 /*
  * Check the framing of an initiator token.  Once IAKERB proxy tokens have
  * been exchanged, the AP-REQ must use the krb5 OID; if the initiator skipped
@@ -88,6 +113,8 @@ check_init_token(gss_buffer_t tok, int *saw_proxy)
     if (tokid == TOK_IAKERB_PROXY) {
         if (!gss_oid_equal(&oid, &mech_iakerb))
             errout("IAKERB proxy token has the wrong mechanism OID");
+        if (get_header_flags(tok, &oid) != 0)
+            errout("Initiator sent IAKERB header-flags");
         *saw_proxy = 1;
     } else if (tokid == TOK_AP_REQ) {
         if (!gss_oid_equal(&oid, *saw_proxy ? &mech_krb5 : &mech_iakerb))
@@ -96,6 +123,19 @@ check_init_token(gss_buffer_t tok, int *saw_proxy)
     } else {
         errout("Unexpected initiator token ID");
     }
+}
+
+/* Display the header-flags of an acceptor IAKERB proxy token, so that the
+ * test script can check them for each response. */
+static void
+check_accept_token(gss_buffer_t tok)
+{
+    gss_OID_desc oid;
+
+    if (tok->length == 0 || parse_token_header(tok, &oid) != TOK_IAKERB_PROXY)
+        return;
+    printf("IAKERB acceptor header-flags: %08x\n",
+           (unsigned int)get_header_flags(tok, &oid));
 }
 
 /* Establish IAKERB contexts with mutual authentication, checking the framing
@@ -126,6 +166,7 @@ establish_iakerb(gss_cred_id_t icred, gss_cred_id_t acred, gss_name_t tname,
                                       GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
                                       &atok, NULL, NULL, NULL);
         check_gsserr("gss_accept_sec_context", amaj, minor);
+        check_accept_token(&atok);
         (void)gss_release_buffer(&minor, &itok);
         if (imaj == GSS_S_COMPLETE)
             break;

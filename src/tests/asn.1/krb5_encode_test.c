@@ -642,6 +642,12 @@ main(int argc, char **argv)
         krb5_iakerb_header ih;
         ktest_make_sample_iakerb_header(&ih);
         encode_run(ih, "iakerb_header", "", encode_krb5_iakerb_header);
+        /* Zero header-flags must be omitted, as initiators send it. */
+        krb5_free_data(NULL, ih.cookie);
+        ih.cookie = NULL;
+        ih.header_flags = 0;
+        encode_run(ih, "iakerb_header", "(optionals NULL)",
+                   encode_krb5_iakerb_header);
         ktest_empty_iakerb_header(&ih);
     }
     /****************************************************************/

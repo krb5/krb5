@@ -27,13 +27,28 @@ realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
            'h:host'], expected_msg='AP-REQ mech: iakerb')
 
-# Test IAKERB getting initial credentials.
-realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
-           'h:host@' + hostname, 'h:host'])
+# Check the IAKERB-HEADER header-flags of each acceptor response in
+# t_iakerb output.  As with a Windows acceptor, every response must
+# carry the LocalKDC indicator, and every response after the first
+# must also carry force-rediscovery.
+def check_header_flags(out):
+    prefix = 'IAKERB acceptor header-flags: '
+    flags = [line[len(prefix):] for line in out.splitlines()
+             if line.startswith(prefix)]
+    if (len(flags) < 2 or flags[0] != '01000000' or
+        any(f != '01000001' for f in flags[1:])):
+        fail('Unexpected IAKERB acceptor header-flags: %r' % flags)
 
-# Test IAKERB realm discovery.
-realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
-           'h:host'])
+# Test IAKERB getting initial credentials.  The user requires preauth,
+# so the first response relays a KRB-ERROR, as Windows does.
+out = realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
+                 'h:host@' + hostname, 'h:host'])
+check_header_flags(out)
+
+# Test IAKERB realm discovery.  The discovery response is the first one.
+out = realm.run(['./t_iakerb', 'e:user', password('user'),
+                 'h:host@' + hostname, 'h:host'])
+check_header_flags(out)
 
 # Test IAKERB realm discovery without default_realm set.  We get an
 # error because the acceptor does not know the realm.

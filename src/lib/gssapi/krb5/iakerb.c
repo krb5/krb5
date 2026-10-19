@@ -54,6 +54,68 @@ struct _iakerb_ctx_id_rec {
 
 #define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
 
+/*
+ * header-flags: a Microsoft extension field in IAKERB-HEADER, not defined by
+ * draft-ietf-kitten-iakerb-03 (which has only target-realm and cookie).  It
+ * is a 32-bit BIT STRING at context tag [3], OPTIONAL.  [MS-KILE] documents
+ * it only as "DC Locator flags", "additional data to be used to find a
+ * domain controller for the Kerberos message":
+ * https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-kile/4c6e819c-36b7-4886-bde1-ed3dcc66f3e2
+ *
+ * The flags are the Flags parameter of DsrGetDcNameEx2 in [MS-NRPC]:
+ * https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrpc/fb8e1146-a045-4c31-98d1-c68507ad5620
+ * There, force-rediscovery (0x00000001, DS_FORCE_REDISCOVERY) means "the
+ * server ignores any cached DC data".  DS_KEY_LIST_SUPPORT_REQUIRED
+ * (0x01000000) means "the server returns a DC that supports key list
+ * requests".  It also requires the KDC-required bit.  Both are defined as
+ * criteria in a locator request.  [MS-NRPC] does not define them for a
+ * response.  Bit names follow Wireshark's packet-spnego.c dissector.
+ *
+ * The bits are those of netr_DsRGetDCName_flags (librpc/idl/netlogon.idl in
+ * the Samba tree), and likewise for every other bit that enum assigns.
+ * Samba's enum leaves 0x01000000 unused.
+ *
+ * Direction of use, per Windows behavior:
+ *
+ * - Every IAKERB proxy message Windows generates carries the field, even if
+ *   zero.  We encode a zero value by omitting the field.
+ * - In a request, the initiator uses it as DC Locator criteria.  The
+ *   acceptor uses the criteria to find a KDC and returns the encapsulated
+ *   Kerberos reply.
+ * - In a response, the acceptor uses it to report metadata about how the
+ *   request was serviced.  The Windows implementation stores the server's
+ *   response flags and checks the LocalKDC indicator for reporting.  A
+ *   LocalKDC sets an internal "serviced by LocalKDC" indicator and the
+ *   acceptor copies it into the response header.  This is not an SMB
+ *   configuration switch, nor a request to rediscover a DC.
+ *
+ * The indicator is 0x01000000 on the wire.  The Windows acceptors we
+ * observed relayed to a LocalKDC and set it in every response.  Microsoft's
+ * implementation sets it when a LocalKDC serviced the request.  An IAKERB
+ * acceptor can also be an app server that relays to a KDC of an internal
+ * network.  We do not know what Windows sends in that case.  We cannot tell
+ * if our KDC is a LocalKDC, so we always set the bit.
+ *
+ * Observed flags in a Windows exchange (hex, I = initiator, A = acceptor):
+ *
+ *   I 00000000 -> A 01000000   first request, KRB-ERROR relayed back
+ *   I 00000001 -> A 01000001   after the first KRB-ERROR relay
+ *   I 01000001 -> A 01000001   every message after that
+ *
+ * A Windows initiator behaves this way against a Windows acceptor and
+ * against ours.  The first nonzero value is sent by the acceptor.  The
+ * initiator's second message adds force-rediscovery, and its third adds the
+ * acceptor's indicator, as if it stored the acceptor's response flags.  Each
+ * acceptor response equals the initiator's flags from the request it
+ * answers ORed with the LocalKDC indicator, so force-rediscovery in a
+ * response may be an echo of the request rather than an acceptor decision.
+ * We do not track the initiator's flags.  Setting force-rediscovery on every
+ * response after the first reproduces this behavior.  Leaving it unset on a
+ * later response causes the Windows client to reset the connection.
+ */
+#define IAKERB_HEADER_FLAG_LOCALKDC 0x01000000
+#define IAKERB_HEADER_FLAG_FORCE_REDISCOVERY 0x00000001
+
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
 typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
 
@@ -304,8 +366,9 @@ cleanup:
 }
 
 /*
- * Create a token from IAKERB-HEADER and KRB-KDC-REQ/REP.  Save the generated
- * token for the finish checksum and increment the message count.
+ * Create a token from IAKERB-HEADER and KRB-KDC-REQ/REP.  Set header-flags
+ * for acceptor tokens.  Save the generated token for the finish checksum and
+ * increment the message count.
  */
 static krb5_error_code
 iakerb_make_token(iakerb_ctx_id_t ctx,
@@ -329,6 +392,13 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
      */
     iah.target_realm = *realm;
     iah.cookie = cookie;
+    /* ctx->count is nonzero once this context has generated a token. */
+    iah.header_flags = 0;
+    if (!ctx->initiate) {
+        iah.header_flags = IAKERB_HEADER_FLAG_LOCALKDC;
+        if (ctx->count > 0)
+            iah.header_flags |= IAKERB_HEADER_FLAG_FORCE_REDISCOVERY;
+    }
 
     code = encode_krb5_iakerb_header(&iah, &data);
     if (code != 0)

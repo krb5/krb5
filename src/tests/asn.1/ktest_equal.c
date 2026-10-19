@@ -545,6 +545,7 @@ ktest_equal_iakerb_header(krb5_iakerb_header *ref, krb5_iakerb_header *var)
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && struct_equal(target_realm,ktest_equal_data);
     p = p && ptr_equal(cookie,ktest_equal_data);
+    p = p && scalar_equal(header_flags);
     return p;
 }
 
