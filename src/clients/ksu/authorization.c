@@ -330,7 +330,7 @@ fcmd_resolve(char *fcmd, char ***out_fcmd, char **out_err)
 {
     char * err;
     char ** tmp_fcmd = NULL;
-    char * path_ptr, *path;
+    char * path_ptr, *path = NULL;
     char * lp, * tc;
     int i=0;
     krb5_boolean ok = FALSE;
@@ -398,6 +398,7 @@ fcmd_resolve(char *fcmd, char ***out_fcmd, char **out_err)
     ok = TRUE;
 
 cleanup:
+    free(path);
     free_fcmd_list(tmp_fcmd);
     return ok;
 }
