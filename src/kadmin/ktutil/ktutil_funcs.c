@@ -153,7 +153,7 @@ ktutil_add(krb5_context context, krb5_kt_list *list, char *princ_str,
     char promptstr[1024];
     char *princ_full = NULL;
     uint8_t *keybytes;
-    size_t keylen;
+    size_t keylen, len;
     unsigned int pwsize = BUFSIZ;
 
     retval = krb5_parse_name(context, princ_str, &princ);
@@ -203,17 +203,16 @@ ktutil_add(krb5_context context, krb5_kt_list *list, char *princ_str,
         entry->key = key;
     } else {
         printf(_("Key for %s (hex): "), princ_full);
-        fgets(buf, BUFSIZ, stdin);
-        /*
-         * We need to get rid of the trailing '\n' from fgets.
-         * If we have an even number of hex digits (as we should),
-         * write a '\0' over the '\n'.  If for some reason we have
-         * an odd number of hex digits, force an even number of hex
-         * digits by writing a '0' into the last position (the string
-         * will still be null-terminated).
-         */
-        buf[strlen(buf) - 1] = strlen(buf) % 2 ? '\0' : '0';
-        if (strlen(buf) == 0) {
+        if (fgets(buf, BUFSIZ, stdin) == NULL)
+            buf[0] = '\0';
+        /* Strip the trailing newline; pad an odd number of hex digits. */
+        buf[strcspn(buf, "\n")] = '\0';
+        len = strlen(buf);
+        if (len % 2 && len + 1 < BUFSIZ) {
+            buf[len] = '0';
+            buf[len + 1] = '\0';
+        }
+        if (*buf == '\0') {
             fprintf(stderr, _("addent: Error reading key.\n"));
             retval = 0;
             goto cleanup;
