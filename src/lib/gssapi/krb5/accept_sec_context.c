@@ -1161,12 +1161,9 @@ fail:
     if (ctx)
         (void) krb5_gss_delete_sec_context(&tmp_minor_status,
                                            (gss_ctx_id_t *) &ctx, NULL);
-    if (deleg_cred) { /* free memory associated with the deleg credential */
-        if (deleg_cred->ccache)
-            (void)krb5_cc_close(context, deleg_cred->ccache);
-        if (deleg_cred->name)
-            kg_release_name(context, &deleg_cred->name);
-        xfree(deleg_cred);
+    {
+        gss_cred_id_t dcred = (gss_cred_id_t) deleg_cred;
+        (void) krb5_gss_release_cred(&tmp_minor_status, &dcred);
     }
     if (token.value)
         xfree(token.value);
