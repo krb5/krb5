@@ -111,19 +111,33 @@ def kill_slapd():
         slapd_pid = -1
 atexit.register(kill_slapd)
 
-out = open(slapd_out, 'w')
-subprocess.call([slapd, '-h', ldap_uri, '-F', slapd_conf], stdout=out,
-                stderr=out, universal_newlines=True)
-out.close()
-pidf = open(slapd_pidfile, 'r')
-slapd_pid = int(pidf.read())
-pidf.close()
-output('*** Started slapd (pid %d, output in %s)\n' % (slapd_pid, slapd_out))
+def start_slapd():
+    global slapd_pid
+    out = open(slapd_out, 'a')
+    subprocess.call([slapd, '-h', ldap_uri, '-F', slapd_conf], stdout=out,
+                    stderr=out, universal_newlines=True)
+    out.close()
+    pidf = open(slapd_pidfile, 'r')
+    slapd_pid = int(pidf.read())
+    pidf.close()
+    output('*** Started slapd (pid %d, output in %s)\n' %
+           (slapd_pid, slapd_out))
 
-# slapd detaches before it finishes setting up its listener sockets
-# (they are bound but listen() has not been called).  Give it a second
-# to finish.
-time.sleep(1)
+    # slapd detaches before it finishes setting up its listener sockets
+    # (they are bound but listen() has not been called).  Give it a second
+    # to finish.
+    time.sleep(1)
+
+# Stop slapd and wait for it to exit, so that it can be started again.
+def stop_slapd():
+    kill_slapd()
+    for i in range(100):
+        if not os.path.exists(slapd_pidfile):
+            return
+        time.sleep(0.1)
+    fail('slapd did not exit')
+
+start_slapd()
 
 # Run kdbtest against the LDAP module.
 conf = {'realms': {'$realm': {'database_module': 'ldap'}},
@@ -545,6 +559,17 @@ realm.run([kadminl, 'modpol', '-maxlife', '0', 'pw_e'])
 realm.run([kadminl, 'cpw', '-pw', 'password_', 'pwuser'])
 realm.run([kadminl, 'getprinc', 'pwuser'],
           expected_msg='Password expiration date: [never]')
+
+# Check that the KDC survives its LDAP server going away and works again
+# once the server returns.  The handle pool used to be corrupted by this
+# (use after free), which memory checkers such as ASan and valgrind detect
+# reliably.
+mark('LDAP server failure')
+stop_slapd()
+realm.kinit(realm.user_princ, password('user'), expected_code=1)
+realm.kinit(realm.user_princ, password('user'), expected_code=1)
+start_slapd()
+realm.kinit(realm.user_princ, password('user'))
 
 realm.stop()
 
