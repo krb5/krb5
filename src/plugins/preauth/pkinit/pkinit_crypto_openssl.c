@@ -1410,7 +1410,9 @@ cms_signeddata_create(krb5_context context,
     PKCS7_SIGNED *p7s = NULL;
     PKCS7_SIGNER_INFO *p7si = NULL;
     unsigned char *p;
-    STACK_OF(X509) * cert_stack = NULL;
+    STACK_OF(X509) *cert_stack = NULL, *certstack = NULL;
+    X509_STORE *certstore = NULL;
+    X509_STORE_CTX *certctx = NULL;
     ASN1_OCTET_STRING *digest_attr = NULL;
     EVP_MD_CTX *ctx;
     unsigned char md_data[EVP_MAX_MD_SIZE], *abuf = NULL;
@@ -1439,9 +1441,6 @@ cms_signeddata_create(krb5_context context,
         goto cleanup;
 
     if (id_cryptoctx->my_cert != NULL) {
-        X509_STORE *certstore = NULL;
-        X509_STORE_CTX *certctx;
-        STACK_OF(X509) *certstack = NULL;
         char buf[DN_BUF_LEN];
         unsigned int i = 0, size = 0;
 
@@ -1466,6 +1465,8 @@ cms_signeddata_create(krb5_context context,
             goto cleanup;
         }
         certstack = X509_STORE_CTX_get1_chain(certctx);
+        if (certstack == NULL)
+            goto cleanup;
         size = sk_X509_num(certstack);
         for (i = 0; i < size - 1; i++) {
             X509 *x = sk_X509_value(certstack, i);
@@ -1473,11 +1474,9 @@ cms_signeddata_create(krb5_context context,
             TRACE_PKINIT_CERT_CHAIN_NAME(context, (int)i, buf);
             sk_X509_push(cert_stack, X509_dup(x));
         }
-        X509_STORE_CTX_free(certctx);
-        X509_STORE_free(certstore);
-        sk_X509_pop_free(certstack, X509_free);
 
         p7s->cert = cert_stack;
+        cert_stack = NULL;
 
         /* fill-in PKCS7_SIGNER_INFO */
         if ((p7si = PKCS7_SIGNER_INFO_new()) == NULL)
@@ -1563,6 +1562,7 @@ cms_signeddata_create(krb5_context context,
         /* adder signer_info to pkcs7 signed */
         if (!PKCS7_add_signer(p7, p7si))
             goto cleanup2;
+        p7si = NULL;
     } /* we have a certificate */
 
     /* start on adding data to the pkcs7 signed */
@@ -1604,6 +1604,11 @@ cleanup2:
             X509_ALGOR_free(alg);
     }
 cleanup:
+    X509_STORE_CTX_free(certctx);
+    X509_STORE_free(certstore);
+    sk_X509_pop_free(cert_stack, X509_free);
+    sk_X509_pop_free(certstack, X509_free);
+    PKCS7_SIGNER_INFO_free(p7si);
     if (p7 != NULL)
         PKCS7_free(p7);
     free(sig);
