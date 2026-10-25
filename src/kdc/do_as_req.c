@@ -598,8 +598,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /* If the KDB module returned a different realm for the client and server,
-     * we need to issue a client realm referral. */
-    if (!data_eq(state->server->princ->realm, state->client->princ->realm)) {
+     * we need to issue a client realm referral.  Realm names which differ
+     * only in alias spelling refer to the same realm, so no referral. */
+    if (!data_eq(state->server->princ->realm, state->client->princ->realm) &&
+        !(is_local_realm_name(realm, state->server->princ->realm.data,
+                              state->server->princ->realm.length) &&
+          is_local_realm_name(realm, state->client->princ->realm.data,
+                              state->client->princ->realm.length))) {
         state->status = "REFERRAL";
         au_state->cl_realm = &state->client->princ->realm;
         errcode = KRB5KDC_ERR_WRONG_REALM;

@@ -941,10 +941,48 @@ static krb5_preauthtype supported_server_pa_types[] = {
 static void
 pkinit_fini_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
-    /*
-     * There is nothing currently allocated by pkinit_init_kdc_profile()
-     * which needs to be freed here.
-     */
+    char **sp;
+
+    for (sp = plgctx->realm_aliases; sp != NULL && *sp != NULL; sp++)
+        free(*sp);
+    free(plgctx->realm_aliases);
+    plgctx->realm_aliases = NULL;
+}
+
+/*
+ * Destructively split realm_aliases profile values into a list of realm
+ * names.  Values may contain multiple space- or comma-separated names, like
+ * other multi-valued KDC profile options.
+ */
+static krb5_error_code
+parse_realm_aliases(char **values, char ***list_out)
+{
+    const char *const delim = " \t\r\n,";
+    char **valuesp, *token, *save = NULL;
+    char **list = NULL;
+    size_t count = 0;
+
+    *list_out = NULL;
+    for (valuesp = values; valuesp != NULL && *valuesp != NULL; valuesp++) {
+        for (token = strtok_r(*valuesp, delim, &save); token != NULL;
+             token = strtok_r(NULL, delim, &save)) {
+            char **newptr = realloc(list, (count + 2) * sizeof(*list));
+            if (newptr == NULL) {
+                free(list);
+                return ENOMEM;
+            }
+            list = newptr;
+            list[count] = strdup(token);
+            if (list[count] == NULL) {
+                free(list);
+                return ENOMEM;
+            }
+            count++;
+            list[count] = NULL;
+        }
+    }
+    *list_out = list;
+    return 0;
 }
 
 static krb5_error_code
@@ -952,6 +990,7 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     krb5_error_code retval;
     char *eku_string = NULL, *ocsp_check = NULL, *minbits = NULL;
+    char **values = NULL;
 
     pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
     retval = pkinit_kdcdefault_string(context, plgctx->realmname,
@@ -1037,6 +1076,15 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
                               KRB5_CONF_PKINIT_INDICATOR,
                               &plgctx->auth_indicators);
 
+    retval = pkinit_kdcdefault_strings(context, plgctx->realmname,
+                                       KRB5_CONF_REALM_ALIASES, &values);
+    if (values != NULL) {
+        retval = parse_realm_aliases(values, &plgctx->realm_aliases);
+        profile_free_list(values);
+        if (retval != 0)
+            goto errout;
+    }
+
     return 0;
 errout:
     pkinit_fini_kdc_profile(context, plgctx);
@@ -1049,6 +1097,7 @@ pkinit_find_realm_context(krb5_context context,
                           krb5_principal princ)
 {
     size_t i;
+    char **alias;
     pkinit_kdc_context *realm_contexts;
 
     if (moddata == NULL)
@@ -1066,6 +1115,28 @@ pkinit_find_realm_context(krb5_context context,
             pkiDebug("%s: returning context at %p for realm '%s'\n",
                      __FUNCTION__, p, p->realmname);
             return p;
+        }
+    }
+
+    /*
+     * No initialized realm matched the request realm.  If some realm lists
+     * it as an alias (see realm_aliases), use that realm's PKINIT context, so
+     * a realm alias can borrow the canonical realm's identity and trust
+     * anchors instead of needing its own initialized realm.
+     */
+    for (i = 0; realm_contexts[i] != NULL; i++) {
+        pkinit_kdc_context p = realm_contexts[i];
+
+        for (alias = p->realm_aliases; alias != NULL && *alias != NULL;
+             alias++) {
+            if ((strlen(*alias) == princ->realm.length) &&
+                (strncasecmp(*alias, princ->realm.data,
+                             princ->realm.length) == 0)) {
+                pkiDebug("%s: returning context at %p for realm '%s' "
+                         "via alias '%s'\n",
+                         __FUNCTION__, p, p->realmname, *alias);
+                return p;
+            }
         }
     }
     pkiDebug("%s: unable to find realm context for realm '%.*s'\n",

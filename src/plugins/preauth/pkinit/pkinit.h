@@ -234,6 +234,7 @@ struct _pkinit_kdc_context {
     char *realmname;
     unsigned int realmname_len;
     char **auth_indicators;
+    char **realm_aliases;
 };
 typedef struct _pkinit_kdc_context *pkinit_kdc_context;
 

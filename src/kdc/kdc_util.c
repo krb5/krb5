@@ -110,6 +110,51 @@ is_local_tgs_principal(krb5_const_principal principal)
 }
 
 /*
+ * Return true if name (of length len) is one of realm's configured realm
+ * aliases (see the realm_aliases KDC profile option).  Comparisons are
+ * case-insensitive, as realm names conventionally are.
+ */
+krb5_boolean
+is_realm_alias(kdc_realm_t *realm, const char *name, size_t len)
+{
+    char **alias;
+
+    for (alias = realm->realm_aliases; alias != NULL && *alias != NULL;
+         alias++) {
+        if (strlen(*alias) == len && strncasecmp(*alias, name, len) == 0)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/* Return true if name (of length len) is realm's realm name or an alias. */
+krb5_boolean
+is_local_realm_name(kdc_realm_t *realm, const char *name, size_t len)
+{
+    return (strlen(realm->realm_name) == len &&
+            strncmp(realm->realm_name, name, len) == 0) ||
+        is_realm_alias(realm, name, len);
+}
+
+/* Return true if data is realm's realm name or an alias of it. */
+static krb5_boolean
+is_local_realm_data(kdc_realm_t *realm, const krb5_data *data)
+{
+    return is_local_realm_name(realm, data->data, data->length);
+}
+
+/*
+ * Return true if princ names the ticket-granting service of realm's canonical
+ * realm or one of its aliases (e.g. krbtgt/ALIAS@ALIAS).
+ */
+krb5_boolean
+is_local_realm_tgs(kdc_realm_t *realm, krb5_const_principal princ)
+{
+    return is_local_tgs_principal(princ) &&
+        is_local_realm_data(realm, &princ->data[1]);
+}
+
+/*
  * given authentication data (provides seed for checksum), verify checksum
  * for source data.
  */
