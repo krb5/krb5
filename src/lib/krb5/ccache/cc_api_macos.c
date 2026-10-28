@@ -66,10 +66,10 @@ struct api_macos_ptcursor {
 
 /*
  * The CCAPI framework and XPC are not safe to use in a child process forked
- * after the parent used them; calling them there can crash the child.  Record
- * the pid of the first use.  In a forked child, report the collection as empty
- * and caches as not found instead of contacting the credential cache service,
- * and leave CCAPI objects inherited from the parent unreleased.
+ * from a multithreaded parent.  Record the pid of the first use.  In a child
+ * forked after that, report the collection as empty and caches as not found
+ * instead of contacting the credential cache service, and leave CCAPI objects
+ * inherited from the parent unreleased.
  */
 static k5_once_t first_use_once = K5_ONCE_INIT;
 static pid_t first_use_pid;
@@ -81,7 +81,7 @@ record_first_use(void)
 }
 
 static krb5_boolean
-in_forked_child(void)
+forked_after_first_use(void)
 {
     if (k5_once(&first_use_once, record_first_use) != 0)
         return FALSE;
@@ -120,7 +120,7 @@ make_cache(const char *residual, cc_context_t cc_context,
     *ccache_out = NULL;
 
     if (cc_context == NULL) {
-        if (in_forked_child())
+        if (forked_after_first_use())
             return KRB5_FCC_NOFILE;
         err = cc_initialize(&cc_context, ccapi_version_max, NULL, NULL);
         if (err != ccNoError)
@@ -159,7 +159,7 @@ oom:
 static uint32_t
 open_cache(struct api_macos_cache_data *data)
 {
-    if (in_forked_child())
+    if (forked_after_first_use())
         return ccErrCCacheNotFound;
     if (data->cache != NULL)
         return ccNoError;
@@ -199,7 +199,7 @@ get_primary_name(krb5_context context, char **name_out)
 
     *name_out = NULL;
 
-    if (in_forked_child())
+    if (forked_after_first_use())
         return KRB5_FCC_NOFILE;
 
     if (uname(&un) == 0) {
@@ -284,7 +284,7 @@ api_macos_gen_new(krb5_context context, krb5_ccache *cache_out)
 
     *cache_out = NULL;
 
-    if (in_forked_child())
+    if (forked_after_first_use())
         return KRB5_FCC_NOFILE;
 
     err = cc_initialize(&cc_context, ccapi_version_max, NULL, NULL);
@@ -325,7 +325,7 @@ api_macos_initialize(krb5_context context, krb5_ccache cache,
     uint32_t err;
     char *princstr = NULL, *prefix_name = NULL;
 
-    if (in_forked_child())
+    if (forked_after_first_use())
         return KRB5_FCC_NOFILE;
 
     /* Apple's cc_context_create_ccache() requires a name with type prefix. */
@@ -356,7 +356,7 @@ api_macos_close(krb5_context context, krb5_ccache cache)
 {
     struct api_macos_cache_data *data = cache->data;
 
-    if (!in_forked_child()) {
+    if (!forked_after_first_use()) {
         if (data->cache != NULL)
             cc_ccache_release(data->cache);
         cc_context_release(data->cc_context);
@@ -479,7 +479,7 @@ api_macos_end_seq_get(krb5_context context, krb5_ccache cache,
 {
     cc_credentials_iterator_t iter = *cursor;
 
-    if (!in_forked_child())
+    if (!forked_after_first_use())
         cc_credentials_iterator_release(iter);
     *cursor = NULL;
     return 0;
@@ -615,7 +615,7 @@ api_macos_ptcursor_next(krb5_context context, krb5_cc_ptcursor ptcursor,
     defname = krb5_cc_default_name(context);
     if (defname == NULL || strncmp(defname, "API:", 4) != 0)
         return 0;
-    if (in_forked_child())
+    if (forked_after_first_use())
         return 0;
     defresidual = defname + 4;
 
@@ -681,7 +681,7 @@ api_macos_ptcursor_free(krb5_context context, krb5_cc_ptcursor *ptcursor)
     struct api_macos_ptcursor *apt = (*ptcursor)->data;
 
     if (apt != NULL) {
-        if (!in_forked_child()) {
+        if (!forked_after_first_use()) {
             if (apt->iter != NULL)
                 cc_ccache_iterator_release(apt->iter);
             if (apt->cc_context != NULL)
