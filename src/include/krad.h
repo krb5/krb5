@@ -45,6 +45,12 @@
 
 #define KRAD_PACKET_SIZE_MAX 4096
 
+/*
+ * Maximum packet size over stream transports (TCP and UNIX domain sockets),
+ * per RFC 7930.  Datagram transports remain limited to KRAD_PACKET_SIZE_MAX.
+ */
+#define KRAD_PACKET_SIZE_MAX_STREAM 65535
+
 #define KRAD_SERVICE_TYPE_LOGIN 1
 #define KRAD_SERVICE_TYPE_FRAMED 2
 #define KRAD_SERVICE_TYPE_CALLBACK_LOGIN 3

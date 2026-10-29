@@ -715,8 +715,8 @@ check_anon(kdc_realm_t *realm, krb5_principal client, krb5_principal server)
 krb5_error_code
 validate_as_request(kdc_realm_t *realm, krb5_kdc_req *request,
                     krb5_db_entry *client, krb5_db_entry *server,
-                    krb5_timestamp kdc_time, const char **status,
-                    krb5_pa_data ***e_data)
+                    krb5_timestamp kdc_time, const krb5_kdb_armor *armor,
+                    const char **status, krb5_pa_data ***e_data)
 {
     krb5_context context = realm->realm_context;
     krb5_error_code ret;
@@ -798,8 +798,8 @@ validate_as_request(kdc_realm_t *realm, krb5_kdc_req *request,
     }
 
     /* Perform KDB module policy checks. */
-    ret = krb5_db_check_policy_as(context, request, client, server, kdc_time,
-                                  status, e_data);
+    ret = krb5_db_check_policy_as_armor(context, request, client, server,
+                                        kdc_time, armor, status, e_data);
     return (ret == KRB5_PLUGIN_OP_NOTSUPP) ? 0 : ret;
 }
 

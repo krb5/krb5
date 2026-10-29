@@ -47,7 +47,7 @@
 
 /* RFC 2865 */
 #define MAX_ATTRSIZE (UCHAR_MAX - 2)
-#define MAX_ATTRSETSIZE (KRAD_PACKET_SIZE_MAX - 20)
+#define MAX_ATTRSETSIZE (KRAD_PACKET_SIZE_MAX_STREAM - 20)
 
 typedef struct krad_remote_st krad_remote;
 
