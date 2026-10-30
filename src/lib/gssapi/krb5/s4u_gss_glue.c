@@ -569,10 +569,8 @@ cleanup:
 }
 
 /*
- * IAKERB wrapper for gss_acquire_cred_impersonate_name.  Builds a deferred
- * S4U2Self credential: the actual TGS-REQ is proxied through the IAKERB
- * channel during gss_init_sec_context (IAKERB_S4U2SELF_TGS_REQ state) rather
- * than contacting the KDC directly.
+ * Build a deferred S4U2Self credential.  The exchange is proxied through the
+ * IAKERB channel during gss_init_sec_context rather than contacting the KDC.
  *
  * kg_impersonate_name() is static, so this function lives here alongside it.
  * The mechglue always passes null desired_mechs and actual_mechs.
@@ -596,6 +594,7 @@ iakerb_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
     krb5_context context = NULL;
     krb5_cc_cursor cur = 0;
     krb5_creds cur_creds;
+    krb5_boolean imp_cred_locked = FALSE;
 
     if (impersonator_cred_handle == GSS_C_NO_CREDENTIAL)
         return GSS_S_CALL_INACCESSIBLE_READ;
@@ -616,12 +615,6 @@ iakerb_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
         return GSS_S_NO_CRED;
     }
 
-    /* Cert-only S4U2Self is not supported through the IAKERB proxy channel. */
-    if (user->is_cert) {
-        *minor_status = (OM_uint32)G_BAD_USAGE;
-        return GSS_S_UNAVAILABLE;
-    }
-
     *output_cred_handle = GSS_C_NO_CREDENTIAL;
     if (time_rec != NULL)
         *time_rec = 0;
@@ -636,6 +629,7 @@ iakerb_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                    impersonator_cred_handle, NULL);
     if (GSS_ERROR(major_status))
         goto cleanup;
+    imp_cred_locked = TRUE;
 
     /* Build a deferred S4U2Self credential.  The S4U2Self TGS-REQ will be
      * proxied through the IAKERB channel in gss_init_sec_context. */
@@ -684,8 +678,11 @@ iakerb_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
         goto k5err;
     code = 0;
 
-    /* Store the user principal for the deferred S4U2Self TGS-REQ. */
-    code = krb5_copy_principal(context, user->princ, &cred->s4u_user);
+    if (user->is_cert)
+        code = krb5int_copy_data_contents(context, user->princ->data,
+                                          &cred->s4u_cert);
+    else
+        code = krb5_copy_principal(context, user->princ, &cred->s4u_user);
     if (code != 0)
         goto k5err;
 
@@ -705,9 +702,12 @@ cleanup:
         if (cred->ccache != NULL)
             krb5_cc_destroy(context, cred->ccache);
         kg_release_name(context, &cred->name);
+        krb5_free_principal(context, cred->s4u_user);
+        krb5_free_data_contents(context, &cred->s4u_cert);
         free(cred);
     }
-    k5_mutex_unlock(&imp_cred->lock);
+    if (imp_cred_locked)
+        k5_mutex_unlock(&imp_cred->lock);
     krb5_free_context(context);
     return major_status;
 }
@@ -765,7 +765,7 @@ enomem:
  *
  * On the first call, set input_token to GSS_C_NO_BUFFER and *cred_handle to
  * GSS_C_NO_CREDENTIAL.  The function returns GSS_S_CONTINUE_NEEDED with an
- * in-progress handle in *cred_handle, a raw Kerberos TGS-REQ in output_token,
+ * in-progress handle in *cred_handle, a raw Kerberos request in output_token,
  * and the target realm in target_realm.
  *
  * On each subsequent call, pass the KDC reply in input_token and the
