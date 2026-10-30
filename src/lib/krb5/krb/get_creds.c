@@ -41,6 +41,7 @@
 #include "int-proto.h"
 #include "os-proto.h"
 #include "fast.h"
+#include "init_creds_ctx.h"
 
 /*
  * Set *mcreds and *fields to a matching credential and field set for
@@ -182,6 +183,7 @@ k5_get_cached_cred(krb5_context context, krb5_flags options,
 
 enum state {
     STATE_BEGIN,                /* Initial step (no input token) */
+    STATE_IDENTIFY,             /* Discovering the certificate user's realm */
     STATE_GET_TGT,              /* Getting TGT for service realm */
     STATE_GET_TGT_OFFPATH,      /* Getting TGT via off-path referrals */
     STATE_REFERRALS,            /* Retrieving service ticket or referral */
@@ -246,6 +248,9 @@ struct _krb5_tkt_creds_context {
     krb5_boolean s4u_cross_realm;      /* TRUE when navigating to user realm */
     krb5_boolean s4u_use_enterprise;   /* TRUE when enterprise princ needed */
     krb5_data s4u_service_realm;       /* saved service realm for cross-realm */
+    krb5_init_creds_context s4u_identify;
+    krb5_get_init_creds_opt s4u_identify_opts;
+    krb5_boolean s4u_cert_identify_tried;
 
     /* S4U2Proxy mode (optional, set by krb5_tkt_creds_set_s4u2proxy). */
     krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
@@ -739,6 +744,44 @@ wrong_enctype(krb5_context context, krb5_enctype enctype)
     return TRUE;
 }
 
+/*
+ * Fall back to an AS-REQ realm-discovery probe for a certificate-only
+ * S4U2Self request after direct S4U2Self failed in the service realm.
+ */
+static krb5_error_code
+begin_identify(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_principal_data client;
+    krb5_data empty_name = empty_data();
+    krb5_data empty = empty_data();
+
+    memset(&client, 0, sizeof(client));
+    client.magic = KV5M_PRINCIPAL;
+    client.realm = ctx->server->realm;
+    client.data = &empty_name;
+    client.length = 1;
+    client.type = KRB5_NT_X500_PRINCIPAL;
+    krb5_get_init_creds_opt_init(&ctx->s4u_identify_opts);
+    krb5_get_init_creds_opt_set_tkt_life(&ctx->s4u_identify_opts, 15);
+    krb5_get_init_creds_opt_set_renew_life(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_forwardable(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_proxiable(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_canonicalize(&ctx->s4u_identify_opts, 1);
+    code = krb5_init_creds_init(context, &client, NULL, NULL, 0,
+                                &ctx->s4u_identify_opts,
+                                &ctx->s4u_identify);
+    if (code != 0)
+        return code;
+    ctx->s4u_identify->identify_realm = TRUE;
+    ctx->s4u_identify->subject_cert = &ctx->s4u_subject_cert;
+    ctx->s4u_cert_identify_tried = TRUE;
+    ctx->state = STATE_IDENTIFY;
+    return krb5_init_creds_step(context, ctx->s4u_identify, &empty,
+                                ctx->caller_out, ctx->caller_realm,
+                                ctx->caller_flags);
+}
+
 /* Advance the referral request loop. */
 static krb5_error_code
 step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
@@ -746,8 +789,21 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_error_code code;
     const krb5_data *referral_realm;
 
-    /* Possibly try a non-referral fallback request on error. */
+    /* Possibly try a fallback request on error. */
     if (ctx->reply_code != 0) {
+        /*
+         * For certificate-only S4U2Self, direct S4U2Self in the service realm
+         * fails with C_PRINCIPAL_UNKNOWN when the certificate belongs to a
+         * foreign realm.  Fall back once to AS-REQ realm discovery.
+         */
+        if (ctx->reply_code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN &&
+            ctx->s4u_user != NULL &&
+            ctx->s4u_user->user_id.user != NULL &&
+            ctx->s4u_user->user_id.user->length == 0 &&
+            ctx->s4u_subject_cert.length != 0 &&
+            !ctx->s4u_cert_identify_tried &&
+            ctx->referral_count == 1)
+            return begin_identify(context, ctx);
         if (ctx->s4u_use_enterprise)
             return ctx->reply_code;
         return try_fallback(context, ctx);
@@ -1518,6 +1574,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
         krb5_free_principal(context, ctx->s4u_user->user_id.user);
         free(ctx->s4u_user);
     }
+    krb5_init_creds_free(context, ctx->s4u_identify);
     krb5_free_data_contents(context, &ctx->s4u_subject_cert);
     krb5_free_data_contents(context, &ctx->s4u_service_realm);
     krb5_free_data_contents(context, &ctx->s4u2proxy_evidence);
@@ -1583,6 +1640,31 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
         code = check_cache(context, ctx);
         if (code != 0 || ctx->state == STATE_COMPLETE)
             return code;
+    }
+    if (ctx->state == STATE_IDENTIFY) {
+        krb5_data empty = empty_data();
+
+        code = krb5_init_creds_step(context, ctx->s4u_identify,
+                                    in == NULL ? &empty : in, out, realm,
+                                    flags);
+        if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
+            return code;
+        if (data_eq(ctx->s4u_identify->request->client->realm,
+                    ctx->server->realm)) {
+            krb5_init_creds_free(context, ctx->s4u_identify);
+            ctx->s4u_identify = NULL;
+            return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+        }
+        krb5_free_data_contents(context, &ctx->s4u_user->user_id.user->realm);
+        code = krb5int_copy_data_contents(
+            context, &ctx->s4u_identify->request->client->realm,
+            &ctx->s4u_user->user_id.user->realm);
+        if (code != 0)
+            return code;
+        krb5_init_creds_free(context, ctx->s4u_identify);
+        ctx->s4u_identify = NULL;
+        ctx->state = STATE_BEGIN;
+        no_input = TRUE;
     }
 
     ctx->caller_out = out;
