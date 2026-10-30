@@ -142,11 +142,6 @@ verify_s4u2self_reply(krb5_context context, krb5_keyblock *subkey,
                       krb5_pa_data **rep_padata, krb5_pa_data **enc_padata,
                       krb5_boolean update_req_user);
 
-/* Step-based S4U2Self support for krb5_tkt_creds_context */
-krb5_error_code
-k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
-                           krb5_principal user, const krb5_data *subject_cert);
-
 /* The subkey field is an output parameter; if a
  * tgs-rep is received then the subkey will be filled
  * in with the subkey needed to decrypt the TGS

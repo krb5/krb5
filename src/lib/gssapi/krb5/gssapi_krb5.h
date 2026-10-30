@@ -302,6 +302,9 @@ gss_krb5_import_cred(OM_uint32 *minor_status,
  * Step-based S4U2Self (protocol transition) credential acquisition for the
  * Kerberos GSS mechanism.  Provides a non-blocking alternative to
  * gss_acquire_cred_impersonate_name() for event-driven applications.
+ * desired_name may be a principal or a GSS_KRB5_NT_X509_CERT name.  For
+ * certificate-only requests, the service realm's KDC must resolve the
+ * certificate; the step API does not discover the user's realm.
  *
  * Protocol:
  *   First call:  input_token = GSS_C_NO_BUFFER, *cred_handle = GSS_C_NO_CREDENTIAL

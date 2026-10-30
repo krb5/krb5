@@ -235,11 +235,62 @@ cleanup:
     krb5_free_context(kctx);
 }
 
+static void
+check(krb5_error_code code)
+{
+    if (code != 0) {
+        com_err("t_imp_step", code, NULL);
+        exit(1);
+    }
+}
+
+static void
+test_raw(const char *user_str, const char *cert_str)
+{
+    krb5_context context;
+    krb5_ccache ccache;
+    krb5_principal service, user = NULL;
+    krb5_tkt_creds_context tcc;
+    krb5_creds in = { 0 }, out;
+    krb5_data cert;
+    char *name, *cert_copy;
+
+    check(krb5_init_context(&context));
+    check(krb5_cc_default(context, &ccache));
+    check(krb5_cc_get_principal(context, ccache, &service));
+    if (strcmp(user_str, "-") != 0)
+        check(krb5_parse_name(context, user_str, &user));
+    cert_copy = strdup(cert_str);
+    assert(cert_copy != NULL);
+    cert = make_data(cert_copy, strlen(cert_copy));
+    in.client = in.server = service;
+    check(krb5_tkt_creds_init(context, ccache, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2self(context, tcc, user, &cert));
+    memset(cert_copy, 0, cert.length);
+    free(cert_copy);
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    check(krb5_unparse_name(context, out.client, &name));
+    printf("raw impersonated: %s\n", name);
+    krb5_free_unparsed_name(context, name);
+    krb5_free_cred_contents(context, &out);
+    krb5_tkt_creds_free(context, tcc);
+    krb5_free_principal(context, user);
+    krb5_free_principal(context, service);
+    krb5_cc_close(context, ccache);
+    krb5_free_context(context);
+}
+
 int
 main(int argc, char **argv)
 {
     int i;
     const char *user_str = NULL;
+
+    if (argc == 4 && strcmp(argv[1], "--raw") == 0) {
+        test_raw(argv[2], argv[3]);
+        return 0;
+    }
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--bad-input") == 0)

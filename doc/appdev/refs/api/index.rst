@@ -290,6 +290,7 @@ Rarely used public interfaces
    krb5_tkt_creds_get_times.rst
    krb5_tkt_creds_init.rst
    krb5_tkt_creds_set_s4u2proxy.rst
+   krb5_tkt_creds_set_s4u2self.rst
    krb5_tkt_creds_step.rst
    krb5_unmarshal_credentials.rst
    krb5_verify_init_creds.rst

@@ -239,7 +239,7 @@ struct _krb5_tkt_creds_context {
     krb5_data *caller_realm;    /* Caller's realm parameter */
     unsigned int *caller_flags; /* Caller's flags parameter */
 
-    /* S4U2Self mode (optional, set by k5_tkt_creds_set_s4u2self). */
+    /* S4U2Self mode (optional, set by krb5_tkt_creds_set_s4u2self). */
     krb5_pa_s4u_x509_user *s4u_user;  /* padata state; NULL unless S4U2Self */
     krb5_data s4u_subject_cert;        /* owned copy of subject cert */
     krb5_boolean s4u_first_req;        /* TRUE before first referral reply */
@@ -1410,14 +1410,16 @@ cleanup:
  * krb5_tkt_creds_step() call.  Subsequent steps will include PA-S4U-X509-USER
  * padata in TGS-REQs and verify the reply padata.
  */
-krb5_error_code
-k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
-                           krb5_principal user, const krb5_data *subject_cert)
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
+                            krb5_principal user, const krb5_data *subject_cert)
 {
     krb5_error_code code;
     krb5_pa_s4u_x509_user *s4u_user;
 
-    if (ctx->state != STATE_BEGIN)
+    if (ctx->state != STATE_BEGIN || ctx->s4u_user != NULL ||
+        ctx->s4u2proxy_evidence.length != 0 ||
+        (user == NULL && (subject_cert == NULL || subject_cert->length == 0)))
         return EINVAL;
 
     s4u_user = k5alloc(sizeof(*s4u_user), &code);
@@ -1427,12 +1429,15 @@ k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
 
     s4u_user->user_id.options = KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
 
-    if (user != NULL) {
+    if (user != NULL)
         code = krb5_copy_principal(context, user, &s4u_user->user_id.user);
-        if (code != 0) {
-            free(s4u_user);
-            return code;
-        }
+    else
+        code = krb5_build_principal_ext(context, &s4u_user->user_id.user,
+                                        ctx->server->realm.length,
+                                        ctx->server->realm.data, 0);
+    if (code != 0) {
+        free(s4u_user);
+        return code;
     }
 
     if (subject_cert != NULL && subject_cert->length > 0) {
@@ -1461,7 +1466,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
                              const krb5_data *evidence_ticket_der)
 {
-    if (ctx->state != STATE_BEGIN || ctx->s4u2proxy_evidence.length != 0)
+    if (ctx->state != STATE_BEGIN || ctx->s4u_user != NULL ||
+        ctx->s4u2proxy_evidence.length != 0)
         return EINVAL;
     if (evidence_ticket_der == NULL || evidence_ticket_der->length == 0)
         return EINVAL;

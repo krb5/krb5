@@ -312,6 +312,12 @@ shutil.copyfile(savefile, r1.ccache)
 mark('S4U2Self using X509 certificate (GSSAPI)')
 
 r1.run(['./t_s4u', 'c:other', '-', r1.keytab])
+r1.run(['./t_imp_step', 'c:other'], expected_msg='impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--raw', '-', 'other'],
+       expected_msg='raw impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'other'],
+       expected_msg='raw impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'user'], expected_code=1)
 r1.run(['./t_s4u', 'c:user@UREALM', '-', r1.keytab])
 
 r1.run(['./t_s4u', '--spnego', 'c:other', '-', r1.keytab])

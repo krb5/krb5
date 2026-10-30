@@ -907,12 +907,6 @@ krb5_gss_acquire_cred_impersonate_name_step(
         }
     }
 
-    if (user->is_cert) {
-        *minor_status = (OM_uint32)G_BAD_USAGE;
-        major = GSS_S_UNAVAILABLE;
-        goto cleanup;
-    }
-
     code = krb5_gss_init_context(&context);
     if (code != 0)
         goto error;
@@ -967,10 +961,11 @@ krb5_gss_acquire_cred_impersonate_name_step(
         goto error;
     code = 0;
 
-    /* Copy user principal for S4U2Self. */
-    code = krb5_copy_principal(context, user->princ, &cred->s4u_user);
-    if (code != 0)
-        goto error;
+    if (!user->is_cert) {
+        code = krb5_copy_principal(context, user->princ, &cred->s4u_user);
+        if (code != 0)
+            goto error;
+    }
 
     k5_mutex_unlock(&imp_cred->lock);
     imp_cred_locked = FALSE;
@@ -989,7 +984,7 @@ krb5_gss_acquire_cred_impersonate_name_step(
         memset(&in_creds, 0, sizeof(in_creds));
         /* client must match the ccache principal so get_cached_local_tgt
          * can find the impersonator's TGT; the S4U2Self user is set via
-         * k5_tkt_creds_set_s4u2self padata. */
+         * krb5_tkt_creds_set_s4u2self padata. */
         in_creds.client = cred->name->princ;
         in_creds.server = cred->name->princ;
         if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
@@ -1002,8 +997,9 @@ krb5_gss_acquire_cred_impersonate_name_step(
                                    &sctx->tcc);
         if (code != 0)
             goto error;
-        code = k5_tkt_creds_set_s4u2self(sctx->context, sctx->tcc,
-                                          cred->s4u_user, NULL);
+        code = krb5_tkt_creds_set_s4u2self(
+            sctx->context, sctx->tcc, cred->s4u_user,
+            user->is_cert ? user->princ->data : NULL);
         if (code != 0)
             goto error;
     }
