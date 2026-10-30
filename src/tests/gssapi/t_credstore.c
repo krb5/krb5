@@ -33,7 +33,7 @@ static void
 usage(void)
 {
     fprintf(stderr,
-            "Usage: t_credstore [-sabi] principal [{key value} ...]\n");
+            "Usage: t_credstore [-sabik] principal [{key value} ...]\n");
     exit(1);
 }
 
@@ -64,6 +64,8 @@ main(int argc, char *argv[])
             cred_usage = GSS_C_BOTH;
         else if (opt == 'i')
             cred_usage = GSS_C_INITIATE;
+        else if (opt == 'k')
+            mechs = &mechset_krb5;
         else
             usage();
     }
