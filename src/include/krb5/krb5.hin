@@ -7576,6 +7576,26 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
                     krb5_tkt_creds_context *ctx);
 
 /**
+ * Configure a ticket credentials context for S4U2Proxy.
+ *
+ * @param [in] context              Library context
+ * @param [in] ctx                  Ticket credentials context
+ * @param [in] evidence_ticket_der  DER-encoded evidence ticket
+ *
+ * Call once after krb5_tkt_creds_init() and before krb5_tkt_creds_step() or
+ * krb5_tkt_creds_get().  The input credentials specify the impersonated client
+ * and target server; the cache contains the impersonating service's TGT.
+ * The evidence ticket is copied.
+ *
+ * @version New in 1.23
+ *
+ * @retval 0 Success; otherwise a Kerberos error code
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
+                             const krb5_data *evidence_ticket_der);
+
+/**
  * Synchronously obtain credentials using a TGS request context.
  *
  * @param[in] context           Library context

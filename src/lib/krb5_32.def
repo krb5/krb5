@@ -526,4 +526,4 @@ EXPORTS
 ; private symbol used by GSSAPI serialization
 	k5_ser_unpack_len				@484 ; PRIVATE
 	k5_tkt_creds_set_s4u2self			@485 ; PRIVATE GSSAPI
-	k5_tkt_creds_set_s4u2proxy			@486 ; PRIVATE GSSAPI
+	krb5_tkt_creds_set_s4u2proxy			@486

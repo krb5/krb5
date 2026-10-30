@@ -147,11 +147,6 @@ krb5_error_code
 k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
                            krb5_principal user, const krb5_data *subject_cert);
 
-/* Step-based S4U2Proxy support for krb5_tkt_creds_context */
-krb5_error_code
-k5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
-                            const krb5_data *evidence_ticket_der);
-
 /* The subkey field is an output parameter; if a
  * tgs-rep is received then the subkey will be filled
  * in with the subkey needed to decrypt the TGS

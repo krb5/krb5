@@ -2458,9 +2458,4 @@ krb5_error_code
 k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
                            krb5_principal user, const krb5_data *subject_cert);
 
-/* Configure a krb5_tkt_creds_context for S4U2Proxy mode.  Must be called
- * after k5_tkt_creds_set_s4u2self() and before krb5_tkt_creds_step(). */
-krb5_error_code
-k5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
-                            const krb5_data *evidence_ticket_der);
 #endif /* _KRB5_INT_H */

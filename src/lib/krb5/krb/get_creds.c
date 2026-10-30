@@ -247,7 +247,7 @@ struct _krb5_tkt_creds_context {
     krb5_boolean s4u_use_enterprise;   /* TRUE when enterprise princ needed */
     krb5_data s4u_service_realm;       /* saved service realm for cross-realm */
 
-    /* S4U2Proxy mode (optional, set by k5_tkt_creds_set_s4u2proxy). */
+    /* S4U2Proxy mode (optional, set by krb5_tkt_creds_set_s4u2proxy). */
     krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
 };
 
@@ -1413,16 +1413,16 @@ k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
 }
 
 /*
- * Configure ctx for S4U2Proxy (constrained delegation).  Must be called after
- * k5_tkt_creds_set_s4u2self() and before the first krb5_tkt_creds_step() call.
+ * Configure ctx for S4U2Proxy (constrained delegation) before the first
+ * krb5_tkt_creds_step() call.
  * evidence_ticket_der is the DER-encoded S4U2Self evidence ticket; it will be
  * sent as additional-tickets[0] in the S4U2Proxy TGS-REQ.
  */
-krb5_error_code
-k5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
-                            const krb5_data *evidence_ticket_der)
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
+                             const krb5_data *evidence_ticket_der)
 {
-    if (ctx->state != STATE_BEGIN)
+    if (ctx->state != STATE_BEGIN || ctx->s4u2proxy_evidence.length != 0)
         return EINVAL;
     if (evidence_ticket_der == NULL || evidence_ticket_der->length == 0)
         return EINVAL;
