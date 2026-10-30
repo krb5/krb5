@@ -572,8 +572,9 @@ check_s4u2proxy_policy(krb5_context context, krb5_kdc_req *req,
 }
 
 static krb5_error_code
-check_tgs_u2u(krb5_context context, krb5_kdc_req *req, const krb5_ticket *stkt,
-              krb5_db_entry *server, const char **status)
+check_tgs_u2u(kdc_realm_t *realm, krb5_context context, krb5_kdc_req *req,
+              const krb5_ticket *stkt, krb5_db_entry *server,
+              const char **status)
 {
     /* A second ticket must be present in the request. */
     if (stkt == NULL) {
@@ -581,9 +582,15 @@ check_tgs_u2u(krb5_context context, krb5_kdc_req *req, const krb5_ticket *stkt,
         return KRB5KDC_ERR_BADOPTION;
     }
 
-    /* The second ticket must be a TGT to the server realm. */
+    /*
+     * The second ticket must be a TGT to the server realm.  Alias spellings
+     * of our realm name the same realm, so they match each other.
+     */
     if (!is_local_tgs_principal(stkt->server) ||
-        !data_eq(stkt->server->data[1], server->princ->realm)) {
+        !(is_local_realm_name(realm, stkt->server->data[1].data,
+                              stkt->server->data[1].length) &&
+          is_local_realm_name(realm, server->princ->realm.data,
+                              server->princ->realm.length))) {
         *status = "2ND_TKT_NOT_TGS";
         return KRB5KDC_ERR_POLICY;
     }
@@ -650,15 +657,22 @@ check_tgs_nontgt(krb5_context context, krb5_kdc_req *req, krb5_ticket *tkt,
  * principal).
  */
 static krb5_error_code
-check_tgs_tgt(krb5_kdc_req *req, krb5_ticket *tkt, const char **status)
+check_tgs_tgt(kdc_realm_t *realm, krb5_kdc_req *req, krb5_ticket *tkt,
+              const char **status)
 {
     /* Make sure it's a TGS principal. */
     if (!krb5_is_tgs_principal(tkt->server)) {
         *status = "BAD TGS SERVER NAME";
         return KRB5KRB_AP_ERR_NOT_US;
     }
-    /* TGS principal second component must match service realm. */
-    if (!data_eq(tkt->server->data[1], req->server->realm)) {
+    /*
+     * TGS principal second component must match service realm.  Alias
+     * spellings of our realm name the same realm, so they match each other.
+     */
+    if (!(is_local_realm_name(realm, tkt->server->data[1].data,
+                              tkt->server->data[1].length) &&
+          is_local_realm_name(realm, req->server->realm.data,
+                              req->server->realm.length))) {
         *status = "BAD TGS SERVER INSTANCE";
         return KRB5KRB_AP_ERR_NOT_US;
     }
@@ -692,7 +706,7 @@ check_tgs_constraints(kdc_realm_t *realm, krb5_kdc_req *request,
     if (request->kdc_options & NON_TGT_OPTION)
         errcode = check_tgs_nontgt(context, request, ticket, status);
     else
-        errcode = check_tgs_tgt(request, ticket, status);
+        errcode = check_tgs_tgt(realm, request, ticket, status);
     if (errcode != 0)
         return errcode;
 
@@ -708,7 +722,7 @@ check_tgs_constraints(kdc_realm_t *realm, krb5_kdc_req *request,
         return errcode;
 
     if (request->kdc_options & KDC_OPT_ENC_TKT_IN_SKEY) {
-        errcode = check_tgs_u2u(context, request, stkt, server, status);
+        errcode = check_tgs_u2u(realm, context, request, stkt, server, status);
         if (errcode != 0)
             return errcode;
     }
