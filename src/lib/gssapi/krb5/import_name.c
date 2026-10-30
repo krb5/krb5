@@ -196,8 +196,10 @@ import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
     } else {
 #ifndef NO_PASSWORD
         uid_t uid;
+#ifdef HAVE_GETPWUID_R
         struct passwd pwx;
         char pwbuf[BUFSIZ];
+#endif
 #endif
 
         stringrep = NULL;
