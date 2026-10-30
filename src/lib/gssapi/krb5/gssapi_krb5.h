@@ -302,13 +302,12 @@ gss_krb5_import_cred(OM_uint32 *minor_status,
  * Step-based S4U2Self (protocol transition) credential acquisition for the
  * Kerberos GSS mechanism.  Provides a non-blocking alternative to
  * gss_acquire_cred_impersonate_name() for event-driven applications.
- * desired_name may be a principal or a GSS_KRB5_NT_X509_CERT name.  For
- * certificate-only requests, the service realm's KDC must resolve the
- * certificate; the step API does not discover the user's realm.
+ * desired_name may be a principal or a GSS_KRB5_NT_X509_CERT name.
+ * Certificate-only requests use AS requests to discover the user's realm.
  *
  * Protocol:
  *   First call:  input_token = GSS_C_NO_BUFFER, *cred_handle = GSS_C_NO_CREDENTIAL
- *   Each call:   returns output_token (raw KDC TGS-REQ) + target_realm
+ *   Each call:   returns output_token (raw KDC AS-REQ or TGS-REQ) + target_realm
  *                and GSS_S_CONTINUE_NEEDED while the exchange is in progress.
  *   Final call:  returns GSS_S_COMPLETE; *cred_handle is the finalized
  *                impersonation credential.  output_token and target_realm are
@@ -330,7 +329,7 @@ krb5_gss_acquire_cred_impersonate_name_step(
     gss_cred_usage_t cred_usage,
     gss_buffer_t input_token,    /* GSS_C_NO_BUFFER on first call; KDC reply subsequently */
     gss_cred_id_t *cred_handle,  /* GSS_C_NO_CREDENTIAL on first call; in-progress handle subsequently */
-    gss_buffer_t output_token,   /* KDC TGS-REQ to send to target_realm */
+    gss_buffer_t output_token,   /* KDC request to send to target_realm */
     gss_buffer_t target_realm,   /* realm of KDC to send output_token to */
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);

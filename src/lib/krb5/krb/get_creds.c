@@ -41,6 +41,7 @@
 #include "int-proto.h"
 #include "os-proto.h"
 #include "fast.h"
+#include "init_creds_ctx.h"
 
 /*
  * Set *mcreds and *fields to a matching credential and field set for
@@ -182,6 +183,7 @@ k5_get_cached_cred(krb5_context context, krb5_flags options,
 
 enum state {
     STATE_BEGIN,                /* Initial step (no input token) */
+    STATE_IDENTIFY,             /* Discovering the certificate user's realm */
     STATE_GET_TGT,              /* Getting TGT for service realm */
     STATE_GET_TGT_OFFPATH,      /* Getting TGT via off-path referrals */
     STATE_REFERRALS,            /* Retrieving service ticket or referral */
@@ -246,6 +248,8 @@ struct _krb5_tkt_creds_context {
     krb5_boolean s4u_cross_realm;      /* TRUE when navigating to user realm */
     krb5_boolean s4u_use_enterprise;   /* TRUE when enterprise princ needed */
     krb5_data s4u_service_realm;       /* saved service realm for cross-realm */
+    krb5_init_creds_context s4u_identify;
+    krb5_get_init_creds_opt s4u_identify_opts;
 
     /* S4U2Proxy mode (optional, set by krb5_tkt_creds_set_s4u2proxy). */
     krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
@@ -544,7 +548,8 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
     }
 
     /* For S4U2Self mode, verify the reply padata and update user_id if needed. */
-    if (ctx->s4u_user != NULL && code == 0 && ctx->reply_creds != NULL) {
+    if (ctx->s4u_user != NULL && code == 0 && ctx->reply_creds != NULL &&
+        (ctx->state == STATE_REFERRALS || ctx->state == STATE_NON_REFERRAL)) {
         code = verify_s4u2self_reply(context, ctx->subkey, ctx->s4u_user,
                                      out_padata, out_enc_padata,
                                      ctx->s4u_first_req);
@@ -1477,6 +1482,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
         krb5_free_principal(context, ctx->s4u_user->user_id.user);
         free(ctx->s4u_user);
     }
+    krb5_init_creds_free(context, ctx->s4u_identify);
     krb5_free_data_contents(context, &ctx->s4u_subject_cert);
     krb5_free_data_contents(context, &ctx->s4u_service_realm);
     krb5_free_data_contents(context, &ctx->s4u2proxy_evidence);
@@ -1546,6 +1552,53 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
         code = check_cache(context, ctx);
         if (code != 0 || ctx->state == STATE_COMPLETE)
             return code;
+    }
+    if (ctx->state == STATE_BEGIN && ctx->s4u_user != NULL &&
+        ctx->s4u_user->user_id.user->length == 0 &&
+        ctx->s4u_subject_cert.length != 0) {
+        krb5_principal_data client;
+        krb5_data empty_name = empty_data();
+
+        memset(&client, 0, sizeof(client));
+        client.magic = KV5M_PRINCIPAL;
+        client.realm = ctx->server->realm;
+        client.data = &empty_name;
+        client.length = 1;
+        client.type = KRB5_NT_X500_PRINCIPAL;
+        krb5_get_init_creds_opt_init(&ctx->s4u_identify_opts);
+        krb5_get_init_creds_opt_set_tkt_life(&ctx->s4u_identify_opts, 15);
+        krb5_get_init_creds_opt_set_renew_life(&ctx->s4u_identify_opts, 0);
+        krb5_get_init_creds_opt_set_forwardable(&ctx->s4u_identify_opts, 0);
+        krb5_get_init_creds_opt_set_proxiable(&ctx->s4u_identify_opts, 0);
+        krb5_get_init_creds_opt_set_canonicalize(&ctx->s4u_identify_opts, 1);
+        code = krb5_init_creds_init(context, &client, NULL, NULL, 0,
+                                    &ctx->s4u_identify_opts,
+                                    &ctx->s4u_identify);
+        if (code != 0)
+            return code;
+        ctx->s4u_identify->identify_realm = TRUE;
+        ctx->s4u_identify->subject_cert = &ctx->s4u_subject_cert;
+        ctx->state = STATE_IDENTIFY;
+    }
+
+    if (ctx->state == STATE_IDENTIFY) {
+        krb5_data empty = empty_data();
+
+        code = krb5_init_creds_step(context, ctx->s4u_identify,
+                                    in == NULL ? &empty : in, out, realm,
+                                    flags);
+        if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
+            return code;
+        krb5_free_data_contents(context, &ctx->s4u_user->user_id.user->realm);
+        code = krb5int_copy_data_contents(
+            context, &ctx->s4u_identify->request->client->realm,
+            &ctx->s4u_user->user_id.user->realm);
+        if (code != 0)
+            return code;
+        krb5_init_creds_free(context, ctx->s4u_identify);
+        ctx->s4u_identify = NULL;
+        ctx->state = STATE_BEGIN;
+        no_input = TRUE;
     }
 
     ctx->caller_out = out;
