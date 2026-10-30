@@ -93,7 +93,7 @@ kg_s4u2proxy_step_init(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = k5_tkt_creds_set_s4u2proxy(context, sctx->proxy_tcc, evidence);
+    code = krb5_tkt_creds_set_s4u2proxy(context, sctx->proxy_tcc, evidence);
     if (code != 0)
         goto cleanup;
 
