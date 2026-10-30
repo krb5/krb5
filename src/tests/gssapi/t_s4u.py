@@ -112,6 +112,14 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 
 # Successful S4U2Self -> S4U2Proxy.
 out = realm.run(['./t_s4u', puser, pservice2])
+mark('IAKERB certificate S4U2Self and S4U2Proxy')
+realm.run(['./t_iakerb', pservice1, '-', pservice2, pservice2, 'c:user'],
+          expected_msg='reused:\t' + realm.user_princ)
+realm.run(['./t_iakerb', pservice1, '-', pservice1, pservice1, 'c:user'],
+          expected_msg='reused:\t' + realm.user_princ)
+realm.run(['./t_iakerb', pservice1, '-', pservice2, pservice2, puser],
+          expected_msg='reused:\t' + realm.user_princ)
+
 
 # Verify that time_req bounds all credentials in the delegated ccache,
 # including the impersonator TGT copied by make_proxy_cred().
@@ -313,11 +321,20 @@ mark('S4U2Self using X509 certificate (GSSAPI)')
 
 r1.run(['./t_s4u', 'c:other', '-', r1.keytab])
 r1.run(['./t_imp_step', 'c:other'], expected_msg='impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--abandon', 'c:other'],
+       expected_msg='abandon: ok (no crash)')
 r1.run(['./t_imp_step', '--raw', '-', 'other'],
        expected_msg='raw impersonated: other@SREALM')
 r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'other'],
        expected_msg='raw impersonated: other@SREALM')
 r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'user'], expected_code=1)
+r1.run(['./t_imp_step', '--raw', '-', 'user@UREALM'],
+       expected_msg='raw impersonated: user@UREALM')
+r1.run(['./t_imp_step', 'c:user@UREALM'],
+       expected_msg='impersonated: user@UREALM')
+r1.run(['./t_iakerb', 'p:' + r1.user_princ, '-', 'p:' + r1.user_princ,
+        'p:' + r1.user_princ, 'c:user@UREALM'],
+       expected_msg='reused:\t' + r2.user_princ)
 r1.run(['./t_s4u', 'c:user@UREALM', '-', r1.keytab])
 
 r1.run(['./t_s4u', '--spnego', 'c:other', '-', r1.keytab])

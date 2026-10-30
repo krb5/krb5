@@ -196,8 +196,7 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
 
-    /* deferred S4U2Self: set by iakerb_gss_acquire_cred_impersonate_name,
-     * consumed by IAKERB_S4U2SELF_TGS_REQ state in iakerb_initiator_step. */
+    /* Deferred S4U2Self for IAKERB. */
     krb5_principal s4u_user;  /* user to impersonate; NULL if cert-only */
     krb5_data s4u_cert;       /* optional subject certificate */
 
@@ -205,9 +204,7 @@ typedef struct _krb5_gss_cred_id_rec {
      * non-NULL while the exchange is in progress. */
     struct _kg_imp_step_ctx *imp_step_ctx;
 
-    /* Step-based S4U2Proxy: saved before kg_finalize_impersonation() is called
-     * so gss_init_sec_context() can drive the S4U2Proxy exchange asynchronously.
-     * Non-NULL only when use_step_proxy is set. */
+    /* Service TGT cache and evidence for step-based S4U2Proxy and IAKERB. */
     krb5_data s4u_evidence;       /* DER-encoded S4U2Self evidence ticket */
     krb5_ccache s4u_tgt_ccache;   /* MEMORY ccache holding the service TGT */
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
