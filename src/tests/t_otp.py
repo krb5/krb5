@@ -29,139 +29,9 @@
 #
 
 from k5test import *
-from queue import Empty
-import io
-import multiprocessing
-import struct
 
-try:
-    from pyrad import packet, dictionary
-except ImportError:
+if not have_pyrad:
     skip_rest('OTP tests', 'Python pyrad module not found')
-
-# Since Python 3.14 (3.8 on macOS), "forkserver" replaces "fork" as
-# default method on POSIX, because forking and continuing execution is
-# inherently unsafe in threaded processes, and because system
-# libraries may have created threads without specific direction from
-# the main process (this is most often seen on macOS so far).
-#
-# "forkserver" relies on being able to re-import the invoking module.
-# That doesn't work for k5test scripts as we don't use __name__ ==
-# 'main' guards and because k5test installs an atexit handler.  For
-# now, switch back to using the "fork" method.
-multiprocessing.set_start_method('fork', force=True)
-
-# We could use a dictionary file, but since we need so few attributes,
-# we'll just include them here.
-radius_attributes = '''
-ATTRIBUTE    User-Name    1    string
-ATTRIBUTE    User-Password   2    octets
-ATTRIBUTE    Service-Type    6    integer
-ATTRIBUTE    NAS-Identifier  32    string
-ATTRIBUTE    Message-Authenticator 80 octets
-'''
-
-class RadiusDaemon(multiprocessing.Process):
-    MAX_PACKET_SIZE = 4096
-    DICTIONARY = dictionary.Dictionary(io.StringIO(radius_attributes))
-
-    def listen(self, addr):
-        raise NotImplementedError()
-
-    def recvRequest(self, data):
-        raise NotImplementedError()
-
-    def run(self):
-        addr = self._args[0]
-        secrfile = self._args[1]
-        pswd = self._args[2]
-        outq = self._args[3]
-
-        if secrfile:
-            with open(secrfile, 'rb') as file:
-                secr = file.read().strip()
-        else:
-            secr = b''
-
-        data = self.listen(addr)
-        outq.put("started")
-        (buf, sock, addr) = self.recvRequest(data)
-        pkt = packet.AuthPacket(secret=secr,
-                                dict=RadiusDaemon.DICTIONARY,
-                                packet=buf)
-
-        usernm = []
-        passwd = []
-        for key in pkt.keys():
-            if key == 'User-Password':
-                passwd = list(map(pkt.PwDecrypt, pkt[key]))
-            elif key == 'User-Name':
-                usernm = pkt[key]
-
-        reply = pkt.CreateReply()
-        replyq = {'user': usernm, 'pass': passwd}
-        if passwd == [pswd]:
-            reply.code = packet.AccessAccept
-            replyq['reply'] = True
-        else:
-            reply.code = packet.AccessReject
-            replyq['reply'] = False
-
-        reply.add_message_authenticator()
-
-        outq.put(replyq)
-        if addr is None:
-            sock.send(reply.ReplyPacket())
-        else:
-            sock.sendto(reply.ReplyPacket(), addr)
-        sock.close()
-
-class UDPRadiusDaemon(RadiusDaemon):
-    def listen(self, addr):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((addr.split(':')[0], int(addr.split(':')[1])))
-        return sock
-
-    def recvRequest(self, sock):
-        (buf, addr) = sock.recvfrom(RadiusDaemon.MAX_PACKET_SIZE)
-        return (buf, sock, addr)
-
-class UnixRadiusDaemon(RadiusDaemon):
-    def listen(self, addr):
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        if os.path.exists(addr):
-            os.remove(addr)
-        sock.bind(addr)
-        sock.listen(1)
-        return (sock, addr)
-
-    def recvRequest(self, sock_and_addr):
-        sock, addr = sock_and_addr
-        conn = sock.accept()[0]
-        sock.close()
-        os.remove(addr)
-
-        buf = b''
-        remain = RadiusDaemon.MAX_PACKET_SIZE
-        while True:
-            buf += conn.recv(remain)
-            remain = RadiusDaemon.MAX_PACKET_SIZE - len(buf)
-            if (len(buf) >= 4):
-                remain = struct.unpack("!BBH", buf[0:4])[2] - len(buf)
-                if (remain <= 0):
-                    return (buf, conn, None)
-
-def verify(daemon, queue, reply, usernm, passwd):
-    try:
-        data = queue.get(timeout=1)
-    except Empty:
-        sys.stderr.write("ERROR: Packet not received by daemon!\n")
-        daemon.terminate()
-        sys.exit(1)
-    assert data['reply'] is reply
-    assert data['user'] == [usernm]
-    assert data['pass'] == [passwd]
-    daemon.join()
 
 # Compose a single token configuration.
 def otpconfig_1(toktype, username=None, indicators=None):
@@ -180,59 +50,45 @@ def otpconfig_1(toktype, username=None, indicators=None):
 def otpconfig(toktype, username=None, indicators=None):
     return '[' + otpconfig_1(toktype, username, indicators) + ']'
 
-prefix = "/tmp/%d" % os.getpid()
-secret_file = prefix + ".secret"
-socket_file = prefix + ".socket"
-with open(secret_file, "w") as file:
-    file.write("otptest")
-atexit.register(lambda: os.remove(secret_file))
-
 conf = {'plugins': {'kdcpreauth': {'enable_only': 'otp'}},
         'otp': {'udp': {'server': '127.0.0.1:$port9',
-                        'secret': secret_file,
+                        'secret': '$testdir/radius.secret',
                         'strip_realm': 'true',
                         'indicator': ['indotp1', 'indotp2']},
-                'unix': {'server': socket_file,
+                'unix': {'server': '$testdir/radius.socket',
                          'strip_realm': 'false'}}}
-
-queue = multiprocessing.Queue()
 
 realm = K5Realm(kdc_conf=conf)
 realm.run([kadminl, 'modprinc', '+requires_preauth', realm.user_princ])
 flags = ['-T', realm.ccache]
-server_addr = '127.0.0.1:' + str(realm.portbase + 9)
+socket_file = os.path.join(realm.testdir, 'radius.socket')
+udp_addr = '127.0.0.1:' + str(realm.portbase + 9)
 
 ## Test UDP fail / custom username
 mark('UDP fail / custom username')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
-daemon.start()
-queue.get()
+daemon = start_mockradius(udp_addr, 'accept')
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
            otpconfig('udp', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
-verify(daemon, queue, False, 'custom', 'reject')
+check_mockradius(daemon, 'False custom reject')
 
 ## Test UDP success / standard username
 mark('UDP success / standard username')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
-daemon.start()
-queue.get()
+daemon = start_mockradius(udp_addr, 'accept')
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('udp')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+check_mockradius(daemon, 'True user accept')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.run(['./adata', realm.krbtgt_princ],
           expected_msg='+97: [indotp1, indotp2]')
 
 # Repeat with an indicators override in the string attribute.
 mark('auth indicator override')
-daemon = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept', queue))
-daemon.start()
-queue.get()
+daemon = start_mockradius(udp_addr, 'accept')
 oconf = otpconfig('udp', indicators=['indtok1', 'indtok2'])
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ.split('@')[0], 'accept')
+check_mockradius(daemon, 'True user accept')
 realm.extract_keytab(realm.krbtgt_princ, realm.keytab)
 realm.run(['./adata', realm.krbtgt_princ],
           expected_msg='+97: [indtok1, indtok2]')
@@ -240,6 +96,7 @@ realm.run(['./adata', realm.krbtgt_princ],
 # Detect upstream pyrad bug
 #   https://github.com/wichert/pyrad/pull/18
 try:
+    from pyrad import packet
     auth = packet.Packet.CreateAuthenticator()
     packet.Packet(authenticator=auth, secret=b'').ReplyPacket()
 except AssertionError:
@@ -247,38 +104,29 @@ except AssertionError:
 
 ## Test Unix fail / custom username
 mark('Unix socket fail / custom username')
-daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
-daemon.start()
-queue.get()
+daemon = start_mockradius(socket_file, 'accept')
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp',
            otpconfig('unix', 'custom')])
 realm.kinit(realm.user_princ, 'reject', flags=flags, expected_code=1)
-verify(daemon, queue, False, 'custom', 'reject')
+check_mockradius(daemon, 'False custom reject')
 
 ## Test Unix success / standard username
 mark('Unix socket success / standard username')
-daemon = UnixRadiusDaemon(args=(socket_file, None, 'accept', queue))
-daemon.start()
-queue.get()
+daemon = start_mockradius(socket_file, 'accept')
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', otpconfig('unix')])
 realm.kinit(realm.user_princ, 'accept', flags=flags)
-verify(daemon, queue, True, realm.user_princ, 'accept')
+check_mockradius(daemon, 'True user@KRBTEST.COM accept')
 
 ## Regression test for #8708: test with the standard username and two
 ## tokens configured, with the first rejecting and the second
 ## accepting.  With the bug, the KDC incorrectly rejects the request
 ## and then performs invalid memory accesses, most likely crashing.
-queue2 = multiprocessing.Queue()
-daemon1 = UDPRadiusDaemon(args=(server_addr, secret_file, 'accept1', queue))
-daemon2 = UnixRadiusDaemon(args=(socket_file, None, 'accept2', queue2))
-daemon1.start()
-queue.get()
-daemon2.start()
-queue2.get()
+daemon1 = start_mockradius(udp_addr, 'accept1')
+daemon2 = start_mockradius(socket_file, 'accept2')
 oconf = '[' + otpconfig_1('udp') + ', ' + otpconfig_1('unix') + ']'
 realm.run([kadminl, 'setstr', realm.user_princ, 'otp', oconf])
 realm.kinit(realm.user_princ, 'accept2', flags=flags)
-verify(daemon1, queue, False, realm.user_princ.split('@')[0], 'accept2')
-verify(daemon2, queue2, True, realm.user_princ, 'accept2')
+check_mockradius(daemon1, 'False user accept2')
+check_mockradius(daemon2, 'True user@KRBTEST.COM accept2')
 
 success('OTP tests')
