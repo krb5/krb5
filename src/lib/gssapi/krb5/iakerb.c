@@ -54,6 +54,26 @@ struct _iakerb_ctx_id_rec {
 
 #define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
 
+/*
+ * header-flags: an undocumented Microsoft extension field in IAKERB-HEADER,
+ * not defined by draft-ietf-kitten-iakerb-03 (which has only target-realm
+ * and cookie).  It is a 32-bit BIT STRING at context tag [3] (bit names per
+ * Wireshark's packet-spnego.c dissector).
+ *
+ * Its bits match netr_DsRGetDCName_flags (librpc/idl/netlogon.idl in the
+ * Samba tree): force-rediscovery is DS_FORCE_REDISCOVERY (0x00000001), and
+ * likewise for every other bit that enum assigns.  key-list-support-required
+ * (0x01000000) falls in a gap netr_DsRGetDCName_flags leaves unused, so it
+ * looks like a Kerberos-specific bit layered onto the same flags word.
+ *
+ * Real Windows IAKERB acceptors always set key-list-support-required.  They
+ * also set force-rediscovery on every response after the first one sent on
+ * a given GSS context. Leaving it unset on a later response causes the
+ * Windows client to reset the connection.
+ */
+#define IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT 0x01000000
+#define IAKERB_HEADER_FLAG_FORCE_REDISCOVERY 0x00000001
+
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
 typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
 
@@ -78,37 +98,69 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     free(ctx);
 }
 
-/* Encode a KRB-ERROR message with the given protocol code.  Use the server
- * principal from verifier_cred if one is available. */
+/*
+ * Encode a KRB-ERROR message with the given protocol code.  Use the server
+ * principal from verifier_cred if one is available.  The initiator may use
+ * the server principal's realm to retry against the correct realm, so when
+ * verifier_cred has no bound name, fall back to the acceptor's default
+ * realm instead of the realm-less anonymous principal.
+ */
 static krb5_error_code
 iakerb_mk_error(krb5_context context, gss_cred_id_t verifier_cred,
                 int protocol_err, krb5_data *enc_err)
 {
+    krb5_error_code ret;
     krb5_error error = { 0 };
     krb5_gss_cred_id_t cred = (krb5_gss_cred_id_t)verifier_cred;
+    krb5_principal server = NULL;
+    char *defrealm = NULL;
 
     error.error = protocol_err;
 
-    /* We must provide a server principal, although we expect the recipient to
-     * care chiefly about the error code. */
-    if (cred != NULL && cred->name != NULL)
+    if (cred != NULL && cred->name != NULL) {
         error.server = cred->name->princ;
-    else
+    } else if (krb5_get_default_realm(context, &defrealm) == 0) {
+        ret = krb5_build_principal_ext(context, &server, strlen(defrealm),
+                                       defrealm, 0);
+        krb5_free_default_realm(context, defrealm);
+        if (ret)
+            return ret;
+        error.server = server;
+    } else {
         error.server = (krb5_principal)krb5_anonymous_principal();
+    }
 
-    return krb5_mk_error(context, &error, enc_err);
+    ret = krb5_mk_error(context, &error, enc_err);
+    krb5_free_principal(context, server);
+    return ret;
 }
 
-/* Decode a KRB-ERROR message and return the associated com_err code. */
+/*
+ * Decode a KRB-ERROR message and return the associated com_err code.
+ * On success, set *realm_out to a copy of the error's server realm (empty if
+ * no server principal was present); the caller must free it.
+ */
 static krb5_error_code
-iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
+iakerb_rd_error(krb5_context context, const krb5_data *enc_err,
+                krb5_data *realm_out)
 {
     krb5_error_code ret;
     krb5_error *error;
 
+    *realm_out = empty_data();
+
     ret = krb5_rd_error(context, enc_err, &error);
     if (ret)
         return ret;
+
+    if (error->server != NULL) {
+        ret = krb5int_copy_data_contents(context, &error->server->realm,
+                                         realm_out);
+        if (ret) {
+            krb5_free_error(context, error);
+            return ret;
+        }
+    }
 
     if (error->error > 0 && error->error <= KRB_ERR_MAX)
         ret = error->error + ERROR_TABLE_BASE_krb5;
@@ -268,6 +320,7 @@ static krb5_error_code
 iakerb_make_token(iakerb_ctx_id_t ctx,
                   krb5_data *realm,
                   krb5_data *cookie,
+                  krb5_flags header_flags,
                   krb5_data *request,
                   gss_buffer_t token)
 {
@@ -286,6 +339,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
      */
     iah.target_realm = *realm;
     iah.cookie = cookie;
+    iah.header_flags = header_flags;
 
     code = encode_krb5_iakerb_header(&iah, &data);
     if (code != 0)
@@ -358,7 +412,9 @@ iakerb_acceptor_realm(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         }
     }
 
-    ret = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
+    ret = iakerb_make_token(ctx, &realm, NULL,
+                            IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT, &reply,
+                            output_token);
     if (ret)
         goto cleanup;
 
@@ -387,6 +443,8 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     OM_uint32 tmp;
     int tcp_only, use_primary, protocol_err;
     krb5_ui_4 kdc_code;
+    krb5_flags header_flags;
+    krb5_boolean first_response;
 
     output_token->length = 0;
     output_token->value = NULL;
@@ -395,6 +453,10 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
         code = KRB5_KDC_UNREACH;
         goto cleanup;
     }
+
+    /* ctx->count is 0 only before any token has been sent or received on
+     * this context, i.e. while building the first acceptor response. */
+    first_response = (ctx->count == 0);
 
     code = iakerb_parse_token(ctx, input_token, &realm, NULL, &request);
     if (code != 0)
@@ -435,16 +497,29 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx, gss_cred_id_t verifier_cred,
     }
 
     if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
+        /*
+         * KRB5_REALM_UNKNOWN means the initiator guessed a realm we have no
+         * KDC for (e.g. a Windows client that skips IAKERB realm discovery
+         * and sends its own hostname as target-realm).  Report this with
+         * the standard cross-realm referral error rather than an
+         * IAKERB-specific one, since initiators already know to retry
+         * against the realm named in a KDC_ERR_WRONG_REALM error.
+         */
         protocol_err = (code == KRB5_KDC_UNREACH) ?
             KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE :
-            KRB_AP_ERR_IAKERB_KDC_NOT_FOUND;
+            KDC_ERR_WRONG_REALM;
         code = iakerb_mk_error(ctx->k5c, verifier_cred, protocol_err, &reply);
         if (code != 0)
             goto cleanup;
     } else if (code != 0)
         goto cleanup;
 
-    code = iakerb_make_token(ctx, &realm, NULL, &reply, output_token);
+    header_flags = IAKERB_HEADER_FLAG_KEY_LIST_SUPPORT;
+    if (!first_response)
+        header_flags |= IAKERB_HEADER_FLAG_FORCE_REDISCOVERY;
+
+    code = iakerb_make_token(ctx, &realm, NULL, header_flags, &reply,
+                             output_token);
 
 cleanup:
     if (code != 0)
@@ -578,6 +653,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     krb5_error_code code = 0;
     krb5_data in = empty_data(), out = empty_data();
     krb5_data realm = empty_data(), server_realm = empty_data();
+    krb5_data err_realm = empty_data();
     krb5_data *cookie = NULL;
     OM_uint32 tmp;
     unsigned int flags = 0;
@@ -599,7 +675,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             goto cleanup;
 
         if (krb5_is_krb_error(&in)) {
-            code = iakerb_rd_error(ctx->k5c, &in);
+            code = iakerb_rd_error(ctx->k5c, &in, &err_realm);
             if (code == KRB5KRB_AP_ERR_IAKERB_KDC_NOT_FOUND &&
                 ctx->state == IAKERB_REALM_DISCOVERY) {
                 save_error_string(code, _("The IAKERB proxy could not "
@@ -616,7 +692,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     case IAKERB_REALM_DISCOVERY:
         if (first_token) {
             /* Send the discovery request. */
-            code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
+            code = iakerb_make_token(ctx, &realm, cookie, 0, &out,
+                                     output_token);
             goto cleanup;
         }
 
@@ -651,6 +728,20 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                 goto cleanup;
             }
         } else if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
+            krb5_creds creds;
+
+            code = krb5_init_creds_get_creds(ctx->k5c, ctx->icc, &creds);
+            if (code != 0)
+                goto cleanup;
+
+            /* Steal the canonical client principal name from creds and save
+             * it in the credential name, matching the behavior of
+             * get_initial_cred() in acquire_cred.c. */
+            krb5_free_principal(ctx->k5c, cred->name->princ);
+            cred->name->princ = creds.client;
+            creds.client = NULL;
+            krb5_free_cred_contents(ctx->k5c, &creds);
+
             krb5_init_creds_get_times(ctx->k5c, ctx->icc, &times);
             kg_cred_set_initial_refresh(ctx->k5c, cred, &times);
             cred->expire = times.endtime;
@@ -691,7 +782,15 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
     if (out.length != 0) {
         assert(ctx->state != IAKERB_AP_REQ);
-        code = iakerb_make_token(ctx, &realm, cookie, &out, output_token);
+        /* Use the realm from the KRB-ERROR server principal for routing if
+         * available; it may differ from the requested realm (e.g. when the
+         * proxy's KDC is in a different realm than the client). */
+        if (err_realm.length != 0) {
+            krb5_free_data_contents(ctx->k5c, &realm);
+            realm = err_realm;
+            err_realm = empty_data();
+        }
+        code = iakerb_make_token(ctx, &realm, cookie, 0, &out, output_token);
     }
 
 cleanup:
@@ -700,6 +799,7 @@ cleanup:
     krb5_free_data(ctx->k5c, cookie);
     krb5_free_data_contents(ctx->k5c, &out);
     krb5_free_data_contents(ctx->k5c, &server_realm);
+    krb5_free_data_contents(ctx->k5c, &err_realm);
     krb5_free_data_contents(ctx->k5c, &realm);
 
     return code;
@@ -1024,11 +1124,18 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (ctx->gssc == GSS_C_NO_CONTEXT)
             input_token = GSS_C_NO_BUFFER;
 
-        /* IAKERB is finished, or we skipped to Kerberos directly. */
+        /* If IAKERB proxy tokens were exchanged, use the krb5 mech OID so
+         * that the AP-REQ token framing matches what Windows AD and other
+         * implementations expect, and so mutual_auth() can verify the
+         * AP-REP header (servers always respond with the krb5 OID).
+         * If we skipped IAKERB entirely (cached ticket), use the IAKERB
+         * OID so the server's mechglue dispatches to the IAKERB acceptor. */
         major_status = krb5_gss_init_sec_context_ext(minor_status,
                                                      (gss_cred_id_t) kcred,
                                                      &ctx->gssc,
                                                      target_name,
+                                                     ctx->count > 0 ?
+                                                     (gss_OID)gss_mech_krb5 :
                                                      (gss_OID)gss_mech_iakerb,
                                                      req_flags,
                                                      time_req,
