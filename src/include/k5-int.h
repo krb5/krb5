@@ -2452,10 +2452,4 @@ k5_print_addr(const struct sockaddr *sa, char *buf, size_t len);
 void
 k5_print_addr_port(const struct sockaddr *sa, char *buf, size_t len);
 
-/* Configure a krb5_tkt_creds_context for S4U2Self mode.  Must be called after
- * krb5_tkt_creds_init() and before the first krb5_tkt_creds_step() call. */
-krb5_error_code
-k5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
-                           krb5_principal user, const krb5_data *subject_cert);
-
 #endif /* _KRB5_INT_H */
