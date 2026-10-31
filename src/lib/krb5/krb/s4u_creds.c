@@ -715,6 +715,7 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
     }
 
     /* Note the authdata we asked for in the output creds. */
+    krb5_free_authdata(context, (*out_creds)->authdata);
     code = krb5_copy_authdata(context, in_creds->authdata,
                               &(*out_creds)->authdata);
     if (code)
