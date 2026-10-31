@@ -1,12 +1,10 @@
 from k5test import *
+import ssl
+import threading
 
-# Skip this test if we're missing proxy functionality or parts of the proxy.
+# Skip this test if we're missing proxy functionality.
 if runenv.tls_impl == 'no':
     skip_rest('HTTP proxy tests', 'TLS build support not enabled')
-try:
-    import kdcproxy
-except:
-    skip_rest('HTTP proxy tests', 'Python kdcproxy module not found')
 
 # Construct a krb5.conf fragment configuring the client to use a local proxy
 # server.
@@ -56,6 +54,73 @@ def start_proxy(realm, keycertpem):
     cmd = [sys.executable, proxy_exec_path, str(realm.server_port()),
            keycertpem]
     return realm.start_server(cmd, sentinel='proxy server ready')
+
+# Accept TLS connections on the realm's server port, read each request, and
+# close the connection without sending a reply.
+def read_request(s):
+    req = b''
+    while b'\r\n\r\n' not in req:
+        data = s.recv(4096)
+        if not data:
+            return
+        req += data
+    head, sep, body = req.partition(b'\r\n\r\n')
+    for line in head.split(b'\r\n'):
+        name, colon, value = line.partition(b':')
+        if name.strip().lower() == b'content-length':
+            while len(body) < int(value):
+                data = s.recv(4096)
+                if not data:
+                    return
+                body += data
+
+def start_closing_proxy(realm, keycertpem):
+    sslctx = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
+    sslctx.load_cert_chain(certfile=keycertpem)
+    lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    lsock.bind(('localhost', realm.server_port()))
+    lsock.listen(5)
+    lsock.settimeout(0.1)
+    stop = threading.Event()
+    def serve():
+        while not stop.is_set():
+            try:
+                conn, addr = lsock.accept()
+            except socket.timeout:
+                continue
+            conn.settimeout(10)
+            try:
+                with sslctx.wrap_socket(conn, server_side=True) as s:
+                    read_request(s)
+            except (OSError, ValueError):
+                pass
+        lsock.close()
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    return stop, thread
+
+def stop_closing_proxy(proxy):
+    stop, thread = proxy
+    stop.set()
+    thread.join()
+
+# Fail cleanly if the proxy closes the connection without replying.
+mark('proxy closes without reply')
+realm = K5Realm(krb5_conf=anchored_name_krb5_conf, get_creds=False,
+                create_host=False)
+proxy = start_closing_proxy(realm, proxyidealpem)
+realm.kinit(realm.user_princ, password=password('user'), expected_code=1,
+            expected_msg='Cannot contact any KDC',
+            expected_trace=('HTTPS error:',))
+stop_closing_proxy(proxy)
+realm.stop()
+
+# The remaining tests require the Python kdcproxy module.
+try:
+    import kdcproxy
+except:
+    skip_rest('HTTP proxy tests', 'Python kdcproxy module not found')
 
 # Fail: untrusted issuer and hostname doesn't match.
 mark('untrusted issuer, hostname mismatch')
