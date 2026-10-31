@@ -552,7 +552,12 @@ test_get_s4u_x509_principal(krb5_context context, const krb5_data *client_cert,
     }
 
     free(canon);
-    return match ? 0 : KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+    if (!match) {
+        krb5_db_free_principal(context, *entry);
+        *entry = NULL;
+        return KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+    }
+    return 0;
 }
 
 static krb5_error_code
