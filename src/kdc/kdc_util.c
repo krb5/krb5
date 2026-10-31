@@ -1595,7 +1595,13 @@ kdc_process_s4u2self_req(krb5_context context, krb5_kdc_req *request,
                                                   &princ);
             if (code == 0 && id->user->length == 0) {
                 krb5_free_principal(context, id->user);
+                id->user = NULL;
                 code = krb5_copy_principal(context, princ->princ, &id->user);
+                if (code) {
+                    krb5_db_free_principal(context, princ);
+                    *status = "LOOKING_UP_S4U2SELF_PRINCIPAL";
+                    return code;
+                }
             }
         } else {
             code = krb5_db_get_principal(context, id->user,

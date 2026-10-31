@@ -33,6 +33,8 @@
 enum iakerb_state {
     IAKERB_REALM_DISCOVERY, /* querying server for its realm */
     IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
+    IAKERB_S4U_SELF,    /* obtaining evidence for impersonation */
+    IAKERB_S4U_PROXY,   /* obtaining a target ticket with that evidence */
     IAKERB_TGS_REQ,     /* acquiring ticket with TGT */
     IAKERB_AP_REQ       /* hand-off to normal GSS AP-REQ exchange */
 };
@@ -44,6 +46,7 @@ struct _iakerb_ctx_id_rec {
     enum iakerb_state state;            /* Initiator only */
     krb5_init_creds_context icc;        /* Initiator only */
     krb5_tkt_creds_context tcc;         /* Initiator only */
+    krb5_creds s4u_creds;              /* S4U2Self evidence */
     gss_ctx_id_t gssc;
     krb5_data conv;                     /* conversation for checksumming */
     unsigned int count;                 /* number of round trips */
@@ -71,6 +74,7 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     krb5_gss_release_cred(&tmp, &ctx->defcred);
     krb5_init_creds_free(ctx->k5c, ctx->icc);
     krb5_tkt_creds_free(ctx->k5c, ctx->tcc);
+    krb5_free_cred_contents(ctx->k5c, &ctx->s4u_creds);
     krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
     krb5_free_data_contents(ctx->k5c, &ctx->conv);
     krb5_get_init_creds_opt_free(ctx->k5c, ctx->gic_opts);
@@ -114,6 +118,31 @@ iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
         ret = error->error + ERROR_TABLE_BASE_krb5;
     else
         ret = KRB5KRB_ERR_GENERIC;
+    krb5_free_error(context, error);
+    return ret;
+}
+
+/*
+ * If enc_err is a KDC_ERR_PREAUTH_REQUIRED error, copy the server realm into
+ * *realm_out.  Leave *realm_out as empty_data() for any other error or if the
+ * server principal carries no realm.
+ */
+static krb5_error_code
+iakerb_preauth_error_realm(krb5_context context, const krb5_data *enc_err,
+                            krb5_data *realm_out)
+{
+    krb5_error_code ret;
+    krb5_error *error;
+
+    *realm_out = empty_data();
+    ret = krb5_rd_error(context, enc_err, &error);
+    if (ret)
+        return ret;
+
+    if (error->error == KDC_ERR_PREAUTH_REQUIRED &&
+        error->server != NULL && error->server->realm.length > 0)
+        ret = krb5int_copy_data_contents(context, &error->server->realm,
+                                         realm_out);
     krb5_free_error(context, error);
     return ret;
 }
@@ -582,6 +611,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     OM_uint32 tmp;
     unsigned int flags = 0;
     krb5_ticket_times times;
+    krb5_creds creds;
+    krb5_ccache saved_ccache = NULL;
     krb5_boolean first_token;
 
     output_token->length = 0;
@@ -634,6 +665,28 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         ctx->state = IAKERB_AS_REQ;
         /* Done with realm discovery; fall through to AS request. */
     case IAKERB_AS_REQ:
+        /*
+         * If the KDC returned PREAUTH_REQUIRED with a realm that differs from
+         * the client principal's current realm, update the principal and
+         * restart the AS exchange so the next AS-REQ uses the correct realm.
+         */
+        if (krb5_is_krb_error(&in)) {
+            krb5_data err_realm = empty_data();
+            code = iakerb_preauth_error_realm(ctx->k5c, &in, &err_realm);
+            if (code != 0)
+                goto cleanup;
+            if (err_realm.length > 0 &&
+                !data_eq(err_realm, cred->name->princ->realm)) {
+                krb5_free_data_contents(ctx->k5c, &cred->name->princ->realm);
+                cred->name->princ->realm = err_realm;
+                err_realm = empty_data();
+                krb5_init_creds_free(ctx->k5c, ctx->icc);
+                ctx->icc = NULL;
+                in = empty_data();
+            }
+            krb5_free_data_contents(ctx->k5c, &err_realm);
+        }
+
         if (ctx->icc == NULL) {
             code = iakerb_init_creds_ctx(ctx, cred, time_req);
             if (code != 0)
@@ -645,7 +698,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         if (code != 0) {
             if (cred->have_tgt) {
                 /* We were trying to refresh; keep going with current creds. */
-                ctx->state = IAKERB_TGS_REQ;
+                ctx->state = (cred->s4u_user != NULL || cred->s4u_cert.length) ?
+                    IAKERB_S4U_SELF : IAKERB_TGS_REQ;
                 krb5_clear_error_message(ctx->k5c);
             } else {
                 goto cleanup;
@@ -658,12 +712,107 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             krb5_init_creds_free(ctx->k5c, ctx->icc);
             ctx->icc = NULL;
 
-            ctx->state = IAKERB_TGS_REQ;
+            ctx->state = (cred->s4u_user != NULL || cred->s4u_cert.length) ?
+                IAKERB_S4U_SELF : IAKERB_TGS_REQ;
         } else
             break;
         in = empty_data();
-        /* Done with AS request; fall through to TGS request. */
+        if (ctx->state == IAKERB_TGS_REQ)
+            goto tgs_req;
+        /* Fall through to the S4U2Self exchange. */
+    case IAKERB_S4U_SELF:
+        if (ctx->tcc == NULL) {
+            memset(&creds, 0, sizeof(creds));
+            creds.client = creds.server = cred->name->princ;
+            code = krb5_tkt_creds_init(ctx->k5c, cred->ccache, &creds, 0,
+                                       &ctx->tcc);
+            if (code != 0)
+                goto cleanup;
+            code = krb5_tkt_creds_set_s4u2self(
+                ctx->k5c, ctx->tcc, cred->s4u_user,
+                cred->s4u_cert.length ? &cred->s4u_cert : NULL);
+            if (code != 0)
+                goto cleanup;
+        }
+        code = krb5_tkt_creds_step(ctx->k5c, ctx->tcc, &in, &out, &realm,
+                                   &flags);
+        if (code != 0)
+            goto cleanup;
+        if (flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE)
+            break;
+        code = krb5_tkt_creds_get_creds(ctx->k5c, ctx->tcc, &ctx->s4u_creds);
+        if (code != 0)
+            goto cleanup;
+        krb5_tkt_creds_free(ctx->k5c, ctx->tcc);
+        ctx->tcc = NULL;
+        code = krb5_cc_new_unique(ctx->k5c, "MEMORY", NULL, &saved_ccache);
+        if (code == 0)
+            code = krb5_cc_initialize(ctx->k5c, saved_ccache,
+                                      cred->name->princ);
+        if (code == 0)
+            code = krb5_cc_copy_creds(ctx->k5c, cred->ccache, saved_ccache);
+        if (code != 0)
+            goto cleanup;
+        if (cred->s4u_tgt_ccache != NULL)
+            krb5_cc_destroy(ctx->k5c, cred->s4u_tgt_ccache);
+        cred->s4u_tgt_ccache = saved_ccache;
+        saved_ccache = NULL;
+        if (krb5_principal_compare(ctx->k5c, cred->name->princ, name->princ)) {
+            code = kg_finalize_impersonation(ctx->k5c, cred, &ctx->s4u_creds);
+            if (code != 0)
+                goto cleanup;
+            ctx->state = IAKERB_AP_REQ;
+            break;
+        }
+        ctx->state = IAKERB_S4U_PROXY;
+        in = empty_data();
+        /* Fall through to the S4U2Proxy exchange. */
+    case IAKERB_S4U_PROXY:
+        if (ctx->tcc == NULL) {
+            memset(&creds, 0, sizeof(creds));
+            creds.client = cred->impersonator != NULL ?
+                cred->impersonator : cred->name->princ;
+            creds.server = name->princ;
+            code = krb5_tkt_creds_init(ctx->k5c, cred->s4u_tgt_ccache, &creds,
+                                       0, &ctx->tcc);
+            if (code != 0)
+                goto cleanup;
+            code = krb5_tkt_creds_set_s4u2proxy(ctx->k5c, ctx->tcc,
+                                                &ctx->s4u_creds.ticket);
+            if (code != 0)
+                goto cleanup;
+        }
+        code = krb5_tkt_creds_step(ctx->k5c, ctx->tcc, &in, &out, &realm,
+                                   &flags);
+        if (code != 0)
+            goto cleanup;
+        if (flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE)
+            break;
+        memset(&creds, 0, sizeof(creds));
+        code = krb5_tkt_creds_get_creds(ctx->k5c, ctx->tcc, &creds);
+        if (code != 0)
+            goto cleanup;
+        if (!krb5_principal_compare(ctx->k5c, creds.client,
+                                    ctx->s4u_creds.client))
+            code = KRB5_KDCREP_MODIFIED;
+        if (code == 0) {
+            krb5_free_data_contents(ctx->k5c, &creds.second_ticket);
+            code = krb5int_copy_data_contents(ctx->k5c, &ctx->s4u_creds.ticket,
+                                              &creds.second_ticket);
+        }
+        if (code == 0 && cred->impersonator == NULL)
+            code = kg_finalize_impersonation(ctx->k5c, cred, &ctx->s4u_creds);
+        if (code == 0)
+            code = krb5_cc_store_cred(ctx->k5c, cred->ccache, &creds);
+        krb5_free_cred_contents(ctx->k5c, &creds);
+        if (code != 0)
+            goto cleanup;
+        krb5_tkt_creds_free(ctx->k5c, ctx->tcc);
+        ctx->tcc = NULL;
+        ctx->state = IAKERB_AP_REQ;
+        break;
     case IAKERB_TGS_REQ:
+    tgs_req:
         if (ctx->tcc == NULL) {
             code = iakerb_tkt_creds_ctx(ctx, cred, name, time_req);
             if (code != 0)
@@ -695,6 +844,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     }
 
 cleanup:
+    if (saved_ccache != NULL)
+        krb5_cc_destroy(ctx->k5c, saved_ccache);
     if (code != 0)
         gss_release_buffer(&tmp, output_token);
     krb5_free_data(ctx->k5c, cookie);
@@ -716,7 +867,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
                          OM_uint32 time_req,
                          enum iakerb_state *state)
 {
-    krb5_creds in_creds, *out_creds = NULL;
+    krb5_creds in_creds, mcreds, *out_creds = NULL;
     krb5_error_code code;
 
     if (cred->name->princ->realm.length == 0) {
@@ -748,12 +899,35 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
         in_creds.times.endtime = ts_incr(now, time_req);
     }
 
+    if (cred->impersonator != NULL && cred->s4u_tgt_ccache != NULL) {
+        if (krb5_principal_compare(ctx->k5c, cred->impersonator,
+                                   target->princ)) {
+            *state = IAKERB_AP_REQ;
+        } else {
+            memset(&mcreds, 0, sizeof(mcreds));
+            mcreds.client = cred->name->princ;
+            mcreds.server = cred->impersonator;
+            code = krb5_cc_retrieve_cred(ctx->k5c, cred->ccache, 0,
+                                         &mcreds, &ctx->s4u_creds);
+            if (code != 0)
+                goto cleanup;
+            *state = IAKERB_S4U_PROXY;
+        }
+        code = 0;
+        goto cleanup;
+    }
     /* Make an AS request if we have no creds or it's time to refresh them. */
     if (cred->expire == 0 || kg_cred_time_to_refresh(ctx->k5c, cred)) {
         *state = IAKERB_AS_REQ;
         code = 0;
         goto cleanup;
     }
+    if (cred->s4u_user != NULL || cred->s4u_cert.length != 0) {
+        *state = IAKERB_S4U_SELF;
+        code = 0;
+        goto cleanup;
+    }
+
 
     code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED, cred->ccache,
                                 &in_creds, &out_creds);

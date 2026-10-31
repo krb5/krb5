@@ -57,6 +57,7 @@
 #include "common.h"
 
 static int use_spnego = 0;
+static OM_uint32 time_req = GSS_C_INDEFINITE;
 
 static void
 test_greet_authz_data(gss_name_t *name)
@@ -120,6 +121,66 @@ init_accept_sec_context(gss_cred_id_t claimant_cred_handle,
     (void)gss_release_name(&minor, &target_name);
     (void)gss_delete_sec_context(&minor, &initiator_context, NULL);
     (void)gss_delete_sec_context(&minor, &acceptor_context, NULL);
+}
+
+/*
+ * Export cred to a MEMORY ccache and verify that every non-config ticket's
+ * endtime is within secs seconds of now.  Used to check that time_req is
+ * honoured for all credentials copied into the delegated-cred ccache (not
+ * just the S4U2Self evidence ticket).
+ */
+static void
+check_cred_endtimes(gss_cred_id_t cred, OM_uint32 secs)
+{
+    krb5_error_code ret;
+    krb5_context context = NULL;
+    krb5_creds kcred;
+    krb5_cc_cursor cur;
+    krb5_ccache ccache;
+    krb5_timestamp now, max_endtime;
+    gss_key_value_set_desc store;
+    gss_key_value_element_desc elem;
+    OM_uint32 major, minor;
+    const char *ccname = "MEMORY:endtime";
+
+    store.count = 1;
+    store.elements = &elem;
+    elem.key = "ccache";
+    elem.value = ccname;
+    major = gss_store_cred_into(&minor, cred, GSS_C_INITIATE, &mech_krb5, 1, 0,
+                                &store, NULL, NULL);
+    check_gsserr("gss_store_cred_into", major, minor);
+
+    ret = krb5_init_context(&context);
+    check_k5err(context, "krb5_init_context", ret);
+
+    ret = krb5_timeofday(context, &now);
+    check_k5err(context, "krb5_timeofday", ret);
+
+    /* Allow 5 seconds of slack for test overhead. */
+    max_endtime = now + (krb5_timestamp)secs + 5;
+
+    ret = krb5_cc_resolve(context, ccname, &ccache);
+    check_k5err(context, "krb5_cc_resolve", ret);
+
+    ret = krb5_cc_start_seq_get(context, ccache, &cur);
+    check_k5err(context, "krb5_cc_start_seq_get", ret);
+
+    while (!krb5_cc_next_cred(context, ccache, &cur, &kcred)) {
+        if (!krb5_is_config_principal(context, kcred.server) &&
+            kcred.times.endtime > max_endtime) {
+            printf("Credential endtime %d exceeds allowed %d (time_req=%u)\n",
+                   (int)kcred.times.endtime, (int)max_endtime, secs);
+            exit(1);
+        }
+        krb5_free_cred_contents(context, &kcred);
+    }
+
+    ret = krb5_cc_end_seq_get(context, ccache, &cur);
+    check_k5err(context, "krb5_cc_end_seq_get", ret);
+
+    krb5_cc_destroy(context, ccache);
+    krb5_free_context(context);
 }
 
 static void
@@ -244,8 +305,8 @@ main(int argc, char *argv[])
     gss_OID_set mechs;
     gss_buffer_set_t bufset = GSS_C_NO_BUFFER_SET;
 
-    if (argc < 2 || argc > 5) {
-        fprintf(stderr, "Usage: %s [--spnego] [user] "
+    if (argc < 2 || argc > 7) {
+        fprintf(stderr, "Usage: %s [--spnego] [--time-req N] user "
                 "[proxy-target] [keytab]\n", argv[0]);
         fprintf(stderr, "       proxy-target and keytab are optional\n");
         exit(1);
@@ -255,6 +316,12 @@ main(int argc, char *argv[])
         use_spnego++;
         argc--;
         argv++;
+    }
+
+    if (argc > 2 && strcmp(argv[1], "--time-req") == 0) {
+        time_req = (OM_uint32)atol(argv[2]);
+        argc -= 2;
+        argv += 2;
     }
 
     user = import_name(argv[1]);
@@ -281,10 +348,15 @@ main(int argc, char *argv[])
 
     /* Get S4U2Self cred. */
     major = gss_acquire_cred_impersonate_name(&minor, impersonator_cred_handle,
-                                              user, GSS_C_INDEFINITE, mechs,
+                                              user, time_req, mechs,
                                               GSS_C_INITIATE,
                                               &user_cred_handle, NULL, NULL);
     check_gsserr("gss_acquire_cred_impersonate_name", major, minor);
+
+    /* When a time_req was specified, verify all ccache credentials are
+     * bounded by it, including any TGT copied from the impersonator. */
+    if (time_req != GSS_C_INDEFINITE)
+        check_cred_endtimes(user_cred_handle, time_req);
 
     init_accept_sec_context(user_cred_handle, impersonator_cred_handle,
                             &delegated_cred_handle);
