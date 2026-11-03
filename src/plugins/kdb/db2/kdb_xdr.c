@@ -63,6 +63,12 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
      * compact and extensible.
      */
 
+    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
+        k5_setmsg(context, KRB5_KDB_TRUNCATED_RECORD,
+                  _("KDB entry length must be %d"), KRB5_KDB_V1_BASE_LENGTH);
+        return KRB5_KDB_TRUNCATED_RECORD;
+    }
+
     /*
      * First allocate enough space for all the data.
      * Need  2 bytes for the length of the base structure
@@ -160,12 +166,6 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     /* # key_data structures */
     krb5_kdb_encode_int16(entry->n_key_data, nextloc);
     nextloc += 2;
-
-    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
-        retval = KRB5_KDB_TRUNCATED_RECORD;
-        k5_setmsg(context, retval, _("KDB entry length must be at least %d"),
-                  KRB5_KDB_V1_BASE_LENGTH);
-    }
 
     /* Any extra data that this version doesn't understand. */
     if (entry->e_length) {
