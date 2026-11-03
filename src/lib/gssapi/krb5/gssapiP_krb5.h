@@ -194,6 +194,7 @@ typedef struct _krb5_gss_cred_id_rec {
     krb5_timestamp refresh_time;
     krb5_enctype *req_enctypes;  /* limit negotiated enctypes to this list */
     char *password;
+    char *otp;
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {
@@ -1306,7 +1307,12 @@ data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
 #define KRB5_CS_CCACHE_URN "ccache"
 #define KRB5_CS_RCACHE_URN "rcache"
 #define KRB5_CS_PASSWORD_URN "password"
+#define KRB5_CS_OTP_URN "otp"
 #define KRB5_CS_VERIFY_URN "verify"
+
+krb5_error_code KRB5_CALLCONV
+kg_otp_responder(krb5_context context, void *data,
+                 krb5_responder_context rctx);
 
 OM_uint32
 kg_value_from_cred_store(gss_const_key_value_set_t cred_store,

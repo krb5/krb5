@@ -50,6 +50,7 @@ kg_release_cred(krb5_context context, krb5_gss_cred_id_t cred)
     krb5_free_principal(context, cred->impersonator);
     free(cred->req_enctypes);
     zapfreestr(cred->password);
+    zapfreestr(cred->otp);
     free(cred);
     return ret;
 }
