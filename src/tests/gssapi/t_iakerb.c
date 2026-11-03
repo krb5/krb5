@@ -39,14 +39,14 @@ main(int argc, char **argv)
 {
     OM_uint32 major, minor;
     const char *password;
-    gss_name_t iname, tname, aname;
-    gss_cred_id_t icred, acred;
+    gss_name_t iname, tname, aname, user = GSS_C_NO_NAME, src = GSS_C_NO_NAME;
+    gss_cred_id_t icred, acred, impersonated = GSS_C_NO_CREDENTIAL;
     gss_ctx_id_t ictx, actx;
     gss_buffer_desc pwbuf;
 
-    if (argc != 5) {
+    if (argc != 5 && argc != 6) {
         fprintf(stderr, "Usage: %s initiatorname password|- targetname "
-                "acceptorname\n", argv[0]);
+                "acceptorname [impersonated-name]\n", argv[0]);
         return 1;
     }
 
@@ -68,17 +68,38 @@ main(int argc, char **argv)
                                  NULL);
         check_gsserr("gss_acquire_cred(iname)", major, minor);
     }
+    if (argc == 6) {
+        user = import_name(argv[5]);
+        major = gss_acquire_cred_impersonate_name(
+            &minor, icred, user, GSS_C_INDEFINITE, &mechset_iakerb,
+            GSS_C_INITIATE, &impersonated, NULL, NULL);
+        check_gsserr("gss_acquire_cred_impersonate_name", major, minor);
+    }
 
     major = gss_acquire_cred(&minor, aname, GSS_C_INDEFINITE, &mechset_iakerb,
                              GSS_C_ACCEPT, &acred, NULL, NULL);
     check_gsserr("gss_acquire_cred(aname)", major, minor);
 
-    establish_contexts(&mech_iakerb, icred, acred, tname, 0, &ictx, &actx,
-                       NULL, NULL, NULL);
+    establish_contexts(&mech_iakerb,
+                       impersonated == GSS_C_NO_CREDENTIAL ? icred : impersonated,
+                       acred, tname, 0, &ictx, &actx, &src, NULL, NULL);
+    if (src != GSS_C_NO_NAME)
+        display_canon_name("authenticated", src, &mech_krb5);
+    if (impersonated != GSS_C_NO_CREDENTIAL) {
+        (void)gss_delete_sec_context(&minor, &ictx, NULL);
+        (void)gss_delete_sec_context(&minor, &actx, NULL);
+        (void)gss_release_name(&minor, &src);
+        establish_contexts(&mech_iakerb, impersonated, acred, tname, 0,
+                           &ictx, &actx, &src, NULL, NULL);
+        display_canon_name("reused", src, &mech_krb5);
+    }
 
     (void)gss_release_name(&minor, &iname);
     (void)gss_release_name(&minor, &tname);
     (void)gss_release_name(&minor, &aname);
+    (void)gss_release_name(&minor, &user);
+    (void)gss_release_name(&minor, &src);
+    (void)gss_release_cred(&minor, &impersonated);
     (void)gss_release_cred(&minor, &icred);
     (void)gss_release_cred(&minor, &acred);
     (void)gss_delete_sec_context(&minor, &ictx, NULL);
