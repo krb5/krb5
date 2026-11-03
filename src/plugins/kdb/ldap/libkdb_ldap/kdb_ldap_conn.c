@@ -302,6 +302,7 @@ krb5_ldap_rebind(krb5_ldap_context *ldap_context,
     krb5_ldap_server_handle *handle = *ldap_server_handle;
 
     ldap_unbind_ext_s(handle->ldap_handle, NULL, NULL);
+    handle->ldap_handle = NULL;
     if (ldap_initialize(&handle->ldap_handle,
                         handle->server_info->server_name) != LDAP_SUCCESS ||
         authenticate(ldap_context, handle) != 0) {
