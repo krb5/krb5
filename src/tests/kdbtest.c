@@ -391,6 +391,15 @@ main(void)
     CHECK(krb5_db_delete_principal(ctx, &sample_princ));
     CHECK(krb5_db_put_principal(ctx, ent));
 
+    /* Check that an entry length below the base record length is ignored.
+     * (Past versons of the DB2 module would crash instead.) */
+    ent->len = 1;
+    ent->mask = KADM5_KEY_DATA;
+    CHECK(krb5_db_put_principal(ctx, ent));
+    krb5_db_free_principal(ctx, ent);
+    CHECK(krb5_db_get_principal(ctx, &sample_princ, 0, &ent));
+    CHECK_COND(ent->len == KRB5_KDB_V1_BASE_LENGTH);
+
     /* Check that a zero-length db_args tl-data value is rejected. */
     CHECK(krb5_dbe_update_tl_data(ctx, ent, &tl_empty_db_args));
     CHECK_COND(krb5_db_put_principal(ctx, ent) == EINVAL);

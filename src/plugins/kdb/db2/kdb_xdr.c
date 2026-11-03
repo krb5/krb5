@@ -70,12 +70,11 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
      *         [ attributes, max_life, max_renewable_life, expiration,
      *           pw_expiration, last_success, last_failed, fail_auth_count ]
      *         [ n_key_data, n_tl_data ]
-     * then XX bytes [ e_length ] for the extra data [ e_data ]
      * then XX bytes [ 2 for length + length for string ] for the principal,
      * then (4 [type + length] + tl_data_length) bytes per tl_data
      * then (4 + (4 + key_data_length) per key_data_contents) bytes per key_data
      */
-    content->length = entry->len + entry->e_length;
+    content->length = KRB5_KDB_V1_BASE_LENGTH;
 
     if ((retval = krb5_unparse_name(context, entry->princ, &unparse_princ)))
         return(retval);
@@ -118,7 +117,7 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     nextloc = (unsigned char *)content->data;
 
     /* Base Length */
-    krb5_kdb_encode_int16(entry->len, nextloc);
+    krb5_kdb_encode_int16(KRB5_KDB_V1_BASE_LENGTH, nextloc);
     nextloc += 2;
 
     /* Attributes */
@@ -160,18 +159,6 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     /* # key_data structures */
     krb5_kdb_encode_int16(entry->n_key_data, nextloc);
     nextloc += 2;
-
-    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
-        retval = KRB5_KDB_TRUNCATED_RECORD;
-        k5_setmsg(context, retval, _("KDB entry length must be at least %d"),
-                  KRB5_KDB_V1_BASE_LENGTH);
-    }
-
-    /* Any extra data that this version doesn't understand. */
-    if (entry->e_length) {
-        memcpy(nextloc, entry->e_data, entry->e_length);
-        nextloc += entry->e_length;
-    }
 
     /*
      * Now we get to the principal.
@@ -260,6 +247,10 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
 
     /* Base Length */
     krb5_kdb_decode_int16(nextloc, entry->len);
+    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        goto error_out;
+    }
     nextloc += 2;
 
     /* Attributes */
@@ -310,20 +301,6 @@ krb5_decode_princ_entry(krb5_context context, krb5_data *content,
     if (entry->n_key_data < 0) {
         retval = KRB5_KDB_TRUNCATED_RECORD;
         goto error_out;
-    }
-
-    /* Check for extra data */
-    if (entry->len > KRB5_KDB_V1_BASE_LENGTH) {
-        entry->e_length = entry->len - KRB5_KDB_V1_BASE_LENGTH;
-        if (entry->e_length > (size_t)sizeleft) {
-            retval = KRB5_KDB_TRUNCATED_RECORD;
-            goto error_out;
-        }
-        entry->e_data = k5memdup(nextloc, entry->e_length, &retval);
-        if (entry->e_data == NULL)
-            goto error_out;
-        nextloc += entry->e_length;
-        sizeleft -= entry->e_length;
     }
 
     /*
