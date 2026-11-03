@@ -113,6 +113,11 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 # Successful S4U2Self -> S4U2Proxy.
 out = realm.run(['./t_s4u', puser, pservice2])
 
+# Verify that time_req bounds all credentials in the delegated ccache,
+# including the impersonator TGT copied by make_proxy_cred().
+mark('S4U2Self time_req bounds impersonator TGT in delegated ccache')
+realm.run(['./t_s4u', '--time-req', '600', puser, pservice2])
+
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
 realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,
