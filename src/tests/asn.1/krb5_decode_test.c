@@ -1005,7 +1005,18 @@ main(int argc, char **argv)
     /* decode_iakerb_header */
     {
         setup(krb5_iakerb_header,ktest_make_sample_iakerb_header);
-        decode_run("iakerb_header","","30 18 A1 0A 0C 08 6B 72 62 35 64 61 74 61 A2 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
+        decode_run("iakerb_header","","30 21 A1 0A 0C 08 6B 72 62 35 64 61 74 61 A2 0A 04 08 6B 72 62 35 64 61 74 61 A3 07 03 05 00 01 00 00 00",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
+
+        /* header-flags as sent by a real Windows acceptor after its first
+         * response: LocalKDC indicator | force-rediscovery. */
+        ref.header_flags = 0x01000001;
+        decode_run("iakerb_header","(Windows acceptor flags)","30 21 A1 0A 0C 08 6B 72 62 35 64 61 74 61 A2 0A 04 08 6B 72 62 35 64 61 74 61 A3 07 03 05 00 01 00 00 01",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
+
+        /* A header without [3] (older peers, initiators) decodes to 0. */
+        krb5_free_data(NULL, ref.cookie);
+        ref.cookie = NULL;
+        ref.header_flags = 0;
+        decode_run("iakerb_header","(optionals NULL)","30 0C A1 0A 0C 08 6B 72 62 35 64 61 74 61",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
         ktest_empty_iakerb_header(&ref);
     }
 

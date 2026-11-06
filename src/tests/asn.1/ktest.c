@@ -565,6 +565,7 @@ ktest_make_sample_iakerb_header(krb5_iakerb_header *ih)
     ktest_make_sample_data(&(ih->target_realm));
     ih->cookie = ealloc(sizeof(krb5_data));
     ktest_make_sample_data(ih->cookie);
+    ih->header_flags = 0x01000000;
 }
 
 void

@@ -19,15 +19,36 @@ wrong_default = realm.special_env('wrong_default', False,
 
 # Test IAKERB with credentials.
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
-           'h:host'])
+           'h:host'], expected_msg='AP-REQ mech: krb5')
 
-# Test IAKERB getting initial credentials.
-realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
-           'h:host@' + hostname, 'h:host'])
+# Test IAKERB with a cached service ticket.  The initiator skips the
+# IAKERB exchange and must frame the AP-REQ with the IAKERB OID so the
+# acceptor's mechglue dispatches to the IAKERB mechanism.
+realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
+           'h:host'], expected_msg='AP-REQ mech: iakerb')
 
-# Test IAKERB realm discovery.
-realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
-           'h:host'])
+# Check the IAKERB-HEADER header-flags of each acceptor response in
+# t_iakerb output.  As with a Windows acceptor, every response must
+# carry the LocalKDC indicator, and every response after the first
+# must also carry force-rediscovery.
+def check_header_flags(out):
+    prefix = 'IAKERB acceptor header-flags: '
+    flags = [line[len(prefix):] for line in out.splitlines()
+             if line.startswith(prefix)]
+    if (len(flags) < 2 or flags[0] != '01000000' or
+        any(f != '01000001' for f in flags[1:])):
+        fail('Unexpected IAKERB acceptor header-flags: %r' % flags)
+
+# Test IAKERB getting initial credentials.  The user requires preauth,
+# so the first response relays a KRB-ERROR, as Windows does.
+out = realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
+                 'h:host@' + hostname, 'h:host'])
+check_header_flags(out)
+
+# Test IAKERB realm discovery.  The discovery response is the first one.
+out = realm.run(['./t_iakerb', 'e:user', password('user'),
+                 'h:host@' + hostname, 'h:host'])
+check_header_flags(out)
 
 # Test IAKERB realm discovery without default_realm set.  We get an
 # error because the acceptor does not know the realm.
@@ -43,6 +64,20 @@ realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
 # Test IAKERB realm discovery with a non-useful default_realm set.
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'p:' + realm.host_princ], env=wrong_default)
+
+# Test IAKERB with a client alias that the KDC canonicalizes.  The
+# initiator must look up its TGT using the canonical client name from
+# the AS reply.
+realm.run([kadminl, 'alias', 'ualias', realm.user_princ])
+canon_conf = {'libdefaults': {'canonicalize': 'true'}}
+canon = realm.special_env('canon', False, krb5_conf=canon_conf)
+realm.run(['./t_iakerb', 'p:ualias@' + realm.realm, password('user'),
+           'h:host@' + hostname, 'h:host'], env=canon)
+
+# Test again with an enterprise name, which implies canonicalization
+# (as Windows clients do with UPNs), combined with realm discovery.
+realm.run(['./t_iakerb', 'e:ualias', password('user'), 'h:host@' + hostname,
+           'h:host'])
 
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
