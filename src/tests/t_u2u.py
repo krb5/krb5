@@ -19,6 +19,9 @@ realm.run([kadminl, 'modprinc', '-allow_svr', 'alice'])
 realm.run([kvno, 'alice'], expected_code=1,
           expected_msg='Server principal valid for user2user only')
 realm.run([kvno, '--u2u', u2u_ccache, 'alice'], expected_msg='kvno = 0')
+# Make the same request again.  If it isn't answered from the ccache
+# as expected, the ticket count below will be 3 instead of 2.
+realm.run([kvno, '--u2u', u2u_ccache, 'alice'], expected_msg='kvno = 0')
 realm.run([kadminl, 'modprinc', '+allow_svr', 'alice'])
 
 # Verify that normal lookups ignore the user-to-user ticket.
