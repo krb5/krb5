@@ -315,7 +315,7 @@ krb5int_process_tgs_reply(krb5_context context,
         dec_rep->enc_part2->enc_padata = NULL;
     }
 
-    is_skey = (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY);
+    is_skey = (kdcoptions & KDC_OPT_ENC_TKT_IN_SKEY) != 0;
     retval = kdcrep2creds(context, dec_rep, address, is_skey,
                           &in_cred->second_ticket, out_cred);
     if (retval != 0)
