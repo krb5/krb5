@@ -50,7 +50,7 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
 	       size = strlen(*objp) + 1;
      }
      if (!xdr_u_int(xdrs, &size) ||
-	 size > GSSRPC_MAX_ELEMENT_SIZE && xdrs->x_op != XDR_FREE) {
+	 (size > GSSRPC_MAX_ELEMENT_SIZE && xdrs->x_op != XDR_FREE)) {
 	  return FALSE;
      }
      switch (xdrs->x_op) {
