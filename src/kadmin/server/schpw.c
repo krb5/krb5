@@ -230,11 +230,11 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
         if (target == NULL) {
             tlen = clen;
             tdots = cdots;
-            targetp = targetstr;
+            targetp = clientstr;
         } else {
             tlen = strlen(targetstr);
             trunc_name(&tlen, &tdots);
-            targetp = clientstr;
+            targetp = targetstr;
         }
 
         krb5_klog_syslog(LOG_NOTICE, _("setpw request from %s by %.*s%s for "
