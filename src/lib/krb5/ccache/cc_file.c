@@ -86,14 +86,6 @@ static krb5_error_code interpret_errno(krb5_context, int);
 
 #define FCC_TAG_DELTATIME       1
 
-#ifndef TKT_ROOT
-#ifdef MSDOS_FILESYSTEM
-#define TKT_ROOT "\\tkt"
-#else
-#define TKT_ROOT "/tmp/tkt"
-#endif
-#endif
-
 typedef struct fcc_data_st {
     k5_cc_mutex lock;
     char *filename;
@@ -929,15 +921,29 @@ err_out:
 
 /*
  * Create a new file cred cache whose name is guaranteed to be unique.  The
- * name begins with the string TKT_ROOT (from fcc.h).  The cache file is not
+ * name begins with the default ccache name. The cache file is not
  * opened, but the new filename is reserved.
  */
 static krb5_error_code KRB5_CALLCONV
 fcc_generate_new(krb5_context context, krb5_ccache *id)
 {
-    char scratch[sizeof(TKT_ROOT) + 7]; /* Room for XXXXXX and terminator */
+    const char *defccache = krb5_cc_default_name(context);
+    char *scratch = NULL;
 
-    (void)snprintf(scratch, sizeof(scratch), "%sXXXXXX", TKT_ROOT);
+    /* Strip type prefix */
+    if (strncmp(defccache, "FILE:", 5) == 0)
+        scratch = strdup(defccache + 5);
+    else if (strchr(defccache + 2, ':') == NULL)  /* Skip drive prefix if any. */
+        scratch = strdup(defccache);
+    else
+        return 0;
+
+    /* Append the template chars for mkstemp */
+    scratch = (char *) realloc(scratch, strlen(scratch) + 8);
+    if (scratch == NULL)
+        return 0;
+    strcat(scratch, "_XXXXXX");
+
     return krb5int_fcc_new_unique(context, scratch, id);
 }
 
