@@ -19,7 +19,13 @@ wrong_default = realm.special_env('wrong_default', False,
 
 # Test IAKERB with credentials.
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
-           'h:host'])
+           'h:host'], expected_msg='AP-REQ mech: krb5')
+
+# Test IAKERB with a cached service ticket.  The initiator skips the
+# IAKERB exchange and must frame the AP-REQ with the IAKERB OID so the
+# acceptor's mechglue dispatches to the IAKERB mechanism.
+realm.run(['./t_iakerb', 'p:' + realm.user_princ, '-', 'h:host@' + hostname,
+           'h:host'], expected_msg='AP-REQ mech: iakerb')
 
 # Test IAKERB getting initial credentials.
 realm.run(['./t_iakerb', 'p:' + realm.user_princ, password('user'),
@@ -43,6 +49,20 @@ realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
 # Test IAKERB realm discovery with a non-useful default_realm set.
 realm.run(['./t_iakerb', 'e:user', password('user'), 'h:host@' + hostname,
            'p:' + realm.host_princ], env=wrong_default)
+
+# Test IAKERB with a client alias that the KDC canonicalizes.  The
+# initiator must look up its TGT using the canonical client name from
+# the AS reply.
+realm.run([kadminl, 'alias', 'ualias', realm.user_princ])
+canon_conf = {'libdefaults': {'canonicalize': 'true'}}
+canon = realm.special_env('canon', False, krb5_conf=canon_conf)
+realm.run(['./t_iakerb', 'p:ualias@' + realm.realm, password('user'),
+           'h:host@' + hostname, 'h:host'], env=canon)
+
+# Test again with an enterprise name, which implies canonicalization
+# (as Windows clients do with UPNs), combined with realm discovery.
+realm.run(['./t_iakerb', 'e:ualias', password('user'), 'h:host@' + hostname,
+           'h:host'])
 
 # Test gss_add_cred().
 realm.run(['./t_add_cred'])
