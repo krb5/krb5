@@ -778,9 +778,86 @@ test_allowed_to_delegate_from(krb5_context context,
     return found ? 0 : KRB5KDC_ERR_BADOPTION;
 }
 
+/*
+ * For a TGS request with explicit FAST armor, check that the armor PAC was
+ * issued by this module and add a PAC_DEVICE_INFO buffer containing the armor
+ * client's entry name, as a stand-in for compound identity.
+ */
+static krb5_error_code
+test_issue_pac_armor(krb5_context context, unsigned int flags,
+                     krb5_db_entry *client, krb5_keyblock *replaced_reply_key,
+                     krb5_db_entry *server, krb5_db_entry *krb5tgt,
+                     krb5_timestamp authtime, krb5_pac old_pac,
+                     krb5_pac new_pac, krb5_data ***auth_indicators,
+                     const krb5_kdb_armor *armor)
+{
+    krb5_error_code ret;
+    krb5_data data;
+    char *name;
+
+    ret = test_issue_pac(context, flags, client, replaced_reply_key, server,
+                         krb5tgt, authtime, old_pac, new_pac, auth_indicators);
+    if (ret || armor == NULL || !armor->explicit_tgs || armor->pac == NULL)
+        return ret;
+
+    /* All armor in the tests is local, so it has a client entry. */
+    assert(armor->krbtgt != NULL && armor->client != NULL);
+    check(krb5_pac_get_buffer(context, armor->pac, KRB5_PAC_LOGON_INFO,
+                              &data));
+    assert(data_eq_string(data, "fake"));
+    krb5_free_data_contents(context, &data);
+
+    /* Don't add a second buffer if one was copied from old_pac. */
+    if (krb5_pac_get_buffer(context, new_pac, KRB5_PAC_DEVICE_INFO,
+                            &data) == 0) {
+        krb5_free_data_contents(context, &data);
+        return 0;
+    }
+
+    check(krb5_unparse_name(context, armor->client->princ, &name));
+    data = string2data(name);
+    check(krb5_pac_add_buffer(context, new_pac, KRB5_PAC_DEVICE_INFO, &data));
+    krb5_free_unparsed_name(context, name);
+    return 0;
+}
+
+/* Reject AS requests armored with a ticket for service/2. */
+static krb5_error_code
+test_check_policy_as_armor(krb5_context context, krb5_kdc_req *request,
+                           krb5_db_entry *client, krb5_db_entry *server,
+                           krb5_timestamp kdc_time,
+                           const krb5_kdb_armor *armor, const char **status,
+                           krb5_pa_data ***e_data)
+{
+    krb5_principal princ;
+
+    if (armor == NULL || armor->client == NULL)
+        return 0;
+    princ = armor->client->princ;
+    if (princ->length == 2 && data_eq_string(princ->data[0], "service") &&
+        data_eq_string(princ->data[1], "2")) {
+        *status = "ARMOR_DENIED";
+        return KRB5KDC_ERR_POLICY;
+    }
+    return 0;
+}
+
+static krb5_error_code
+test_allowed_to_delegate_from_armor(krb5_context context,
+                                    krb5_const_principal client,
+                                    krb5_const_principal server,
+                                    krb5_pac server_pac,
+                                    const krb5_db_entry *proxy,
+                                    const krb5_kdb_armor *armor)
+{
+    assert(armor == NULL || armor->krbtgt != NULL);
+    return test_allowed_to_delegate_from(context, client, server, server_pac,
+                                         proxy);
+}
+
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
-    0,                                      /* minor version number */
+    1,                                      /* minor version number */
     test_init,
     test_cleanup,
     test_open,
@@ -818,4 +895,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_test, kdb_function_table) = {
     test_get_s4u_x509_principal,
     test_allowed_to_delegate_from,
     test_issue_pac,
+    test_issue_pac_armor,
+    test_check_policy_as_armor,
+    test_allowed_to_delegate_from_armor,
 };

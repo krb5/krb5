@@ -35,13 +35,15 @@ unload_kdcpolicy_plugins(krb5_context context);
 krb5_error_code
 check_kdcpolicy_as(krb5_context context, const krb5_kdc_req *request,
                    const krb5_db_entry *client, const krb5_db_entry *server,
-                   krb5_data *const *auth_indicators, krb5_timestamp kdc_time,
+                   krb5_data *const *auth_indicators,
+                   const krb5_kdb_armor *armor, krb5_timestamp kdc_time,
                    krb5_ticket_times *times, const char **status);
 
 krb5_error_code
 check_kdcpolicy_tgs(krb5_context context, const krb5_kdc_req *request,
                     const krb5_db_entry *server, const krb5_ticket *ticket,
-                    krb5_data *const *auth_indicators, krb5_timestamp kdc_time,
+                    krb5_data *const *auth_indicators,
+                    const krb5_kdb_armor *armor, krb5_timestamp kdc_time,
                     krb5_ticket_times *times, const char **status);
 
 #endif /* __KRB5_KDC_POLICY__ */

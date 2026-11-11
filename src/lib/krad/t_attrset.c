@@ -42,7 +42,7 @@ const static unsigned char encpass[] = {
 int
 main(void)
 {
-    unsigned char buffer[KRAD_PACKET_SIZE_MAX], encoded[MAX_ATTRSETSIZE];
+    unsigned char buffer[MAX_ATTRSETSIZE], encoded[MAX_ATTRSETSIZE];
     const char *username = "testUser", *password = "accept";
     const krb5_data *tmpp;
     krad_attrset *set;

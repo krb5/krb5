@@ -91,6 +91,58 @@ test_check_tgs(krb5_context context, krb5_kdcpolicy_moddata moddata,
                                  renew_lifetime_out, status);
 }
 
+/* Deny the request if the first component of princ is "needarmor" and the
+ * request has no AP-REQ armor. */
+static krb5_error_code
+check_armor(krb5_const_principal princ, const krb5_ticket *armor_ticket,
+            const char **status)
+{
+    if (princ != NULL && princ->length >= 1 &&
+        data_eq_string(princ->data[0], "needarmor") && armor_ticket == NULL) {
+        *status = "NO_ARMOR";
+        return KRB5KDC_ERR_POLICY;
+    }
+    return 0;
+}
+
+static krb5_error_code
+test_check_as_armor(krb5_context context, krb5_kdcpolicy_moddata moddata,
+                    const krb5_kdc_req *request, const krb5_db_entry *client,
+                    const krb5_db_entry *server,
+                    const char *const *auth_indicators,
+                    const krb5_ticket *armor_ticket, krb5_pac armor_pac,
+                    const char **status, krb5_deltat *lifetime_out,
+                    krb5_deltat *renew_lifetime_out)
+{
+    krb5_error_code ret;
+
+    ret = check_armor(request->client, armor_ticket, status);
+    if (ret)
+        return ret;
+    return test_check_as(context, moddata, request, client, server,
+                         auth_indicators, status, lifetime_out,
+                         renew_lifetime_out);
+}
+
+static krb5_error_code
+test_check_tgs_armor(krb5_context context, krb5_kdcpolicy_moddata moddata,
+                     const krb5_kdc_req *request, const krb5_db_entry *server,
+                     const krb5_ticket *ticket,
+                     const char *const *auth_indicators,
+                     const krb5_ticket *armor_ticket, krb5_pac armor_pac,
+                     const char **status, krb5_deltat *lifetime_out,
+                     krb5_deltat *renew_lifetime_out)
+{
+    krb5_error_code ret;
+
+    ret = check_armor(request->server, armor_ticket, status);
+    if (ret)
+        return ret;
+    return test_check_tgs(context, moddata, request, server, ticket,
+                          auth_indicators, status, lifetime_out,
+                          renew_lifetime_out);
+}
+
 krb5_error_code
 kdcpolicy_test_initvt(krb5_context context, int maj_ver, int min_ver,
                       krb5_plugin_vtable vtable);
@@ -107,5 +159,9 @@ kdcpolicy_test_initvt(krb5_context context, int maj_ver, int min_ver,
     vt->name = "test";
     vt->check_as = test_check_as;
     vt->check_tgs = test_check_tgs;
+    if (min_ver < 2)
+        return 0;
+    vt->check_as_armor = test_check_as_armor;
+    vt->check_tgs_armor = test_check_tgs_armor;
     return 0;
 }

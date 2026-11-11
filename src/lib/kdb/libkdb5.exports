@@ -5,10 +5,12 @@ krb5_db_inited
 krb5_db_alloc
 krb5_db_free
 krb5_db_allowed_to_delegate_from
+krb5_db_allowed_to_delegate_from_armor
 krb5_db_audit_as_req
 krb5_db_check_allowed_to_delegate
 krb5_db_get_s4u_x509_principal
 krb5_db_check_policy_as
+krb5_db_check_policy_as_armor
 krb5_db_check_policy_tgs
 krb5_db_check_transited_realms
 krb5_db_create
@@ -23,6 +25,7 @@ krb5_db_get_key_data_kvno
 krb5_db_get_context
 krb5_db_get_principal
 krb5_db_issue_pac
+krb5_db_issue_pac_armor
 krb5_db_iterate
 krb5_db_lock
 krb5_db_mkey_list_alias

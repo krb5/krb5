@@ -217,8 +217,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     errcode = check_kdcpolicy_as(context, state->request, state->client,
                                  state->server, state->auth_indicators,
-                                 state->kdc_time, &state->enc_tkt_reply.times,
-                                 &state->status);
+                                 state->rstate->armor, state->kdc_time,
+                                 &state->enc_tkt_reply.times, &state->status);
     if (errcode)
         goto egress;
 
@@ -273,7 +273,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                               &state->server_keyblock, NULL,
                               replaced_reply_key, state->req_pkt,
                               state->request, NULL, NULL, NULL,
-                              &state->auth_indicators, &state->enc_tkt_reply);
+                              state->rstate->armor, &state->auth_indicators,
+                              &state->enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),
                          errcode);
@@ -620,7 +621,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     errcode = validate_as_request(realm, state->request, state->client,
                                   state->server, state->kdc_time,
-                                  &state->status, &state->e_data);
+                                  state->rstate->armor, &state->status,
+                                  &state->e_data);
     if (errcode)
         goto errout;
 

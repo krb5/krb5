@@ -86,6 +86,10 @@ struct tgs_req_info {
     krb5_keyblock *subkey;
     krb5_pac header_pac;
 
+    /* The explicit FAST armor of the request, if present; owned by the
+     * request state. */
+    const krb5_kdb_armor *armor;
+
     /*
      * If a second ticket is present and this is a U2U or S4U2Proxy request,
      * the decoded and verified PAC if present, the KDB entry for the second
@@ -637,6 +641,7 @@ gather_tgs_req_info(kdc_realm_t *realm, krb5_kdc_req **reqptr, krb5_data *pkt,
         *status = "FIND_FAST";
         return ret;
     }
+    t->armor = fast_state->armor;
     /* Reset t->sprinc for the inner body and check it. */
     t->sprinc = t->req->server;
     if (t->sprinc == NULL) {
@@ -882,7 +887,8 @@ check_tgs_req(kdc_realm_t *realm, struct tgs_req_info *t,
     ret = check_tgs_policy(realm, t->req, t->server, t->header_tkt,
                            t->header_pac, t->stkt, t->stkt_pac,
                            t->stkt_pac_client, t->stkt_server, kdc_time,
-                           t->is_crossrealm, t->is_referral, status, e_data);
+                           t->armor, t->is_crossrealm, t->is_referral, status,
+                           e_data);
     if (ret) {
         au_state->violation = LOCAL_POLICY;
         if (t->flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) {
@@ -917,7 +923,8 @@ check_tgs_req(kdc_realm_t *realm, struct tgs_req_info *t,
     /* Consult kdcpolicy modules, giving them a chance to modify the times of
      * the issued ticket. */
     ret = check_kdcpolicy_tgs(context, t->req, t->server, t->header_tkt,
-                              t->auth_indicators, kdc_time, times, status);
+                              t->auth_indicators, t->armor, kdc_time, times,
+                              status);
     if (ret)
         return ret;
 
@@ -1039,8 +1046,8 @@ tgs_issue_ticket(kdc_realm_t *realm, struct tgs_req_info *t,
                           subject_server, t->local_tgt, &t->local_tgt_key,
                           initial_reply_key, ticket_encrypting_key,
                           subject_key, NULL, pkt, t->req, t->s4u_cprinc,
-                          subject_pac, t->subject_tkt, &t->auth_indicators,
-                          &enc_tkt_reply);
+                          subject_pac, t->subject_tkt, t->armor,
+                          &t->auth_indicators, &enc_tkt_reply);
     if (ret) {
         krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"), ret);
         *status = "HANDLE_AUTHDATA";

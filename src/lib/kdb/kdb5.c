@@ -326,6 +326,14 @@ copy_vtable(const kdb_vftabl *in, kdb_vftabl *out)
     out->allowed_to_delegate_from = in->allowed_to_delegate_from;
     out->issue_pac = in->issue_pac;
 
+    /* Copy fields for minor version 1. */
+    if (in->min_ver >= 1) {
+        out->issue_pac_armor = in->issue_pac_armor;
+        out->check_policy_as_armor = in->check_policy_as_armor;
+        out->allowed_to_delegate_from_armor =
+            in->allowed_to_delegate_from_armor;
+    }
+
     /* Set defaults for optional fields. */
     if (out->fetch_master_key == NULL)
         out->fetch_master_key = krb5_db_def_fetch_mkey;
@@ -2675,6 +2683,29 @@ krb5_db_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
 }
 
 krb5_error_code
+krb5_db_check_policy_as_armor(krb5_context kcontext, krb5_kdc_req *request,
+                              krb5_db_entry *client, krb5_db_entry *server,
+                              krb5_timestamp kdc_time,
+                              const krb5_kdb_armor *armor,
+                              const char **status, krb5_pa_data ***e_data)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    *status = NULL;
+    *e_data = NULL;
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->check_policy_as_armor != NULL) {
+        return v->check_policy_as_armor(kcontext, request, client, server,
+                                        kdc_time, armor, status, e_data);
+    }
+    return krb5_db_check_policy_as(kcontext, request, client, server,
+                                   kdc_time, status, e_data);
+}
+
+krb5_error_code
 krb5_db_check_policy_tgs(krb5_context kcontext, krb5_kdc_req *request,
                          krb5_db_entry *server, krb5_ticket *ticket,
                          const char **status, krb5_pa_data ***e_data)
@@ -2784,6 +2815,28 @@ krb5_db_allowed_to_delegate_from(krb5_context kcontext,
                                        proxy);
 }
 
+krb5_error_code
+krb5_db_allowed_to_delegate_from_armor(krb5_context kcontext,
+                                       krb5_const_principal client,
+                                       krb5_const_principal server,
+                                       krb5_pac server_pac,
+                                       const krb5_db_entry *proxy,
+                                       const krb5_kdb_armor *armor)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->allowed_to_delegate_from_armor != NULL) {
+        return v->allowed_to_delegate_from_armor(kcontext, client, server,
+                                                 server_pac, proxy, armor);
+    }
+    return krb5_db_allowed_to_delegate_from(kcontext, client, server,
+                                            server_pac, proxy);
+}
+
 void
 krb5_dbe_sort_key_data(krb5_key_data *key_data, size_t key_data_length)
 {
@@ -2820,6 +2873,31 @@ krb5_db_issue_pac(krb5_context context, unsigned int flags,
         return KRB5_PLUGIN_OP_NOTSUPP;
     return v->issue_pac(context, flags, client, replaced_reply_key, server,
                         krbtgt, authtime, old_pac, new_pac, auth_indicators);
+}
+
+krb5_error_code
+krb5_db_issue_pac_armor(krb5_context context, unsigned int flags,
+                        krb5_db_entry *client,
+                        krb5_keyblock *replaced_reply_key,
+                        krb5_db_entry *server, krb5_db_entry *krbtgt,
+                        krb5_timestamp authtime, krb5_pac old_pac,
+                        krb5_pac new_pac, krb5_data ***auth_indicators,
+                        const krb5_kdb_armor *armor)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    ret = get_vftabl(context, &v);
+    if (ret)
+        return ret;
+    if (v->issue_pac_armor != NULL) {
+        return v->issue_pac_armor(context, flags, client, replaced_reply_key,
+                                  server, krbtgt, authtime, old_pac, new_pac,
+                                  auth_indicators, armor);
+    }
+    return krb5_db_issue_pac(context, flags, client, replaced_reply_key,
+                             server, krbtgt, authtime, old_pac, new_pac,
+                             auth_indicators);
 }
 
 krb5_error_code

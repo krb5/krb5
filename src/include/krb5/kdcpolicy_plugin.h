@@ -34,8 +34,8 @@
  * Declarations for kdcpolicy plugin module implementors.
  *
  * The kdcpolicy pluggable interface currently has only one supported major
- * version, which is 1.  Major version 1 has a current minor version number of
- * 1.
+ * version, which is 1. Major version 1 has a current minor version number
+ * of 2.
  *
  * kdcpolicy plugin modules should define a function named
  * kdcpolicy_<modulename>_initvt, matching the signature:
@@ -117,12 +117,60 @@ typedef krb5_error_code
                                const char **status, krb5_deltat *lifetime_out,
                                krb5_deltat *renew_lifetime_out);
 
+/*
+ * Optional: like check_as, but also receive the request's FAST armor.
+ * armor_ticket is the ticket from the request's AP-REQ armor, or NULL if the
+ * request was not armored with an AP-REQ; its client principal has not been
+ * looked up in the database. armor_pac is the armor ticket's PAC with a
+ * verified server signature, or NULL if there is none. For a cross-realm
+ * armor ticket the PAC was produced by the issuing realm and has not been
+ * filtered. Neither may be modified or freed. If a module sets this method,
+ * check_as is not called.
+ */
+typedef krb5_error_code
+(*krb5_kdcpolicy_check_as_armor_fn)(krb5_context context,
+                                    krb5_kdcpolicy_moddata moddata,
+                                    const krb5_kdc_req *request,
+                                    const struct _krb5_db_entry_new *client,
+                                    const struct _krb5_db_entry_new *server,
+                                    const char *const *auth_indicators,
+                                    const krb5_ticket *armor_ticket,
+                                    krb5_pac armor_pac,
+                                    const char **status,
+                                    krb5_deltat *lifetime_out,
+                                    krb5_deltat *renew_lifetime_out);
+
+/*
+ * Optional: like check_tgs, but also receive the request's explicit FAST
+ * armor, as described for check_as_armor. armor_ticket is NULL unless the
+ * TGS request carried an explicit AP-REQ armor (the header ticket is passed
+ * as ticket, as for check_tgs). If a module sets this method, check_tgs is
+ * not called.
+ */
+typedef krb5_error_code
+(*krb5_kdcpolicy_check_tgs_armor_fn)(krb5_context context,
+                                     krb5_kdcpolicy_moddata moddata,
+                                     const krb5_kdc_req *request,
+                                     const struct _krb5_db_entry_new *server,
+                                     const krb5_ticket *ticket,
+                                     const char *const *auth_indicators,
+                                     const krb5_ticket *armor_ticket,
+                                     krb5_pac armor_pac,
+                                     const char **status,
+                                     krb5_deltat *lifetime_out,
+                                     krb5_deltat *renew_lifetime_out);
+
 typedef struct krb5_kdcpolicy_vtable_st {
     const char *name;
     krb5_kdcpolicy_init_fn init;
     krb5_kdcpolicy_fini_fn fini;
     krb5_kdcpolicy_check_as_fn check_as;
     krb5_kdcpolicy_check_tgs_fn check_tgs;
+    /* Minor version 1 ends here. */
+
+    krb5_kdcpolicy_check_as_armor_fn check_as_armor;
+    krb5_kdcpolicy_check_tgs_armor_fn check_tgs_armor;
+    /* Minor version 2 ends here. */
 } *krb5_kdcpolicy_vtable;
 
 #endif /* KRB5_POLICY_PLUGIN_H */

@@ -37,6 +37,9 @@ struct krb5int_fast_request_state {
     krb5_ui_4 fast_state_flags;
     krb5_ui_4 fast_options;
     krb5_int32 nonce;
+    /* For TGS requests, the ccache holding an explicit armor TGT, if any.  Not
+     * owned by the state. */
+    krb5_ccache tgs_armor_ccache;
 };
 
 #define KRB5INT_FAST_DO_FAST     (1l<<0)  /* Perform FAST */

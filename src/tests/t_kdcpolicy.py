@@ -62,4 +62,29 @@ realm.run([kvno, 'fail@%s' % realm.realm], expected_code=1,
 realm.kinit('fail@%s' % realm.realm, password('fail'),
             expected_code=1, expected_msg='KDC policy rejects request')
 
+# Test the FAST armor passed to check_as_armor and check_tgs_armor. The
+# test module rejects requests for needarmor clients and services which
+# are not armored with an AP-REQ.
+mark('kdcpolicy armor')
+realm.run([kadminl, 'addprinc', '-pw', password('needarmor'), 'needarmor'])
+realm.run([kadminl, 'addprinc', '-randkey', 'needarmor/svc'])
+armor_ccache = os.path.join(realm.testdir, 'armor')
+realm.kinit(realm.user_princ, password('user'), ['-c', armor_ccache])
+realm.kinit('needarmor', password('needarmor'), expected_code=1,
+            expected_msg='KDC policy rejects request')
+realm.kinit('needarmor', password('needarmor'), ['-T', armor_ccache])
+realm.run([kvno, 'needarmor/svc'], expected_code=1,
+          expected_msg='KDC policy rejects request')
+realm.extract_keytab('needarmor/svc', realm.keytab)
+realm.run(['./adata', '-a', armor_ccache, 'needarmor/svc'])
+
+# The KDC looks up the armor ticket client and rejects armor from a
+# principal which may not obtain tickets.
+mark('armor client checks')
+realm.run([kadminl, 'modprinc', '-allow_tix', realm.user_princ])
+realm.kinit('needarmor', password('needarmor'), ['-T', armor_ccache],
+            expected_code=1, expected_msg='revoked')
+realm.run([kadminl, 'modprinc', '+allow_tix', realm.user_princ])
+realm.kinit('needarmor', password('needarmor'), ['-T', armor_ccache])
+
 success('kdcpolicy tests')
