@@ -39,6 +39,10 @@
 krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
 krb5_boolean is_cross_tgs_principal(krb5_const_principal);
 krb5_boolean is_local_tgs_principal(krb5_const_principal);
+krb5_boolean is_realm_alias(kdc_realm_t *realm, const char *name, size_t len);
+krb5_boolean is_local_realm_name(kdc_realm_t *realm, const char *name,
+                                 size_t len);
+krb5_boolean is_local_realm_tgs(kdc_realm_t *realm, krb5_const_principal princ);
 krb5_error_code
 add_to_transited (krb5_data *,
                   krb5_data *,

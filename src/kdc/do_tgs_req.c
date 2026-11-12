@@ -682,8 +682,13 @@ gather_tgs_req_info(kdc_realm_t *realm, krb5_kdc_req **reqptr, krb5_data *pkt,
         t->flags |= KRB5_KDB_FLAG_ISSUING_REFERRAL;
 
     /* Mark the request as cross-realm if the header ticket server is not from
-     * this realm. */
-    if (!data_eq(t->header_server->princ->realm, t->sprinc->realm))
+     * this realm.  Realm names which differ only in alias spelling refer to
+     * the same realm, so they are not cross-realm. */
+    if (!data_eq(t->header_server->princ->realm, t->sprinc->realm) &&
+        !(is_local_realm_name(realm, t->header_server->princ->realm.data,
+                              t->header_server->princ->realm.length) &&
+          is_local_realm_name(realm, t->sprinc->realm.data,
+                              t->sprinc->realm.length)))
         t->flags |= KRB5_KDB_FLAG_CROSS_REALM;
 
     t->is_referral = (t->flags & KRB5_KDB_FLAG_ISSUING_REFERRAL);

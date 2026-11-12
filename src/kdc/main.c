@@ -111,6 +111,11 @@ find_realm_data(struct server_handle *handle, char *rname, krb5_ui_4 rsize)
             !strncmp(rname, kdc_realmlist[i]->realm_name, rsize))
             return(kdc_realmlist[i]);
     }
+    /* An alias realm name routes to the realm which lists it as an alias. */
+    for (i=0; i<kdc_numrealms; i++) {
+        if (is_realm_alias(kdc_realmlist[i], rname, rsize))
+            return(kdc_realmlist[i]);
+    }
     return((kdc_realm_t *) NULL);
 }
 
@@ -156,6 +161,12 @@ finish_realm(kdc_realm_t *rdp)
         free(rdp->realm_hostbased);
     if (rdp->realm_no_referral)
         free(rdp->realm_no_referral);
+    if (rdp->realm_aliases) {
+        char **sp;
+        for (sp = rdp->realm_aliases; *sp != NULL; sp++)
+            free(*sp);
+        free(rdp->realm_aliases);
+    }
     if (rdp->realm_context) {
         if (rdp->realm_mprinc)
             krb5_free_principal(rdp->realm_context, rdp->realm_mprinc);
@@ -189,6 +200,42 @@ combine(const char *val1, const char *val2, char **val_out)
 }
 
 /*
+ * Destructively split realm_aliases profile values into a NULL-terminated
+ * list of realm names.  Values may contain multiple space- or comma-
+ * separated names, like other multi-valued KDC profile options.
+ */
+static krb5_error_code
+parse_realm_aliases(char **values, char ***list_out)
+{
+    const char *const delim = " \t\r\n,";
+    char **valuesp, *token, *save = NULL;
+    char **list = NULL;
+    size_t count = 0;
+
+    *list_out = NULL;
+    for (valuesp = values; valuesp != NULL && *valuesp != NULL; valuesp++) {
+        for (token = strtok_r(*valuesp, delim, &save); token != NULL;
+             token = strtok_r(NULL, delim, &save)) {
+            char **newptr = realloc(list, (count + 2) * sizeof(*list));
+            if (newptr == NULL) {
+                free(list);
+                return ENOMEM;
+            }
+            list = newptr;
+            list[count] = strdup(token);
+            if (list[count] == NULL) {
+                free(list);
+                return ENOMEM;
+            }
+            count++;
+            list[count] = NULL;
+        }
+    }
+    *list_out = list;
+    return 0;
+}
+
+/*
  * Initialize a realm control structure from the alternate profile or from
  * the specified defaults.
  *
@@ -209,6 +256,7 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     const char          *hierarchy[4];
     krb5_kvno       mkvno = IGNORE_VNO;
     char ename[32];
+    char **values = NULL;
 
     memset(rdp, 0, sizeof(kdc_realm_t));
     if (!realm) {
@@ -339,6 +387,15 @@ init_realm(kdc_realm_t * rdp, krb5_pointer aprof, char *realm,
     if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE,
                                &rdp->realm_disable_pac))
         rdp->realm_disable_pac = FALSE;
+
+    hierarchy[2] = KRB5_CONF_REALM_ALIASES;
+    (void)krb5_aprof_getvals(aprof, hierarchy, &values);
+    if (values != NULL) {
+        kret = parse_realm_aliases(values, &rdp->realm_aliases);
+        profile_free_list(values);
+        if (kret)
+            goto whoops;
+    }
 
     /*
      * We've got our parameters, now go and setup our realm context.
