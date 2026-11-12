@@ -14,8 +14,9 @@ SHLIB_EXPDEPS= \
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5support$(SHLIBEXT) \
 	$(COM_ERR_DEPLIB)
-SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto $(COM_ERR_LIB) $(LIBS)
+SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lkrb5support $(COM_ERR_LIB) $(LIBS)
 RELDIR=rpc
 
 SRCS = $(srcdir)/auth_none.c \
