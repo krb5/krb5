@@ -16,6 +16,7 @@ OBJS= \
 	fuzz_crypto.o \
 	fuzz_des.o \
 	fuzz_gss.o \
+	fuzz_gss_exchange.o \
 	fuzz_json.o \
 	fuzz_kdc.o \
 	fuzz_keytab.o \
@@ -39,6 +40,7 @@ SRCS= \
 	$(srcdir)/fuzz_crypto.c \
 	$(srcdir)/fuzz_des.c \
 	$(srcdir)/fuzz_gss.c \
+	$(srcdir)/fuzz_gss_exchange.c \
 	$(srcdir)/fuzz_json.c \
 	$(srcdir)/fuzz_kdc.c \
 	$(srcdir)/fuzz_keytab.c \
@@ -62,6 +64,7 @@ FUZZ_TARGETS= \
 	fuzz_crypto \
 	fuzz_des \
 	fuzz_gss \
+	fuzz_gss_exchange \
 	fuzz_json \
 	fuzz_kdc \
 	fuzz_keytab \
@@ -104,6 +107,9 @@ fuzz_des: fuzz_des.o $(KRB5_BASE_DEPLIBS)
 
 fuzz_gss: fuzz_gss.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_gss.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_gss_exchange: fuzz_gss_exchange.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_gss_exchange.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_json: fuzz_json.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_json.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
