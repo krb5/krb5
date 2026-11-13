@@ -381,6 +381,7 @@ json_kgcred(krb5_context context, krb5_gss_cred_id_t cred,
     k5_json_array array;
     k5_json_value name = NULL, imp = NULL, keytab = NULL, rcache = NULL;
     k5_json_value ccache = NULL, ckeytab = NULL, etypes = NULL;
+    k5_json_string otp;
 
     *val_out = NULL;
     ret = json_kgname(context, cred->name, &name);
@@ -413,6 +414,20 @@ json_kgcred(krb5_context context, krb5_gss_cred_id_t cred,
                             cred->password);
     if (ret)
         goto cleanup;
+
+    /* Add an otp element only if one is set, so that credentials without one
+     * remain importable by older library versions. */
+    if (cred->otp != NULL) {
+        ret = k5_json_string_create(cred->otp, &otp);
+        if (!ret) {
+            ret = k5_json_array_add(array, otp);
+            k5_json_release(otp);
+        }
+        if (ret) {
+            k5_json_release(array);
+            goto cleanup;
+        }
+    }
     *val_out = array;
 
 cleanup:
