@@ -35,6 +35,24 @@
 #ifdef __APPLE__
 #include <dns.h>
 #endif
+#ifdef __ANDROID__
+#include <android/multinetwork.h>
+#include <poll.h>
+
+/*
+ * Maximum length of a DNS message.  A reply to a query is never longer
+ * than this, so a buffer of this size can hold any reply.
+ */
+#define ANDROID_DNS_MAXLEN 65536
+
+/*
+ * Number of milliseconds to wait for a reply to a query.  The platform
+ * resolver applies its own timeout and reports failures using the resolver
+ * return code, so this timeout is only a backstop for the case where the
+ * resolver never answers.
+ */
+#define ANDROID_DNS_TIMEOUT 30000
+#endif /* __ANDROID__ */
 
 /*
  * Opaque handle
@@ -66,7 +84,22 @@ static int initparse(struct k5_dns_state *);
  * evaluate to nothing.
  */
 
-#if defined(__APPLE__)
+#if defined(__ANDROID__)
+
+/*
+ * Use the Android NDK resolver (android/multinetwork.h).  The BIND
+ * interfaces cannot be used here: an app has no reachable list of name
+ * servers, so res_search() and friends cannot find any.  The NDK
+ * interface goes through the platform resolver instead, and returns raw
+ * DNS replies, which we parse just like any other resolver's replies.
+ */
+#define DECLARE_HANDLE(h) net_handle_t h
+#define INIT_HANDLE(h) android_dns_network(&(h))
+#define SEARCH(h, n, c, t, a, l) android_dns_search(h, n, c, t, a, l)
+#define PRIMARY_DOMAIN(h) NULL
+#define DESTROY_HANDLE(h)
+
+#elif defined(__APPLE__)
 
 /* Use the macOS interfaces dns_open, dns_search, and dns_free. */
 #define DECLARE_HANDLE(h) dns_handle_t h
@@ -99,6 +132,97 @@ static int initparse(struct k5_dns_state *);
 #define DESTROY_HANDLE(h)
 
 #endif
+
+#ifdef __ANDROID__
+
+/*
+ * android_dns_network()
+ *
+ * Determine which network to send DNS queries over.  A network bound to
+ * the process takes precedence over one bound for DNS resolution.  If
+ * neither is bound, use the unspecified network, which asks the platform
+ * resolver to use the default network.
+ *
+ * Returns 1 on success, or 0 on error.
+ */
+static int
+android_dns_network(net_handle_t *net)
+{
+    net_handle_t n;
+
+    if (android_getprocnetwork(&n) == 0 && n != NETWORK_UNSPECIFIED) {
+        *net = n;
+        return 1;
+    }
+    if (android_getprocdns(&n) == 0 && n != NETWORK_UNSPECIFIED) {
+        *net = n;
+        return 1;
+    }
+    *net = NETWORK_UNSPECIFIED;
+    return 1;
+}
+
+/*
+ * android_dns_search()
+ *
+ * Look up a resource record and copy the reply into the buffer.  The
+ * reply is a complete DNS message, which is what the parsing code in this
+ * file expects from any other resolver.
+ *
+ * Returns the length of the reply on success, or -1 on error.  If the
+ * reply does not fit in the buffer, its full length is returned, so that
+ * the caller can retry with a larger buffer.
+ */
+static int
+android_dns_search(net_handle_t network, const char *name, int nclass,
+                   int ntype, unsigned char *answer, int anslen)
+{
+    uint8_t *buf = NULL;
+    struct pollfd pfd;
+    int fd, len, rcode, ret;
+
+    buf = malloc(ANDROID_DNS_MAXLEN);
+    if (buf == NULL)
+        return -1;
+
+    fd = android_res_nquery(network, name, nclass, ntype, 0);
+    if (fd < 0) {
+        ret = -1;
+        goto cleanup;
+    }
+
+    pfd.fd = fd;
+    pfd.events = POLLIN;
+    pfd.revents = 0;
+    do {
+        ret = poll(&pfd, 1, ANDROID_DNS_TIMEOUT);
+    } while (ret < 0 && errno == EINTR);
+    if (ret <= 0) {
+        /* Timed out, or the wait was interrupted.  Cancel the query. */
+        android_res_cancel(fd);
+        close(fd);
+        ret = -1;
+        goto cleanup;
+    }
+
+    /* android_res_nresult() closes fd before returning. */
+    len = android_res_nresult(fd, &rcode, buf, ANDROID_DNS_MAXLEN);
+    if (len < 0 || rcode != ns_r_noerror) {
+        ret = -1;
+        goto cleanup;
+    }
+
+    ret = len;
+    if (len > anslen)
+        len = anslen;
+    memcpy(answer, buf, (size_t)len);
+
+cleanup:
+    free(buf);
+    return ret;
+}
+
+#endif /* __ANDROID__ */
 
 int
 k5_dns_init(const char *host, int nclass, int ntype,
