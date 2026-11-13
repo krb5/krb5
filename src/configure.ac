@@ -1507,6 +1507,15 @@ AC_DEFINE_UNQUOTED(DEFKTNAME, ["$DEFKTNAME"], [Define to default keytab name])
 AC_DEFINE_UNQUOTED(DEFCKTNAME, ["$DEFCKTNAME"],
                    [Define to default client keytab name])
 
+# Library lists for the client-side pkg-config files.  The Windows build
+# substitutes its native library names into the same templates.
+KRB5_PC_LIBS="-lkrb5 -lk5crypto $COM_ERR_LIB"
+KRB5_PC_LIBS_PRIVATE="-lkrb5support $MACOS_FRAMEWORK $LIBS $DL_LIB"
+GSSAPI_PC_LIBS="-lgssapi_krb5"
+AC_SUBST(KRB5_PC_LIBS)
+AC_SUBST(KRB5_PC_LIBS_PRIVATE)
+AC_SUBST(GSSAPI_PC_LIBS)
+
 AC_ARG_VAR(PKCS11_MODNAME, [Default PKCS11 module name])
 if test "${PKCS11_MODNAME+set}" != set; then
 	PKCS11_MODNAME=opensc-pkcs11.so

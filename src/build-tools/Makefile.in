@@ -11,7 +11,22 @@ PKGCONFIG_FILES = \
 	krb5-gssapi.pc \
 	gssrpc.pc
 
+##WIN32##WINDOWS_PKGCONFIG_FILES = \
+##WIN32##	krb5-gssapi.pc \
+##WIN32##	krb5.pc \
+##WIN32##	mit-krb5-gssapi.pc \
+##WIN32##	mit-krb5.pc
+
 all-unix: krb5-config $(PKGCONFIG_FILES)
+
+##WIN32##all-windows: windows-pkgconfig
+##WIN32##windows-pkgconfig: $(srcdir)\make-windows-pc.pl \
+##WIN32##		$(BUILDTOP)\patchlevel.h \
+##WIN32##		$(srcdir)\krb5-gssapi.pc.in $(srcdir)\krb5.pc.in \
+##WIN32##		$(srcdir)\mit-krb5-gssapi.pc.in \
+##WIN32##		$(srcdir)\mit-krb5.pc.in
+##WIN32##	$(PERL) "$(srcdir)\make-windows-pc.pl" $(BITS) \
+##WIN32##		"$(BUILDTOP)\patchlevel.h" "$(srcdir)" "."
 
 krb5-config $(PKGCONFIG_FILES): $(BUILDTOP)/config.status
 	(cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/$@)
@@ -48,3 +63,6 @@ check-unix: krb5-config
 
 distclean-unix:
 	$(RM) $(PKGCONFIG_FILES) krb5-config
+
+##WIN32##clean-windows::
+##WIN32##	$(RM) $(WINDOWS_PKGCONFIG_FILES)
