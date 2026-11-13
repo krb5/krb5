@@ -37,6 +37,7 @@
 
 #include <krb5.h>
 #include <kadm5/admin.h>
+#include <errno.h>
 #include <string.h>
 
 static krb5_context ctx;
@@ -100,6 +101,9 @@ static krb5_tl_data tl3 = { &tl4, KRB5_TL_KADM_DATA, 32,
                               "\x00\x00\x00\x00\x00\x00\x00\x00") };
 static krb5_tl_data tl2 = { &tl3, KRB5_TL_MOD_PRINC, 8, U("\5\6\7\0x@Y\0") };
 static krb5_tl_data tl1 = { &tl2, KRB5_TL_LAST_PWD_CHANGE, 4, U("\1\2\3\4") };
+
+/* A zero-length db_args value, as kadmind can receive from a client. */
+static krb5_tl_data tl_empty_db_args = { NULL, KRB5_TL_DB_ARGS, 0, NULL };
 
 /* An encoded osa_print_enc with no policy reference. */
 static krb5_tl_data tl_no_policy = { NULL, KRB5_TL_KADM_DATA, 24,
@@ -386,6 +390,10 @@ main(void)
      * KDB_TL_USER_INFO tl-data. */
     CHECK(krb5_db_delete_principal(ctx, &sample_princ));
     CHECK(krb5_db_put_principal(ctx, ent));
+
+    /* Check that a zero-length db_args tl-data value is rejected. */
+    CHECK(krb5_dbe_update_tl_data(ctx, ent, &tl_empty_db_args));
+    CHECK_COND(krb5_db_put_principal(ctx, ent) == EINVAL);
     krb5_db_free_principal(ctx, ent);
 
     /* Exercise principal iteration code. */

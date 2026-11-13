@@ -910,7 +910,8 @@ extract_db_args_from_tl_data(krb5_context kcontext, krb5_tl_data **start,
             /* Since this is expected to be NULL terminated string and
                this could come from any client, do a check before
                passing it to db.  */
-            if (((char *) curr->tl_data_contents)[curr->tl_data_length - 1] !=
+            if (curr->tl_data_length == 0 ||
+                ((char *) curr->tl_data_contents)[curr->tl_data_length - 1] !=
                 '\0') {
                 /* Not null terminated. Dangerous input.  */
                 status = EINVAL;
