@@ -58,7 +58,7 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
     char *p;
 
     /* validate the glob */
-    if (glob[strlen(glob)-1] == '\\')
+    if (*glob != '\0' && glob[strlen(glob) - 1] == '\\')
         return EINVAL;
 
     /* A character of glob can turn into two in regexp, plus ^ and $ */
