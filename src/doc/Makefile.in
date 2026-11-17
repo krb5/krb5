@@ -11,6 +11,8 @@ DEFCCNAME=@DEFCCNAME@
 DEFKTNAME=@DEFKTNAME@
 DEFCKTNAME=@DEFCKTNAME@
 PKCS11_MODNAME=@PKCS11_MODNAME@
+VENDORDIR=@VENDORDIR@
+USE_VENDORDIR=@USE_VENDORDIR@
 
 RST_SOURCES= _static \
 	_templates \
@@ -43,7 +45,11 @@ LATEXOPTS=
 #     make -f Makefile.in SPHINX_ARGS= htmlsrc
 html: composite
 	rm -rf $(docsrc)/html
-	$(SPHINX_BUILD) -q rst_composite $(docsrc)/html
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -q rst_composite -t use_vendordir $(docsrc)/html; \
+	else \
+		$(SPHINX_BUILD) -q rst_composite $(docsrc)/html; \
+	fi
 
 # Dummy target for use in an unconfigured source tree.
 htmlsrc:
@@ -55,17 +61,24 @@ htmlsrc:
 substhtml: composite paths.py
 	rm -rf html_subst
 	cp paths.py rst_composite
-	$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -t pathsubs -q -t use_vendordir rst_composite html_subst; \
+	else \
+		$(SPHINX_BUILD) -t pathsubs -q rst_composite html_subst; \
+        fi
 
 # Create an ASCII (okay, UTF-8) version of the NOTICE file
 notice.txt: $(docsrc)/conf.py $(docsrc)/notice.rst $(docsrc)/version.py
-	$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .
-
+	if test "$(USE_VENDORDIR)" == "1" ; then \
+		$(SPHINX_BUILD) -b text -t notice -t use_vendordir -q $(docsrc) .; \
+	else \
+		$(SPHINX_BUILD) -b text -t notice -q $(docsrc) .; \
+	fi
 NOTICE: notice.txt
 	cp notice.txt $(top_srcdir)/../NOTICE
 
 $(PDFDIR): composite
-	$(SPHINX_BUILD) -b latex -q rst_composite $(PDFDIR)
+	$(SPHINX_BUILD) -b latex -q -t $(USEVENDORDIR) rst_composite $(PDFDIR)
 	# sphinx-build generates a gmake-specific Makefile that we don't use
 	mv $(PDFDIR)/Makefile $(PDFDIR)/GMakefile
 
@@ -116,6 +129,7 @@ paths.py:
 	echo 'localstatedir = "``$(localstatedir)``"' >> $@
 	echo 'runstatedir = "``$(runstatedir)``"' >> $@
 	echo 'sysconfdir = "``$(sysconfdir)``"' >> $@
+	echo 'vendordir = "``$(VENDORDIR)``"' >> $@
 	echo 'ccache = "``$(DEFCCNAME)``"' >> $@
 	echo 'keytab = "``$(DEFKTNAME)``"' >> $@
 	echo 'ckeytab = "``$(DEFCKTNAME)``"' >> $@
