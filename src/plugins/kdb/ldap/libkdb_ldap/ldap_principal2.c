@@ -669,7 +669,7 @@ update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
 {
     krb5_error_code ret;
     char *auth_ind = NULL;
-    char *strval[10] = { 0 };
+    char *strval[11] = { 0 };
     char *ai, *ai_save = NULL;
     size_t i = 0, sv_num = sizeof(strval) / sizeof(*strval);
     int mask;
@@ -689,8 +689,9 @@ update_ldap_mod_auth_ind(krb5_context context, krb5_db_entry *entry,
         return 0;
     }
 
+    /* Leave room for a null terminator in strval. */
     ai = strtok_r(auth_ind, " ", &ai_save);
-    while (ai != NULL && i < sv_num) {
+    while (ai != NULL && i < sv_num - 1) {
         strval[i++] = ai;
         ai = strtok_r(NULL, " ", &ai_save);
     }

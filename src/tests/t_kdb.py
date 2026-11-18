@@ -356,6 +356,14 @@ out = realm.run([kadminl, 'getstrs', 'authind'])
 if 'require_auth' in out:
     fail('require_auth string attribute still visible after delstr')
 
+# Regression test for #9294: store ten required auth indicators and
+# verify that exactly those indicators are read back.
+realm.run([kadminl, 'setstr', 'authind', 'require_auth',
+           'a b c d e f g h i j'])
+out = realm.run([kadminl, 'getstrs', 'authind'])
+if 'require_auth: a b c d e f g h i j\n' not in out:
+    fail('Expected require_auth value not in getstrs output')
+
 mark('LDAP service principal aliases')
 
 # Test service principal aliases.
