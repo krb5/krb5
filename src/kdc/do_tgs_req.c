@@ -420,7 +420,7 @@ in_list(const char *list, const char *item)
     const char *p;
     int len = strlen(item);
 
-    if (list == NULL)
+    if (list == NULL || *item == '\0')
         return FALSE;
     for (p = strstr(list, item); p != NULL; p = strstr(p + 1, item)) {
         if ((p == list || isspace((unsigned char)p[-1]) || p[-1] == ',') &&

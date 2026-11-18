@@ -86,6 +86,12 @@ testfail(realm, 'srv-hst')
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': 'b,c'}})
 testref(realm, 'srv-hst')
 
+# Regression test for #9292: the KDC should not read past the end of
+# the config string if the service type is empty.
+shutil.copyfile(savefile, realm.ccache)
+realm.run(['./gcred', 'srv-hst', '/x.d@'], expected_code=1,
+          expected_msg='not found in Kerberos database')
+
 # no_host_referrals should override host_based_services for NT-UNKNWON
 # server names.
 restart_kdc(realm, {'kdcdefaults': {'no_host_referral': '*',
