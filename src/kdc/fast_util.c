@@ -59,8 +59,7 @@ static krb5_error_code armor_ap_request
         krb5_free_error_message(context, errmsg);
     }
     if (retval == 0) {
-        if (!krb5_principal_compare_any_realm(context, realm->realm_tgsprinc,
-                                              ticket->server)) {
+        if (!is_local_realm_tgs(realm, ticket->server)) {
             k5_setmsg(context, KRB5KDC_ERR_SERVER_NOMATCH,
                       _("ap-request armor for something other than the local "
                         "TGS"));

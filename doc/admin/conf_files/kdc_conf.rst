@@ -394,6 +394,18 @@ The following tags may be specified in a [realms] subsection:
     listed in **host_based_services**.  ``no_host_referral = *`` will
     disable referral processing altogether.
 
+**realm_aliases**
+    (Whitespace- or comma-separated list.)  Lists alternate realm names
+    which the KDC serves as additional spellings of this realm.  An alias
+    realm is not a separate realm: requests naming an alias realm are
+    handled with this realm's database, keytab, and policy, and tickets
+    issued for alias principals keep the alias realm spelling.  PKINIT
+    requests for an alias realm use this realm's PKINIT identity and trust
+    anchors.  This option allows a realm to be known by more than one name
+    without initializing a separate KDC realm for each name.  This option
+    may be specified multiple times, or as a single space-separated list.
+    (New in release 1.23.)
+
 **reject_bad_transit**
     (Boolean value.)  If set to true, the KDC will check the list of
     transited realms for cross-realm tickets against the transit path
