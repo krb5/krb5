@@ -18,6 +18,7 @@ OBJS= \
 	fuzz_gss.o \
 	fuzz_json.o \
 	fuzz_kdc.o \
+	fuzz_kdc_client.o \
 	fuzz_keytab.o \
 	fuzz_krad.o \
 	fuzz_krb.o \
@@ -41,6 +42,7 @@ SRCS= \
 	$(srcdir)/fuzz_gss.c \
 	$(srcdir)/fuzz_json.c \
 	$(srcdir)/fuzz_kdc.c \
+	$(srcdir)/fuzz_kdc_client.c \
 	$(srcdir)/fuzz_keytab.c \
 	$(srcdir)/fuzz_krad.c \
 	$(srcdir)/fuzz_krb.c \
@@ -64,6 +66,7 @@ FUZZ_TARGETS= \
 	fuzz_gss \
 	fuzz_json \
 	fuzz_kdc \
+	fuzz_kdc_client \
 	fuzz_keytab \
 	fuzz_krad \
 	fuzz_krb \
@@ -110,6 +113,9 @@ fuzz_json: fuzz_json.o $(KRB5_BASE_DEPLIBS)
 
 fuzz_kdc: fuzz_kdc.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_kdc.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
+
+fuzz_kdc_client: fuzz_kdc_client.o $(KRB5_BASE_DEPLIBS)
+	$(CXX_LINK) -o $@ fuzz_kdc_client.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
 
 fuzz_keytab: fuzz_keytab.o $(KRB5_BASE_DEPLIBS)
 	$(CXX_LINK) -o $@ fuzz_keytab.o $(KRB5_BASE_LIBS) $(FUZZ_LDFLAGS)
