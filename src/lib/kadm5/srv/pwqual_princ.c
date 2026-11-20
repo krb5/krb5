@@ -30,26 +30,30 @@
 #include <krb5/pwqual_plugin.h>
 #include "server_internal.h"
 
+/* Similar to data_eq_string(), but case-insensitive. */
+static inline krb5_boolean
+data_eq_string_case(const krb5_data d, const char *s)
+{
+    return d.length == strlen(s) && (d.length == 0 ||
+                                     strncasecmp(d.data, s, d.length) == 0);
+}
+
 static krb5_error_code
 princ_check(krb5_context context, krb5_pwqual_moddata data,
             const char *password, const char *policy_name,
             krb5_principal princ, const char **languages)
 {
-    int i, n;
-    char *cp;
+    int i;
 
     /* Don't check for principals with no password policy. */
     if (policy_name == NULL)
         return 0;
 
     /* Check against components of the principal. */
-    n = krb5_princ_size(handle->context, princ);
-    cp = krb5_princ_realm(handle->context, princ)->data;
-    if (strcasecmp(cp, password) == 0)
+    if (data_eq_string_case(princ->realm, password))
         return KADM5_PASS_Q_DICT;
-    for (i = 0; i < n; i++) {
-        cp = krb5_princ_component(handle->context, princ, i)->data;
-        if (strcasecmp(cp, password) == 0) {
+    for (i = 0; i < princ->length; i++) {
+        if (data_eq_string_case(princ->data[i], password)) {
             k5_setmsg(context, KADM5_PASS_Q_DICT,
                       _("Password may not match principal name"));
             return KADM5_PASS_Q_DICT;
