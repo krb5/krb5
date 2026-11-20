@@ -152,6 +152,42 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
     if (!forwardable) /* Reset KDC_OPT_FORWARDABLE */
         kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
+    /* Optionally limit the lifetime of the forwarded ticket and clear
+       its renewable flag, to limit the exposure of unconstrained
+       credential delegation.  Configurable per-process via the
+       KRB5_FORWARD_LIFETIME environment variable, or site-wide via
+       the [libdefaults] forward_lifetime setting. */
+    {
+        char *envstr = secure_getenv("KRB5_FORWARD_LIFETIME"), *confstr = NULL;
+        char *str = envstr;
+        krb5_deltat lifetime;
+
+        if ((str == NULL || *str == '\0') &&
+            krb5int_libdefault_string(context, &client->realm,
+                                      KRB5_CONF_FORWARD_LIFETIME,
+                                      &confstr) == 0)
+            str = confstr;
+        if (str != NULL && *str != '\0') {
+            if (krb5_string_to_deltat(str, &lifetime) != 0 || lifetime <= 0) {
+                TRACE_FWD_TGT_LIFETIME_BAD(context, str);
+            } else {
+                krb5_timestamp now, cap;
+                retval = krb5_timeofday(context, &now);
+                if (retval == 0) {
+                    cap = ts_incr(now, lifetime);
+                    if (ts_after(creds.times.endtime, cap))
+                        creds.times.endtime = cap;
+                    creds.times.renew_till = creds.times.endtime;
+                    kdcoptions &= ~KDC_OPT_RENEWABLE;
+                    TRACE_FWD_TGT_LIFETIME_CAPPED(context, lifetime);
+                }
+            }
+        }
+        free(confstr);
+        if (retval)
+            goto errout;
+    }
+
     if ((retval = krb5_get_cred_via_tkt(context, &tgt, kdcoptions,
                                         addrs, &creds, &pcreds))) {
         if (enctype) {
