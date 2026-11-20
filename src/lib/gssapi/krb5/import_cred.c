@@ -509,9 +509,12 @@ json_to_kgcred(krb5_context context, k5_json_array array,
     k5_json_bool b;
     krb5_boolean is_new;
     OM_uint32 tmp;
+    size_t len;
 
     *cred_out = NULL;
-    if (k5_json_array_length(array) != 14)
+    /* Tokens from before the otp field was added have 14 elements. */
+    len = k5_json_array_length(array);
+    if (len != 14 && len != 15)
         return -1;
 
     cred = calloc(1, sizeof(*cred));
@@ -578,6 +581,10 @@ json_to_kgcred(krb5_context context, k5_json_array array,
         goto invalid;
 
     if (json_to_optional_string(k5_json_array_get(array, 13), &cred->password))
+        goto invalid;
+
+    if (len > 14 &&
+        json_to_optional_string(k5_json_array_get(array, 14), &cred->otp))
         goto invalid;
 
     *cred_out = cred;

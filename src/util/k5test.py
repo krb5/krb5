@@ -167,6 +167,19 @@ Scripts may use the following functions and variables:
   the port needs to be reused; daemon processes will be stopped
   automatically when the script exits.
 
+* start_mockradius(addr, expected_password): Start a RADIUS daemon
+  that will answer one request on a UDP port or Unix domain socket.
+  This function must only be used if have_pyrad is True.  The answer
+  will be Access-Accept if the password matches expected_password,
+  Access-Reject otherwise.  addr can be an absolute pathname for a
+  Unix-domain socket, or ipaddr:port for a UDP socket.  For UDP
+  listeners a trivial OTP secret will be used, matching the contents
+  of $testdir/radius.secret.
+
+* check_mockradius(proc, expected_line): Check the report from the
+  mock RADIUS server, which is of the form 'True/False username
+  password', and wait for the daemon process to terminate.
+
 * multipass_realms(**keywords): This is an iterator function.  Yields
   a realm for each of the standard test passes, each of which alters
   the default configuration in some way to exercise different parts of
@@ -195,6 +208,8 @@ Scripts may use the following functions and variables:
   arguments taking priority.
 
 * buildtop: The top of the build directory (absolute path).
+
+* have_pyrad: True if the pyrad Python module is present.
 
 * srctop: The top of the source directory (absolute path).
 
@@ -393,6 +408,7 @@ command-line flags.  These are documented in the --help output.
 import atexit
 import fcntl
 import glob
+import importlib.util
 import optparse
 import os
 import shlex
@@ -931,6 +947,23 @@ def stop_daemon(proc):
     return await_daemon_exit(proc)
 
 
+# Start a mock RADIUS daemon.  Do not use if have_pyrad is false.
+def start_mockradius(addr, expected_password):
+    assert have_pyrad
+    mockradius = os.path.join(srctop, 'util', 'mockradius.py')
+    return _start_daemon([sys.executable, mockradius, addr, expected_password],
+                         None, 'starting...')
+
+
+# Check the status result from a mock RADIUS daemon process and wait
+# for the process to terminate.
+def check_mockradius(proc, expected_line):
+    line = proc.stdout.readline().strip()
+    if line != expected_line:
+        fail('Expected %s, got %s from mockradius' % (expected_line, line))
+    await_daemon_exit(proc)
+
+
 class K5Realm(object):
     """An object representing a functional krb5 test realm."""
 
@@ -938,7 +971,8 @@ class K5Realm(object):
                  krb5_conf=None, kdc_conf=None, create_kdb=True,
                  krbtgt_keysalt=None, create_user=True, get_creds=True,
                  create_host=True, start_kdc=True, start_kadmind=False,
-                 start_kpropd=False, bdb_only=False, pkinit=False):
+                 start_kpropd=False, bdb_only=False, pkinit=False,
+                 radius_secret=None):
         global hostname, _default_krb5_conf, _default_kdc_conf
         global _lmdb_kdc_conf, _current_db
 
@@ -977,6 +1011,7 @@ class K5Realm(object):
         self._create_conf(self._kdc_conf, kdc_conf_path)
         self._create_acl()
         self._create_dictfile()
+        self._create_radius_secret()
 
         if create_kdb:
             self.create_kdb()
@@ -1069,6 +1104,10 @@ class K5Realm(object):
         file = open(filename, 'w')
         file.write('weak_password\n')
         file.close()
+
+    def _create_radius_secret(self):
+        with open(os.path.join(self.testdir, 'radius.secret'), 'w') as f:
+            f.write('otptest')
 
     def _make_env(self, krb5_conf_path, kdc_conf_path):
         env = _build_env()
@@ -1472,6 +1511,7 @@ srctop = _find_srctop()
 plugins = os.path.join(buildtop, 'plugins')
 pkinit_enabled = os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so'))
 pkinit_certs = os.path.join(srctop, 'tests', 'pkinit-certs')
+have_pyrad = importlib.util.find_spec('pyrad') is not None
 hostname = socket.gethostname().lower()
 null_input = open(os.devnull, 'r')
 

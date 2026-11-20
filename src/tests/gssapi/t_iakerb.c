@@ -45,8 +45,8 @@ main(int argc, char **argv)
     gss_buffer_desc pwbuf;
 
     if (argc != 5) {
-        fprintf(stderr, "Usage: %s initiatorname password|- targetname "
-                "acceptorname\n", argv[0]);
+        fprintf(stderr, "Usage: %s initiatorname password|otp:value|- "
+                "targetname acceptorname\n", argv[0]);
         return 1;
     }
 
@@ -55,7 +55,15 @@ main(int argc, char **argv)
     tname = import_name(argv[3]);
     aname = import_name(argv[4]);
 
-    if (strcmp(password, "-") != 0) {
+    if (strncmp(password, "otp:", 4) == 0) {
+        gss_key_value_element_desc elem = { "otp", password + 4 };
+        gss_key_value_set_desc store = { 1, &elem };
+
+        major = gss_acquire_cred_from(&minor, iname, 0, &mechset_iakerb,
+                                      GSS_C_INITIATE, &store, &icred, NULL,
+                                      NULL);
+        check_gsserr("gss_acquire_cred_from", major, minor);
+    } else if (strcmp(password, "-") != 0) {
         pwbuf.value = (void *)password;
         pwbuf.length = strlen(password);
         major = gss_acquire_cred_with_password(&minor, iname, &pwbuf, 0,
