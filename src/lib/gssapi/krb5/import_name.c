@@ -129,7 +129,7 @@ import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
     krb5_error_code code;
     unsigned char *cp, *end;
     char *tmp = NULL, *tmp2 = NULL, *service = NULL, *host = NULL, *stringrep;
-    ssize_t    length;
+    size_t     length;
 #ifndef NO_PASSWORD
     struct passwd *pw;
 #endif
@@ -231,7 +231,7 @@ import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
         } else if (g_OID_equal(input_name_type, gss_nt_exported_name) ||
                    g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT)) {
 #define BOUNDS_CHECK(cp, end, n)                                        \
-            do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
+            do { if ((size_t)((end) - (cp)) < (n)) goto fail_name; } while (0)
             cp = (unsigned char *)tmp;
             end = cp + input_name_buffer->length;
 
@@ -252,14 +252,14 @@ import_name(OM_uint32 *minor_status, gss_buffer_t input_name_buffer,
             if (*cp++ != 0x00)
                 goto fail_name;
             length = *cp++;
-            if (length != (ssize_t)gss_mech_krb5->length+2)
+            if (length != gss_mech_krb5->length + 2)
                 goto fail_name;
 
             BOUNDS_CHECK(cp, end, 2);
             if (*cp++ != 0x06)
                 goto fail_name;
             length = *cp++;
-            if (length != (ssize_t)gss_mech_krb5->length)
+            if (length != gss_mech_krb5->length)
                 goto fail_name;
 
             BOUNDS_CHECK(cp, end, length);
