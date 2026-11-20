@@ -55,6 +55,14 @@ client's database entry, and the client's database entry itself.  The
 be included in the issued ticket using the ``add_auth_indicator``
 callback (new in release 1.14).
 
+If the request is armored with an AP-REQ, a module can inspect the
+FAST armor ticket using the ``fast_armor_ticket`` callback, its
+verified PAC using the ``fast_armor_pac`` callback, and the database
+entry of the armor ticket client using the ``fast_armor_client``
+callback (new in release 1.23). The KDC looks up the armor client and
+rejects the request if the client may not obtain tickets; anonymous
+armor and cross-realm armor without a local entry have no entry.
+
 A module can generate state information to be included with the next
 client request using the ``set_cookie`` callback (new in release
 1.14).  On the next request, the module can read this state

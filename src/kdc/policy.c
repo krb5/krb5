@@ -45,6 +45,9 @@ typedef struct kdcpolicy_handle_st {
 
 static kdcpolicy_handle *handles;
 
+#define ARMOR_TKT(armor) (((armor) != NULL) ? (armor)->ticket : NULL)
+#define ARMOR_PAC(armor) (((armor) != NULL) ? (armor)->pac : NULL)
+
 static void
 free_indicators(char **ais)
 {
@@ -103,7 +106,8 @@ update_ticket_times(krb5_ticket_times *times, krb5_timestamp now,
 krb5_error_code
 check_kdcpolicy_as(krb5_context context, const krb5_kdc_req *request,
                    const krb5_db_entry *client, const krb5_db_entry *server,
-                   krb5_data *const *auth_indicators, krb5_timestamp kdc_time,
+                   krb5_data *const *auth_indicators,
+                   const krb5_kdb_armor *armor, krb5_timestamp kdc_time,
                    krb5_ticket_times *times, const char **status)
 {
     krb5_deltat life = 0, rlife = 0;
@@ -119,11 +123,17 @@ check_kdcpolicy_as(krb5_context context, const krb5_kdc_req *request,
 
     for (hp = handles; *hp != NULL; hp++) {
         h = *hp;
-        if (h->vt.check_as == NULL)
+        if (h->vt.check_as_armor != NULL) {
+            ret = h->vt.check_as_armor(context, h->moddata, request, client,
+                                       server, (const char **)ais,
+                                       ARMOR_TKT(armor), ARMOR_PAC(armor),
+                                       status, &life, &rlife);
+        } else if (h->vt.check_as != NULL) {
+            ret = h->vt.check_as(context, h->moddata, request, client, server,
+                                 (const char **)ais, status, &life, &rlife);
+        } else {
             continue;
-
-        ret = h->vt.check_as(context, h->moddata, request, client, server,
-                             (const char **)ais, status, &life, &rlife);
+        }
         if (ret)
             goto done;
 
@@ -143,7 +153,8 @@ done:
 krb5_error_code
 check_kdcpolicy_tgs(krb5_context context, const krb5_kdc_req *request,
                     const krb5_db_entry *server, const krb5_ticket *ticket,
-                    krb5_data *const *auth_indicators, krb5_timestamp kdc_time,
+                    krb5_data *const *auth_indicators,
+                    const krb5_kdb_armor *armor, krb5_timestamp kdc_time,
                     krb5_ticket_times *times, const char **status)
 {
     krb5_deltat life = 0, rlife = 0;
@@ -159,11 +170,17 @@ check_kdcpolicy_tgs(krb5_context context, const krb5_kdc_req *request,
 
     for (hp = handles; *hp != NULL; hp++) {
         h = *hp;
-        if (h->vt.check_tgs == NULL)
+        if (h->vt.check_tgs_armor != NULL) {
+            ret = h->vt.check_tgs_armor(context, h->moddata, request, server,
+                                        ticket, (const char **)ais,
+                                        ARMOR_TKT(armor), ARMOR_PAC(armor),
+                                        status, &life, &rlife);
+        } else if (h->vt.check_tgs != NULL) {
+            ret = h->vt.check_tgs(context, h->moddata, request, server, ticket,
+                                  (const char **)ais, status, &life, &rlife);
+        } else {
             continue;
-
-        ret = h->vt.check_tgs(context, h->moddata, request, server, ticket,
-                              (const char **)ais, status, &life, &rlife);
+        }
         if (ret)
             goto done;
 
@@ -213,7 +230,7 @@ load_kdcpolicy_plugins(krb5_context context)
         if (h == NULL)
             goto cleanup;
 
-        ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&h->vt);
+        ret = (*mod)(context, 1, 2, (krb5_plugin_vtable)&h->vt);
         if (ret) {              /* Version mismatch. */
             TRACE_KDCPOLICY_VTINIT_FAIL(context, ret);
             free(h);

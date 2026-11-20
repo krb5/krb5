@@ -408,6 +408,30 @@ fast_armor(krb5_context context, krb5_kdcpreauth_rock rock)
     return rock->rstate->armor_key;
 }
 
+static const krb5_ticket *
+fast_armor_ticket(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    krb5_kdb_armor *armor = rock->rstate->armor;
+
+    return (armor != NULL) ? armor->ticket : NULL;
+}
+
+static krb5_pac
+fast_armor_pac(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    krb5_kdb_armor *armor = rock->rstate->armor;
+
+    return (armor != NULL) ? armor->pac : NULL;
+}
+
+static void *
+fast_armor_client(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    krb5_kdb_armor *armor = rock->rstate->armor;
+
+    return (armor != NULL) ? armor->client : NULL;
+}
+
 static krb5_error_code
 get_string(krb5_context context, krb5_kdcpreauth_rock rock, const char *key,
            char **value_out)
@@ -582,7 +606,7 @@ replace_reply_key(krb5_context context, krb5_kdcpreauth_rock rock,
 }
 
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
-    6,
+    7,
     max_time_skew,
     client_keys,
     free_keys,
@@ -601,7 +625,10 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     client_name,
     send_freshness_token,
     check_freshness_token,
-    replace_reply_key
+    replace_reply_key,
+    fast_armor_ticket,
+    fast_armor_pac,
+    fast_armor_client
 };
 
 static krb5_error_code
