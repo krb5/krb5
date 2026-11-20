@@ -34,6 +34,110 @@
 #include <string.h>
 #include "common.h"
 
+/* Token IDs from lib/gssapi/krb5/gssapiP_krb5.h. */
+#define TOK_AP_REQ 0x0100
+#define TOK_IAKERB_PROXY 0x0501
+
+/* Parse the RFC 2743 framing of tok.  Alias the mechanism OID into *oid_out
+ * and return the two-byte token ID which follows it. */
+static unsigned int
+parse_token_header(gss_buffer_t tok, gss_OID_desc *oid_out)
+{
+    const unsigned char *p = tok->value, *end = p + tok->length;
+    size_t lenlen;
+
+    if (end - p < 2 || *p++ != 0x60)
+        errout("Token lacks GSS framing");
+
+    /* Skip the outer DER length; tok->length bounds the parse. */
+    if (*p & 0x80) {
+        lenlen = *p++ & 0x7F;
+        if (lenlen > (size_t)(end - p))
+            errout("Truncated token length");
+        p += lenlen;
+    } else {
+        p++;
+    }
+
+    if (end - p < 2 || *p++ != 0x06)
+        errout("Token lacks a mechanism OID");
+    oid_out->length = *p++;
+    if ((size_t)(end - p) < oid_out->length + 2)
+        errout("Truncated token mechanism OID");
+    oid_out->elements = (void *)p;
+    p += oid_out->length;
+    return (p[0] << 8) | p[1];
+}
+
+/*
+ * Check the framing of an initiator token.  Once IAKERB proxy tokens have
+ * been exchanged, the AP-REQ must use the krb5 OID; if the initiator skipped
+ * straight to the AP exchange, it must use the IAKERB OID so that the
+ * acceptor dispatches to the IAKERB mechanism.
+ */
+static void
+check_init_token(gss_buffer_t tok, int *saw_proxy)
+{
+    gss_OID_desc oid;
+    unsigned int tokid;
+
+    if (tok->length == 0)
+        return;
+
+    tokid = parse_token_header(tok, &oid);
+    if (tokid == TOK_IAKERB_PROXY) {
+        if (!gss_oid_equal(&oid, &mech_iakerb))
+            errout("IAKERB proxy token has the wrong mechanism OID");
+        *saw_proxy = 1;
+    } else if (tokid == TOK_AP_REQ) {
+        if (!gss_oid_equal(&oid, *saw_proxy ? &mech_krb5 : &mech_iakerb))
+            errout("AP-REQ token has the wrong mechanism OID");
+        printf("AP-REQ mech: %s\n", *saw_proxy ? "krb5" : "iakerb");
+    } else {
+        errout("Unexpected initiator token ID");
+    }
+}
+
+/* Establish IAKERB contexts with mutual authentication, checking the framing
+ * of each initiator token. */
+static void
+establish_iakerb(gss_cred_id_t icred, gss_cred_id_t acred, gss_name_t tname,
+                 gss_ctx_id_t *ictx, gss_ctx_id_t *actx)
+{
+    OM_uint32 minor, imaj, amaj;
+    gss_buffer_desc itok = GSS_C_EMPTY_BUFFER, atok = GSS_C_EMPTY_BUFFER;
+    int saw_proxy = 0;
+
+    *ictx = *actx = GSS_C_NO_CONTEXT;
+    imaj = amaj = GSS_S_CONTINUE_NEEDED;
+    for (;;) {
+        (void)gss_release_buffer(&minor, &itok);
+        imaj = gss_init_sec_context(&minor, icred, ictx, tname, &mech_iakerb,
+                                    GSS_C_MUTUAL_FLAG, GSS_C_INDEFINITE,
+                                    GSS_C_NO_CHANNEL_BINDINGS, &atok, NULL,
+                                    &itok, NULL, NULL);
+        check_gsserr("gss_init_sec_context", imaj, minor);
+        check_init_token(&itok, &saw_proxy);
+        if (amaj == GSS_S_COMPLETE)
+            break;
+
+        (void)gss_release_buffer(&minor, &atok);
+        amaj = gss_accept_sec_context(&minor, actx, acred, &itok,
+                                      GSS_C_NO_CHANNEL_BINDINGS, NULL, NULL,
+                                      &atok, NULL, NULL, NULL);
+        check_gsserr("gss_accept_sec_context", amaj, minor);
+        (void)gss_release_buffer(&minor, &itok);
+        if (imaj == GSS_S_COMPLETE)
+            break;
+    }
+
+    if (imaj != GSS_S_COMPLETE || amaj != GSS_S_COMPLETE)
+        errout("One side wants to continue after the other is done");
+
+    (void)gss_release_buffer(&minor, &itok);
+    (void)gss_release_buffer(&minor, &atok);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -73,8 +177,7 @@ main(int argc, char **argv)
                              GSS_C_ACCEPT, &acred, NULL, NULL);
     check_gsserr("gss_acquire_cred(aname)", major, minor);
 
-    establish_contexts(&mech_iakerb, icred, acred, tname, 0, &ictx, &actx,
-                       NULL, NULL, NULL);
+    establish_iakerb(icred, acred, tname, &ictx, &actx);
 
     (void)gss_release_name(&minor, &iname);
     (void)gss_release_name(&minor, &tname);
