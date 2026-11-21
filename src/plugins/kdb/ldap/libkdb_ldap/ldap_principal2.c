@@ -1710,8 +1710,13 @@ decode_keys(struct berval **bvalues, ldap_seqof_key_data **keysets_out,
         if (err)
             goto cleanup;
 
-        if (total_keys_out)
+        if (total_keys_out) {
+            if (keysets[ki].n_key_data > INT16_MAX - total_keys) {
+                err = EOVERFLOW;
+                goto cleanup;
+            }
             total_keys += keysets[ki].n_key_data;
+        }
         ki++;
     }
 
