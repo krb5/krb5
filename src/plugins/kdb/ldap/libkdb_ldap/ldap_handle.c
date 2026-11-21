@@ -107,7 +107,9 @@ krb5_ldap_cleanup_handles(krb5_ldap_server_info *ldap_server_info)
     while (ldap_server_info->ldap_server_handles != NULL) {
         ldap_server_handle = ldap_server_info->ldap_server_handles;
         ldap_server_info->ldap_server_handles = ldap_server_handle->next;
-        /* ldap_unbind_s(ldap_server_handle); */
+        /* A failed rebind can leave a handle without a connection. */
+        if (ldap_server_handle->ldap_handle != NULL)
+            ldap_unbind_ext_s(ldap_server_handle->ldap_handle, NULL, NULL);
         free (ldap_server_handle);
         ldap_server_handle = NULL;
     }
