@@ -191,7 +191,7 @@ krb5int_process_tgs_reply(krb5_context context,
                                             &err_reply, NULL, NULL);
         if (retval)
             goto cleanup;
-        retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
+        retval = k5_protocol_err_to_code(err_reply->error);
         if (err_reply->text.length > 0) {
             switch (err_reply->error) {
             case KRB_ERR_GENERIC:

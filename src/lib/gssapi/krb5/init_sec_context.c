@@ -776,10 +776,7 @@ mutual_auth(
             code = krb5_rd_error(context, &body, &krb_error);
             if (code)
                 goto fail;
-            if (krb_error->error)
-                code = (krb5_error_code)krb_error->error + ERROR_TABLE_BASE_krb5;
-            else
-                code = 0;
+            code = k5_protocol_err_to_code(krb_error->error);
             krb5_free_error(context, krb_error);
             goto fail;
         } else if (toktype != KG_TOK_CTX_AP_REP) {

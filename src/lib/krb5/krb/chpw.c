@@ -90,7 +90,7 @@ get_error_edata(krb5_context context, const krb5_data *error_packet,
 
     if (krberror->e_data.data == NULL) {
         /* Return a krb5 error code based on the error number. */
-        ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code)krberror->error;
+        ret = k5_protocol_err_to_code(krberror->error);
         goto cleanup;
     }
 

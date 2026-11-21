@@ -53,7 +53,7 @@ get_from_error(krb5_context context, krb5_data *pkt,
     if (ret)
         goto cleanup;
     if (error->error != KDC_ERR_PREAUTH_REQUIRED) {
-        ret = ERROR_TABLE_BASE_krb5 + error->error;
+        ret = k5_protocol_err_to_code(error->error);
         goto cleanup;
     }
     ret = k5_get_etype_info(context, icc, padata);
