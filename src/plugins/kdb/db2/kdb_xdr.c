@@ -80,6 +80,16 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     if ((retval = krb5_unparse_name(context, entry->princ, &unparse_princ)))
         return(retval);
 
+    /* The base part of the record occupies KRB5_KDB_V1_BASE_LENGTH bytes.  We
+     * size the buffer from entry->len, so reject a shorter length before we
+     * allocate and write, rather than overrunning the allocation. */
+    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        k5_setmsg(context, retval, _("KDB entry length must be %d"),
+                  KRB5_KDB_V1_BASE_LENGTH);
+        goto epc_error;
+    }
+
     unparse_princ_size = strlen(unparse_princ) + 1;
     content->length += unparse_princ_size;
     content->length += 2;
@@ -160,12 +170,6 @@ krb5_encode_princ_entry(krb5_context context, krb5_data *content,
     /* # key_data structures */
     krb5_kdb_encode_int16(entry->n_key_data, nextloc);
     nextloc += 2;
-
-    if (entry->len != KRB5_KDB_V1_BASE_LENGTH) {
-        retval = KRB5_KDB_TRUNCATED_RECORD;
-        k5_setmsg(context, retval, _("KDB entry length must be at least %d"),
-                  KRB5_KDB_V1_BASE_LENGTH);
-    }
 
     /* Any extra data that this version doesn't understand. */
     if (entry->e_length) {
