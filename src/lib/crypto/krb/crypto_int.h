@@ -593,17 +593,37 @@ find_cksumtype(krb5_cksumtype ctype)
     return &krb5int_cksumtypes_list[i];
 }
 
-/* Verify that a key is appropriate for a checksum type. */
+/* Return an error if ctp has an inappropriate type for key or usage, or if key
+ * has an invalid enctype or length. */
 static inline krb5_error_code
-verify_key(const struct krb5_cksumtypes *ctp, krb5_key key)
+verify_cksumtype_and_key(const struct krb5_cksumtypes *ctp, krb5_key key,
+                         krb5_keyusage usage)
 {
-    const struct krb5_keytypes *ktp;
+    const struct krb5_keytypes *ktp = NULL;
 
-    ktp = key ? find_enctype(key->keyblock.enctype) : NULL;
-    if (ctp->enc != NULL && (!ktp || ktp->enc != ctp->enc))
+    if (ctp->flags & CKSUM_UNKEYED) {
+        /* Most standard key usages require a keyed checksum. */
+        if (usage >= 1 && usage <= 511 &&
+            usage != KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST &&
+            usage != KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY)
+            return KRB5_BAD_ENCTYPE;
+    }
+
+    if (key != NULL) {
+        /* Verify that we hae an entry for the key's enctype and that the key
+         * has the expected length for its enctype. */
+        ktp = find_enctype(key->keyblock.enctype);
+        if (ktp == NULL)
+            return KRB5_BAD_ENCTYPE;
+        if (key->keyblock.length != ktp->enc->keylength)
+            return KRB5_BAD_KEYSIZE;
+    }
+
+    /* If the checksum type uses an encryption algorithm, verify that the key
+     * is present and that its enctype uses the same algorithm. */
+    if (ctp->enc != NULL && (ktp == NULL || ktp->enc != ctp->enc))
         return KRB5_BAD_ENCTYPE;
-    if (key && (!ktp || key->keyblock.length != ktp->enc->keylength))
-        return KRB5_BAD_KEYSIZE;
+
     return 0;
 }
 

@@ -54,8 +54,8 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
     if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
 
-    ret = verify_key(ctp, key);
-    if (ret != 0)
+    ret = verify_cksumtype_and_key(ctp, key, usage);
+    if (ret)
         return ret;
 
     /* If there's actually a verify function, call it. */
