@@ -33,7 +33,7 @@ static void
 usage(void)
 {
     fprintf(stderr,
-            "Usage: t_credstore [-sabi] principal [{key value} ...]\n");
+            "Usage: t_credstore [-sabirp] principal [{key value} ...]\n");
     exit(1);
 }
 
@@ -48,7 +48,7 @@ main(int argc, char *argv[])
     gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
     gss_ctx_id_t ictx = GSS_C_NO_CONTEXT, actx = GSS_C_NO_CONTEXT;
     gss_buffer_desc itok, atok;
-    krb5_boolean store_creds = FALSE, replay = FALSE;
+    krb5_boolean store_creds = FALSE, replay = FALSE, add_prompter = FALSE;
     char opt;
 
     /* Parse options. */
@@ -64,7 +64,9 @@ main(int argc, char *argv[])
             cred_usage = GSS_C_BOTH;
         else if (opt == 'i')
             cred_usage = GSS_C_INITIATE;
-        else
+        else if (opt == 'p')
+            add_prompter = TRUE;
+	else
             usage();
     }
 
@@ -76,7 +78,8 @@ main(int argc, char *argv[])
     argv++;
 
     /* Put any remaining arguments into the store. */
-    store.elements = calloc(argc, sizeof(struct gss_key_value_element_struct));
+    store.elements = calloc(argc + (add_prompter ? 2 : 0),
+                            sizeof(struct gss_key_value_element_struct));
     if (!store.elements)
         errout("OOM");
     store.count = 0;
@@ -102,6 +105,13 @@ main(int argc, char *argv[])
         gss_release_cred(&minor, &cred);
     }
 
+    if (add_prompter) {
+        store.elements[store.count].key = "prompter";
+        store.elements[store.count].value = (const char *) krb5_prompter_posix;
+        store.elements[store.count + 1].key = "prompter_data";
+        store.elements[store.count + 1].value = NULL;
+        store.count += 2;
+    }
     /* Try to acquire creds from store. */
     major = gss_acquire_cred_from(&minor, name, 0, mechs, cred_usage,
                                   &store, &cred, NULL, NULL);
