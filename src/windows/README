@@ -102,6 +102,10 @@ Run the following commands in a Visual Studio command prompt:
  9) cd windows\installer\wix            # Go to the installer source
 10) nmake [NODEBUG=1]                   # Build the installer
 
+The build also creates krb5.pc, mit-krb5.pc, krb5-gssapi.pc, and
+mit-krb5-gssapi.pc in the build-tools directory.  The install target
+copies these files to the lib\pkgconfig directory below KRB_INSTALL_DIR.
+
 Step 1 may be skipped if uicc is already in the command-line path (try
 running "uicc" to see if you get a usage message or a not-found
 error), or if you are not building the graphical ticket manager.
