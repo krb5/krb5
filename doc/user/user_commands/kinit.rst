@@ -209,6 +209,43 @@ ENVIRONMENT
 See :ref:`kerberos(7)` for a description of Kerberos environment
 variables.
 
+Debugging Kerberos authentication
+---------------------------------
+
+When troubleshooting authentication issues with kinit, it can be useful to
+enable Kerberos library tracing and verify configuration settings.
+
+Enable trace logs::
+
+    export KRB5_TRACE=/dev/stderr
+    kinit user@REALM
+
+This will display detailed information about the Kerberos exchange,
+including KDC requests, pre-authentication methods, and encryption types.
+
+Common issues:
+
+* Clock skew: Kerberos is sensitive to time differences. Ensure system time
+  is synchronized (e.g., via NTP or chrony).
+
+* Incorrect realm or KDC: Verify the ``[realms]`` section in ``krb5.conf``.
+
+* DNS resolution: Ensure that the KDC hostname resolves correctly.
+
+* Encryption types: Some environments disable weak ciphers. Verify that both
+  client and KDC support a common enctype.
+
+* Credential cache issues: Remove old tickets::
+
+      kdestroy
+
+      Then retry authentication.
+
+Environment variables:
+
+* ``KRB5_CONFIG``: Path to krb5.conf
+* ``KRB5_TRACE``: Enables verbose tracing output
+* ``KRB5CCNAME``: Credential cache location
 
 FILES
 -----
