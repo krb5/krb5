@@ -283,6 +283,7 @@ main(void)
     krb5_pa_data **e_data;
     const char *status;
     int count;
+    krb5_int16 save_len;
 
     CHECK(krb5_init_context_profile(NULL, KRB5_INIT_CONTEXT_KDC, &ctx));
 
@@ -390,6 +391,15 @@ main(void)
      * KDB_TL_USER_INFO tl-data. */
     CHECK(krb5_db_delete_principal(ctx, &sample_princ));
     CHECK(krb5_db_put_principal(ctx, ent));
+
+    /* Check that an entry length below the base record length is ignored
+     * rather than used to size the DB2 encoder's output buffer.  (Built with
+     * asan, an encoder that trusts the field overruns its allocation here.) */
+    save_len = ent->len;
+    ent->len = 1;
+    ent->mask = KADM5_KEY_DATA;
+    CHECK(krb5_db_put_principal(ctx, ent));
+    ent->len = save_len;
 
     /* Check that a zero-length db_args tl-data value is rejected. */
     CHECK(krb5_dbe_update_tl_data(ctx, ent, &tl_empty_db_args));
