@@ -239,6 +239,7 @@ if 'mansubs' in tags:
     localstatedir = '``@LOCALSTATEDIR@``'
     runstatedir = '``@RUNSTATEDIR@``'
     sysconfdir = '``@SYSCONFDIR@``'
+    vendordir = '``@VENDORDIR@``'
     ccache = '``@CCNAME@``'
     keytab = '``@KTNAME@``'
     ckeytab = '``@CKTNAME@``'
@@ -253,6 +254,7 @@ else:
     localstatedir = ':ref:`LOCALSTATEDIR <paths>`'
     runstatedir = ':ref:`RUNSTATEDIR <paths>`'
     sysconfdir = ':ref:`SYSCONFDIR <paths>`'
+    vendordir = ':ref:`VENDORDIR <paths>`'
     ccache = ':ref:`DEFCCNAME <paths>`'
     keytab = ':ref:`DEFKTNAME <paths>`'
     ckeytab = ':ref:`DEFCKTNAME <paths>`'
@@ -278,8 +280,9 @@ else:
     rst_epilog += '.. |keytab| replace:: %s\n' % keytab
     rst_epilog += '.. |ckeytab| replace:: %s\n' % ckeytab
     rst_epilog += '.. |pkcs11_modname| replace:: %s\n' % pkcs11_modname
+    rst_epilog += '.. |vendorkrb5conf| replace:: %s/krb5.conf\n' % vendordir
+    rst_epilog += '.. |krb5conf| replace:: %s/krb5.conf\n' % sysconfdir
     rst_epilog += '''
-.. |krb5conf| replace:: ``/etc/krb5.conf``
 .. |defkeysalts| replace:: ``aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal``
 .. |defetypes| replace:: ``aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 aes256-cts-hmac-sha384-192 aes128-cts-hmac-sha256-128 des3-cbc-sha1 arcfour-hmac-md5 camellia256-cts-cmac camellia128-cts-cmac``
 .. |defmkey| replace:: ``aes256-cts-hmac-sha1-96``
