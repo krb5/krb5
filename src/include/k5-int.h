@@ -291,6 +291,7 @@ typedef unsigned char   u_char;
 #define KRB5_CONF_QUALIFY_SHORTNAME            "qualify_shortname"
 #define KRB5_CONF_RDNS                         "rdns"
 #define KRB5_CONF_REALMS                       "realms"
+#define KRB5_CONF_REALM_ALIASES                "realm_aliases"
 #define KRB5_CONF_REALM_TRY_DOMAINS            "realm_try_domains"
 #define KRB5_CONF_REJECT_BAD_TRANSIT           "reject_bad_transit"
 #define KRB5_CONF_RENEW_LIFETIME               "renew_lifetime"
