@@ -110,10 +110,7 @@ iakerb_rd_error(krb5_context context, const krb5_data *enc_err)
     if (ret)
         return ret;
 
-    if (error->error > 0 && error->error <= KRB_ERR_MAX)
-        ret = error->error + ERROR_TABLE_BASE_krb5;
-    else
-        ret = KRB5KRB_ERR_GENERIC;
+    ret = k5_protocol_err_to_code(error->error);
     krb5_free_error(context, error);
     return ret;
 }

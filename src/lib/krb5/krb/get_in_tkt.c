@@ -1419,7 +1419,7 @@ init_creds_step_request(krb5_context context,
                                    &ctx->request->padata);
         if (code) {
             krb5_clear_error_message(context);
-            code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
+            code = k5_protocol_err_to_code(ctx->err_reply->error);
         }
     }
     /* Don't continue after a keyboard interrupt. */
@@ -1852,7 +1852,7 @@ init_creds_step_reply(krb5_context context,
                 code = 0;
             } else {
                 /* error + no hints (or no preauth mech) = give up */
-                code = (krb5_error_code)reply_code + ERROR_TABLE_BASE_krb5;
+                code = k5_protocol_err_to_code(reply_code);
             }
         }
 

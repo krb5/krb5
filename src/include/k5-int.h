@@ -422,6 +422,21 @@ typedef unsigned char   u_char;
 #define KRB_ERR_MAX 127 /* err table base max offset for protocol err codes */
 
 /*
+ * Convert the error-code field of a received KRB-ERROR message to a com_err
+ * code.  Protocol error numbers occupy only the first KRB_ERR_MAX + 1 offsets
+ * of the krb5 error table, so map anything outside that range to
+ * KRB5KRB_ERR_GENERIC instead of naming an unrelated internal code (0, meaning
+ * success, among them).
+ */
+static inline krb5_error_code
+k5_protocol_err_to_code(krb5_ui_4 protocol_err)
+{
+    if (protocol_err == 0 || protocol_err > KRB_ERR_MAX)
+        return KRB5KRB_ERR_GENERIC;
+    return ERROR_TABLE_BASE_krb5 + protocol_err;
+}
+
+/*
  * A null-terminated array of this structure is returned by the KDC as
  * the data part of the ETYPE_INFO preauth type.  It informs the
  * client which encryption types are supported.
