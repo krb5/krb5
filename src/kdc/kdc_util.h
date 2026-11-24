@@ -79,7 +79,7 @@ get_local_tgt(krb5_context context, const krb5_data *realm,
 
 krb5_error_code
 validate_as_request (kdc_realm_t *, krb5_kdc_req *, krb5_db_entry *,
-                     krb5_db_entry *, krb5_timestamp,
+                     krb5_db_entry *, krb5_timestamp, const krb5_kdb_armor *,
                      const char **, krb5_pa_data ***);
 
 krb5_error_code
@@ -97,9 +97,9 @@ check_tgs_policy(kdc_realm_t *realm, krb5_kdc_req *request,
                  krb5_db_entry *server, krb5_ticket *ticket,
                  krb5_pac pac, const krb5_ticket *stkt, krb5_pac stkt_pac,
                  krb5_principal stkt_pac_client, krb5_db_entry *stkt_server,
-                 krb5_timestamp kdc_time, krb5_boolean is_crossrealm,
-                 krb5_boolean is_referral, const char **status,
-                 krb5_pa_data ***e_data);
+                 krb5_timestamp kdc_time, const krb5_kdb_armor *armor,
+                 krb5_boolean is_crossrealm, krb5_boolean is_referral,
+                 const char **status, krb5_pa_data ***e_data);
 
 krb5_flags
 get_ticket_flags(krb5_flags reqflags, krb5_db_entry *client,
@@ -239,7 +239,7 @@ handle_authdata(kdc_realm_t *realm, unsigned int flags, krb5_db_entry *client,
                 krb5_data *req_pkt, krb5_kdc_req *request,
                 krb5_const_principal altcprinc, krb5_pac subject_pac,
                 krb5_enc_tkt_part *enc_tkt_request,
-                krb5_data ***auth_indicators,
+                const krb5_kdb_armor *armor, krb5_data ***auth_indicators,
                 krb5_enc_tkt_part *enc_tkt_reply);
 
 /* replay.c */

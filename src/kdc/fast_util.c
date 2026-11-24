@@ -32,8 +32,124 @@
 /* Let cookies be valid for ten minutes. */
 #define COOKIE_LIFETIME 600
 
+static void
+free_armor(krb5_context context, krb5_kdb_armor *armor)
+{
+    if (armor == NULL)
+        return;
+    krb5_free_ticket(context, (krb5_ticket *)armor->ticket);
+    krb5_pac_free(context, armor->pac);
+    krb5_db_free_principal(context, armor->client);
+    krb5_db_free_principal(context, armor->krbtgt);
+    free(armor);
+}
+
+/*
+ * Look up the client of an armor ticket and check that it may obtain tickets,
+ * as the KDC checks the client of an AS request.  Anonymous armor has no
+ * entry, and neither may cross-realm armor.
+ */
+static krb5_error_code
+get_armor_client(krb5_context context, const krb5_ticket *ticket,
+                 krb5_db_entry **client_out)
+{
+    krb5_error_code ret;
+    krb5_principal cprinc = ticket->enc_part2->client;
+    krb5_db_entry *client = NULL;
+    krb5_boolean cross_realm = is_cross_tgs_principal(ticket->server);
+    unsigned int flags = KRB5_KDB_FLAG_CLIENT | KRB5_KDB_FLAG_ARMOR_PRINCIPAL;
+    krb5_timestamp now;
+
+    *client_out = NULL;
+
+    if (krb5_principal_compare_any_realm(context, cprinc,
+                                         krb5_anonymous_principal()))
+        return 0;
+
+    if (cross_realm)
+        flags |= KRB5_KDB_FLAG_CROSS_REALM;
+    ret = krb5_db_get_principal(context, cprinc, flags, &client);
+    if (ret == KRB5_KDB_NOENTRY && cross_realm)
+        return 0;
+    if (ret == KRB5_KDB_NOENTRY) {
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        k5_setmsg(context, ret, _("FAST armor client not found"));
+        return ret;
+    }
+    if (ret)
+        return ret;
+
+    ret = krb5_timeofday(context, &now);
+    if (ret)
+        goto cleanup;
+    if (client->attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
+        ret = KRB5KDC_ERR_CLIENT_REVOKED;
+        k5_setmsg(context, ret, _("FAST armor client is locked out"));
+        goto cleanup;
+    }
+    if (client->expiration && ts_after(now, client->expiration)) {
+        ret = KRB5KDC_ERR_NAME_EXP;
+        k5_setmsg(context, ret, _("FAST armor client has expired"));
+        goto cleanup;
+    }
+
+    *client_out = client;
+    client = NULL;
+
+cleanup:
+    krb5_db_free_principal(context, client);
+    return ret;
+}
+
+/*
+ * Create the armor context for an armor ticket: look up the entry used to
+ * decrypt it, verify its PAC, and look up and check its client.  On success,
+ * take ownership of ticket.  The armor ticket is a local or cross-realm TGT,
+ * so as for the header ticket of a TGS request, only the PAC server signature
+ * is checked.
+ */
+static krb5_error_code
+make_armor(krb5_context context, krb5_ticket *ticket,
+           krb5_boolean explicit_tgs, krb5_kdb_armor **armor_out)
+{
+    krb5_error_code ret;
+    krb5_kdb_armor *armor;
+    krb5_keyblock *krbtgt_key = NULL;
+
+    *armor_out = NULL;
+    armor = k5alloc(sizeof(*armor), &ret);
+    if (armor == NULL)
+        return ret;
+
+    ret = kdc_get_server_key(context, ticket, 0, TRUE, &armor->krbtgt,
+                             &krbtgt_key, NULL);
+    if (ret)
+        goto cleanup;
+    ret = get_verified_pac(context, ticket->enc_part2, armor->krbtgt,
+                           krbtgt_key, NULL, NULL, &armor->pac);
+    if (ret) {
+        k5_prependmsg(context, ret,
+                      _("while verifying the PAC of the FAST armor ticket"));
+        goto cleanup;
+    }
+    ret = get_armor_client(context, ticket, &armor->client);
+    if (ret)
+        goto cleanup;
+
+    armor->ticket = ticket;
+    armor->explicit_tgs = explicit_tgs;
+    *armor_out = armor;
+    armor = NULL;
+
+cleanup:
+    krb5_free_keyblock(context, krbtgt_key);
+    free_armor(context, armor);
+    return ret;
+}
+
 static krb5_error_code armor_ap_request
-(struct kdc_request_state *state, krb5_fast_armor *armor)
+(struct kdc_request_state *state, krb5_fast_armor *armor,
+ krb5_boolean explicit_tgs)
 {
     krb5_error_code retval = 0;
     krb5_auth_context authcontext = NULL;
@@ -80,6 +196,11 @@ static krb5_error_code armor_ap_request
                                       subkey, "subkeyarmor",
                                       ticket->enc_part2->session, "ticketarmor",
                                       &state->armor_key);
+    if (retval == 0) {
+        retval = make_armor(context, ticket, explicit_tgs, &state->armor);
+        if (retval == 0)
+            ticket = NULL;
+    }
     if (ticket)
         krb5_free_ticket(context, ticket);
     if (subkey)
@@ -87,6 +208,30 @@ static krb5_error_code armor_ap_request
     if (authcontext)
         krb5_auth_con_free(context, authcontext);
     return retval;
+}
+
+/*
+ * Combine the armor key from an explicit AP-REQ armor in a TGS request with
+ * the TGS request subkey, as the client does in krb5int_fast_tgs_armor().
+ */
+static krb5_error_code
+explicit_tgs_armor(struct kdc_request_state *state, krb5_keyblock *tgs_subkey)
+{
+    krb5_context context = state->realm_data->realm_context;
+    krb5_error_code ret;
+    krb5_keyblock *explicit_key = state->armor_key;
+
+    if (tgs_subkey == NULL) {
+        ret = KRB5KDC_ERR_PREAUTH_FAILED;
+        k5_setmsg(context, ret,
+                  _("Explicit FAST armor in a TGS request without a subkey"));
+        return ret;
+    }
+    state->armor_key = NULL;
+    ret = krb5_c_fx_cf2_simple(context, explicit_key, "explicitarmor",
+                               tgs_subkey, "tgsarmor", &state->armor_key);
+    krb5_free_keyblock(context, explicit_key);
+    return ret;
 }
 
 static krb5_error_code
@@ -156,13 +301,11 @@ kdc_find_fast(krb5_kdc_req **requestptr,
         if (retval == 0 &&fast_armored_req->armor) {
             switch (fast_armored_req->armor->armor_type) {
             case KRB5_FAST_ARMOR_AP_REQUEST:
-                if (tgs_subkey) {
-                    retval = KRB5KDC_ERR_PREAUTH_FAILED;
-                    k5_setmsg(context, retval,
-                              _("Ap-request armor not permitted with TGS"));
-                    break;
-                }
-                retval = armor_ap_request(state, fast_armored_req->armor);
+                /* In a TGS request this is explicit armor. */
+                retval = armor_ap_request(state, fast_armored_req->armor,
+                                          tgs_session != NULL);
+                if (retval == 0 && tgs_session != NULL)
+                    retval = explicit_tgs_armor(state, tgs_subkey);
                 break;
             default:
                 k5_setmsg(context, KRB5KDC_ERR_PREAUTH_FAILED,
@@ -268,6 +411,7 @@ kdc_free_rstate (struct kdc_request_state *s)
         krb5_free_keyblock(s->realm_data->realm_context, s->armor_key);
     if (s->strengthen_key)
         krb5_free_keyblock(s->realm_data->realm_context, s->strengthen_key);
+    free_armor(s->realm_data->realm_context, s->armor);
     k5_zapfree_pa_data(s->in_cookie_padata);
     k5_zapfree_pa_data(s->out_cookie_padata);
     free(s);

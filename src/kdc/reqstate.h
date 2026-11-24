@@ -34,6 +34,7 @@
 #define REQSTATE_H
 
 #include "realm_data.h"
+#include "kdb.h"
 
 /* Request state */
 
@@ -44,6 +45,9 @@ struct kdc_request_state {
     krb5_pa_data **out_cookie_padata;
     krb5_int32 fast_options;
     krb5_int32 fast_internal_flags;
+    /* The AP-REQ FAST armor of the request (AS armor or explicit TGS armor),
+     * owned by the request state; null if there is none. */
+    krb5_kdb_armor *armor;
     kdc_realm_t *realm_data;
 };
 

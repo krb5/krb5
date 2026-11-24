@@ -122,6 +122,8 @@
 #define KRB5_KDB_FLAG_CROSS_REALM               0x00001000
 /* Issuing referral */
 #define KRB5_KDB_FLAG_ISSUING_REFERRAL          0x00004000
+/* Client of a FAST armor ticket */
+#define KRB5_KDB_FLAG_ARMOR_PRINCIPAL           0x00008000
 
 
 #define KRB5_KDB_FLAGS_S4U                      ( KRB5_KDB_FLAG_PROTOCOL_TRANSITION | \
@@ -211,6 +213,30 @@ typedef struct _krb5_db_entry_new {
     /* key_data must be sorted by kvno in descending order. */
     krb5_key_data       * key_data;             /* Array */
 } krb5_db_entry;
+
+/*
+ * The FAST armor of a request, passed to the KDB methods added in DAL minor
+ * version 1. It describes the AP-REQ armor of an AS request, or the explicit
+ * armor of a TGS request (typically the TGT of the device the client is
+ * using). The KDC owns all fields; modules must not modify or free them.
+ * Fields may be added at the end in later DAL versions.
+ */
+typedef struct _krb5_kdb_armor {
+    /* The decrypted armor ticket, a local or cross-realm TGT. */
+    const krb5_ticket *ticket;
+    /* The armor ticket's PAC with a verified server signature, or NULL if it
+     * has none. For a cross-realm armor ticket it has not been filtered. */
+    krb5_pac pac;
+    /* The entry for the armor ticket client, looked up with
+     * KRB5_KDB_FLAG_CLIENT | KRB5_KDB_FLAG_ARMOR_PRINCIPAL and checked as for
+     * the client of an AS request; NULL for anonymous armor, or for
+     * cross-realm armor whose client has no local entry. */
+    krb5_db_entry *client;
+    /* The krbtgt entry used to decrypt the armor ticket. */
+    krb5_db_entry *krbtgt;
+    /* True for explicit armor in a TGS request. */
+    krb5_boolean explicit_tgs;
+} krb5_kdb_armor;
 
 typedef struct _osa_policy_ent_t {
     int               version;
@@ -681,6 +707,15 @@ krb5_error_code krb5_db_check_policy_as(krb5_context kcontext,
                                         const char **status,
                                         krb5_pa_data ***e_data);
 
+krb5_error_code krb5_db_check_policy_as_armor(krb5_context kcontext,
+                                              krb5_kdc_req *request,
+                                              krb5_db_entry *client,
+                                              krb5_db_entry *server,
+                                              krb5_timestamp kdc_time,
+                                              const krb5_kdb_armor *armor,
+                                              const char **status,
+                                              krb5_pa_data ***e_data);
+
 krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          krb5_kdc_req *request,
                                          krb5_db_entry *server,
@@ -713,6 +748,14 @@ krb5_error_code krb5_db_allowed_to_delegate_from(krb5_context context,
                                                  krb5_pac server_pac,
                                                  const krb5_db_entry *proxy);
 
+krb5_error_code
+krb5_db_allowed_to_delegate_from_armor(krb5_context context,
+                                       krb5_const_principal client,
+                                       krb5_const_principal server,
+                                       krb5_pac server_pac,
+                                       const krb5_db_entry *proxy,
+                                       const krb5_kdb_armor *armor);
+
 /**
  * Sort an array of @a krb5_key_data keys in descending order by their kvno.
  * Key data order within a kvno is preserved.
@@ -732,6 +775,15 @@ krb5_db_issue_pac(krb5_context context, unsigned int flags,
                   krb5_db_entry *server, krb5_db_entry *krbtgt,
                   krb5_timestamp authtime, krb5_pac old_pac, krb5_pac new_pac,
                   krb5_data ***auth_indicators);
+
+krb5_error_code
+krb5_db_issue_pac_armor(krb5_context context, unsigned int flags,
+                        krb5_db_entry *client,
+                        krb5_keyblock *replaced_reply_key,
+                        krb5_db_entry *server, krb5_db_entry *krbtgt,
+                        krb5_timestamp authtime, krb5_pac old_pac,
+                        krb5_pac new_pac, krb5_data ***auth_indicators,
+                        const krb5_kdb_armor *armor);
 
 /* default functions. Should not be directly called */
 /*
@@ -1066,6 +1118,15 @@ typedef struct _kdb_vftabl {
      *     entry during a TGS request, if the requested server principal is not
      *     part of the realm being served, and a referral or alternate TGT will
      *     be issued instead.
+     *
+     * KRB5_KDB_FLAG_ARMOR_PRINCIPAL: Set by the KDC, together with
+     *     KRB5_KDB_FLAG_CLIENT, when looking up the client of a FAST armor
+     *     ticket (DAL minor version 1).  The entry is only used to describe
+     *     the requesting device, so a module need not apply the policies it
+     *     would apply to the client of the request.  KRB5_KDB_FLAG_CROSS_REALM
+     *     is also set if the armor ticket is a cross-realm TGT; the module may
+     *     then return KRB5_KDB_NOENTRY to indicate that the device has no
+     *     local entry.
      *
      * A module may return an in-realm alias by setting (*entry)->princ to the
      * canonical name.  The KDC will decide based on the request whether to use
@@ -1482,6 +1543,57 @@ typedef struct _kdb_vftabl {
                                  krb5_data ***auth_indicators);
 
     /* End of minor version 0 for major version 9. */
+
+    /*
+     * The following optional methods are variants of earlier methods which
+     * also receive the FAST armor of the request (see krb5_kdb_armor), or NULL
+     * if the request has no AP-REQ armor. If a module sets one of them, the
+     * KDC calls it instead of the earlier method.
+     */
+
+    /*
+     * Optional: like issue_pac, with the request's armor. For a TGS request
+     * with explicit armor, a module can use armor->pac to produce
+     * PAC_DEVICE_INFO and PAC_DEVICE_CLAIMS buffers (compound identity). If
+     * armor->krbtgt is an incoming cross-realm TGS entry, the fields of
+     * armor->pac should be filtered as described for old_pac.
+     */
+    krb5_error_code (*issue_pac_armor)(krb5_context context,
+                                       unsigned int flags,
+                                       krb5_db_entry *client,
+                                       krb5_keyblock *replaced_reply_key,
+                                       krb5_db_entry *server,
+                                       krb5_db_entry *signing_krbtgt,
+                                       krb5_timestamp authtime,
+                                       krb5_pac old_pac, krb5_pac new_pac,
+                                       krb5_data ***auth_indicators,
+                                       const krb5_kdb_armor *armor);
+
+    /*
+     * Optional: like check_policy_as, with the request's armor, for example
+     * to restrict which devices a client may authenticate from. armor is
+     * NULL when the KDC checks the client policy of an S4U2Self request.
+     */
+    krb5_error_code (*check_policy_as_armor)(krb5_context kcontext,
+                                             krb5_kdc_req *request,
+                                             krb5_db_entry *client,
+                                             krb5_db_entry *server,
+                                             krb5_timestamp kdc_time,
+                                             const krb5_kdb_armor *armor,
+                                             const char **status,
+                                             krb5_pa_data ***e_data);
+
+    /*
+     * Optional: like allowed_to_delegate_from, with the explicit armor of the
+     * S4U2Proxy request, so that resource-based delegation policy can depend
+     * on the device.
+     */
+    krb5_error_code (*allowed_to_delegate_from_armor)(
+        krb5_context context, krb5_const_principal client,
+        krb5_const_principal server, krb5_pac server_pac,
+        const krb5_db_entry *proxy, const krb5_kdb_armor *armor);
+
+    /* End of minor version 1 for major version 9. */
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */
