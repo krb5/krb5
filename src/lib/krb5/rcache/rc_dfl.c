@@ -58,7 +58,7 @@ open_file(krb5_context context, int *fd_out)
 
     dir = getenv("KRB5RCACHEDIR");
     if (dir != NULL) {
-        if (asprintf(&fname, "%s\\krb5.rcache2") < 0)
+        if (asprintf(&fname, "%s\\krb5.rcache2", dir) < 0)
             return ENOMEM;
     } else {
         ret = k5_expand_path_tokens(context, "%{LOCAL_APPDATA}\\krb5.rcache2",
