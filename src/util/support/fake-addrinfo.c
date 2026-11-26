@@ -456,7 +456,7 @@ static void debug_dump_addrinfos (const struct addrinfo *ai)
         ai = ai->ai_next;
         count++;
     }
-    fprintf(stderr, "end addrinfos returned (%d)\n");
+    fprintf(stderr, "end addrinfos returned (%d)\n", count);
 }
 
 #endif
