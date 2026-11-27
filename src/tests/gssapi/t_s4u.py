@@ -143,6 +143,11 @@ out = realm.run(['./t_proxy_step', puser, pservice2])
 if 'proxy-auth: ' + realm.user_princ not in out:
     fail('t_proxy_step basic')
 
+# Verify PA-S4U-X509-USER reply checksum uses raw wire S4UUserID DER.
+mark('S4U2Self raw wire S4UUserID DER checksum verification')
+realm.run(['./t_imp_step', '--raw-der-cksum', realm.user_princ],
+          expected_msg='raw-der-cksum: ok')
+
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
 realm.kinit(realm.user_princ, None, ['-f', '-k', '-c', usercache,

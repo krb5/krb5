@@ -281,6 +281,208 @@ test_raw(const char *user_str, const char *cert_str)
     krb5_free_context(context);
 }
 
+/*
+ * Extract the TGS-REQ authenticator subkey using the TGT session key, mutate
+ * the KDC reply's S4UUserID encoding (extending KerberosFlags to 5 bytes so
+ * re-encoding produces different DER), re-sign the checksum over the wire
+ * S4UUserID bytes, and verify krb5_tkt_creds_step() accepts the valid wire
+ * checksum and rejects a tampered one.
+ */
+static void
+test_raw_der_cksum(const char *user_str)
+{
+    krb5_context context;
+    krb5_ccache ccache;
+    krb5_principal service, user, tgt_princ;
+    krb5_creds in, tgt, out;
+    krb5_tkt_creds_context tcc;
+    krb5_data empty = empty_data(), req = empty_data(), realm = empty_data();
+    krb5_data rep = empty_data(), mod_uid = empty_data();
+    krb5_data *cksum_der = NULL, *mod_rep = NULL, *nofast_req = NULL;
+    krb5_data auth_plain = empty_data();
+    krb5_kdc_req *tgs_req = NULL;
+    krb5_ap_req *ap_req = NULL;
+    krb5_authenticator *auth = NULL;
+    krb5_kdc_rep *tgs_rep = NULL;
+    krb5_pa_data *pa_ap, *pa_s4u;
+    krb5_pa_s4u_x509_user *rep_s4u = NULL;
+    krb5_checksum new_cksum;
+    unsigned int flags = 0;
+    int use_primary = 0, tamper;
+    uint8_t *p, *uid_start, *buf;
+    size_t uid_len, outer_len, a0_len, total_len, pos, i, j;
+    krb5_error_code code;
+    const uint8_t orig_opts[9] = {
+        0xa4, 0x07, 0x03, 0x05, 0x00, 0x20, 0x00, 0x00, 0x00
+    };
+    const uint8_t ext_opts[10] = {
+        0xa4, 0x08, 0x03, 0x06, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00
+    };
+
+    check(krb5_init_context(&context));
+    check(krb5_cc_default(context, &ccache));
+    check(krb5_cc_get_principal(context, ccache, &service));
+    check(krb5_parse_name(context, user_str, &user));
+    check(krb5_build_principal_ext(context, &tgt_princ,
+                                   service->realm.length, service->realm.data,
+                                   KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                   service->realm.length, service->realm.data,
+                                   0));
+    memset(&in, 0, sizeof(in));
+    in.client = service;
+    in.server = tgt_princ;
+    check(krb5_cc_retrieve_cred(context, ccache, 0, &in, &tgt));
+
+    for (tamper = 0; tamper <= 1; tamper++) {
+        memset(&in, 0, sizeof(in));
+        in.client = in.server = service;
+        check(krb5_tkt_creds_init(context, ccache, &in, 0, &tcc));
+        check(krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL));
+        check(krb5_tkt_creds_step(context, tcc, &empty, &req, &realm, &flags));
+        assert(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE);
+
+        /* Decrypt AP-REQ authenticator from TGS-REQ to get the subkey. */
+        check(decode_krb5_tgs_req(&req, &tgs_req));
+        pa_ap = krb5int_find_pa_data(context, tgs_req->padata,
+                                     KRB5_PADATA_AP_REQ);
+        assert(pa_ap != NULL);
+        {
+            krb5_data ap_data = make_data(pa_ap->contents, pa_ap->length);
+            check(decode_krb5_ap_req(&ap_data, &ap_req));
+        }
+        check(alloc_data(&auth_plain, ap_req->authenticator.ciphertext.length));
+        check(krb5_c_decrypt(context, &tgt.keyblock,
+                             KRB5_KEYUSAGE_TGS_REQ_AUTH, NULL,
+                             &ap_req->authenticator, &auth_plain));
+        check(decode_krb5_authenticator(&auth_plain, &auth));
+        assert(auth->subkey != NULL);
+
+        /* Strip PA-FX-FAST so the KDC returns PA-S4U-X509-USER directly in
+         * TGS-REP padata instead of encrypted inside a FAST response. */
+        for (i = 0, j = 0; tgs_req->padata[i] != NULL; i++) {
+            if (tgs_req->padata[i]->pa_type == KRB5_PADATA_FX_FAST) {
+                free(tgs_req->padata[i]->contents);
+                free(tgs_req->padata[i]);
+            } else {
+                tgs_req->padata[j++] = tgs_req->padata[i];
+            }
+        }
+        tgs_req->padata[j] = NULL;
+        check(encode_krb5_tgs_req(tgs_req, &nofast_req));
+
+        /* Send non-FAST TGS-REQ to KDC and decode the TGS-REP. */
+        check(krb5_sendto_kdc(context, nofast_req, &realm, &rep,
+                              &use_primary, 0));
+        krb5_free_data(context, nofast_req);
+        nofast_req = NULL;
+        check(decode_krb5_tgs_rep(&rep, &tgs_rep));
+        pa_s4u = krb5int_find_pa_data(context, tgs_rep->padata,
+                                      KRB5_PADATA_S4U_X509_USER);
+        assert(pa_s4u != NULL);
+        {
+            krb5_data pa_data = make_data(pa_s4u->contents, pa_s4u->length);
+            check(decode_krb5_pa_s4u_x509_user(&pa_data, &rep_s4u));
+        }
+
+        /* Parse outer SEQUENCE and [0] S4UUserID (short-form lengths). */
+        p = pa_s4u->contents;
+        assert(pa_s4u->length > 6 && p[0] == 0x30 && p[1] < 0x80);
+        assert(p[2] == 0xa0 && p[3] < 0x80);
+        a0_len = p[3];
+        uid_start = p + 4;
+        assert(uid_start[0] == 0x30 && uid_start[1] < 0x80);
+        assert(a0_len >= sizeof(orig_opts));
+        assert(memcmp(uid_start + a0_len - sizeof(orig_opts),
+                      orig_opts, sizeof(orig_opts)) == 0);
+
+        /* Extend [4] KerberosFlags from 4 bytes to 5 bytes (valid RFC 4120
+         * BIT STRING; MIT's encoder always emits 4 bytes). */
+        uid_len = a0_len + 1;
+        check(alloc_data(&mod_uid, uid_len));
+        memcpy(mod_uid.data, uid_start, a0_len - sizeof(orig_opts));
+        ((uint8_t *)mod_uid.data)[1] = uid_start[1] + 1;
+        memcpy(mod_uid.data + a0_len - sizeof(orig_opts),
+               ext_opts, sizeof(ext_opts));
+
+        check(krb5_c_make_checksum(context, rep_s4u->cksum.checksum_type,
+                                   auth->subkey,
+                                   KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY,
+                                   &mod_uid, &new_cksum));
+        if (tamper)
+            ((uint8_t *)mod_uid.data)[uid_len - 1] ^= 0x01;
+
+        check(encode_krb5_checksum(&new_cksum, &cksum_der));
+        assert(uid_len < 0x80 && cksum_der->length < 0x80);
+        outer_len = 2 + uid_len + 2 + cksum_der->length;
+        assert(outer_len < 0x80);
+        total_len = 2 + outer_len;
+        buf = malloc(total_len);
+        assert(buf != NULL);
+        pos = 0;
+        buf[pos++] = 0x30;
+        buf[pos++] = outer_len;
+        buf[pos++] = 0xa0;
+        buf[pos++] = uid_len;
+        memcpy(buf + pos, mod_uid.data, uid_len);
+        pos += uid_len;
+        buf[pos++] = 0xa1;
+        buf[pos++] = cksum_der->length;
+        memcpy(buf + pos, cksum_der->data, cksum_der->length);
+        pos += cksum_der->length;
+        assert(pos == total_len);
+
+        free(pa_s4u->contents);
+        pa_s4u->contents = buf;
+        pa_s4u->length = total_len;
+
+        check(encode_krb5_tgs_rep(tgs_rep, &mod_rep));
+        krb5_free_data_contents(context, &req);
+        krb5_free_data_contents(context, &realm);
+        code = krb5_tkt_creds_step(context, tcc, mod_rep, &req, &realm,
+                                   &flags);
+        if (tamper) {
+            assert(code == KRB5_KDCREP_MODIFIED);
+        } else {
+            check(code);
+            assert(!(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE));
+            check(krb5_tkt_creds_get_creds(context, tcc, &out));
+            assert(krb5_principal_compare(context, out.client, user));
+            krb5_free_cred_contents(context, &out);
+        }
+
+        krb5_tkt_creds_free(context, tcc);
+        krb5_free_checksum_contents(context, &new_cksum);
+        krb5_free_data(context, cksum_der);
+        cksum_der = NULL;
+        krb5_free_data(context, mod_rep);
+        mod_rep = NULL;
+        krb5_free_data_contents(context, &mod_uid);
+        krb5_free_data_contents(context, &auth_plain);
+        krb5_free_data_contents(context, &req);
+        krb5_free_data_contents(context, &realm);
+        krb5_free_data_contents(context, &rep);
+        krb5_free_pa_s4u_x509_user(context, rep_s4u);
+        rep_s4u = NULL;
+        krb5_free_kdc_rep(context, tgs_rep);
+        tgs_rep = NULL;
+        krb5_free_authenticator(context, auth);
+        auth = NULL;
+        krb5_free_ap_req(context, ap_req);
+        ap_req = NULL;
+        krb5_free_kdc_req(context, tgs_req);
+        tgs_req = NULL;
+    }
+
+    printf("raw-der-cksum: ok\n");
+
+    krb5_free_cred_contents(context, &tgt);
+    krb5_free_principal(context, tgt_princ);
+    krb5_free_principal(context, user);
+    krb5_free_principal(context, service);
+    krb5_cc_close(context, ccache);
+    krb5_free_context(context);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -289,6 +491,10 @@ main(int argc, char **argv)
 
     if (argc == 4 && strcmp(argv[1], "--raw") == 0) {
         test_raw(argv[2], argv[3]);
+        return 0;
+    }
+    if (argc == 3 && strcmp(argv[1], "--raw-der-cksum") == 0) {
+        test_raw_der_cksum(argv[2]);
         return 0;
     }
 

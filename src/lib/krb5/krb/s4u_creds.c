@@ -280,7 +280,7 @@ verify_s4u2self_reply(krb5_context context,
     krb5_error_code code;
     krb5_pa_data *rep_s4u_padata, *enc_s4u_padata;
     krb5_pa_s4u_x509_user *rep_s4u_user = NULL;
-    krb5_data data, *datap = NULL;
+    krb5_data data, user_id_der = empty_data();
     krb5_keyusage usage;
     krb5_boolean valid;
     krb5_boolean not_newer;
@@ -312,7 +312,11 @@ verify_s4u2self_reply(krb5_context context,
     data.length = rep_s4u_padata->length;
     data.data = (char *)rep_s4u_padata->contents;
 
-    code = decode_krb5_pa_s4u_x509_user(&data, &rep_s4u_user);
+    /* Decode and preserve the raw S4UUserID DER bytes so checksum verification
+     * succeeds even if the KDC used a non-minimal encoding (e.g. negative
+     * name-type such as KRB5_NT_MS_PRINCIPAL). */
+    code = k5_decode_pa_s4u_x509_user_with_der(&data, &rep_s4u_user,
+                                               &user_id_der);
     if (code != 0)
         goto cleanup;
 
@@ -321,16 +325,12 @@ verify_s4u2self_reply(krb5_context context,
         goto cleanup;
     }
 
-    code = encode_krb5_s4u_userid(&rep_s4u_user->user_id, &datap);
-    if (code != 0)
-        goto cleanup;
-
     if (rep_s4u_user->user_id.options & KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE)
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY;
     else
         usage = KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST;
 
-    code = krb5_c_verify_checksum(context, subkey, usage, datap,
+    code = krb5_c_verify_checksum(context, subkey, usage, &user_id_der,
                                   &rep_s4u_user->cksum, &valid);
     if (code != 0)
         goto cleanup;
@@ -391,7 +391,7 @@ verify_s4u2self_reply(krb5_context context,
 
 cleanup:
     krb5_free_pa_s4u_x509_user(context, rep_s4u_user);
-    krb5_free_data(context, datap);
+    krb5_free_data_contents(context, &user_id_der);
 
     return code;
 }
