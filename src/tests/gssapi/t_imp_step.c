@@ -282,6 +282,164 @@ test_raw(const char *user_str, const char *cert_str)
 }
 
 /*
+ * Test krb5_tkt_creds_set_s4u_ccache(), ccache isolation for S4U2Self and
+ * S4U2Proxy, and mutual exclusion between set_s4u2self and set_s4u2proxy.
+ */
+static void
+test_s4u_ccache(const char *user_str, const char *service2_str)
+{
+    krb5_context context;
+    krb5_ccache imp_cc, s4u_cc;
+    krb5_principal service1, service2, user;
+    krb5_tkt_creds_context tcc;
+    krb5_creds in, out, evidence, probe;
+    krb5_error_code code;
+
+    check(krb5_init_context(&context));
+    check(krb5_cc_default(context, &imp_cc));
+    check(krb5_cc_get_principal(context, imp_cc, &service1));
+    check(krb5_parse_name(context, user_str, &user));
+    check(krb5_parse_name(context, service2_str, &service2));
+    check(krb5_cc_new_unique(context, "MEMORY", NULL, &s4u_cc));
+    check(krb5_cc_initialize(context, s4u_cc, user));
+
+    /* 1. S4U2Self without s4u_ccache must not store into impersonator ccache. */
+    memset(&in, 0, sizeof(in));
+    in.client = in.server = service1;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &evidence));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, evidence.client, user));
+
+    memset(&in, 0, sizeof(in));
+    in.client = user;
+    in.server = service1;
+    code = krb5_cc_retrieve_cred(context, imp_cc, 0, &in, &probe);
+    assert(code == KRB5_CC_NOTFOUND);
+
+    /* 2. Mutual exclusion between set_s4u2self and set_s4u2proxy. */
+    memset(&in, 0, sizeof(in));
+    in.client = in.server = service1;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL));
+    code = krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket);
+    assert(code == EINVAL);
+    krb5_tkt_creds_free(context, tcc);
+
+    memset(&in, 0, sizeof(in));
+    in.client = service1;
+    in.server = service2;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket));
+    code = krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL);
+    assert(code == EINVAL);
+    krb5_tkt_creds_free(context, tcc);
+
+    /* 3. S4U2Self with s4u_ccache stores into s4u_cc and hits cache on reuse. */
+    memset(&in, 0, sizeof(in));
+    in.client = in.server = service1;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL));
+    check(krb5_tkt_creds_set_s4u_ccache(context, tcc, s4u_cc));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    krb5_free_cred_contents(context, &out);
+
+    /* Still absent from impersonator ccache. */
+    memset(&in, 0, sizeof(in));
+    in.client = user;
+    in.server = service1;
+    code = krb5_cc_retrieve_cred(context, imp_cc, 0, &in, &probe);
+    assert(code == KRB5_CC_NOTFOUND);
+
+    /* Cached lookup via KRB5_GC_CACHED succeeds from s4u_cc. */
+    memset(&in, 0, sizeof(in));
+    in.client = in.server = service1;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, KRB5_GC_CACHED, &tcc));
+    check(krb5_tkt_creds_set_s4u2self(context, tcc, user, NULL));
+    check(krb5_tkt_creds_set_s4u_ccache(context, tcc, s4u_cc));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, out.client, user));
+    krb5_free_cred_contents(context, &out);
+
+    /* 4. Pre-populate impersonator ccache with service1 -> service2 ticket. */
+    memset(&in, 0, sizeof(in));
+    in.client = service1;
+    in.server = service2;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, out.client, service1));
+    krb5_free_cred_contents(context, &out);
+
+    /* S4U2Proxy with KRB5_GC_CACHED and no s4u_ccache must not return
+     * service1's own cached service2 ticket. */
+    memset(&in, 0, sizeof(in));
+    in.client = service1;
+    in.server = service2;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, KRB5_GC_CACHED, &tcc));
+    check(krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket));
+    code = krb5_tkt_creds_get(context, tcc);
+    assert(code == KRB5_CC_NOTFOUND);
+    krb5_tkt_creds_free(context, tcc);
+
+    /* S4U2Proxy without s4u_ccache obtains user -> service2 and does not
+     * store it in imp_cc. */
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, out.client, user));
+    assert(data_eq(out.second_ticket, evidence.ticket));
+    krb5_free_cred_contents(context, &out);
+
+    memset(&in, 0, sizeof(in));
+    in.client = user;
+    in.server = service2;
+    code = krb5_cc_retrieve_cred(context, imp_cc, 0, &in, &probe);
+    assert(code == KRB5_CC_NOTFOUND);
+
+    /* S4U2Proxy with s4u_ccache stores into s4u_cc and hits cache on reuse. */
+    memset(&in, 0, sizeof(in));
+    in.client = service1;
+    in.server = service2;
+    check(krb5_tkt_creds_init(context, imp_cc, &in, 0, &tcc));
+    check(krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket));
+    check(krb5_tkt_creds_set_s4u_ccache(context, tcc, s4u_cc));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, out.client, user));
+    krb5_free_cred_contents(context, &out);
+
+    check(krb5_tkt_creds_init(context, imp_cc, &in, KRB5_GC_CACHED, &tcc));
+    check(krb5_tkt_creds_set_s4u2proxy(context, tcc, &evidence.ticket));
+    check(krb5_tkt_creds_set_s4u_ccache(context, tcc, s4u_cc));
+    check(krb5_tkt_creds_get(context, tcc));
+    check(krb5_tkt_creds_get_creds(context, tcc, &out));
+    krb5_tkt_creds_free(context, tcc);
+    assert(krb5_principal_compare(context, out.client, user));
+    krb5_free_cred_contents(context, &out);
+
+    printf("s4u-ccache: ok\n");
+
+    krb5_free_cred_contents(context, &evidence);
+    krb5_cc_destroy(context, s4u_cc);
+    krb5_cc_close(context, imp_cc);
+    krb5_free_principal(context, service1);
+    krb5_free_principal(context, service2);
+    krb5_free_principal(context, user);
+    krb5_free_context(context);
+}
+
+/*
  * Extract the TGS-REQ authenticator subkey using the TGT session key, mutate
  * the KDC reply's S4UUserID encoding (extending KerberosFlags to 5 bytes so
  * re-encoding produces different DER), re-sign the checksum over the wire
@@ -491,6 +649,10 @@ main(int argc, char **argv)
 
     if (argc == 4 && strcmp(argv[1], "--raw") == 0) {
         test_raw(argv[2], argv[3]);
+        return 0;
+    }
+    if (argc == 4 && strcmp(argv[1], "--s4u-ccache") == 0) {
+        test_s4u_ccache(argv[2], argv[3]);
         return 0;
     }
     if (argc == 3 && strcmp(argv[1], "--raw-der-cksum") == 0) {

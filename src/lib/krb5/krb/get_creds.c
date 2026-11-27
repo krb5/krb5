@@ -254,6 +254,10 @@ struct _krb5_tkt_creds_context {
 
     /* S4U2Proxy mode (optional, set by krb5_tkt_creds_set_s4u2proxy). */
     krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
+
+    /* Optional cache for S4U2Self/S4U2Proxy output tickets (not impersonator
+     * TGTs).  Set by krb5_tkt_creds_set_s4u_ccache(). */
+    krb5_ccache s4u_ccache;
 };
 
 /* Convert ticket flags to necessary KDC options */
@@ -629,6 +633,7 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_error_code code;
     krb5_boolean is_s4u = (ctx->s4u_user != NULL ||
                            ctx->s4u2proxy_evidence.length > 0);
+    krb5_ccache store_ccache = is_s4u ? ctx->s4u_ccache : ctx->ccache;
 
     TRACE_TKT_CREDS_COMPLETE(context, ctx->reply_creds->server);
 
@@ -651,9 +656,9 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
             return code;
     }
 
-    if (!(ctx->req_options & KRB5_GC_NO_STORE) && !is_s4u) {
+    if (!(ctx->req_options & KRB5_GC_NO_STORE) && store_ccache != NULL) {
         /* Try to cache the credential. */
-        (void) krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
+        (void) krb5_cc_store_cred(context, store_ccache, ctx->reply_creds);
     }
 
     ctx->state = STATE_COMPLETE;
@@ -1303,15 +1308,29 @@ check_cache(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
     krb5_creds req_in_creds;
+    krb5_boolean is_s4u = (ctx->s4u_user != NULL ||
+                           ctx->s4u2proxy_evidence.length > 0);
+    krb5_ccache lookup_ccache = is_s4u ? ctx->s4u_ccache : ctx->ccache;
+    krb5_flags options = ctx->req_options;
 
     /* Never look up S4U tickets in the impersonator's ccache. */
-    if (ctx->s4u_user != NULL || ctx->s4u2proxy_evidence.length > 0)
+    if (lookup_ccache == NULL)
         return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
 
     /* Check the cache for the originally requested server principal. */
     req_in_creds = *ctx->in_creds;
     req_in_creds.server = ctx->req_server;
-    code = k5_get_cached_cred(context, ctx->req_options, ctx->ccache,
+    if (ctx->s4u_user != NULL) {
+        /* Cannot match in cache without a client name (cert-only S4U2Self). */
+        if (ctx->s4u_user->user_id.user == NULL ||
+            ctx->s4u_user->user_id.user->length == 0)
+            return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
+        req_in_creds.client = ctx->s4u_user->user_id.user;
+    } else if (ctx->s4u2proxy_evidence.length > 0) {
+        options |= KRB5_GC_CONSTRAINED_DELEGATION;
+        req_in_creds.second_ticket = ctx->s4u2proxy_evidence;
+    }
+    code = k5_get_cached_cred(context, options, lookup_ccache,
                               &req_in_creds, &ctx->reply_creds);
     if (code == 0) {
         ctx->state = STATE_COMPLETE;
@@ -1532,6 +1551,16 @@ krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u_ccache(krb5_context context, krb5_tkt_creds_context ctx,
+                              krb5_ccache user_ccache)
+{
+    if (ctx->state != STATE_BEGIN || ctx->s4u_ccache != NULL ||
+        user_ccache == NULL)
+        return EINVAL;
+    return krb5_cc_dup(context, user_ccache, &ctx->s4u_ccache);
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds)
 {
@@ -1578,6 +1607,8 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_data_contents(context, &ctx->s4u_subject_cert);
     krb5_free_data_contents(context, &ctx->s4u_service_realm);
     krb5_free_data_contents(context, &ctx->s4u2proxy_evidence);
+    if (ctx->s4u_ccache != NULL)
+        krb5_cc_close(context, ctx->s4u_ccache);
     free(ctx);
 }
 

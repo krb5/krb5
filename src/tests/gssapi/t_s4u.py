@@ -143,6 +143,12 @@ out = realm.run(['./t_proxy_step', puser, pservice2])
 if 'proxy-auth: ' + realm.user_princ not in out:
     fail('t_proxy_step basic')
 
+# Verify S4U ccache isolation, krb5_tkt_creds_set_s4u_ccache(), and mutual
+# exclusion between set_s4u2self and set_s4u2proxy.
+mark('S4U ccache isolation and krb5_tkt_creds_set_s4u_ccache')
+realm.run(['./t_imp_step', '--s4u-ccache', realm.user_princ, service2],
+          expected_msg='s4u-ccache: ok')
+
 # Verify PA-S4U-X509-USER reply checksum uses raw wire S4UUserID DER.
 mark('S4U2Self raw wire S4UUserID DER checksum verification')
 realm.run(['./t_imp_step', '--raw-der-cksum', realm.user_princ],

@@ -7587,11 +7587,10 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
  * krb5_tkt_creds_get().  The input credentials must specify the service
  * principal as both client and server, and the cache must contain its TGT.
  * The user and certificate are copied.  At least one must be specified.
- * For certificate-only requests, if the service realm rejects the certificate
- * with KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN, an AS exchange discovers the user's
- * realm and retries cross-realm S4U2Self.
- * Cached service tickets are not used for these requests.  KRB5_GC_CACHED
- * causes the acquisition to fail with KRB5_CC_NOTFOUND.
+ * For certificate-only requests, the service realm's KDC is tried first, and
+ * an AS exchange discovers the user's realm if the certificate is not known
+ * locally.  Impersonated tickets are not looked up or stored unless
+ * krb5_tkt_creds_set_s4u_ccache() is called.
  *
  * @version New in 1.23
  *
@@ -7620,6 +7619,30 @@ krb5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
                              const krb5_data *evidence_ticket_der);
+
+/**
+ * Set the credential cache for S4U2Self or S4U2Proxy tickets.
+ *
+ * @param [in] context      Library context
+ * @param [in] ctx          Ticket credentials context
+ * @param [in] user_ccache  Credential cache for impersonated user tickets
+ *
+ * Call once after krb5_tkt_creds_init() and before krb5_tkt_creds_step() or
+ * krb5_tkt_creds_get(), together with krb5_tkt_creds_set_s4u2self() or
+ * krb5_tkt_creds_set_s4u2proxy().  When set, @a user_ccache is used to look up
+ * and store the resulting impersonated ticket (respecting KRB5_GC_CACHED and
+ * KRB5_GC_NO_STORE).  The ccache passed to krb5_tkt_creds_init() is used only
+ * for the impersonating service's TGTs and is never searched for or updated
+ * with impersonated tickets.  If this function is not called, impersonated
+ * tickets are neither looked up in nor stored in any credential cache.
+ *
+ * @version New in 1.23
+ *
+ * @retval 0 Success; otherwise a Kerberos error code
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u_ccache(krb5_context context, krb5_tkt_creds_context ctx,
+                              krb5_ccache user_ccache);
 
 /**
  * Synchronously obtain credentials using a TGS request context.
