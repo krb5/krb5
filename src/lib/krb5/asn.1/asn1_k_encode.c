@@ -984,6 +984,20 @@ static const struct atype_info *pa_s4u_x509_user_fields[] = {
 };
 DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields);
 
+struct pa_s4u_x509_user_der {
+    krb5_data user_id_der;
+    krb5_checksum cksum;
+};
+DEFFIELD(pa_s4u_x509_user_der_0, struct pa_s4u_x509_user_der, user_id_der, 0,
+         der_data);
+DEFFIELD(pa_s4u_x509_user_der_1, struct pa_s4u_x509_user_der, cksum, 1,
+         checksum);
+static const struct atype_info *pa_s4u_x509_user_der_fields[] = {
+    &k5_atype_pa_s4u_x509_user_der_0, &k5_atype_pa_s4u_x509_user_der_1
+};
+DEFSEQTYPE(pa_s4u_x509_user_der, struct pa_s4u_x509_user_der,
+           pa_s4u_x509_user_der_fields);
+
 DEFFIELD(pa_pac_req_0, krb5_pa_pac_req, include_pac, 0, boolean);
 static const struct atype_info *pa_pac_req_fields[] = {
     &k5_atype_pa_pac_req_0
@@ -1280,6 +1294,52 @@ MAKE_DECODER(decode_krb5_pa_for_user, pa_for_user);
 MAKE_ENCODER(encode_krb5_s4u_userid, s4u_userid);
 MAKE_ENCODER(encode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
 MAKE_DECODER(decode_krb5_pa_s4u_x509_user, pa_s4u_x509_user);
+
+krb5_error_code
+k5_decode_pa_s4u_x509_user_with_der(const krb5_data *code,
+                                    krb5_pa_s4u_x509_user **rep_out,
+                                    krb5_data *user_id_der_out)
+{
+    krb5_error_code ret;
+    void *der_ptr = NULL, *uid_ptr = NULL;
+    struct pa_s4u_x509_user_der *der;
+    krb5_s4u_userid *uid;
+    krb5_pa_s4u_x509_user *rep;
+
+    *rep_out = NULL;
+    *user_id_der_out = empty_data();
+
+    ret = k5_asn1_full_decode(code, &k5_atype_pa_s4u_x509_user_der, &der_ptr);
+    if (ret)
+        return ret;
+    der = der_ptr;
+    ret = k5_asn1_full_decode(&der->user_id_der, &k5_atype_s4u_userid,
+                              &uid_ptr);
+    if (ret) {
+        free(der->user_id_der.data);
+        free(der->cksum.contents);
+        free(der);
+        return ret;
+    }
+    uid = uid_ptr;
+    rep = calloc(1, sizeof(*rep));
+    if (rep == NULL) {
+        free(der->user_id_der.data);
+        free(der->cksum.contents);
+        free(der);
+        krb5_free_principal(NULL, uid->user);
+        free(uid->subject_cert.data);
+        free(uid);
+        return ENOMEM;
+    }
+    rep->user_id = *uid;
+    rep->cksum = der->cksum;
+    *user_id_der_out = der->user_id_der;
+    *rep_out = rep;
+    free(uid);
+    free(der);
+    return 0;
+}
 MAKE_ENCODER(encode_krb5_pa_pac_req, pa_pac_req);
 MAKE_DECODER(decode_krb5_pa_pac_req, pa_pac_req);
 MAKE_ENCODER(encode_krb5_etype_list, etype_list);

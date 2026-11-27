@@ -100,6 +100,8 @@ encryption types has been removed.
 Major changes in 1.23
 ---------------------
 
+* Fix a memory leak when reusing cached S4U2Self credentials.
+
 krb5-1.23 changes by ticket ID
 ------------------------------
 

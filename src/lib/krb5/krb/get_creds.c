@@ -41,6 +41,7 @@
 #include "int-proto.h"
 #include "os-proto.h"
 #include "fast.h"
+#include "init_creds_ctx.h"
 
 /*
  * Set *mcreds and *fields to a matching credential and field set for
@@ -182,6 +183,8 @@ k5_get_cached_cred(krb5_context context, krb5_flags options,
 
 enum state {
     STATE_BEGIN,                /* Initial step (no input token) */
+    STATE_IDENTIFY,             /* Discovering the certificate user's realm */
+    STATE_PROBE,                /* Probing for enterprise user's realm */
     STATE_GET_TGT,              /* Getting TGT for service realm */
     STATE_GET_TGT_OFFPATH,      /* Getting TGT via off-path referrals */
     STATE_REFERRALS,            /* Retrieving service ticket or referral */
@@ -238,6 +241,24 @@ struct _krb5_tkt_creds_context {
     krb5_data *caller_out;      /* Caller's out parameter */
     krb5_data *caller_realm;    /* Caller's realm parameter */
     unsigned int *caller_flags; /* Caller's flags parameter */
+
+    /* S4U2Self mode (optional, set by krb5_tkt_creds_set_s4u2self). */
+    krb5_pa_s4u_x509_user *s4u_user;  /* padata state; NULL unless S4U2Self */
+    krb5_data s4u_subject_cert;        /* owned copy of subject cert */
+    krb5_boolean s4u_first_req;        /* TRUE before first referral reply */
+    krb5_boolean s4u_cross_realm;      /* TRUE when navigating to user realm */
+    krb5_boolean s4u_use_enterprise;   /* TRUE when enterprise princ needed */
+    krb5_data s4u_service_realm;       /* saved service realm for cross-realm */
+    krb5_init_creds_context s4u_identify;
+    krb5_get_init_creds_opt s4u_identify_opts;
+    krb5_boolean s4u_cert_identify_tried;
+
+    /* S4U2Proxy mode (optional, set by krb5_tkt_creds_set_s4u2proxy). */
+    krb5_data s4u2proxy_evidence;      /* owned DER-encoded evidence ticket */
+
+    /* Optional cache for S4U2Self/S4U2Proxy output tickets (not impersonator
+     * TGTs).  Set by krb5_tkt_creds_set_s4u_ccache(). */
+    krb5_ccache s4u_ccache;
 };
 
 /* Convert ticket flags to necessary KDC options */
@@ -288,6 +309,9 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
 {
     krb5_error_code code;
     krb5_data request = empty_data();
+    krb5_pa_data **padata = NULL;
+    k5_pacb_fn pacb_fn = NULL;
+    void *pacb_data = NULL;
 
     ctx->kdcopt = extra_options | FLAGS2OPTS(ctx->cur_tgt->ticket_flags);
 
@@ -304,10 +328,67 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
 
     krb5_free_keyblock(context, ctx->subkey);
     ctx->subkey = NULL;
-    code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt, ctx->kdcopt,
-                           ctx->cur_tgt->addresses, NULL, ctx->tgs_in_creds,
-                           NULL, NULL, &request, &ctx->timestamp, &ctx->nonce,
-                           &ctx->subkey);
+
+    if (ctx->s4u_user != NULL && ctx->state != STATE_PROBE &&
+        !IS_TGS_PRINC(ctx->tgs_in_creds->server)) {
+        krb5_pa_data *pa0 = NULL, *pa1 = NULL;
+
+        /* Free any checksum from a prior round. */
+        krb5_free_checksum_contents(context, &ctx->s4u_user->cksum);
+
+        /* Build a padata array: PA-S4U-X509-USER placeholder + optional
+         * PA-FOR-USER.  The placeholder is filled in by the callback. */
+        padata = k5calloc(3, sizeof(*padata), &code);
+        if (padata == NULL)
+            return code;
+
+        pa0 = k5alloc(sizeof(*pa0), &code);
+        if (pa0 == NULL) {
+            free(padata);
+            return code;
+        }
+        pa0->magic = KV5M_PA_DATA;
+        pa0->pa_type = KRB5_PADATA_S4U_X509_USER;
+        pa0->length = 0;
+        pa0->contents = NULL;
+        padata[0] = pa0;
+
+        if (ctx->s4u_user->user_id.user != NULL &&
+            ctx->s4u_user->user_id.user->length > 0) {
+            code = build_pa_for_user(context, ctx->cur_tgt,
+                                     &ctx->s4u_user->user_id, &pa1);
+            if (code == KRB5_CRYPTO_INTERNAL)
+                code = 0;   /* skip PA-FOR-USER on unsupported enctype */
+            if (code != 0) {
+                krb5_free_pa_data(context, padata);
+                return code;
+            }
+            padata[1] = pa1;   /* may be NULL if skipped */
+        }
+
+        pacb_fn = build_pa_s4u_x509_user;
+        pacb_data = ctx->s4u_user;
+    }
+
+    if (ctx->s4u2proxy_evidence.length > 0 &&
+        !IS_TGS_PRINC(ctx->tgs_in_creds->server)) {
+        /* Temporarily install the evidence ticket as second_ticket so
+         * k5_make_tgs_req encodes it in additional-tickets.  Restore after. */
+        krb5_data saved = ctx->tgs_in_creds->second_ticket;
+        ctx->kdcopt |= KDC_OPT_CNAME_IN_ADDL_TKT;
+        ctx->tgs_in_creds->second_ticket = ctx->s4u2proxy_evidence;
+        code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt,
+                               ctx->kdcopt, ctx->cur_tgt->addresses, padata,
+                               ctx->tgs_in_creds, pacb_fn, pacb_data, &request,
+                               &ctx->timestamp, &ctx->nonce, &ctx->subkey);
+        ctx->tgs_in_creds->second_ticket = saved;
+    } else {
+        code = k5_make_tgs_req(context, ctx->fast_state, ctx->cur_tgt,
+                               ctx->kdcopt, ctx->cur_tgt->addresses, padata,
+                               ctx->tgs_in_creds, pacb_fn, pacb_data, &request,
+                               &ctx->timestamp, &ctx->nonce, &ctx->subkey);
+    }
+    krb5_free_pa_data(context, padata);
     if (code != 0)
         return code;
 
@@ -344,6 +425,42 @@ make_request_for_tgt(krb5_context context, krb5_tkt_creds_context ctx,
     return code;
 }
 
+/*
+ * Create an enterprise-form copy of princ with realm set to tgt_realm.
+ * Used for cross-realm S4U2Self to let the foreign KDC resolve the service
+ * via referrals rather than performing a direct local lookup.
+ */
+static krb5_error_code
+make_s4u_enterprise_princ(krb5_context context, krb5_principal princ,
+                           const krb5_data *tgt_realm,
+                           krb5_principal *eprinc_out)
+{
+    krb5_error_code code;
+    char *str = NULL;
+    krb5_principal ep = NULL;
+
+    *eprinc_out = NULL;
+    code = krb5_unparse_name(context, princ, &str);
+    if (code != 0)
+        return code;
+    code = krb5_parse_name_flags(context, str,
+                                 KRB5_PRINCIPAL_PARSE_ENTERPRISE |
+                                 KRB5_PRINCIPAL_PARSE_IGNORE_REALM,
+                                 &ep);
+    krb5_free_unparsed_name(context, str);
+    if (code != 0)
+        return code;
+    /* IGNORE_REALM leaves ep->realm empty; replace it with tgt_realm. */
+    krb5_free_data_contents(context, &ep->realm);
+    code = krb5int_copy_data_contents(context, tgt_realm, &ep->realm);
+    if (code != 0) {
+        krb5_free_principal(context, ep);
+        return code;
+    }
+    *eprinc_out = ep;
+    return 0;
+}
+
 /* Set up a request for the desired service principal, using ctx->cur_tgt.
  * Optionally allow the answer to be a referral. */
 static krb5_error_code
@@ -374,6 +491,34 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
     if (referral)
         context->use_conf_ktypes = TRUE;
     ctx->tgs_in_creds = ctx->in_creds;
+
+    /*
+     * For cross-realm S4U2Self: when the current TGT is from a foreign realm
+     * (not the service realm), use an enterprise principal so the foreign KDC
+     * can resolve the service name via its referral machinery rather than
+     * attempting a direct local lookup (which fails with GET_LOCAL_TGT).
+     */
+    if (ctx->s4u_use_enterprise &&
+        !data_eq(ctx->cur_tgt->server->data[1], ctx->s4u_service_realm)) {
+        krb5_principal_data svc = *ctx->server;
+        krb5_principal eprinc = NULL, saved_server;
+
+        svc.realm = ctx->s4u_service_realm;
+        code = make_s4u_enterprise_princ(context, &svc,
+                                         &ctx->cur_tgt->server->data[1],
+                                         &eprinc);
+        if (code == 0) {
+            saved_server = ctx->tgs_in_creds->server;
+            ctx->tgs_in_creds->server = eprinc;
+            code = make_request(context, ctx, extra_options);
+            ctx->tgs_in_creds->server = saved_server;
+            krb5_free_principal(context, eprinc);
+        }
+        if (referral)
+            context->use_conf_ktypes = FALSE;
+        return code;
+    }
+
     code = make_request(context, ctx, extra_options);
     if (referral)
         context->use_conf_ktypes = FALSE;
@@ -387,14 +532,25 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_data *reply)
 {
     krb5_error_code code;
+    krb5_pa_data **out_padata = NULL, **out_enc_padata = NULL;
+    /* Minimal padata marker to signal S4U2Self mode to process_tgs_reply. */
+    krb5_pa_data s4u_marker = { KV5M_PA_DATA, KRB5_PADATA_S4U_X509_USER,
+                                 0, NULL };
+    krb5_pa_data *s4u_padata[2] = { &s4u_marker, NULL };
+    krb5_boolean is_s4u2self_req =
+        (ctx->s4u_user != NULL &&
+         (ctx->state == STATE_REFERRALS || ctx->state == STATE_NON_REFERRAL));
 
     krb5_free_creds(context, ctx->reply_creds);
     ctx->reply_creds = NULL;
     code = krb5int_process_tgs_reply(context, ctx->fast_state,
                                      reply, ctx->cur_tgt, ctx->kdcopt,
-                                     ctx->cur_tgt->addresses, NULL,
+                                     ctx->cur_tgt->addresses,
+                                     is_s4u2self_req ? s4u_padata : NULL,
                                      ctx->tgs_in_creds, ctx->timestamp,
-                                     ctx->nonce, ctx->subkey, NULL, NULL,
+                                     ctx->nonce, ctx->subkey,
+                                     is_s4u2self_req ? &out_padata : NULL,
+                                     is_s4u2self_req ? &out_enc_padata : NULL,
                                      &ctx->reply_creds);
     if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
         /* Instruct the caller to re-send the request with TCP. */
@@ -403,6 +559,28 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
             return code;
         return KRB5KRB_ERR_RESPONSE_TOO_BIG;
     }
+
+    /* For S4U2Self mode, verify the reply padata and update user_id if needed. */
+    if (is_s4u2self_req && code == 0 && ctx->reply_creds != NULL) {
+        code = verify_s4u2self_reply(context, ctx->subkey, ctx->s4u_user,
+                                     out_padata, out_enc_padata,
+                                     ctx->s4u_first_req);
+        if (code != 0) {
+            krb5_free_pa_data(context, out_padata);
+            krb5_free_pa_data(context, out_enc_padata);
+            krb5_free_creds(context, ctx->reply_creds);
+            ctx->reply_creds = NULL;
+            TRACE_TKT_CREDS_RESPONSE_CODE(context, code);
+            return code;
+        }
+        if (ctx->s4u_first_req) {
+            /* After the first authoritative reply, stop sending subject_cert. */
+            ctx->s4u_user->user_id.subject_cert = empty_data();
+            ctx->s4u_first_req = FALSE;
+        }
+    }
+    krb5_free_pa_data(context, out_padata);
+    krb5_free_pa_data(context, out_enc_padata);
 
     /* Depending on our state, we may or may not be able to handle an error.
      * For now, store it in the context and return success. */
@@ -454,6 +632,11 @@ seen_realm_before(krb5_context context, krb5_tkt_creds_context ctx,
 static krb5_error_code
 complete(krb5_context context, krb5_tkt_creds_context ctx)
 {
+    krb5_error_code code;
+    krb5_boolean is_s4u = (ctx->s4u_user != NULL ||
+                           ctx->s4u2proxy_evidence.length > 0);
+    krb5_ccache store_ccache = is_s4u ? ctx->s4u_ccache : ctx->ccache;
+
     TRACE_TKT_CREDS_COMPLETE(context, ctx->reply_creds->server);
 
     /* Put the requested server principal in the output creds. */
@@ -465,9 +648,19 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
     ctx->reply_creds->authdata = ctx->authdata;
     ctx->authdata = NULL;
 
-    if (!(ctx->req_options & KRB5_GC_NO_STORE)) {
+    /* Preserve the evidence ticket in S4U2Proxy credentials so subsequent
+     * cache lookups can match via KRB5_TC_MATCH_2ND_TKT. */
+    if (ctx->s4u2proxy_evidence.length > 0 &&
+        ctx->reply_creds->second_ticket.length == 0) {
+        code = krb5int_copy_data_contents(context, &ctx->s4u2proxy_evidence,
+                                          &ctx->reply_creds->second_ticket);
+        if (code != 0)
+            return code;
+    }
+
+    if (!(ctx->req_options & KRB5_GC_NO_STORE) && store_ccache != NULL) {
         /* Try to cache the credential. */
-        (void) krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
+        (void) krb5_cc_store_cred(context, store_ccache, ctx->reply_creds);
     }
 
     ctx->state = STATE_COMPLETE;
@@ -558,6 +751,44 @@ wrong_enctype(krb5_context context, krb5_enctype enctype)
     return TRUE;
 }
 
+/*
+ * Fall back to an AS-REQ realm-discovery probe for a certificate-only
+ * S4U2Self request after direct S4U2Self failed in the service realm.
+ */
+static krb5_error_code
+begin_identify(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_principal_data client;
+    krb5_data empty_name = empty_data();
+    krb5_data empty = empty_data();
+
+    memset(&client, 0, sizeof(client));
+    client.magic = KV5M_PRINCIPAL;
+    client.realm = ctx->server->realm;
+    client.data = &empty_name;
+    client.length = 1;
+    client.type = KRB5_NT_X500_PRINCIPAL;
+    krb5_get_init_creds_opt_init(&ctx->s4u_identify_opts);
+    krb5_get_init_creds_opt_set_tkt_life(&ctx->s4u_identify_opts, 15);
+    krb5_get_init_creds_opt_set_renew_life(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_forwardable(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_proxiable(&ctx->s4u_identify_opts, 0);
+    krb5_get_init_creds_opt_set_canonicalize(&ctx->s4u_identify_opts, 1);
+    code = krb5_init_creds_init(context, &client, NULL, NULL, 0,
+                                &ctx->s4u_identify_opts,
+                                &ctx->s4u_identify);
+    if (code != 0)
+        return code;
+    ctx->s4u_identify->identify_realm = TRUE;
+    ctx->s4u_identify->subject_cert = &ctx->s4u_subject_cert;
+    ctx->s4u_cert_identify_tried = TRUE;
+    ctx->state = STATE_IDENTIFY;
+    return krb5_init_creds_step(context, ctx->s4u_identify, &empty,
+                                ctx->caller_out, ctx->caller_realm,
+                                ctx->caller_flags);
+}
+
 /* Advance the referral request loop. */
 static krb5_error_code
 step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
@@ -565,9 +796,25 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_error_code code;
     const krb5_data *referral_realm;
 
-    /* Possibly try a non-referral fallback request on error. */
-    if (ctx->reply_code != 0)
+    /* Possibly try a fallback request on error. */
+    if (ctx->reply_code != 0) {
+        /*
+         * For certificate-only S4U2Self, direct S4U2Self in the service realm
+         * fails with C_PRINCIPAL_UNKNOWN when the certificate belongs to a
+         * foreign realm.  Fall back once to AS-REQ realm discovery.
+         */
+        if (ctx->reply_code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN &&
+            ctx->s4u_user != NULL &&
+            ctx->s4u_user->user_id.user != NULL &&
+            ctx->s4u_user->user_id.user->length == 0 &&
+            ctx->s4u_subject_cert.length != 0 &&
+            !ctx->s4u_cert_identify_tried &&
+            ctx->referral_count == 1)
+            return begin_identify(context, ctx);
+        if (ctx->s4u_use_enterprise)
+            return ctx->reply_code;
         return try_fallback(context, ctx);
+    }
 
     /* Check if we got the ticket we asked for.  Allow the KDC to canonicalize
      * the realm. */
@@ -616,7 +863,11 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     if (code != 0)
         return code;
 
-    /* Use the referral TGT for the next request. */
+    /*
+     * Use the referral TGT for the next request.  Never cache referral TGTs
+     * here: during cross-realm S4U2Self return hops (and S4U2Proxy referrals),
+     * they carry the impersonated user's PAC rather than the service's.
+     */
     krb5_free_creds(context, ctx->cur_tgt);
     ctx->cur_tgt = ctx->reply_creds;
     ctx->reply_creds = NULL;
@@ -662,6 +913,22 @@ begin_referrals(krb5_context context, krb5_tkt_creds_context ctx)
 static krb5_error_code
 end_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
 {
+    krb5_error_code code;
+
+    if (ctx->s4u_cross_realm) {
+        /*
+         * TGT acquisition reached the user's realm.  Restore ctx->server->realm
+         * to the service realm (start_realm) so the referral loop targets the
+         * right service and can follow KDC referrals back to it.
+         */
+        krb5_free_data_contents(context, &ctx->server->realm);
+        code = krb5int_copy_data_contents(context, &ctx->start_realm,
+                                          &ctx->server->realm);
+        if (code != 0)
+            return code;
+        ctx->s4u_cross_realm = FALSE;
+    }
+
     if (ctx->getting_tgt_for == STATE_REFERRALS)
         return begin_referrals(context, ctx);
     else
@@ -1043,11 +1310,29 @@ check_cache(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
     krb5_creds req_in_creds;
+    krb5_boolean is_s4u = (ctx->s4u_user != NULL ||
+                           ctx->s4u2proxy_evidence.length > 0);
+    krb5_ccache lookup_ccache = is_s4u ? ctx->s4u_ccache : ctx->ccache;
+    krb5_flags options = ctx->req_options;
+
+    /* Never look up S4U tickets in the impersonator's ccache. */
+    if (lookup_ccache == NULL)
+        return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
 
     /* Check the cache for the originally requested server principal. */
     req_in_creds = *ctx->in_creds;
     req_in_creds.server = ctx->req_server;
-    code = k5_get_cached_cred(context, ctx->req_options, ctx->ccache,
+    if (ctx->s4u_user != NULL) {
+        /* Cannot match in cache without a client name (cert-only S4U2Self). */
+        if (ctx->s4u_user->user_id.user == NULL ||
+            ctx->s4u_user->user_id.user->length == 0)
+            return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
+        req_in_creds.client = ctx->s4u_user->user_id.user;
+    } else if (ctx->s4u2proxy_evidence.length > 0) {
+        options |= KRB5_GC_CONSTRAINED_DELEGATION;
+        req_in_creds.second_ticket = ctx->s4u2proxy_evidence;
+    }
+    code = k5_get_cached_cred(context, options, lookup_ccache,
                               &req_in_creds, &ctx->reply_creds);
     if (code == 0) {
         ctx->state = STATE_COMPLETE;
@@ -1065,6 +1350,160 @@ check_cache(krb5_context context, krb5_tkt_creds_context ctx)
     return 0;
 }
 
+/***** STATE_PROBE *****/
+
+/*
+ * Send a TGS-REQ probing for an enterprise user's realm without S4U padata.
+ * Uses ctx->cur_tgt (the impersonating service's TGT or a referral TGT) and
+ * sets sname to ctx->tgt_princ (the enterprise user principal with realm set
+ * to ctx->cur_tgt's realm).
+ */
+static krb5_error_code
+make_request_for_probe(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+
+    memset(&ctx->tgt_in_creds, 0, sizeof(ctx->tgt_in_creds));
+    ctx->tgt_in_creds.client = ctx->client;
+    ctx->tgt_in_creds.server = ctx->tgt_princ;
+    ctx->tgs_in_creds = &ctx->tgt_in_creds;
+    context->use_conf_ktypes = TRUE;
+    code = make_request(context, ctx, KDC_OPT_CANONICALIZE);
+    context->use_conf_ktypes = FALSE;
+    return code;
+}
+
+/*
+ * Finish the enterprise-principal realm probe.  ctx->cur_tgt is now a TGT for
+ * the realm that holds the user account.  Update the enterprise user's realm
+ * and start the S4U2Self referral loop.
+ */
+static krb5_error_code
+end_probe(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    const krb5_data *user_realm = &ctx->cur_tgt->server->data[1];
+
+    krb5_free_data_contents(context, &ctx->s4u_user->user_id.user->realm);
+    code = krb5int_copy_data_contents(context, user_realm,
+                                      &ctx->s4u_user->user_id.user->realm);
+    if (code != 0)
+        return code;
+
+    if (!data_eq(*user_realm, ctx->server->realm)) {
+        krb5_free_data_contents(context, &ctx->s4u_service_realm);
+        code = krb5int_copy_data_contents(context, &ctx->server->realm,
+                                          &ctx->s4u_service_realm);
+        if (code != 0)
+            return code;
+        ctx->s4u_use_enterprise = TRUE;
+        ctx->referral_req = TRUE;
+    }
+
+    return begin_referrals(context, ctx);
+}
+
+/* Process the reply to an enterprise-principal realm probe. */
+static krb5_error_code
+step_probe(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    const krb5_data *referral_realm;
+
+    /*
+     * S_PRINCIPAL_UNKNOWN (or C_PRINCIPAL_UNKNOWN) means this KDC does not
+     * refer the enterprise name further; send S4U2Self here.
+     */
+    if (ctx->reply_code == KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN ||
+        ctx->reply_code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN)
+        return end_probe(context, ctx);
+
+    if (ctx->reply_code != 0)
+        return ctx->reply_code;
+
+    /*
+     * A non-TGT ticket means the user account has an SPN in this realm.
+     * Discard it and proceed to S4U2Self in this realm.
+     */
+    if (!IS_TGS_PRINC(ctx->reply_creds->server)) {
+        krb5_free_creds(context, ctx->reply_creds);
+        ctx->reply_creds = NULL;
+        return end_probe(context, ctx);
+    }
+
+    /* A TGT to the same realm means no further referral. */
+    referral_realm = &ctx->reply_creds->server->data[1];
+    if (data_eq(*referral_realm, ctx->cur_tgt->server->data[1])) {
+        krb5_free_creds(context, ctx->reply_creds);
+        ctx->reply_creds = NULL;
+        return end_probe(context, ctx);
+    }
+
+    /* Follow the cross-realm referral TGT. */
+    if (ctx->referral_count++ >= KRB5_REFERRAL_MAXHOPS)
+        return KRB5_KDC_UNREACH;
+    if (seen_realm_before(context, ctx, referral_realm))
+        return KRB5_KDC_UNREACH;
+    code = remember_realm(context, ctx, referral_realm);
+    if (code != 0)
+        return code;
+
+    /* Cache the service's cross-realm TGT towards the user's realm. */
+    if (!(ctx->req_options & KRB5_GC_NO_STORE))
+        (void)krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
+
+    krb5_free_creds(context, ctx->cur_tgt);
+    ctx->cur_tgt = ctx->reply_creds;
+    ctx->reply_creds = NULL;
+
+    krb5_free_data_contents(context, &ctx->tgt_princ->realm);
+    code = krb5int_copy_data_contents(context, referral_realm,
+                                      &ctx->tgt_princ->realm);
+    if (code != 0)
+        return code;
+
+    return make_request_for_probe(context, ctx);
+}
+
+/* Begin probing for an enterprise user's realm via TGS referrals. */
+static krb5_error_code
+begin_probe(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    const krb5_data *tgt_realm;
+
+    krb5_free_creds(context, ctx->cur_tgt);
+    ctx->cur_tgt = NULL;
+    code = get_cached_local_tgt(context, ctx, &ctx->cur_tgt);
+    if (code != 0)
+        return code;
+    TRACE_TKT_CREDS_LOCAL_TGT(context, ctx->cur_tgt);
+
+    ctx->state = STATE_PROBE;
+    ctx->referral_count = 1;
+
+    krb5int_free_data_list(context, ctx->realms_seen);
+    ctx->realms_seen = NULL;
+    tgt_realm = &ctx->cur_tgt->server->data[1];
+    code = remember_realm(context, ctx, tgt_realm);
+    if (code != 0)
+        return code;
+
+    krb5_free_principal(context, ctx->tgt_princ);
+    ctx->tgt_princ = NULL;
+    code = krb5_copy_principal(context, ctx->s4u_user->user_id.user,
+                               &ctx->tgt_princ);
+    if (code != 0)
+        return code;
+    krb5_free_data_contents(context, &ctx->tgt_princ->realm);
+    code = krb5int_copy_data_contents(context, tgt_realm,
+                                      &ctx->tgt_princ->realm);
+    if (code != 0)
+        return code;
+
+    return make_request_for_probe(context, ctx);
+}
+
 /* Decide where to begin the acquisition process. */
 static krb5_error_code
 begin(krb5_context context, krb5_tkt_creds_context ctx)
@@ -1080,6 +1519,51 @@ begin(krb5_context context, krb5_tkt_creds_context ctx)
         TRACE_TKT_CREDS_REFERRAL_REALM(context, ctx->server);
         if (code != 0)
             return code;
+    }
+
+    if (ctx->s4u_user != NULL && ctx->s4u_user->user_id.user != NULL) {
+        krb5_principal s4u_princ = ctx->s4u_user->user_id.user;
+
+        /* Fill in an empty realm for certificate-only S4U2Self after resolving
+         * a referral server realm. */
+        if (s4u_princ->length == 0 && s4u_princ->realm.length == 0) {
+            code = krb5int_copy_data_contents(context, &ctx->server->realm,
+                                              &s4u_princ->realm);
+            if (code != 0)
+                return code;
+        }
+
+        /*
+         * Enterprise principals do not carry the user's actual realm; probe
+         * with a plain TGS-REQ (no S4U padata) to follow referral TGTs to the
+         * user's KDC before sending S4U2Self.
+         */
+        if (s4u_princ->length > 0 &&
+            s4u_princ->type == KRB5_NT_ENTERPRISE_PRINCIPAL)
+            return begin_probe(context, ctx);
+
+        /*
+         * For S4U2Self cross-realm: the user's realm differs from the service
+         * realm.  First acquire a cross-realm TGT to the user's realm before
+         * sending the S4U2Self request; end_get_tgt() restores the service
+         * realm so the referral loop follows referrals back to it.
+         */
+        if (s4u_princ->realm.length > 0 &&
+            !data_eq(s4u_princ->realm, ctx->server->realm)) {
+            krb5_free_data_contents(context, &ctx->s4u_service_realm);
+            code = krb5int_copy_data_contents(context, &ctx->server->realm,
+                                              &ctx->s4u_service_realm);
+            if (code != 0)
+                return code;
+            ctx->s4u_use_enterprise = TRUE;
+            krb5_free_data_contents(context, &ctx->server->realm);
+            code = krb5int_copy_data_contents(context, &s4u_princ->realm,
+                                              &ctx->server->realm);
+            if (code != 0)
+                return code;
+            ctx->s4u_cross_realm = TRUE;
+            ctx->referral_req = TRUE;
+        }
     }
 
     /* Obtain a TGT for the service realm. */
@@ -1163,6 +1647,86 @@ cleanup:
     return code;
 }
 
+/*
+ * Configure ctx for S4U2Self mode.  Must be called before the first
+ * krb5_tkt_creds_step() call.  Subsequent steps will include PA-S4U-X509-USER
+ * padata in TGS-REQs and verify the reply padata.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u2self(krb5_context context, krb5_tkt_creds_context ctx,
+                            krb5_principal user, const krb5_data *subject_cert)
+{
+    krb5_error_code code;
+    krb5_pa_s4u_x509_user *s4u_user;
+
+    if (ctx->state != STATE_BEGIN || ctx->s4u_user != NULL ||
+        ctx->s4u2proxy_evidence.length != 0 ||
+        (user == NULL && (subject_cert == NULL || subject_cert->length == 0)))
+        return EINVAL;
+
+    s4u_user = k5alloc(sizeof(*s4u_user), &code);
+    if (s4u_user == NULL)
+        return code;
+    memset(s4u_user, 0, sizeof(*s4u_user));
+
+    s4u_user->user_id.options = KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
+
+    if (user != NULL)
+        code = krb5_copy_principal(context, user, &s4u_user->user_id.user);
+    else
+        code = krb5_build_principal_ext(context, &s4u_user->user_id.user,
+                                        ctx->server->realm.length,
+                                        ctx->server->realm.data, 0);
+    if (code != 0) {
+        free(s4u_user);
+        return code;
+    }
+
+    if (subject_cert != NULL && subject_cert->length > 0) {
+        code = krb5int_copy_data_contents(context, subject_cert,
+                                          &ctx->s4u_subject_cert);
+        if (code != 0) {
+            krb5_free_principal(context, s4u_user->user_id.user);
+            free(s4u_user);
+            return code;
+        }
+        s4u_user->user_id.subject_cert = ctx->s4u_subject_cert;
+    }
+
+    ctx->s4u_user = s4u_user;
+    ctx->s4u_first_req = TRUE;
+    return 0;
+}
+
+/*
+ * Configure ctx for S4U2Proxy (constrained delegation) before the first
+ * krb5_tkt_creds_step() call.
+ * evidence_ticket_der is the DER-encoded S4U2Self evidence ticket; it will be
+ * sent as additional-tickets[0] in the S4U2Proxy TGS-REQ.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u2proxy(krb5_context context, krb5_tkt_creds_context ctx,
+                             const krb5_data *evidence_ticket_der)
+{
+    if (ctx->state != STATE_BEGIN || ctx->s4u_user != NULL ||
+        ctx->s4u2proxy_evidence.length != 0)
+        return EINVAL;
+    if (evidence_ticket_der == NULL || evidence_ticket_der->length == 0)
+        return EINVAL;
+    return krb5int_copy_data_contents(context, evidence_ticket_der,
+                                      &ctx->s4u2proxy_evidence);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_set_s4u_ccache(krb5_context context, krb5_tkt_creds_context ctx,
+                              krb5_ccache user_ccache)
+{
+    if (ctx->state != STATE_BEGIN || ctx->s4u_ccache != NULL ||
+        user_ccache == NULL)
+        return EINVAL;
+    return krb5_cc_dup(context, user_ccache, &ctx->s4u_ccache);
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds)
@@ -1201,6 +1765,17 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_data_contents(context, &ctx->previous_request);
     krb5int_free_data_list(context, ctx->realm_path);
     krb5_free_creds(context, ctx->reply_creds);
+    if (ctx->s4u_user != NULL) {
+        krb5_free_checksum_contents(context, &ctx->s4u_user->cksum);
+        krb5_free_principal(context, ctx->s4u_user->user_id.user);
+        free(ctx->s4u_user);
+    }
+    krb5_init_creds_free(context, ctx->s4u_identify);
+    krb5_free_data_contents(context, &ctx->s4u_subject_cert);
+    krb5_free_data_contents(context, &ctx->s4u_service_realm);
+    krb5_free_data_contents(context, &ctx->s4u2proxy_evidence);
+    if (ctx->s4u_ccache != NULL)
+        krb5_cc_close(context, ctx->s4u_ccache);
     free(ctx);
 }
 
@@ -1264,6 +1839,31 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
         if (code != 0 || ctx->state == STATE_COMPLETE)
             return code;
     }
+    if (ctx->state == STATE_IDENTIFY) {
+        krb5_data empty = empty_data();
+
+        code = krb5_init_creds_step(context, ctx->s4u_identify,
+                                    in == NULL ? &empty : in, out, realm,
+                                    flags);
+        if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
+            return code;
+        if (data_eq(ctx->s4u_identify->request->client->realm,
+                    ctx->server->realm)) {
+            krb5_init_creds_free(context, ctx->s4u_identify);
+            ctx->s4u_identify = NULL;
+            return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+        }
+        krb5_free_data_contents(context, &ctx->s4u_user->user_id.user->realm);
+        code = krb5int_copy_data_contents(
+            context, &ctx->s4u_identify->request->client->realm,
+            &ctx->s4u_user->user_id.user->realm);
+        if (code != 0)
+            return code;
+        krb5_init_creds_free(context, ctx->s4u_identify);
+        ctx->s4u_identify = NULL;
+        ctx->state = STATE_BEGIN;
+        no_input = TRUE;
+    }
 
     ctx->caller_out = out;
     ctx->caller_realm = realm;
@@ -1278,6 +1878,8 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
 
     if (ctx->state == STATE_BEGIN)
         code = begin(context, ctx);
+    else if (ctx->state == STATE_PROBE)
+        code = step_probe(context, ctx);
     else if (ctx->state == STATE_GET_TGT)
         code = step_get_tgt(context, ctx);
     else if (ctx->state == STATE_GET_TGT_OFFPATH)

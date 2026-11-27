@@ -1664,6 +1664,11 @@ krb5_error_code
 decode_krb5_pa_s4u_x509_user(const krb5_data *, krb5_pa_s4u_x509_user **);
 
 krb5_error_code
+k5_decode_pa_s4u_x509_user_with_der(const krb5_data *,
+                                    krb5_pa_s4u_x509_user **,
+                                    krb5_data *);
+
+krb5_error_code
 decode_krb5_pa_pac_req(const krb5_data *, krb5_pa_pac_req **);
 
 krb5_error_code

@@ -112,6 +112,47 @@ if 'auth1: user@' not in out or 'auth2: user@' not in out:
 
 # Successful S4U2Self -> S4U2Proxy.
 out = realm.run(['./t_s4u', puser, pservice2])
+mark('IAKERB certificate S4U2Self and S4U2Proxy')
+realm.run(['./t_iakerb', pservice1, '-', pservice2, pservice2, 'c:user'],
+          expected_msg='reused:\t' + realm.user_princ)
+realm.run(['./t_iakerb', pservice1, '-', pservice1, pservice1, 'c:user'],
+          expected_msg='reused:\t' + realm.user_princ)
+realm.run(['./t_iakerb', pservice1, '-', pservice2, pservice2, puser],
+          expected_msg='reused:\t' + realm.user_princ)
+
+
+# Verify that time_req bounds all credentials in the delegated ccache,
+# including the impersonator TGT copied by make_proxy_cred().
+mark('S4U2Self time_req bounds impersonator TGT in delegated ccache')
+realm.run(['./t_s4u', '--time-req', '600', puser, pservice2])
+
+# Step-based S4U2Self via krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Self (krb5_gss_acquire_cred_impersonate_name_step)')
+out = realm.run(['./t_imp_step', puser])
+if 'impersonated: ' + realm.user_princ not in out:
+    fail('t_imp_step basic')
+realm.run(['./t_imp_step', '--bad-input', puser],
+          expected_msg='bad-input: correctly returned error')
+realm.run(['./t_imp_step', '--abandon', puser],
+          expected_msg='abandon: ok (no crash)')
+
+# Step-based S4U2Proxy via gss_init_sec_context with a use_step_proxy
+# credential obtained from krb5_gss_acquire_cred_impersonate_name_step.
+mark('step-based S4U2Proxy (gss_init_sec_context with use_step_proxy cred)')
+out = realm.run(['./t_proxy_step', puser, pservice2])
+if 'proxy-auth: ' + realm.user_princ not in out:
+    fail('t_proxy_step basic')
+
+# Verify S4U ccache isolation, krb5_tkt_creds_set_s4u_ccache(), and mutual
+# exclusion between set_s4u2self and set_s4u2proxy.
+mark('S4U ccache isolation and krb5_tkt_creds_set_s4u_ccache')
+realm.run(['./t_imp_step', '--s4u-ccache', realm.user_princ, service2],
+          expected_msg='s4u-ccache: ok')
+
+# Verify PA-S4U-X509-USER reply checksum uses raw wire S4UUserID DER.
+mark('S4U2Self raw wire S4UUserID DER checksum verification')
+realm.run(['./t_imp_step', '--raw-der-cksum', realm.user_princ],
+          expected_msg='raw-der-cksum: ok')
 
 # Regression test for #8139: get a user ticket directly for service1 and
 # try krb5 -> S4U2Proxy.
@@ -164,7 +205,8 @@ kdcconf1 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
                                    'alias': {'enterprise@abc': '@UREALM',
-                                             'user@UREALM': '@UREALM'}}}}
+                                             'user@UREALM': '@UREALM',
+                                             'unknown': '@NOREALM'}}}}
 kdcconf2 = {'realms': {'$realm': {'database_module': 'test'}},
             'dbmodules': {'test': {'db_library': 'test',
                                    'princs': testprincs,
@@ -197,6 +239,14 @@ msgs = ('Getting credentials user@UREALM -> user@SREALM',
 r1.run(['./t_s4u', 'p:' + r2.user_princ, '-', r1.keytab], env=no_default,
        expected_trace=msgs)
 
+# Test cross-realm step-based S4U2Self.  The service (user@SREALM) must
+# navigate to the user's realm (UREALM) first, then follow referrals back.
+mark('cross-realm step-based S4U2Self')
+shutil.copyfile(savefile, r1.ccache)
+out = r1.run(['./t_imp_step', 'p:' + r2.user_princ])
+if 'impersonated: ' + r2.user_princ not in out:
+    fail('cross-realm t_imp_step')
+
 # Test realm identification of enterprise principal names ([MS-SFU]
 # 3.1.5.1.1.1).  Attach a bogus realm to the enterprise name to verify
 # that we start at the server realm.
@@ -212,6 +262,21 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
         'TGS reply is for enterprise\\@abc@UREALM -> user@SREALM')
 r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
        expected_trace=msgs)
+
+# Test cross-realm step-based S4U2Self with an enterprise principal name.
+# Realm discovery must use TGS referrals (STATE_PROBE) rather than AS-REQ.
+mark('cross-realm step-based S4U2Self with enterprise name (TGS probe)')
+shutil.copyfile(savefile, r1.ccache)
+msgs = ('Reply server krbtgt/UREALM@SREALM differs from requested '
+        'enterprise\\@abc@SREALM',
+        'TGS reply is for user@SREALM -> krbtgt/UREALM@SREALM',
+        'Following referral TGT krbtgt/SREALM@UREALM',
+        'TGS reply is for enterprise\\@abc@UREALM -> user@SREALM')
+out, trace = r1.run(['./t_imp_step', 'e:enterprise@abc@NOREALM'],
+                    expected_msg='impersonated: enterprise\\@abc@UREALM',
+                    expected_trace=msgs, return_trace=True)
+if 'Getting initial credentials' in trace:
+    fail('enterprise step S4U2Self unexpectedly used AS-REQ')
 
 mark('S4U2Self using X509 certificate')
 
@@ -282,6 +347,43 @@ shutil.copyfile(savefile, r1.ccache)
 mark('S4U2Self using X509 certificate (GSSAPI)')
 
 r1.run(['./t_s4u', 'c:other', '-', r1.keytab])
+# Local certificate-only S4U2Self succeeds directly without an AS-REQ probe.
+shutil.copyfile(savefile, r1.ccache)
+out, trace = r1.run(
+    ['./t_imp_step', 'c:other'],
+    expected_msg='impersonated: other@SREALM',
+    expected_trace=('TGS reply is for other@SREALM -> user@SREALM',),
+    return_trace=True)
+if 'Getting initial credentials' in trace:
+    fail('local cert-only step S4U2Self unexpectedly used AS-REQ')
+r1.run(['./t_imp_step', '--abandon', 'c:other'],
+       expected_msg='abandon: ok (no crash)')
+r1.run(['./t_imp_step', '--raw', '-', 'other'],
+       expected_msg='raw impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'other'],
+       expected_msg='raw impersonated: other@SREALM')
+r1.run(['./t_imp_step', '--raw', 'other@SREALM', 'user'], expected_code=1)
+r1.run(['./t_imp_step', '--raw', '-', 'user@UREALM'],
+       expected_msg='raw impersonated: user@UREALM')
+# Cross-realm certificate-only S4U2Self tries the local realm first, then
+# falls back to AS-REQ realm identification on C_PRINCIPAL_UNKNOWN.
+shutil.copyfile(savefile, r1.ccache)
+msgs = ('/Client not found in Kerberos database',
+        'Getting initial credentials for @SREALM',
+        'Following referral to realm UREALM',
+        'TGS reply is for user@UREALM -> user@SREALM')
+r1.run(['./t_imp_step', 'c:user@UREALM'],
+       expected_msg='impersonated: user@UREALM', expected_trace=msgs)
+# Unknown certificate fails after a single fallback without looping.
+shutil.copyfile(savefile, r1.ccache)
+msgs = ('/Client not found in Kerberos database',
+        'Getting initial credentials for @SREALM',
+        'Following referral to realm NOREALM')
+r1.run(['./t_imp_step', '--raw', '-', 'unknown'],
+       expected_code=1, expected_trace=msgs)
+r1.run(['./t_iakerb', 'p:' + r1.user_princ, '-', 'p:' + r1.user_princ,
+        'p:' + r1.user_princ, 'c:user@UREALM'],
+       expected_msg='reused:\t' + r2.user_princ)
 r1.run(['./t_s4u', 'c:user@UREALM', '-', r1.keytab])
 
 r1.run(['./t_s4u', '--spnego', 'c:other', '-', r1.keytab])
