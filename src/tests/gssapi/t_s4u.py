@@ -263,6 +263,21 @@ msgs = ('Getting initial credentials for enterprise\\@abc@SREALM',
 r1.run(['./t_s4u', 'e:enterprise@abc@NOREALM', '-', r1.keytab],
        expected_trace=msgs)
 
+# Test cross-realm step-based S4U2Self with an enterprise principal name.
+# Realm discovery must use TGS referrals (STATE_PROBE) rather than AS-REQ.
+mark('cross-realm step-based S4U2Self with enterprise name (TGS probe)')
+shutil.copyfile(savefile, r1.ccache)
+msgs = ('Reply server krbtgt/UREALM@SREALM differs from requested '
+        'enterprise\\@abc@SREALM',
+        'TGS reply is for user@SREALM -> krbtgt/UREALM@SREALM',
+        'Following referral TGT krbtgt/SREALM@UREALM',
+        'TGS reply is for enterprise\\@abc@UREALM -> user@SREALM')
+out, trace = r1.run(['./t_imp_step', 'e:enterprise@abc@NOREALM'],
+                    expected_msg='impersonated: enterprise\\@abc@UREALM',
+                    expected_trace=msgs, return_trace=True)
+if 'Getting initial credentials' in trace:
+    fail('enterprise step S4U2Self unexpectedly used AS-REQ')
+
 mark('S4U2Self using X509 certificate')
 
 # Encode name as a PEM certificate file (sort of) for use by kvno.
