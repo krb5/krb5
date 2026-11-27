@@ -49,7 +49,7 @@ krb5_k_make_checksum_iov(krb5_context context,
     if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
 
-    ret = verify_key(ctp, key);
+    ret = verify_cksumtype_and_key(ctp, key, usage);
     if (ret != 0)
         return ret;
 
