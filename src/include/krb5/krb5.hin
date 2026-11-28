@@ -5584,7 +5584,7 @@ krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
  *
  * @note The @a rdata_out argument is required if the
  * #KRB5_AUTH_CONTEXT_RET_TIME or #KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set
- * in @a auth_context.`
+ * in @a auth_context.
  *
  * @a creddata will be decrypted using the receiving subkey if it is present in
  * @a auth_context, or the session key if the receiving subkey is not present
